@@ -18,7 +18,7 @@ import pyvisa as visa
 import nidaqmx
 import scTDC
 import variables
-import tdc_hdf5
+# import tdc_hdf5
 
 # package needed
 import time
@@ -143,7 +143,7 @@ def main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target)
     main_v_p.append(variables.pulse_voltage)
     main_counter.append(variables.count_temp)
     # averaging count rate of N_averg counts
-    variables.avg_n_count = sum(main_counter[-variables.cycle_avg:])
+    variables.avg_n_count = variables.ex_freq * (sum(main_counter[-variables.cycle_avg:]) / variables.cycle_avg)
 
     counts_measured = variables.avg_n_count / (variables.pulse_frequency * 1000)
 
@@ -188,6 +188,7 @@ def cleanup_variables():
     variables.count = 0
     variables.count_temp = 0
     variables.avg_n_count = 0
+    variables.index_plot = 0
 
 
 
@@ -247,8 +248,10 @@ def main():
         end_main_ex_loop = time.time()
         variables.elapsed_time = end_main_ex_loop - start_main_ex
 
+    # Current time and date
+    now = datetime.datetime.now()
     # save hdf5 file
-    with h5py.File("%s" %variables.hdf5_path, "w") as f:
+    with h5py.File("D:\\oxcart\\data\\" + now.strftime("%b-%d-%Y_%H-%M_") + "%s" % variables.hdf5_path, "w") as f:
         f.create_dataset("high_voltage", data=main_v_dc, dtype='f')
         f.create_dataset("pulse_voltage", data=main_v_p, dtype='f')
         f.create_dataset("events", data=main_counter, dtype='f')
@@ -256,7 +259,6 @@ def main():
         f.create_dataset("y", (0,), dtype='f')
         f.create_dataset("t", (0,), dtype='f')
         f.create_dataset("trigger#", (0,), dtype='f')
-    # clear_up(device)
     clear_up(task_counter)
     print('experiment is finished')
 

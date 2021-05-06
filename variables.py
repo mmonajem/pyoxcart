@@ -15,6 +15,9 @@ def init():
     global pulse_frequency
     global pulse_amp_per_supply_voltage
     global cycle_avg
+    global flag_main_gate
+    global flag_load_gate
+    global flag_cryo_gate
 
     global elapsed_time
     global total_ions
@@ -28,6 +31,7 @@ def init():
     global count_last
     global count_temp
     global avg_n_count
+    global index_plot
 
     # Setup parameters
     ex_time = 0
@@ -42,6 +46,9 @@ def init():
     pulse_amp_per_supply_voltage = 3500/160
     cycle_avg = 0
     hdf5_path = ''
+    flag_main_gate = False
+    flag_load_gate = False
+    flag_cryo_gate = False
 
     # Run statistics=
     elapsed_time = 0.0
@@ -55,6 +62,7 @@ def init():
     count_last = 0
     count_temp = 0
     avg_n_count = 0
+    index_plot = 0
     stop_flag = False
     start_flag = False
 
