@@ -146,13 +146,13 @@
      <string>Histogram</string>
     </property>
    </widget>
-   <widget class="QWidget" name="histogram" native="true">
+   <widget class="QWidget" name="temperature" native="true">
     <property name="geometry">
      <rect>
-      <x>1100</x>
-      <y>800</y>
-      <width>500</width>
-      <height>500</height>
+      <x>2130</x>
+      <y>1330</y>
+      <width>441</width>
+      <height>361</height>
      </rect>
     </property>
    </widget>
@@ -282,63 +282,13 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QPushButton" name="load_lock_switch_2">
+      <widget class="QPushButton" name="load_lock_switch">
        <property name="text">
         <string>Load Lock</string>
        </property>
       </widget>
      </item>
     </layout>
-   </widget>
-   <widget class="QWidget" name="cam_s_o" native="true">
-    <property name="geometry">
-     <rect>
-      <x>1650</x>
-      <y>120</y>
-      <width>500</width>
-      <height>500</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QWidget" name="vdc_time_3" native="true">
-    <property name="geometry">
-     <rect>
-      <x>1650</x>
-      <y>790</y>
-      <width>500</width>
-      <height>500</height>
-     </rect>
-    </property>
-    <widget class="QWidget" name="cam_b_o" native="true">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>10</y>
-       <width>500</width>
-       <height>500</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QWidget" name="cam_b_d" native="true">
-    <property name="geometry">
-     <rect>
-      <x>2160</x>
-      <y>790</y>
-      <width>1200</width>
-      <height>500</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QWidget" name="cam_s_d" native="true">
-    <property name="geometry">
-     <rect>
-      <x>2160</x>
-      <y>120</y>
-      <width>1200</width>
-      <height>500</height>
-     </rect>
-    </property>
    </widget>
    <widget class="QLabel" name="label_29">
     <property name="geometry">
@@ -486,7 +436,7 @@
    <widget class="QLCDNumber" name="vacume_main">
     <property name="geometry">
      <rect>
-      <x>1380</x>
+      <x>1340</x>
       <y>1370</y>
       <width>231</width>
       <height>91</height>
@@ -496,7 +446,7 @@
    <widget class="QLCDNumber" name="vacume_buffer">
     <property name="geometry">
      <rect>
-      <x>1380</x>
+      <x>1340</x>
       <y>1480</y>
       <width>231</width>
       <height>91</height>
@@ -506,8 +456,8 @@
    <widget class="QLCDNumber" name="vacume_load_lock">
     <property name="geometry">
      <rect>
-      <x>1380</x>
-      <y>1590</y>
+      <x>1340</x>
+      <y>1600</y>
       <width>231</width>
       <height>91</height>
      </rect>
@@ -516,7 +466,7 @@
    <widget class="QLabel" name="label_35">
     <property name="geometry">
      <rect>
-      <x>1170</x>
+      <x>1130</x>
       <y>1410</y>
       <width>171</width>
       <height>25</height>
@@ -535,7 +485,7 @@
    <widget class="QLabel" name="label_36">
     <property name="geometry">
      <rect>
-      <x>1170</x>
+      <x>1130</x>
       <y>1510</y>
       <width>171</width>
       <height>25</height>
@@ -554,8 +504,8 @@
    <widget class="QLabel" name="label_37">
     <property name="geometry">
      <rect>
-      <x>1180</x>
-      <y>1620</y>
+      <x>1140</x>
+      <y>1630</y>
       <width>171</width>
       <height>25</height>
      </rect>
@@ -573,14 +523,95 @@
    <widget class="QPushButton" name="pump_load_loack">
     <property name="geometry">
      <rect>
-      <x>910</x>
-      <y>1630</y>
+      <x>860</x>
+      <y>1620</y>
       <width>198</width>
       <height>46</height>
      </rect>
     </property>
     <property name="text">
-     <string>Pump</string>
+     <string>Load Lock Pump</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_38">
+    <property name="geometry">
+     <rect>
+      <x>1660</x>
+      <y>1510</y>
+      <width>191</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Temperature (K)</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="vacume_load_lock_2">
+    <property name="geometry">
+     <rect>
+      <x>1860</x>
+      <y>1480</y>
+      <width>231</width>
+      <height>91</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="cam_s_o">
+    <property name="geometry">
+     <rect>
+      <x>1650</x>
+      <y>120</y>
+      <width>500</width>
+      <height>500</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="cam_b_o">
+    <property name="geometry">
+     <rect>
+      <x>1650</x>
+      <y>790</y>
+      <width>500</width>
+      <height>500</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="cam_s_d">
+    <property name="geometry">
+     <rect>
+      <x>2170</x>
+      <y>120</y>
+      <width>1200</width>
+      <height>500</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="cam_b_d">
+    <property name="geometry">
+     <rect>
+      <x>2170</x>
+      <y>790</y>
+      <width>1200</width>
+      <height>500</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
    <widget class="QWidget" name="">
@@ -802,7 +833,7 @@
      <item row="8" column="0">
       <widget class="QLabel" name="label_20">
        <property name="text">
-        <string>Cycle for Avg.</string>
+        <string>Cycle for Avg. (Hz)</string>
        </property>
       </widget>
      </item>

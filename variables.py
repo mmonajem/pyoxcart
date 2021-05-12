@@ -1,5 +1,6 @@
 
 import numpy as np
+
 def init():
 
     global ex_time
@@ -25,6 +26,8 @@ def init():
     global camera_1_ExposureTime
 
     global elapsed_time
+    global start_time
+    global end_time
     global total_ions
     global specimen_voltage
     global detection_rate
@@ -42,6 +45,7 @@ def init():
     global img0_zoom
     global img1_orig
     global img1_zoom
+    global temperature
 
     # Setup parameters
     ex_time = 0
@@ -72,6 +76,8 @@ def init():
 
     # Run statistics=
     elapsed_time = 0.0
+    start_time = ''
+    end_time = ''
     total_ions = 0
     specimen_voltage = 0.0
     detection_rate = 0.0
@@ -85,4 +91,5 @@ def init():
     index_plot = 0
     stop_flag = False
     start_flag = False
+    temperature = 0
 

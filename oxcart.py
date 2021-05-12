@@ -151,13 +151,13 @@ def main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target)
 
     counts_error = counts_target - counts_measured  # deviation from setpoint
 
-    print('V_dc = ', variables.specimen_voltage, 'V')
-    print('V_p = ', variables.pulse_voltage, 'V')
-    print('# count:', variables.count_temp)
-    print('Total Ions:', variables.total_ions)
-    print('counts_target', counts_target * variables.pulse_frequency * 1000)
-    print('counts_measured', counts_measured * variables.pulse_frequency * 1000)
-    print('Error', counts_error * variables.pulse_frequency * 1000)
+    # print('V_dc = ', variables.specimen_voltage, 'V')
+    # print('V_p = ', variables.pulse_voltage, 'V')
+    # print('# count:', variables.count_temp)
+    # print('Total Ions:', variables.total_ions)
+    # print('counts_target', counts_target * variables.pulse_frequency * 1000)
+    # print('counts_measured', counts_measured * variables.pulse_frequency * 1000)
+    # print('Error', counts_error * variables.pulse_frequency * 1000)
 
     # simple proportional control with averaging
     if counts_error > 0:
@@ -206,6 +206,7 @@ def main():
     print('ex_time:', variables.ex_time, 'ex_freq:', 'ex_freq:', variables.ex_freq, 'vdc_min:', variables.vdc_min, 'vdc_max:', variables.vdc_max,
           'vdc_step_up:', variables.vdc_step_down, 'vdc_step_up:', variables.vdc_step_down, 'v_p_min:', variables.v_p_min, 'v_p_max:', variables.v_p_max)
 
+    variables.start_time = datetime.datetime.now().strftime( "%d/%m/%Y %H:%M" )
     # Initialization of devices
     initialize_v_dc()
     initialize_v_p()
@@ -262,7 +263,6 @@ def main():
     # Current time and date
     now = datetime.datetime.now()
     # save hdf5 file
-    dt = h5py.string_dtype(encoding='utf-8')
     subject = now.strftime("%b-%d-%Y_%H-%M_") + "%s" % variables.hdf5_path
     with h5py.File("D:\\oxcart\\data\\" + subject + '.h5', "w") as f:
         f.create_dataset("high_voltage", data=main_v_dc, dtype='f')
@@ -275,10 +275,18 @@ def main():
         f.create_dataset("y", (0,), dtype='f')
         f.create_dataset("t", (0,), dtype='f')
         f.create_dataset("trigger#", (0,), dtype='f')
+
+    variables.end_time = datetime.datetime.now().strftime( "%d/%m/%Y %H:%M" )
     # send an email
-    message_email = 'The Experiment %s finished' %variables.hdf5_path
+    subject = 'Oxcart Experiment {} Report'.format(variables.hdf5_path)
+    elapsed_time_temp = float("{:.3f}".format(variables.elapsed_time))
+    message = 'The experiment was started at: {}\n' \
+              'The experiment was ended at: {}\n' \
+              'Elapsed time: {}\n' \
+              'Total number of ions: {}\n'.format(elapsed_time_temp,
+                    variables.end_time, variables.elapsed_time, variables.total_ions)
     if len(variables.email) > 3:
-        email_send.send_email(variables.email, subject, message_email)
+        email_send.send_email(variables.email, subject, message)
     # send a Tweet
     message_tweet = 'The Experiment %s finished' %variables.hdf5_path
     if variables.tweet == True:

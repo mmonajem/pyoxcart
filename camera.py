@@ -12,16 +12,16 @@ class Camera():
 
     def update_cameras(self, cameras, converter):
         while True:
-            cameras[0].Open()
-            cameras[0].ExposureTime.SetValue(variables.camera_0_ExposureTime)
-            cameras[1].Open()
-            cameras[1].ExposureTime.SetValue(variables.camera_1_ExposureTime)
+            # cameras[0].Open()
+            # cameras[0].ExposureTime.SetValue(variables.camera_0_ExposureTime)
+            # cameras[1].Open()
+            # cameras[1].ExposureTime.SetValue(variables.camera_1_ExposureTime)
             if variables.light == False:
                 grabResult0 = cameras[0].RetrieveResult(10000000, pylon.TimeoutHandling_ThrowException)
                 grabResult1 = cameras[1].RetrieveResult(1000000, pylon.TimeoutHandling_ThrowException)
             elif variables.light == True:
-                grabResult0 = cameras[0].RetrieveResult(10000, pylon.TimeoutHandling_ThrowException)
-                grabResult1 = cameras[1].RetrieveResult(10000, pylon.TimeoutHandling_ThrowException)
+                grabResult0 = cameras[0].RetrieveResult(9000, pylon.TimeoutHandling_ThrowException)
+                grabResult1 = cameras[1].RetrieveResult(9000, pylon.TimeoutHandling_ThrowException)
             image0 = converter.Convert(grabResult0)
             img0 = image0.GetArray()
             image1 = converter.Convert(grabResult1)
