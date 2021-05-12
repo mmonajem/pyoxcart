@@ -38,10 +38,12 @@ class Camera():
             variables.img0_zoom = np.require(img0_zoom, np.uint8, 'C')
             variables.img1_orig = np.require(img1_orig, np.uint8, 'C')
             variables.img1_zoom = np.require(img1_zoom, np.uint8, 'C')
-            # cv2.imwrite(".\png\\1.png", img0_orig)
-            # cv2.imwrite(".\png\\1_zoom.png", img0_zoom)
-            # cv2.imwrite('.\png\\2.png', img1_orig)
-            # cv2.imwrite('.\png\\2_zoom.png', img1_zoom)
+            variables.index_save_image += 1
+            if variables.index_save_image % 10 == 0 and variables.start_flag == True:
+                cv2.imwrite(variables.path + "\\side_index_%s.png" %variables.index_save_image, img0_orig)
+                cv2.imwrite(variables.path + "\\side_zoom_index_%s.png" %variables.index_save_image, img0_zoom)
+                cv2.imwrite(variables.path + '\\bottom_index_%s.png' %variables.index_save_image, img1_orig)
+                cv2.imwrite(variables.path + '\\bottom_zoom_index_%s.png' %variables.index_save_image, img1_zoom)
 
     def camera_init(self,):
         # Limits the amount of cameras used for grabbing.

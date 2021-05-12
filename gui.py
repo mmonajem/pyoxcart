@@ -7,6 +7,8 @@ import numpy as np
 import nidaqmx
 import time
 import threading
+import datetime
+import os
 import scipy.misc, PIL.ImageQt
 
 import oxcart
@@ -514,6 +516,8 @@ class Ui_OXCART(object):
                          np.nan] * 1000  # 1000 data points
         self.y_vps = [
                          np.nan] * 1000  # 1000 data points
+        # Add legend
+        self.vdc_time.addLegend()
         pen_vdc = pg.mkPen(color=(255, 0, 0), width=6)
         pen_vps = pg.mkPen(color=(0, 0, 255), width=3)
         self.data_line_vdc = self.vdc_time.plot(self.x_vdc, self.y_vdc, name="High Vol.", pen=pen_vdc)
@@ -528,8 +532,7 @@ class Ui_OXCART(object):
         # Add Range
         self.vdc_time.setXRange(-100, 1100, padding=0)
         self.vdc_time.setYRange(-200, 20000, padding=0)
-        # Add legend
-        self.vdc_time.addLegend()
+
 
         # Detection Visualization #########################
         self.x_dtec = list(range(
@@ -651,6 +654,18 @@ class Ui_OXCART(object):
         variables.email = self.email.text()
         if self.tweet.currentText() == 'Yes':
             variables.tweet = True
+
+        # Read the experiment counter
+        with open('./png/counter.txt') as f:
+            variables.counter = int(f.readlines()[0])
+        # Current time and date
+        now = datetime.datetime.now()
+        subject = "%s_" % variables.counter + \
+                  now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
+        variables.path = 'D:\\oxcart\\data\\%s' % subject
+        # Create folder to save the data
+        if not os.path.isdir(variables.path):
+            os.makedirs(variables.path, mode=0o777, exist_ok=True)
 
         self.tread.start()
 

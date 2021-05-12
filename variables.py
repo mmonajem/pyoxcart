@@ -1,8 +1,10 @@
 
 import numpy as np
 
+
 def init():
 
+    global counter
     global ex_time
     global ex_freq
     global vdc_min
@@ -24,6 +26,8 @@ def init():
     global tweet
     global camera_0_ExposureTime
     global camera_1_ExposureTime
+    global path
+    global index_save_image
 
     global elapsed_time
     global start_time
@@ -48,6 +52,7 @@ def init():
     global temperature
 
     # Setup parameters
+    counter = 0
     ex_time = 0
     ex_freq =0
     vdc_min = 0.0
@@ -73,6 +78,8 @@ def init():
     img0_zoom = np.ones((1200,500,3), dtype=np.uint8)
     img1_orig = np.ones((500,500,3), dtype=np.uint8)
     img1_zoom = np.ones((1200,500,3), dtype=np.uint8)
+    path = ''
+    index_save_image = 0
 
     # Run statistics=
     elapsed_time = 0.0

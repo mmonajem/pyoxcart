@@ -26,6 +26,7 @@ import tweet_send
 import time
 import datetime
 import h5py
+import os
 import threading
 import numpy as np
 import sys
@@ -194,6 +195,7 @@ def cleanup_variables():
     variables.count_temp = 0
     variables.avg_n_count = 0
     variables.index_plot = 0
+    variables.index_save_image = 0
 
 
 
@@ -260,11 +262,9 @@ def main():
         end_main_ex_loop = time.time()
         variables.elapsed_time = end_main_ex_loop - start_main_ex
 
-    # Current time and date
-    now = datetime.datetime.now()
+
     # save hdf5 file
-    subject = now.strftime("%b-%d-%Y_%H-%M_") + "%s" % variables.hdf5_path
-    with h5py.File("D:\\oxcart\\data\\" + subject + '.h5', "w") as f:
+    with h5py.File(variables.path + '\\%s_data.h5' %variables.hdf5_path, "w") as f:
         f.create_dataset("high_voltage", data=main_v_dc, dtype='f')
         f.create_dataset("pulse_voltage", data=main_v_p, dtype='f')
         f.create_dataset("events", data=main_counter, dtype='i')
@@ -282,9 +282,9 @@ def main():
     elapsed_time_temp = float("{:.3f}".format(variables.elapsed_time))
     message = 'The experiment was started at: {}\n' \
               'The experiment was ended at: {}\n' \
-              'Elapsed time: {}\n' \
-              'Total number of ions: {}\n'.format(elapsed_time_temp,
-                    variables.end_time, variables.elapsed_time, variables.total_ions)
+              'Experiment duration: {}\n' \
+              'Total number of ions: {}\n'.format(variables.start_time,
+                    variables.end_time, elapsed_time_temp, variables.total_ions)
     if len(variables.email) > 3:
         email_send.send_email(variables.email, subject, message)
     # send a Tweet
@@ -292,6 +292,9 @@ def main():
     if variables.tweet == True:
         tweet_send.send_tweet(message_tweet)
     clear_up(task_counter)
+    # save new variable
+    with open('./png/counter.txt', 'w') as f:
+        f.write(str(variables.counter + 1))
     print('experiment is finished')
 
 # if __name__ == "__main__":
