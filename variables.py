@@ -1,12 +1,13 @@
 
-
+import numpy as np
 def init():
 
     global ex_time
     global ex_freq
     global vdc_min
     global vdc_max
-    global vdc_step
+    global vdc_step_up
+    global vdc_step_down
     global v_p_min
     global v_p_max
     global pulse_fraction
@@ -18,6 +19,10 @@ def init():
     global flag_main_gate
     global flag_load_gate
     global flag_cryo_gate
+    global email
+    global tweet
+    global camera_0_ExposureTime
+    global camera_1_ExposureTime
 
     global elapsed_time
     global total_ions
@@ -32,13 +37,19 @@ def init():
     global count_temp
     global avg_n_count
     global index_plot
+    global light
+    global img0_orig
+    global img0_zoom
+    global img1_orig
+    global img1_zoom
 
     # Setup parameters
     ex_time = 0
     ex_freq =0
     vdc_min = 0.0
     vdc_max = 0.0
-    vdc_step = 0.0
+    vdc_step_up = 0.0
+    vdc_step_down = 0.0
     v_p_min = 0.0
     v_p_max = 0.0
     pulse_fraction = 0
@@ -49,6 +60,15 @@ def init():
     flag_main_gate = False
     flag_load_gate = False
     flag_cryo_gate = False
+    email = ''
+    tweet = False
+    light = False
+    camera_0_ExposureTime = 10000000
+    camera_1_ExposureTime = 1000000
+    img0_orig = np.ones((500,500,3), dtype=np.uint8)
+    img0_zoom = np.ones((1200,500,3), dtype=np.uint8)
+    img1_orig = np.ones((500,500,3), dtype=np.uint8)
+    img1_zoom = np.ones((1200,500,3), dtype=np.uint8)
 
     # Run statistics=
     elapsed_time = 0.0

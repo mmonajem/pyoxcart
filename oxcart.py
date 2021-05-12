@@ -18,6 +18,8 @@ import pyvisa as visa
 import nidaqmx
 import scTDC
 import variables
+import email_send
+import tweet_send
 # import tdc_hdf5
 
 # package needed
@@ -158,7 +160,10 @@ def main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target)
     print('Error', counts_error * variables.pulse_frequency * 1000)
 
     # simple proportional control with averaging
-    voltage_step = counts_error * variables.vdc_step
+    if counts_error > 0:
+        voltage_step = counts_error * variables.vdc_step_up
+    elif counts_error <= 0:
+        voltage_step = counts_error * variables.vdc_step_down
     # update v_dc
     if variables.specimen_voltage < variables.vdc_max:
         # sending VDC via serial
@@ -199,7 +204,7 @@ def main():
     # Sleep for 2 seconds in order to update variables from GUI
     time.sleep(2)
     print('ex_time:', variables.ex_time, 'ex_freq:', 'ex_freq:', variables.ex_freq, 'vdc_min:', variables.vdc_min, 'vdc_max:', variables.vdc_max,
-          'vdc_step:', variables.vdc_step, 'v_p_min:', variables.v_p_min, 'v_p_max:', variables.v_p_max)
+          'vdc_step_up:', variables.vdc_step_down, 'vdc_step_up:', variables.vdc_step_down, 'v_p_min:', variables.v_p_min, 'v_p_max:', variables.v_p_max)
 
     # Initialization of devices
     initialize_v_dc()
@@ -216,6 +221,9 @@ def main():
     main_v_dc = []
     main_v_p = []
     main_counter = []
+    time_ex_s = []
+    time_ex_m = []
+    time_ex_h = []
     counts_target = ((variables.detection_rate/100) * variables.pulse_frequency) / variables.pulse_frequency
     variables.start_flag = True
     start_main_ex = time.time()
@@ -234,6 +242,9 @@ def main():
         start = datetime.datetime.now()
         main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target)
         end = datetime.datetime.now()
+        time_ex_s.append(int(end.strftime("%S")))
+        time_ex_m.append(int(end.strftime("%M")))
+        time_ex_h.append(int(end.strftime("%H")))
         if variables.stop_flag == False:
             if (1000 / variables.ex_freq) > ((end - start).microseconds / 1000):  # time in milliseconds
                 time.sleep(((1000 / variables.ex_freq) - ((end - start).microseconds / 1000)) / 1000)
@@ -251,14 +262,27 @@ def main():
     # Current time and date
     now = datetime.datetime.now()
     # save hdf5 file
-    with h5py.File("D:\\oxcart\\data\\" + now.strftime("%b-%d-%Y_%H-%M_") + "%s" % variables.hdf5_path, "w") as f:
+    dt = h5py.string_dtype(encoding='utf-8')
+    subject = now.strftime("%b-%d-%Y_%H-%M_") + "%s" % variables.hdf5_path
+    with h5py.File("D:\\oxcart\\data\\" + subject + '.h5', "w") as f:
         f.create_dataset("high_voltage", data=main_v_dc, dtype='f')
         f.create_dataset("pulse_voltage", data=main_v_p, dtype='f')
-        f.create_dataset("events", data=main_counter, dtype='f')
+        f.create_dataset("events", data=main_counter, dtype='i')
+        f.create_dataset("time_s", data=time_ex_s, dtype='i')
+        f.create_dataset("time_m", data=time_ex_m, dtype='i')
+        f.create_dataset("time_h", data=time_ex_h, dtype='i')
         f.create_dataset("x", (0,), dtype='f')
         f.create_dataset("y", (0,), dtype='f')
         f.create_dataset("t", (0,), dtype='f')
         f.create_dataset("trigger#", (0,), dtype='f')
+    # send an email
+    message_email = 'The Experiment %s finished' %variables.hdf5_path
+    if len(variables.email) > 3:
+        email_send.send_email(variables.email, subject, message_email)
+    # send a Tweet
+    message_tweet = 'The Experiment %s finished' %variables.hdf5_path
+    if variables.tweet == True:
+        tweet_send.send_tweet(message_tweet)
     clear_up(task_counter)
     print('experiment is finished')
 
