@@ -10,7 +10,7 @@ os.environ["PYLON_CAMEMU"] = "2"
 
 class Camera():
 
-    def update_cameras(self, cameras, converter):
+    def update_cameras(self, cameras, converter, lock):
         while True:
             # cameras[0].Open()
             # cameras[0].ExposureTime.SetValue(variables.camera_0_ExposureTime)
@@ -34,17 +34,18 @@ class Camera():
             img1_zoom = img1[1050:1300, 1000:1500]
             img1_zoom = cv2.resize(img1_zoom, dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
             # Saving images - So far it is not possible to not save and load images in a proper way with ImageQt
-            variables.img0_orig = np.require(img0_orig, np.uint8, 'C')
-            variables.img0_zoom = np.require(img0_zoom, np.uint8, 'C')
-            variables.img1_orig = np.require(img1_orig, np.uint8, 'C')
-            variables.img1_zoom = np.require(img1_zoom, np.uint8, 'C')
-            variables.index_save_image += 1
+            with lock:
+                variables.img0_orig = np.require(img0_orig, np.uint8, 'C')
+                variables.img0_zoom = np.require(img0_zoom, np.uint8, 'C')
+                variables.img1_orig = np.require(img1_orig, np.uint8, 'C')
+                variables.img1_zoom = np.require(img1_zoom, np.uint8, 'C')
+                variables.index_save_image += 1
+
             if variables.index_save_image % 10 == 0 and variables.start_flag == True:
                 cv2.imwrite(variables.path + "\\side_index_%s.png" %variables.index_save_image, img0_orig)
                 cv2.imwrite(variables.path + "\\side_zoom_index_%s.png" %variables.index_save_image, img0_zoom)
                 cv2.imwrite(variables.path + '\\bottom_index_%s.png' %variables.index_save_image, img1_orig)
                 cv2.imwrite(variables.path + '\\bottom_zoom_index_%s.png' %variables.index_save_image, img1_zoom)
-
     def camera_init(self,):
         # Limits the amount of cameras used for grabbing.
         # The bandwidth used by a FireWire camera device can be limited by adjusting the packet size.

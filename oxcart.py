@@ -31,6 +31,29 @@ import threading
 import numpy as np
 import sys
 
+def logging():
+    # Gets or creates a logger
+    import logging
+    logger = logging.getLogger(__name__)
+    # set log level
+    logger.setLevel(logging.INFO)
+    # define file handler and set formatter
+    file_handler = logging.FileHandler(variables.path + '\\logfile.log', mode='w')
+    formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
+    file_handler.setFormatter(formatter)
+
+    # add file handler to logger
+    logger.addHandler(file_handler)
+
+    # Logs
+    # logger.debug('A debug message')
+    # logger.info('An info message')
+    # logger.warning('Something is not right.')
+    # logger.error('A Major error has happened.')
+    # logger.critical('Fatal error. Cannot continue')
+
+    return logger
+
 # get available COM ports and store as list
 com_ports = list(serial.tools.list_ports.comports())
 # Setting the com port of V_dc
@@ -203,6 +226,9 @@ def cleanup_variables():
 
 
 def main():
+    # Initialize logger
+    logger = logging()
+    logger.info('Experiment is starting')
     # Sleep for 2 seconds in order to update variables from GUI
     time.sleep(2)
     print('ex_time:', variables.ex_time, 'ex_freq:', 'ex_freq:', variables.ex_freq, 'vdc_min:', variables.vdc_min, 'vdc_max:', variables.vdc_max,
@@ -211,9 +237,12 @@ def main():
     variables.start_time = datetime.datetime.now().strftime( "%d/%m/%Y %H:%M" )
     # Initialization of devices
     initialize_v_dc()
+    logger.info('High voltage is initialized')
     initialize_v_p()
+    logger.info('Pulser is initialized')
     # device = initialize_tdc()
     task_counter = initialize_counter()
+    logger.info('Edge counter is initialized')
     # Starting tdc hdf5 streaming
     # threading.Thread(target=tdc_hdf5.hdf5_streaming(device)).start()
     # start the timer for main experiment
@@ -229,6 +258,7 @@ def main():
     time_ex_h = []
     counts_target = ((variables.detection_rate/100) * variables.pulse_frequency) / variables.pulse_frequency
     variables.start_flag = True
+    logger.info('Start the main loop')
     start_main_ex = time.time()
     for steps in range(variables.ex_time * variables.ex_freq):
         if steps == 0:
@@ -253,15 +283,19 @@ def main():
                 time.sleep(((1000 / variables.ex_freq) - ((end - start).microseconds / 1000)) / 1000)
             else:
                 print('Experiment loop takes longer than initialized frequency Seconds')
+                logger.error('Experiment loop takes longer than initialized frequency Seconds')
                 break
         else:
-            print('Experiment is stopped')
+            print('Experiment is stopped by user')
+            logger.info('Experiment is stopped by user')
             # wait for 5 second
             time.sleep(5)
             break
         end_main_ex_loop = time.time()
         variables.elapsed_time = end_main_ex_loop - start_main_ex
 
+    print('experiment is finished')
+    logger.info('Experiment is finished')
 
     # save hdf5 file
     with h5py.File(variables.path + '\\%s_data.h5' %variables.hdf5_path, "w") as f:
@@ -275,8 +309,24 @@ def main():
         f.create_dataset("y", (0,), dtype='f')
         f.create_dataset("t", (0,), dtype='f')
         f.create_dataset("trigger#", (0,), dtype='f')
-
+    logger.info('HDF5 file is created')
     variables.end_time = datetime.datetime.now().strftime( "%d/%m/%Y %H:%M" )
+
+    clear_up(task_counter)
+    logger.info('Variables and devices is cleared')
+    # save new variable
+    with open('./png/counter.txt', 'w') as f:
+        f.write(str(variables.counter + 1))
+        logger.info('Experiment counter is increased')
+
+    # Adding results of the experiment to the log file
+    logger.info('Total number of Ions is: %s' % variables.total_ions)
+    # send a Tweet
+    message_tweet = 'The Experiment %s finished' % variables.hdf5_path
+    if variables.tweet == True:
+        tweet_send.send_tweet(message_tweet)
+        logger.info('Tweet is sent')
+
     # send an email
     subject = 'Oxcart Experiment {} Report'.format(variables.hdf5_path)
     elapsed_time_temp = float("{:.3f}".format(variables.elapsed_time))
@@ -284,18 +334,11 @@ def main():
               'The experiment was ended at: {}\n' \
               'Experiment duration: {}\n' \
               'Total number of ions: {}\n'.format(variables.start_time,
-                    variables.end_time, elapsed_time_temp, variables.total_ions)
+                                                  variables.end_time, elapsed_time_temp, variables.total_ions)
+
     if len(variables.email) > 3:
+        logger.info('Email is sent')
         email_send.send_email(variables.email, subject, message)
-    # send a Tweet
-    message_tweet = 'The Experiment %s finished' %variables.hdf5_path
-    if variables.tweet == True:
-        tweet_send.send_tweet(message_tweet)
-    clear_up(task_counter)
-    # save new variable
-    with open('./png/counter.txt', 'w') as f:
-        f.write(str(variables.counter + 1))
-    print('experiment is finished')
 
 # if __name__ == "__main__":
 #     main(ex_time_g=60, ex_freq_g=20, vdc_min_g=2000, vdc_max_g=15000, vdc_step_g=5, v_p_min_g=15, v_p_max_g=100)
