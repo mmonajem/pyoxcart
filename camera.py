@@ -17,7 +17,7 @@ class Camera():
             # cameras[1].Open()
             # cameras[1].ExposureTime.SetValue(variables.camera_1_ExposureTime)
             if variables.light == False:
-                grabResult0 = cameras[0].RetrieveResult(10000000, pylon.TimeoutHandling_ThrowException)
+                grabResult0 = cameras[0].RetrieveResult(1000000, pylon.TimeoutHandling_ThrowException)
                 grabResult1 = cameras[1].RetrieveResult(1000000, pylon.TimeoutHandling_ThrowException)
             elif variables.light == True:
                 grabResult0 = cameras[0].RetrieveResult(9000, pylon.TimeoutHandling_ThrowException)
@@ -71,17 +71,21 @@ class Camera():
             cam.Attach(tlFactory.CreateDevice(devices[i]))
 
             # Print the model name of the camera.
-            print("Using camera ", cam.GetDeviceInfo().GetModelName())
+            # print("Using camera ", cam.GetDeviceInfo().GetModelName())
 
         if variables.light == True:
             cameras[0].Open()
-            cameras[0].ExposureTime.SetValue(3000)
+            cameras[0].ExposureAuto.SetValue('Off')
+            cameras[0].ExposureTime.SetValue(9000)
             cameras[1].Open()
-            cameras[1].ExposureTime.SetValue(3000)
+            cameras[1].ExposureAuto.SetValue('Off')
+            cameras[1].ExposureTime.SetValue(9000)
         elif variables.light == False:
             cameras[0].Open()
-            cameras[0].ExposureTime.SetValue(10000000)
+            cameras[0].ExposureAuto.SetValue('Off')
+            cameras[0].ExposureTime.SetValue(1000000)
             cameras[1].Open()
+            cameras[1].ExposureAuto.SetValue('Off')
             cameras[1].ExposureTime.SetValue(1000000)
 
         # Starts grabbing for all cameras starting with index 0. The grabbing

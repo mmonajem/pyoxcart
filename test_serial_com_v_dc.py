@@ -44,6 +44,7 @@ import time
 
 # get available COM ports and store as list
 com_ports = list(serial.tools.list_ports.comports())
+print(com_ports)
 
 # get number of available COM ports
 no_com_ports = len(com_ports)

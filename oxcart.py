@@ -1,7 +1,8 @@
 # OXCART
 # Python Script for doing an experiments
-com_port_idx_V_dc = 1
-com_port_idx_V_p = 2
+com_port_idx_V_dc = 2
+com_port_idx_V_p = 0
+
 
 # ex_time = 90  # Experiment time in second
 # ex_freq = 30 # Experiment main loop frequency in Hz
@@ -65,6 +66,7 @@ com_port_v_dc = serial.Serial(
     stopbits=serial.STOPBITS_ONE  # 1
 )
 
+
 # set the port for v_p
 resources = visa.ResourceManager('@py')
 com_port_v_p = resources.open_resource('ASRL4::INSTR')
@@ -126,7 +128,7 @@ def command_v_dc(cmd):
 
 
 def clear_up(task_counter):
-    print('Start to clean up')
+    print('starting to clean up')
     # save the data to the HDF5
 
     # Switch off the v_dc
@@ -146,10 +148,10 @@ def clear_up(task_counter):
     task_counter.close()
     # Zero variables
     cleanup_variables()
+    print('Clean up is finished')
 
-
-
-def main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target):
+def main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target,
+                 temperature, main_chamber_vacum):
 
     # # reading DC HV
     # v_dc = (command_v_dc(">S0A?")[5:-1])
@@ -202,6 +204,9 @@ def main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target)
 
     if new_vp < variables.pulse_voltage_max or new_vp > variables.pulse_voltage_min:
         com_port_v_p.write('VOLT %s' % new_vp)
+
+    temperature.append(variables.temperature)
+    main_chamber_vacum.append(variables.vacum_main)
 
 def cleanup_variables():
 
@@ -256,9 +261,11 @@ def main():
     time_ex_s = []
     time_ex_m = []
     time_ex_h = []
+    temperature = []
+    main_chamber_vacum = []
     counts_target = ((variables.detection_rate/100) * variables.pulse_frequency) / variables.pulse_frequency
     variables.start_flag = True
-    logger.info('Start the main loop')
+    logger.info('Starting the main loop')
     start_main_ex = time.time()
     for steps in range(variables.ex_time * variables.ex_freq):
         if steps == 0:
@@ -273,7 +280,7 @@ def main():
             # variables.start_flag == True
         # main loop
         start = datetime.datetime.now()
-        main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target)
+        main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target, temperature, main_chamber_vacum)
         end = datetime.datetime.now()
         time_ex_s.append(int(end.strftime("%S")))
         time_ex_m.append(int(end.strftime("%M")))
@@ -302,6 +309,7 @@ def main():
         f.create_dataset("high_voltage", data=main_v_dc, dtype='f')
         f.create_dataset("pulse_voltage", data=main_v_p, dtype='f')
         f.create_dataset("events", data=main_counter, dtype='i')
+        f.create_dataset('temperature', data=temperature, dtype='f')
         f.create_dataset("time_s", data=time_ex_s, dtype='i')
         f.create_dataset("time_m", data=time_ex_m, dtype='i')
         f.create_dataset("time_h", data=time_ex_h, dtype='i')

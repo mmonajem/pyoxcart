@@ -47,7 +47,6 @@ tlFactory = pylon.TlFactory.GetInstance()
 # Get all attached devices and exit application if no device is found.
 devices = tlFactory.EnumerateDevices()
 
-
 if len(devices) == 0:
     raise pylon.RuntimeException("No camera present.")
 
@@ -59,15 +58,19 @@ l = cameras.GetSize()
 # Create and attach all Pylon Devices.
 for i, cam in enumerate(cameras):
     cam.Attach(tlFactory.CreateDevice(devices[i]))
+    # Enable data chunks
+
 
     # Print the model name of the camera.
     print("Using device ", cam.GetDeviceInfo().GetModelName())
 
 
 cameras[0].Open()
+cameras[0].ExposureAuto.SetValue('Off')
 # cameras[0].ExposureTime.SetValue(10000000)
 cameras[0].ExposureTime.SetValue(3000)
 cameras[1].Open()
+cameras[1].ExposureAuto.SetValue('Off')
 # cameras[1].ExposureTime.SetValue(1000000)
 cameras[1].ExposureTime.SetValue(3000)
 

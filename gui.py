@@ -9,17 +9,36 @@ import time
 import threading
 import datetime
 import os
+import serial.tools.list_ports
+from random import randint
 import scipy.misc, PIL.ImageQt
 
 import oxcart
 import variables
-import camera
+from camera import Camera
+from pfeiffer import TPG362
+
+com_port_idx_cryovac = 1
+COM_PORT_pfeiffer = 'COM5'
+
+# get available COM ports and store as list
+com_ports = list(serial.tools.list_ports.comports())
+# Setting the com port of Cryovac
+com_port_cryovac = serial.Serial(
+    port=com_ports[com_port_idx_cryovac].device,  # chosen COM port
+    baudrate=9600,  # 115200
+    bytesize=serial.EIGHTBITS,  # 8
+    parity=serial.PARITY_NONE,  # N
+    stopbits=serial.STOPBITS_ONE  # 1
+)
 
 
 class Ui_OXCART(object):
-    def __init__(self, cameras, converter):
-        self.cameras = cameras   # Initialize cameras
+    def __init__(self, cameras, converter, lock):
+        self.cameras = cameras  # Initialize cameras
         self.converter = converter
+        self.lock = lock
+
     def setupUi(self, OXCART):
         OXCART.setObjectName("OXCART")
         OXCART.resize(3400, 1800)
@@ -205,30 +224,33 @@ class Ui_OXCART(object):
         self.led_light.setAlignment(QtCore.Qt.AlignCenter)
         self.led_light.setObjectName("led_light")
         self.vacume_main = QtWidgets.QLCDNumber(self.centralwidget)
+        self.vacume_main.setDigitCount(8)
         self.vacume_main.setGeometry(QtCore.QRect(1340, 1370, 231, 91))
         self.vacume_main.setObjectName("vacume_main")
         self.vacume_buffer = QtWidgets.QLCDNumber(self.centralwidget)
+        self.vacume_buffer.setDigitCount(8)
         self.vacume_buffer.setGeometry(QtCore.QRect(1340, 1480, 231, 91))
         self.vacume_buffer.setObjectName("vacume_buffer")
         self.vacume_load_lock = QtWidgets.QLCDNumber(self.centralwidget)
+        self.vacume_load_lock.setDigitCount(8)
         self.vacume_load_lock.setGeometry(QtCore.QRect(1340, 1600, 231, 91))
         self.vacume_load_lock.setObjectName("vacume_load_lock")
         self.label_35 = QtWidgets.QLabel(self.centralwidget)
-        self.label_35.setGeometry(QtCore.QRect(1130, 1410, 171, 25))
+        self.label_35.setGeometry(QtCore.QRect(1080, 1400, 221, 31))
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
         self.label_35.setFont(font)
         self.label_35.setObjectName("label_35")
         self.label_36 = QtWidgets.QLabel(self.centralwidget)
-        self.label_36.setGeometry(QtCore.QRect(1130, 1510, 171, 25))
+        self.label_36.setGeometry(QtCore.QRect(1080, 1510, 231, 31))
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
         self.label_36.setFont(font)
         self.label_36.setObjectName("label_36")
         self.label_37 = QtWidgets.QLabel(self.centralwidget)
-        self.label_37.setGeometry(QtCore.QRect(1140, 1630, 171, 25))
+        self.label_37.setGeometry(QtCore.QRect(1100, 1640, 171, 25))
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
@@ -244,9 +266,10 @@ class Ui_OXCART(object):
         font.setWeight(75)
         self.label_38.setFont(font)
         self.label_38.setObjectName("label_38")
-        self.vacume_load_lock_2 = QtWidgets.QLCDNumber(self.centralwidget)
-        self.vacume_load_lock_2.setGeometry(QtCore.QRect(1860, 1480, 231, 91))
-        self.vacume_load_lock_2.setObjectName("vacume_load_lock_2")
+        self.temp = QtWidgets.QLCDNumber(self.centralwidget)
+        self.temp.setDigitCount(8)
+        self.temp.setGeometry(QtCore.QRect(1860, 1480, 231, 91))
+        self.temp.setObjectName("temperature")
         self.widget = QtWidgets.QWidget(self.centralwidget)
         self.widget.setGeometry(QtCore.QRect(20, 753, 436, 242))
         self.widget.setObjectName("widget")
@@ -456,14 +479,14 @@ class Ui_OXCART(object):
         self.label_34.setText(_translate("OXCART", "Camera Side"))
         self.light.setText(_translate("OXCART", "Light"))
         self.led_light.setText(_translate("OXCART", "light"))
-        self.label_35.setText(_translate("OXCART", "Main Chamber"))
-        self.label_36.setText(_translate("OXCART", "Buffer Chamber"))
-        self.label_37.setText(_translate("OXCART", "Load lock"))
+        self.label_35.setText(_translate("OXCART", "Main Chamber (Bar)"))
+        self.label_36.setText(_translate("OXCART", "Buffer Chamber (Bar)"))
+        self.label_37.setText(_translate("OXCART", "Load lock (Bar)"))
         ###
-        self.main_chamber_switch.clicked.connect(lambda:self.gates(1))
-        self.load_lock_switch.clicked.connect(lambda:self.gates(2))
-        self.cryo_switch.clicked.connect(lambda:self.gates(3))
-        self.light.clicked.connect(lambda:self.light_switch())
+        self.main_chamber_switch.clicked.connect(lambda: self.gates(1))
+        self.load_lock_switch.clicked.connect(lambda: self.gates(2))
+        self.cryo_switch.clicked.connect(lambda: self.gates(3))
+        self.light.clicked.connect(lambda: self.light_switch())
         ###
         self.pump_load_loack.setText(_translate("OXCART", "Load Lock Pump"))
         self.label_38.setText(_translate("OXCART", "Temperature (K)"))
@@ -533,7 +556,6 @@ class Ui_OXCART(object):
         self.vdc_time.setXRange(-100, 1100, padding=0)
         self.vdc_time.setYRange(-200, 20000, padding=0)
 
-
         # Detection Visualization #########################
         self.x_dtec = list(range(
             1000))  # 1000 time points
@@ -552,7 +574,7 @@ class Ui_OXCART(object):
         self.detection_rate_viz.setXRange(-100, 1100, padding=0)
         self.detection_rate_viz.setYRange(-100, 2000, padding=0)
 
-        # Detection Temperature #########################
+        # Temperature #########################
         self.x_tem = list(range(
             1000))  # 1000 time points
         self.y_tem = [
@@ -568,7 +590,7 @@ class Ui_OXCART(object):
         self.temperature.showGrid(x=True, y=True)
         # Add Range
         self.temperature.setXRange(-100, 1100, padding=0)
-        self.temperature.setYRange(0, 200, padding=0)
+        self.temperature.setYRange(0, 100, padding=0)
 
         # Visualization #####################
 
@@ -607,7 +629,7 @@ class Ui_OXCART(object):
         self.timer1.start()
         # timer cameras
         self.timer2 = QtCore.QTimer()
-        self.timer2.setInterval(1)
+        self.timer2.setInterval(50)
         self.timer2.timeout.connect(self.update_cameras)
         self.timer2.start()
 
@@ -660,9 +682,9 @@ class Ui_OXCART(object):
             variables.counter = int(f.readlines()[0])
         # Current time and date
         now = datetime.datetime.now()
-        subject = "%s_" % variables.counter + \
-                  now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
-        variables.path = 'D:\\oxcart\\data\\%s' % subject
+        exp_name = "%s_" % variables.counter + \
+                   now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
+        variables.path = 'D:\\oxcart\\data\\%s' % exp_name
         # Create folder to save the data
         if not os.path.isdir(variables.path):
             os.makedirs(variables.path, mode=0o777, exist_ok=True)
@@ -721,7 +743,7 @@ class Ui_OXCART(object):
         else:
             _translate = QtCore.QCoreApplication.translate
             self.Error.setText(_translate("OXCART",
-        "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all the Gates</span></p></body></html>"))
+                                          "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all the Gates</span></p></body></html>"))
 
     def light_switch(self):
         if variables.light == False:
@@ -744,6 +766,24 @@ class Ui_OXCART(object):
             variables.light = False
 
     def update_plot_data(self):
+
+        #  Temperature Visualization
+        output = command_cryovac('getOutput')
+        variables.temperature = float(output.split()[0].replace(',', ''))
+
+        if variables.index_plot_temp <= 999:
+            self.y_tem = self.y_tem[:-1]  # Remove the first
+            self.y_tem.insert(variables.index_plot, int(variables.temperature))
+            variables.index_plot_temp += 1
+        else:
+            self.x_tem = self.x_tem[
+                          1:]  # Remove the first element.
+            self.x_tem.append(self.x_tem[
+                                   -1] + 1)  # Add a new value 1 higher than the last.
+            self.y_tem = self.y_tem[1:]
+            self.y_tem.insert(999, int(variables.temperature))
+
+        self.data_line_tem.setData(self.x_tem, self.y_tem)
 
         if variables.start_flag == True:
             if variables.index_plot <= 999:
@@ -792,23 +832,6 @@ class Ui_OXCART(object):
 
             self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 
-            #  Temperature Visualization
-            if variables.start_flag == True:
-                if variables.index_plot <= 999:
-                    self.y_tem = self.y_tem[
-                                  :-1]  # Remove the first
-                    self.y_tem.insert(variables.index_plot,
-                                       int(variables.temperature))  # Add a new value.
-                else:
-                    self.x_tem = self.x_tem[
-                                  1:]  # Remove the first element.
-                    self.x_tem.append(self.x_tem[
-                                           -1] + 1)  # Add a new value 1 higher than the last.
-                    self.y_tem = self.y_tem[1:]
-                    self.y_tem.insert(999, int(variables.temperature))
-
-            self.data_line_tem.setData(self.x_tem, self.y_tem)
-
             # Increase the index
             variables.index_plot += 1
 
@@ -828,11 +851,7 @@ class Ui_OXCART(object):
 
             self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 
-            self.y_tem = [np.nan] * 1000
-
-            self.data_line_tem.setData(self.x_tem, self.y_tem)
-
-            # Statistics Update
+        # Statistics Update
         self.speciemen_voltage.setText(str(float("{:.3f}".format(variables.specimen_voltage))))
         self.pulse_voltage.setText(str(float("{:.3f}".format(variables.pulse_voltage))))
         self.elapsed_time.setText(str(float("{:.3f}".format(variables.elapsed_time))))
@@ -849,32 +868,40 @@ class Ui_OXCART(object):
             _translate = QtCore.QCoreApplication.translate
             self.Error.setText(_translate("OXCART",
                                           "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible number is 20KV</span></p></body></html>"))
-            self.vdc_max.setText(_translate("OXCART", "4000"))
-            variables.vdc_max = float(self.vdc_max.text())
-            variables.vdc_step_up = float(self.vdc_steps_up.text())
-            variables.vdc_step_down = float(self.vdc_steps_down.text())
-            variables.v_p_min = float(self.vp_min.text())
-            if float(self.vp_max.text()) > 3281:
-                _translate = QtCore.QCoreApplication.translate
+            self.vdc_max.setText(_translate("OXCART", str(variables.vdc_max)))
+        variables.vdc_max = variables.vdc_max
+        variables.vdc_step_up = float(self.vdc_steps_up.text())
+        variables.vdc_step_down = float(self.vdc_steps_down.text())
+        variables.v_p_min = float(self.vp_min.text())
+        if float(self.vp_max.text()) > 3281:
+            _translate = QtCore.QCoreApplication.translate
             self.Error.setText(_translate("OXCART",
                                           "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible number is 3281 V</span></p></body></html>"))
             self.vp_max.setText(_translate("OXCART", "3281"))
-            variables.v_p_max = float(self.vp_max.text())
-            variables.pulse_fraction = float(self.pulse_fraction.text()) / 100
-            variables.pulse_frequency = int(self.pulse_frequency.text())
-            variables.detection_rate = int(self.detection_rate_init.text())
-            variables.hdf5_path = self.hdf5_path.text()
-            variables.cycle_avg = int(self.cycle_avg.text())
+        variables.v_p_max = float(self.vp_max.text())
+        variables.pulse_fraction = float(self.pulse_fraction.text()) / 100
+        variables.pulse_frequency = int(self.pulse_frequency.text())
+        variables.detection_rate = int(self.detection_rate_init.text())
+        variables.hdf5_path = self.hdf5_path.text()
+        variables.cycle_avg = int(self.cycle_avg.text())
 
-    def update_cameras(self):
+        # update temperature and vacum gages
+        initialize_gauges()
+        self.temp.display(variables.temperature)
+        self.vacume_main.display(variables.vacum_main)
+        self.vacume_buffer.display((variables.vacum_buffer))
+        self.vacume_load_lock.display(variables.vacum_load_lock)
 
-        self.camera0 = QImage(variables.img0_orig, 500, 500, QImage.Format_RGB888)
+    def update_cameras(self, ):
+
+        with self.lock:
+            self.camera0 = QImage(variables.img0_orig, 500, 500, QImage.Format_RGB888)
+            self.camera0_zoom = QImage(variables.img0_zoom, 1200, 500, QImage.Format_RGB888)
+            self.camera1 = QImage(variables.img1_orig, 500, 500, QImage.Format_RGB888)
+            self.camera1_zoom = QImage(variables.img1_zoom, 1200, 500, QImage.Format_RGB888)
         self.camera0 = QtGui.QPixmap(self.camera0)
-        self.camera0_zoom = QImage(variables.img0_zoom, 1200, 500, QImage.Format_RGB888)
         self.camera0_zoom = QtGui.QPixmap(self.camera0_zoom)
-        self.camera1 = QImage(variables.img1_orig, 500, 500, QImage.Format_RGB888)
         self.camera1 = QtGui.QPixmap(self.camera1)
-        self.camera1_zoom = QImage(variables.img1_zoom, 1200, 500, QImage.Format_RGB888)
         self.camera1_zoom = QtGui.QPixmap(self.camera1_zoom)
         # self.camera0 = QPixmap(".\png\\1.png")
         # self.camera0_zoom = QPixmap(".\png\\1_zoom.png")
@@ -899,9 +926,48 @@ class MainThread(QThread):
         self.signal.emit(main_tread)
 
 
-if __name__ == "__main__":
+# apply command to the Cryovac
+def command_cryovac(cmd):
+    com_port_cryovac.write(
+        (cmd + '\r\n').encode())  # send cmd to device # might not work with older devices -> "LF" only needed!
+    time.sleep(0.1)  # small sleep for response
+    response = ''
+    while com_port_cryovac.in_waiting > 0:
+        response = com_port_cryovac.readline()  # all characters received, read line till '\r\n'
+    return response.decode("utf-8")
+
+
+def initialize_cryovac():
+    try:
+        output = command_cryovac('getOutput')
+        variables.temperature = float(output.split()[0].replace(',', ''))
+    except:
+        print('Can not initialize the Cryovac')
+
+
+def initialize_gauges():
+    tpg = TPG362(port=COM_PORT_pfeiffer)
+    value, _ = tpg.pressure_gauge(2)
+    # unit = tpg.pressure_unit()
+    variables.vacum_main = '{}'.format(value)
+    value, _ = tpg.pressure_gauge(1)
+    # unit = tpg.pressure_unit()
+    variables.vacum_buffer = '{}'.format(value)
+
+
+def main():
     # Initialize global experiment variables
     variables.init()
+    # Cryovac initialized
+    try:
+        initialize_cryovac()
+    except:
+        print('Can not initialize the Cryovac')
+    # Main and Buffer vacuum gauges
+    try:
+        initialize_gauges()
+    except:
+        print('Can not initialize the Pfeiffer gauges')
 
     app = QtWidgets.QApplication(sys.argv)
 
@@ -910,13 +976,34 @@ if __name__ == "__main__":
     width, height = screen_resolution.width(), screen_resolution.height()
     print('Screen size is:(%s,%s)' % (width, height))
     # Cameras thread
-    camera = camera.Camera()
-    cameras, converter = camera.camera_init()
-    camera_thread = threading.Thread(target=camera.update_cameras, args=(cameras, converter))
+    try:
+        camera = Camera()
+        cameras, converter = camera.camera_init()
+    except:
+        print('Can not initialize the Cameras')
+    lock = threading.Lock()
+    camera_thread = threading.Thread(target=camera.update_cameras, args=(cameras, converter, lock))
     camera_thread.setDaemon(True)
     camera_thread.start()
     OXCART = QtWidgets.QMainWindow()
-    ui = Ui_OXCART(cameras, converter)
+    ui = Ui_OXCART(cameras, converter, lock)
     ui.setupUi(OXCART)
     OXCART.show()
     sys.exit(app.exec_())
+
+
+if __name__ == "__main__":
+    import cProfile
+
+    cProfile.run('main()', 'output.dat')
+
+    import pstats
+    from pstats import SortKey
+
+    with open('output_time.txt', 'w') as f:
+        p = pstats.Stats('output.dat', stream=f)
+        p.sort_stats('time').print_stats()
+
+    with open('output_calls.txt', 'w') as f:
+        p = pstats.Stats('output.dat', stream=f)
+        p.sort_stats(("calls")).print_stats()

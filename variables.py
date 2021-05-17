@@ -44,12 +44,16 @@ def init():
     global count_temp
     global avg_n_count
     global index_plot
+    global index_plot_temp
     global light
     global img0_orig
     global img0_zoom
     global img1_orig
     global img1_zoom
     global temperature
+    global vacum_main
+    global vacum_buffer
+    global vacum_load_lock
 
     # Setup parameters
     counter = 0
@@ -96,7 +100,11 @@ def init():
     count_temp = 0
     avg_n_count = 0
     index_plot = 0
+    index_plot_temp = 0
     stop_flag = False
     start_flag = False
     temperature = 0
+    vacum_main = 0
+    vacum_buffer = 0
+    vacum_load_lock = 0
 
