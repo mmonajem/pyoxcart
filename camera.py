@@ -11,17 +11,13 @@ os.environ["PYLON_CAMEMU"] = "2"
 class Camera():
 
     def update_cameras(self, cameras, converter, lock):
-        while True:
-            # cameras[0].Open()
-            # cameras[0].ExposureTime.SetValue(variables.camera_0_ExposureTime)
-            # cameras[1].Open()
-            # cameras[1].ExposureTime.SetValue(variables.camera_1_ExposureTime)
+        while cameras.IsGrabbing():
             if variables.light == False:
                 grabResult0 = cameras[0].RetrieveResult(1000000, pylon.TimeoutHandling_ThrowException)
                 grabResult1 = cameras[1].RetrieveResult(1000000, pylon.TimeoutHandling_ThrowException)
             elif variables.light == True:
-                grabResult0 = cameras[0].RetrieveResult(9000, pylon.TimeoutHandling_ThrowException)
-                grabResult1 = cameras[1].RetrieveResult(9000, pylon.TimeoutHandling_ThrowException)
+                grabResult0 = cameras[0].RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
+                grabResult1 = cameras[1].RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
             image0 = converter.Convert(grabResult0)
             img0 = image0.GetArray()
             image1 = converter.Convert(grabResult1)
@@ -31,7 +27,7 @@ class Camera():
             img0_zoom = img0[800:1100, 1800:2300]
             img0_zoom = cv2.resize(img0_zoom, dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
             img1_orig = cv2.resize(img1, dsize=(500, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            img1_zoom = img1[1050:1300, 1000:1500]
+            img1_zoom = img1[1100:1300, 1000:1500]
             img1_zoom = cv2.resize(img1_zoom, dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
             # Saving images - So far it is not possible to not save and load images in a proper way with ImageQt
             with lock:

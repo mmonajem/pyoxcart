@@ -7,8 +7,12 @@ import numpy as np
 import nidaqmx
 import time
 import threading
+import multiprocessing
+from multiprocessing.pool import ThreadPool as Pool
 import datetime
 import os
+import dill
+import functools
 import serial.tools.list_ports
 from random import randint
 import scipy.misc, PIL.ImageQt
@@ -16,7 +20,8 @@ import scipy.misc, PIL.ImageQt
 import oxcart
 import variables
 from camera import Camera
-from pfeiffer import TPG362
+from pfeiffer_gauges import TPG362
+from edwards_tic import EdwardsAGC
 
 com_port_idx_cryovac = 1
 COM_PORT_pfeiffer = 'COM5'
@@ -96,10 +101,6 @@ class Ui_OXCART(object):
         font.setWeight(75)
         self.label_24.setFont(font)
         self.label_24.setObjectName("label_24")
-        # self.histogram = QtWidgets.QWidget(self.centralwidget)
-        self.histogram = pg.PlotWidget(self.centralwidget)
-        self.histogram.setGeometry(QtCore.QRect(1100, 800, 500, 500))
-        self.histogram.setObjectName("histogram")
         # self.temperature = QtWidgets.QWidget(self.centralwidget)
         self.temperature = pg.PlotWidget(self.centralwidget)
         self.temperature.setGeometry(QtCore.QRect(2130, 1330, 441, 361))
@@ -159,21 +160,6 @@ class Ui_OXCART(object):
         self.load_lock_switch = QtWidgets.QPushButton(self.layoutWidget2)
         self.load_lock_switch.setObjectName("load_lock_switch")
         self.gridLayout.addWidget(self.load_lock_switch, 0, 1, 1, 1)
-        self.cam_s_o = QtWidgets.QLabel(self.centralwidget)
-        self.cam_s_o.setGeometry(QtCore.QRect(1650, 120, 500, 500))
-        self.cam_s_o.setObjectName("cam_s_o")
-        self.vdc_time_3 = QtWidgets.QWidget(self.centralwidget)
-        self.vdc_time_3.setGeometry(QtCore.QRect(1650, 790, 500, 500))
-        self.vdc_time_3.setObjectName("vdc_time_3")
-        self.cam_b_o = QtWidgets.QLabel(self.vdc_time_3)
-        self.cam_b_o.setGeometry(QtCore.QRect(0, 10, 500, 500))
-        self.cam_b_o.setObjectName("cam_b_o")
-        self.cam_b_d = QtWidgets.QLabel(self.centralwidget)
-        self.cam_b_d.setGeometry(QtCore.QRect(2160, 790, 1200, 500))
-        self.cam_b_d.setObjectName("cam_b_d")
-        self.cam_s_d = QtWidgets.QLabel(self.centralwidget)
-        self.cam_s_d.setGeometry(QtCore.QRect(2160, 120, 1200, 500))
-        self.cam_s_d.setObjectName("cam_s_d")
         self.label_29 = QtWidgets.QLabel(self.centralwidget)
         self.label_29.setGeometry(QtCore.QRect(1830, 760, 110, 25))
         font = QtGui.QFont()
@@ -224,15 +210,15 @@ class Ui_OXCART(object):
         self.led_light.setAlignment(QtCore.Qt.AlignCenter)
         self.led_light.setObjectName("led_light")
         self.vacume_main = QtWidgets.QLCDNumber(self.centralwidget)
-        self.vacume_main.setDigitCount(8)
         self.vacume_main.setGeometry(QtCore.QRect(1340, 1370, 231, 91))
         self.vacume_main.setObjectName("vacume_main")
         self.vacume_buffer = QtWidgets.QLCDNumber(self.centralwidget)
-        self.vacume_buffer.setDigitCount(8)
         self.vacume_buffer.setGeometry(QtCore.QRect(1340, 1480, 231, 91))
+        font = QtGui.QFont()
+        font.setPointSize(8)
+        self.vacume_buffer.setFont(font)
         self.vacume_buffer.setObjectName("vacume_buffer")
         self.vacume_load_lock = QtWidgets.QLCDNumber(self.centralwidget)
-        self.vacume_load_lock.setDigitCount(8)
         self.vacume_load_lock.setGeometry(QtCore.QRect(1340, 1600, 231, 91))
         self.vacume_load_lock.setObjectName("vacume_load_lock")
         self.label_35 = QtWidgets.QLabel(self.centralwidget)
@@ -256,9 +242,6 @@ class Ui_OXCART(object):
         font.setWeight(75)
         self.label_37.setFont(font)
         self.label_37.setObjectName("label_37")
-        self.pump_load_loack = QtWidgets.QPushButton(self.centralwidget)
-        self.pump_load_loack.setGeometry(QtCore.QRect(860, 1620, 198, 46))
-        self.pump_load_loack.setObjectName("pump_load_loack")
         self.label_38 = QtWidgets.QLabel(self.centralwidget)
         self.label_38.setGeometry(QtCore.QRect(1660, 1510, 191, 25))
         font = QtGui.QFont()
@@ -267,169 +250,201 @@ class Ui_OXCART(object):
         self.label_38.setFont(font)
         self.label_38.setObjectName("label_38")
         self.temp = QtWidgets.QLCDNumber(self.centralwidget)
-        self.temp.setDigitCount(8)
         self.temp.setGeometry(QtCore.QRect(1860, 1480, 231, 91))
-        self.temp.setObjectName("temperature")
-        self.widget = QtWidgets.QWidget(self.centralwidget)
-        self.widget.setGeometry(QtCore.QRect(20, 753, 436, 242))
-        self.widget.setObjectName("widget")
-        self.gridLayout_3 = QtWidgets.QGridLayout(self.widget)
+        self.temp.setObjectName("temp")
+        self.cam_s_o = QtWidgets.QLabel(self.centralwidget)
+        self.cam_s_o.setGeometry(QtCore.QRect(1650, 120, 500, 500))
+        self.cam_s_o.setText("")
+        self.cam_s_o.setObjectName("cam_s_o")
+        self.cam_b_o = QtWidgets.QLabel(self.centralwidget)
+        self.cam_b_o.setGeometry(QtCore.QRect(1650, 790, 500, 500))
+        self.cam_b_o.setText("")
+        self.cam_b_o.setObjectName("cam_b_o")
+        self.cam_s_d = QtWidgets.QLabel(self.centralwidget)
+        self.cam_s_d.setGeometry(QtCore.QRect(2170, 120, 1200, 500))
+        self.cam_s_d.setText("")
+        self.cam_s_d.setObjectName("cam_s_d")
+        self.cam_b_d = QtWidgets.QLabel(self.centralwidget)
+        self.cam_b_d.setGeometry(QtCore.QRect(2170, 790, 1200, 500))
+        self.cam_b_d.setText("")
+        self.cam_b_d.setObjectName("cam_b_d")
+        self.layoutWidget3 = QtWidgets.QWidget(self.centralwidget)
+        self.layoutWidget3.setGeometry(QtCore.QRect(20, 753, 436, 242))
+        self.layoutWidget3.setObjectName("layoutWidget3")
+        self.gridLayout_3 = QtWidgets.QGridLayout(self.layoutWidget3)
         self.gridLayout_3.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_3.setObjectName("gridLayout_3")
-        self.label_11 = QtWidgets.QLabel(self.widget)
+        self.label_11 = QtWidgets.QLabel(self.layoutWidget3)
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
         self.label_11.setFont(font)
         self.label_11.setObjectName("label_11")
         self.gridLayout_3.addWidget(self.label_11, 0, 0, 1, 1)
-        self.label_12 = QtWidgets.QLabel(self.widget)
+        self.label_12 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_12.setObjectName("label_12")
         self.gridLayout_3.addWidget(self.label_12, 1, 0, 1, 1)
-        self.elapsed_time = QtWidgets.QLineEdit(self.widget)
+        self.elapsed_time = QtWidgets.QLineEdit(self.layoutWidget3)
         self.elapsed_time.setText("")
         self.elapsed_time.setObjectName("elapsed_time")
         self.gridLayout_3.addWidget(self.elapsed_time, 1, 1, 1, 1)
-        self.label_13 = QtWidgets.QLabel(self.widget)
+        self.label_13 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_13.setObjectName("label_13")
         self.gridLayout_3.addWidget(self.label_13, 2, 0, 1, 1)
-        self.total_ions = QtWidgets.QLineEdit(self.widget)
+        self.total_ions = QtWidgets.QLineEdit(self.layoutWidget3)
         self.total_ions.setText("")
         self.total_ions.setObjectName("total_ions")
         self.gridLayout_3.addWidget(self.total_ions, 2, 1, 1, 1)
-        self.label_14 = QtWidgets.QLabel(self.widget)
+        self.label_14 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_14.setObjectName("label_14")
         self.gridLayout_3.addWidget(self.label_14, 3, 0, 1, 1)
-        self.speciemen_voltage = QtWidgets.QLineEdit(self.widget)
+        self.speciemen_voltage = QtWidgets.QLineEdit(self.layoutWidget3)
         self.speciemen_voltage.setText("")
         self.speciemen_voltage.setObjectName("speciemen_voltage")
         self.gridLayout_3.addWidget(self.speciemen_voltage, 3, 1, 1, 1)
-        self.label_16 = QtWidgets.QLabel(self.widget)
+        self.label_16 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_16.setObjectName("label_16")
         self.gridLayout_3.addWidget(self.label_16, 4, 0, 1, 1)
-        self.pulse_voltage = QtWidgets.QLineEdit(self.widget)
+        self.pulse_voltage = QtWidgets.QLineEdit(self.layoutWidget3)
         self.pulse_voltage.setText("")
         self.pulse_voltage.setObjectName("pulse_voltage")
         self.gridLayout_3.addWidget(self.pulse_voltage, 4, 1, 1, 1)
-        self.label_15 = QtWidgets.QLabel(self.widget)
+        self.label_15 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_15.setObjectName("label_15")
         self.gridLayout_3.addWidget(self.label_15, 5, 0, 1, 1)
-        self.detection_rate = QtWidgets.QLineEdit(self.widget)
+        self.detection_rate = QtWidgets.QLineEdit(self.layoutWidget3)
         self.detection_rate.setText("")
         self.detection_rate.setObjectName("detection_rate")
         self.gridLayout_3.addWidget(self.detection_rate, 5, 1, 1, 1)
-        self.widget1 = QtWidgets.QWidget(self.centralwidget)
-        self.widget1.setGeometry(QtCore.QRect(20, 30, 488, 715))
-        self.widget1.setObjectName("widget1")
-        self.gridLayout_5 = QtWidgets.QGridLayout(self.widget1)
+        self.layoutWidget4 = QtWidgets.QWidget(self.centralwidget)
+        self.layoutWidget4.setGeometry(QtCore.QRect(20, 30, 488, 715))
+        self.layoutWidget4.setObjectName("layoutWidget4")
+        self.gridLayout_5 = QtWidgets.QGridLayout(self.layoutWidget4)
         self.gridLayout_5.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_5.setObjectName("gridLayout_5")
-        self.label = QtWidgets.QLabel(self.widget1)
+        self.label = QtWidgets.QLabel(self.layoutWidget4)
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
         self.label.setFont(font)
         self.label.setObjectName("label")
         self.gridLayout_5.addWidget(self.label, 0, 0, 1, 1)
-        self.label_21 = QtWidgets.QLabel(self.widget1)
+        self.label_21 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_21.setObjectName("label_21")
         self.gridLayout_5.addWidget(self.label_21, 1, 0, 1, 1)
-        self.hdf5_path = QtWidgets.QLineEdit(self.widget1)
+        self.hdf5_path = QtWidgets.QLineEdit(self.layoutWidget4)
         self.hdf5_path.setObjectName("hdf5_path")
         self.gridLayout_5.addWidget(self.hdf5_path, 1, 1, 1, 1)
-        self.label_2 = QtWidgets.QLabel(self.widget1)
+        self.label_2 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_2.setObjectName("label_2")
         self.gridLayout_5.addWidget(self.label_2, 2, 0, 1, 1)
-        self.ex_time = QtWidgets.QLineEdit(self.widget1)
+        self.ex_time = QtWidgets.QLineEdit(self.layoutWidget4)
         self.ex_time.setObjectName("ex_time")
         self.gridLayout_5.addWidget(self.ex_time, 2, 1, 1, 1)
-        self.label_3 = QtWidgets.QLabel(self.widget1)
+        self.label_3 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_3.setObjectName("label_3")
         self.gridLayout_5.addWidget(self.label_3, 3, 0, 1, 1)
-        self.ex_freq = QtWidgets.QLineEdit(self.widget1)
+        self.ex_freq = QtWidgets.QLineEdit(self.layoutWidget4)
         self.ex_freq.setObjectName("ex_freq")
         self.gridLayout_5.addWidget(self.ex_freq, 3, 1, 1, 1)
-        self.label_4 = QtWidgets.QLabel(self.widget1)
+        self.label_4 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_4.setObjectName("label_4")
         self.gridLayout_5.addWidget(self.label_4, 4, 0, 1, 1)
-        self.vdc_min = QtWidgets.QLineEdit(self.widget1)
+        self.vdc_min = QtWidgets.QLineEdit(self.layoutWidget4)
         self.vdc_min.setObjectName("vdc_min")
         self.gridLayout_5.addWidget(self.vdc_min, 4, 1, 1, 1)
-        self.label_5 = QtWidgets.QLabel(self.widget1)
+        self.label_5 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_5.setObjectName("label_5")
         self.gridLayout_5.addWidget(self.label_5, 5, 0, 1, 1)
-        self.vdc_max = QtWidgets.QLineEdit(self.widget1)
+        self.vdc_max = QtWidgets.QLineEdit(self.layoutWidget4)
         self.vdc_max.setObjectName("vdc_max")
         self.gridLayout_5.addWidget(self.vdc_max, 5, 1, 1, 1)
-        self.label_6 = QtWidgets.QLabel(self.widget1)
+        self.label_6 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_6.setObjectName("label_6")
         self.gridLayout_5.addWidget(self.label_6, 6, 0, 1, 1)
-        self.vdc_steps_up = QtWidgets.QLineEdit(self.widget1)
+        self.vdc_steps_up = QtWidgets.QLineEdit(self.layoutWidget4)
         self.vdc_steps_up.setObjectName("vdc_steps_up")
         self.gridLayout_5.addWidget(self.vdc_steps_up, 6, 1, 1, 1)
-        self.label_28 = QtWidgets.QLabel(self.widget1)
+        self.label_28 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_28.setObjectName("label_28")
         self.gridLayout_5.addWidget(self.label_28, 7, 0, 1, 1)
-        self.vdc_steps_down = QtWidgets.QLineEdit(self.widget1)
+        self.vdc_steps_down = QtWidgets.QLineEdit(self.layoutWidget4)
         self.vdc_steps_down.setObjectName("vdc_steps_down")
         self.gridLayout_5.addWidget(self.vdc_steps_down, 7, 1, 1, 1)
-        self.label_20 = QtWidgets.QLabel(self.widget1)
+        self.label_20 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_20.setObjectName("label_20")
         self.gridLayout_5.addWidget(self.label_20, 8, 0, 1, 1)
-        self.cycle_avg = QtWidgets.QLineEdit(self.widget1)
+        self.cycle_avg = QtWidgets.QLineEdit(self.layoutWidget4)
         self.cycle_avg.setObjectName("cycle_avg")
         self.gridLayout_5.addWidget(self.cycle_avg, 8, 1, 1, 1)
-        self.label_8 = QtWidgets.QLabel(self.widget1)
+        self.label_8 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_8.setObjectName("label_8")
         self.gridLayout_5.addWidget(self.label_8, 9, 0, 1, 1)
-        self.vp_min = QtWidgets.QLineEdit(self.widget1)
+        self.vp_min = QtWidgets.QLineEdit(self.layoutWidget4)
         self.vp_min.setObjectName("vp_min")
         self.gridLayout_5.addWidget(self.vp_min, 9, 1, 1, 1)
-        self.label_9 = QtWidgets.QLabel(self.widget1)
+        self.label_9 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_9.setObjectName("label_9")
         self.gridLayout_5.addWidget(self.label_9, 10, 0, 1, 1)
-        self.vp_max = QtWidgets.QLineEdit(self.widget1)
+        self.vp_max = QtWidgets.QLineEdit(self.layoutWidget4)
         self.vp_max.setObjectName("vp_max")
         self.gridLayout_5.addWidget(self.vp_max, 10, 1, 1, 1)
-        self.label_25 = QtWidgets.QLabel(self.widget1)
+        self.label_25 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_25.setObjectName("label_25")
         self.gridLayout_5.addWidget(self.label_25, 11, 0, 1, 1)
-        self.pulse_fraction = QtWidgets.QLineEdit(self.widget1)
+        self.pulse_fraction = QtWidgets.QLineEdit(self.layoutWidget4)
         self.pulse_fraction.setObjectName("pulse_fraction")
         self.gridLayout_5.addWidget(self.pulse_fraction, 11, 1, 1, 1)
-        self.label_23 = QtWidgets.QLabel(self.widget1)
+        self.label_23 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_23.setObjectName("label_23")
         self.gridLayout_5.addWidget(self.label_23, 12, 0, 1, 1)
-        self.pulse_frequency = QtWidgets.QLineEdit(self.widget1)
+        self.pulse_frequency = QtWidgets.QLineEdit(self.layoutWidget4)
         self.pulse_frequency.setObjectName("pulse_frequency")
         self.gridLayout_5.addWidget(self.pulse_frequency, 12, 1, 1, 1)
-        self.label_17 = QtWidgets.QLabel(self.widget1)
+        self.label_17 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_17.setObjectName("label_17")
         self.gridLayout_5.addWidget(self.label_17, 13, 0, 1, 1)
-        self.detection_rate_init = QtWidgets.QLineEdit(self.widget1)
+        self.detection_rate_init = QtWidgets.QLineEdit(self.layoutWidget4)
         self.detection_rate_init.setObjectName("detection_rate_init")
         self.gridLayout_5.addWidget(self.detection_rate_init, 13, 1, 1, 1)
-        self.label_22 = QtWidgets.QLabel(self.widget1)
+        self.label_22 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_22.setObjectName("label_22")
         self.gridLayout_5.addWidget(self.label_22, 14, 0, 1, 1)
-        self.hit_displayed = QtWidgets.QLineEdit(self.widget1)
+        self.hit_displayed = QtWidgets.QLineEdit(self.layoutWidget4)
         self.hit_displayed.setObjectName("hit_displayed")
         self.gridLayout_5.addWidget(self.hit_displayed, 14, 1, 1, 1)
-        self.label_26 = QtWidgets.QLabel(self.widget1)
+        self.label_26 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_26.setObjectName("label_26")
         self.gridLayout_5.addWidget(self.label_26, 15, 0, 1, 1)
-        self.email = QtWidgets.QLineEdit(self.widget1)
+        self.email = QtWidgets.QLineEdit(self.layoutWidget4)
         self.email.setText("")
         self.email.setObjectName("email")
         self.gridLayout_5.addWidget(self.email, 15, 1, 1, 1)
-        self.label_27 = QtWidgets.QLabel(self.widget1)
+        self.label_27 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_27.setObjectName("label_27")
         self.gridLayout_5.addWidget(self.label_27, 16, 0, 1, 1)
-        self.tweet = QtWidgets.QComboBox(self.widget1)
+        self.tweet = QtWidgets.QComboBox(self.layoutWidget4)
         self.tweet.setObjectName("tweet")
         self.tweet.addItem("")
         self.tweet.addItem("")
         self.gridLayout_5.addWidget(self.tweet, 16, 1, 1, 1)
+        self.widget = QtWidgets.QWidget(self.centralwidget)
+        self.widget.setGeometry(QtCore.QRect(780, 1560, 235, 111))
+        self.widget.setObjectName("widget")
+        self.gridLayout_6 = QtWidgets.QGridLayout(self.widget)
+        self.gridLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_6.setObjectName("gridLayout_6")
+        self.pump_load_lock_switch = QtWidgets.QPushButton(self.widget)
+        self.pump_load_lock_switch.setObjectName("pump_load_lock_switch")
+        self.gridLayout_6.addWidget(self.pump_load_lock_switch, 2, 0, 1, 1)
+        self.led_pump_load_lock = QtWidgets.QLabel(self.widget)
+        self.led_pump_load_lock.setAlignment(QtCore.Qt.AlignCenter)
+        self.led_pump_load_lock.setObjectName("led_pump_load_lock")
+        self.gridLayout_6.addWidget(self.led_pump_load_lock, 0, 0, 2, 1)
+        # self.histogram = QtWidgets.QWidget(self.centralwidget)
+        self.histogram = pg.PlotWidget(self.centralwidget)
+        self.histogram.setGeometry(QtCore.QRect(1100, 800, 500, 500))
+        self.histogram.setObjectName("histogram")
         OXCART.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(OXCART)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 3400, 38))
@@ -448,6 +463,13 @@ class Ui_OXCART(object):
         self.retranslateUi(OXCART)
         QtCore.QMetaObject.connectSlotsByName(OXCART)
 
+
+        ####
+        self.vacume_main.setDigitCount(8)
+        self.vacume_buffer.setDigitCount(8)
+        self.vacume_load_lock.setDigitCount(8)
+        self.temp.setDigitCount(8)
+        ####
     def retranslateUi(self, OXCART):
         _translate = QtCore.QCoreApplication.translate
         OXCART.setWindowTitle(_translate("OXCART", "OXCART"))
@@ -487,8 +509,8 @@ class Ui_OXCART(object):
         self.load_lock_switch.clicked.connect(lambda: self.gates(2))
         self.cryo_switch.clicked.connect(lambda: self.gates(3))
         self.light.clicked.connect(lambda: self.light_switch())
+        self.pump_load_lock_switch.clicked.connect(lambda: self.pump_switch())
         ###
-        self.pump_load_loack.setText(_translate("OXCART", "Load Lock Pump"))
         self.label_38.setText(_translate("OXCART", "Temperature (K)"))
         self.label_11.setText(_translate("OXCART", "Run Statistics"))
         self.label_12.setText(_translate("OXCART", "Elapsed Time (S):"))
@@ -529,6 +551,8 @@ class Ui_OXCART(object):
         self.label_27.setText(_translate("OXCART", "Twitter"))
         self.tweet.setItemText(0, _translate("OXCART", "No"))
         self.tweet.setItemText(1, _translate("OXCART", "Yes"))
+        self.pump_load_lock_switch.setText(_translate("OXCART", "Load Lock Pump"))
+        self.led_pump_load_lock.setText(_translate("OXCART", "pump"))
         self.menuFile.setTitle(_translate("OXCART", "File"))
         self.actionExit.setText(_translate("OXCART", "Exit"))
 
@@ -627,9 +651,15 @@ class Ui_OXCART(object):
             1000)  # In milliseconds
         self.timer1.timeout.connect(self.update_plot_data)
         self.timer1.start()
+        # timer statistics
+        self.timer3 = QtCore.QTimer()
+        self.timer3.setInterval(
+            200)  # In milliseconds
+        self.timer3.timeout.connect(self.statistics)
+        self.timer3.start()
         # timer cameras
         self.timer2 = QtCore.QTimer()
-        self.timer2.setInterval(50)
+        self.timer2.setInterval(100)
         self.timer2.timeout.connect(self.update_cameras)
         self.timer2.start()
 
@@ -646,6 +676,7 @@ class Ui_OXCART(object):
         self.led_load_lock.setPixmap(self.led_red)
         self.led_cryo.setPixmap(self.led_red)
         self.led_light.setPixmap(self.led_red)
+        self.led_pump_load_lock.setPixmap(self.led_green)
 
     def closeEvent(self, event):
 
@@ -745,15 +776,30 @@ class Ui_OXCART(object):
             self.Error.setText(_translate("OXCART",
                                           "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all the Gates</span></p></body></html>"))
 
+    def pump_switch(self):
+        if variables.flag_main_gate == False and variables.flag_cryo_gate == False \
+            and variables.flag_load_gate == False:
+            if variables.pump_load_lock == True:
+                initialize_edwards_tic('pump')
+                self.led_pump_load_lock.setPixmap(self.led_red)
+                variables.pump_load_lock = False
+            elif variables.pump_load_lock == False:
+                initialize_edwards_tic('pump')
+                self.led_pump_load_lock.setPixmap(self.led_green)
+                variables.pump_load_lock = True
+        else:
+            _translate = QtCore.QCoreApplication.translate
+            self.Error.setText(_translate("OXCART",
+                                          "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all the Gates</span></p></body></html>"))
     def light_switch(self):
         if variables.light == False:
             self.led_light.setPixmap(self.led_green)
             self.cameras[0].Open()
             self.cameras[0].ExposureTime.SetValue(1500)
+            self.cameras[0].AcquisitionFrameRate.SetValue(150)
             self.cameras[1].Open()
             self.cameras[1].ExposureTime.SetValue(1500)
-            # variables.camera_0_ExposureTime = 1500
-            # variables.camera_1_ExposureTime = 1500
+            self.cameras[1].AcquisitionFrameRate.SetValue(150)
             variables.light = True
         elif variables.light == True:
             self.led_light.setPixmap(self.led_red)
@@ -761,8 +807,6 @@ class Ui_OXCART(object):
             self.cameras[0].ExposureTime.SetValue(10000000)
             self.cameras[1].Open()
             self.cameras[1].ExposureTime.SetValue(1000000)
-            # variables.camera_0_ExposureTime = 10000000
-            # variables.camera_1_ExposureTime = 1000000
             variables.light = False
 
     def update_plot_data(self):
@@ -796,18 +840,8 @@ class Ui_OXCART(object):
                 self.y_vps.insert(variables.index_plot,
                                   int(variables.pulse_voltage))  # Add a new value.
             else:
-                # self.x_vdc = self.x_vdc[
-                #               1:]  # Remove the first .
                 self.x_vdc.append(self.x_vdc[
                                       -1] + 1)  # Add a new value 1 higher than the last.
-                # self.y_vdc = self.y_vdc[
-                #              1:]  # Remove the first
-                # self.y_vps = self.y_vps[
-                #              1:]  # Remove the first
-                # self.y_vdc.insert(999,
-                #                   int(variables.specimen_voltage))  # Add a new value.
-                # self.y_vps.insert(999,
-                #                   int(variables.pulse_voltage))  # Add a new value.
                 self.y_vdc.append(
                     int(variables.specimen_voltage))  # Add a new value.
                 self.y_vps.append(
@@ -851,6 +885,33 @@ class Ui_OXCART(object):
 
             self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 
+        # Update the setup parameters
+        variables.ex_time = int(self.ex_time.text())
+        variables.ex_freq = int(self.ex_freq.text())
+        variables.vdc_min = int(self.vdc_min.text())
+        if float(self.vdc_max.text()) > 20000:
+            _translate = QtCore.QCoreApplication.translate
+            self.Error.setText(_translate("OXCART",
+                                          "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible number is 20KV</span></p></body></html>"))
+            self.vdc_max.setText(_translate("OXCART", str(variables.vdc_max)))
+        else:
+            variables.vdc_max = int(self.vdc_max.text())
+        variables.vdc_step_up = int(self.vdc_steps_up.text())
+        variables.vdc_step_down = int(self.vdc_steps_down.text())
+        variables.v_p_min = int(self.vp_min.text())
+        if float(self.vp_max.text()) > 3281:
+            _translate = QtCore.QCoreApplication.translate
+            self.Error.setText(_translate("OXCART",
+                                          "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible number is 3281 V</span></p></body></html>"))
+            self.vp_max.setText(_translate("OXCART", str(variables.v_p_max)))
+        else:
+            variables.v_p_max = int(self.vp_max.text())
+        variables.pulse_fraction = int(self.pulse_fraction.text()) / 100
+        variables.pulse_frequency = int(self.pulse_frequency.text())
+        variables.detection_rate = int(self.detection_rate_init.text())
+        variables.hdf5_path = self.hdf5_path.text()
+        variables.cycle_avg = int(self.cycle_avg.text())
+
         # Statistics Update
         self.speciemen_voltage.setText(str(float("{:.3f}".format(variables.specimen_voltage))))
         self.pulse_voltage.setText(str(float("{:.3f}".format(variables.pulse_voltage))))
@@ -860,39 +921,27 @@ class Ui_OXCART(object):
             (float("{:.3f}".format(
             (variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000)))))
 
-        # Update the setup parameters
-        variables.ex_time = int(self.ex_time.text())
-        variables.ex_freq = int(self.ex_freq.text())
-        variables.vdc_min = float(self.vdc_min.text())
-        if float(self.vdc_max.text()) > 20000:
-            _translate = QtCore.QCoreApplication.translate
-            self.Error.setText(_translate("OXCART",
-                                          "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible number is 20KV</span></p></body></html>"))
-            self.vdc_max.setText(_translate("OXCART", str(variables.vdc_max)))
-        variables.vdc_max = variables.vdc_max
-        variables.vdc_step_up = float(self.vdc_steps_up.text())
-        variables.vdc_step_down = float(self.vdc_steps_down.text())
-        variables.v_p_min = float(self.vp_min.text())
-        if float(self.vp_max.text()) > 3281:
-            _translate = QtCore.QCoreApplication.translate
-            self.Error.setText(_translate("OXCART",
-                                          "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible number is 3281 V</span></p></body></html>"))
-            self.vp_max.setText(_translate("OXCART", "3281"))
-        variables.v_p_max = float(self.vp_max.text())
-        variables.pulse_fraction = float(self.pulse_fraction.text()) / 100
-        variables.pulse_frequency = int(self.pulse_frequency.text())
-        variables.detection_rate = int(self.detection_rate_init.text())
-        variables.hdf5_path = self.hdf5_path.text()
-        variables.cycle_avg = int(self.cycle_avg.text())
-
+    def statistics(self):
         # update temperature and vacum gages
         initialize_gauges()
+        initialize_edwards_tic('presure')
         self.temp.display(variables.temperature)
         self.vacume_main.display(variables.vacum_main)
         self.vacume_buffer.display((variables.vacum_buffer))
         self.vacume_load_lock.display(variables.vacum_load_lock)
+        if variables.pump_load_lock == False:
+            self.led_pump_load_lock.setPixmap(self.led_red)
+        elif variables.pump_load_lock == True:
+            self.led_pump_load_lock.setPixmap(self.led_green)
 
-    def update_cameras(self, ):
+        variables.index_warning_message += 1
+        if variables.index_warning_message == 10:
+            _translate = QtCore.QCoreApplication.translate
+            self.Error.setText(_translate("OXCART",
+                                      "<html><head/><body><p><span style=\" color:#ff0000;\"></span></p></body></html>"))
+            variables.index_warning_message = 0
+
+    def update_cameras(self,):
 
         with self.lock:
             self.camera0 = QImage(variables.img0_orig, 500, 500, QImage.Format_RGB888)
@@ -911,7 +960,6 @@ class Ui_OXCART(object):
         self.cam_b_o.setPixmap(self.camera1)
         self.cam_s_d.setPixmap(self.camera0_zoom)
         self.cam_b_d.setPixmap(self.camera1_zoom)
-
 
 class MainThread(QThread):
     signal = pyqtSignal('PyQt_PyObject')
@@ -938,11 +986,28 @@ def command_cryovac(cmd):
 
 
 def initialize_cryovac():
-    try:
-        output = command_cryovac('getOutput')
-        variables.temperature = float(output.split()[0].replace(',', ''))
-    except:
-        print('Can not initialize the Cryovac')
+
+    output = command_cryovac('getOutput')
+    variables.temperature = float(output.split()[0].replace(',', ''))
+
+def initialize_edwards_tic(command):
+
+    E_AGC = EdwardsAGC()
+    if command == 'pump' and variables.pump_load_lock == True:
+        response = E_AGC.comm('!C933 0')
+    elif command == 'pump' and variables.pump_load_lock == False:
+        response = E_AGC.comm('!C933 1')
+    elif command == 'presure':
+        response_tmp = E_AGC.comm('?V911')
+        response_tmp = float(response_tmp.replace(';', ' ').split()[1])
+        if response_tmp < 90:
+            variables.pump_load_lock = False
+        elif response_tmp >= 90:
+            variables.pump_load_lock = True
+        response = E_AGC.comm('?V913')
+        variables.vacum_load_lock = float(response.replace(';', ' ').split()[1])
+    else:
+        print('Unkown command for Edwards TIC')
 
 
 def initialize_gauges():
@@ -955,36 +1020,51 @@ def initialize_gauges():
     variables.vacum_buffer = '{}'.format(value)
 
 
-def main():
+
+if __name__ == "__main__":
+
     # Initialize global experiment variables
     variables.init()
     # Cryovac initialized
     try:
         initialize_cryovac()
-    except:
+    except Exception as e:
         print('Can not initialize the Cryovac')
+        print(e)
     # Main and Buffer vacuum gauges
     try:
         initialize_gauges()
-    except:
+    except Exception as e:
         print('Can not initialize the Pfeiffer gauges')
+        print(e)
+    # Load Lock vacuum gauges
+    try:
+        initialize_edwards_tic('presure')
+    except Exception as e:
+        print('Can not initialize the Edwards gauges')
+        print(e)
 
-    app = QtWidgets.QApplication(sys.argv)
-
-    # get display resolution
-    screen_resolution = app.desktop().screenGeometry()
-    width, height = screen_resolution.width(), screen_resolution.height()
-    print('Screen size is:(%s,%s)' % (width, height))
     # Cameras thread
     try:
         camera = Camera()
         cameras, converter = camera.camera_init()
     except:
         print('Can not initialize the Cameras')
+
     lock = threading.Lock()
     camera_thread = threading.Thread(target=camera.update_cameras, args=(cameras, converter, lock))
     camera_thread.setDaemon(True)
     camera_thread.start()
+    # lock = multiprocessing.Lock()
+    # camera_process = multiprocessing.Process(target=camera.update_cameras, args=(cameras, converter, lock))
+    # camera_process.daemon = True
+    # camera_process.start()
+
+    app = QtWidgets.QApplication(sys.argv)
+    # get display resolution
+    screen_resolution = app.desktop().screenGeometry()
+    width, height = screen_resolution.width(), screen_resolution.height()
+    print('Screen size is:(%s,%s)' % (width, height))
     OXCART = QtWidgets.QMainWindow()
     ui = Ui_OXCART(cameras, converter, lock)
     ui.setupUi(OXCART)
@@ -992,18 +1072,5 @@ def main():
     sys.exit(app.exec_())
 
 
-if __name__ == "__main__":
-    import cProfile
 
-    cProfile.run('main()', 'output.dat')
 
-    import pstats
-    from pstats import SortKey
-
-    with open('output_time.txt', 'w') as f:
-        p = pstats.Stats('output.dat', stream=f)
-        p.sort_stats('time').print_stats()
-
-    with open('output_calls.txt', 'w') as f:
-        p = pstats.Stats('output.dat', stream=f)
-        p.sort_stats(("calls")).print_stats()

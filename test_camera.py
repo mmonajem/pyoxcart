@@ -13,14 +13,15 @@
 # ============================================================================
 
 import os
-import time
 
-os.environ["PYLON_CAMEMU"] = "2"
+os.environ["PYLON_CAMEMU"] = "3"
 
 from pypylon import genicam
 from pypylon import pylon
 import sys
+import time
 import cv2
+import numpy as np
 
 # Number of images to be grabbed.
 countOfImagesToGrab = 10
@@ -38,87 +39,115 @@ maxCamerasToUse = 2
 
 # The exit code of the sample application.
 exitCode = 0
+img0 = []
+img1 = []
+windowName = 'title'
+
+try:
+
+    # Get the transport layer factory.
+    tlFactory = pylon.TlFactory.GetInstance()
+
+    # Get all attached devices and exit application if no device is found.
+    devices = tlFactory.EnumerateDevices()
+    if len(devices) == 0:
+        raise pylon.RUNTIME_EXCEPTION("No camera present.")
+
+    # Create an array of instant cameras for the found devices and avoid exceeding a maximum number of devices.
+    cameras = pylon.InstantCameraArray(min(len(devices), maxCamerasToUse))
+
+    l = cameras.GetSize()
+
+    # Create and attach all Pylon Devices.
+    for i, cam in enumerate(cameras):
+        cam.Attach(tlFactory.CreateDevice(devices[i]))
+        cam.Open()
+        cam.Width = 2448
+        cam.Height = 2048
+        cam.ExposureTime.SetValue(500)
+        # Print the model name of the camera.
+        print("Using device ", cam.GetDeviceInfo().GetModelName())
+        # print("Exposure time ", cam.ExposureTime.GetValue())
+
+    # Starts grabbing for all cameras starting with index 0. The grabbing
+    # is started for one camera after the other. That's why the images of all
+    # cameras are not taken at the same time.
+    # However, a hardware trigger setup can be used to cause all cameras to grab images synchronously.
+    # According to their default configuration, the cameras are
+    # set up for free-running continuous acquisition.
+    cameras.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
+
+    # converting to opencv bgr format
+    converter = pylon.ImageFormatConverter()
+    converter.OutputPixelFormat = pylon.PixelType_BGR8packed
+    converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
+
+    while cameras.IsGrabbing():
+        # Grab c_countOfImagesToGrab from the cameras.
+        # for i in range(countOfImagesToGrab):
+        if not cameras.IsGrabbing():
+            break
+
+        grabResult = cameras.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
+
+        # When the cameras in the array are created the camera context value
+        # is set to the index of the camera in the array.
+        # The camera context is a user settable value.
+        # This value is attached to each grab result and can be used
+        # to determine the camera that produced the grab result.
+        cameraContextValue = grabResult.GetCameraContext()
+
+        # Print the index and the model name of the camera.
+        # print("Camera ", cameraContextValue, ": ", cameras[cameraContextValue].GetDeviceInfo().GetModelName())
+
+        # Now, the image data can be processed.
+        # print("GrabSucceeded: ", grabResult.GrabSucceeded())
+        # print("SizeX: ", grabResult.GetWidth())
+        # print("SizeY: ", grabResult.GetHeight())
+        # img = grabResult.GetArray()
+        # print("Gray value of first pixel: ", img[0, 0])
+
+        if grabResult.GrabSucceeded():
+            image = converter.Convert(grabResult)  # Access the openCV image data
+            if cameraContextValue == 0:  # If camera 0, save array into img0[]
+                img0 = image.GetArray()
+            else:  # if camera 1, save array into img1[]
+                img1 = image.GetArray()
+
+            # If there is no img1, the first time, make img1=img0
+            # Need the same length arrays to concatenate
+            if len(img1) == 0:
+                img1 = img0
+
+            numpy_horizontal = np.hstack((img0, img1))
+            vis = np.concatenate((img0, img1), axis=1)  # Combine 2 images horizontally
+            cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
+            cv2.resizeWindow(windowName, 1500, 600)
+            cv2.imshow(windowName, vis)  # displays image in specified window
+            k = cv2.waitKey(1)
+            if k == 27:  # If press ESC key
+                print('ESC')
+                cv2.destroyAllWindows()
+                break
+
+        else:
+            print("Error: ", grabResult.ErrorCode)
+            # grabResult.ErrorDescription does not work properly in python could throw UnicodeDecodeError
+        grabResult.Release()
+        time.sleep(0.1)
+
+        # If window has been closed using the X button, close program
+        # getWindowProperty() returns -1 as soon as the window is closed
+        if cv2.getWindowProperty(windowName, 0) < 0:
+            cv2.destroyAllWindows()
+            break
 
 
 
-# Get the transport layer factory.
-tlFactory = pylon.TlFactory.GetInstance()
+except genicam.GenericException as e:
+    # Error handling
+    print("An exception occurred.", e.GetDescription())
+    exitCode = 1
 
-# Get all attached devices and exit application if no device is found.
-devices = tlFactory.EnumerateDevices()
-
-if len(devices) == 0:
-    raise pylon.RuntimeException("No camera present.")
-
-# Create an array of instant cameras for the found devices and avoid exceeding a maximum number of devices.
-cameras = pylon.InstantCameraArray(min(len(devices), maxCamerasToUse))
-
-
-l = cameras.GetSize()
-# Create and attach all Pylon Devices.
-for i, cam in enumerate(cameras):
-    cam.Attach(tlFactory.CreateDevice(devices[i]))
-    # Enable data chunks
-
-
-    # Print the model name of the camera.
-    print("Using device ", cam.GetDeviceInfo().GetModelName())
-
-
-cameras[0].Open()
-cameras[0].ExposureAuto.SetValue('Off')
-# cameras[0].ExposureTime.SetValue(10000000)
-cameras[0].ExposureTime.SetValue(3000)
-cameras[1].Open()
-cameras[1].ExposureAuto.SetValue('Off')
-# cameras[1].ExposureTime.SetValue(1000000)
-cameras[1].ExposureTime.SetValue(3000)
-
-# Starts grabbing for all cameras starting with index 0. The grabbing
-# is started for one camera after the other. That's why the images of all
-# cameras are not taken at the same time.
-# However, a hardware trigger setup can be used to cause all cameras to grab images synchronously.
-# According to their default configuration, the cameras are
-# set up for free-running continuous acquisition.
-cameras.StartGrabbing()
-
-
-
-converter = pylon.ImageFormatConverter()
-
-# converting to opencv bgr format
-converter.OutputPixelFormat = pylon.PixelType_BGR8packed
-converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
-
-# Grab c_countOfImagesToGrab from the cameras.
-for i in range(countOfImagesToGrab):
-    if not cameras.IsGrabbing():
-        break
-
-    if i <=4:
-        grabResult = cameras[0].RetrieveResult(10000000, pylon.TimeoutHandling_ThrowException)
-    else:
-        grabResult = cameras[1].RetrieveResult(1000000, pylon.TimeoutHandling_ThrowException)
-
-    # When the cameras in the array are created the camera context value
-    # is set to the index of the camera in the array.
-    # The camera context is a user settable value.
-    # This value is attached to each grab result and can be used
-    # to determine the camera that produced the grab result.
-    cameraContextValue = grabResult.GetCameraContext()
-
-    # Print the index and the model name of the camera.
-    print("Camera ", cameraContextValue, ": ", cameras[cameraContextValue].GetDeviceInfo().GetModelName())
-
-    # Now, the image data can be processed.
-    print("GrabSucceeded: ", grabResult.GrabSucceeded())
-    print("SizeX: ", grabResult.GetWidth())
-    print("SizeY: ", grabResult.GetHeight())
-    image = converter.Convert(grabResult)
-    img = image.GetArray()
-    cv2.imwrite('./camera_%s_%s.png' %(cameraContextValue, i), img)
-    # cv2.imshow('title', img)
-    # time.sleep(1)
-    print("Gray value of first pixel: ", img[0, 0])
-
-time.sleep(3)
+# Comment the following two lines to disable waiting on exit.
+sys.exit(exitCode)

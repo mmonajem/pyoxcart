@@ -28,6 +28,7 @@ def init():
     global camera_1_ExposureTime
     global path
     global index_save_image
+    global pump_load_lock
 
     global elapsed_time
     global start_time
@@ -45,6 +46,7 @@ def init():
     global avg_n_count
     global index_plot
     global index_plot_temp
+    global index_warning_message
     global light
     global img0_orig
     global img0_zoom
@@ -58,13 +60,13 @@ def init():
     # Setup parameters
     counter = 0
     ex_time = 0
-    ex_freq =0
-    vdc_min = 0.0
-    vdc_max = 0.0
-    vdc_step_up = 0.0
-    vdc_step_down = 0.0
-    v_p_min = 0.0
-    v_p_max = 0.0
+    ex_freq = 0
+    vdc_min = 0
+    vdc_max = 0
+    vdc_step_up = 0
+    vdc_step_down = 0
+    v_p_min = 0
+    v_p_max = 0
     pulse_fraction = 0
     pulse_frequency = 0
     pulse_amp_per_supply_voltage = 3500/160
@@ -84,6 +86,7 @@ def init():
     img1_zoom = np.ones((1200,500,3), dtype=np.uint8)
     path = ''
     index_save_image = 0
+    pump_load_lock = True
 
     # Run statistics=
     elapsed_time = 0.0
@@ -101,6 +104,7 @@ def init():
     avg_n_count = 0
     index_plot = 0
     index_plot_temp = 0
+    index_warning_message = 0
     stop_flag = False
     start_flag = False
     temperature = 0
