@@ -358,7 +358,7 @@
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLCDNumber" name="vacume_main">
+   <widget class="QLCDNumber" name="vacuum_main">
     <property name="geometry">
      <rect>
       <x>1800</x>
@@ -368,7 +368,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLCDNumber" name="vacume_buffer">
+   <widget class="QLCDNumber" name="vacuum_buffer">
     <property name="geometry">
      <rect>
       <x>1800</x>
@@ -383,7 +383,7 @@
      </font>
     </property>
    </widget>
-   <widget class="QLCDNumber" name="vacume_load_lock">
+   <widget class="QLCDNumber" name="vacuum_load_lock">
     <property name="geometry">
      <rect>
       <x>1210</x>
@@ -940,7 +940,7 @@
      <string>Buffer Chamber Pre (Bar)</string>
     </property>
    </widget>
-   <widget class="QLCDNumber" name="vacume_buffer_back">
+   <widget class="QLCDNumber" name="vacuum_buffer_back">
     <property name="geometry">
      <rect>
       <x>1800</x>
@@ -955,7 +955,7 @@
      </font>
     </property>
    </widget>
-   <widget class="QLCDNumber" name="vacume_load_lock_back">
+   <widget class="QLCDNumber" name="vacuum_load_lock_back">
     <property name="geometry">
      <rect>
       <x>1210</x>

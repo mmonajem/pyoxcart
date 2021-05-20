@@ -48,6 +48,10 @@ class Ui_OXCART(object):
         self.cameras = cameras  # Initialize cameras
         self.converter = converter
         self.lock = lock
+        self.cameras[0].Open()
+        self.cameras[0].ExposureTime.SetValue(1000000)
+        self.cameras[1].Open()
+        self.cameras[1].ExposureTime.SetValue(350000)
 
     def setupUi(self, OXCART):
         OXCART.setObjectName("OXCART")
@@ -214,18 +218,18 @@ class Ui_OXCART(object):
         self.led_light.setGeometry(QtCore.QRect(3060, 10, 111, 61))
         self.led_light.setAlignment(QtCore.Qt.AlignCenter)
         self.led_light.setObjectName("led_light")
-        self.vacume_main = QtWidgets.QLCDNumber(self.centralwidget)
-        self.vacume_main.setGeometry(QtCore.QRect(1460, 1340, 231, 91))
-        self.vacume_main.setObjectName("vacume_main")
-        self.vacume_buffer = QtWidgets.QLCDNumber(self.centralwidget)
-        self.vacume_buffer.setGeometry(QtCore.QRect(1800, 1470, 231, 91))
+        self.vacuum_main = QtWidgets.QLCDNumber(self.centralwidget)
+        self.vacuum_main.setGeometry(QtCore.QRect(1460, 1340, 231, 91))
+        self.vacuum_main.setObjectName("vacuum_main")
+        self.vacuum_buffer = QtWidgets.QLCDNumber(self.centralwidget)
+        self.vacuum_buffer.setGeometry(QtCore.QRect(1800, 1470, 231, 91))
         font = QtGui.QFont()
         font.setPointSize(8)
-        self.vacume_buffer.setFont(font)
-        self.vacume_buffer.setObjectName("vacume_buffer")
-        self.vacume_load_lock = QtWidgets.QLCDNumber(self.centralwidget)
-        self.vacume_load_lock.setGeometry(QtCore.QRect(1210, 1470, 231, 91))
-        self.vacume_load_lock.setObjectName("vacume_load_lock")
+        self.vacuum_buffer.setFont(font)
+        self.vacuum_buffer.setObjectName("vacuum_buffer")
+        self.vacuum_load_lock = QtWidgets.QLCDNumber(self.centralwidget)
+        self.vacuum_load_lock.setGeometry(QtCore.QRect(1210, 1470, 231, 91))
+        self.vacuum_load_lock.setObjectName("vacuum_load_lock")
         self.label_35 = QtWidgets.QLabel(self.centralwidget)
         self.label_35.setGeometry(QtCore.QRect(1170, 1370, 221, 31))
         font = QtGui.QFont()
@@ -457,15 +461,15 @@ class Ui_OXCART(object):
         font.setWeight(75)
         self.label_40.setFont(font)
         self.label_40.setObjectName("label_40")
-        self.vacume_buffer_back = QtWidgets.QLCDNumber(self.centralwidget)
-        self.vacume_buffer_back.setGeometry(QtCore.QRect(1800, 1580, 231, 91))
+        self.vacuum_buffer_back = QtWidgets.QLCDNumber(self.centralwidget)
+        self.vacuum_buffer_back.setGeometry(QtCore.QRect(1800, 1580, 231, 91))
         font = QtGui.QFont()
         font.setPointSize(8)
-        self.vacume_buffer_back.setFont(font)
-        self.vacume_buffer_back.setObjectName("vacume_buffer_back")
-        self.vacume_load_lock_back = QtWidgets.QLCDNumber(self.centralwidget)
-        self.vacume_load_lock_back.setGeometry(QtCore.QRect(1210, 1580, 231, 91))
-        self.vacume_load_lock_back.setObjectName("vacume_load_lock_back")
+        self.vacuum_buffer_back.setFont(font)
+        self.vacuum_buffer_back.setObjectName("vacuum_buffer_back")
+        self.vacuum_load_lock_back = QtWidgets.QLCDNumber(self.centralwidget)
+        self.vacuum_load_lock_back.setGeometry(QtCore.QRect(1210, 1580, 231, 91))
+        self.vacuum_load_lock_back.setObjectName("vacuum_load_lock_back")
         self.label_39 = QtWidgets.QLabel(self.centralwidget)
         self.label_39.setGeometry(QtCore.QRect(990, 1610, 201, 25))
         font = QtGui.QFont()
@@ -492,11 +496,11 @@ class Ui_OXCART(object):
         QtCore.QMetaObject.connectSlotsByName(OXCART)
 
         #### Set 8 digits for each LCD to show
-        self.vacume_main.setDigitCount(8)
-        self.vacume_buffer.setDigitCount(8)
-        self.vacume_buffer_back.setDigitCount(8)
-        self.vacume_load_lock.setDigitCount(8)
-        self.vacume_load_lock_back.setDigitCount(8)
+        self.vacuum_main.setDigitCount(8)
+        self.vacuum_buffer.setDigitCount(8)
+        self.vacuum_buffer_back.setDigitCount(8)
+        self.vacuum_load_lock.setDigitCount(8)
+        self.vacuum_load_lock_back.setDigitCount(8)
         self.temp.setDigitCount(8)
         ####
 
@@ -591,7 +595,7 @@ class Ui_OXCART(object):
         # High Voltage visualization ################
         self.x_vdc = list(range(100))  # 100 time points
         self.y_vdc = [np.nan] * 100  # 100 data points
-        self.y_vps = [ np.nan] * 100  # 100 data points
+        self.y_vps = [np.nan] * 100  # 100 data points
         # Add legend
         self.vdc_time.addLegend()
         pen_vdc = pg.mkPen(color=(255, 0, 0), width=6)
@@ -681,7 +685,7 @@ class Ui_OXCART(object):
         # timer statistics
         self.timer3 = QtCore.QTimer()
         self.timer3.setInterval(
-            200)  # In milliseconds
+            300)  # In milliseconds
         self.timer3.timeout.connect(self.statistics)
         self.timer3.start()
         # timer cameras
@@ -808,13 +812,15 @@ class Ui_OXCART(object):
         if not variables.flag_main_gate and not variables.flag_cryo_gate \
                 and not variables.flag_load_gate:
             if variables.flag_pump_load_lock:
-                self.led_pump_load_lock.setPixmap(self.led_red)
+                # self.led_pump_load_lock.setPixmap(self.led_red)
                 # variables.flag_pump_load_lock = False
                 variables.flag_pump_load_lock_click = True
+                self.pump_load_lock_switch.setEnabled(False)
             elif not variables.flag_pump_load_lock:
-                self.led_pump_load_lock.setPixmap(self.led_green)
+                # self.led_pump_load_lock.setPixmap(self.led_green)
                 # variables.flag_pump_load_lock = True
                 variables.flag_pump_load_lock_click = True
+                self.pump_load_lock_switch.setEnabled(False)
         else:
             _translate = QtCore.QCoreApplication.translate
             self.Error.setText(_translate("OXCART",
@@ -825,22 +831,21 @@ class Ui_OXCART(object):
         if not variables.light:
             self.led_light.setPixmap(self.led_green)
             self.cameras[0].Open()
-            self.cameras[0].ExposureTime.SetValue(1500)
+            self.cameras[0].ExposureTime.SetValue(2000)
             self.cameras[0].AcquisitionFrameRate.SetValue(150)
             self.cameras[1].Open()
-            self.cameras[1].ExposureTime.SetValue(1500)
+            self.cameras[1].ExposureTime.SetValue(2000)
             self.cameras[1].AcquisitionFrameRate.SetValue(150)
             variables.light = True
         elif variables.light:
             self.led_light.setPixmap(self.led_red)
             self.cameras[0].Open()
-            self.cameras[0].ExposureTime.SetValue(10000000)
+            self.cameras[0].ExposureTime.SetValue(1000000)
             self.cameras[1].Open()
-            self.cameras[1].ExposureTime.SetValue(1000000)
+            self.cameras[1].ExposureTime.SetValue(350000)
             variables.light = False
 
     def update_plot_data(self):
-
 
         if variables.index_plot_temp <= 999:
             self.y_tem = self.y_tem[:-1]  # Remove the first
@@ -897,9 +902,9 @@ class Ui_OXCART(object):
             self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 
         # Update the setup parameters
-        variables.ex_time = int(self.ex_time.text())
-        variables.ex_freq = int(self.ex_freq.text())
-        variables.vdc_min = int(self.vdc_min.text())
+        variables.ex_time = int(float(self.ex_time.text()))
+        variables.ex_freq = int(float(self.ex_freq.text()))
+        variables.vdc_min = int(float(self.vdc_min.text()))
         if float(self.vdc_max.text()) > 20000:
             _translate = QtCore.QCoreApplication.translate
             self.Error.setText(_translate("OXCART",
@@ -907,10 +912,10 @@ class Ui_OXCART(object):
                                           "number is 20KV</span></p></body></html>"))
             self.vdc_max.setText(_translate("OXCART", str(variables.vdc_max)))
         else:
-            variables.vdc_max = int(self.vdc_max.text())
-        variables.vdc_step_up = int(self.vdc_steps_up.text())
-        variables.vdc_step_down = int(self.vdc_steps_down.text())
-        variables.v_p_min = int(self.vp_min.text())
+            variables.vdc_max = int(float(self.vdc_max.text()))
+        variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
+        variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
+        variables.v_p_min = int(float(self.vp_min.text()))
         if float(self.vp_max.text()) > 3281:
             _translate = QtCore.QCoreApplication.translate
             self.Error.setText(_translate("OXCART",
@@ -918,12 +923,12 @@ class Ui_OXCART(object):
                                           "number is 3281 V</span></p></body></html>"))
             self.vp_max.setText(_translate("OXCART", str(variables.v_p_max)))
         else:
-            variables.v_p_max = int(self.vp_max.text())
-        variables.pulse_fraction = int(self.pulse_fraction.text()) / 100
-        variables.pulse_frequency = int(self.pulse_frequency.text())
-        variables.detection_rate = int(self.detection_rate_init.text())
+            variables.v_p_max = int(float(self.vp_max.text()))
+        variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
+        variables.pulse_frequency = int(float(self.pulse_frequency.text()))
+        variables.detection_rate = int(float(self.detection_rate_init.text()))
         variables.hdf5_path = self.hdf5_path.text()
-        variables.cycle_avg = int(self.cycle_avg.text())
+        variables.cycle_avg = int(float(self.cycle_avg.text()))
 
         # Statistics Update
         self.speciemen_voltage.setText(str(float("{:.3f}".format(variables.specimen_voltage))))
@@ -935,25 +940,30 @@ class Ui_OXCART(object):
             (variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000)))))
 
     def statistics(self):
-        # update temperature and vacum gages
+        # update temperature and vacuum gages
         self.temp.display(variables.temperature)
-        self.vacume_main.display(variables.vacum_main)
-        self.vacume_buffer.display(variables.vacum_buffer)
-        self.vacume_buffer_back.display('{:.2e}'.format(variables.vacum_buffer_backing))
-        self.vacume_load_lock.display('{:.2e}'.format(variables.vacum_load_lock))
-        self.vacume_load_lock_back.display('{:.2e}'.format(variables.vacum_load_lock_backing))
-        if not variables.flag_pump_load_lock:
+        self.vacuum_main.display(variables.vacuum_main)
+        self.vacuum_buffer.display(variables.vacuum_buffer)
+        self.vacuum_buffer_back.display('{:.2e}'.format(variables.vacuum_buffer_backing))
+        self.vacuum_load_lock.display('{:.2e}'.format(variables.vacuum_load_lock))
+        self.vacuum_load_lock_back.display('{:.2e}'.format(variables.vacuum_load_lock_backing))
+        if variables.flag_pump_load_lock_led == False:
             self.led_pump_load_lock.setPixmap(self.led_red)
-        elif variables.flag_pump_load_lock:
+            self.pump_load_lock_switch.setEnabled(True)
+            variables.flag_pump_load_lock_led = None
+        elif variables.flag_pump_load_lock_led == True:
             self.led_pump_load_lock.setPixmap(self.led_green)
+            self.pump_load_lock_switch.setEnabled(True)
+            variables.flag_pump_load_lock_led = None
 
-        variables.index_warning_message += 1
-        if variables.index_warning_message == 10:
+        if variables.index_warning_message == 15:
             _translate = QtCore.QCoreApplication.translate
             self.Error.setText(_translate("OXCART",
                                           "<html><head/><body><p><span style=\" "
                                           "color:#ff0000;\"></span></p></body></html>"))
             variables.index_warning_message = 0
+
+        variables.index_warning_message += 1
 
     def update_cameras(self, ):
 
@@ -996,55 +1006,65 @@ def command_cryovac(cmd):
         response = com_port_cryovac.readline()  # all characters received, read line till '\r\n'
     return response.decode("utf-8")
 
+
 def command_edwards(cmd, lock, E_AGC, status=None):
-    if variables.flag_pump_load_lock_click  and variables.flag_pump_load_lock and status == 'load_lock':
+    if variables.flag_pump_load_lock_click and variables.flag_pump_load_lock and status == 'load_lock':
         E_AGC.comm('!C910 0')  # Backing Pump off
         E_AGC.comm('!C904 0')  # Turbo Pump off
         with lock:
             variables.flag_pump_load_lock_click = False
             variables.flag_pump_load_lock = False
+            variables.flag_pump_load_lock_led = False
+            time.sleep(1)
     elif variables.flag_pump_load_lock_click and not variables.flag_pump_load_lock and status == 'load_lock':
         E_AGC.comm('!C910 1')  # Backing Pump on
         E_AGC.comm('!C904 1')  # Turbo Pump on
         with lock:
             variables.flag_pump_load_lock_click = False
             variables.flag_pump_load_lock = True
+            variables.flag_pump_load_lock_led = True
+            time.sleep(1)
     if cmd == 'presure':
         response_tmp = E_AGC.comm('?V911')
         response_tmp = float(response_tmp.replace(';', ' ').split()[1])
         if response_tmp < 90 and status == 'load_lock':
-            variables.flag_pump_load_lock = False
+            variables.flag_pump_load_lock_led = False
         elif response_tmp >= 90 and status == 'load_lock':
-            variables.flag_pump_load_lock = True
+            variables.flag_pump_load_lock_led = True
         response = E_AGC.comm('?V940')
     else:
         print('Unknown command for Edwards TIC Load Lock')
 
     return response
 
+
 def initialize_cryovac():
     output = command_cryovac('getOutput')
     variables.temperature = float(output.split()[0].replace(',', ''))
 
+
 def initialize_edwards_tic_load_lock():
     E_AGC_ll = EdwardsAGC(COM_PORT_edwards_ll)
     response = command_edwards('presure', lock=None, E_AGC=E_AGC_ll)
-    variables.vacum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
-    variables.vacum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
+    variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
+    variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
+
 
 def initialize_edwards_tic_buffer_chamber():
     E_AGC_bc = EdwardsAGC(COM_PORT_edwards_bc)
-    response = command_edwards('presure', lock=None, E_AGC=E_AGC_bc,)
-    variables.vacum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
+    response = command_edwards('presure', lock=None, E_AGC=E_AGC_bc, )
+    variables.vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
+
 
 def initialize_pfeiffer_gauges():
     tpg = TPG362(port=COM_PORT_pfeiffer)
     value, _ = tpg.pressure_gauge(2)
     # unit = tpg.pressure_unit()
-    variables.vacum_main = '{}'.format(value)
+    variables.vacuum_main = '{}'.format(value)
     value, _ = tpg.pressure_gauge(1)
     # unit = tpg.pressure_unit()
-    variables.vacum_buffer = '{}'.format(value)
+    variables.vacuum_buffer = '{}'.format(value)
+
 
 def gauges_update(lock):
     tpg = TPG362(port=COM_PORT_pfeiffer)
@@ -1059,22 +1079,24 @@ def gauges_update(lock):
         value, _ = tpg.pressure_gauge(2)
         # unit = tpg.pressure_unit()
         with lock:
-            variables.vacum_main = '{}'.format(value)
+            variables.vacuum_main = '{}'.format(value)
         value, _ = tpg.pressure_gauge(1)
         # unit = tpg.pressure_unit()
         with lock:
-            variables.vacum_buffer = '{}'.format(value)
+            variables.vacuum_buffer = '{}'.format(value)
         # Edwards Load Lock update
         response = command_edwards('presure', lock, E_AGC=E_AGC_ll, status='load_lock')
         with lock:
-            variables.vacum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
-            variables.vacum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
+            variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
+            variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
 
         # Edwards Buffer Chamber update
         response = command_edwards('presure', lock, E_AGC=E_AGC_bc)
         with lock:
-            variables.vacum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
+            variables.vaccum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
         time.sleep(1)
+
+
 if __name__ == "__main__":
 
     # Initialize global experiment variables

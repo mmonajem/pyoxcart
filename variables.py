@@ -30,6 +30,7 @@ def init():
     global index_save_image
     global flag_pump_load_lock
     global flag_pump_load_lock_click
+    global flag_pump_load_lock_led
 
     global elapsed_time
     global start_time
@@ -54,11 +55,11 @@ def init():
     global img1_orig
     global img1_zoom
     global temperature
-    global vacum_main
-    global vacum_buffer
-    global vacum_buffer_backing
-    global vacum_load_lock
-    global vacum_load_lock_backing
+    global vacuum_main
+    global vacuum_buffer
+    global vacuum_buffer_backing
+    global vacuum_load_lock
+    global vacuum_load_lock_backing
 
 
     # Setup parameters
@@ -82,8 +83,8 @@ def init():
     email = ''
     tweet = False
     light = False
-    camera_0_ExposureTime = 10000000
-    camera_1_ExposureTime = 1000000
+    camera_0_ExposureTime = 2000
+    camera_1_ExposureTime = 2000
     img0_orig = np.ones((500,500,3), dtype=np.uint8)
     img0_zoom = np.ones((1200,500,3), dtype=np.uint8)
     img1_orig = np.ones((500,500,3), dtype=np.uint8)
@@ -92,6 +93,7 @@ def init():
     index_save_image = 0
     flag_pump_load_lock = True
     flag_pump_load_lock_click = False
+    flag_pump_load_lock_led = None
 
     # Run statistics=
     elapsed_time = 0.0
@@ -113,10 +115,9 @@ def init():
     stop_flag = False
     start_flag = False
     temperature = 0
-    vacum_main = 0
-    vacum_buffer = 0
-    vacum_buffer_backing = 0
-    vacum_load_lock = 0
-    vacum_load_lock_backing = 0
-
+    vacuum_main = 0
+    vacuum_buffer = 0
+    vacuum_buffer_backing = 0
+    vacuum_load_lock = 0
+    vacuum_load_lock_backing = 0
 

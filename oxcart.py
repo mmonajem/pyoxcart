@@ -149,7 +149,7 @@ def clear_up(task_counter):
     print('Clean up is finished')
 
 def main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target,
-                 temperature, main_chamber_vacum):
+                 temperature, main_chamber_vacuum):
 
     # # reading DC HV
     # v_dc = (command_v_dc(">S0A?")[5:-1])
@@ -204,7 +204,7 @@ def main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target,
         com_port_v_p.write('VOLT %s' % new_vp)
 
     temperature.append(variables.temperature)
-    main_chamber_vacum.append(variables.vacum_main)
+    main_chamber_vacuum.append(variables.vacuum_main)
 
 def cleanup_variables():
 
@@ -260,7 +260,7 @@ def main():
     time_ex_m = []
     time_ex_h = []
     temperature = []
-    main_chamber_vacum = []
+    main_chamber_vacuum = []
     counts_target = ((variables.detection_rate/100) * variables.pulse_frequency) / variables.pulse_frequency
     variables.start_flag = True
     logger.info('Starting the main loop')
@@ -278,7 +278,7 @@ def main():
             # variables.start_flag == True
         # main loop
         start = datetime.datetime.now()
-        main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target, temperature, main_chamber_vacum)
+        main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target, temperature, main_chamber_vacuum)
         end = datetime.datetime.now()
         time_ex_s.append(int(end.strftime("%S")))
         time_ex_m.append(int(end.strftime("%M")))
