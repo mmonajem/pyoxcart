@@ -77,8 +77,7 @@ def initialize_v_dc():
     if com_port_v_dc.is_open:
         com_port_v_dc.flushInput()
         com_port_v_dc.flushOutput()
-        # print("Opened Port: " + com_ports[com_port_idx_V_dc].device)
-        print("Opened Port for V_dc ")
+
 
         cmd_list = [">S1 3.0e-4", ">S0B 0", ">S0 %s" % variables.vdc_min, "F0", ">S0?", ">DON?",
                     ">S0A?"]
@@ -90,7 +89,6 @@ def initialize_v_dc():
 
 
 def initialize_v_p():
-    print("Opened Port for V_p ")
     try:
         com_port_v_p.query('*RST')
     except:

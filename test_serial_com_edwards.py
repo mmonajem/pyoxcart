@@ -78,15 +78,19 @@ class EdwardsAGC(object):
     def my_commands(self):
         """ Return the software version of the controller """
         # Presures
-        # return self.comm('?V940')
-        return self.comm('?V911') # Backing speed
+        return self.comm('?V940')
+        # return self.comm('?V911') # Backing speed
         # Turbo pump On and Off
         # return self.comm('!C933 1')
 
+        # return self.comm('!C904 1')
+        # return self.comm('!C910 1')
+
 
 if __name__ == '__main__':
-    E_AGC = EdwardsAGC()
+    E_AGC = EdwardsAGC('COM2')
     # print(E_AGC.gauge_type(4))
+    # print(E_AGC.my_commands())
     print(E_AGC.my_commands())
     # print(E_AGC.read_pressure(1))
     # print(E_AGC.read_pressure(2))

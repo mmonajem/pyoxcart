@@ -28,7 +28,8 @@ def init():
     global camera_1_ExposureTime
     global path
     global index_save_image
-    global pump_load_lock
+    global flag_pump_load_lock
+    global flag_pump_load_lock_click
 
     global elapsed_time
     global start_time
@@ -55,7 +56,10 @@ def init():
     global temperature
     global vacum_main
     global vacum_buffer
+    global vacum_buffer_backing
     global vacum_load_lock
+    global vacum_load_lock_backing
+
 
     # Setup parameters
     counter = 0
@@ -86,7 +90,8 @@ def init():
     img1_zoom = np.ones((1200,500,3), dtype=np.uint8)
     path = ''
     index_save_image = 0
-    pump_load_lock = True
+    flag_pump_load_lock = True
+    flag_pump_load_lock_click = False
 
     # Run statistics=
     elapsed_time = 0.0
@@ -110,5 +115,8 @@ def init():
     temperature = 0
     vacum_main = 0
     vacum_buffer = 0
+    vacum_buffer_backing = 0
     vacum_load_lock = 0
+    vacum_load_lock_backing = 0
+
 

@@ -6,8 +6,9 @@ class EdwardsAGC(object):
     http://www.idealvac.com/files/brochures/Edwards_AGC_D386-52-880_IssueM.pdf """
 
 
-    def __init__(self, port='COM1'):
-        self.serial = serial.Serial(port, baudrate=9600, timeout=0.5)
+    def __init__(self, port):
+        self.port = port
+        self.serial = serial.Serial(self.port, baudrate=9600, timeout=0.5)
 
 
     def comm(self, command):
