@@ -1,8 +1,7 @@
 # OXCART
 # Python Script for doing an experiments
-com_port_idx_V_dc = 2
+com_port_idx_V_dc = 4
 com_port_idx_V_p = 0
-
 
 # ex_time = 90  # Experiment time in second
 # ex_freq = 30 # Experiment main loop frequency in Hz
@@ -32,6 +31,7 @@ import threading
 import numpy as np
 import sys
 
+
 def logging():
     # Gets or creates a logger
     import logging
@@ -55,6 +55,7 @@ def logging():
 
     return logger
 
+
 # get available COM ports and store as list
 com_ports = list(serial.tools.list_ports.comports())
 # Setting the com port of V_dc
@@ -66,10 +67,10 @@ com_port_v_dc = serial.Serial(
     stopbits=serial.STOPBITS_ONE  # 1
 )
 
-
 # set the port for v_p
 resources = visa.ResourceManager('@py')
 com_port_v_p = resources.open_resource('ASRL4::INSTR')
+
 
 # Initialize the V_dc for the experiment
 def initialize_v_dc():
@@ -77,7 +78,6 @@ def initialize_v_dc():
     if com_port_v_dc.is_open:
         com_port_v_dc.flushInput()
         com_port_v_dc.flushOutput()
-
 
         cmd_list = [">S1 3.0e-4", ">S0B 0", ">S0 %s" % variables.vdc_min, "F0", ">S0?", ">DON?",
                     ">S0A?"]
@@ -95,8 +95,8 @@ def initialize_v_p():
 
         com_port_v_p.write('VOLT %s' % (variables.v_p_min * (1 / variables.pulse_amp_per_supply_voltage)))
 
-def initialize_tdc():
 
+def initialize_tdc():
     device = scTDC.Device(autoinit=False)
     retcode, errmsg = device.initialize()
     if retcode < 0:
@@ -105,6 +105,7 @@ def initialize_tdc():
 
     return device
 
+
 def initialize_counter():
     task_counter = nidaqmx.Task()
     task_counter.ci_channels.add_ci_count_edges_chan("Dev1/ctr0")
@@ -112,6 +113,7 @@ def initialize_counter():
     task_counter.ci_channels[0].ci_count_edges_term = "PFI0"
 
     return task_counter
+
 
 # apply command to the V_dc
 def command_v_dc(cmd):
@@ -122,7 +124,6 @@ def command_v_dc(cmd):
     while com_port_v_dc.in_waiting > 0:
         response = com_port_v_dc.readline()  # all characters received, read line till '\r\n'
     return response.decode("utf-8")
-
 
 
 def clear_up(task_counter):
@@ -148,9 +149,9 @@ def clear_up(task_counter):
     cleanup_variables()
     print('Clean up is finished')
 
+
 def main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target,
                  temperature, main_chamber_vacuum):
-
     # # reading DC HV
     # v_dc = (command_v_dc(">S0A?")[5:-1])
     # variables.specimen_voltage = float(v_dc)
@@ -175,14 +176,6 @@ def main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target,
 
     counts_error = counts_target - counts_measured  # deviation from setpoint
 
-    # print('V_dc = ', variables.specimen_voltage, 'V')
-    # print('V_p = ', variables.pulse_voltage, 'V')
-    # print('# count:', variables.count_temp)
-    # print('Total Ions:', variables.total_ions)
-    # print('counts_target', counts_target * variables.pulse_frequency * 1000)
-    # print('counts_measured', counts_measured * variables.pulse_frequency * 1000)
-    # print('Error', counts_error * variables.pulse_frequency * 1000)
-
     # simple proportional control with averaging
     if counts_error > 0:
         voltage_step = counts_error * variables.vdc_step_up
@@ -195,7 +188,6 @@ def main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target,
         command_v_dc(">S0 %s" % (variables.specimen_voltage))
 
     # update pulse voltage v_p
-
     new_vp = variables.specimen_voltage * variables.pulse_fraction * \
              (1 / variables.pulse_amp_per_supply_voltage)
     variables.pulse_voltage = new_vp * variables.pulse_amp_per_supply_voltage
@@ -204,10 +196,10 @@ def main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target,
         com_port_v_p.write('VOLT %s' % new_vp)
 
     temperature.append(variables.temperature)
-    main_chamber_vacuum.append(variables.vacuum_main)
+    main_chamber_vacuum.append(float(variables.vacuum_main))
+
 
 def cleanup_variables():
-
     variables.stop_flag = False
     variables.start_flag = False
     variables.elapsed_time = 0.0
@@ -224,20 +216,12 @@ def cleanup_variables():
     variables.index_save_image = 0
 
 
-
-
-
-
 def main():
     # Initialize logger
     logger = logging()
     logger.info('Experiment is starting')
-    # Sleep for 2 seconds in order to update variables from GUI
-    time.sleep(2)
-    print('ex_time:', variables.ex_time, 'ex_freq:', 'ex_freq:', variables.ex_freq, 'vdc_min:', variables.vdc_min, 'vdc_max:', variables.vdc_max,
-          'vdc_step_up:', variables.vdc_step_down, 'vdc_step_up:', variables.vdc_step_down, 'v_p_min:', variables.v_p_min, 'v_p_max:', variables.v_p_max)
 
-    variables.start_time = datetime.datetime.now().strftime( "%d/%m/%Y %H:%M" )
+    variables.start_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
     # Initialization of devices
     initialize_v_dc()
     logger.info('High voltage is initialized')
@@ -261,10 +245,9 @@ def main():
     time_ex_h = []
     temperature = []
     main_chamber_vacuum = []
-    counts_target = ((variables.detection_rate/100) * variables.pulse_frequency) / variables.pulse_frequency
-    variables.start_flag = True
+    counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
     logger.info('Starting the main loop')
-    start_main_ex = time.time()
+
     for steps in range(variables.ex_time * variables.ex_freq):
         if steps == 0:
             # Turn on the v_dc and v_p
@@ -274,8 +257,9 @@ def main():
             task_counter.start()
             # Wait for 3 second before starting the experiment
             time.sleep(3)
-            # Change the start flag for reset plotting
-            # variables.start_flag == True
+            # Total experiment time variable
+            variables.start_flag = True
+            start_main_ex = time.time()
         # main loop
         start = datetime.datetime.now()
         main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target, temperature, main_chamber_vacuum)
@@ -290,24 +274,30 @@ def main():
                 print('Experiment loop takes longer than initialized frequency Seconds')
                 logger.error('Experiment loop takes longer than initialized frequency Seconds')
                 break
-        else:
+        elif variables.stop_flag:
             print('Experiment is stopped by user')
             logger.info('Experiment is stopped by user')
-            # wait for 5 second
-            time.sleep(5)
+            # wait for 3 second
+            time.sleep(3)
+            break
+        if variables.max_ions <= variables.total_ions:
+            print('Total number of Ions is achieved')
+            logger.info('Total number of Ions is achieved')
+            # wait for 3 second
+            time.sleep(3)
             break
         end_main_ex_loop = time.time()
         variables.elapsed_time = end_main_ex_loop - start_main_ex
-
-    print('experiment is finished')
+    print('Experiment is finished')
     logger.info('Experiment is finished')
 
     # save hdf5 file
-    with h5py.File(variables.path + '\\%s_data.h5' %variables.hdf5_path, "w") as f:
+    with h5py.File(variables.path + '\\%s_data.h5' % variables.hdf5_path, "w") as f:
         f.create_dataset("high_voltage", data=main_v_dc, dtype='f')
         f.create_dataset("pulse_voltage", data=main_v_p, dtype='f')
         f.create_dataset("events", data=main_counter, dtype='i')
         f.create_dataset('temperature', data=temperature, dtype='f')
+        f.create_dataset('main_chamber_vacuum', data=main_chamber_vacuum, dtype='f')
         f.create_dataset("time_s", data=time_ex_s, dtype='i')
         f.create_dataset("time_m", data=time_ex_m, dtype='i')
         f.create_dataset("time_h", data=time_ex_h, dtype='i')
@@ -316,11 +306,9 @@ def main():
         f.create_dataset("t", (0,), dtype='f')
         f.create_dataset("trigger#", (0,), dtype='f')
     logger.info('HDF5 file is created')
-    variables.end_time = datetime.datetime.now().strftime( "%d/%m/%Y %H:%M" )
+    variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
-    clear_up(task_counter)
-    logger.info('Variables and devices is cleared')
-    # save new variable
+    # save new value of experiment counter
     with open('./png/counter.txt', 'w') as f:
         f.write(str(variables.counter + 1))
         logger.info('Experiment counter is increased')
@@ -328,9 +316,11 @@ def main():
     # Adding results of the experiment to the log file
     logger.info('Total number of Ions is: %s' % variables.total_ions)
     # send a Tweet
-    message_tweet = 'The Experiment %s finished' % variables.hdf5_path
+    message_tweet = 'The Experiment %s finished\n' \
+                    'Total number of Ions is: %s' % (variables.hdf5_path,
+                                                     variables.total_ions)
     if variables.tweet == True:
-        tweet_send.send_tweet(message_tweet)
+        tweet_send.tweet_send(message_tweet)
         logger.info('Tweet is sent')
 
     # send an email
@@ -345,6 +335,27 @@ def main():
     if len(variables.email) > 3:
         logger.info('Email is sent')
         email_send.send_email(variables.email, subject, message)
-
+        # save setup parameters and run statistics in a txt file
+    with open(variables.path + '\\parameters.txt', 'w') as f:
+        f.write('Experiment Name: ' + variables.hdf5_path + '\r\n')
+        f.write('Detection Rate: %s\r\n' % (variables.pulse_fraction * variables.cycle_avg))
+        f.write('Maximum Number of Ions: %s\r\n' % variables.max_ions)
+        f.write('Control Refresh freq.: %s\r\n' % variables.ex_freq)
+        f.write('Cycle for Avg.: %s\r\n' % variables.cycle_avg)
+        f.write('K_p Downwards: %s\r\n' % variables.vdc_step_down)
+        f.write('K_p Upwards: %s\r\n' % variables.vdc_step_up)
+        f.write('K_p Downwards: %s\r\n' % variables.vdc_step_down)
+        f.write('Experiment Elapsed Time: %s\r\n' % variables.elapsed_time)
+        f.write('Experiment Total Ions: %s\r\n' % variables.total_ions)
+        f.write('Email: ' + variables.email + '\r\n')
+        f.write('Twitter: %s\r\n' % variables.tweet)
+        f.write('Specimen start Voltage: %s\r\n' % variables.vdc_min)
+        f.write('Specimen Stop Voltage: %s\r\n' % variables.vdc_max)
+        f.write('Specimen Max Achieved Voltage: %s\r\n' % variables.specimen_voltage)
+        f.write('Pulse start Voltage: %s\r\n' % variables.v_p_min)
+        f.write('Pulse Stop Voltage: %s\r\n' % variables.v_p_max)
+        f.write('Specimen Max Achieved Pulse Voltage: %s\r\n' % variables.pulse_voltage)
+    clear_up(task_counter)
+    logger.info('Variables and devices is cleared')
 # if __name__ == "__main__":
 #     main(ex_time_g=60, ex_freq_g=20, vdc_min_g=2000, vdc_max_g=15000, vdc_step_g=5, v_p_min_g=15, v_p_max_g=100)

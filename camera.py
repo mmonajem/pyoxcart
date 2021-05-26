@@ -23,25 +23,30 @@ class Camera():
             image1 = converter.Convert(grabResult1)
             img1 = image1.GetArray()
 
-            img0_orig = cv2.resize(img0, dsize=(500, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            img0_zoom = img0[800:1100, 1800:2300]
-            img0_zoom = cv2.resize(img0_zoom, dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            img1_orig = cv2.resize(img1, dsize=(500, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            img1_zoom = img1[1100:1300, 1000:1500]
-            img1_zoom = cv2.resize(img1_zoom, dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            # Saving images - So far it is not possible to not save and load images in a proper way with ImageQt
+            # Original size is 2048 * 2448
+            # img0_orig = cv2.resize(img0, dsize=(500, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
+            img0_orig = cv2.resize(img0, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
+            img0_zoom = cv2.resize(img0[800:1100, 1800:2300], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
+            # img1_orig = cv2.resize(img1, dsize=(500, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
+            img1_orig = cv2.resize(img1, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
+            img1_zoom = cv2.resize(img1[1100:1300, 1000:1500], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
             with lock:
-                variables.img0_orig = np.require(img0_orig, np.uint8, 'C')
+                # variables.img0_orig = np.require(img0_orig, np.uint8, 'C')
                 variables.img0_zoom = np.require(img0_zoom, np.uint8, 'C')
-                variables.img1_orig = np.require(img1_orig, np.uint8, 'C')
+                # variables.img1_orig = np.require(img1_orig, np.uint8, 'C')
                 variables.img1_zoom = np.require(img1_zoom, np.uint8, 'C')
+
+                variables.img0_orig = np.swapaxes(img0_orig, 0, 1)
+                # variables.img0_zoom = np.swapaxes(img0_zoom, 0, 1)
+                variables.img1_orig = np.swapaxes(img1_orig, 0, 1)
+                # variables.img1_zoom = np.swapaxes(img1_zoom, 0, 1)
                 variables.index_save_image += 1
 
-            if variables.index_save_image % 10 == 0 and variables.start_flag == True:
-                cv2.imwrite(variables.path + "\\side_index_%s.png" %variables.index_save_image, img0_orig)
-                cv2.imwrite(variables.path + "\\side_zoom_index_%s.png" %variables.index_save_image, img0_zoom)
-                cv2.imwrite(variables.path + '\\bottom_index_%s.png' %variables.index_save_image, img1_orig)
-                cv2.imwrite(variables.path + '\\bottom_zoom_index_%s.png' %variables.index_save_image, img1_zoom)
+            if variables.index_save_image % 100 == 0 and variables.start_flag == True:
+                cv2.imwrite(variables.path + "\\%s_side_index.png" %variables.index_save_image, img0_orig)
+                cv2.imwrite(variables.path + "\\%s_side_zoom_index.png" %variables.index_save_image, img0_zoom)
+                cv2.imwrite(variables.path + '\\%s_bottom_index.png' %variables.index_save_image, img1_orig)
+                cv2.imwrite(variables.path + '\\%s_bottom_zoom_index.png' %variables.index_save_image, img1_zoom)
     def camera_init(self,):
         # Limits the amount of cameras used for grabbing.
         # The bandwidth used by a FireWire camera device can be limited by adjusting the packet size.

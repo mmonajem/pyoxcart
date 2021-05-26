@@ -6,6 +6,7 @@ def init():
 
     global counter
     global ex_time
+    global max_ions
     global ex_freq
     global vdc_min
     global vdc_max
@@ -65,6 +66,7 @@ def init():
     # Setup parameters
     counter = 0
     ex_time = 0
+    max_ions = 0
     ex_freq = 0
     vdc_min = 0
     vdc_max = 0

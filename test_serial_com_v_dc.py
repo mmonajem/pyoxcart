@@ -117,8 +117,9 @@ if no_com_ports > 0:
             else:
                 print("<< Error, no Response!")
 
-        cmd_list = [">S1 3.0e-4",">S0B 1", ">S0R 250", ">S0 15000", "F0", ">S0?", ">DON?",
-                    ">S0A?", "F1",]
+        # cmd_list = [">S1 3.0e-4",">S0B 1", ">S0R 250", ">S0 15000", "F0", ">S0?", ">DON?",
+        #             ">S0A?", "F1",]
+        cmd_list = [">S1 3.0e-4"]
         for cmd in range(len(cmd_list)):
             command(cmd_list[cmd])
         for i in range(20):
