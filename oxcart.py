@@ -1,15 +1,8 @@
 # OXCART
+
 # Python Script for doing an experiments
 com_port_idx_V_dc = 4
 com_port_idx_V_p = 0
-
-# ex_time = 90  # Experiment time in second
-# ex_freq = 30 # Experiment main loop frequency in Hz
-# vdc_min = 2000 # Minimum value which reached by v_dc
-# vdc_max = 15000 # Maximum value which reached by v_dc
-# vdc_step = 5 # Increase or decrease vdc in each steps
-# v_p_min = 15 # Minimum value which the v_dc start
-# v_p_max = 100 # Maximum value which reached by v_dc
 
 
 # package needed to list available COM ports
@@ -20,7 +13,8 @@ import scTDC
 import variables
 import email_send
 import tweet_send
-# import tdc_hdf5
+import multiprocessing
+
 
 # package needed
 import time
@@ -30,6 +24,64 @@ import os
 import threading
 import numpy as np
 import sys
+
+manager_x = multiprocessing.Manager()
+manager_y = multiprocessing.Manager()
+manager_t = multiprocessing.Manager()
+manager_start_counter = multiprocessing.Manager()
+variables.x = manager_x.list()
+variables.y = manager_y.list()
+variables.t = manager_t.list()
+variables.start_counter = manager_start_counter.list()
+
+# get available COM ports and store as list
+com_ports = list(serial.tools.list_ports.comports())
+# Setting the com port of V_dc
+com_port_v_dc = serial.Serial(
+    port=com_ports[com_port_idx_V_dc].device,  # chosen COM port
+    baudrate=115200,  # 115200
+    bytesize=serial.EIGHTBITS,  # 8
+    parity=serial.PARITY_NONE,  # N
+    stopbits=serial.STOPBITS_ONE  # 1
+)
+
+# set the port for v_p
+resources = visa.ResourceManager('@py')
+com_port_v_p = resources.open_resource('ASRL4::INSTR')
+
+class UCB2(scTDC.usercallbacks_pipe):
+    def __init__(self, lib, dev_desc):
+        super().__init__(lib, dev_desc)  # <-- mandatory
+        self.x = []
+        self.y = []
+        self.t = []
+        self.start_counter = []
+
+    def on_millisecond(self):
+        pass  # do nothing (one could also skip this function definition altogether)
+
+    def on_start_of_meas(self):
+        pass  # do nothing
+
+    def on_end_of_meas(self):
+        variables.x = self.x
+        variables.y = self.y
+        variables.t = self.t
+        variables.start_counter = self.start_counter
+
+    def on_tdc_event(self, tdc_events, nr_tdc_events):
+        pass
+        # for i in range(nr_tdc_events):  # iterate through tdc_events
+        #     # see class tdc_event_t in scTDC.py for all accessible fields
+        #     t = tdc_events[i].time_data
+
+    def on_dld_event(self, dld_events, nr_dld_events):
+        for i in range(nr_dld_events):  # iterate through dld_events
+            # see class dld_event_t in scTDC.py for all accessible fields
+            self.t.append(dld_events[i].sum)
+            self.x.append(dld_events[i].dif1)
+            self.y.append(dld_events[i].dif2)
+            self.start_counter.append(dld_events[i].start_counter)
 
 
 def logging():
@@ -55,21 +107,6 @@ def logging():
 
     return logger
 
-
-# get available COM ports and store as list
-com_ports = list(serial.tools.list_ports.comports())
-# Setting the com port of V_dc
-com_port_v_dc = serial.Serial(
-    port=com_ports[com_port_idx_V_dc].device,  # chosen COM port
-    baudrate=115200,  # 115200
-    bytesize=serial.EIGHTBITS,  # 8
-    parity=serial.PARITY_NONE,  # N
-    stopbits=serial.STOPBITS_ONE  # 1
-)
-
-# set the port for v_p
-resources = visa.ResourceManager('@py')
-com_port_v_p = resources.open_resource('ASRL4::INSTR')
 
 
 # Initialize the V_dc for the experiment
@@ -101,7 +138,7 @@ def initialize_tdc():
     retcode, errmsg = device.initialize()
     if retcode < 0:
         print("Error during initialization : ({}) {}".format(errmsg, retcode))
-        return
+        return 0
 
     return device
 
@@ -126,7 +163,7 @@ def command_v_dc(cmd):
     return response.decode("utf-8")
 
 
-def clear_up(task_counter):
+def clear_up(task_counter, device_tdc):
     print('starting to clean up')
     # save the data to the HDF5
 
@@ -147,10 +184,13 @@ def clear_up(task_counter):
     task_counter.close()
     # Zero variables
     cleanup_variables()
+
+    if variables.counter_source == 'TDC':
+        device_tdc.deinitialize()
     print('Clean up is finished')
 
 
-def main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target,
+def main_ex_loop(ucb, task_counter, main_v_dc, main_v_p, main_counter, counts_target,
                  temperature, main_chamber_vacuum):
     # # reading DC HV
     # v_dc = (command_v_dc(">S0A?")[5:-1])
@@ -160,8 +200,15 @@ def main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target,
     # v_p = com_port_v_p.query('MEASure:VOLTage?')[:-3]
     # variables.pulse_voltage = float(v_p)
 
-    # reading detector MCP pulse counter and calculating pulses since last loop iteration
-    variables.total_ions = task_counter.read(number_of_samples_per_channel=1)[0]
+    # Start the measurement of TDC
+    if variables.counter_source == 'TDC':
+        ucb.do_measurement(int(1000/variables.ex_freq)) # Time of measurement in ms
+    if variables.counter_source == 'TDC':
+        variables.total_ions = len(variables.x)
+    elif variables.counter_source == 'pulse_counter':
+        # reading detector MCP pulse counter and calculating pulses since last loop iteration
+        variables.total_ions = task_counter.read(number_of_samples_per_channel=1)[0]
+
     variables.count_temp = variables.total_ions - variables.count_last
     variables.count_last = variables.total_ions
 
@@ -223,20 +270,33 @@ def main():
 
     variables.start_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
     # Initialization of devices
+
     initialize_v_dc()
     logger.info('High voltage is initialized')
+
     initialize_v_p()
     logger.info('Pulser is initialized')
-    # device = initialize_tdc()
+
+    if variables.counter_source == 'TDC':
+        device_tdc = initialize_tdc()
+        ucb = UCB2(device_tdc.lib, device_tdc.dev_desc)  # opens a user callbacks pipe
+        logger.info('TDC is initialized')
+    else:
+        device_tdc = None
+        ucb = None
+
     task_counter = initialize_counter()
     logger.info('Edge counter is initialized')
-    # Starting tdc hdf5 streaming
-    # threading.Thread(target=tdc_hdf5.hdf5_streaming(device)).start()
+
     # start the timer for main experiment
     variables.specimen_voltage = variables.vdc_min
     variables.pulse_voltage_min = variables.v_p_min * (1 / variables.pulse_amp_per_supply_voltage)
     variables.pulse_voltage_max = variables.v_p_max * (1 / variables.pulse_amp_per_supply_voltage)
     variables.pulse_voltage = variables.v_p_min
+    x = []
+    y = []
+    t = []
+    start_counter = []
     main_v_dc = []
     main_v_p = []
     main_counter = []
@@ -248,7 +308,9 @@ def main():
     counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
     logger.info('Starting the main loop')
 
-    for steps in range(variables.ex_time * variables.ex_freq):
+    total_steps = variables.ex_time * variables.ex_freq
+    steps = 0
+    while steps < total_steps:
         if steps == 0:
             # Turn on the v_dc and v_p
             com_port_v_p.write('OUTPut ON')
@@ -262,19 +324,24 @@ def main():
             start_main_ex = time.time()
         # main loop
         start = datetime.datetime.now()
-        main_ex_loop(task_counter, main_v_dc, main_v_p, main_counter, counts_target, temperature, main_chamber_vacuum)
+        main_ex_loop(ucb, task_counter, main_v_dc, main_v_p,
+                     main_counter, counts_target, temperature, main_chamber_vacuum)
         end = datetime.datetime.now()
         time_ex_s.append(int(end.strftime("%S")))
         time_ex_m.append(int(end.strftime("%M")))
         time_ex_h.append(int(end.strftime("%H")))
-        if variables.stop_flag == False:
+        print(((end - start).microseconds / 1000), 'ms')
+        if variables.counter_source == 'pulse_counter':
             if (1000 / variables.ex_freq) > ((end - start).microseconds / 1000):  # time in milliseconds
                 time.sleep(((1000 / variables.ex_freq) - ((end - start).microseconds / 1000)) / 1000)
+                end2 = datetime.datetime.now()
+                print(((end2 - start).microseconds / 1000), 'ms')
             else:
                 print('Experiment loop takes longer than initialized frequency Seconds')
                 logger.error('Experiment loop takes longer than initialized frequency Seconds')
                 break
-        elif variables.stop_flag:
+
+        if variables.stop_flag:
             print('Experiment is stopped by user')
             logger.info('Experiment is stopped by user')
             # wait for 3 second
@@ -288,6 +355,12 @@ def main():
             break
         end_main_ex_loop = time.time()
         variables.elapsed_time = end_main_ex_loop - start_main_ex
+
+        total_steps = variables.ex_time * variables.ex_freq
+        steps += 1
+
+    if variables.counter_source == 'TDC':
+        ucb.close() # closes the user callbacks pipe, method inherited from base class
     print('Experiment is finished')
     logger.info('Experiment is finished')
 
@@ -301,10 +374,10 @@ def main():
         f.create_dataset("time_s", data=time_ex_s, dtype='i')
         f.create_dataset("time_m", data=time_ex_m, dtype='i')
         f.create_dataset("time_h", data=time_ex_h, dtype='i')
-        f.create_dataset("x", (0,), dtype='f')
-        f.create_dataset("y", (0,), dtype='f')
-        f.create_dataset("t", (0,), dtype='f')
-        f.create_dataset("trigger#", (0,), dtype='f')
+        f.create_dataset("x", data=variables.x, dtype='f')
+        f.create_dataset("y", data=variables.y, dtype='f')
+        f.create_dataset("t", data=variables.t, dtype='f')
+        f.create_dataset("start_counter", data=variables.start_counter, dtype='f')
     logger.info('HDF5 file is created')
     variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
@@ -355,7 +428,7 @@ def main():
         f.write('Pulse start Voltage: %s\r\n' % variables.v_p_min)
         f.write('Pulse Stop Voltage: %s\r\n' % variables.v_p_max)
         f.write('Specimen Max Achieved Pulse Voltage: %s\r\n' % variables.pulse_voltage)
-    clear_up(task_counter)
+    clear_up(task_counter, device_tdc)
     logger.info('Variables and devices is cleared')
 # if __name__ == "__main__":
 #     main(ex_time_g=60, ex_freq_g=20, vdc_min_g=2000, vdc_max_g=15000, vdc_step_g=5, v_p_min_g=15, v_p_max_g=100)

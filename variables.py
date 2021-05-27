@@ -4,6 +4,7 @@ import numpy as np
 
 def init():
 
+    global counter_source
     global counter
     global ex_time
     global max_ions
@@ -23,6 +24,7 @@ def init():
     global flag_main_gate
     global flag_load_gate
     global flag_cryo_gate
+    global hit_display
     global email
     global tweet
     global camera_0_ExposureTime
@@ -48,6 +50,7 @@ def init():
     global count_temp
     global avg_n_count
     global index_plot
+    global index_plot_save
     global index_plot_temp
     global index_warning_message
     global light
@@ -61,6 +64,11 @@ def init():
     global vacuum_buffer_backing
     global vacuum_load_lock
     global vacuum_load_lock_backing
+
+    global x
+    global y
+    global t
+    global start_counter
 
 
     # Setup parameters
@@ -82,6 +90,7 @@ def init():
     flag_main_gate = False
     flag_load_gate = False
     flag_cryo_gate = False
+    hit_display = 0
     email = ''
     tweet = False
     light = False
@@ -112,6 +121,7 @@ def init():
     count_temp = 0
     avg_n_count = 0
     index_plot = 0
+    index_plot_save = 0
     index_plot_temp = 0
     index_warning_message = 0
     stop_flag = False
@@ -122,4 +132,12 @@ def init():
     vacuum_buffer_backing = 0
     vacuum_load_lock = 0
     vacuum_load_lock_backing = 0
+
+    x = []
+    y = []
+    t = []
+    start_counter = []
+
+    # Source of calculating the detected events pulse_counter or TDC
+    counter_source = 'TDC'
 

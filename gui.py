@@ -5,6 +5,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
 from PyQt5.QtGui import QPixmap, QImage
 import pyqtgraph as pg
+import pyqtgraph.exporters
 import sys
 import numpy as np
 import nidaqmx
@@ -241,6 +242,12 @@ class Ui_OXCART(object):
         self.cam_s_o.ui.menuBtn.hide()
         self.cam_s_o.setGeometry(QtCore.QRect(1650, 120, 500, 500))
         self.cam_s_o.setObjectName("cam_s_o")
+        arrow1 = pg.ArrowItem(pos=(1050, 600), angle=-90)
+        arrow2 = pg.ArrowItem(pos=(1050, 1100), angle=90)
+        arrow3 = pg.ArrowItem(pos=(1350, 1100), angle=0)
+        self.cam_s_o.addItem(arrow1)
+        self.cam_s_o.addItem(arrow2)
+        self.cam_s_o.addItem(arrow3)
         # self.cam_s_o.setText("")
         # self.cam_b_o = QtWidgets.QLabel(self.centralwidget)
         self.cam_b_o = pg.ImageView(self.centralwidget)
@@ -250,6 +257,12 @@ class Ui_OXCART(object):
         self.cam_b_o.ui.menuBtn.hide()
         self.cam_b_o.setGeometry(QtCore.QRect(1650, 790, 500, 500))
         self.cam_b_o.setObjectName("cam_b_o")
+        arrow1 = pg.ArrowItem(pos=(550, 900), angle=-90)
+        arrow2 = pg.ArrowItem(pos=(550, 1400), angle=90)
+        arrow3 = pg.ArrowItem(pos=(610, 1300), angle=0)
+        self.cam_b_o.addItem(arrow1)
+        self.cam_b_o.addItem(arrow2)
+        self.cam_b_o.addItem(arrow3)
         # self.cam_b_o.setText("")
         self.cam_s_d = QtWidgets.QLabel(self.centralwidget)
         # self.cam_s_d = pg.ImageView(self.centralwidget)
@@ -259,7 +272,7 @@ class Ui_OXCART(object):
         # self.cam_s_d.ui.menuBtn.hide()
         self.cam_s_d.setGeometry(QtCore.QRect(2170, 120, 1200, 500))
         self.cam_s_d.setObjectName("cam_s_d")
-        # self.cam_s_d.setText("")
+        self.cam_s_d.setText("")
         self.cam_b_d = QtWidgets.QLabel(self.centralwidget)
         # self.cam_b_d = pg.ImageView(self.centralwidget)
         # self.cam_b_d.adjustSize()
@@ -657,6 +670,12 @@ class Ui_OXCART(object):
         self.detection_rate_viz.setYRange(0, 4000, padding=0.05)
 
         # Temperature #########################
+        # Add Axis Labels
+        styles = {"color": "#f00", "font-size": "20px"}
+        self.histogram.setLabel("left", "Frequency (Counts)", **styles)
+        self.histogram.setLabel("bottom", "Time (nSec)", **styles)
+
+        # Temperature #########################
         self.x_tem = list(range(1000))  # 1000 time points
         self.y_tem = [np.nan] * 1000  # 1000 data points
         pen_dtec = pg.mkPen(color=(255, 0, 0), width=6)
@@ -674,34 +693,15 @@ class Ui_OXCART(object):
 
         # Visualization #####################
 
-        # creating a scatter plot item
-        # using brush to enlarge the of white color with transparency is 50%
-        scatter = pg.ScatterPlotItem(
-            size=10, brush=pg.mkBrush(255, 255, 255, 120))
-        # number of points
-        n = 300
-        # getting random position
-        pos = np.random.normal(size=(2, n), scale=1e2)
-        # creating spots using the random position
-        spots = [{'pos': pos[:, i], 'data': 1}
-                 for i in range(n)] + [{'pos': [0, 0], 'data': 1}]
-        # adding points to the scatter plot
-        # scatter.addPoints(spots)
-        # add item to plot window
-        # adding scatter plot item to the plot window
-        self.visualization.addItem(scatter)
-        # Add Axis Labels
-        styles = {"color": "#f00", "font-size": "20px"}
-        self.visualization.setLabel("left", "Y", **styles)
-        self.visualization.setLabel("bottom", "X", **styles)
-        # Add grid
-        self.visualization.showGrid(x=True, y=True)
-        # Add Range
-        self.visualization.setXRange(0, 100, padding=0)
-        self.visualization.setYRange(0, 100, padding=0)
+        # Remove axes
+        self.visualization.getPlotItem().hideAxis('bottom')
+        self.visualization.getPlotItem().hideAxis('left')
 
-        # Histogram ################
-        # timer plot and variables
+
+
+
+
+        # timer plot, variables, and cameras
         self.timer1 = QtCore.QTimer()
         self.timer1.setInterval(1000)  # In milliseconds
         self.timer1.timeout.connect(self.update_plot_data)
@@ -751,8 +751,8 @@ class Ui_OXCART(object):
     def tread_main(self):
         self.start_button.setEnabled(False)
         variables.ex_time = int(self.ex_time.text())
-        variables.ex_time = int(self.max_ions.text())
-        variables.max_ions = int(self.ex_freq.text())
+        variables.max_ions = int(self.max_ions.text())
+        variables.ex_freq = int(self.ex_freq.text())
         variables.vdc_min = float(self.vdc_min.text())
         variables.vdc_max = float(self.vdc_max.text())
         variables.vdc_step_up = float(self.vdc_steps_up.text())
@@ -877,7 +877,7 @@ class Ui_OXCART(object):
             variables.light = False
 
     def update_plot_data(self):
-
+        # Temperature
         if variables.index_plot_temp <= 999:
             self.y_tem = self.y_tem[:-1]  # Remove the first
             self.y_tem.insert(variables.index_plot, int(variables.temperature))
@@ -891,6 +891,7 @@ class Ui_OXCART(object):
         self.data_line_tem.setData(self.x_tem, self.y_tem)
 
         if variables.start_flag:
+            # V_dc and V_p
             if variables.index_plot <= 999:
                 self.y_vdc = self.y_vdc[:-1]  # Remove the last
                 self.y_vps = self.y_vps[:-1]  # Remove the last
@@ -900,26 +901,64 @@ class Ui_OXCART(object):
                 self.x_vdc.append(self.x_vdc[-1] + 1)  # Add a new value 1 higher than the last.
                 self.y_vdc.append(int(variables.specimen_voltage))  # Add a new value.
                 self.y_vps.append(int(variables.pulse_voltage))  # Add a new value.
+
             self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
             self.data_line_vps.setData(self.x_vdc, self.y_vps)
 
-            # # Detection Rate Visualization
-            if variables.start_flag:
-                if variables.index_plot <= 999:
-                    self.y_dtec = self.y_dtec[:-1]  # Remove the first
-                    self.y_dtec.insert(variables.index_plot, int(variables.avg_n_count))  # Add a new value.
-                else:
-                    self.x_dtec = self.x_dtec[1:]  # Remove the first element.
-                    self.x_dtec.append(self.x_dtec[-1] + 1)  # Add a new value 1 higher than the last.
-                    self.y_dtec = self.y_dtec[1:]
-                    self.y_dtec.insert(999, int(variables.avg_n_count))
+            # Detection Rate Visualization
+            if variables.index_plot <= 999:
+                self.y_dtec = self.y_dtec[:-1]  # Remove the first
+                self.y_dtec.insert(variables.index_plot, int(variables.avg_n_count))  # Add a new value.
+            else:
+                self.x_dtec = self.x_dtec[1:]  # Remove the first element.
+                self.x_dtec.append(self.x_dtec[-1] + 1)  # Add a new value 1 higher than the last.
+                self.y_dtec = self.y_dtec[1:]
+                self.y_dtec.insert(999, int(variables.avg_n_count))
 
             self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 
+
+            # Time of Flight
+            if variables.counter_source == 'TDC':
+                self.y_tof, self.x_tof = np.histogram(variables.t, bins=128)
+                self.histogram.addItem(pg.BarGraphItem(x=self.x_tof[:-1], height=self.y_tof, width=0.1, brush='r'))
+
+            # Visualization
+
+            # creating a scatter plot item
+            # using brush to enlarge the of white color with transparency is 50%
+            scatter = pg.ScatterPlotItem(
+                size=1, brush=pg.mkBrush(255, 255, 255, 120))
+            # number of points
+            pos = np.array([variables.x, variables.y])
+            # n = 300
+            # # getting random position
+            # pos = np.random.normal(size=(2, n), scale=1e2)
+            # creating spots using the random position
+            spots = [{'pos': pos[:, i], 'data': 1}
+                     for i in range(len(variables.x))]
+            # adding points to the scatter plot
+            scatter.addPoints(spots)
+            # add item to plot window
+            # adding scatter plot item to the plot window
+            self.visualization.addItem(scatter)
+
+            # save plots to the file
+            if variables.index_plot_save % 100 == 0:
+                exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
+                exporter.export(variables.path +'\\v_dc_p_%s.png' %variables.index_plot_save )
+                exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
+                exporter.export(variables.path +'\\detection_rate_%s.png' %variables.index_plot_save )
+                exporter = pg.exporters.ImageExporter(self.visualization.plotItem)
+                exporter.export(variables.path +'\\visualization_%s.png' %variables.index_plot_save )
+                exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
+                exporter.export(variables.path +'\\tof_%s.png' %variables.index_plot_save )
+
             # Increase the index
             variables.index_plot += 1
+            variables.index_plot_save += 1
 
-        # Visualization
+
         if not variables.start_flag:
             self.x_vdc = list(range(1000))  # 1000 time points
             self.y_vdc = [np.nan] * 1000  # 1000 data points
@@ -937,6 +976,23 @@ class Ui_OXCART(object):
         variables.ex_freq = int(float(self.ex_freq.text()))
         variables.max_ions = int(float(self.max_ions.text()))
         variables.vdc_min = int(float(self.vdc_min.text()))
+        variables.detection_rate = float(self.detection_rate_init.text())
+        variables.pulse_fraction = int(float(self.pulse_fraction.text()))
+        variables.hit_display = int(float(self.hit_displayed.text()))
+
+        variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
+        variables.pulse_frequency = int(float(self.pulse_frequency.text()))
+        variables.detection_rate = int(float(self.detection_rate_init.text()))
+        variables.hdf5_path = self.hdf5_path.text()
+        variables.email = self.email.text()
+        variables.cycle_avg = int(float(self.cycle_avg.text()))
+        variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
+        variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
+        variables.v_p_min = int(float(self.vp_min.text()))
+
+        if self.tweet.currentText() == 'Yes':
+            variables.tweet = True
+
         if int(float(self.vdc_max.text())) > 20000:
             _translate = QtCore.QCoreApplication.translate
             self.Error.setText(_translate("OXCART",
@@ -945,9 +1001,7 @@ class Ui_OXCART(object):
             self.vdc_max.setText(_translate("OXCART", str(variables.vdc_max)))
         else:
             variables.vdc_max = int(float(self.vdc_max.text()))
-        variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
-        variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
-        variables.v_p_min = int(float(self.vp_min.text()))
+
         if float(self.vp_max.text()) > 3281:
             _translate = QtCore.QCoreApplication.translate
             self.Error.setText(_translate("OXCART",
@@ -956,11 +1010,8 @@ class Ui_OXCART(object):
             self.vp_max.setText(_translate("OXCART", str(variables.v_p_max)))
         else:
             variables.v_p_max = int(float(self.vp_max.text()))
-        variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
-        variables.pulse_frequency = int(float(self.pulse_frequency.text()))
-        variables.detection_rate = int(float(self.detection_rate_init.text()))
-        variables.hdf5_path = self.hdf5_path.text()
-        variables.cycle_avg = int(float(self.cycle_avg.text()))
+
+
 
         # Statistics Update
         self.speciemen_voltage.setText(str(float("{:.3f}".format(variables.specimen_voltage))))
