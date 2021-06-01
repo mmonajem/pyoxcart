@@ -34,14 +34,7 @@ COM_PORT_edwards_ll = 'COM1'
 
 # get available COM ports and store as list
 com_ports = list(serial.tools.list_ports.comports())
-# Setting the com port of Cryovac
-com_port_cryovac = serial.Serial(
-    port=com_ports[com_port_idx_cryovac].device,  # chosen COM port
-    baudrate=9600,  # 115200
-    bytesize=serial.EIGHTBITS,  # 8
-    parity=serial.PARITY_NONE,  # N
-    stopbits=serial.STOPBITS_ONE  # 1
-)
+
 
 
 class Ui_OXCART(object):
@@ -624,7 +617,7 @@ class Ui_OXCART(object):
         self.label_17.setText(_translate("OXCART", "Detection Rate (%)"))
         self.detection_rate_init.setText(_translate("OXCART", "1"))
         self.label_22.setText(_translate("OXCART", "# Hits Displayed"))
-        self.hit_displayed.setText(_translate("OXCART", "0"))
+        self.hit_displayed.setText(_translate("OXCART", "8000"))
         self.label_26.setText(_translate("OXCART", "Email"))
         self.label_27.setText(_translate("OXCART", "Twitter"))
         self.tweet.setItemText(0, _translate("OXCART", "No"))
@@ -673,11 +666,11 @@ class Ui_OXCART(object):
         # Add Axis Labels
         styles = {"color": "#f00", "font-size": "20px"}
         self.histogram.setLabel("left", "Frequency (Counts)", **styles)
-        self.histogram.setLabel("bottom", "Time (nSec)", **styles)
+        self.histogram.setLabel("bottom", "Time", **styles)
 
         # Temperature #########################
-        self.x_tem = list(range(1000))  # 1000 time points
-        self.y_tem = [np.nan] * 1000  # 1000 data points
+        self.x_tem = list(range(100))  # 1000 time points
+        self.y_tem = [np.nan] * 100  # 1000 data points
         pen_dtec = pg.mkPen(color=(255, 0, 0), width=6)
         self.data_line_tem = self.temperature.plot(self.x_tem, self.y_tem, pen=pen_dtec)
         self.temperature.setBackground('b')
@@ -694,6 +687,13 @@ class Ui_OXCART(object):
         # Visualization #####################
 
         # Remove axes
+        # self.x_vis = []
+        # self.y_vis = []
+        # self.scatter_visualization = self.visualization.plot(self.x_vis, self.y_vis, pen=None,
+        #                             symbolBrush=(255, 0, 0), symbolSize=1, symbolPen=None)
+
+        self.scatter = pg.ScatterPlotItem(
+            size=1, brush=pg.mkBrush(255, 255, 255, 120))
         self.visualization.getPlotItem().hideAxis('bottom')
         self.visualization.getPlotItem().hideAxis('left')
 
@@ -708,12 +708,12 @@ class Ui_OXCART(object):
         self.timer1.start()
         # timer statistics
         self.timer2 = QtCore.QTimer()
-        self.timer2.setInterval(300)  # In milliseconds
+        self.timer2.setInterval(500)  # In milliseconds
         self.timer2.timeout.connect(self.statistics)
         self.timer2.start()
         # timer cameras
         self.timer3 = QtCore.QTimer()
-        self.timer3.setInterval(100)
+        self.timer3.setInterval(1000)
         self.timer3.timeout.connect(self.update_cameras_zoom)
         self.timer3.start()
 
@@ -750,6 +750,7 @@ class Ui_OXCART(object):
 
     def tread_main(self):
         self.start_button.setEnabled(False)
+        variables.plot_clear_flag = True
         variables.ex_time = int(self.ex_time.text())
         variables.max_ions = int(self.max_ions.text())
         variables.ex_freq = int(self.ex_freq.text())
@@ -761,7 +762,7 @@ class Ui_OXCART(object):
         variables.v_p_max = float(self.vp_max.text())
         variables.pulse_fraction = float(self.pulse_fraction.text()) / 100
         variables.pulse_frequency = int(self.pulse_frequency.text())
-        variables.detection_rate = int(self.detection_rate_init.text())
+        variables.detection_rate = float(self.detection_rate_init.text())
         variables.hdf5_path = self.hdf5_path.text()
         variables.cycle_avg = int(self.cycle_avg.text())
         variables.email = self.email.text()
@@ -867,6 +868,8 @@ class Ui_OXCART(object):
             self.cameras[1].Open()
             self.cameras[1].ExposureTime.SetValue(2000)
             self.cameras[1].AcquisitionFrameRate.SetValue(150)
+            self.timer3.setInterval(50)
+            self.timer4.setInterval(50)
             variables.light = True
         elif variables.light:
             self.led_light.setPixmap(self.led_red)
@@ -874,19 +877,16 @@ class Ui_OXCART(object):
             self.cameras[0].ExposureTime.SetValue(1000000)
             self.cameras[1].Open()
             self.cameras[1].ExposureTime.SetValue(350000)
+            self.timer3.setInterval(1000)
+            self.timer4.setInterval(1000)
             variables.light = False
 
     def update_plot_data(self):
         # Temperature
-        if variables.index_plot_temp <= 999:
-            self.y_tem = self.y_tem[:-1]  # Remove the first
-            self.y_tem.insert(variables.index_plot, int(variables.temperature))
-            variables.index_plot_temp += 1
-        else:
-            self.x_tem = self.x_tem[1:]  # Remove the first element.
-            self.x_tem.append(self.x_tem[-1] + 1)  # Add a new value 1 higher than the last.
-            self.y_tem = self.y_tem[1:]
-            self.y_tem.insert(999, int(variables.temperature))
+        self.x_tem = self.x_tem[1:]  # Remove the first element.
+        self.x_tem.append(self.x_tem[-1] + 1)  # Add a new value 1 higher than the last.
+        self.y_tem = self.y_tem[1:]
+        self.y_tem.append(int(variables.temperature))
 
         self.data_line_tem.setData(self.x_tem, self.y_tem)
 
@@ -917,31 +917,29 @@ class Ui_OXCART(object):
 
             self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 
-
             # Time of Flight
             if variables.counter_source == 'TDC':
-                self.y_tof, self.x_tof = np.histogram(variables.t, bins=128)
-                self.histogram.addItem(pg.BarGraphItem(x=self.x_tof[:-1], height=self.y_tof, width=0.1, brush='r'))
+                if variables.index_wait_on_plot_start <= 8:
+                    variables.index_wait_on_plot_start += 1
+                if variables.index_wait_on_plot_start > 8:
+                    logbins = np.max(variables.t) * (np.logspace(0, 1, num=1000) - 1) / 9
+                    self.y_tof, self.x_tof = np.histogram(variables.t, bins=logbins)
+                    self.histogram.clear()
+                    self.histogram.addItem(pg.BarGraphItem(x=self.x_tof[:-1], height=self.y_tof, width=0.1, brush='r'))
 
-            # Visualization
+                    # Visualization
+                    # number of points
+                    pos = np.array([variables.x[-variables.hit_display:], variables.y[-variables.hit_display:]], dtype="object")
 
-            # creating a scatter plot item
-            # using brush to enlarge the of white color with transparency is 50%
-            scatter = pg.ScatterPlotItem(
-                size=1, brush=pg.mkBrush(255, 255, 255, 120))
-            # number of points
-            pos = np.array([variables.x, variables.y])
-            # n = 300
-            # # getting random position
-            # pos = np.random.normal(size=(2, n), scale=1e2)
-            # creating spots using the random position
-            spots = [{'pos': pos[:, i], 'data': 1}
-                     for i in range(len(variables.x))]
-            # adding points to the scatter plot
-            scatter.addPoints(spots)
-            # add item to plot window
-            # adding scatter plot item to the plot window
-            self.visualization.addItem(scatter)
+                    # creating spots using the random position
+                    spots = [{'pos': pos[:, i]} for i in range(len(pos[1,:]))]
+                    # adding points to the scatter plot
+                    self.scatter.clear()
+                    self.scatter.addPoints(spots)
+                    # add item to plot window
+                    # adding scatter plot item to the plot window
+                    self.visualization.clear()
+                    self.visualization.addItem(self.scatter)
 
             # save plots to the file
             if variables.index_plot_save % 100 == 0:
@@ -959,7 +957,8 @@ class Ui_OXCART(object):
             variables.index_plot_save += 1
 
 
-        if not variables.start_flag:
+        if variables.plot_clear_flag:
+
             self.x_vdc = list(range(1000))  # 1000 time points
             self.y_vdc = [np.nan] * 1000  # 1000 data points
             self.y_vps = [np.nan] * 1000  # 1000 data points
@@ -971,6 +970,11 @@ class Ui_OXCART(object):
 
             self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 
+            self.histogram.clear()
+
+            self.visualization.clear()
+            variables.plot_clear_flag = False
+
         # Update the setup parameters
         variables.ex_time = int(float(self.ex_time.text()))
         variables.ex_freq = int(float(self.ex_freq.text()))
@@ -979,10 +983,8 @@ class Ui_OXCART(object):
         variables.detection_rate = float(self.detection_rate_init.text())
         variables.pulse_fraction = int(float(self.pulse_fraction.text()))
         variables.hit_display = int(float(self.hit_displayed.text()))
-
         variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
         variables.pulse_frequency = int(float(self.pulse_frequency.text()))
-        variables.detection_rate = int(float(self.detection_rate_init.text()))
         variables.hdf5_path = self.hdf5_path.text()
         variables.email = self.email.text()
         variables.cycle_avg = int(float(self.cycle_avg.text()))
@@ -1010,8 +1012,6 @@ class Ui_OXCART(object):
             self.vp_max.setText(_translate("OXCART", str(variables.v_p_max)))
         else:
             variables.v_p_max = int(float(self.vp_max.text()))
-
-
 
         # Statistics Update
         self.speciemen_voltage.setText(str(float("{:.3f}".format(variables.specimen_voltage))))
@@ -1051,15 +1051,6 @@ class Ui_OXCART(object):
 
     def update_cameras_main(self,):
 
-        # self.camera0 = QImage(variables.img0_orig, 500, 500, QImage.Format_RGB888)
-        # self.camera1 = QImage(variables.img1_orig, 500, 500, QImage.Format_RGB888)
-
-        # self.camera0 = QtGui.QPixmap(self.camera0)
-        # self.camera1 = QtGui.QPixmap(self.camera1)
-
-        # self.cam_s_o.setPixmap(self.camera0)
-        # self.cam_b_o.setPixmap(self.camera1)
-
         self.cam_s_o.setImage(variables.img0_orig, autoRange=False)
         self.cam_b_o.setImage(variables.img1_orig, autoRange=False)
 
@@ -1073,9 +1064,6 @@ class Ui_OXCART(object):
 
         self.cam_s_d.setPixmap(self.camera0_zoom)
         self.cam_b_d.setPixmap(self.camera1_zoom)
-
-        # self.cam_s_d.setImage(variables.img0_zoom, autoRange=False)
-        # self.cam_b_d.setImage(variables.img1_zoom, autoRange=False)
 
 
 class MainThread(QThread):
@@ -1092,7 +1080,8 @@ class MainThread(QThread):
 
 
 # apply command to the Cryovac
-def command_cryovac(cmd):
+def command_cryovac(cmd, com_port_cryovac):
+
     com_port_cryovac.write(
         (cmd + '\r\n').encode())  # send cmd to device # might not work with older devices -> "LF" only needed!
     time.sleep(0.1)  # small sleep for response
@@ -1133,8 +1122,9 @@ def command_edwards(cmd, lock, E_AGC, status=None):
     return response
 
 
-def initialize_cryovac():
-    output = command_cryovac('getOutput')
+def initialize_cryovac(com_port_cryovac):
+    # Setting the com port of Cryovac
+    output = command_cryovac('getOutput', com_port_cryovac)
     variables.temperature = float(output.split()[0].replace(',', ''))
 
 
@@ -1161,13 +1151,13 @@ def initialize_pfeiffer_gauges():
     variables.vacuum_buffer = '{}'.format(value)
 
 
-def gauges_update(lock):
+def gauges_update(lock, com_port_cryovac):
     tpg = TPG362(port=COM_PORT_pfeiffer)
     E_AGC_ll = EdwardsAGC(COM_PORT_edwards_ll)
     E_AGC_bc = EdwardsAGC(COM_PORT_edwards_bc)
     while True:
         #  Temperature update
-        output = command_cryovac('getOutput')
+        output = command_cryovac('getOutput', com_port_cryovac)
         with lock:
             variables.temperature = float(output.split()[0].replace(',', ''))
         # Pfeiffer gauges update
@@ -1198,7 +1188,14 @@ if __name__ == "__main__":
     variables.init()
     # Cryovac initialized
     try:
-        initialize_cryovac()
+        com_port_cryovac = serial.Serial(
+            port=com_ports[com_port_idx_cryovac].device,  # chosen COM port
+            baudrate=9600,  # 115200
+            bytesize=serial.EIGHTBITS,  # 8
+            parity=serial.PARITY_NONE,  # N
+            stopbits=serial.STOPBITS_ONE  # 1
+        )
+        initialize_cryovac(com_port_cryovac)
     except Exception as e:
         print('Can not initialize the Cryovac')
         print(e)
@@ -1231,14 +1228,10 @@ if __name__ == "__main__":
     lock = threading.Lock()
     camera_thread = threading.Thread(target=camera.update_cameras, args=(cameras, converter, lock))
     camera_thread.setDaemon(True)
-    gauges_thread = threading.Thread(target=gauges_update, args=(lock,))
+    gauges_thread = threading.Thread(target=gauges_update, args=(lock, com_port_cryovac))
     gauges_thread.setDaemon(True)
     gauges_thread.start()
     camera_thread.start()
-    # lock = multiprocessing.Lock()
-    # camera_process = multiprocessing.Process(target=camera.update_cameras, args=(cameras, converter, lock))
-    # camera_process.daemon = True
-    # camera_process.start()
 
     app = QtWidgets.QApplication(sys.argv)
     # get display resolution

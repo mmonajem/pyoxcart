@@ -18,6 +18,7 @@ def init():
     global pulse_fraction
     global stop_flag
     global start_flag
+    global plot_clear_flag
     global pulse_frequency
     global pulse_amp_per_supply_voltage
     global cycle_avg
@@ -51,6 +52,7 @@ def init():
     global avg_n_count
     global index_plot
     global index_plot_save
+    global index_wait_on_plot_start
     global index_plot_temp
     global index_warning_message
     global light
@@ -69,6 +71,17 @@ def init():
     global y
     global t
     global start_counter
+
+    global x_temp
+    global y_temp
+    global t_temp
+    global start_counter_temp
+
+    global main_v_dc
+    global main_v_p
+    global main_counter
+    global main_temperature
+    global main_chamber_vacuum
 
 
     # Setup parameters
@@ -122,10 +135,12 @@ def init():
     avg_n_count = 0
     index_plot = 0
     index_plot_save = 0
+    index_wait_on_plot_start = 0
     index_plot_temp = 0
     index_warning_message = 0
     stop_flag = False
     start_flag = False
+    plot_clear_flag = False
     temperature = 0
     vacuum_main = 0
     vacuum_buffer = 0
@@ -138,6 +153,17 @@ def init():
     t = []
     start_counter = []
 
+    x_temp = []
+    y_temp = []
+    t_temp = []
+    start_counter_temp = []
+
     # Source of calculating the detected events pulse_counter or TDC
     counter_source = 'TDC'
+
+    main_v_dc = []
+    main_v_p = []
+    main_counter = []
+    main_temperature = []
+    main_chamber_vacuum = []
 
