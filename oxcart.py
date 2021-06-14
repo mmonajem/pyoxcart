@@ -68,11 +68,15 @@ class bcolors:
 
 class OXCART:
 
-    def __init__(self, queue_x, queue_y, queue_t, queue_start_counter, lock):
+    def __init__(self, queue_x, queue_y, queue_t, queue_dld_start_counter,
+                 queue_channel, queue_time_data, queue_tdc_start_counter, lock):
         self.queue_x = queue_x
         self.queue_y = queue_y
         self.queue_t = queue_t
-        self.queue_start_counter = queue_start_counter
+        self.queue_dld_start_counter = queue_dld_start_counter
+        self.queue_channel = queue_channel
+        self.queue_time_data = queue_time_data
+        self.queue_tdc_start_counter = queue_tdc_start_counter
         self.lock = lock
     # Initialize the V_dc for the experiment
     def initialize_v_dc(self):
@@ -158,25 +162,49 @@ class OXCART:
         variables.x = []
         variables.y = []
         variables.t = []
-        variables.start_counter = []
+        variables.dld_start_counter = []
+
+        variables.x_temp = []
+        variables.y_temp = []
+        variables.t_temp = []
+        variables.start_counter_temp = []
+
+        variables.channel = []
+        variables.time_data = []
+        variables.tdc_start_counter = []
+
 
         variables.main_v_dc = []
         variables.main_v_p = []
         variables.main_counter = []
         variables.main_temperature = []
         variables.main_chamber_vacuum = []
-
+        variables.main_v_dc_dld = []
+        variables.main_v_p_dld = []
+        variables.main_v_dc_tdc = []
+        variables.main_v_p_tdc = []
         print('Clean up is finished')
 
-    def reader_queue(self):
+    def reader_queue_dld(self):
         while True:
-            while not self.queue_x.empty():
-                with self.lock:
-                    variables.x_temp.append(self.queue_x.get())
-                    variables.y_temp.append(self.queue_y.get())
-                    variables.t_temp.append(self.queue_t.get())
-                    variables.start_counter_temp.append(self.queue_start_counter.get())
+            while not self.queue_x.empty() or not self.queue_y.empty() or not self.queue_t.empty() or not self.queue_dld_start_counter.empty():
+                # with self.lock:
+                variables.x_temp.append(self.queue_x.get())
+                variables.y_temp.append(self.queue_y.get())
+                variables.t_temp.append(self.queue_t.get())
+                variables.start_counter_temp.append(self.queue_dld_start_counter.get())
+                variables.main_v_dc_dld.append(variables.specimen_voltage)
+                variables.main_v_p_dld.append(variables.pulse_voltage)
 
+    def reader_queue_tdc(self):
+        while True:
+            while not self.queue_channel.empty() or not self.queue_time_data.empty() or not self.queue_tdc_start_counter.empty():
+                # with self.lock:
+                variables.channel.append(self.queue_channel.get())
+                variables.time_data.append(self.queue_time_data.get())
+                variables.tdc_start_counter.append(self.queue_tdc_start_counter.get())
+                variables.main_v_dc_tdc.append(variables.specimen_voltage)
+                variables.main_v_p_tdc.append(variables.pulse_voltage)
     def main_ex_loop(self, task_counter, counts_target):
         # # reading DC HV
         # v_dc = (command_v_dc(">S0A?")[5:-1])
@@ -192,7 +220,7 @@ class OXCART:
         variables.x = variables.x_temp
         variables.y = variables.y_temp
         variables.t = variables.t_temp
-        variables.start_counter = variables.start_counter_temp
+        variables.dld_start_counter = variables.start_counter_temp
 
         if variables.counter_source == 'TDC':
             variables.total_ions = len(variables.x)
@@ -266,20 +294,26 @@ def main():
         queue_x = Queue(maxsize=-1, ctx=multiprocessing.get_context())
         queue_y = Queue(maxsize=-1, ctx=multiprocessing.get_context())
         queue_t = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-        queue_start_counter = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_dld_start_counter = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_channel = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_time_data = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_tdc_start_counter = Queue(maxsize=-1, ctx=multiprocessing.get_context())
         process = multiprocessing.Process(target=tdc.experiment_measure, args=(queue_x,
-                                                                               queue_y, queue_t, queue_start_counter))
+                        queue_y, queue_t, queue_dld_start_counter, queue_channel,
+                        queue_time_data, queue_tdc_start_counter))
         process.daemon = True
         process.start()
     else:
         queue_x = None
         queue_y = None
         queue_t = None
-        queue_start_counter = None
+        queue_dld_start_counter = None
 
     # Initialization of devices
     lock = threading.Lock()
-    experiment = OXCART(queue_x, queue_y, queue_t, queue_start_counter, lock)
+    experiment = OXCART(queue_x, queue_y, queue_t, queue_dld_start_counter,
+                        queue_channel, queue_time_data,
+                        queue_tdc_start_counter, lock)
     experiment.initialize_v_dc()
     logger.info('High voltage is initialized')
 
@@ -301,13 +335,17 @@ def main():
     time_ex_s = []
     time_ex_m = []
     time_ex_h = []
+    time_counter = []
 
 
     counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
     logger.info('Starting the main loop')
 
     if variables.counter_source == 'TDC':
-        read_tdc_queue_thread = threading.Thread(target=experiment.reader_queue)
+        read_dld_queue_thread = threading.Thread(target=experiment.reader_queue_dld)
+        read_dld_queue_thread.setDaemon(True)
+        read_dld_queue_thread.start()
+        read_tdc_queue_thread = threading.Thread(target=experiment.reader_queue_tdc)
         read_tdc_queue_thread.setDaemon(True)
         read_tdc_queue_thread.start()
     total_steps = variables.ex_time * variables.ex_freq
@@ -362,6 +400,7 @@ def main():
         variables.elapsed_time = end_main_ex_loop - start_main_ex
 
         total_steps = variables.ex_time * variables.ex_freq
+        time_counter.append(steps)
         steps += 1
     if variables.counter_source == 'TDC':
         process.terminate()
@@ -372,18 +411,30 @@ def main():
 
     # save hdf5 file
     with h5py.File(variables.path + '\\%s_data.h5' % variables.hdf5_path, "w") as f:
-        f.create_dataset("high_voltage", data=variables.main_v_dc, dtype='f')
-        f.create_dataset("pulse_voltage", data=variables.main_v_p, dtype='f')
-        f.create_dataset("events", data=variables.main_counter, dtype='i')
-        f.create_dataset('temperature', data=variables.main_temperature, dtype='f')
-        f.create_dataset('main_chamber_vacuum', data=variables.main_chamber_vacuum, dtype='f')
-        f.create_dataset("time_s", data=time_ex_s, dtype='i')
-        f.create_dataset("time_m", data=time_ex_m, dtype='i')
-        f.create_dataset("time_h", data=time_ex_h, dtype='i')
-        f.create_dataset("x", data=variables.x, dtype='f')
-        f.create_dataset("y", data=variables.y, dtype='f')
-        f.create_dataset("t", data=variables.t, dtype='f')
-        f.create_dataset("start_counter", data=variables.start_counter, dtype='f')
+        f.create_dataset("oxcart/high_voltage", data=variables.main_v_dc, dtype='f')
+        f.create_dataset("oxcart/pulse_voltage", data=variables.main_v_p, dtype='f')
+        f.create_dataset("oxcart/num_events", data=variables.main_counter, dtype='i')
+        f.create_dataset('oxcart/temperature', data=variables.main_temperature, dtype='f')
+        f.create_dataset('oxcart/main_chamber_vacuum', data=variables.main_chamber_vacuum, dtype='f')
+        f.create_dataset("oxcart/time_counter", data=time_counter, dtype='i')
+
+        f.create_dataset("time/time_s", data=time_ex_s, dtype='i')
+        f.create_dataset("time/time_m", data=time_ex_m, dtype='i')
+        f.create_dataset("time/time_h", data=time_ex_h, dtype='i')
+
+        f.create_dataset("dld/x", data=variables.x, dtype='i')
+        f.create_dataset("dld/y", data=variables.y, dtype='i')
+        f.create_dataset("dld/t", data=variables.t, dtype='i')
+        f.create_dataset("dld/start_counter", data=variables.dld_start_counter, dtype='i')
+        f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld, dtype='f')
+        f.create_dataset("dld/pulse_voltage", data=variables.main_v_p_dld, dtype='f')
+
+        f.create_dataset("tdc/channel", data=variables.channel, dtype='i')
+        f.create_dataset("tdc/time_data", data=variables.time_data, dtype='i')
+        f.create_dataset("tdc/start_counter", data=variables.tdc_start_counter, dtype='i')
+        f.create_dataset("tdc/high_voltage", data=variables.main_v_dc_tdc, dtype='f')
+        f.create_dataset("tdc/pulse_voltage", data=variables.main_v_p_tdc, dtype='f')
+
     logger.info('HDF5 file is created')
     variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
@@ -417,7 +468,7 @@ def main():
         # save setup parameters and run statistics in a txt file
     with open(variables.path + '\\parameters.txt', 'w') as f:
         f.write('Experiment Name: ' + variables.hdf5_path + '\r\n')
-        f.write('Detection Rate: %s\r\n' % (variables.pulse_fraction * variables.cycle_avg))
+        f.write('Detection Rate: %s\r\n' % (variables.detection_rate))
         f.write('Maximum Number of Ions: %s\r\n' % variables.max_ions)
         f.write('Control Refresh freq.: %s\r\n' % variables.ex_freq)
         f.write('Cycle for Avg.: %s\r\n' % variables.cycle_avg)

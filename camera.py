@@ -27,12 +27,20 @@ class Camera():
             # img0_orig = cv2.resize(img0, dsize=(500, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
             img0_orig = cv2.resize(img0, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
             img0_zoom = cv2.resize(img0[800:1100, 1800:2300], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            img0_zoom_marker = cv2.drawMarker(img0_zoom, (975, 250), (0, 0, 255), markerType=cv2.MARKER_TRIANGLE_UP,
-                           markerSize=40, thickness=2, line_type=cv2.LINE_AA)
+
             # img1_orig = cv2.resize(img1, dsize=(500, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
             img1_orig = cv2.resize(img1, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
             img1_zoom = cv2.resize(img1[1100:1300, 1000:1500], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            img1_zoom_marker = cv2.drawMarker(img1_zoom, (990, 240), (0, 0, 255), markerType=cv2.MARKER_TRIANGLE_UP,
+
+            if variables.index_save_image % 100 == 0 and variables.start_flag == True:
+                cv2.imwrite(variables.path + "\\side_%s.png" %variables.index_save_image, img0_orig)
+                cv2.imwrite(variables.path + "\\side_zoom_%s.png" %variables.index_save_image, img0_zoom)
+                cv2.imwrite(variables.path + '\\bottom_%s.png' %variables.index_save_image, img1_orig)
+                cv2.imwrite(variables.path + '\\bottom_zoom_%s.png' %variables.index_save_image, img1_zoom)
+
+            img0_zoom_marker = cv2.drawMarker(img0_zoom, (1020, 265), (0, 0, 255), markerType=cv2.MARKER_TRIANGLE_UP,
+                           markerSize=40, thickness=2, line_type=cv2.LINE_AA)
+            img1_zoom_marker = cv2.drawMarker(img1_zoom, (1040, 255), (0, 0, 255), markerType=cv2.MARKER_TRIANGLE_UP,
                            markerSize=40, thickness=2, line_type=cv2.LINE_AA)
             with lock:
                 # variables.img0_orig = np.require(img0_orig, np.uint8, 'C')

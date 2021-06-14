@@ -70,19 +70,27 @@ def init():
     global x
     global y
     global t
-    global start_counter
+    global dld_start_counter
+
+    global channel
+    global time_data
+    global tdc_start_counter
 
     global x_temp
     global y_temp
     global t_temp
     global start_counter_temp
 
+
     global main_v_dc
     global main_v_p
     global main_counter
     global main_temperature
     global main_chamber_vacuum
-
+    global main_v_dc_dld
+    global main_v_p_dld
+    global main_v_dc_tdc
+    global main_v_p_tdc
 
     # Setup parameters
     counter = 0
@@ -151,19 +159,27 @@ def init():
     x = []
     y = []
     t = []
-    start_counter = []
+    dld_start_counter = []
 
     x_temp = []
     y_temp = []
     t_temp = []
     start_counter_temp = []
 
+    channel = []
+    time_data = []
+    tdc_start_counter = []
+
     # Source of calculating the detected events pulse_counter or TDC
-    counter_source = 'TDC'
+    counter_source = 'pulse_counter'
 
     main_v_dc = []
     main_v_p = []
     main_counter = []
     main_temperature = []
     main_chamber_vacuum = []
+    main_v_dc_dld = []
+    main_v_p_dld = []
+    main_v_dc_tdc = []
+    main_v_p_tdc = []
 
