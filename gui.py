@@ -21,6 +21,7 @@ import serial.tools.list_ports
 from random import randint
 import scipy.misc, PIL.ImageQt
 
+
 import oxcart
 import variables
 from camera import Camera
@@ -36,7 +37,16 @@ COM_PORT_edwards_ll = 'COM1'
 com_ports = list(serial.tools.list_ports.comports())
 
 
-
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 
 class Ui_OXCART(object):
@@ -587,7 +597,7 @@ class Ui_OXCART(object):
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:7pt;\">ex_name=test;ex_time=90;max_ions=2000;ex_freq=10;vdc_min=2000;vdc_max=4000;vdc_steps_up=100;vdc_steps_down=100;vp_min=328;vp_max=3281;pulse_fraction=20;pulse_frequency=200;detection_rate_init=1;hit_displayed=20000;emai=;tweet=No;counter_source=TDC</span></p></body></html>"))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:7pt;\">ex_name=test;ex_time=90;max_ions=2000;ex_freq=10;vdc_min=500;vdc_max=4000;vdc_steps_up=100;vdc_steps_down=100;vp_min=328;vp_max=3281;pulse_fraction=20;pulse_frequency=200;detection_rate_init=1;hit_displayed=20000;emai=;tweet=No;counter_source=TDC</span></p></body></html>"))
         self.label.setText(_translate("OXCART", "Setup Parameters"))
         self.label_21.setText(_translate("OXCART", "Experiment Name"))
         self.ex_name.setText(_translate("OXCART", "test"))
@@ -598,7 +608,7 @@ class Ui_OXCART(object):
         self.label_3.setText(_translate("OXCART", "Control refresh Freq.(Hz)"))
         self.ex_freq.setText(_translate("OXCART", "10"))
         self.label_4.setText(_translate("OXCART", "Specimen Start Voltage (V)"))
-        self.vdc_min.setText(_translate("OXCART", "2000"))
+        self.vdc_min.setText(_translate("OXCART", "500"))
         self.label_5.setText(_translate("OXCART", "Specimen Stop Voltage (V)"))
         self.vdc_max.setText(_translate("OXCART", "4000"))
         self.label_6.setText(_translate("OXCART", "K_p Upwards"))
@@ -901,37 +911,38 @@ class Ui_OXCART(object):
         self.data_line_tem.setData(self.x_tem, self.y_tem)
 
         if variables.start_flag:
-            # V_dc and V_p
-            if variables.index_plot <= 999:
-                self.y_vdc = self.y_vdc[:-1]  # Remove the last
-                self.y_vps = self.y_vps[:-1]  # Remove the last
-                self.y_vdc.insert(variables.index_plot, int(variables.specimen_voltage))  # Add a new value.
-                self.y_vps.insert(variables.index_plot, int(variables.pulse_voltage))  # Add a new value.
-            else:
-                self.x_vdc.append(self.x_vdc[-1] + 1)  # Add a new value 1 higher than the last.
-                self.y_vdc.append(int(variables.specimen_voltage))  # Add a new value.
-                self.y_vps.append(int(variables.pulse_voltage))  # Add a new value.
+            if variables.index_wait_on_plot_start >= 3:
+                # V_dc and V_p
+                if variables.index_plot <= 999:
+                    self.y_vdc = self.y_vdc[:-1]  # Remove the last
+                    self.y_vps = self.y_vps[:-1]  # Remove the last
+                    self.y_vdc.insert(variables.index_plot, int(variables.specimen_voltage))  # Add a new value.
+                    self.y_vps.insert(variables.index_plot, int(variables.pulse_voltage))  # Add a new value.
+                else:
+                    self.x_vdc.append(self.x_vdc[-1] + 1)  # Add a new value 1 higher than the last.
+                    self.y_vdc.append(int(variables.specimen_voltage))  # Add a new value.
+                    self.y_vps.append(int(variables.pulse_voltage))  # Add a new value.
 
-            self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
-            self.data_line_vps.setData(self.x_vdc, self.y_vps)
+                self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
+                self.data_line_vps.setData(self.x_vdc, self.y_vps)
 
-            # Detection Rate Visualization
-            if variables.index_plot <= 999:
-                self.y_dtec = self.y_dtec[:-1]  # Remove the first
-                self.y_dtec.insert(variables.index_plot, int(variables.avg_n_count))  # Add a new value.
-            else:
-                self.x_dtec = self.x_dtec[1:]  # Remove the first element.
-                self.x_dtec.append(self.x_dtec[-1] + 1)  # Add a new value 1 higher than the last.
-                self.y_dtec = self.y_dtec[1:]
-                self.y_dtec.insert(999, int(variables.avg_n_count))
+                # Detection Rate Visualization
+                if variables.index_plot <= 999:
+                    self.y_dtec = self.y_dtec[:-1]  # Remove the first
+                    self.y_dtec.insert(variables.index_plot, int(variables.avg_n_count))  # Add a new value.
+                else:
+                    self.x_dtec = self.x_dtec[1:]  # Remove the first element.
+                    self.x_dtec.append(self.x_dtec[-1] + 1)  # Add a new value 1 higher than the last.
+                    self.y_dtec = self.y_dtec[1:]
+                    self.y_dtec.insert(999, int(variables.avg_n_count))
 
-            self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+                self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 
             # Time of Flight
             if variables.counter_source == 'TDC':
-                if variables.index_wait_on_plot_start <= 8:
+                if variables.index_wait_on_plot_start <= 16:
                     variables.index_wait_on_plot_start += 1
-                if variables.index_wait_on_plot_start > 8:
+                if variables.index_wait_on_plot_start > 16:
                     bins = np.logspace(np.log10(np.min(variables.t)),
                                        np.log10(np.max(variables.t)),
                                        num=128)
@@ -948,7 +959,9 @@ class Ui_OXCART(object):
                         spots = [{'pos': pos[:, i]} for i in range(len(pos[1,:]))]
                         self.spots = spots
                     except:
-                        pass
+                        print(
+                            f"{bcolors.FAIL}Error: Cannot plot Ions correctly{bcolors.ENDC}")
+
                     # adding points to the scatter plot
                     self.scatter.clear()
                     self.scatter.addPoints(self.spots)
