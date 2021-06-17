@@ -18,6 +18,7 @@ import os
 import dill
 import functools
 import serial.tools.list_ports
+from pypylon import pylon
 from random import randint
 import scipy.misc, PIL.ImageQt
 
@@ -49,16 +50,11 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-class Ui_OXCART(object):
+class Ui_OXCART(Camera, object):
 
-    def __init__(self, cameras, converter, lock):
-        self.cameras = cameras  # Initialize cameras
-        self.converter = converter
+    def __init__(self, devices, tlFactory, cameras, converter, lock):
+        super().__init__(devices, tlFactory, cameras, converter)
         self.lock = lock
-        self.cameras[0].Open()
-        self.cameras[0].ExposureTime.SetValue(1000000)
-        self.cameras[1].Open()
-        self.cameras[1].ExposureTime.SetValue(350000)
 
     def setupUi(self, OXCART):
         OXCART.setObjectName("OXCART")
@@ -119,7 +115,7 @@ class Ui_OXCART(object):
         self.label_24.setObjectName("label_24")
         # self.temperature = QtWidgets.QWidget(self.centralwidget)
         self.temperature = pg.PlotWidget(self.centralwidget)
-        self.temperature.setGeometry(QtCore.QRect(2530, 1350, 441, 361))
+        self.temperature.setGeometry(QtCore.QRect(2530, 1400, 411, 311))
         self.temperature.setObjectName("temperature")
         self.label_18 = QtWidgets.QLabel(self.centralwidget)
         self.label_18.setGeometry(QtCore.QRect(10, 1080, 101, 41))
@@ -336,176 +332,179 @@ class Ui_OXCART(object):
         self.textEdit.setGeometry(QtCore.QRect(530, 30, 2581, 140))
         self.textEdit.setObjectName("textEdit")
         self.widget = QtWidgets.QWidget(self.centralwidget)
-        self.widget.setGeometry(QtCore.QRect(10, 11, 488, 1055))
+        self.widget.setGeometry(QtCore.QRect(11, 12, 488, 801))
         self.widget.setObjectName("widget")
-        self.gridLayout_4 = QtWidgets.QGridLayout(self.widget)
-        self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout_4.setObjectName("gridLayout_4")
+        self.gridLayout_3 = QtWidgets.QGridLayout(self.widget)
+        self.gridLayout_3.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_3.setObjectName("gridLayout_3")
         self.label = QtWidgets.QLabel(self.widget)
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
         self.label.setFont(font)
         self.label.setObjectName("label")
-        self.gridLayout_4.addWidget(self.label, 0, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label, 0, 0, 1, 1)
         self.label_21 = QtWidgets.QLabel(self.widget)
         self.label_21.setObjectName("label_21")
-        self.gridLayout_4.addWidget(self.label_21, 1, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_21, 1, 0, 1, 1)
         self.ex_name = QtWidgets.QLineEdit(self.widget)
         self.ex_name.setObjectName("ex_name")
-        self.gridLayout_4.addWidget(self.ex_name, 1, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.ex_name, 1, 1, 1, 1)
         self.label_2 = QtWidgets.QLabel(self.widget)
         self.label_2.setObjectName("label_2")
-        self.gridLayout_4.addWidget(self.label_2, 2, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_2, 2, 0, 1, 1)
         self.ex_time = QtWidgets.QLineEdit(self.widget)
         self.ex_time.setObjectName("ex_time")
-        self.gridLayout_4.addWidget(self.ex_time, 2, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.ex_time, 2, 1, 1, 1)
         self.label_41 = QtWidgets.QLabel(self.widget)
         self.label_41.setObjectName("label_41")
-        self.gridLayout_4.addWidget(self.label_41, 3, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_41, 3, 0, 1, 1)
         self.max_ions = QtWidgets.QLineEdit(self.widget)
         self.max_ions.setObjectName("max_ions")
-        self.gridLayout_4.addWidget(self.max_ions, 3, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.max_ions, 3, 1, 1, 1)
         self.label_3 = QtWidgets.QLabel(self.widget)
         self.label_3.setObjectName("label_3")
-        self.gridLayout_4.addWidget(self.label_3, 4, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_3, 4, 0, 1, 1)
         self.ex_freq = QtWidgets.QLineEdit(self.widget)
         self.ex_freq.setObjectName("ex_freq")
-        self.gridLayout_4.addWidget(self.ex_freq, 4, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.ex_freq, 4, 1, 1, 1)
         self.label_4 = QtWidgets.QLabel(self.widget)
         self.label_4.setObjectName("label_4")
-        self.gridLayout_4.addWidget(self.label_4, 5, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_4, 5, 0, 1, 1)
         self.vdc_min = QtWidgets.QLineEdit(self.widget)
         self.vdc_min.setObjectName("vdc_min")
-        self.gridLayout_4.addWidget(self.vdc_min, 5, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.vdc_min, 5, 1, 1, 1)
         self.label_5 = QtWidgets.QLabel(self.widget)
         self.label_5.setObjectName("label_5")
-        self.gridLayout_4.addWidget(self.label_5, 6, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_5, 6, 0, 1, 1)
         self.vdc_max = QtWidgets.QLineEdit(self.widget)
         self.vdc_max.setObjectName("vdc_max")
-        self.gridLayout_4.addWidget(self.vdc_max, 6, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.vdc_max, 6, 1, 1, 1)
         self.label_6 = QtWidgets.QLabel(self.widget)
         self.label_6.setObjectName("label_6")
-        self.gridLayout_4.addWidget(self.label_6, 7, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_6, 7, 0, 1, 1)
         self.vdc_steps_up = QtWidgets.QLineEdit(self.widget)
         self.vdc_steps_up.setObjectName("vdc_steps_up")
-        self.gridLayout_4.addWidget(self.vdc_steps_up, 7, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.vdc_steps_up, 7, 1, 1, 1)
         self.label_28 = QtWidgets.QLabel(self.widget)
         self.label_28.setObjectName("label_28")
-        self.gridLayout_4.addWidget(self.label_28, 8, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_28, 8, 0, 1, 1)
         self.vdc_steps_down = QtWidgets.QLineEdit(self.widget)
         self.vdc_steps_down.setObjectName("vdc_steps_down")
-        self.gridLayout_4.addWidget(self.vdc_steps_down, 8, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.vdc_steps_down, 8, 1, 1, 1)
         self.label_20 = QtWidgets.QLabel(self.widget)
         self.label_20.setObjectName("label_20")
-        self.gridLayout_4.addWidget(self.label_20, 9, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_20, 9, 0, 1, 1)
         self.cycle_avg = QtWidgets.QLineEdit(self.widget)
         self.cycle_avg.setObjectName("cycle_avg")
-        self.gridLayout_4.addWidget(self.cycle_avg, 9, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.cycle_avg, 9, 1, 1, 1)
         self.label_8 = QtWidgets.QLabel(self.widget)
         self.label_8.setObjectName("label_8")
-        self.gridLayout_4.addWidget(self.label_8, 10, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_8, 10, 0, 1, 1)
         self.vp_min = QtWidgets.QLineEdit(self.widget)
         self.vp_min.setObjectName("vp_min")
-        self.gridLayout_4.addWidget(self.vp_min, 10, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.vp_min, 10, 1, 1, 1)
         self.label_9 = QtWidgets.QLabel(self.widget)
         self.label_9.setObjectName("label_9")
-        self.gridLayout_4.addWidget(self.label_9, 11, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_9, 11, 0, 1, 1)
         self.vp_max = QtWidgets.QLineEdit(self.widget)
         self.vp_max.setObjectName("vp_max")
-        self.gridLayout_4.addWidget(self.vp_max, 11, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.vp_max, 11, 1, 1, 1)
         self.label_25 = QtWidgets.QLabel(self.widget)
         self.label_25.setObjectName("label_25")
-        self.gridLayout_4.addWidget(self.label_25, 12, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_25, 12, 0, 1, 1)
         self.pulse_fraction = QtWidgets.QLineEdit(self.widget)
         self.pulse_fraction.setObjectName("pulse_fraction")
-        self.gridLayout_4.addWidget(self.pulse_fraction, 12, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.pulse_fraction, 12, 1, 1, 1)
         self.label_23 = QtWidgets.QLabel(self.widget)
         self.label_23.setObjectName("label_23")
-        self.gridLayout_4.addWidget(self.label_23, 13, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_23, 13, 0, 1, 1)
         self.pulse_frequency = QtWidgets.QLineEdit(self.widget)
         self.pulse_frequency.setObjectName("pulse_frequency")
-        self.gridLayout_4.addWidget(self.pulse_frequency, 13, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.pulse_frequency, 13, 1, 1, 1)
         self.label_17 = QtWidgets.QLabel(self.widget)
         self.label_17.setObjectName("label_17")
-        self.gridLayout_4.addWidget(self.label_17, 14, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_17, 14, 0, 1, 1)
         self.detection_rate_init = QtWidgets.QLineEdit(self.widget)
         self.detection_rate_init.setObjectName("detection_rate_init")
-        self.gridLayout_4.addWidget(self.detection_rate_init, 14, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.detection_rate_init, 14, 1, 1, 1)
         self.label_22 = QtWidgets.QLabel(self.widget)
         self.label_22.setObjectName("label_22")
-        self.gridLayout_4.addWidget(self.label_22, 15, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_22, 15, 0, 1, 1)
         self.hit_displayed = QtWidgets.QLineEdit(self.widget)
         self.hit_displayed.setObjectName("hit_displayed")
-        self.gridLayout_4.addWidget(self.hit_displayed, 15, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.hit_displayed, 15, 1, 1, 1)
         self.label_26 = QtWidgets.QLabel(self.widget)
         self.label_26.setObjectName("label_26")
-        self.gridLayout_4.addWidget(self.label_26, 16, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_26, 16, 0, 1, 1)
         self.email = QtWidgets.QLineEdit(self.widget)
         self.email.setText("")
         self.email.setObjectName("email")
-        self.gridLayout_4.addWidget(self.email, 16, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.email, 16, 1, 1, 1)
         self.label_27 = QtWidgets.QLabel(self.widget)
         self.label_27.setObjectName("label_27")
-        self.gridLayout_4.addWidget(self.label_27, 17, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_27, 17, 0, 1, 1)
         self.tweet = QtWidgets.QComboBox(self.widget)
         self.tweet.setObjectName("tweet")
         self.tweet.addItem("")
         self.tweet.addItem("")
-        self.gridLayout_4.addWidget(self.tweet, 17, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.tweet, 17, 1, 1, 1)
         self.label_42 = QtWidgets.QLabel(self.widget)
         self.label_42.setObjectName("label_42")
-        self.gridLayout_4.addWidget(self.label_42, 18, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.label_42, 18, 0, 1, 1)
         self.counter_source = QtWidgets.QComboBox(self.widget)
         self.counter_source.setObjectName("counter_source")
         self.counter_source.addItem("")
         self.counter_source.addItem("")
-        self.gridLayout_4.addWidget(self.counter_source, 18, 1, 1, 1)
-        self.gridLayout_3 = QtWidgets.QGridLayout()
-        self.gridLayout_3.setObjectName("gridLayout_3")
-        self.label_11 = QtWidgets.QLabel(self.widget)
+        self.gridLayout_3.addWidget(self.counter_source, 18, 1, 1, 1)
+        self.widget1 = QtWidgets.QWidget(self.centralwidget)
+        self.widget1.setGeometry(QtCore.QRect(12, 824, 436, 242))
+        self.widget1.setObjectName("widget1")
+        self.gridLayout_4 = QtWidgets.QGridLayout(self.widget1)
+        self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_4.setObjectName("gridLayout_4")
+        self.label_11 = QtWidgets.QLabel(self.widget1)
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
         self.label_11.setFont(font)
         self.label_11.setObjectName("label_11")
-        self.gridLayout_3.addWidget(self.label_11, 0, 0, 1, 1)
-        self.label_12 = QtWidgets.QLabel(self.widget)
+        self.gridLayout_4.addWidget(self.label_11, 0, 0, 1, 1)
+        self.label_12 = QtWidgets.QLabel(self.widget1)
         self.label_12.setObjectName("label_12")
-        self.gridLayout_3.addWidget(self.label_12, 1, 0, 1, 1)
-        self.elapsed_time = QtWidgets.QLineEdit(self.widget)
+        self.gridLayout_4.addWidget(self.label_12, 1, 0, 1, 1)
+        self.elapsed_time = QtWidgets.QLineEdit(self.widget1)
         self.elapsed_time.setText("")
         self.elapsed_time.setObjectName("elapsed_time")
-        self.gridLayout_3.addWidget(self.elapsed_time, 1, 1, 1, 1)
-        self.label_13 = QtWidgets.QLabel(self.widget)
+        self.gridLayout_4.addWidget(self.elapsed_time, 1, 1, 1, 1)
+        self.label_13 = QtWidgets.QLabel(self.widget1)
         self.label_13.setObjectName("label_13")
-        self.gridLayout_3.addWidget(self.label_13, 2, 0, 1, 1)
-        self.total_ions = QtWidgets.QLineEdit(self.widget)
+        self.gridLayout_4.addWidget(self.label_13, 2, 0, 1, 1)
+        self.total_ions = QtWidgets.QLineEdit(self.widget1)
         self.total_ions.setText("")
         self.total_ions.setObjectName("total_ions")
-        self.gridLayout_3.addWidget(self.total_ions, 2, 1, 1, 1)
-        self.label_14 = QtWidgets.QLabel(self.widget)
+        self.gridLayout_4.addWidget(self.total_ions, 2, 1, 1, 1)
+        self.label_14 = QtWidgets.QLabel(self.widget1)
         self.label_14.setObjectName("label_14")
-        self.gridLayout_3.addWidget(self.label_14, 3, 0, 1, 1)
-        self.speciemen_voltage = QtWidgets.QLineEdit(self.widget)
+        self.gridLayout_4.addWidget(self.label_14, 3, 0, 1, 1)
+        self.speciemen_voltage = QtWidgets.QLineEdit(self.widget1)
         self.speciemen_voltage.setText("")
         self.speciemen_voltage.setObjectName("speciemen_voltage")
-        self.gridLayout_3.addWidget(self.speciemen_voltage, 3, 1, 1, 1)
-        self.label_16 = QtWidgets.QLabel(self.widget)
+        self.gridLayout_4.addWidget(self.speciemen_voltage, 3, 1, 1, 1)
+        self.label_16 = QtWidgets.QLabel(self.widget1)
         self.label_16.setObjectName("label_16")
-        self.gridLayout_3.addWidget(self.label_16, 4, 0, 1, 1)
-        self.pulse_voltage = QtWidgets.QLineEdit(self.widget)
+        self.gridLayout_4.addWidget(self.label_16, 4, 0, 1, 1)
+        self.pulse_voltage = QtWidgets.QLineEdit(self.widget1)
         self.pulse_voltage.setText("")
         self.pulse_voltage.setObjectName("pulse_voltage")
-        self.gridLayout_3.addWidget(self.pulse_voltage, 4, 1, 1, 1)
-        self.label_15 = QtWidgets.QLabel(self.widget)
+        self.gridLayout_4.addWidget(self.pulse_voltage, 4, 1, 1, 1)
+        self.label_15 = QtWidgets.QLabel(self.widget1)
         self.label_15.setObjectName("label_15")
-        self.gridLayout_3.addWidget(self.label_15, 5, 0, 1, 1)
-        self.detection_rate = QtWidgets.QLineEdit(self.widget)
+        self.gridLayout_4.addWidget(self.label_15, 5, 0, 1, 1)
+        self.detection_rate = QtWidgets.QLineEdit(self.widget1)
         self.detection_rate.setText("")
         self.detection_rate.setObjectName("detection_rate")
-        self.gridLayout_3.addWidget(self.detection_rate, 5, 1, 1, 1)
-        self.gridLayout_4.addLayout(self.gridLayout_3, 19, 0, 1, 2)
+        self.gridLayout_4.addWidget(self.detection_rate, 5, 1, 1, 1)
         OXCART.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(OXCART)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 3400, 38))
@@ -553,11 +552,13 @@ class Ui_OXCART(object):
         self.label_7.setText(_translate("OXCART", "Voltage"))
         self.start_button.setText(_translate("OXCART", "Start"))
         ###
-        self.start_button.clicked.connect(self.tread_main)
-        self.tread = MainThread()
-        self.tread.signal.connect(self.finished_tread_main)
+        self.start_button.clicked.connect(self.thread_main)
+        self.thread = MainThread()
+        self.thread.signal.connect(self.finished_thread_main)
         self.stop_button.setText(_translate("OXCART", "Stop"))
         self.stop_button.clicked.connect(self.stop_ex)
+        self.statistics_t = self.thread_worker(self.statistics_thread)
+        self.statistics_t.start()
         ###
         self.label_10.setText(_translate("OXCART", "Detection Rate"))
         self.label_19.setText(_translate("OXCART", "Visualization"))
@@ -705,42 +706,27 @@ class Ui_OXCART(object):
         self.temperature.setYRange(0, 100, padding=0.1)
 
         # Visualization #####################
-
-        # Remove axes
-        # self.x_vis = []
-        # self.y_vis = []
-        # self.scatter_visualization = self.visualization.plot(self.x_vis, self.y_vis, pen=None,
-        #                             symbolBrush=(255, 0, 0), symbolSize=1, symbolPen=None)
-
         self.scatter = pg.ScatterPlotItem(
             size=1, brush=pg.mkBrush(255, 255, 255, 120))
         self.visualization.getPlotItem().hideAxis('bottom')
         self.visualization.getPlotItem().hideAxis('left')
 
-
-
-
-
         # timer plot, variables, and cameras
-        self.timer1 = QtCore.QTimer()
-        self.timer1.setInterval(1000)  # In milliseconds
-        self.timer1.timeout.connect(self.update_plot_data)
-        self.timer1.start()
+        # self.timer1 = QtCore.QTimer()
+        # self.timer1.setInterval(1000)  # In milliseconds
+        # self.timer1.timeout.connect(self.update_plot_data)
+        # self.timer1.start()
         # timer statistics
-        self.timer2 = QtCore.QTimer()
-        self.timer2.setInterval(500)  # In milliseconds
-        self.timer2.timeout.connect(self.statistics)
-        self.timer2.start()
-        # timer cameras
-        self.timer3 = QtCore.QTimer()
-        self.timer3.setInterval(1000)
-        self.timer3.timeout.connect(self.update_cameras_zoom)
-        self.timer3.start()
+        # self.timer2 = QtCore.QTimer()
+        # self.timer2.setInterval(1000)  # In milliseconds
+        # self.timer2.timeout.connect(self.statistics)
+        # self.timer2.start()
+        # # timer cameras
+        self.timer1 = QtCore.QTimer()
+        self.timer1.setInterval(1000)
+        self.timer1.timeout.connect(self.update_cameras)
+        self.timer1.start()
 
-        self.timer4 = QtCore.QTimer()
-        self.timer4.setInterval(1000)
-        self.timer4.timeout.connect(self.update_cameras_main)
-        self.timer4.start()
 
         # Diagram and LEDs ##############
         self.diagram_close_all = QPixmap('.\png\close_all.png')
@@ -768,24 +754,26 @@ class Ui_OXCART(object):
         else:
             event.ignore()
 
-    def tread_main(self):
+    def thread_main(self):
         self.start_button.setEnabled(False)
         variables.plot_clear_flag = True
-        variables.ex_time = int(self.ex_time.text())
-        variables.max_ions = int(self.max_ions.text())
-        variables.ex_freq = int(self.ex_freq.text())
-        variables.vdc_min = float(self.vdc_min.text())
-        variables.vdc_max = float(self.vdc_max.text())
-        variables.vdc_step_up = float(self.vdc_steps_up.text())
-        variables.vdc_step_down = float(self.vdc_steps_down.text())
-        variables.v_p_min = float(self.vp_min.text())
-        variables.v_p_max = float(self.vp_max.text())
-        variables.pulse_fraction = float(self.pulse_fraction.text()) / 100
-        variables.pulse_frequency = int(self.pulse_frequency.text())
+        variables.ex_time = int(float(self.ex_time.text()))
+        variables.ex_freq = int(float(self.ex_freq.text()))
+        variables.max_ions = int(float(self.max_ions.text()))
+        variables.vdc_min = int(float(self.vdc_min.text()))
         variables.detection_rate = float(self.detection_rate_init.text())
+        variables.pulse_fraction = int(float(self.pulse_fraction.text()))
+        variables.hit_display = int(float(self.hit_displayed.text()))
+        variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
+        variables.pulse_frequency = int(float(self.pulse_frequency.text()))
         variables.hdf5_path = self.ex_name.text()
-        variables.cycle_avg = int(self.cycle_avg.text())
         variables.email = self.email.text()
+        variables.cycle_avg = int(float(self.cycle_avg.text()))
+        variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
+        variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
+        variables.v_p_min = int(float(self.vp_min.text()))
+        variables.counter_source = str(self.counter_source.currentText())
+
         if self.tweet.currentText() == 'Yes':
             variables.tweet = True
 
@@ -801,9 +789,16 @@ class Ui_OXCART(object):
         if not os.path.isdir(variables.path):
             os.makedirs(variables.path, mode=0o777, exist_ok=True)
 
-        self.tread.start()
+        self.plot_thread = self.thread_worker(self.update_plot_data)
+        self.plot_thread.setDaemon(True)
+        self.plot_thread.start()
+        self.thread.start()
 
-    def finished_tread_main(self):
+    def statistics_thread(self):
+        while True:
+            self.statistics()
+            time.sleep(2)
+    def finished_thread_main(self):
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(True)
 
@@ -882,175 +877,200 @@ class Ui_OXCART(object):
     def light_switch(self):
         if not variables.light:
             self.led_light.setPixmap(self.led_green)
-            self.cameras[0].Open()
-            self.cameras[0].ExposureTime.SetValue(2000)
-            self.cameras[0].AcquisitionFrameRate.SetValue(150)
-            self.cameras[1].Open()
-            self.cameras[1].ExposureTime.SetValue(2000)
-            self.cameras[1].AcquisitionFrameRate.SetValue(150)
-            self.timer3.setInterval(100)
-            self.timer4.setInterval(100)
+            Camera.light_switch(self)
+            self.timer1.setInterval(500)
             variables.light = True
+            variables.sample_adjust = True
+            variables.light_swich = True
         elif variables.light:
             self.led_light.setPixmap(self.led_red)
-            self.cameras[0].Open()
-            self.cameras[0].ExposureTime.SetValue(1000000)
-            self.cameras[1].Open()
-            self.cameras[1].ExposureTime.SetValue(350000)
-            self.timer3.setInterval(1000)
-            self.timer4.setInterval(1000)
+            Camera.light_switch(self)
+            self.timer1.setInterval(500)
             variables.light = False
+            variables.sample_adjust = False
+            variables.light_swich = False
 
+    def thread_worker(self, target):
+        return threading.Thread(target=target)
     def update_plot_data(self):
         # Temperature
-        self.x_tem = self.x_tem[1:]  # Remove the first element.
-        self.x_tem.append(self.x_tem[-1] + 1)  # Add a new value 1 higher than the last.
-        self.y_tem = self.y_tem[1:]
-        self.y_tem.append(int(variables.temperature))
+        time.sleep(5)
+        while self.thread.isRunning():
+            time.sleep(1)
+            self.x_tem = self.x_tem[1:]  # Remove the first element.
+            self.x_tem.append(self.x_tem[-1] + 1)  # Add a new value 1 higher than the last.
+            self.y_tem = self.y_tem[1:]
+            self.y_tem.append(int(variables.temperature))
 
-        self.data_line_tem.setData(self.x_tem, self.y_tem)
+            self.data_line_tem.setData(self.x_tem, self.y_tem)
 
-        if variables.start_flag:
-            if variables.index_wait_on_plot_start >= 3:
-                # V_dc and V_p
-                if variables.index_plot <= 999:
-                    self.y_vdc = self.y_vdc[:-1]  # Remove the last
-                    self.y_vps = self.y_vps[:-1]  # Remove the last
-                    self.y_vdc.insert(variables.index_plot, int(variables.specimen_voltage))  # Add a new value.
-                    self.y_vps.insert(variables.index_plot, int(variables.pulse_voltage))  # Add a new value.
-                else:
-                    self.x_vdc.append(self.x_vdc[-1] + 1)  # Add a new value 1 higher than the last.
-                    self.y_vdc.append(int(variables.specimen_voltage))  # Add a new value.
-                    self.y_vps.append(int(variables.pulse_voltage))  # Add a new value.
+            if variables.start_flag:
+                if variables.index_wait_on_plot_start >= 3:
+                    # V_dc and V_p
+                    if variables.index_plot <= 999:
+                        self.y_vdc = self.y_vdc[:-1]  # Remove the last
+                        self.y_vps = self.y_vps[:-1]  # Remove the last
+                        self.y_vdc.insert(variables.index_plot, int(variables.specimen_voltage))  # Add a new value.
+                        self.y_vps.insert(variables.index_plot, int(variables.pulse_voltage))  # Add a new value.
+                    else:
+                        self.x_vdc.append(self.x_vdc[-1] + 1)  # Add a new value 1 higher than the last.
+                        self.y_vdc.append(int(variables.specimen_voltage))  # Add a new value.
+                        self.y_vps.append(int(variables.pulse_voltage))  # Add a new value.
+
+                    self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
+                    self.data_line_vps.setData(self.x_vdc, self.y_vps)
+
+                    # Detection Rate Visualization
+                    if variables.total_ions > 0:
+                        if variables.index_plot <= 999:
+                            self.y_dtec = self.y_dtec[:-1]  # Remove the first
+                            self.y_dtec.insert(variables.index_plot, int(variables.avg_n_count))  # Add a new value.
+                        else:
+                            self.x_dtec = self.x_dtec[1:]  # Remove the first element.
+                            self.x_dtec.append(self.x_dtec[-1] + 1)  # Add a new value 1 higher than the last.
+                            self.y_dtec = self.y_dtec[1:]
+                            self.y_dtec.insert(999, int(variables.avg_n_count))
+
+                        self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+
+                # Time of Flight
+                if variables.counter_source == 'TDC':
+                    if variables.index_wait_on_plot_start <= 16:
+                        variables.index_wait_on_plot_start += 1
+                    if variables.index_wait_on_plot_start > 16:
+
+                        # max_lenght = max(len(variables.x), len(variables.y),
+                        #                  len(variables.t), len(variables.main_v_dc_dld))
+                        # d_0 = 110
+                        # e = 1.602 * 10**(-19)
+                        # dtec_dim = 78
+                        # pix_size_x = 0.03243
+                        # pix_size_y = 0.03257
+                        try:
+                            # x_n = np.array(variables.x[:max_lenght]) - 2450
+                            # y_n = np.array(variables.y[:max_lenght]) - 2450
+
+                            # x_n = x_n * pix_size_x
+                            # y_n = y_n * pix_size_y
+
+                            #
+                            # t_n = np.array(variables.t[:max_lenght]) * 27.432 * 10**(-12)
+                            #
+                            # l = np.sqrt(d_0 ** 2 + x_n ** 2 + y_n ** 2)
+
+                            # math_to_charge = (2 * np.array(variables.main_v_dc_dld[:max_lenght]) * e * t_n**2) / ((l * 10 ** -3)**2)
+                            math_to_charge = np.array(variables.t)
+                            math_to_charge = math_to_charge[math_to_charge < 800000]
+                            bins = np.logspace(np.log10(np.min(math_to_charge)),
+                                               np.log10(np.max(math_to_charge)),
+                                               num=128)
+                            self.y_tof, self.x_tof = np.histogram(math_to_charge, bins=bins)
+                            self.histogram.clear()
+                            self.histogram.addItem(pg.BarGraphItem(x=self.x_tof[:-1], height=self.y_tof, width=0.1, brush='r'))
+                        except:
+                            print(
+                                f"{bcolors.FAIL}Error: Cannot plot Histogram correctly{bcolors.ENDC}")
+
+                        # Visualization
+                        # number of points
+                        try:
+                            pos = np.array([variables.x[-variables.hit_display:], variables.y[-variables.hit_display:]], dtype="object")
+                            # creating spots using the random position
+                            spots = [{'pos': pos[:, i]} for i in range(len(pos[1,:]))]
+                            self.spots = spots
+                            # adding points to the scatter plot
+                            self.scatter.clear()
+                            # time.sleep(0.05)
+                            self.scatter.addPoints(self.spots)
+                        except:
+                            print(
+                                f"{bcolors.FAIL}Error: Cannot plot Ions correctly{bcolors.ENDC}")
+                        # add item to plot window
+                        # adding scatter plot item to the plot window
+                        self.visualization.clear()
+                        self.visualization.addItem(self.scatter)
+
+                # save plots to the file
+                if variables.index_plot_save % 100 == 0:
+                    exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
+                    exporter.export(variables.path +'\\v_dc_p_%s.png' %variables.index_plot_save )
+                    exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
+                    exporter.export(variables.path +'\\detection_rate_%s.png' %variables.index_plot_save )
+                    exporter = pg.exporters.ImageExporter(self.visualization.plotItem)
+                    exporter.export(variables.path +'\\visualization_%s.png' %variables.index_plot_save )
+                    exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
+                    exporter.export(variables.path +'\\tof_%s.png' %variables.index_plot_save )
+
+                # Increase the index
+                variables.index_plot += 1
+                variables.index_plot_save += 1
+
+
+            if variables.plot_clear_flag:
+
+                self.x_vdc = list(range(1000))  # 1000 time points
+                self.y_vdc = [np.nan] * 1000  # 1000 data points
+                self.y_vps = [np.nan] * 1000  # 1000 data points
 
                 self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
                 self.data_line_vps.setData(self.x_vdc, self.y_vps)
 
-                # Detection Rate Visualization
-                if variables.index_plot <= 999:
-                    self.y_dtec = self.y_dtec[:-1]  # Remove the first
-                    self.y_dtec.insert(variables.index_plot, int(variables.avg_n_count))  # Add a new value.
-                else:
-                    self.x_dtec = self.x_dtec[1:]  # Remove the first element.
-                    self.x_dtec.append(self.x_dtec[-1] + 1)  # Add a new value 1 higher than the last.
-                    self.y_dtec = self.y_dtec[1:]
-                    self.y_dtec.insert(999, int(variables.avg_n_count))
+                self.y_dtec = [np.nan] * 1000
 
                 self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 
-            # Time of Flight
-            if variables.counter_source == 'TDC':
-                if variables.index_wait_on_plot_start <= 16:
-                    variables.index_wait_on_plot_start += 1
-                if variables.index_wait_on_plot_start > 16:
-                    bins = np.logspace(np.log10(np.min(variables.t)),
-                                       np.log10(np.max(variables.t)),
-                                       num=128)
-                    # logbins = np.max(variables.t) * (np.logspace(0, 1, num=1000) - 1) / 9
-                    self.y_tof, self.x_tof = np.histogram(variables.t, bins=bins)
-                    self.histogram.clear()
-                    self.histogram.addItem(pg.BarGraphItem(x=self.x_tof[:-1], height=self.y_tof, width=0.1, brush='r'))
+                self.histogram.clear()
 
-                    # Visualization
-                    # number of points
-                    try:
-                        pos = np.array([variables.x[-variables.hit_display:], variables.y[-variables.hit_display:]], dtype="object")
-                        # creating spots using the random position
-                        spots = [{'pos': pos[:, i]} for i in range(len(pos[1,:]))]
-                        self.spots = spots
-                    except:
-                        print(
-                            f"{bcolors.FAIL}Error: Cannot plot Ions correctly{bcolors.ENDC}")
+                self.visualization.clear()
+                variables.plot_clear_flag = False
 
-                    # adding points to the scatter plot
-                    self.scatter.clear()
-                    self.scatter.addPoints(self.spots)
-                    # add item to plot window
-                    # adding scatter plot item to the plot window
-                    self.visualization.clear()
-                    self.visualization.addItem(self.scatter)
+            # Update the setup parameters
+            variables.ex_time = int(float(self.ex_time.text()))
+            variables.ex_freq = int(float(self.ex_freq.text()))
+            variables.max_ions = int(float(self.max_ions.text()))
+            variables.vdc_min = int(float(self.vdc_min.text()))
+            variables.detection_rate = float(self.detection_rate_init.text())
+            variables.pulse_fraction = int(float(self.pulse_fraction.text()))
+            variables.hit_display = int(float(self.hit_displayed.text()))
+            variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
+            variables.pulse_frequency = int(float(self.pulse_frequency.text()))
+            variables.hdf5_path = self.ex_name.text()
+            variables.email = self.email.text()
+            variables.cycle_avg = int(float(self.cycle_avg.text()))
+            variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
+            variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
+            variables.v_p_min = int(float(self.vp_min.text()))
+            variables.counter_source = str(self.counter_source.currentText())
 
-            # save plots to the file
-            if variables.index_plot_save % 100 == 0:
-                exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
-                exporter.export(variables.path +'\\v_dc_p_%s.png' %variables.index_plot_save )
-                exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
-                exporter.export(variables.path +'\\detection_rate_%s.png' %variables.index_plot_save )
-                exporter = pg.exporters.ImageExporter(self.visualization.plotItem)
-                exporter.export(variables.path +'\\visualization_%s.png' %variables.index_plot_save )
-                exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
-                exporter.export(variables.path +'\\tof_%s.png' %variables.index_plot_save )
+            if self.tweet.currentText() == 'Yes':
+                variables.tweet = True
 
-            # Increase the index
-            variables.index_plot += 1
-            variables.index_plot_save += 1
+            if int(float(self.vdc_max.text())) > 20000:
+                _translate = QtCore.QCoreApplication.translate
+                self.Error.setText(_translate("OXCART",
+                                              "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible "
+                                              "number is 20KV</span></p></body></html>"))
+                self.vdc_max.setText(_translate("OXCART", str(variables.vdc_max)))
+            else:
+                variables.vdc_max = int(float(self.vdc_max.text()))
 
+            if float(self.vp_max.text()) > 3281:
+                _translate = QtCore.QCoreApplication.translate
+                self.Error.setText(_translate("OXCART",
+                                              "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible "
+                                              "number is 3281 V</span></p></body></html>"))
+                self.vp_max.setText(_translate("OXCART", str(variables.v_p_max)))
+            else:
+                variables.v_p_max = int(float(self.vp_max.text()))
 
-        if variables.plot_clear_flag:
-
-            self.x_vdc = list(range(1000))  # 1000 time points
-            self.y_vdc = [np.nan] * 1000  # 1000 data points
-            self.y_vps = [np.nan] * 1000  # 1000 data points
-
-            self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
-            self.data_line_vps.setData(self.x_vdc, self.y_vps)
-
-            self.y_dtec = [np.nan] * 1000
-
-            self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
-
-            self.histogram.clear()
-
-            self.visualization.clear()
-            variables.plot_clear_flag = False
-
-        # Update the setup parameters
-        variables.ex_time = int(float(self.ex_time.text()))
-        variables.ex_freq = int(float(self.ex_freq.text()))
-        variables.max_ions = int(float(self.max_ions.text()))
-        variables.vdc_min = int(float(self.vdc_min.text()))
-        variables.detection_rate = float(self.detection_rate_init.text())
-        variables.pulse_fraction = int(float(self.pulse_fraction.text()))
-        variables.hit_display = int(float(self.hit_displayed.text()))
-        variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
-        variables.pulse_frequency = int(float(self.pulse_frequency.text()))
-        variables.hdf5_path = self.ex_name.text()
-        variables.email = self.email.text()
-        variables.cycle_avg = int(float(self.cycle_avg.text()))
-        variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
-        variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
-        variables.v_p_min = int(float(self.vp_min.text()))
-        variables.counter_source = str(self.counter_source.currentText())
-
-        if self.tweet.currentText() == 'Yes':
-            variables.tweet = True
-
-        if int(float(self.vdc_max.text())) > 20000:
-            _translate = QtCore.QCoreApplication.translate
-            self.Error.setText(_translate("OXCART",
-                                          "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible "
-                                          "number is 20KV</span></p></body></html>"))
-            self.vdc_max.setText(_translate("OXCART", str(variables.vdc_max)))
-        else:
-            variables.vdc_max = int(float(self.vdc_max.text()))
-
-        if float(self.vp_max.text()) > 3281:
-            _translate = QtCore.QCoreApplication.translate
-            self.Error.setText(_translate("OXCART",
-                                          "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible "
-                                          "number is 3281 V</span></p></body></html>"))
-            self.vp_max.setText(_translate("OXCART", str(variables.v_p_max)))
-        else:
-            variables.v_p_max = int(float(self.vp_max.text()))
-
-        # Statistics Update
-        self.speciemen_voltage.setText(str(float("{:.3f}".format(variables.specimen_voltage))))
-        self.pulse_voltage.setText(str(float("{:.3f}".format(variables.pulse_voltage))))
-        self.elapsed_time.setText(str(float("{:.3f}".format(variables.elapsed_time))))
-        self.total_ions.setText((str(variables.total_ions)))
-        self.detection_rate.setText(str
-            (float("{:.3f}".format(
-            (variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000)))))
+            # Statistics Update
+            self.speciemen_voltage.setText(str(float("{:.3f}".format(variables.specimen_voltage))))
+            self.pulse_voltage.setText(str(float("{:.3f}".format(variables.pulse_voltage))))
+            self.elapsed_time.setText(str(float("{:.3f}".format(variables.elapsed_time))))
+            self.total_ions.setText((str(variables.total_ions)))
+            self.detection_rate.setText(str
+                (float("{:.3f}".format(
+                (variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000)))))
 
     def statistics(self):
         # update temperature and vacuum gages
@@ -1079,12 +1099,10 @@ class Ui_OXCART(object):
 
         variables.index_warning_message += 1
 
-    def update_cameras_main(self,):
+    def update_cameras(self,):
 
         self.cam_s_o.setImage(variables.img0_orig, autoRange=False)
         self.cam_b_o.setImage(variables.img1_orig, autoRange=False)
-
-    def update_cameras_zoom(self,):
 
         self.camera0_zoom = QImage(variables.img0_zoom, 1200, 500, QImage.Format_RGB888)
         self.camera1_zoom = QImage(variables.img1_zoom, 1200, 500, QImage.Format_RGB888)
@@ -1104,9 +1122,8 @@ class MainThread(QThread):
         # run method gets called when we start the thread
 
     def run(self):
-        main_tread = oxcart.main()
-        # subprocess.check_output(main_tread)
-        self.signal.emit(main_tread)
+        main_thread = oxcart.main()
+        self.signal.emit(main_thread)
 
 
 # apply command to the Cryovac
@@ -1250,13 +1267,37 @@ if __name__ == "__main__":
 
     # Cameras thread
     try:
-        camera = Camera()
-        cameras, converter = camera.camera_init()
+        # Limits the amount of cameras used for grabbing.
+        # The bandwidth used by a FireWire camera device can be limited by adjusting the packet size.
+        maxCamerasToUse = 2
+        # The exit code of the sample application.
+        exitCode = 0
+        # Get the transport layer factory.
+        tlFactory = pylon.TlFactory.GetInstance()
+        # Get all attached devices and exit application if no device is found.
+        devices = tlFactory.EnumerateDevices()
+
+        if len(devices) == 0:
+            raise pylon.RuntimeException("No camera present.")
+
+        # Create an array of instant cameras for the found devices and avoid exceeding a maximum number of devices.
+        cameras = pylon.InstantCameraArray(min(len(devices), maxCamerasToUse))
+
+        # Create and attach all Pylon Devices.
+        for i, cam in enumerate(cameras):
+            cam.Attach(tlFactory.CreateDevice(devices[i]))
+        converter = pylon.ImageFormatConverter()
+
+        # converting to opencv bgr format
+        converter.OutputPixelFormat = pylon.PixelType_BGR8packed
+        converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
+
+        camera = Camera(devices, tlFactory, cameras, converter)
     except:
         print('Can not initialize the Cameras')
 
     lock = threading.Lock()
-    camera_thread = threading.Thread(target=camera.update_cameras, args=(cameras, converter, lock))
+    camera_thread = threading.Thread(target=camera.update_cameras, args=(lock,))
     camera_thread.setDaemon(True)
     gauges_thread = threading.Thread(target=gauges_update, args=(lock, com_port_cryovac))
     gauges_thread.setDaemon(True)
@@ -1269,7 +1310,7 @@ if __name__ == "__main__":
     width, height = screen_resolution.width(), screen_resolution.height()
     print('Screen size is:(%s,%s)' % (width, height))
     OXCART = QtWidgets.QMainWindow()
-    ui = Ui_OXCART(cameras, converter, lock)
+    ui = Ui_OXCART(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock)
     ui.setupUi(OXCART)
     OXCART.show()
     sys.exit(app.exec_())

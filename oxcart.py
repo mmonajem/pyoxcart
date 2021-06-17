@@ -188,23 +188,23 @@ class OXCART:
     def reader_queue_dld(self):
         while True:
             while not self.queue_x.empty() or not self.queue_y.empty() or not self.queue_t.empty() or not self.queue_dld_start_counter.empty():
-                # with self.lock:
-                variables.x_temp.append(self.queue_x.get())
-                variables.y_temp.append(self.queue_y.get())
-                variables.t_temp.append(self.queue_t.get())
-                variables.start_counter_temp.append(self.queue_dld_start_counter.get())
-                variables.main_v_dc_dld.append(variables.specimen_voltage)
-                variables.main_v_p_dld.append(variables.pulse_voltage)
+                with self.lock:
+                    variables.x_temp.append(self.queue_x.get())
+                    variables.y_temp.append(self.queue_y.get())
+                    variables.t_temp.append(self.queue_t.get())
+                    variables.start_counter_temp.append(self.queue_dld_start_counter.get())
+                    variables.main_v_dc_dld.append(variables.specimen_voltage)
+                    variables.main_v_p_dld.append(variables.pulse_voltage)
 
     def reader_queue_tdc(self):
         while True:
             while not self.queue_channel.empty() or not self.queue_time_data.empty() or not self.queue_tdc_start_counter.empty():
-                # with self.lock:
-                variables.channel.append(self.queue_channel.get())
-                variables.time_data.append(self.queue_time_data.get())
-                variables.tdc_start_counter.append(self.queue_tdc_start_counter.get())
-                variables.main_v_dc_tdc.append(variables.specimen_voltage)
-                variables.main_v_p_tdc.append(variables.pulse_voltage)
+                with self.lock:
+                    variables.channel.append(self.queue_channel.get())
+                    variables.time_data.append(self.queue_time_data.get())
+                    variables.tdc_start_counter.append(self.queue_tdc_start_counter.get())
+                    variables.main_v_dc_tdc.append(variables.specimen_voltage)
+                    variables.main_v_p_tdc.append(variables.pulse_voltage)
     def main_ex_loop(self, task_counter, counts_target):
         # # reading DC HV
         # v_dc = (command_v_dc(">S0A?")[5:-1])
@@ -265,7 +265,6 @@ class OXCART:
         variables.main_temperature.append(variables.temperature)
         variables.main_chamber_vacuum.append(float(variables.vacuum_main))
 
-
     def cleanup_variables(self):
         variables.stop_flag = False
         variables.start_flag = False
@@ -278,9 +277,11 @@ class OXCART:
         variables.total_count = 0
         variables.count = 0
         variables.count_temp = 0
+        variables.count_last = 0
         variables.avg_n_count = 0
         variables.index_plot = 0
         variables.index_save_image = 0
+
 
 def main():
     # Initialize logger
@@ -308,6 +309,9 @@ def main():
         queue_y = None
         queue_t = None
         queue_dld_start_counter = None
+        queue_channel = None
+        queue_time_data = None
+        queue_tdc_start_counter = None
 
     # Initialization of devices
     lock = threading.Lock()
@@ -331,12 +335,10 @@ def main():
     variables.pulse_voltage_max = variables.v_p_max * (1 / variables.pulse_amp_per_supply_voltage)
     variables.pulse_voltage = variables.v_p_min
 
-
     time_ex_s = []
     time_ex_m = []
     time_ex_h = []
     time_counter = []
-
 
     counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
     logger.info('Starting the main loop')
@@ -410,6 +412,20 @@ def main():
     logger.info('Experiment is finished')
 
     # save hdf5 file
+    length = len(variables.x)
+    if all(len(lst) == length for lst in [variables.x, variables.y,
+                                variables.t, variables.dld_start_counter,
+                                variables.main_v_dc_dld, variables.main_v_dc_dld]):
+        pass
+    else:
+        logger.warning('dld data have not same length')
+    length = len(variables.x)
+    if all(len(lst) == length for lst in [variables.channel, variables.time_data,
+                                variables.tdc_start_counter,
+                                variables.main_v_dc_tdc, variables.main_v_p_tdc]):
+        pass
+    else:
+        logger.warning('tdc data have not same length')
     with h5py.File(variables.path + '\\%s_data.h5' % variables.hdf5_path, "w") as f:
         f.create_dataset("oxcart/high_voltage", data=variables.main_v_dc, dtype='f')
         f.create_dataset("oxcart/pulse_voltage", data=variables.main_v_p, dtype='f')
@@ -427,7 +443,7 @@ def main():
         f.create_dataset("dld/t", data=variables.t, dtype='i')
         f.create_dataset("dld/start_counter", data=variables.dld_start_counter, dtype='i')
         f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld, dtype='f')
-        f.create_dataset("dld/pulse_voltage", data=variables.main_v_p_dld, dtype='f')
+        f.create_dataset("dld/pulse_voltage", data=variables.main_v_dc_dld, dtype='f')
 
         f.create_dataset("tdc/channel", data=variables.channel, dtype='i')
         f.create_dataset("tdc/time_data", data=variables.time_data, dtype='i')
@@ -488,5 +504,4 @@ def main():
 
     experiment.clear_up(task_counter)
     logger.info('Variables and devices is cleared')
-# if __name__ == "__main__":
-#     main(ex_time_g=60, ex_freq_g=20, vdc_min_g=2000, vdc_max_g=15000, vdc_step_g=5, v_p_min_g=15, v_p_max_g=100)
+

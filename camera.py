@@ -1,26 +1,45 @@
-
-import cv2
-import os
-import numpy as np
+from pypylon import genicam
 from pypylon import pylon
-
+import sys
+import os
+import time
+import cv2
+import numpy as np
 import variables
 
 os.environ["PYLON_CAMEMU"] = "2"
 
 class Camera():
 
-    def update_cameras(self, cameras, converter, lock):
-        while cameras.IsGrabbing():
-            if variables.light == False:
-                grabResult0 = cameras[0].RetrieveResult(1000000, pylon.TimeoutHandling_ThrowException)
-                grabResult1 = cameras[1].RetrieveResult(1000000, pylon.TimeoutHandling_ThrowException)
-            elif variables.light == True:
-                grabResult0 = cameras[0].RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
-                grabResult1 = cameras[1].RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
-            image0 = converter.Convert(grabResult0)
+    def __init__(self, devices, tlFactory, cameras, converter):
+
+        self.devices = devices
+        self.tlFactory = tlFactory
+        self.cameras = cameras
+        self.converter = converter
+
+        self.cameras[0].Open()
+        self.cameras[0].ExposureAuto.SetValue('Off')
+        self.cameras[0].ExposureTime.SetValue(1000000)
+        self.cameras[1].Open()
+        self.cameras[1].ExposureAuto.SetValue('Off')
+        self.cameras[1].ExposureTime.SetValue(350000)
+
+    def update_cameras(self, lock):
+
+        # Starts grabbing for all cameras starting with index 0. The grabbing
+        # set up for free-running continuous acquisition.
+        self.cameras.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
+        while self.cameras.IsGrabbing():
+            # if variables.light == False:
+            #     grabResult0 = self.cameras[0].RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
+            #     grabResult1 = self.cameras[1].RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
+            # elif variables.light == True:
+            grabResult0 = self.cameras[0].RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
+            grabResult1 = self.cameras[1].RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
+            image0 = self.converter.Convert(grabResult0)
             img0 = image0.GetArray()
-            image1 = converter.Convert(grabResult1)
+            image1 = self.converter.Convert(grabResult1)
             img1 = image1.GetArray()
 
             # Original size is 2048 * 2448
@@ -59,71 +78,95 @@ class Camera():
                 cv2.imwrite(variables.path + "\\side_zoom_%s.png" %variables.index_save_image, img0_zoom)
                 cv2.imwrite(variables.path + '\\bottom_%s.png' %variables.index_save_image, img1_orig)
                 cv2.imwrite(variables.path + '\\bottom_zoom_%s.png' %variables.index_save_image, img1_zoom)
-    def camera_init(self,):
-        # Limits the amount of cameras used for grabbing.
-        # The bandwidth used by a FireWire camera device can be limited by adjusting the packet size.
-        maxCamerasToUse = 2
+
+            grabResult0.Release()
+            grabResult1.Release()
+
+            if variables.sample_adjust == True:
+                self.camera_s_d()
+                variables.sample_adjust = False
+
+
+
+    def light_switch(self,):
+        if variables.light == False:
+            self.cameras[0].Open()
+            self.cameras[0].ExposureTime.SetValue(2000)
+            # self.cameras[0].AcquisitionFrameRate.SetValue(150)
+            self.cameras[1].Open()
+            self.cameras[1].ExposureTime.SetValue(2000)
+            # self.cameras[1].AcquisitionFrameRate.SetValue(150)
+            variables.light = True
+            variables.sample_adjust = True
+        elif variables.light == True:
+            self.cameras[0].Open()
+            self.cameras[0].ExposureTime.SetValue(1000000)
+            self.cameras[1].Open()
+            self.cameras[1].ExposureTime.SetValue(350000)
+            variables.light = False
+            variables.sample_adjust = False
+
+    def camera_s_d(self,):
 
         # The exit code of the sample application.
         exitCode = 0
+        img0 = []
+        img1 = []
+        windowName = 'Sample Alignment'
 
-        # Get the transport layer factory.
-        tlFactory = pylon.TlFactory.GetInstance()
+        while self.cameras.IsGrabbing():
+            if not self.cameras.IsGrabbing():
+                break
 
-        # Get all attached devices and exit application if no device is found.
-        devices = tlFactory.EnumerateDevices()
+            try:
+                grabResult = self.cameras.RetrieveResult(200, pylon.TimeoutHandling_ThrowException)
 
-        if len(devices) == 0:
-            raise pylon.RuntimeException("No camera present.")
+                # When the cameras in the array are created the camera context value
+                # is set to the index of the camera in the array.
+                # The camera context is a user settable value.
+                # This value is attached to each grab result and can be used
+                # to determine the camera that produced the grab result.
+                cameraContextValue = grabResult.GetCameraContext()
 
-        # Create an array of instant cameras for the found devices and avoid exceeding a maximum number of devices.
-        cameras = pylon.InstantCameraArray(min(len(devices), maxCamerasToUse))
+                if grabResult.GrabSucceeded():
+                    image = self.converter.Convert(grabResult)  # Access the openCV image data
 
-        # Create and attach all Pylon Devices.
-        for i, cam in enumerate(cameras):
-            cam.Attach(tlFactory.CreateDevice(devices[i]))
+                    if cameraContextValue == 0:  # If camera 0, save array into img0[]
+                        img0 = image.GetArray()
+                    else:  # if camera 1, save array into img1[]
+                        img1 = image.GetArray()
 
-            # Print the model name of the camera.
-            # print("Using camera ", cam.GetDeviceInfo().GetModelName())
+                    # If there is no img1, the first time, make img1=img0
+                    # Need the same length arrays to concatenate
+                    if len(img1) == 0:
+                        img1 = img0
 
-        if variables.light == True:
-            cameras[0].Open()
-            cameras[0].ExposureAuto.SetValue('Off')
-            cameras[0].ExposureTime.SetValue(9000)
-            cameras[1].Open()
-            cameras[1].ExposureAuto.SetValue('Off')
-            cameras[1].ExposureTime.SetValue(9000)
-        elif variables.light == False:
-            cameras[0].Open()
-            cameras[0].ExposureAuto.SetValue('Off')
-            cameras[0].ExposureTime.SetValue(1000000)
-            cameras[1].Open()
-            cameras[1].ExposureAuto.SetValue('Off')
-            cameras[1].ExposureTime.SetValue(1000000)
+                    img0_zoom = cv2.resize(img0[800:1100, 1800:2300], dsize=(2448, 1000), interpolation=cv2.INTER_CUBIC)
+                    img1_zoom = cv2.resize(img1[1100:1300, 1000:1500], dsize=(2448, 1000),
+                                           interpolation=cv2.INTER_CUBIC)
+                    # numpy_horizontal = np.hstack((img0, img1))
+                    img0_f = np.concatenate((img0, img0_zoom), axis=0)
+                    img1_f = np.concatenate((img1, img1_zoom), axis=0)
+                    vis = np.concatenate((img0_f, img1_f), axis=1)  # Combine 2 images horizontally
+                    cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
+                    cv2.resizeWindow(windowName, 2500, 1200)
+                    cv2.imshow(windowName, vis)  # displays image in specified window
+                    k = cv2.waitKey(1)
+                    if k == 27:  # If press ESC key
+                        print('ESC')
+                        cv2.destroyAllWindows()
+                        break
+            except:
+                pass
+            grabResult.Release()
+            time.sleep(0.05)
 
-        # Starts grabbing for all cameras starting with index 0. The grabbing
-        # set up for free-running continuous acquisition.
-        cameras.StartGrabbing()
+            # If window has been closed using the X button, close program
+            # getWindowProperty() returns -1 as soon as the window is closed
+            if cv2.getWindowProperty(windowName, 0) < 0 or variables.light_swich == False:
+                grabResult.Release()
+                cv2.destroyAllWindows()
+                break
 
-        converter = pylon.ImageFormatConverter()
 
-        # converting to opencv bgr format
-        converter.OutputPixelFormat = pylon.PixelType_BGR8packed
-        converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
-
-        return cameras, converter
-
-    def light_switch(self, cameras):
-        if variables.light == False:
-            variables.light = True
-            cameras[0].Open()
-            cameras[0].ExposureTime.SetValue(3000)
-            cameras[1].Open()
-            cameras[1].ExposureTime.SetValue(3000)
-        elif variables.light == True:
-            variables.light = False
-            cameras[0].Open()
-            cameras[0].ExposureTime.SetValue(10000000)
-            cameras[1].Open()
-            cameras[1].ExposureTime.SetValue(1000000)
 

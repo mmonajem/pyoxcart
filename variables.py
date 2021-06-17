@@ -35,6 +35,7 @@ def init():
     global flag_pump_load_lock
     global flag_pump_load_lock_click
     global flag_pump_load_lock_led
+    global sample_adjust
 
     global elapsed_time
     global start_time
@@ -56,6 +57,7 @@ def init():
     global index_plot_temp
     global index_warning_message
     global light
+    global light_swich
     global img0_orig
     global img0_zoom
     global img1_orig
@@ -115,6 +117,7 @@ def init():
     email = ''
     tweet = False
     light = False
+    light_swich = False
     camera_0_ExposureTime = 2000
     camera_1_ExposureTime = 2000
     img0_orig = np.ones((500,500,3), dtype=np.uint8)
@@ -126,6 +129,7 @@ def init():
     flag_pump_load_lock = True
     flag_pump_load_lock_click = False
     flag_pump_load_lock_led = None
+    sample_adjust = False
 
     # Run statistics=
     elapsed_time = 0.0

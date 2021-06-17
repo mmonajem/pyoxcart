@@ -14,7 +14,7 @@
 
 import os
 
-os.environ["PYLON_CAMEMU"] = "3"
+# os.environ["PYLON_CAMEMU"] = "3"
 
 from pypylon import genicam
 from pypylon import pylon
@@ -56,7 +56,7 @@ try:
     # Create an array of instant cameras for the found devices and avoid exceeding a maximum number of devices.
     cameras = pylon.InstantCameraArray(min(len(devices), maxCamerasToUse))
 
-    l = cameras.GetSize()
+    # l = cameras.GetSize()
 
     # Create and attach all Pylon Devices.
     for i, cam in enumerate(cameras):
@@ -64,7 +64,7 @@ try:
         cam.Open()
         cam.Width = 2448
         cam.Height = 2048
-        cam.ExposureTime.SetValue(500)
+        cam.ExposureTime.SetValue(2000)
         # Print the model name of the camera.
         print("Using device ", cam.GetDeviceInfo().GetModelName())
         # print("Exposure time ", cam.ExposureTime.GetValue())
@@ -88,7 +88,7 @@ try:
         if not cameras.IsGrabbing():
             break
 
-        grabResult = cameras.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
+        grabResult = cameras.RetrieveResult(500, pylon.TimeoutHandling_ThrowException)
 
         # When the cameras in the array are created the camera context value
         # is set to the index of the camera in the array.
@@ -119,8 +119,12 @@ try:
             if len(img1) == 0:
                 img1 = img0
 
-            numpy_horizontal = np.hstack((img0, img1))
-            vis = np.concatenate((img0, img1), axis=1)  # Combine 2 images horizontally
+            img0_zoom = cv2.resize(img0[800:1100, 1800:2300], dsize=(2448, 1000), interpolation=cv2.INTER_CUBIC)
+            img1_zoom = cv2.resize(img1[1100:1300, 1000:1500], dsize=(2448, 1000), interpolation=cv2.INTER_CUBIC)
+            # numpy_horizontal = np.hstack((img0, img1))
+            img0_f = np.concatenate((img0, img0_zoom), axis=0)
+            img1_f = np.concatenate((img1, img1_zoom), axis=0)
+            vis = np.concatenate((img0_f, img1_f), axis=1)  # Combine 2 images horizontally
             cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
             cv2.resizeWindow(windowName, 1500, 600)
             cv2.imshow(windowName, vis)  # displays image in specified window
@@ -134,7 +138,7 @@ try:
             print("Error: ", grabResult.ErrorCode)
             # grabResult.ErrorDescription does not work properly in python could throw UnicodeDecodeError
         grabResult.Release()
-        time.sleep(0.1)
+        time.sleep(0.05)
 
         # If window has been closed using the X button, close program
         # getWindowProperty() returns -1 as soon as the window is closed
