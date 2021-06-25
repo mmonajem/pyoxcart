@@ -10,6 +10,7 @@ class UCB2(scTDC.usercallbacks_pipe):
                  queue_dld_start_counter, queue_channel, queue_time_data,
                  queue_tdc_start_counter):
         super().__init__(lib, dev_desc)  # <-- mandatory
+        # The queues that share the data between this and main process
         self.queue_x = queue_x
         self.queue_y = queue_y
         self.queue_t = queue_t
@@ -30,6 +31,7 @@ class UCB2(scTDC.usercallbacks_pipe):
     def on_tdc_event(self, tdc_events, nr_tdc_events):
         for i in range(nr_tdc_events):  # iterate through tdc_events
             # see class tdc_event_t in scTDC.py for all accessible fields
+            # save TDC events in queues
             self.queue_time_data.put(tdc_events[i].time_data)
             self.queue_channel.put(tdc_events[i].channel)
             self.queue_tdc_start_counter.put(tdc_events[i].start_counter)
@@ -37,12 +39,13 @@ class UCB2(scTDC.usercallbacks_pipe):
     def on_dld_event(self, dld_events, nr_dld_events):
         for i in range(nr_dld_events):  # iterate through dld_events
             # see class dld_event_t in scTDC.py for all accessible fields
+            # save DLD events in queues
             self.queue_x.put(dld_events[i].dif1)
             self.queue_y.put(dld_events[i].dif2)
             self.queue_t.put(dld_events[i].sum)
             self.queue_dld_start_counter.put(dld_events[i].start_counter)
 
-
+# Initializing the TDC
 def initialize_tdc():
     device = scTDC.Device(autoinit=False)
     retcode, errmsg = device.initialize()
@@ -52,22 +55,36 @@ def initialize_tdc():
 
     return device
 
-
+# This function is called from main control loop in a separate process
 def experiment_measure(queue_x, queue_y, queue_t, queue_dld_start_counter, queue_channel,
-                       queue_time_data, queue_tdc_start_counter):
+                       queue_time_data, queue_tdc_start_counter,
+                       queue_start_measurement, queue_stop_mesurment):
 
     device_tdc = initialize_tdc()
     ucb = UCB2(device_tdc.lib, device_tdc.dev_desc,
                queue_x, queue_y, queue_t, queue_dld_start_counter, queue_channel,
                queue_time_data, queue_tdc_start_counter)  # opens a user callbacks pipe
-    while True:
-        ucb.do_measurement(86400000)
-        # ucb.do_measurement(int(1000 / variables.ex_freq))  # Time of measurement in ms
-        # if variables.stop_flag:
-        #     # wait for 3 second
-        #     time.sleep(3)
-        #     break
 
+    ucb.close()  # closes the user callbacks pipe, method inherited from base class
+
+    device_tdc.deinitialize()
+
+    device_tdc = initialize_tdc()
+    ucb = UCB2(device_tdc.lib, device_tdc.dev_desc,
+               queue_x, queue_y, queue_t, queue_dld_start_counter, queue_channel,
+               queue_time_data, queue_tdc_start_counter)  # opens a user callbacks pipe
+
+    # print('The TDC process is ready for measurement')
+    while True:
+        # Do the measurment for a long time
+        # The measurement is terminate if the main process terminate this process
+        # ucb.do_measurement(86400000)
+        if not queue_start_measurement.empty():
+            ucb.do_measurement(100)
+        if not queue_stop_mesurment.empty():
+            break
+
+    # The code not comes to the below lines.
     ucb.close()  # closes the user callbacks pipe, method inherited from base class
 
     device_tdc.deinitialize()

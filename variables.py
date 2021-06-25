@@ -17,6 +17,7 @@ def init():
     global v_p_max
     global pulse_fraction
     global stop_flag
+    global end_experiment
     global start_flag
     global plot_clear_flag
     global pulse_frequency
@@ -151,6 +152,7 @@ def init():
     index_plot_temp = 0
     index_warning_message = 0
     stop_flag = False
+    end_experiment = False
     start_flag = False
     plot_clear_flag = False
     temperature = 0
@@ -160,30 +162,30 @@ def init():
     vacuum_load_lock = 0
     vacuum_load_lock_backing = 0
 
-    x = []
-    y = []
-    t = []
-    dld_start_counter = []
+    x = np.zeros(0)
+    y = np.zeros(0)
+    t = np.zeros(0)
+    dld_start_counter = np.zeros(0)
 
-    x_temp = []
-    y_temp = []
-    t_temp = []
-    start_counter_temp = []
+    x_temp = np.zeros(0)
+    y_temp = np.zeros(0)
+    t_temp = np.zeros(0)
+    start_counter_temp = np.zeros(0)
 
-    channel = []
-    time_data = []
-    tdc_start_counter = []
+    channel = np.zeros(0)
+    time_data = np.zeros(0)
+    tdc_start_counter = np.zeros(0)
 
     # Source of calculating the detected events pulse_counter or TDC
     counter_source = 'pulse_counter'
 
-    main_v_dc = []
-    main_v_p = []
-    main_counter = []
-    main_temperature = []
-    main_chamber_vacuum = []
-    main_v_dc_dld = []
-    main_v_p_dld = []
-    main_v_dc_tdc = []
-    main_v_p_tdc = []
+    main_v_dc = np.zeros(0)
+    main_v_p = np.zeros(0)
+    main_counter = np.zeros(0)
+    main_temperature = np.zeros(0)
+    main_chamber_vacuum = np.zeros(0)
+    main_v_dc_dld = np.zeros(0)
+    main_v_p_dld = np.zeros(0)
+    main_v_dc_tdc = np.zeros(0)
+    main_v_p_tdc = np.zeros(0)
 
