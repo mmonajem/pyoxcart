@@ -57,9 +57,9 @@ class Camera():
                 cv2.imwrite(variables.path + '\\bottom_%s.png' %variables.index_save_image, img1_orig)
                 cv2.imwrite(variables.path + '\\bottom_zoom_%s.png' %variables.index_save_image, img1_zoom)
 
-            img0_zoom_marker = cv2.drawMarker(img0_zoom, (1020, 265), (0, 0, 255), markerType=cv2.MARKER_TRIANGLE_UP,
+            img0_zoom_marker = cv2.drawMarker(img0_zoom, (1030, 265), (0, 0, 255), markerType=cv2.MARKER_TRIANGLE_UP,
                            markerSize=40, thickness=2, line_type=cv2.LINE_AA)
-            img1_zoom_marker = cv2.drawMarker(img1_zoom, (1040, 255), (0, 0, 255), markerType=cv2.MARKER_TRIANGLE_UP,
+            img1_zoom_marker = cv2.drawMarker(img1_zoom, (1100, 255), (0, 0, 255), markerType=cv2.MARKER_TRIANGLE_UP,
                            markerSize=40, thickness=2, line_type=cv2.LINE_AA)
             with lock:
                 # variables.img0_orig = np.require(img0_orig, np.uint8, 'C')
@@ -144,6 +144,12 @@ class Camera():
                     img0_zoom = cv2.resize(img0[800:1100, 1800:2300], dsize=(2448, 1000), interpolation=cv2.INTER_CUBIC)
                     img1_zoom = cv2.resize(img1[1100:1300, 1000:1500], dsize=(2448, 1000),
                                            interpolation=cv2.INTER_CUBIC)
+                    img0_zoom = cv2.drawMarker(img0_zoom, (2120, 510), (0, 0, 255),
+                                                      markerType=cv2.MARKER_TRIANGLE_UP,
+                                                      markerSize=80, thickness=2, line_type=cv2.LINE_AA)
+                    img1_zoom = cv2.drawMarker(img1_zoom, (2260, 520), (0, 0, 255),
+                                                      markerType=cv2.MARKER_TRIANGLE_UP,
+                                                      markerSize=80, thickness=2, line_type=cv2.LINE_AA)
                     # numpy_horizontal = np.hstack((img0, img1))
                     img0_f = np.concatenate((img0, img0_zoom), axis=0)
                     img1_f = np.concatenate((img1, img1_zoom), axis=0)

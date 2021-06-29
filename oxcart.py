@@ -163,7 +163,8 @@ class OXCART:
                     variables.x = np.append(variables.x, self.queue_x.get())
                     variables.y = np.append(variables.y, self.queue_y.get())
                     variables.t = np.append(variables.t, self.queue_t.get())
-                    variables.dld_start_counter = np.append(variables.dld_start_counter, self.queue_dld_start_counter.get())
+                    variables.dld_start_counter = np.append(variables.dld_start_counter,
+                                                            self.queue_dld_start_counter.get())
                     variables.main_v_dc_dld = np.append(variables.main_v_dc_dld, variables.specimen_voltage)
                     variables.main_v_p_dld = np.append(variables.main_v_p_dld, variables.pulse_voltage)
             if variables.end_experiment:
@@ -175,7 +176,8 @@ class OXCART:
                 with self.lock2:
                     variables.channel = np.append(variables.channel, self.queue_channel.get())
                     variables.time_data = np.append(variables.time_data, self.queue_time_data.get())
-                    variables.tdc_start_counter = np.append(variables.tdc_start_counter, self.queue_tdc_start_counter.get())
+                    variables.tdc_start_counter = np.append(variables.tdc_start_counter,
+                                                            self.queue_tdc_start_counter.get())
                     variables.main_v_dc_tdc = np.append(variables.main_v_dc_tdc, variables.specimen_voltage)
                     variables.main_v_p_tdc = np.append(variables.main_v_p_tdc, variables.pulse_voltage)
             if variables.end_experiment:
@@ -206,7 +208,7 @@ class OXCART:
         variables.main_counter = np.append(variables.main_counter, variables.count_temp)
         # averaging count rate of N_averg counts
         variables.avg_n_count = variables.ex_freq * (
-                    sum(variables.main_counter[-variables.cycle_avg:]) / variables.cycle_avg)
+                sum(variables.main_counter[-variables.cycle_avg:]) / variables.cycle_avg)
 
         counts_measured = variables.avg_n_count / (variables.pulse_frequency * 1000)
 
@@ -229,7 +231,6 @@ class OXCART:
         if new_vp < variables.pulse_voltage_max and new_vp > variables.pulse_voltage_min:
             self.com_port_v_p.write('VOLT %s' % new_vp)
             variables.pulse_voltage = new_vp * variables.pulse_amp_per_supply_voltage
-
 
         variables.main_temperature = np.append(variables.main_temperature, variables.temperature)
         variables.main_chamber_vacuum = np.append(variables.main_chamber_vacuum, float(variables.vacuum_main))
@@ -274,6 +275,7 @@ class OXCART:
         variables.main_v_dc_tdc = np.zeros(0)
         variables.main_v_p_tdc = np.zeros(0)
 
+
 def main():
     # Initialize logger
     logger = logging()
@@ -293,11 +295,13 @@ def main():
         queue_start_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
         queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
         tdc_process = multiprocessing.Process(target=tdc.experiment_measure, args=(queue_x,
-                                                                               queue_y, queue_t,
-                                                                               queue_dld_start_counter, queue_channel,
-                                                                               queue_time_data,
-                                                                               queue_tdc_start_counter, queue_start_measurement,
-                                                                               queue_stop_measurement))
+                                                                                   queue_y, queue_t,
+                                                                                   queue_dld_start_counter,
+                                                                                   queue_channel,
+                                                                                   queue_time_data,
+                                                                                   queue_tdc_start_counter,
+                                                                                   queue_start_measurement,
+                                                                                   queue_stop_measurement))
         tdc_process.daemon = True
         tdc_process.start()
     else:
@@ -308,6 +312,7 @@ def main():
         queue_channel = None
         queue_time_data = None
         queue_tdc_start_counter = None
+        queue_start_measurement = None
         queue_stop_measurement = None
 
     # Initialization of devices
@@ -363,9 +368,13 @@ def main():
 
             variables.start_flag = True
             time.sleep(8)
-            queue_start_measurement.put(True)
+            if variables.counter_source == 'TDC':
+                queue_start_measurement.put(True)
             # Total experiment time variable
             start_main_ex = time.time()
+
+            print('Experiment is started')
+            logger.info('Experiment is started')
         # main loop
         start = datetime.datetime.now()
 
@@ -397,26 +406,28 @@ def main():
             print('Experiment is stopped by user')
             logger.info('Experiment is stopped by user')
             queue_stop_measurement.put(True)
-            # wait for 1 second
             time.sleep(1)
             break
         if variables.max_ions <= variables.total_ions:
             print('Total number of Ions is achieved')
             logger.info('Total number of Ions is achieved')
             queue_stop_measurement.put(True)
-            # wait for 1 second
             time.sleep(1)
             break
 
     if variables.counter_source == 'TDC':
-        # tdc_process.terminate()
-        tdc_process.join()
-        tdc_process.close()
+        tdc_process.join(3)
+        if tdc_process.is_alive():
+            tdc_process.terminate()
+            tdc_process.join(1)
+            # Release all the resources of the TDC process
+            tdc_process.close()
 
     variables.end_experiment = True
     time.sleep(1)
-    read_dld_queue_thread.join()
-    read_tdc_queue_thread.join()
+    if variables.counter_source == 'TDC':
+        read_dld_queue_thread.join(1)
+        read_tdc_queue_thread.join(1)
 
     variables.total_ions = len(variables.x)
     time.sleep(1)
@@ -425,15 +436,15 @@ def main():
 
     # save hdf5 file
     if all(len(lst) == len(variables.x) for lst in [variables.x, variables.y,
-                                          variables.t, variables.dld_start_counter,
-                                          variables.main_v_dc_dld, variables.main_v_dc_dld]):
+                                                    variables.t, variables.dld_start_counter,
+                                                    variables.main_v_dc_dld, variables.main_v_dc_dld]):
         logger.warning('dld data have not same length')
     else:
         pass
 
     if all(len(lst) == len(variables.channel) for lst in [variables.channel, variables.time_data,
-                                          variables.tdc_start_counter,
-                                          variables.main_v_dc_tdc, variables.main_v_p_tdc]):
+                                                          variables.tdc_start_counter,
+                                                          variables.main_v_dc_tdc, variables.main_v_p_tdc]):
         logger.warning('tdc data have not same length')
 
     else:

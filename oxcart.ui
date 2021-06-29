@@ -719,13 +719,13 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:7pt;&quot;&gt;ex_name=test;ex_time=90;max_ions=2000;ex_freq=10;vdc_min=500;vdc_max=4000;vdc_steps_up=100;vdc_steps_down=100;vp_min=328;vp_max=3281;pulse_fraction=20;pulse_frequency=200;detection_rate_init=1;hit_displayed=20000;emai=;tweet=No;counter_source=TDC&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>11</x>
       <y>12</y>
       <width>488</width>
-      <height>801</height>
+      <height>807</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_3">
@@ -1008,13 +1008,27 @@ p, li { white-space: pre-wrap; }
        </item>
       </widget>
      </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="parameters_source">
+       <item>
+        <property name="text">
+         <string>TextBox</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>TextLine</string>
+        </property>
+       </item>
+      </widget>
+     </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>12</x>
-      <y>824</y>
+      <x>10</x>
+      <y>840</y>
       <width>436</width>
       <height>242</height>
      </rect>

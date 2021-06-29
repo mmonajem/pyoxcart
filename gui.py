@@ -3,6 +3,8 @@ import cProfile
 import re
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QScreen
 from PyQt5.QtGui import QPixmap, QImage
 import pyqtgraph as pg
 import pyqtgraph.exporters
@@ -21,7 +23,6 @@ import serial.tools.list_ports
 from pypylon import pylon
 from random import randint
 import scipy.misc, PIL.ImageQt
-
 
 import oxcart
 import variables
@@ -558,6 +559,7 @@ class Ui_OXCART(Camera, object):
         self.stop_button.setText(_translate("OXCART", "Stop"))
         self.stop_button.clicked.connect(self.stop_ex)
         self.statistics_t = self.thread_worker(self.statistics_thread)
+        self.statistics_t.setDaemon(True)
         self.statistics_t.start()
         ###
         self.label_10.setText(_translate("OXCART", "Detection Rate"))
@@ -594,11 +596,12 @@ class Ui_OXCART(Camera, object):
         self.main_chamber_switch.setText(_translate("OXCART", "Main Chamber"))
         self.load_lock_switch.setText(_translate("OXCART", "Load Lock"))
         self.cryo_switch.setText(_translate("OXCART", "Cryo"))
-        self.textEdit.setHtml(_translate("OXCART", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:7pt;\">ex_name=test;ex_time=90;max_ions=2000;ex_freq=10;vdc_min=500;vdc_max=4000;vdc_steps_up=100;vdc_steps_down=100;vp_min=328;vp_max=3281;pulse_fraction=20;pulse_frequency=200;detection_rate_init=1;hit_displayed=20000;emai=;tweet=No;counter_source=TDC</span></p></body></html>"))
+        self.textEdit.setHtml(_translate("OXCART",
+                                         "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                         "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                         "p, li { white-space: pre-wrap; }\n"
+                                         "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt; font-weight:400; font-style:normal;\">\n"
+                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:7pt;\">ex_name=test;ex_time=90;max_ions=2000;ex_freq=10;vdc_min=500;vdc_max=4000;vdc_steps_up=100;vdc_steps_down=100;vp_min=328;vp_max=3281;pulse_fraction=20;pulse_frequency=200;detection_rate_init=1;hit_displayed=20000;emai=;tweet=No;counter_source=TDC</span></p></body></html>"))
         self.label.setText(_translate("OXCART", "Setup Parameters"))
         self.label_21.setText(_translate("OXCART", "Experiment Name"))
         self.ex_name.setText(_translate("OXCART", "test"))
@@ -647,9 +650,11 @@ class Ui_OXCART(Camera, object):
         self.actionExit.setText(_translate("OXCART", "Exit"))
 
         # High Voltage visualization ################
-        self.x_vdc = list(range(1000))  # 1000 time points
-        self.y_vdc = [np.nan] * 1000  # 1000 data points
-        self.y_vps = [np.nan] * 1000  # 1000 data points
+        self.x_vdc = np.arange(1000)  # 1000 time points
+        self.y_vdc = np.zeros(1000)  # 1000 data points
+        self.y_vdc[:] = np.nan
+        self.y_vps = np.zeros(1000)  # 1000 data points
+        self.y_vps[:] = np.nan
         # Add legend
         self.vdc_time.addLegend()
         pen_vdc = pg.mkPen(color=(255, 0, 0), width=6)
@@ -668,8 +673,9 @@ class Ui_OXCART(Camera, object):
         self.vdc_time.setYRange(0, 20000, padding=0.05)
 
         # Detection Visualization #########################
-        self.x_dtec = list(range(1000))  # 1000 time points
-        self.y_dtec = [np.nan] * 1000  # 1000 data points
+        self.x_dtec = np.arange(1000)  # 1000 time points
+        self.y_dtec = np.zeros(1000)  # 1000 data points
+        self.y_dtec[:] = np.nan
         pen_dtec = pg.mkPen(color=(255, 0, 0), width=6)
         self.data_line_dtec = self.detection_rate_viz.plot(self.x_dtec, self.y_dtec, pen=pen_dtec)
         self.detection_rate_viz.setBackground('w')
@@ -690,8 +696,9 @@ class Ui_OXCART(Camera, object):
         self.histogram.setLabel("bottom", "Time", **styles)
 
         # Temperature #########################
-        self.x_tem = list(range(100))  # 1000 time points
-        self.y_tem = [np.nan] * 100  # 1000 data points
+        self.x_tem = np.arange(100)  # 1000 time points
+        self.y_tem = np.zeros(100)  # 1000 data points
+        self.y_tem[:] = np.nan
         pen_dtec = pg.mkPen(color=(255, 0, 0), width=6)
         self.data_line_tem = self.temperature.plot(self.x_tem, self.y_tem, pen=pen_dtec)
         self.temperature.setBackground('b')
@@ -702,8 +709,8 @@ class Ui_OXCART(Camera, object):
         # Add grid
         self.temperature.showGrid(x=True, y=True)
         # Add Range
-        # self.temperature.setXRange(-100, 1100, padding=0)
         self.temperature.setYRange(0, 100, padding=0.1)
+
 
         # Visualization #####################
         self.scatter = pg.ScatterPlotItem(
@@ -712,21 +719,14 @@ class Ui_OXCART(Camera, object):
         self.visualization.getPlotItem().hideAxis('left')
 
         # timer plot, variables, and cameras
-        # self.timer1 = QtCore.QTimer()
-        # self.timer1.setInterval(1000)  # In milliseconds
-        # self.timer1.timeout.connect(self.update_plot_data)
-        # self.timer1.start()
-        # timer statistics
-        # self.timer2 = QtCore.QTimer()
-        # self.timer2.setInterval(1000)  # In milliseconds
-        # self.timer2.timeout.connect(self.statistics)
-        # self.timer2.start()
-        # # timer cameras
         self.timer1 = QtCore.QTimer()
         self.timer1.setInterval(1000)
         self.timer1.timeout.connect(self.update_cameras)
         self.timer1.start()
-
+        self.timer2 = QtCore.QTimer()
+        self.timer2.setInterval(1000)
+        self.timer2.timeout.connect(self.update_plot_data)
+        self.timer2.start()
 
         # Diagram and LEDs ##############
         self.diagram_close_all = QPixmap('.\png\close_all.png')
@@ -772,6 +772,7 @@ class Ui_OXCART(Camera, object):
         variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
         variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
         variables.v_p_min = int(float(self.vp_min.text()))
+        variables.v_p_max = int(float(self.vp_max.text()))
         variables.counter_source = str(self.counter_source.currentText())
 
         if self.tweet.currentText() == 'Yes':
@@ -789,18 +790,19 @@ class Ui_OXCART(Camera, object):
         if not os.path.isdir(variables.path):
             os.makedirs(variables.path, mode=0o777, exist_ok=True)
 
-        self.plot_thread = self.thread_worker(self.update_plot_data)
-        self.plot_thread.setDaemon(True)
-        self.plot_thread.start()
         self.thread.start()
 
     def statistics_thread(self):
         while True:
             self.statistics()
             time.sleep(2)
+
     def finished_thread_main(self):
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(True)
+        QScreen.grabWindow(app.primaryScreen(),
+                           QApplication.desktop().winId()).save(variables.path + '\\screenshot.png')
+
 
     def stop_ex(self):
         variables.stop_flag = True
@@ -891,186 +893,161 @@ class Ui_OXCART(Camera, object):
             variables.light_swich = False
 
     def thread_worker(self, target):
+
         return threading.Thread(target=target)
+
     def update_plot_data(self):
         # Temperature
-        time.sleep(5)
-        while self.thread.isRunning():
-            time.sleep(1)
-            self.x_tem = self.x_tem[1:]  # Remove the first element.
-            self.x_tem.append(self.x_tem[-1] + 1)  # Add a new value 1 higher than the last.
-            self.y_tem = self.y_tem[1:]
-            self.y_tem.append(int(variables.temperature))
+        self.x_tem = self.x_tem[1:]  # Remove the first element.
+        self.x_tem = np.append(self.x_tem, self.x_tem[-1] + 1)  # Add a new value 1 higher than the last.
+        self.y_tem = self.y_tem[1:]  # Remove the first element.
+        self.y_tem = np.append(self.y_tem, int(variables.temperature))
 
-            self.data_line_tem.setData(self.x_tem, self.y_tem)
+        self.data_line_tem.setData(self.x_tem, self.y_tem)
+        if variables.index_auto_scale_graph == 30:
+            self.temperature.enableAutoRange()
+            self.vdc_time.enableAutoRange()
+            self.detection_rate_viz.enableAutoRange()
+            variables.index_auto_scale_graph = 0
 
-            if variables.start_flag:
-                if variables.index_wait_on_plot_start >= 3:
-                    # V_dc and V_p
-                    if variables.index_plot <= 999:
-                        self.y_vdc = self.y_vdc[:-1]  # Remove the last
-                        self.y_vps = self.y_vps[:-1]  # Remove the last
-                        self.y_vdc.insert(variables.index_plot, int(variables.specimen_voltage))  # Add a new value.
-                        self.y_vps.insert(variables.index_plot, int(variables.pulse_voltage))  # Add a new value.
-                    else:
-                        self.x_vdc.append(self.x_vdc[-1] + 1)  # Add a new value 1 higher than the last.
-                        self.y_vdc.append(int(variables.specimen_voltage))  # Add a new value.
-                        self.y_vps.append(int(variables.pulse_voltage))  # Add a new value.
+        self.temperature.disableAutoRange()
+        self.vdc_time.disableAutoRange()
+        self.detection_rate_viz.disableAutoRange()
 
-                    self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
-                    self.data_line_vps.setData(self.x_vdc, self.y_vps)
+        variables.index_auto_scale_graph += 1
 
-                    # Detection Rate Visualization
-                    if variables.total_ions > 0:
-                        if variables.index_plot <= 999:
-                            self.y_dtec = self.y_dtec[:-1]  # Remove the first
-                            self.y_dtec.insert(variables.index_plot, int(variables.avg_n_count))  # Add a new value.
-                        else:
-                            self.x_dtec = self.x_dtec[1:]  # Remove the first element.
-                            self.x_dtec.append(self.x_dtec[-1] + 1)  # Add a new value 1 higher than the last.
-                            self.y_dtec = self.y_dtec[1:]
-                            self.y_dtec.insert(999, int(variables.avg_n_count))
+        if variables.plot_clear_flag:
+            self.x_vdc = np.arange(1000)  # 1000 time points
+            self.y_vdc = np.zeros(1000)  # 1000 data points
+            self.y_vdc[:] = np.nan
+            self.y_vps = np.zeros(1000)  # 1000 data points
+            self.y_vps[:] = np.nan
 
-                        self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+            self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
+            self.data_line_vps.setData(self.x_vdc, self.y_vps)
 
-                # Time of Flight
-                if variables.counter_source == 'TDC':
-                    if variables.index_wait_on_plot_start <= 16:
-                        variables.index_wait_on_plot_start += 1
-                    if variables.index_wait_on_plot_start > 16:
+            self.x_dtec = np.arange(1000)
+            self.y_dtec = np.zeros(1000)
+            self.y_dtec[:] = np.nan
 
-                        # max_lenght = max(len(variables.x), len(variables.y),
-                        #                  len(variables.t), len(variables.main_v_dc_dld))
-                        # d_0 = 110
-                        # e = 1.602 * 10**(-19)
-                        # dtec_dim = 78
-                        # pix_size_x = 0.03243
-                        # pix_size_y = 0.03257
-                        try:
-                            # x_n = np.array(variables.x[:max_lenght]) - 2450
-                            # y_n = np.array(variables.y[:max_lenght]) - 2450
+            self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 
-                            # x_n = x_n * pix_size_x
-                            # y_n = y_n * pix_size_y
+            self.histogram.clear()
 
-                            #
-                            # t_n = np.array(variables.t[:max_lenght]) * 27.432 * 10**(-12)
-                            #
-                            # l = np.sqrt(d_0 ** 2 + x_n ** 2 + y_n ** 2)
+            self.scatter.clear()
+            self.visualization.clear()
+            variables.plot_clear_flag = False
 
-                            # math_to_charge = (2 * np.array(variables.main_v_dc_dld[:max_lenght]) * e * t_n**2) / ((l * 10 ** -3)**2)
-                            math_to_charge = np.array(variables.t)
-                            math_to_charge = math_to_charge[math_to_charge < 800000]
-                            bins = np.logspace(np.log10(np.min(math_to_charge)),
-                                               np.log10(np.max(math_to_charge)),
-                                               num=128)
-                            self.y_tof, self.x_tof = np.histogram(math_to_charge, bins=bins)
-                            self.histogram.clear()
-                            self.histogram.addItem(pg.BarGraphItem(x=self.x_tof[:-1], height=self.y_tof, width=0.1, brush='r'))
-                        except:
-                            print(
-                                f"{bcolors.FAIL}Error: Cannot plot Histogram correctly{bcolors.ENDC}")
-
-                        # Visualization
-                        # number of points
-                        try:
-                            pos = np.array([variables.x[-variables.hit_display:], variables.y[-variables.hit_display:]], dtype="object")
-                            # creating spots using the random position
-                            spots = [{'pos': pos[:, i]} for i in range(len(pos[1,:]))]
-                            self.spots = spots
-                            # adding points to the scatter plot
-                            self.scatter.clear()
-                            # time.sleep(0.05)
-                            self.scatter.addPoints(self.spots)
-                        except:
-                            print(
-                                f"{bcolors.FAIL}Error: Cannot plot Ions correctly{bcolors.ENDC}")
-                        # add item to plot window
-                        # adding scatter plot item to the plot window
-                        self.visualization.clear()
-                        self.visualization.addItem(self.scatter)
-
-                # save plots to the file
-                if variables.index_plot_save % 100 == 0:
-                    exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
-                    exporter.export(variables.path +'\\v_dc_p_%s.png' %variables.index_plot_save )
-                    exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
-                    exporter.export(variables.path +'\\detection_rate_%s.png' %variables.index_plot_save )
-                    exporter = pg.exporters.ImageExporter(self.visualization.plotItem)
-                    exporter.export(variables.path +'\\visualization_%s.png' %variables.index_plot_save )
-                    exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
-                    exporter.export(variables.path +'\\tof_%s.png' %variables.index_plot_save )
-
-                # Increase the index
-                variables.index_plot += 1
-                variables.index_plot_save += 1
-
-
-            if variables.plot_clear_flag:
-
-                self.x_vdc = list(range(1000))  # 1000 time points
-                self.y_vdc = [np.nan] * 1000  # 1000 data points
-                self.y_vps = [np.nan] * 1000  # 1000 data points
+        if variables.start_flag:
+            if variables.index_wait_on_plot_start >= 8:
+                # V_dc and V_p
+                if variables.index_plot <= 999:
+                    self.y_vdc[variables.index_plot] = int(variables.specimen_voltage)  # Add a new value.
+                    self.y_vps[variables.index_plot] = int(variables.pulse_voltage)  # Add a new value.
+                else:
+                    self.x_vdc = np.append(self.x_vdc,
+                                           self.x_tem[-1] + 1)  # Add a new value 1 higher than the last.
+                    self.y_vdc = np.append(self.y_vdc, int(variables.specimen_voltage))  # Add a new value.
+                    self.y_vps = np.append(self.y_vps, int(variables.pulse_voltage))  # Add a new value.
 
                 self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
                 self.data_line_vps.setData(self.x_vdc, self.y_vps)
 
-                self.y_dtec = [np.nan] * 1000
+                # Detection Rate Visualization
+                if variables.total_ions > 0:
+                    if variables.index_plot <= 999:
+                        self.y_dtec[variables.index_plot] = int(variables.avg_n_count)  # Add a new value.
+                    else:
+                        self.x_dtec = self.x_dtec[1:]  # Remove the first element.
+                        self.x_dtec = np.append(self.x_dtec,
+                                                self.x_dtec[-1] + 1)  # Add a new value 1 higher than the last.
+                        self.y_dtec = self.y_dtec[1:]
+                        self.y_dtec = np.append(self.y_dtec, int(variables.avg_n_count))
 
-                self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+                    self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+                # Increase the index
+                variables.index_plot += 1
+            # Time of Flight
+            if variables.counter_source == 'TDC':
+                if variables.index_wait_on_plot_start <= 16:
+                    variables.index_wait_on_plot_start += 1
+                if variables.index_wait_on_plot_start > 16:
 
-                self.histogram.clear()
+                    # max_lenght = max(len(variables.x), len(variables.y),
+                    #                  len(variables.t), len(variables.main_v_dc_dld))
+                    # d_0 = 110
+                    # e = 1.602 * 10**(-19)
+                    # dtec_dim = 78
+                    # pix_size_x = 0.03243
+                    # pix_size_y = 0.03257
+                    try:
+                        # x_n = np.array(variables.x[:max_lenght]) - 2450
+                        # y_n = np.array(variables.y[:max_lenght]) - 2450
 
-                self.visualization.clear()
-                variables.plot_clear_flag = False
+                        # x_n = x_n * pix_size_x
+                        # y_n = y_n * pix_size_y
 
-            # Update the setup parameters
-            variables.ex_time = int(float(self.ex_time.text()))
-            variables.ex_freq = int(float(self.ex_freq.text()))
-            variables.max_ions = int(float(self.max_ions.text()))
-            variables.vdc_min = int(float(self.vdc_min.text()))
-            variables.detection_rate = float(self.detection_rate_init.text())
-            variables.pulse_fraction = int(float(self.pulse_fraction.text()))
-            variables.hit_display = int(float(self.hit_displayed.text()))
-            variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
-            variables.pulse_frequency = int(float(self.pulse_frequency.text()))
-            variables.hdf5_path = self.ex_name.text()
-            variables.email = self.email.text()
-            variables.cycle_avg = int(float(self.cycle_avg.text()))
-            variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
-            variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
-            variables.v_p_min = int(float(self.vp_min.text()))
-            variables.counter_source = str(self.counter_source.currentText())
+                        #
+                        # t_n = np.array(variables.t[:max_lenght]) * 27.432 * 10**(-12)
+                        #
+                        # l = np.sqrt(d_0 ** 2 + x_n ** 2 + y_n ** 2)
 
-            if self.tweet.currentText() == 'Yes':
-                variables.tweet = True
+                        # math_to_charge = (2 * np.array(variables.main_v_dc_dld[:max_lenght]) * e * t_n**2) / ((l * 10 ** -3)**2)
+                        math_to_charge = variables.t
+                        math_to_charge = math_to_charge[math_to_charge < 800000]
+                        bins = np.logspace(np.log10(np.min(math_to_charge)),
+                                           np.log10(np.max(math_to_charge)),
+                                           num=128)
+                        self.y_tof, self.x_tof = np.histogram(math_to_charge, bins=bins)
+                        self.histogram.clear()
+                        self.histogram.addItem(
+                            pg.BarGraphItem(x=self.x_tof[:-1], height=self.y_tof, width=0.1, brush='r'))
 
-            if int(float(self.vdc_max.text())) > 20000:
-                _translate = QtCore.QCoreApplication.translate
-                self.Error.setText(_translate("OXCART",
-                                              "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible "
-                                              "number is 20KV</span></p></body></html>"))
-                self.vdc_max.setText(_translate("OXCART", str(variables.vdc_max)))
-            else:
-                variables.vdc_max = int(float(self.vdc_max.text()))
+                    except:
+                        print(
+                            f"{bcolors.FAIL}Error: Cannot plot Histogram correctly{bcolors.ENDC}")
 
-            if float(self.vp_max.text()) > 3281:
-                _translate = QtCore.QCoreApplication.translate
-                self.Error.setText(_translate("OXCART",
-                                              "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible "
-                                              "number is 3281 V</span></p></body></html>"))
-                self.vp_max.setText(_translate("OXCART", str(variables.v_p_max)))
-            else:
-                variables.v_p_max = int(float(self.vp_max.text()))
+                    # Visualization
+                    try:
+                        # adding points to the scatter plot
+                        self.scatter.clear()
+                        x = variables.x
+                        y = variables.y
+                        min_length = min(len(x), len(y))
+                        x = variables.x[-min_length:]
+                        y = variables.y[-min_length:]
+                        self.scatter.setData(x=x[-variables.hit_display:],
+                                             y=y[-variables.hit_display:])
+                        # add item to plot window
+                        # adding scatter plot item to the plot window
+                        self.visualization.clear()
+                        self.visualization.addItem(self.scatter)
+                    except:
+                        print(
+                            f"{bcolors.FAIL}Error: Cannot plot Ions correctly{bcolors.ENDC}")
 
-            # Statistics Update
-            self.speciemen_voltage.setText(str(float("{:.3f}".format(variables.specimen_voltage))))
-            self.pulse_voltage.setText(str(float("{:.3f}".format(variables.pulse_voltage))))
-            self.elapsed_time.setText(str(float("{:.3f}".format(variables.elapsed_time))))
-            self.total_ions.setText((str(variables.total_ions)))
-            self.detection_rate.setText(str
-                (float("{:.3f}".format(
-                (variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000)))))
+            # save plots to the file
+            if variables.index_plot_save % 100 == 0:
+                exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
+                exporter.export(variables.path + '\\v_dc_p_%s.png' % variables.index_plot_save)
+                exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
+                exporter.export(variables.path + '\\detection_rate_%s.png' % variables.index_plot_save)
+                exporter = pg.exporters.ImageExporter(self.visualization.plotItem)
+                exporter.export(variables.path + '\\visualization_%s.png' % variables.index_plot_save)
+                exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
+                exporter.export(variables.path + '\\tof_%s.png' % variables.index_plot_save)
+
+            # Increase the index
+            variables.index_plot_save += 1
+
+        # Statistics Update
+        self.speciemen_voltage.setText(str(float("{:.3f}".format(variables.specimen_voltage))))
+        self.pulse_voltage.setText(str(float("{:.3f}".format(variables.pulse_voltage))))
+        self.elapsed_time.setText(str(float("{:.3f}".format(variables.elapsed_time))))
+        self.total_ions.setText((str(variables.total_ions)))
+        self.detection_rate.setText(str
+            (float("{:.3f}".format(
+            (variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000)))))
 
     def statistics(self):
         # update temperature and vacuum gages
@@ -1099,7 +1076,52 @@ class Ui_OXCART(Camera, object):
 
         variables.index_warning_message += 1
 
-    def update_cameras(self,):
+        try:
+            # Update the setup parameters
+            variables.ex_time = int(float(self.ex_time.text()))
+            variables.ex_freq = int(float(self.ex_freq.text()))
+            variables.max_ions = int(float(self.max_ions.text()))
+            variables.vdc_min = int(float(self.vdc_min.text()))
+            variables.detection_rate = float(self.detection_rate_init.text())
+            variables.pulse_fraction = int(float(self.pulse_fraction.text()))
+            variables.hit_display = int(float(self.hit_displayed.text()))
+            variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
+            variables.pulse_frequency = int(float(self.pulse_frequency.text()))
+            variables.hdf5_path = self.ex_name.text()
+            variables.email = self.email.text()
+            variables.cycle_avg = int(float(self.cycle_avg.text()))
+            variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
+            variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
+            variables.v_p_min = int(float(self.vp_min.text()))
+            variables.v_p_max = int(float(self.vp_max.text()))
+            variables.counter_source = str(self.counter_source.currentText())
+
+            if self.tweet.currentText() == 'Yes':
+                variables.tweet = True
+
+            if int(float(self.vdc_max.text())) > 20000:
+                _translate = QtCore.QCoreApplication.translate
+                self.Error.setText(_translate("OXCART",
+                                              "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible "
+                                              "number is 20KV</span></p></body></html>"))
+                self.vdc_max.setText(_translate("OXCART", str(variables.vdc_max)))
+            else:
+                variables.vdc_max = int(float(self.vdc_max.text()))
+
+            if float(self.vp_max.text()) > 3281:
+                _translate = QtCore.QCoreApplication.translate
+                self.Error.setText(_translate("OXCART",
+                                              "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible "
+                                              "number is 3281 V</span></p></body></html>"))
+                self.vp_max.setText(_translate("OXCART", str(variables.v_p_max)))
+            else:
+                variables.v_p_max = int(float(self.vp_max.text()))
+
+        except:
+            print(
+                f"{bcolors.FAIL}Error: Cannot update setup parameters{bcolors.ENDC}")
+
+    def update_cameras(self, ):
 
         self.cam_s_o.setImage(variables.img0_orig, autoRange=False)
         self.cam_b_o.setImage(variables.img1_orig, autoRange=False)
@@ -1112,6 +1134,10 @@ class Ui_OXCART(Camera, object):
 
         self.cam_s_d.setPixmap(self.camera0_zoom)
         self.cam_b_d.setPixmap(self.camera1_zoom)
+
+    def setYRange(self,):
+        self.temperature.enableAutoRange(axis='y')
+        self.temperature.setAutoVisible(y=True)
 
 
 class MainThread(QThread):
@@ -1128,7 +1154,6 @@ class MainThread(QThread):
 
 # apply command to the Cryovac
 def command_cryovac(cmd, com_port_cryovac):
-
     com_port_cryovac.write(
         (cmd + '\r\n').encode())  # send cmd to device # might not work with older devices -> "LF" only needed!
     time.sleep(0.1)  # small sleep for response
@@ -1293,16 +1318,18 @@ if __name__ == "__main__":
         converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
 
         camera = Camera(devices, tlFactory, cameras, converter)
+
     except:
         print('Can not initialize the Cameras')
 
-    lock = threading.Lock()
-    camera_thread = threading.Thread(target=camera.update_cameras, args=(lock,))
+    lock2 = threading.Lock()
+    camera_thread = threading.Thread(target=camera.update_cameras, args=(lock2,))
     camera_thread.setDaemon(True)
-    gauges_thread = threading.Thread(target=gauges_update, args=(lock, com_port_cryovac))
+    camera_thread.start()
+    lock1 = threading.Lock()
+    gauges_thread = threading.Thread(target=gauges_update, args=(lock1, com_port_cryovac))
     gauges_thread.setDaemon(True)
     gauges_thread.start()
-    camera_thread.start()
 
     app = QtWidgets.QApplication(sys.argv)
     # get display resolution
@@ -1310,6 +1337,7 @@ if __name__ == "__main__":
     width, height = screen_resolution.width(), screen_resolution.height()
     print('Screen size is:(%s,%s)' % (width, height))
     OXCART = QtWidgets.QMainWindow()
+    lock = threading.Lock()
     ui = Ui_OXCART(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock)
     ui.setupUi(OXCART)
     OXCART.show()

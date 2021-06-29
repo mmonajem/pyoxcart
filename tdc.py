@@ -80,8 +80,9 @@ def experiment_measure(queue_x, queue_y, queue_t, queue_dld_start_counter, queue
         # The measurement is terminate if the main process terminate this process
         # ucb.do_measurement(86400000)
         if not queue_start_measurement.empty():
-            ucb.do_measurement(100)
+            ucb.do_measurement(5000)
         if not queue_stop_mesurment.empty():
+            print('TDC loop is break in child process')
             break
 
     # The code not comes to the below lines.

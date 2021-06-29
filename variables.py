@@ -57,6 +57,7 @@ def init():
     global index_wait_on_plot_start
     global index_plot_temp
     global index_warning_message
+    global index_auto_scale_graph
     global light
     global light_swich
     global img0_orig
@@ -151,6 +152,7 @@ def init():
     index_wait_on_plot_start = 0
     index_plot_temp = 0
     index_warning_message = 0
+    index_auto_scale_graph = 0
     stop_flag = False
     end_experiment = False
     start_flag = False
