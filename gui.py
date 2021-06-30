@@ -1,6 +1,3 @@
-import yappi
-import cProfile
-import re
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
 from PyQt5.QtWidgets import QApplication
@@ -13,30 +10,16 @@ import numpy as np
 import nidaqmx
 import time
 import threading
-import multiprocessing
-from multiprocessing.pool import ThreadPool as Pool
 import datetime
 import os
-import dill
-import functools
 import serial.tools.list_ports
 from pypylon import pylon
-from random import randint
-import scipy.misc, PIL.ImageQt
 
 import oxcart
 import variables
 from camera import Camera
-from pfeiffer_gauges import TPG362
-from edwards_tic import EdwardsAGC
+import initialize_devices
 
-com_port_idx_cryovac = 3
-COM_PORT_pfeiffer = 'COM5'
-COM_PORT_edwards_bc = 'COM2'
-COM_PORT_edwards_ll = 'COM1'
-
-# get available COM ports and store as list
-com_ports = list(serial.tools.list_ports.comports())
 
 
 class bcolors:
@@ -567,9 +550,6 @@ class Ui_OXCART(Camera, object):
         self.thread.signal.connect(self.finished_thread_main)
         self.stop_button.setText(_translate("OXCART", "Stop"))
         self.stop_button.clicked.connect(self.stop_ex)
-        self.statistics_t = self.thread_worker(self.statistics_thread)
-        self.statistics_t.setDaemon(True)
-        self.statistics_t.start()
         ###
         self.label_10.setText(_translate("OXCART", "Detection Rate"))
         self.label_19.setText(_translate("OXCART", "Visualization"))
@@ -739,6 +719,10 @@ class Ui_OXCART(Camera, object):
         self.timer2.setInterval(1000)
         self.timer2.timeout.connect(self.update_plot_data)
         self.timer2.start()
+        self.timer3 = QtCore.QTimer()
+        self.timer3.setInterval(2000)
+        self.timer3.timeout.connect(self.statistics)
+        self.timer3.start()
 
         # Diagram and LEDs ##############
         self.diagram_close_all = QPixmap('.\png\close_all.png')
@@ -866,10 +850,6 @@ class Ui_OXCART(Camera, object):
         self.thread.start()
         variables.index_line += 1
 
-    def statistics_thread(self):
-        while True:
-            self.statistics()
-            time.sleep(2)
 
     def finished_thread_main(self):
         self.start_button.setEnabled(True)
@@ -1016,10 +996,10 @@ class Ui_OXCART(Camera, object):
             self.visualization.clear()
             variables.plot_clear_flag = False
 
-        if variables.index_wait_on_plot_start <= 16:
-            variables.index_wait_on_plot_start += 1
-
         if variables.start_flag:
+            if variables.index_wait_on_plot_start <= 16:
+                variables.index_wait_on_plot_start += 1
+
             if variables.index_wait_on_plot_start >= 8:
                 # V_dc and V_p
                 if variables.index_plot <= 999:
@@ -1220,9 +1200,6 @@ class Ui_OXCART(Camera, object):
         self.cam_s_d.setPixmap(self.camera0_zoom)
         self.cam_b_d.setPixmap(self.camera1_zoom)
 
-    def setYRange(self,):
-        self.temperature.enableAutoRange(axis='y')
-        self.temperature.setAutoVisible(y=True)
 
 
 class MainThread(QThread):
@@ -1237,106 +1214,10 @@ class MainThread(QThread):
         self.signal.emit(main_thread)
 
 
-# apply command to the Cryovac
-def command_cryovac(cmd, com_port_cryovac):
-    com_port_cryovac.write(
-        (cmd + '\r\n').encode())  # send cmd to device # might not work with older devices -> "LF" only needed!
-    time.sleep(0.1)  # small sleep for response
-    response = ''
-    while com_port_cryovac.in_waiting > 0:
-        response = com_port_cryovac.readline()  # all characters received, read line till '\r\n'
-    return response.decode("utf-8")
 
 
-def command_edwards(cmd, lock, E_AGC, status=None):
-    if variables.flag_pump_load_lock_click and variables.flag_pump_load_lock and status == 'load_lock':
-        E_AGC.comm('!C910 0')  # Backing Pump off
-        E_AGC.comm('!C904 0')  # Turbo Pump off
-        with lock:
-            variables.flag_pump_load_lock_click = False
-            variables.flag_pump_load_lock = False
-            variables.flag_pump_load_lock_led = False
-            time.sleep(1)
-    elif variables.flag_pump_load_lock_click and not variables.flag_pump_load_lock and status == 'load_lock':
-        E_AGC.comm('!C910 1')  # Backing Pump on
-        E_AGC.comm('!C904 1')  # Turbo Pump on
-        with lock:
-            variables.flag_pump_load_lock_click = False
-            variables.flag_pump_load_lock = True
-            variables.flag_pump_load_lock_led = True
-            time.sleep(1)
-    if cmd == 'presure':
-        response_tmp = E_AGC.comm('?V911')
-        response_tmp = float(response_tmp.replace(';', ' ').split()[1])
-        if response_tmp < 90 and status == 'load_lock':
-            variables.flag_pump_load_lock_led = False
-        elif response_tmp >= 90 and status == 'load_lock':
-            variables.flag_pump_load_lock_led = True
-        response = E_AGC.comm('?V940')
-    else:
-        print('Unknown command for Edwards TIC Load Lock')
-
-    return response
 
 
-def initialize_cryovac(com_port_cryovac):
-    # Setting the com port of Cryovac
-    output = command_cryovac('getOutput', com_port_cryovac)
-    variables.temperature = float(output.split()[0].replace(',', ''))
-
-
-def initialize_edwards_tic_load_lock():
-    E_AGC_ll = EdwardsAGC(COM_PORT_edwards_ll)
-    response = command_edwards('presure', lock=None, E_AGC=E_AGC_ll)
-    variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
-    variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
-
-
-def initialize_edwards_tic_buffer_chamber():
-    E_AGC_bc = EdwardsAGC(COM_PORT_edwards_bc)
-    response = command_edwards('presure', lock=None, E_AGC=E_AGC_bc, )
-    variables.vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
-
-
-def initialize_pfeiffer_gauges():
-    tpg = TPG362(port=COM_PORT_pfeiffer)
-    value, _ = tpg.pressure_gauge(2)
-    # unit = tpg.pressure_unit()
-    variables.vacuum_main = '{}'.format(value)
-    value, _ = tpg.pressure_gauge(1)
-    # unit = tpg.pressure_unit()
-    variables.vacuum_buffer = '{}'.format(value)
-
-
-def gauges_update(lock, com_port_cryovac):
-    tpg = TPG362(port=COM_PORT_pfeiffer)
-    E_AGC_ll = EdwardsAGC(COM_PORT_edwards_ll)
-    E_AGC_bc = EdwardsAGC(COM_PORT_edwards_bc)
-    while True:
-        #  Temperature update
-        output = command_cryovac('getOutput', com_port_cryovac)
-        with lock:
-            variables.temperature = float(output.split()[0].replace(',', ''))
-        # Pfeiffer gauges update
-        value, _ = tpg.pressure_gauge(2)
-        # unit = tpg.pressure_unit()
-        with lock:
-            variables.vacuum_main = '{}'.format(value)
-        value, _ = tpg.pressure_gauge(1)
-        # unit = tpg.pressure_unit()
-        with lock:
-            variables.vacuum_buffer = '{}'.format(value)
-        # Edwards Load Lock update
-        response = command_edwards('presure', lock, E_AGC=E_AGC_ll, status='load_lock')
-        with lock:
-            variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
-            variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
-
-        # Edwards Buffer Chamber update
-        response = command_edwards('presure', lock, E_AGC=E_AGC_bc)
-        with lock:
-            variables.vaccum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
-        time.sleep(1)
 
 
 if __name__ == "__main__":
@@ -1346,31 +1227,31 @@ if __name__ == "__main__":
     # Cryovac initialized
     try:
         com_port_cryovac = serial.Serial(
-            port=com_ports[com_port_idx_cryovac].device,  # chosen COM port
+            port=initialize_devices.com_ports[variables.com_port_idx_cryovac].device,  # chosen COM port
             baudrate=9600,  # 115200
             bytesize=serial.EIGHTBITS,  # 8
             parity=serial.PARITY_NONE,  # N
             stopbits=serial.STOPBITS_ONE  # 1
         )
-        initialize_cryovac(com_port_cryovac)
+        initialize_devices.initialize_cryovac(com_port_cryovac)
     except Exception as e:
         print('Can not initialize the Cryovac')
         print(e)
     # Main and Buffer vacuum gauges
     try:
-        initialize_pfeiffer_gauges()
+        initialize_devices.initialize_pfeiffer_gauges()
     except Exception as e:
         print('Can not initialize the Pfeiffer gauges')
         print(e)
     # Buffer Backing vacuum gauges
     try:
-        initialize_edwards_tic_buffer_chamber()
+        initialize_devices.initialize_edwards_tic_buffer_chamber()
     except Exception as e:
         print('Can not initialize the buffer vacuum gauges')
         print(e)
     # Load Lock vacuum gauges
     try:
-        initialize_edwards_tic_load_lock()
+        initialize_devices.initialize_edwards_tic_load_lock()
     except Exception as e:
         print('Can not initialize the Edwards gauges')
         print(e)
@@ -1412,7 +1293,7 @@ if __name__ == "__main__":
     camera_thread.setDaemon(True)
     camera_thread.start()
     lock1 = threading.Lock()
-    gauges_thread = threading.Thread(target=gauges_update, args=(lock1, com_port_cryovac))
+    gauges_thread = threading.Thread(target=initialize_devices.gauges_update, args=(lock1, com_port_cryovac))
     gauges_thread.setDaemon(True)
     gauges_thread.start()
 

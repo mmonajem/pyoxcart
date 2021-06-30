@@ -1,8 +1,5 @@
 # OXCART
 
-# Python Script for doing an experiments
-com_port_idx_V_dc = 4
-com_port_idx_V_p = 0
 
 # package needed
 import time
@@ -17,15 +14,14 @@ import numpy as np
 import serial.tools.list_ports
 import pyvisa as visa
 import nidaqmx
-import scTDC
 
 import tdc
 import variables
 import email_send
 import tweet_send
-
-# get available COM ports and store as list
-com_ports = list(serial.tools.list_ports.comports())
+import initialize_devices
+# # get available COM ports and store as list
+# com_ports = list(serial.tools.list_ports.comports())
 
 
 def logging():
@@ -83,7 +79,7 @@ class OXCART:
 
         # Setting the com port of V_dc
         self.com_port_v_dc = serial.Serial(
-            port=com_ports[com_port_idx_V_dc].device,  # chosen COM port
+            port=initialize_devices.com_ports[variables.com_port_idx_V_dc].device,  # chosen COM port
             baudrate=115200,  # 115200
             bytesize=serial.EIGHTBITS,  # 8
             parity=serial.PARITY_NONE,  # N

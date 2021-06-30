@@ -1,6 +1,12 @@
 
 import numpy as np
 
+com_port_idx_cryovac = 3
+COM_PORT_pfeiffer = 'COM5'
+COM_PORT_edwards_bc = 'COM2'
+COM_PORT_edwards_ll = 'COM1'
+com_port_idx_V_dc = 4
+com_port_idx_V_p = 0
 
 def init():
 
@@ -59,7 +65,6 @@ def init():
     global index_warning_message
     global index_auto_scale_graph
     global index_line
-    global num_line
     global light
     global light_swich
     global img0_orig
@@ -124,10 +129,10 @@ def init():
     light_swich = False
     camera_0_ExposureTime = 2000
     camera_1_ExposureTime = 2000
-    img0_orig = np.ones((500,500,3), dtype=np.uint8)
-    img0_zoom = np.ones((1200,500,3), dtype=np.uint8)
-    img1_orig = np.ones((500,500,3), dtype=np.uint8)
-    img1_zoom = np.ones((1200,500,3), dtype=np.uint8)
+    img0_orig = np.ones((500, 500, 3), dtype=np.uint8)
+    img0_zoom = np.ones((1200, 500, 3), dtype=np.uint8)
+    img1_orig = np.ones((500, 500, 3), dtype=np.uint8)
+    img1_zoom = np.ones((1200, 500, 3), dtype=np.uint8)
     path = ''
     index_save_image = 0
     flag_pump_load_lock = True
@@ -156,7 +161,6 @@ def init():
     index_warning_message = 0
     index_auto_scale_graph = 0
     index_line = 0
-    num_line = 0
     stop_flag = False
     end_experiment = False
     start_flag = False
