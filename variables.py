@@ -58,6 +58,8 @@ def init():
     global index_plot_temp
     global index_warning_message
     global index_auto_scale_graph
+    global index_line
+    global num_line
     global light
     global light_swich
     global img0_orig
@@ -153,6 +155,8 @@ def init():
     index_plot_temp = 0
     index_warning_message = 0
     index_auto_scale_graph = 0
+    index_line = 0
+    num_line = 0
     stop_flag = False
     end_experiment = False
     start_flag = False

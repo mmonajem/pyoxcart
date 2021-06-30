@@ -327,6 +327,7 @@ def main():
     experiment.initialize_v_p()
     logger.info('Pulser is initialized')
 
+
     if variables.counter_source == 'pulse_counter':
         task_counter = experiment.initialize_counter()
         logger.info('Edge counter is initialized')
@@ -405,13 +406,15 @@ def main():
         if variables.stop_flag:
             print('Experiment is stopped by user')
             logger.info('Experiment is stopped by user')
-            queue_stop_measurement.put(True)
+            if variables.counter_source == 'TDC':
+                queue_stop_measurement.put(True)
             time.sleep(1)
             break
         if variables.max_ions <= variables.total_ions:
             print('Total number of Ions is achieved')
             logger.info('Total number of Ions is achieved')
-            queue_stop_measurement.put(True)
+            if variables.counter_source == 'TDC':
+                queue_stop_measurement.put(True)
             time.sleep(1)
             break
 

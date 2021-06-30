@@ -236,6 +236,7 @@ class Ui_OXCART(Camera, object):
         self.temp = QtWidgets.QLCDNumber(self.centralwidget)
         self.temp.setGeometry(QtCore.QRect(2270, 1620, 231, 91))
         self.temp.setObjectName("temp")
+        ####
         # self.cam_s_o = QtWidgets.QLabel(self.centralwidget)
         self.cam_s_o = pg.ImageView(self.centralwidget)
         self.cam_s_o.adjustSize()
@@ -246,6 +247,7 @@ class Ui_OXCART(Camera, object):
         # self.cam_s_o.setText("")
         self.cam_s_o.setObjectName("cam_s_o")
         # self.cam_b_o = QtWidgets.QLabel(self.centralwidget)
+        ####
         self.cam_b_o = pg.ImageView(self.centralwidget)
         self.cam_b_o.adjustSize()
         self.cam_b_o.ui.histogram.hide()
@@ -332,177 +334,182 @@ class Ui_OXCART(Camera, object):
         self.textEdit = QtWidgets.QTextEdit(self.centralwidget)
         self.textEdit.setGeometry(QtCore.QRect(530, 30, 2581, 140))
         self.textEdit.setObjectName("textEdit")
-        self.widget = QtWidgets.QWidget(self.centralwidget)
-        self.widget.setGeometry(QtCore.QRect(11, 12, 488, 801))
-        self.widget.setObjectName("widget")
-        self.gridLayout_3 = QtWidgets.QGridLayout(self.widget)
+        self.layoutWidget3 = QtWidgets.QWidget(self.centralwidget)
+        self.layoutWidget3.setGeometry(QtCore.QRect(11, 12, 488, 807))
+        self.layoutWidget3.setObjectName("layoutWidget3")
+        self.gridLayout_3 = QtWidgets.QGridLayout(self.layoutWidget3)
         self.gridLayout_3.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_3.setObjectName("gridLayout_3")
-        self.label = QtWidgets.QLabel(self.widget)
+        self.label = QtWidgets.QLabel(self.layoutWidget3)
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
         self.label.setFont(font)
         self.label.setObjectName("label")
         self.gridLayout_3.addWidget(self.label, 0, 0, 1, 1)
-        self.label_21 = QtWidgets.QLabel(self.widget)
+        self.label_21 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_21.setObjectName("label_21")
         self.gridLayout_3.addWidget(self.label_21, 1, 0, 1, 1)
-        self.ex_name = QtWidgets.QLineEdit(self.widget)
+        self.ex_name = QtWidgets.QLineEdit(self.layoutWidget3)
         self.ex_name.setObjectName("ex_name")
         self.gridLayout_3.addWidget(self.ex_name, 1, 1, 1, 1)
-        self.label_2 = QtWidgets.QLabel(self.widget)
+        self.label_2 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_2.setObjectName("label_2")
         self.gridLayout_3.addWidget(self.label_2, 2, 0, 1, 1)
-        self.ex_time = QtWidgets.QLineEdit(self.widget)
+        self.ex_time = QtWidgets.QLineEdit(self.layoutWidget3)
         self.ex_time.setObjectName("ex_time")
         self.gridLayout_3.addWidget(self.ex_time, 2, 1, 1, 1)
-        self.label_41 = QtWidgets.QLabel(self.widget)
+        self.label_41 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_41.setObjectName("label_41")
         self.gridLayout_3.addWidget(self.label_41, 3, 0, 1, 1)
-        self.max_ions = QtWidgets.QLineEdit(self.widget)
+        self.max_ions = QtWidgets.QLineEdit(self.layoutWidget3)
         self.max_ions.setObjectName("max_ions")
         self.gridLayout_3.addWidget(self.max_ions, 3, 1, 1, 1)
-        self.label_3 = QtWidgets.QLabel(self.widget)
+        self.label_3 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_3.setObjectName("label_3")
         self.gridLayout_3.addWidget(self.label_3, 4, 0, 1, 1)
-        self.ex_freq = QtWidgets.QLineEdit(self.widget)
+        self.ex_freq = QtWidgets.QLineEdit(self.layoutWidget3)
         self.ex_freq.setObjectName("ex_freq")
         self.gridLayout_3.addWidget(self.ex_freq, 4, 1, 1, 1)
-        self.label_4 = QtWidgets.QLabel(self.widget)
+        self.label_4 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_4.setObjectName("label_4")
         self.gridLayout_3.addWidget(self.label_4, 5, 0, 1, 1)
-        self.vdc_min = QtWidgets.QLineEdit(self.widget)
+        self.vdc_min = QtWidgets.QLineEdit(self.layoutWidget3)
         self.vdc_min.setObjectName("vdc_min")
         self.gridLayout_3.addWidget(self.vdc_min, 5, 1, 1, 1)
-        self.label_5 = QtWidgets.QLabel(self.widget)
+        self.label_5 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_5.setObjectName("label_5")
         self.gridLayout_3.addWidget(self.label_5, 6, 0, 1, 1)
-        self.vdc_max = QtWidgets.QLineEdit(self.widget)
+        self.vdc_max = QtWidgets.QLineEdit(self.layoutWidget3)
         self.vdc_max.setObjectName("vdc_max")
         self.gridLayout_3.addWidget(self.vdc_max, 6, 1, 1, 1)
-        self.label_6 = QtWidgets.QLabel(self.widget)
+        self.label_6 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_6.setObjectName("label_6")
         self.gridLayout_3.addWidget(self.label_6, 7, 0, 1, 1)
-        self.vdc_steps_up = QtWidgets.QLineEdit(self.widget)
+        self.vdc_steps_up = QtWidgets.QLineEdit(self.layoutWidget3)
         self.vdc_steps_up.setObjectName("vdc_steps_up")
         self.gridLayout_3.addWidget(self.vdc_steps_up, 7, 1, 1, 1)
-        self.label_28 = QtWidgets.QLabel(self.widget)
+        self.label_28 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_28.setObjectName("label_28")
         self.gridLayout_3.addWidget(self.label_28, 8, 0, 1, 1)
-        self.vdc_steps_down = QtWidgets.QLineEdit(self.widget)
+        self.vdc_steps_down = QtWidgets.QLineEdit(self.layoutWidget3)
         self.vdc_steps_down.setObjectName("vdc_steps_down")
         self.gridLayout_3.addWidget(self.vdc_steps_down, 8, 1, 1, 1)
-        self.label_20 = QtWidgets.QLabel(self.widget)
+        self.label_20 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_20.setObjectName("label_20")
         self.gridLayout_3.addWidget(self.label_20, 9, 0, 1, 1)
-        self.cycle_avg = QtWidgets.QLineEdit(self.widget)
+        self.cycle_avg = QtWidgets.QLineEdit(self.layoutWidget3)
         self.cycle_avg.setObjectName("cycle_avg")
         self.gridLayout_3.addWidget(self.cycle_avg, 9, 1, 1, 1)
-        self.label_8 = QtWidgets.QLabel(self.widget)
+        self.label_8 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_8.setObjectName("label_8")
         self.gridLayout_3.addWidget(self.label_8, 10, 0, 1, 1)
-        self.vp_min = QtWidgets.QLineEdit(self.widget)
+        self.vp_min = QtWidgets.QLineEdit(self.layoutWidget3)
         self.vp_min.setObjectName("vp_min")
         self.gridLayout_3.addWidget(self.vp_min, 10, 1, 1, 1)
-        self.label_9 = QtWidgets.QLabel(self.widget)
+        self.label_9 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_9.setObjectName("label_9")
         self.gridLayout_3.addWidget(self.label_9, 11, 0, 1, 1)
-        self.vp_max = QtWidgets.QLineEdit(self.widget)
+        self.vp_max = QtWidgets.QLineEdit(self.layoutWidget3)
         self.vp_max.setObjectName("vp_max")
         self.gridLayout_3.addWidget(self.vp_max, 11, 1, 1, 1)
-        self.label_25 = QtWidgets.QLabel(self.widget)
+        self.label_25 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_25.setObjectName("label_25")
         self.gridLayout_3.addWidget(self.label_25, 12, 0, 1, 1)
-        self.pulse_fraction = QtWidgets.QLineEdit(self.widget)
+        self.pulse_fraction = QtWidgets.QLineEdit(self.layoutWidget3)
         self.pulse_fraction.setObjectName("pulse_fraction")
         self.gridLayout_3.addWidget(self.pulse_fraction, 12, 1, 1, 1)
-        self.label_23 = QtWidgets.QLabel(self.widget)
+        self.label_23 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_23.setObjectName("label_23")
         self.gridLayout_3.addWidget(self.label_23, 13, 0, 1, 1)
-        self.pulse_frequency = QtWidgets.QLineEdit(self.widget)
+        self.pulse_frequency = QtWidgets.QLineEdit(self.layoutWidget3)
         self.pulse_frequency.setObjectName("pulse_frequency")
         self.gridLayout_3.addWidget(self.pulse_frequency, 13, 1, 1, 1)
-        self.label_17 = QtWidgets.QLabel(self.widget)
+        self.label_17 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_17.setObjectName("label_17")
         self.gridLayout_3.addWidget(self.label_17, 14, 0, 1, 1)
-        self.detection_rate_init = QtWidgets.QLineEdit(self.widget)
+        self.detection_rate_init = QtWidgets.QLineEdit(self.layoutWidget3)
         self.detection_rate_init.setObjectName("detection_rate_init")
         self.gridLayout_3.addWidget(self.detection_rate_init, 14, 1, 1, 1)
-        self.label_22 = QtWidgets.QLabel(self.widget)
+        self.label_22 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_22.setObjectName("label_22")
         self.gridLayout_3.addWidget(self.label_22, 15, 0, 1, 1)
-        self.hit_displayed = QtWidgets.QLineEdit(self.widget)
+        self.hit_displayed = QtWidgets.QLineEdit(self.layoutWidget3)
         self.hit_displayed.setObjectName("hit_displayed")
         self.gridLayout_3.addWidget(self.hit_displayed, 15, 1, 1, 1)
-        self.label_26 = QtWidgets.QLabel(self.widget)
+        self.label_26 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_26.setObjectName("label_26")
         self.gridLayout_3.addWidget(self.label_26, 16, 0, 1, 1)
-        self.email = QtWidgets.QLineEdit(self.widget)
+        self.email = QtWidgets.QLineEdit(self.layoutWidget3)
         self.email.setText("")
         self.email.setObjectName("email")
         self.gridLayout_3.addWidget(self.email, 16, 1, 1, 1)
-        self.label_27 = QtWidgets.QLabel(self.widget)
+        self.label_27 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_27.setObjectName("label_27")
         self.gridLayout_3.addWidget(self.label_27, 17, 0, 1, 1)
-        self.tweet = QtWidgets.QComboBox(self.widget)
+        self.tweet = QtWidgets.QComboBox(self.layoutWidget3)
         self.tweet.setObjectName("tweet")
         self.tweet.addItem("")
         self.tweet.addItem("")
         self.gridLayout_3.addWidget(self.tweet, 17, 1, 1, 1)
-        self.label_42 = QtWidgets.QLabel(self.widget)
+        self.label_42 = QtWidgets.QLabel(self.layoutWidget3)
         self.label_42.setObjectName("label_42")
         self.gridLayout_3.addWidget(self.label_42, 18, 0, 1, 1)
-        self.counter_source = QtWidgets.QComboBox(self.widget)
+        self.counter_source = QtWidgets.QComboBox(self.layoutWidget3)
         self.counter_source.setObjectName("counter_source")
         self.counter_source.addItem("")
         self.counter_source.addItem("")
         self.gridLayout_3.addWidget(self.counter_source, 18, 1, 1, 1)
-        self.widget1 = QtWidgets.QWidget(self.centralwidget)
-        self.widget1.setGeometry(QtCore.QRect(12, 824, 436, 242))
-        self.widget1.setObjectName("widget1")
-        self.gridLayout_4 = QtWidgets.QGridLayout(self.widget1)
+        self.parameters_source = QtWidgets.QComboBox(self.layoutWidget3)
+        self.parameters_source.setObjectName("parameters_source")
+        self.parameters_source.addItem("")
+        self.parameters_source.addItem("")
+        self.gridLayout_3.addWidget(self.parameters_source, 0, 1, 1, 1)
+        self.layoutWidget4 = QtWidgets.QWidget(self.centralwidget)
+        self.layoutWidget4.setGeometry(QtCore.QRect(10, 840, 436, 242))
+        self.layoutWidget4.setObjectName("layoutWidget4")
+        self.gridLayout_4 = QtWidgets.QGridLayout(self.layoutWidget4)
         self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_4.setObjectName("gridLayout_4")
-        self.label_11 = QtWidgets.QLabel(self.widget1)
+        self.label_11 = QtWidgets.QLabel(self.layoutWidget4)
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
         self.label_11.setFont(font)
         self.label_11.setObjectName("label_11")
         self.gridLayout_4.addWidget(self.label_11, 0, 0, 1, 1)
-        self.label_12 = QtWidgets.QLabel(self.widget1)
+        self.label_12 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_12.setObjectName("label_12")
         self.gridLayout_4.addWidget(self.label_12, 1, 0, 1, 1)
-        self.elapsed_time = QtWidgets.QLineEdit(self.widget1)
+        self.elapsed_time = QtWidgets.QLineEdit(self.layoutWidget4)
         self.elapsed_time.setText("")
         self.elapsed_time.setObjectName("elapsed_time")
         self.gridLayout_4.addWidget(self.elapsed_time, 1, 1, 1, 1)
-        self.label_13 = QtWidgets.QLabel(self.widget1)
+        self.label_13 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_13.setObjectName("label_13")
         self.gridLayout_4.addWidget(self.label_13, 2, 0, 1, 1)
-        self.total_ions = QtWidgets.QLineEdit(self.widget1)
+        self.total_ions = QtWidgets.QLineEdit(self.layoutWidget4)
         self.total_ions.setText("")
         self.total_ions.setObjectName("total_ions")
         self.gridLayout_4.addWidget(self.total_ions, 2, 1, 1, 1)
-        self.label_14 = QtWidgets.QLabel(self.widget1)
+        self.label_14 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_14.setObjectName("label_14")
         self.gridLayout_4.addWidget(self.label_14, 3, 0, 1, 1)
-        self.speciemen_voltage = QtWidgets.QLineEdit(self.widget1)
+        self.speciemen_voltage = QtWidgets.QLineEdit(self.layoutWidget4)
         self.speciemen_voltage.setText("")
         self.speciemen_voltage.setObjectName("speciemen_voltage")
         self.gridLayout_4.addWidget(self.speciemen_voltage, 3, 1, 1, 1)
-        self.label_16 = QtWidgets.QLabel(self.widget1)
+        self.label_16 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_16.setObjectName("label_16")
         self.gridLayout_4.addWidget(self.label_16, 4, 0, 1, 1)
-        self.pulse_voltage = QtWidgets.QLineEdit(self.widget1)
+        self.pulse_voltage = QtWidgets.QLineEdit(self.layoutWidget4)
         self.pulse_voltage.setText("")
         self.pulse_voltage.setObjectName("pulse_voltage")
         self.gridLayout_4.addWidget(self.pulse_voltage, 4, 1, 1, 1)
-        self.label_15 = QtWidgets.QLabel(self.widget1)
+        self.label_15 = QtWidgets.QLabel(self.layoutWidget4)
         self.label_15.setObjectName("label_15")
         self.gridLayout_4.addWidget(self.label_15, 5, 0, 1, 1)
-        self.detection_rate = QtWidgets.QLineEdit(self.widget1)
+        self.detection_rate = QtWidgets.QLineEdit(self.layoutWidget4)
         self.detection_rate.setText("")
         self.detection_rate.setObjectName("detection_rate")
         self.gridLayout_4.addWidget(self.detection_rate, 5, 1, 1, 1)
@@ -548,11 +555,13 @@ class Ui_OXCART(Camera, object):
         ####
 
     def retranslateUi(self, OXCART):
+
         _translate = QtCore.QCoreApplication.translate
         OXCART.setWindowTitle(_translate("OXCART", "OXCART"))
         self.label_7.setText(_translate("OXCART", "Voltage"))
         self.start_button.setText(_translate("OXCART", "Start"))
         ###
+        self._translate = QtCore.QCoreApplication.translate
         self.start_button.clicked.connect(self.thread_main)
         self.thread = MainThread()
         self.thread.signal.connect(self.finished_thread_main)
@@ -601,7 +610,8 @@ class Ui_OXCART(Camera, object):
                                          "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
                                          "p, li { white-space: pre-wrap; }\n"
                                          "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt; font-weight:400; font-style:normal;\">\n"
-                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:7pt;\">ex_name=test;ex_time=90;max_ions=2000;ex_freq=10;vdc_min=500;vdc_max=4000;vdc_steps_up=100;vdc_steps_down=100;vp_min=328;vp_max=3281;pulse_fraction=20;pulse_frequency=200;detection_rate_init=1;hit_displayed=20000;emai=;tweet=No;counter_source=TDC</span></p></body></html>"))
+                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">ex_name=test1;ex_time=90;max_ions=2000;ex_freq=10;vdc_min=500;vdc_max=4000;vdc_steps_up=100;vdc_steps_down=100;vp_min=328;vp_max=3281;pulse_fraction=20;pulse_frequency=200;detection_rate_init=1;hit_displayed=20000;email=;tweet=No;counter_source=TDC</p>\n"
+                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">ex_name=test2;ex_time=100;max_ions=3000;ex_freq=5;vdc_min=1000;vdc_max=3000;vdc_steps_up=50;vdc_steps_down=50;vp_min=400;vp_max=2000;pulse_fraction=15;pulse_frequency=200;detection_rate_init=2;hit_displayed=40000;email=;tweet=No;counter_source=Pulse Counter</p></body></html>"))
         self.label.setText(_translate("OXCART", "Setup Parameters"))
         self.label_21.setText(_translate("OXCART", "Experiment Name"))
         self.ex_name.setText(_translate("OXCART", "test"))
@@ -640,6 +650,8 @@ class Ui_OXCART(Camera, object):
         self.label_42.setText(_translate("OXCART", "Counter Source"))
         self.counter_source.setItemText(0, _translate("OXCART", "TDC"))
         self.counter_source.setItemText(1, _translate("OXCART", "Pulse Counter"))
+        self.parameters_source.setItemText(0, _translate("OXCART", "TextBox"))
+        self.parameters_source.setItemText(1, _translate("OXCART", "TextLine"))
         self.label_11.setText(_translate("OXCART", "Run Statistics"))
         self.label_12.setText(_translate("OXCART", "Elapsed Time (S):"))
         self.label_13.setText(_translate("OXCART", "Total Ions"))
@@ -755,14 +767,75 @@ class Ui_OXCART(Camera, object):
             event.ignore()
 
     def thread_main(self):
+
+        def read_update(text_line, index_line):
+            _translate = QtCore.QCoreApplication.translate
+            text_line = text_line[index_line].split(';')
+            text_line_b = []
+            for i in range(len(text_line)):
+                text_line_b.append(text_line[i].split('='))
+            for i in range(len(text_line_b)):
+                if text_line_b[i][0] == 'ex_name':
+                    self.ex_name.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'ex_time':
+                    self.ex_time.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'ex_freq':
+                    self.ex_freq.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'max_ions':
+                    self.max_ions.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'vdc_min':
+                    self.vdc_min.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'vdc_max':
+                    self.vdc_max.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'detection_rate_init':
+                    self.detection_rate_init.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'pulse_fraction':
+                    self.pulse_fraction.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'pulse_frequency':
+                    self.pulse_frequency.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'hit_displayed':
+                    self.hit_displayed.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'hdf5_path':
+                    self.ex_name.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'email':
+                    self.email.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'cycle_avg':
+                    self.cycle_avg.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'vdc_steps_up':
+                    self.vdc_steps_up.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'vdc_steps_down':
+                    self.vdc_steps_down.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'vp_min':
+                    self.vp_min.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'vp_max':
+                    self.vp_max.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'counter_source':
+                    if text_line_b[i][1] == 'TDC':
+                        self.counter_source.setCurrentIndex(0)
+                    if text_line_b[i][1] == 'Pulse Counter':
+                        self.counter_source.setCurrentIndex(1)
+                if text_line_b[i][0] == 'tweet':
+                    if text_line_b[i][1] == 'NO':
+                        self.tweet.setCurrentIndex(0)
+                    if text_line_b[i][1] == 'Yes':
+                        self.tweet.setCurrentIndex(1)
+
+        if self.parameters_source.currentText() == 'TextLine' and variables.index_line == 0:
+            lines = self.textEdit.toPlainText()
+            self.text_line = lines.splitlines()
+            self.num_line = len(self.text_line)
+        elif self.parameters_source.currentText() != 'TextLine' and variables.index_line == 0:
+            self.num_line = 0
         self.start_button.setEnabled(False)
         variables.plot_clear_flag = True
+
+        if self.parameters_source.currentText() == 'TextLine':
+            read_update(self.text_line, variables.index_line)
         variables.ex_time = int(float(self.ex_time.text()))
         variables.ex_freq = int(float(self.ex_freq.text()))
         variables.max_ions = int(float(self.max_ions.text()))
         variables.vdc_min = int(float(self.vdc_min.text()))
         variables.detection_rate = float(self.detection_rate_init.text())
-        variables.pulse_fraction = int(float(self.pulse_fraction.text()))
         variables.hit_display = int(float(self.hit_displayed.text()))
         variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
         variables.pulse_frequency = int(float(self.pulse_frequency.text()))
@@ -791,6 +864,7 @@ class Ui_OXCART(Camera, object):
             os.makedirs(variables.path, mode=0o777, exist_ok=True)
 
         self.thread.start()
+        variables.index_line += 1
 
     def statistics_thread(self):
         while True:
@@ -802,6 +876,10 @@ class Ui_OXCART(Camera, object):
         self.stop_button.setEnabled(True)
         QScreen.grabWindow(app.primaryScreen(),
                            QApplication.desktop().winId()).save(variables.path + '\\screenshot.png')
+        if variables.index_line < self.num_line:
+            self.thread_main()
+        else:
+            variables.index_line = 0
 
 
     def stop_ex(self):
@@ -938,6 +1016,9 @@ class Ui_OXCART(Camera, object):
             self.visualization.clear()
             variables.plot_clear_flag = False
 
+        if variables.index_wait_on_plot_start <= 16:
+            variables.index_wait_on_plot_start += 1
+
         if variables.start_flag:
             if variables.index_wait_on_plot_start >= 8:
                 # V_dc and V_p
@@ -969,8 +1050,6 @@ class Ui_OXCART(Camera, object):
                 variables.index_plot += 1
             # Time of Flight
             if variables.counter_source == 'TDC':
-                if variables.index_wait_on_plot_start <= 16:
-                    variables.index_wait_on_plot_start += 1
                 if variables.index_wait_on_plot_start > 16:
 
                     # max_lenght = max(len(variables.x), len(variables.y),
@@ -1096,8 +1175,14 @@ class Ui_OXCART(Camera, object):
             variables.v_p_max = int(float(self.vp_max.text()))
             variables.counter_source = str(self.counter_source.currentText())
 
+            if variables.counter_source == 'Pulse Counter':
+                variables.counter_source = 'pulse_counter'
+
+
             if self.tweet.currentText() == 'Yes':
                 variables.tweet = True
+            elif self.tweet.currentText() == 'No':
+                variables.tweet = False
 
             if int(float(self.vdc_max.text())) > 20000:
                 _translate = QtCore.QCoreApplication.translate
