@@ -1,9 +1,5 @@
-import multiprocessing
-import time
 
-import variables
 import scTDC
-
 
 class UCB2(scTDC.usercallbacks_pipe):
     def __init__(self, lib, dev_desc, queue_x, queue_y, queue_t,
@@ -45,6 +41,7 @@ class UCB2(scTDC.usercallbacks_pipe):
             self.queue_t.put(dld_events[i].sum)
             self.queue_dld_start_counter.put(dld_events[i].start_counter)
 
+
 # Initializing the TDC
 def initialize_tdc():
     device = scTDC.Device(autoinit=False)
@@ -55,11 +52,11 @@ def initialize_tdc():
 
     return device
 
+
 # This function is called from main control loop in a separate process
 def experiment_measure(queue_x, queue_y, queue_t, queue_dld_start_counter, queue_channel,
                        queue_time_data, queue_tdc_start_counter,
                        queue_start_measurement, queue_stop_mesurment):
-
     device_tdc = initialize_tdc()
     ucb = UCB2(device_tdc.lib, device_tdc.dev_desc,
                queue_x, queue_y, queue_t, queue_dld_start_counter, queue_channel,

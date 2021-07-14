@@ -1,8 +1,3 @@
-# from pfeiffer import TPG262
-
-
-
-
 
 """This module contains drivers for the following equipment from Pfeiffer
 Vacuum:
@@ -166,7 +161,7 @@ class TPG26x(object):
                 value2, (status_code2, MEASUREMENT_STATUS[status_code2]))
 
     def gauge_identification(self):
-        """Return the gauge identication
+        """Return the gauge identification
         :return: (id_code_1, id_1, id_code_2, id_2)
         :rtype: tuple
         """
@@ -214,12 +209,7 @@ class TPG362(TPG26x):
         """
         super(TPG362, self).__init__(port=port, baudrate=baudrate)
 
-# tpg = TPG362(port='COM5')
-# value, (status_code, status_string) = tpg.pressure_gauge(2)
-# # or
-# value, _ = tpg.pressure_gauge(2)
-# unit = tpg.pressure_unit()
-# print ('pressure is {} {}'.format(value, unit))
+
 
 
 

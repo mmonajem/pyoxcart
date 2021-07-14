@@ -1,10 +1,8 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, QThread, pyqtSignal
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QScreen
-from PyQt5.QtGui import QPixmap, QImage
-import pyqtgraph as pg
-import pyqtgraph.exporters
+"""
+This is the main script of main GUI of the OXCART Atom Probe.
+@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
+"""
+
 import sys
 import numpy as np
 import nidaqmx
@@ -12,33 +10,30 @@ import time
 import threading
 import datetime
 import os
+# PyQt and PyQtgraph libraries
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QScreen, QPixmap, QImage
+import pyqtgraph as pg
+import pyqtgraph.exporters
+# Serial ports and Camera libraries
 import serial.tools.list_ports
 from pypylon import pylon
-
+# Local project scripts
 import oxcart
 import variables
 from camera import Camera
 import initialize_devices
 
 
-
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-
 class Ui_OXCART(Camera, object):
-
+    """
+    The GUI class of the Oxcart
+    """
     def __init__(self, devices, tlFactory, cameras, converter, lock):
-        super().__init__(devices, tlFactory, cameras, converter)
-        self.lock = lock
+        super().__init__(devices, tlFactory, cameras, converter) # Cameras variables and converter
+        self.lock = lock # Lock for thread ...
 
     def setupUi(self, OXCART):
         OXCART.setObjectName("OXCART")
@@ -662,7 +657,7 @@ class Ui_OXCART(Camera, object):
         self.vdc_time.showGrid(x=True, y=True)
         # Add Range
         self.vdc_time.setXRange(0, 1000, padding=0.05)
-        self.vdc_time.setYRange(0, 20000, padding=0.05)
+        self.vdc_time.setYRange(0, 15000, padding=0.05)
 
         # Detection Visualization #########################
         self.x_dtec = np.arange(1000)  # 1000 time points
@@ -703,7 +698,6 @@ class Ui_OXCART(Camera, object):
         # Add Range
         self.temperature.setYRange(0, 100, padding=0.1)
 
-
         # Visualization #####################
         self.scatter = pg.ScatterPlotItem(
             size=1, brush=pg.mkBrush(255, 255, 255, 120))
@@ -739,20 +733,16 @@ class Ui_OXCART(Camera, object):
         self.led_light.setPixmap(self.led_red)
         self.led_pump_load_lock.setPixmap(self.led_green)
 
-    def closeEvent(self, event):
-
-        reply = QtWidgets.QMessageBox.question(self, 'Message',
-                                               "Are you sure to quit?", QtWidgets.QMessageBox.Yes |
-                                               QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
-        if reply == QtWidgets.QMessageBox.Yes:
-
-            event.accept()
-        else:
-            event.ignore()
-
     def thread_main(self):
-
+        """
+        Main thread for running experiment
+        """
         def read_update(text_line, index_line):
+            """
+            Function for reading the Textline box
+            This function is only run if Textline is selected in the GUI
+            The function read the the text line and put it in the Qboxes
+            """
             _translate = QtCore.QCoreApplication.translate
             text_line = text_line[index_line].split(';')
             text_line_b = []
@@ -805,16 +795,18 @@ class Ui_OXCART(Camera, object):
                         self.tweet.setCurrentIndex(1)
 
         if self.parameters_source.currentText() == 'TextLine' and variables.index_line == 0:
-            lines = self.textEdit.toPlainText()
-            self.text_line = lines.splitlines()
-            self.num_line = len(self.text_line)
+            lines = self.textEdit.toPlainText() # Copy all the lines in TextLine
+            self.text_line = lines.splitlines() # Seperate the lines in TextLine
+            self.num_line = len(self.text_line) # count number of line in TextLine (Number of experiments that have to be done)
         elif self.parameters_source.currentText() != 'TextLine' and variables.index_line == 0:
             self.num_line = 0
-        self.start_button.setEnabled(False)
-        variables.plot_clear_flag = True
+        self.start_button.setEnabled(False) # Disable the start button in the GUI
+        variables.plot_clear_flag = True # Change the flag to clear the plots in GUI
 
+        # If the TextLine is selected the read_update function is run
         if self.parameters_source.currentText() == 'TextLine':
             read_update(self.text_line, variables.index_line)
+        # Update global variables to do the experiments
         variables.ex_time = int(float(self.ex_time.text()))
         variables.ex_freq = int(float(self.ex_freq.text()))
         variables.max_ions = int(float(self.max_ions.text()))
@@ -846,69 +838,84 @@ class Ui_OXCART(Camera, object):
         # Create folder to save the data
         if not os.path.isdir(variables.path):
             os.makedirs(variables.path, mode=0o777, exist_ok=True)
-
+        # start the run methos of MainThread Class, which is main function of oxcart.py
         self.thread.start()
-        variables.index_line += 1
-
+        if self.parameters_source.currentText() == 'TextLine':
+            variables.index_line += 1 # increase the index line of TextLine to read the second line in next step
 
     def finished_thread_main(self):
+        """
+        The function that is run after end of experiment(MainThread)
+        """
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(True)
         QScreen.grabWindow(app.primaryScreen(),
                            QApplication.desktop().winId()).save(variables.path + '\\screenshot.png')
-        if variables.index_line < self.num_line:
+        if variables.index_line < self.num_line: # Do next experiment in case of TextLine
             self.thread_main()
         else:
             variables.index_line = 0
 
-
     def stop_ex(self):
-        variables.stop_flag = True
-        self.stop_button.setEnabled(False)
-        print('STOP Flag is set:', variables.stop_flag)
+        """
+        The function that is run if STOP button is pressed
+        """
+        if variables.start_flag == True:
+            variables.stop_flag = True # Set the STOP flag
+            self.stop_button.setEnabled(False) # Disable the stop button
+            print('STOP Flag is set:', variables.stop_flag)
 
     def gates(self, gate_num):
+        """
+        The function for closing or opening gates
+        """
         def switch_gate(num):
+            """
+            The function for applying the command of closing or opening gate
+            """
             with nidaqmx.Task() as task:
                 task.do_channels.add_do_chan('Dev2/port0/line%s' % num)
                 task.start()
                 task.write([True])
                 time.sleep(.5)
                 task.write([False])
-
+        # Main gate
         if gate_num == 1 and not variables.flag_load_gate and not variables.flag_cryo_gate and variables.flag_pump_load_lock:
-            if not variables.flag_main_gate:
+            if not variables.flag_main_gate: # Open the main gate
                 switch_gate(0)
                 self.led_main_chamber.setPixmap(self.led_green)
                 self.diagram.setPixmap(self.diagram_main_open)
                 variables.flag_main_gate = True
-            elif variables.flag_main_gate:
+            elif variables.flag_main_gate: # Close the main gate
                 switch_gate(1)
                 self.led_main_chamber.setPixmap(self.led_red)
                 self.diagram.setPixmap(self.diagram_close_all)
                 variables.flag_main_gate = False
+        # Buffer gate
         elif gate_num == 2 and not variables.flag_main_gate and not variables.flag_cryo_gate and variables.flag_pump_load_lock:
-            if not variables.flag_load_gate:
+            if not variables.flag_load_gate: # Open the main gate
                 switch_gate(2)
                 self.led_load_lock.setPixmap(self.led_green)
                 self.diagram.setPixmap(self.diagram_load_open)
                 variables.flag_load_gate = True
-            elif variables.flag_load_gate:
+            elif variables.flag_load_gate: # Close the main gate
                 switch_gate(3)
                 self.led_load_lock.setPixmap(self.led_red)
                 self.diagram.setPixmap(self.diagram_close_all)
                 variables.flag_load_gate = False
+        # Cryo gate
         elif gate_num == 3 and not variables.flag_main_gate and not variables.flag_load_gate and variables.flag_pump_load_lock:
-            if not variables.flag_cryo_gate:
+            if not variables.flag_cryo_gate: # Open the main gate
                 switch_gate(4)
                 self.led_cryo.setPixmap(self.led_green)
                 self.diagram.setPixmap(self.diagram_cryo_open)
                 variables.flag_cryo_gate = True
-            elif variables.flag_cryo_gate:
+            elif variables.flag_cryo_gate: # Close the main gate
                 switch_gate(5)
                 self.led_cryo.setPixmap(self.led_red)
                 self.diagram.setPixmap(self.diagram_close_all)
                 variables.flag_cryo_gate = False
+        # Show the error message in the GUI
         else:
             _translate = QtCore.QCoreApplication.translate
             self.Error.setText(_translate("OXCART",
@@ -916,25 +923,27 @@ class Ui_OXCART(Camera, object):
                                           "the Gates and switch on the pump !!!</span></p></body></html>"))
 
     def pump_switch(self):
+        """
+        The function for Switching the Load Lock pump
+        """
         if not variables.flag_main_gate and not variables.flag_cryo_gate \
                 and not variables.flag_load_gate:
             if variables.flag_pump_load_lock:
-                # self.led_pump_load_lock.setPixmap(self.led_red)
-                # variables.flag_pump_load_lock = False
                 variables.flag_pump_load_lock_click = True
                 self.pump_load_lock_switch.setEnabled(False)
             elif not variables.flag_pump_load_lock:
-                # self.led_pump_load_lock.setPixmap(self.led_green)
-                # variables.flag_pump_load_lock = True
                 variables.flag_pump_load_lock_click = True
                 self.pump_load_lock_switch.setEnabled(False)
-        else:
+        else: # SHow error message in the GUI
             _translate = QtCore.QCoreApplication.translate
             self.Error.setText(_translate("OXCART",
                                           "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all "
                                           "the Gates !!!</span></p></body></html>"))
 
     def light_switch(self):
+        """
+        The function for switching the exposure time of cameras in case of swithching the light
+        """
         if not variables.light:
             self.led_light.setPixmap(self.led_green)
             Camera.light_switch(self)
@@ -951,10 +960,15 @@ class Ui_OXCART(Camera, object):
             variables.light_swich = False
 
     def thread_worker(self, target):
-
+        """
+        The function for creating workers
+        """
         return threading.Thread(target=target)
 
     def update_plot_data(self):
+        """
+        The function for updating plots
+        """
         # Temperature
         self.x_tem = self.x_tem[1:]  # Remove the first element.
         self.x_tem = np.append(self.x_tem, self.x_tem[-1] + 1)  # Add a new value 1 higher than the last.
@@ -963,9 +977,9 @@ class Ui_OXCART(Camera, object):
 
         self.data_line_tem.setData(self.x_tem, self.y_tem)
         if variables.index_auto_scale_graph == 30:
-            self.temperature.enableAutoRange()
-            self.vdc_time.enableAutoRange()
-            self.detection_rate_viz.enableAutoRange()
+            self.temperature.enableAutoRange(axis='x')
+            self.vdc_time.enableAutoRange(axis='x')
+            self.detection_rate_viz.enableAutoRange(axis='x')
             variables.index_auto_scale_graph = 0
 
         self.temperature.disableAutoRange()
@@ -1007,7 +1021,7 @@ class Ui_OXCART(Camera, object):
                     self.y_vps[variables.index_plot] = int(variables.pulse_voltage)  # Add a new value.
                 else:
                     self.x_vdc = np.append(self.x_vdc,
-                                           self.x_tem[-1] + 1)  # Add a new value 1 higher than the last.
+                                           self.x_vdc[-1] + 1)  # Add a new value 1 higher than the last.
                     self.y_vdc = np.append(self.y_vdc, int(variables.specimen_voltage))  # Add a new value.
                     self.y_vps = np.append(self.y_vps, int(variables.pulse_voltage))  # Add a new value.
 
@@ -1015,21 +1029,20 @@ class Ui_OXCART(Camera, object):
                 self.data_line_vps.setData(self.x_vdc, self.y_vps)
 
                 # Detection Rate Visualization
-                if variables.total_ions > 0:
-                    if variables.index_plot <= 999:
-                        self.y_dtec[variables.index_plot] = int(variables.avg_n_count)  # Add a new value.
-                    else:
-                        self.x_dtec = self.x_dtec[1:]  # Remove the first element.
-                        self.x_dtec = np.append(self.x_dtec,
-                                                self.x_dtec[-1] + 1)  # Add a new value 1 higher than the last.
-                        self.y_dtec = self.y_dtec[1:]
-                        self.y_dtec = np.append(self.y_dtec, int(variables.avg_n_count))
+                if variables.index_plot <= 999:
+                    self.y_dtec[variables.index_plot] = int(variables.avg_n_count)  # Add a new value.
+                else:
+                    self.x_dtec = self.x_dtec[1:]  # Remove the first element.
+                    self.x_dtec = np.append(self.x_dtec,
+                                            self.x_dtec[-1] + 1)  # Add a new value 1 higher than the last.
+                    self.y_dtec = self.y_dtec[1:]
+                    self.y_dtec = np.append(self.y_dtec, int(variables.avg_n_count))
 
-                    self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+                self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
                 # Increase the index
                 variables.index_plot += 1
             # Time of Flight
-            if variables.counter_source == 'TDC':
+            if variables.counter_source == 'TDC' and variables.total_ions > 0 and variables.index_wait_on_plot_start > 16 and variables.index_wait_on_plot_start > 16:
                 if variables.index_wait_on_plot_start > 16:
 
                     # max_lenght = max(len(variables.x), len(variables.y),
@@ -1064,7 +1077,7 @@ class Ui_OXCART(Camera, object):
 
                     except:
                         print(
-                            f"{bcolors.FAIL}Error: Cannot plot Histogram correctly{bcolors.ENDC}")
+                            f"{initialize_devices.bcolors.FAIL}Error: Cannot plot Histogram correctly{initialize_devices.bcolors.ENDC}")
 
                     # Visualization
                     try:
@@ -1083,7 +1096,7 @@ class Ui_OXCART(Camera, object):
                         self.visualization.addItem(self.scatter)
                     except:
                         print(
-                            f"{bcolors.FAIL}Error: Cannot plot Ions correctly{bcolors.ENDC}")
+                            f"{initialize_devices.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
 
             # save plots to the file
             if variables.index_plot_save % 100 == 0:
@@ -1109,6 +1122,9 @@ class Ui_OXCART(Camera, object):
             (variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000)))))
 
     def statistics(self):
+        """
+        The function for updating statistics in the GUI
+        """
         # update temperature and vacuum gages
         self.temp.display(variables.temperature)
         self.vacuum_main.display(variables.vacuum_main)
@@ -1158,12 +1174,11 @@ class Ui_OXCART(Camera, object):
             if variables.counter_source == 'Pulse Counter':
                 variables.counter_source = 'pulse_counter'
 
-
             if self.tweet.currentText() == 'Yes':
                 variables.tweet = True
             elif self.tweet.currentText() == 'No':
                 variables.tweet = False
-
+            # Show error message for V_dc higher than 20Kv
             if int(float(self.vdc_max.text())) > 20000:
                 _translate = QtCore.QCoreApplication.translate
                 self.Error.setText(_translate("OXCART",
@@ -1172,7 +1187,7 @@ class Ui_OXCART(Camera, object):
                 self.vdc_max.setText(_translate("OXCART", str(variables.vdc_max)))
             else:
                 variables.vdc_max = int(float(self.vdc_max.text()))
-
+            # Show error message for V_p higher than 3281
             if float(self.vp_max.text()) > 3281:
                 _translate = QtCore.QCoreApplication.translate
                 self.Error.setText(_translate("OXCART",
@@ -1184,10 +1199,12 @@ class Ui_OXCART(Camera, object):
 
         except:
             print(
-                f"{bcolors.FAIL}Error: Cannot update setup parameters{bcolors.ENDC}")
+                f"{initialize_devices.bcolors.FAIL}Error: Cannot update setup parameters{initialize_devices.bcolors.ENDC}")
 
     def update_cameras(self, ):
-
+        """
+        The function for updating cameras in the GUI
+        """
         self.cam_s_o.setImage(variables.img0_orig, autoRange=False)
         self.cam_b_o.setImage(variables.img1_orig, autoRange=False)
 
@@ -1201,10 +1218,12 @@ class Ui_OXCART(Camera, object):
         self.cam_b_d.setPixmap(self.camera1_zoom)
 
 
-
 class MainThread(QThread):
+    """
+    A class for creating main_thread
+    The run method create thread of main function in the OXCART script
+    """
     signal = pyqtSignal('PyQt_PyObject')
-
     def __init__(self, ):
         QThread.__init__(self, )
         # run method gets called when we start the thread
@@ -1212,12 +1231,6 @@ class MainThread(QThread):
     def run(self):
         main_thread = oxcart.main()
         self.signal.emit(main_thread)
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
@@ -1287,12 +1300,13 @@ if __name__ == "__main__":
 
     except:
         print('Can not initialize the Cameras')
-
+    # Thread for reading cameras
     lock2 = threading.Lock()
     camera_thread = threading.Thread(target=camera.update_cameras, args=(lock2,))
     camera_thread.setDaemon(True)
     camera_thread.start()
     lock1 = threading.Lock()
+    # Thread for reading gauges
     gauges_thread = threading.Thread(target=initialize_devices.gauges_update, args=(lock1, com_port_cryovac))
     gauges_thread.setDaemon(True)
     gauges_thread.start()

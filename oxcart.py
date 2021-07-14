@@ -1,7 +1,9 @@
-# OXCART
+"""
+This is the main script for doing experiment.
+It contains the main control loop of experiment.
+@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
+"""
 
-
-# package needed
 import time
 import datetime
 import h5py
@@ -10,23 +12,24 @@ from multiprocessing.queues import Queue
 import threading
 import numpy as np
 
-# package needed to list available COM ports
+# Serial ports and NI
 import serial.tools.list_ports
 import pyvisa as visa
 import nidaqmx
-
+# Local project scripts
 import tdc
 import variables
 import email_send
 import tweet_send
 import initialize_devices
-# # get available COM ports and store as list
-# com_ports = list(serial.tools.list_ports.comports())
 
 
 def logging():
-    # Gets or creates a logger
+    """
+    logging function
+    """
     import logging
+    # Gets or creates a logger
     logger = logging.getLogger(__name__)
     # set log level
     logger.setLevel(logging.INFO)
@@ -48,35 +51,31 @@ def logging():
     return logger
 
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-
 class OXCART:
+    """
+    OXCART class
+    """
 
     def __init__(self, queue_x, queue_y, queue_t, queue_dld_start_counter,
                  queue_channel, queue_time_data, queue_tdc_start_counter, lock1, lock2):
+        # Queues for sharing data between tdc and main process
+        # dld queues
         self.queue_x = queue_x
         self.queue_y = queue_y
         self.queue_t = queue_t
         self.queue_dld_start_counter = queue_dld_start_counter
+        self.lock1 = lock1
+        # TDC queues
         self.queue_channel = queue_channel
         self.queue_time_data = queue_time_data
         self.queue_tdc_start_counter = queue_tdc_start_counter
-        self.lock1 = lock1
         self.lock2 = lock2
 
     # Initialize the V_dc for the experiment
     def initialize_v_dc(self):
-
+        """
+        Initializing the high voltage function
+        """
         # Setting the com port of V_dc
         self.com_port_v_dc = serial.Serial(
             port=initialize_devices.com_ports[variables.com_port_idx_V_dc].device,  # chosen COM port
@@ -99,7 +98,9 @@ class OXCART:
             exit()
 
     def initialize_v_p(self):
-
+        """
+        Initializing the pulser function
+        """
         # set the port for v_p
         resources = visa.ResourceManager('@py')
         self.com_port_v_p = resources.open_resource('ASRL4::INSTR')
@@ -111,6 +112,9 @@ class OXCART:
             self.com_port_v_p.write('VOLT %s' % (variables.v_p_min * (1 / variables.pulse_amp_per_supply_voltage)))
 
     def initialize_counter(self):
+        """
+        Initializing the edge counter function
+        """
         task_counter = nidaqmx.Task()
         task_counter.ci_channels.add_ci_count_edges_chan("Dev1/ctr0")
         # reference the terminal you want to use for the counter here
@@ -120,6 +124,9 @@ class OXCART:
 
     # apply command to the V_dc
     def command_v_dc(self, cmd):
+        """
+        Initializing the high voltage function
+        """
         self.com_port_v_dc.write(
             (cmd + '\r\n').encode())  # send cmd to device # might not work with older devices -> "LF" only needed!
         time.sleep(0.005)  # small sleep for response
@@ -128,31 +135,13 @@ class OXCART:
             response = self.com_port_v_dc.readline()  # all characters received, read line till '\r\n'
         return response.decode("utf-8")
 
-    def clear_up(self, task_counter):
-        print('starting to clean up')
-        # save the data to the HDF5
 
-        # Switch off the v_dc
-        self.command_v_dc('F0')
-        self.com_port_v_dc.close()
-
-        # Switch off the v_p
-        self.com_port_v_p.write('VOLT 0')
-        self.com_port_v_p.write('OUTPut OFF')
-        self.com_port_v_p.close()
-
-        # Interrupt the TDC
-        # device.interrupt_measurement()
-
-        if variables.counter_source == 'pulse_counter':
-            # Close the task of counter
-            task_counter.stop()
-            task_counter.close()
-        # Zero variables
-        self.cleanup_variables()
-        print('Clean up is finished')
 
     def reader_queue_dld(self):
+        """
+        reader of DLD queues function
+        This function is called continuously by a separate thread
+        """
         while True:
             while not self.queue_x.empty() or not self.queue_y.empty() or not self.queue_t.empty() or not self.queue_dld_start_counter.empty():
                 with self.lock1:
@@ -163,10 +152,15 @@ class OXCART:
                                                             self.queue_dld_start_counter.get())
                     variables.main_v_dc_dld = np.append(variables.main_v_dc_dld, variables.specimen_voltage)
                     variables.main_v_p_dld = np.append(variables.main_v_p_dld, variables.pulse_voltage)
+            # If end of experiment flag is set break the while loop
             if variables.end_experiment:
                 break
 
     def reader_queue_tdc(self):
+        """
+        reader of TDC queues function
+        This function is called continuously by a separate thread
+        """
         while True:
             while not self.queue_channel.empty() or not self.queue_time_data.empty() or not self.queue_tdc_start_counter.empty():
                 with self.lock2:
@@ -176,10 +170,17 @@ class OXCART:
                                                             self.queue_tdc_start_counter.get())
                     variables.main_v_dc_tdc = np.append(variables.main_v_dc_tdc, variables.specimen_voltage)
                     variables.main_v_p_tdc = np.append(variables.main_v_p_tdc, variables.pulse_voltage)
+            # If end of experiment flag is set break the while loop
             if variables.end_experiment:
                 break
 
     def main_ex_loop(self, task_counter, counts_target):
+        """
+        Function that is called in each loop of main function
+        1- Read the number of detected Ions(in TDC or Counter mode)
+        2- Calculate the error of detection rate of desire rate
+        3- Regulate the high voltage and pulser
+        """
         # # reading DC HV
         # v_dc = (command_v_dc(">S0A?")[5:-1])
         # variables.specimen_voltage = float(v_dc)
@@ -215,11 +216,13 @@ class OXCART:
             voltage_step = counts_error * variables.vdc_step_up
         elif counts_error <= 0:
             voltage_step = counts_error * variables.vdc_step_down
+
         # update v_dc
         if variables.specimen_voltage < variables.vdc_max:
-            # sending VDC via serial
-            variables.specimen_voltage = variables.specimen_voltage + voltage_step
-            self.command_v_dc(">S0 %s" % (variables.specimen_voltage))
+            if variables.specimen_voltage >= variables.vdc_min:
+                # sending VDC via serial
+                variables.specimen_voltage = variables.specimen_voltage + voltage_step
+                self.command_v_dc(">S0 %s" % (variables.specimen_voltage))
 
         # update pulse voltage v_p
         new_vp = variables.specimen_voltage * variables.pulse_fraction * \
@@ -231,55 +234,97 @@ class OXCART:
         variables.main_temperature = np.append(variables.main_temperature, variables.temperature)
         variables.main_chamber_vacuum = np.append(variables.main_chamber_vacuum, float(variables.vacuum_main))
 
-    def cleanup_variables(self):
-        variables.stop_flag = False
-        variables.end_experiment = False
-        variables.start_flag = False
-        variables.elapsed_time = 0.0
-        variables.total_ions = 0
-        variables.specimen_voltage = 0.0
-        variables.detection_rate = 0.0
-        variables.detection_rate_elapsed = 0.0
-        variables.pulse_voltage = 0.0
-        variables.total_count = 0
-        variables.count = 0
-        variables.count_temp = 0
-        variables.count_last = 0
-        variables.avg_n_count = 0
-        variables.index_plot = 0
-        variables.index_save_image = 0
-        variables.index_wait_on_plot_start = 0
-        variables.index_plot_save = 0
-        variables.index_plot = 0
+    def clear_up(self, task_counter):
+        """
+        Clear global variables and deinitializing high voltage and pulser  function
+        """
 
-        variables.x = np.zeros(0)
-        variables.y = np.zeros(0)
-        variables.t = np.zeros(0)
-        variables.dld_start_counter = np.zeros(0)
+        @staticmethod
+        def cleanup_variables():
+            """
+            Clear up all the global variables
+            """
+            variables.stop_flag = False
+            variables.end_experiment = False
+            variables.start_flag = False
+            variables.elapsed_time = 0.0
+            variables.total_ions = 0
+            variables.specimen_voltage = 0.0
+            variables.detection_rate = 0.0
+            variables.detection_rate_elapsed = 0.0
+            variables.pulse_voltage = 0.0
+            variables.total_count = 0
+            variables.count = 0
+            variables.count_temp = 0
+            variables.count_last = 0
+            variables.avg_n_count = 0
+            variables.index_plot = 0
+            variables.index_save_image = 0
+            variables.index_wait_on_plot_start = 0
+            variables.index_plot_save = 0
+            variables.index_plot = 0
 
-        variables.channel = np.zeros(0)
-        variables.time_data = np.zeros(0)
-        variables.tdc_start_counter = np.zeros(0)
+            variables.x = np.zeros(0)
+            variables.y = np.zeros(0)
+            variables.t = np.zeros(0)
+            variables.dld_start_counter = np.zeros(0)
 
-        variables.main_v_dc = np.zeros(0)
-        variables.main_v_p = np.zeros(0)
-        variables.main_counter = np.zeros(0)
-        variables.main_temperature = np.zeros(0)
-        variables.main_chamber_vacuum = np.zeros(0)
-        variables.main_v_dc_dld = np.zeros(0)
-        variables.main_v_p_dld = np.zeros(0)
-        variables.main_v_dc_tdc = np.zeros(0)
-        variables.main_v_p_tdc = np.zeros(0)
+            variables.channel = np.zeros(0)
+            variables.time_data = np.zeros(0)
+            variables.tdc_start_counter = np.zeros(0)
 
+            variables.main_v_dc = np.zeros(0)
+            variables.main_v_p = np.zeros(0)
+            variables.main_counter = np.zeros(0)
+            variables.main_temperature = np.zeros(0)
+            variables.main_chamber_vacuum = np.zeros(0)
+            variables.main_v_dc_dld = np.zeros(0)
+            variables.main_v_p_dld = np.zeros(0)
+            variables.main_v_dc_tdc = np.zeros(0)
+            variables.main_v_p_tdc = np.zeros(0)
+
+        print('starting to clean up')
+        # save the data to the HDF5
+
+        # Switch off the v_dc
+        self.command_v_dc('F0')
+        self.com_port_v_dc.close()
+
+        # Switch off the v_p
+        self.com_port_v_p.write('VOLT 0')
+        self.com_port_v_p.write('OUTPut OFF')
+        self.com_port_v_p.close()
+
+        # Interrupt the TDC
+        # device.interrupt_measurement()
+
+        if variables.counter_source == 'pulse_counter':
+            # Close the task of counter
+            task_counter.stop()
+            task_counter.close()
+        # Zero variables
+        self.cleanup_variables()
+        print('Clean up is finished')
 
 def main():
+    """
+    Main function for doing experiments
+    1- Initialize all the devices (High voltage, pulser, TDC or Edge-Counter)
+    2- Create and start reader DLD and TDC thread
+    3- Create and start the TDC process if TDC is selected in GUI
+    4- Iterate over the main loop of experiments and control the experiment frequency
+    5- Stop the experiment if stop condition is achieved
+    6- Deinitialize devices
+    7- Save the data
+    8- Send email and tweet
+    """
     # Initialize logger
     logger = logging()
     logger.info('Experiment is starting')
 
     variables.start_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
-    # Wait for 3 second before starting the experiment
+    # Create and start the TDC process and related queues
     if variables.counter_source == 'TDC':
         queue_x = Queue(maxsize=-1, ctx=multiprocessing.get_context())
         queue_y = Queue(maxsize=-1, ctx=multiprocessing.get_context())
@@ -311,18 +356,19 @@ def main():
         queue_start_measurement = None
         queue_stop_measurement = None
 
-    # Initialization of devices
+    # Lock that is used by TDC and DLD threads
     lock1 = threading.Lock()
     lock2 = threading.Lock()
+    # Create the experiment object
     experiment = OXCART(queue_x, queue_y, queue_t, queue_dld_start_counter,
                         queue_channel, queue_time_data,
                         queue_tdc_start_counter, lock1, lock2)
+    # Initialize high voltage
     experiment.initialize_v_dc()
     logger.info('High voltage is initialized')
-
+    # Initialize pulser
     experiment.initialize_v_p()
     logger.info('Pulser is initialized')
-
 
     if variables.counter_source == 'pulse_counter':
         task_counter = experiment.initialize_counter()
@@ -352,7 +398,9 @@ def main():
         read_tdc_queue_thread.start()
     total_steps = variables.ex_time * variables.ex_freq
     steps = 0
+    # Main loop of experiment
     while steps < total_steps:
+        # Only for initializing every thing at firs iteration
         if steps == 0:
             # Turn on the v_dc and v_p
             experiment.com_port_v_p.write('OUTPut ON')
@@ -364,7 +412,9 @@ def main():
                 task_counter.start()
 
             variables.start_flag = True
+            # Wait for 8 second to all devices get ready
             time.sleep(8)
+            # Set the TDC flag
             if variables.counter_source == 'TDC':
                 queue_start_measurement.put(True)
             # Total experiment time variable
@@ -372,12 +422,13 @@ def main():
 
             print('Experiment is started')
             logger.info('Experiment is started')
-        # main loop
+        # Measure time
         start = datetime.datetime.now()
-
+        # main loop function
         experiment.main_ex_loop(task_counter, counts_target)
         end = datetime.datetime.now()
         # print('control loop takes:', ((end - start).microseconds / 1000), 'ms')
+        # If the main experiment function takes less than experiment frequency we have to waite
         if (1000 / variables.ex_freq) > ((end - start).microseconds / 1000):  # time in milliseconds
             sleep_time = ((1000 / variables.ex_freq) - ((end - start).microseconds / 1000))
             time.sleep(sleep_time / 1000)
@@ -386,9 +437,8 @@ def main():
             # print('Entire control loop time:', ((end2 - start).microseconds / 1000), 'ms')
         else:
             print(
-                f"{bcolors.WARNING}Warning: Experiment loop takes longer than initialized frequency Seconds{bcolors.ENDC}")
+                f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop takes longer than initialized frequency Seconds{initialize_devices.bcolors.ENDC}")
             logger.error('Experiment loop takes longer than initialized frequency Seconds')
-            # break
 
         time_ex_s = np.append(time_ex_s, int(end.strftime("%S")))
         time_ex_m = np.append(time_ex_m, int(end.strftime("%M")))
@@ -397,6 +447,7 @@ def main():
         variables.elapsed_time = end_main_ex_loop - start_main_ex
 
         total_steps = variables.ex_time * variables.ex_freq
+        # Counter of iteration
         time_counter = np.append(time_counter, steps)
         steps += 1
         if variables.stop_flag:
@@ -413,17 +464,22 @@ def main():
                 queue_stop_measurement.put(True)
             time.sleep(1)
             break
-
-    if variables.counter_source == 'TDC':
-        tdc_process.join(3)
-        if tdc_process.is_alive():
-            tdc_process.terminate()
-            tdc_process.join(1)
-            # Release all the resources of the TDC process
-            tdc_process.close()
+    # Stop the TDC process
+    try:
+        if variables.counter_source == 'TDC':
+            tdc_process.join(3)
+            if tdc_process.is_alive():
+                tdc_process.terminate()
+                tdc_process.join(1)
+                # Release all the resources of the TDC process
+                tdc_process.close()
+    except:
+        print(
+            f"{initialize_devices.bcolors.WARNING}Warning: The TDC process cannot be terminated properly{initialize_devices.bcolors.ENDC}")
 
     variables.end_experiment = True
     time.sleep(1)
+    # Stop the TDC and DLD thread
     if variables.counter_source == 'TDC':
         read_dld_queue_thread.join(1)
         read_tdc_queue_thread.join(1)
@@ -433,7 +489,7 @@ def main():
     print('Experiment is finished')
     logger.info('Experiment is finished')
 
-    # save hdf5 file
+    # Check the length of arrays to be equal
     if all(len(lst) == len(variables.x) for lst in [variables.x, variables.y,
                                                     variables.t, variables.dld_start_counter,
                                                     variables.main_v_dc_dld, variables.main_v_dc_dld]):
@@ -448,6 +504,7 @@ def main():
 
     else:
         pass
+    # save hdf5 file
     with h5py.File(variables.path + '\\%s_data.h5' % variables.hdf5_path, "w") as f:
         f.create_dataset("oxcart/high_voltage", data=variables.main_v_dc, dtype='f')
         f.create_dataset("oxcart/pulse_voltage", data=variables.main_v_p, dtype='f')
@@ -476,7 +533,7 @@ def main():
     logger.info('HDF5 file is created')
     variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
-    # save new value of experiment counter
+    # Save new value of experiment counter
     with open('./png/counter.txt', 'w') as f:
         f.write(str(variables.counter + 1))
         logger.info('Experiment counter is increased')
@@ -484,10 +541,10 @@ def main():
     # Adding results of the experiment to the log file
     logger.info('Total number of Ions is: %s' % variables.total_ions)
     # send a Tweet
-    message_tweet = 'The Experiment %s finished\n' \
-                    'Total number of Ions is: %s' % (variables.hdf5_path,
-                                                     variables.total_ions)
-    if variables.tweet == True:
+    if variables.tweet:
+        message_tweet = 'The Experiment %s finished\n' \
+                        'Total number of Ions is: %s' % (variables.hdf5_path,
+                                                         variables.total_ions)
         tweet_send.tweet_send(message_tweet)
         logger.info('Tweet is sent')
 
@@ -503,7 +560,8 @@ def main():
     if len(variables.email) > 3:
         logger.info('Email is sent')
         email_send.send_email(variables.email, subject, message)
-        # save setup parameters and run statistics in a txt file
+
+    # save setup parameters and run statistics in a txt file
     with open(variables.path + '\\parameters.txt', 'w') as f:
         f.write('Experiment Name: ' + variables.hdf5_path + '\r\n')
         f.write('Detection Rate: %s\r\n' % (variables.detection_rate))
@@ -523,5 +581,6 @@ def main():
         f.write('Pulse Stop Voltage: %s\r\n' % variables.v_p_max)
         f.write('Specimen Max Achieved Pulse Voltage: %s\r\n' % "{:.3f}".format(variables.pulse_voltage))
 
+    # Clear up all the variables and deinitialize devices
     experiment.clear_up(task_counter)
     logger.info('Variables and devices is cleared')

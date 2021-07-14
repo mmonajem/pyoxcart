@@ -1,15 +1,13 @@
-from pypylon import genicam
-from pypylon import pylon
-import sys
-import os
+
 import time
 import cv2
 import numpy as np
+
+from pypylon import pylon
 import variables
 
-os.environ["PYLON_CAMEMU"] = "2"
 
-class Camera():
+class Camera:
 
     def __init__(self, devices, tlFactory, cameras, converter):
 
@@ -43,53 +41,47 @@ class Camera():
             img1 = image1.GetArray()
 
             # Original size is 2048 * 2448
-            # img0_orig = cv2.resize(img0, dsize=(500, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
             img0_orig = cv2.resize(img0, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            img0_zoom = cv2.resize(img0[800:1100, 1800:2300], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
+            img0_zoom = cv2.resize(img0[800:1100, 1800:2300], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(
+                np.int32)
 
-            # img1_orig = cv2.resize(img1, dsize=(500, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
             img1_orig = cv2.resize(img1, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            img1_zoom = cv2.resize(img1[1100:1300, 1000:1500], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(np.int32)
+            img1_zoom = cv2.resize(img1[1100:1300, 1000:1500], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(
+                np.int32)
 
-            if variables.index_save_image % 100 == 0 and variables.start_flag == True:
-                cv2.imwrite(variables.path + "\\side_%s.png" %variables.index_save_image, img0_orig)
-                cv2.imwrite(variables.path + "\\side_zoom_%s.png" %variables.index_save_image, img0_zoom)
-                cv2.imwrite(variables.path + '\\bottom_%s.png' %variables.index_save_image, img1_orig)
-                cv2.imwrite(variables.path + '\\bottom_zoom_%s.png' %variables.index_save_image, img1_zoom)
+            if variables.index_save_image % 100 == 0 and variables.start_flag:
+                cv2.imwrite(variables.path + "\\side_%s.png" % variables.index_save_image, img0_orig)
+                cv2.imwrite(variables.path + "\\side_zoom_%s.png" % variables.index_save_image, img0_zoom)
+                cv2.imwrite(variables.path + '\\bottom_%s.png' % variables.index_save_image, img1_orig)
+                cv2.imwrite(variables.path + '\\bottom_zoom_%s.png' % variables.index_save_image, img1_zoom)
 
             img0_zoom_marker = cv2.drawMarker(img0_zoom, (1030, 265), (0, 0, 255), markerType=cv2.MARKER_TRIANGLE_UP,
-                           markerSize=40, thickness=2, line_type=cv2.LINE_AA)
+                                              markerSize=40, thickness=2, line_type=cv2.LINE_AA)
             img1_zoom_marker = cv2.drawMarker(img1_zoom, (1100, 255), (0, 0, 255), markerType=cv2.MARKER_TRIANGLE_UP,
-                           markerSize=40, thickness=2, line_type=cv2.LINE_AA)
+                                              markerSize=40, thickness=2, line_type=cv2.LINE_AA)
             with lock:
-                # variables.img0_orig = np.require(img0_orig, np.uint8, 'C')
                 variables.img0_zoom = np.require(img0_zoom_marker, np.uint8, 'C')
-                # variables.img1_orig = np.require(img1_orig, np.uint8, 'C')
                 variables.img1_zoom = np.require(img1_zoom_marker, np.uint8, 'C')
 
                 variables.img0_orig = np.swapaxes(img0_orig, 0, 1)
-                # variables.img0_zoom = np.swapaxes(img0_zoom, 0, 1)
                 variables.img1_orig = np.swapaxes(img1_orig, 0, 1)
-                # variables.img1_zoom = np.swapaxes(img1_zoom, 0, 1)
                 variables.index_save_image += 1
 
-            if variables.index_save_image % 100 == 0 and variables.start_flag == True:
-                cv2.imwrite(variables.path + "\\side_%s.png" %variables.index_save_image, img0_orig)
-                cv2.imwrite(variables.path + "\\side_zoom_%s.png" %variables.index_save_image, img0_zoom)
-                cv2.imwrite(variables.path + '\\bottom_%s.png' %variables.index_save_image, img1_orig)
-                cv2.imwrite(variables.path + '\\bottom_zoom_%s.png' %variables.index_save_image, img1_zoom)
+            if variables.index_save_image % 100 == 0 and variables.start_flag:
+                cv2.imwrite(variables.path + "\\side_%s.png" % variables.index_save_image, img0_orig)
+                cv2.imwrite(variables.path + "\\side_zoom_%s.png" % variables.index_save_image, img0_zoom)
+                cv2.imwrite(variables.path + '\\bottom_%s.png' % variables.index_save_image, img1_orig)
+                cv2.imwrite(variables.path + '\\bottom_zoom_%s.png' % variables.index_save_image, img1_zoom)
 
             grabResult0.Release()
             grabResult1.Release()
 
-            if variables.sample_adjust == True:
+            if variables.sample_adjust:
                 self.camera_s_d()
                 variables.sample_adjust = False
 
-
-
-    def light_switch(self,):
-        if variables.light == False:
+    def light_switch(self, ):
+        if not variables.light:
             self.cameras[0].Open()
             self.cameras[0].ExposureTime.SetValue(2000)
             # self.cameras[0].AcquisitionFrameRate.SetValue(150)
@@ -98,7 +90,7 @@ class Camera():
             # self.cameras[1].AcquisitionFrameRate.SetValue(150)
             variables.light = True
             variables.sample_adjust = True
-        elif variables.light == True:
+        elif variables.light:
             self.cameras[0].Open()
             self.cameras[0].ExposureTime.SetValue(1000000)
             self.cameras[1].Open()
@@ -106,10 +98,9 @@ class Camera():
             variables.light = False
             variables.sample_adjust = False
 
-    def camera_s_d(self,):
+    def camera_s_d(self, ):
 
         # The exit code of the sample application.
-        exitCode = 0
         img0 = []
         img1 = []
         windowName = 'Sample Alignment'
@@ -145,12 +136,11 @@ class Camera():
                     img1_zoom = cv2.resize(img1[1100:1300, 1000:1500], dsize=(2448, 1000),
                                            interpolation=cv2.INTER_CUBIC)
                     img0_zoom = cv2.drawMarker(img0_zoom, (2120, 510), (0, 0, 255),
-                                                      markerType=cv2.MARKER_TRIANGLE_UP,
-                                                      markerSize=80, thickness=2, line_type=cv2.LINE_AA)
+                                               markerType=cv2.MARKER_TRIANGLE_UP,
+                                               markerSize=80, thickness=2, line_type=cv2.LINE_AA)
                     img1_zoom = cv2.drawMarker(img1_zoom, (2260, 520), (0, 0, 255),
-                                                      markerType=cv2.MARKER_TRIANGLE_UP,
-                                                      markerSize=80, thickness=2, line_type=cv2.LINE_AA)
-                    # numpy_horizontal = np.hstack((img0, img1))
+                                               markerType=cv2.MARKER_TRIANGLE_UP,
+                                               markerSize=80, thickness=2, line_type=cv2.LINE_AA)
                     img0_f = np.concatenate((img0, img0_zoom), axis=0)
                     img1_f = np.concatenate((img1, img1_zoom), axis=0)
                     vis = np.concatenate((img0_f, img1_f), axis=1)  # Combine 2 images horizontally
@@ -164,15 +154,13 @@ class Camera():
                         break
             except:
                 pass
+
             grabResult.Release()
             time.sleep(0.05)
 
             # If window has been closed using the X button, close program
             # getWindowProperty() returns -1 as soon as the window is closed
-            if cv2.getWindowProperty(windowName, 0) < 0 or variables.light_swich == False:
+            if cv2.getWindowProperty(windowName, 0) < 0 or not variables.light_swich:
                 grabResult.Release()
                 cv2.destroyAllWindows()
                 break
-
-
-

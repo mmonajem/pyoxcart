@@ -14,7 +14,6 @@
 
 import os
 
-# os.environ["PYLON_CAMEMU"] = "3"
 
 from pypylon import genicam
 from pypylon import pylon
@@ -145,8 +144,6 @@ try:
         if cv2.getWindowProperty(windowName, 0) < 0:
             cv2.destroyAllWindows()
             break
-
-
 
 except genicam.GenericException as e:
     # Error handling
