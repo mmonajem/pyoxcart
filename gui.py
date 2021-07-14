@@ -23,8 +23,8 @@ from pypylon import pylon
 # Local project scripts
 import oxcart
 import variables
-from camera import Camera
-import initialize_devices
+from devices.camera import Camera
+from devices import initialize_devices
 
 
 class Ui_OXCART(Camera, object):

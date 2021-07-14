@@ -17,11 +17,9 @@ import serial.tools.list_ports
 import pyvisa as visa
 import nidaqmx
 # Local project scripts
-import tdc
+from tdc import tdc
 import variables
-import email_send
-import tweet_send
-import initialize_devices
+from devices import email_send, tweet_send, initialize_devices
 
 
 def logging():
@@ -238,8 +236,6 @@ class OXCART:
         """
         Clear global variables and deinitializing high voltage and pulser  function
         """
-
-        @staticmethod
         def cleanup_variables():
             """
             Clear up all the global variables
