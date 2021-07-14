@@ -1,4 +1,7 @@
-
+"""
+This is the main script of all global variables.
+@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
+"""
 import numpy as np
 
 com_port_idx_cryovac = 3
@@ -8,8 +11,12 @@ COM_PORT_edwards_ll = 'COM1'
 com_port_idx_V_dc = 4
 com_port_idx_V_p = 0
 
-def init():
 
+def init():
+    """
+    Initializing of global variables function
+    """
+    # Setup parameters
     global counter_source
     global counter
     global ex_time
@@ -44,6 +51,7 @@ def init():
     global flag_pump_load_lock_led
     global sample_adjust
 
+    # Statistics parameters
     global elapsed_time
     global start_time
     global end_time
@@ -78,21 +86,17 @@ def init():
     global vacuum_load_lock
     global vacuum_load_lock_backing
 
+    # DLD parameters
     global x
     global y
     global t
     global dld_start_counter
-
+    # TDC parameters
     global channel
     global time_data
     global tdc_start_counter
 
-    global x_temp
-    global y_temp
-    global t_temp
-    global start_counter_temp
-
-
+    # Experiment variables
     global main_v_dc
     global main_v_p
     global main_counter
@@ -103,7 +107,6 @@ def init():
     global main_v_dc_tdc
     global main_v_p_tdc
 
-    # Setup parameters
     counter = 0
     ex_time = 0
     max_ions = 0
@@ -116,7 +119,7 @@ def init():
     v_p_max = 0
     pulse_fraction = 0
     pulse_frequency = 0
-    pulse_amp_per_supply_voltage = 3500/160
+    pulse_amp_per_supply_voltage = 3500 / 160
     cycle_avg = 0
     hdf5_path = ''
     flag_main_gate = False
@@ -177,11 +180,6 @@ def init():
     t = np.zeros(0)
     dld_start_counter = np.zeros(0)
 
-    x_temp = np.zeros(0)
-    y_temp = np.zeros(0)
-    t_temp = np.zeros(0)
-    start_counter_temp = np.zeros(0)
-
     channel = np.zeros(0)
     time_data = np.zeros(0)
     tdc_start_counter = np.zeros(0)
@@ -198,4 +196,3 @@ def init():
     main_v_p_dld = np.zeros(0)
     main_v_dc_tdc = np.zeros(0)
     main_v_p_tdc = np.zeros(0)
-

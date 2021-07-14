@@ -1,7 +1,14 @@
-
+"""
+This is the main script for reading TDC.
+@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
+"""
 import scTDC
 
+
 class UCB2(scTDC.usercallbacks_pipe):
+    """
+    TDC class for DLD and TDC events
+    """
     def __init__(self, lib, dev_desc, queue_x, queue_y, queue_t,
                  queue_dld_start_counter, queue_channel, queue_time_data,
                  queue_tdc_start_counter):
@@ -44,6 +51,9 @@ class UCB2(scTDC.usercallbacks_pipe):
 
 # Initializing the TDC
 def initialize_tdc():
+    """
+    Initialize the TDC
+    """
     device = scTDC.Device(autoinit=False)
     retcode, errmsg = device.initialize()
     if retcode < 0:
@@ -57,6 +67,9 @@ def initialize_tdc():
 def experiment_measure(queue_x, queue_y, queue_t, queue_dld_start_counter, queue_channel,
                        queue_time_data, queue_tdc_start_counter,
                        queue_start_measurement, queue_stop_mesurment):
+    """
+    measurement function
+    """
     device_tdc = initialize_tdc()
     ucb = UCB2(device_tdc.lib, device_tdc.dev_desc,
                queue_x, queue_y, queue_t, queue_dld_start_counter, queue_channel,
@@ -76,8 +89,9 @@ def experiment_measure(queue_x, queue_y, queue_t, queue_dld_start_counter, queue
         # Do the measurment for a long time
         # The measurement is terminate if the main process terminate this process
         # ucb.do_measurement(86400000)
-        if not queue_start_measurement.empty():
-            ucb.do_measurement(5000)
+        # Do the measurement for 5 second
+        ucb.do_measurement(5000)
+        # The while loop breaks if the main process send stop flag
         if not queue_stop_mesurment.empty():
             print('TDC loop is break in child process')
             break

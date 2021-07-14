@@ -303,7 +303,7 @@ class OXCART:
             task_counter.stop()
             task_counter.close()
         # Zero variables
-        self.cleanup_variables()
+        cleanup_variables()
         print('Clean up is finished')
 
 def main():
