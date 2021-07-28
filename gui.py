@@ -668,8 +668,8 @@ class Ui_OXCART(Camera, object):
         self.detection_rate_viz.setBackground('w')
         # Add Axis Labels
         styles = {"color": "#f00", "font-size": "20px"}
-        self.detection_rate_viz.setLabel("left", "Detection Rate", **styles)
-        self.detection_rate_viz.setLabel("bottom", "Time (Sec)", **styles)
+        self.detection_rate_viz.setLabel("left", "Counts", **styles)
+        self.detection_rate_viz.setLabel("bottom", "Time (s)", **styles)
         # Add grid
         self.detection_rate_viz.showGrid(x=True, y=True)
         # Add Range
@@ -680,7 +680,7 @@ class Ui_OXCART(Camera, object):
         # Add Axis Labels
         styles = {"color": "#f00", "font-size": "20px"}
         self.histogram.setLabel("left", "Frequency (Counts)", **styles)
-        self.histogram.setLabel("bottom", "Time", **styles)
+        self.histogram.setLabel("bottom", "Time (ns)", **styles)
 
         # Temperature #########################
         self.x_tem = np.arange(100)  # 1000 time points
@@ -692,7 +692,7 @@ class Ui_OXCART(Camera, object):
         # Add Axis Labels
         styles = {"color": "#f00", "font-size": "20px"}
         self.temperature.setLabel("left", "Temperature (K)", **styles)
-        self.temperature.setLabel("bottom", "Time (Sec)", **styles)
+        self.temperature.setLabel("bottom", "Time (s)", **styles)
         # Add grid
         self.temperature.showGrid(x=True, y=True)
         # Add Range
@@ -1042,7 +1042,8 @@ class Ui_OXCART(Camera, object):
                 # Increase the index
                 variables.index_plot += 1
             # Time of Flight
-            if variables.counter_source == 'TDC' and variables.total_ions > 0 and variables.index_wait_on_plot_start > 16 and variables.index_wait_on_plot_start > 16:
+            if variables.counter_source == 'TDC' and variables.total_ions > 0 and variables.index_wait_on_plot_start > 16 \
+                    and variables.index_wait_on_plot_start > 16 and not variables.raw_mode:
                 if variables.index_wait_on_plot_start > 16:
 
                     # max_lenght = max(len(variables.x), len(variables.y),
@@ -1065,15 +1066,17 @@ class Ui_OXCART(Camera, object):
                         # l = np.sqrt(d_0 ** 2 + x_n ** 2 + y_n ** 2)
 
                         # math_to_charge = (2 * np.array(variables.main_v_dc_dld[:max_lenght]) * e * t_n**2) / ((l * 10 ** -3)**2)
-                        math_to_charge = variables.t
-                        math_to_charge = math_to_charge[math_to_charge < 800000]
-                        bins = np.logspace(np.log10(np.min(math_to_charge)),
-                                           np.log10(np.max(math_to_charge)),
-                                           num=128)
-                        self.y_tof, self.x_tof = np.histogram(math_to_charge, bins=bins)
+                        def replaceZeroes(data):
+                            min_nonzero = np.min(data[np.nonzero(data)])
+                            data[data == 0] = min_nonzero
+                            return data
+                        math_to_charge = variables.t[variables.t < 800000]
+                        math_to_charge = math_to_charge * 27.432 * 0.001 # Time in ns
+                        self.y_tof, self.x_tof = np.histogram(math_to_charge, bins=512)
                         self.histogram.clear()
+                        self.y_tof = replaceZeroes(self.y_tof)
                         self.histogram.addItem(
-                            pg.BarGraphItem(x=self.x_tof[:-1], height=self.y_tof, width=0.1, brush='r'))
+                            pg.BarGraphItem(x=self.x_tof[:-1], height=np.log(self.y_tof), width=0.1, brush='r'))
 
                     except:
                         print(

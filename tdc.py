@@ -10,8 +10,7 @@ class UCB2(scTDC.usercallbacks_pipe):
     TDC class for DLD and TDC events
     """
     def __init__(self, lib, dev_desc, queue_x, queue_y, queue_t,
-                 queue_dld_start_counter, queue_channel, queue_time_data,
-                 queue_tdc_start_counter):
+                 queue_dld_start_counter, queue_channel, queue_time_data, queue_tdc_start_counter):
         super().__init__(lib, dev_desc)  # <-- mandatory
         # The queues that share the data between this and main process
         self.queue_x = queue_x
@@ -66,19 +65,10 @@ def initialize_tdc():
 # This function is called from main control loop in a separate process
 def experiment_measure(queue_x, queue_y, queue_t, queue_dld_start_counter, queue_channel,
                        queue_time_data, queue_tdc_start_counter,
-                       queue_start_measurement, queue_stop_mesurment):
+                        queue_stop_mesurment):
     """
     measurement function
     """
-    device_tdc = initialize_tdc()
-    ucb = UCB2(device_tdc.lib, device_tdc.dev_desc,
-               queue_x, queue_y, queue_t, queue_dld_start_counter, queue_channel,
-               queue_time_data, queue_tdc_start_counter)  # opens a user callbacks pipe
-
-    ucb.close()  # closes the user callbacks pipe, method inherited from base class
-
-    device_tdc.deinitialize()
-
     device_tdc = initialize_tdc()
     ucb = UCB2(device_tdc.lib, device_tdc.dev_desc,
                queue_x, queue_y, queue_t, queue_dld_start_counter, queue_channel,
@@ -100,3 +90,6 @@ def experiment_measure(queue_x, queue_y, queue_t, queue_dld_start_counter, queue
     ucb.close()  # closes the user callbacks pipe, method inherited from base class
 
     device_tdc.deinitialize()
+
+
+

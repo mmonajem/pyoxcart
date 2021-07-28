@@ -17,6 +17,7 @@ def init():
     Initializing of global variables function
     """
     # Setup parameters
+    global raw_mode
     global counter_source
     global counter
     global ex_time
@@ -107,6 +108,7 @@ def init():
     global main_v_dc_tdc
     global main_v_p_tdc
 
+    raw_mode = False
     counter = 0
     ex_time = 0
     max_ions = 0
