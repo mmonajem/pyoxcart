@@ -651,8 +651,8 @@ class Ui_OXCART(Camera, object):
         self.vdc_time.setBackground('w')
         # Add Axis Labels
         styles = {"color": "#f00", "font-size": "20px"}
-        self.vdc_time.setLabel("left", "High Voltage (V)", **styles)
-        self.vdc_time.setLabel("bottom", "Time (Sec)", **styles)
+        self.vdc_time.setLabel("left", "High Voltage (v)", **styles)
+        self.vdc_time.setLabel("bottom", "Time (s)", **styles)
         # Add grid
         self.vdc_time.showGrid(x=True, y=True)
         # Add Range
@@ -679,7 +679,7 @@ class Ui_OXCART(Camera, object):
         # Temperature #########################
         # Add Axis Labels
         styles = {"color": "#f00", "font-size": "20px"}
-        self.histogram.setLabel("left", "Frequency (Counts)", **styles)
+        self.histogram.setLabel("left", "Frequency (counts)", **styles)
         self.histogram.setLabel("bottom", "Time (ns)", **styles)
 
         # Temperature #########################
