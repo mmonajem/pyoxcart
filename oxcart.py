@@ -190,10 +190,12 @@ class OXCART:
         # v_p = com_port_v_p.query('MEASure:VOLTage?')[:-3]
         # variables.pulse_voltage = float(v_p)
 
-        if variables.counter_source == 'TDC' and not variables.raw_mode:
+        if variables.counter_source == 'TDC':
             variables.total_ions = len(variables.x)
-
-        elif variables.counter_source == 'pulse_counter' or variables.raw_mode:
+        elif  variables.counter_source == 'TDC_Raw':
+            if len(variables.channel) > 0:
+                variables.total_ions = int(len(variables.channel)/4)
+        elif variables.counter_source == 'pulse_counter':
             # reading detector MCP pulse counter and calculating pulses since last loop iteration
             variables.total_ions = task_counter.read(number_of_samples_per_channel=1)[0]
 
@@ -297,7 +299,7 @@ class OXCART:
         # Interrupt the TDC
         # device.interrupt_measurement()
 
-        if variables.counter_source == 'pulse_counter' or variables.raw_mode:
+        if variables.counter_source == 'pulse_counter':
             # Close the task of counter
             task_counter.stop()
             task_counter.close()
@@ -324,7 +326,7 @@ def main():
     variables.start_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
     # Create and start the TDC process and related queues
-    if variables.counter_source == 'TDC':
+    if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
         queue_x = Queue(maxsize=-1, ctx=multiprocessing.get_context())
         queue_y = Queue(maxsize=-1, ctx=multiprocessing.get_context())
         queue_t = Queue(maxsize=-1, ctx=multiprocessing.get_context())
@@ -333,15 +335,7 @@ def main():
         queue_time_data = Queue(maxsize=-1, ctx=multiprocessing.get_context())
         queue_tdc_start_counter = Queue(maxsize=-1, ctx=multiprocessing.get_context())
         queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
-        # tdc_process = multiprocessing.Process(target=tdc.experiment_measure, args=(queue_x,
-        #                                                                            queue_y, queue_t,
-        #                                                                            queue_dld_start_counter,
-        #                                                                            queue_channel,
-        #                                                                            queue_time_data,
-        #                                                                            queue_tdc_start_counter,
-        #                                                                            queue_stop_measurement))
-        # tdc_process.daemon = True
-        # tdc_process.start()
+
         tdc_process = multiprocessing.Process(target=tdc_new.experiment_measure, args=(variables.raw_mode, queue_x,
                                                                                        queue_y, queue_t,
                                                                                        queue_dld_start_counter,
@@ -375,7 +369,7 @@ def main():
     experiment.initialize_v_p()
     logger.info('Pulser is initialized')
 
-    if variables.counter_source == 'pulse_counter' or variables.raw_mode:
+    if variables.counter_source == 'pulse_counter':
         task_counter = experiment.initialize_counter()
         logger.info('Edge counter is initialized')
     else:
@@ -395,16 +389,16 @@ def main():
     logger.info('Starting the main loop')
 
     if variables.counter_source == 'TDC':
-        if not variables.raw_mode:
-            read_dld_queue_thread = threading.Thread(target=experiment.reader_queue_dld)
-            read_dld_queue_thread.setDaemon(True)
-            read_dld_queue_thread.start()
-        elif variables.raw_mode:
-            read_tdc_queue_thread = threading.Thread(target=experiment.reader_queue_tdc)
-            read_tdc_queue_thread.setDaemon(True)
-            read_tdc_queue_thread.start()
+        read_dld_queue_thread = threading.Thread(target=experiment.reader_queue_dld)
+        read_dld_queue_thread.setDaemon(True)
+        read_dld_queue_thread.start()
+    elif variables.counter_source == 'TDC_Raw':
+        read_tdc_queue_thread = threading.Thread(target=experiment.reader_queue_tdc)
+        read_tdc_queue_thread.setDaemon(True)
+        read_tdc_queue_thread.start()
     total_steps = variables.ex_time * variables.ex_freq
     steps = 0
+    flag_achieved_high_voltage = 0
     ex_time_temp = variables.ex_time
     # Main loop of experiment
     while steps < total_steps:
@@ -415,7 +409,7 @@ def main():
             time.sleep(0.5)
             experiment.command_v_dc("F1")
             time.sleep(0.5)
-            if variables.counter_source == 'pulse_counter' or variables.raw_mode:
+            if variables.counter_source == 'pulse_counter':
                 # start the Counter
                 task_counter.start()
 
@@ -442,8 +436,9 @@ def main():
             # print('Entire control loop time:', ((end2 - start).microseconds / 1000), 'ms')
         else:
             print(
-                f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop takes longer than initialized frequency Seconds{initialize_devices.bcolors.ENDC}")
-            logger.error('Experiment loop takes longer than initialized frequency Seconds')
+                f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop takes longer than %s Millisecond{initialize_devices.bcolors.ENDC}" % (int(1000 / variables.ex_freq)))
+            logger.error('Experiment loop takes longer than %s Millisecond' % (int(1000 / variables.ex_freq)))
+            print('The iteration time:', ((end - start).microseconds / 1000))
 
         time_ex_s = np.append(time_ex_s, int(end.strftime("%S")))
         time_ex_m = np.append(time_ex_m, int(end.strftime("%M")))
@@ -458,15 +453,22 @@ def main():
         if variables.stop_flag:
             print('Experiment is stopped by user')
             logger.info('Experiment is stopped by user')
-            if variables.counter_source == 'TDC':
+            if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
                 queue_stop_measurement.put(True)
             time.sleep(1)
             break
         if variables.max_ions <= variables.total_ions:
             print('Total number of Ions is achieved')
             logger.info('Total number of Ions is achieved')
-            if variables.counter_source == 'TDC':
+            if variables.counter_source == 'TDC'or variables.counter_source == 'TDC_Raw':
                 queue_stop_measurement.put(True)
+            time.sleep(1)
+            break
+        if variables.vdc_max <= variables.specimen_voltage:
+            if flag_achieved_high_voltage == variables.ex_freq * 10:
+                flag_achieved_high_voltage += 1
+            print('High Voltage Max. is achieved')
+            logger.info('High Voltage Max. is achieved')
             time.sleep(1)
             break
         if variables.ex_time != ex_time_temp:
@@ -474,7 +476,7 @@ def main():
             ex_time_temp = variables.ex_time
     # Stop the TDC process
     try:
-        if variables.counter_source == 'TDC':
+        if variables.counter_source == 'TDC'or variables.counter_source == 'TDC_Raw':
             tdc_process.join(3)
             if tdc_process.is_alive():
                 tdc_process.terminate()
@@ -489,13 +491,14 @@ def main():
     time.sleep(1)
     # Stop the TDC and DLD thread
     if variables.counter_source == 'TDC':
-        if not variables.raw_mode:
-            read_dld_queue_thread.join(1)
-        elif variables.raw_mode:
-            read_tdc_queue_thread.join(1)
+        read_dld_queue_thread.join(1)
+    elif variables.counter_source == 'TDC_Raw':
+        read_tdc_queue_thread.join(1)
 
     if variables.counter_source == 'TDC':
         variables.total_ions = len(variables.x)
+    elif variables.counter_source == 'TDC_Raw':
+        variables.total_ions = int(len(variables.channel) / 4)
 
     time.sleep(1)
     print('Experiment is finished')
@@ -507,7 +510,7 @@ def main():
                                                     variables.t, variables.dld_start_counter,
                                                     variables.main_v_dc_dld, variables.main_v_dc_dld]):
             logger.warning('dld data have not same length')
-
+    elif variables.counter_source == 'TDC_Raw':
         if all(len(lst) == len(variables.channel) for lst in [variables.channel, variables.time_data,
                                                           variables.tdc_start_counter,
                                                           variables.main_v_dc_tdc, variables.main_v_p_tdc]):
@@ -572,8 +575,9 @@ def main():
 
     # save setup parameters and run statistics in a txt file
     with open(variables.path + '\\parameters.txt', 'w') as f:
+        f.write('Username: ' + variables.user_name + '\r\n')
         f.write('Experiment Name: ' + variables.hdf5_path + '\r\n')
-        f.write('Detection Rate  (%): %s\r\n' % (variables.detection_rate))
+        f.write('Detection Rate ('+chr(37)+') : %s\r\n' % variables.detection_rate)
         f.write('Maximum Number of Ions: %s\r\n' % variables.max_ions)
         f.write('Control Refresh freq. (Hz): %s\r\n' % variables.ex_freq)
         f.write('Time bins (Sec): %s\r\n' % (1/variables.ex_freq))

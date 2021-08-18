@@ -68,6 +68,18 @@ def experiment_measure(queue_x, queue_y, queue_t, queue_dld_start_counter, queue
                         queue_stop_mesurment):
     """
     measurement function
+    Parameters
+    ----------
+    DLD Queues: queue
+        Queues that contains DLD data
+    TDC Queues: queue
+        Queues that contains TDC raw data
+    Stop measurement flag: queue
+        Queue for stop the measurement. This queue is set to True from oxcart.py
+
+    Returns
+    -------
+    None
     """
     device_tdc = initialize_tdc()
     ucb = UCB2(device_tdc.lib, device_tdc.dev_desc,

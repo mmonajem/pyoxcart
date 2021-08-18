@@ -1,5 +1,5 @@
 """
-This is the main script for reading TDC.
+This is the main new script for reading TDC.
 @author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
 import scTDC
@@ -64,6 +64,22 @@ def experiment_measure(raw_mode, queue_x,
                        queue_time_data,
                        queue_tdc_start_counter,
                        queue_stop_measurement):
+    """
+    measurement function
+    Parameters
+    ----------
+    DLD Queues: queue
+        Queues that contains DLD data
+    TDC Queues: queue
+        Queues that contains TDC raw data
+    Stop measurement flag: queue
+        Queue for stop the measurement. This queue is set to True from oxcart.py
+
+    Returns
+    -------
+    None
+    """
+
     device = scTDC.Device(autoinit=False)
 
     # initialize TDC --- and check for error!
@@ -89,12 +105,12 @@ def experiment_measure(raw_mode, queue_x,
 
 
     # start a first measurement
-    retcode = bufdatacb.start_measurement(1000)
+    retcode = bufdatacb.start_measurement(300)
     if errorcheck(retcode) < 0:
         return -1
 
     while True:
-        start = time.time()
+        # start = time.time()
         eventtype, data = bufdatacb.queue.get()  # waits until element available
         if eventtype == QUEUE_DATA:
             if not raw_mode:
@@ -108,7 +124,7 @@ def experiment_measure(raw_mode, queue_x,
                 queue_tdc_start_counter.put(data["start_counter"])
         elif eventtype == QUEUE_ENDOFMEAS:
             if queue_stop_measurement.empty():
-                retcode = bufdatacb.start_measurement(1000)
+                retcode = bufdatacb.start_measurement(300)
                 if errorcheck(retcode) < 0:
                     return -1
             else:
@@ -116,7 +132,7 @@ def experiment_measure(raw_mode, queue_x,
                 break
         else: # unknown event
             break # break out of the event loop
-        print('tdc process time:', time.time() - start)
+        # print('tdc process time:', time.time() - start)
 
     time.sleep(0.1)
     # clean up

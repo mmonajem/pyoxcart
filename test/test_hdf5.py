@@ -90,21 +90,3 @@ plt.hist(t, bins=bins)
 plt.show()
 
 f.close()
-
-
-
-
-# f = h5py.File('testA.h5', 'a')
-# list_keys = list(f.keys())
-# print(list_keys)
-# del f['msMarkers']
-# del f['startMarkers']
-# list_keys = list(f.keys())
-# print(list_keys)
-# for i in range(len(list_keys)):
-#     data = f[list_keys[i]]
-#     print(list_keys[i])
-#     print(data.shape)
-#     print(data.dtype)
-#     #for j in range(data.shape[0]):
-#        #print(data[j])

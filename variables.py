@@ -23,6 +23,7 @@ def init():
     global ex_time
     global max_ions
     global ex_freq
+    global user_name
     global vdc_min
     global vdc_max
     global vdc_step_up
@@ -113,6 +114,7 @@ def init():
     ex_time = 0
     max_ions = 0
     ex_freq = 0
+    user_name = ''
     vdc_min = 0
     vdc_max = 0
     vdc_step_up = 0
