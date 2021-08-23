@@ -223,9 +223,11 @@ class OXCART:
         # update v_dc
         if variables.specimen_voltage < variables.vdc_max:
             if variables.specimen_voltage >= variables.vdc_min:
-                # sending VDC via serial
-                variables.specimen_voltage = variables.specimen_voltage + voltage_step
-                self.command_v_dc(">S0 %s" % (variables.specimen_voltage))
+                specimen_voltage_temp = variables.specimen_voltage + voltage_step
+                if specimen_voltage_temp > variables.specimen_voltage:
+                    variables.specimen_voltage = specimen_voltage_temp
+                    # sending VDC via serial
+                    self.command_v_dc(">S0 %s" % (variables.specimen_voltage))
 
         # update pulse voltage v_p
         new_vp = variables.specimen_voltage * variables.pulse_fraction * \
@@ -399,6 +401,7 @@ def main():
     total_steps = variables.ex_time * variables.ex_freq
     steps = 0
     flag_achieved_high_voltage = 0
+    index_time = 0
     ex_time_temp = variables.ex_time
     # Main loop of experiment
     while steps < total_steps:
@@ -438,8 +441,8 @@ def main():
             print(
                 f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop takes longer than %s Millisecond{initialize_devices.bcolors.ENDC}" % (int(1000 / variables.ex_freq)))
             logger.error('Experiment loop takes longer than %s Millisecond' % (int(1000 / variables.ex_freq)))
-            print('The iteration time:', ((end - start).microseconds / 1000))
-
+            print('The %s iteration time:' %index_time, ((end - start).microseconds / 1000))
+            index_time += 1
         time_ex_s = np.append(time_ex_s, int(end.strftime("%S")))
         time_ex_m = np.append(time_ex_m, int(end.strftime("%M")))
         time_ex_h = np.append(time_ex_h, int(end.strftime("%H")))
@@ -466,11 +469,11 @@ def main():
             break
         if variables.vdc_max <= variables.specimen_voltage:
             if flag_achieved_high_voltage == variables.ex_freq * 10:
-                flag_achieved_high_voltage += 1
-            print('High Voltage Max. is achieved')
-            logger.info('High Voltage Max. is achieved')
-            time.sleep(1)
-            break
+                print('High Voltage Max. is achieved')
+                logger.info('High Voltage Max. is achieved')
+                time.sleep(1)
+                break
+            flag_achieved_high_voltage += 1
         if variables.ex_time != ex_time_temp:
             total_steps = variables.ex_time * variables.ex_freq - steps
             ex_time_temp = variables.ex_time

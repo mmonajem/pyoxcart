@@ -805,7 +805,7 @@ class Ui_OXCART(Camera, object):
                         self.tweet.setCurrentIndex(1)
 
         # check if the gates are closed
-        if not variables.flag_main_gate:
+        if not variables.flag_main_gate and not variables.flag_load_gate and not variables.flag_cryo_gate:
             if self.parameters_source.currentText() == 'TextLine' and variables.index_line == 0:
                 lines = self.textEdit.toPlainText() # Copy all the lines in TextLine
                 self.text_line = lines.splitlines() # Seperate the lines in TextLine
@@ -860,8 +860,8 @@ class Ui_OXCART(Camera, object):
         else:
             _translate = QtCore.QCoreApplication.translate
             self.Error.setText(_translate("OXCART",
-                                          "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close Main "
-                                          "Gate !!!</span></p></body></html>"))
+                                          "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all "
+                                          "Gates !!!</span></p></body></html>"))
     def finished_thread_main(self):
         """
         The function that is run after end of experiment(MainThread)
@@ -899,7 +899,7 @@ class Ui_OXCART(Camera, object):
                 time.sleep(.5)
                 task.write([False])
         # Main gate
-        if gate_num == 1 and not variables.flag_load_gate and not variables.flag_cryo_gate and variables.flag_pump_load_lock:
+        if not variables.start_flag and gate_num == 1 and not variables.flag_load_gate and not variables.flag_cryo_gate and variables.flag_pump_load_lock:
             if not variables.flag_main_gate: # Open the main gate
                 switch_gate(0)
                 self.led_main_chamber.setPixmap(self.led_green)
@@ -911,7 +911,7 @@ class Ui_OXCART(Camera, object):
                 self.diagram.setPixmap(self.diagram_close_all)
                 variables.flag_main_gate = False
         # Buffer gate
-        elif gate_num == 2 and not variables.flag_main_gate and not variables.flag_cryo_gate and variables.flag_pump_load_lock:
+        elif not variables.start_flag and gate_num == 2 and not variables.flag_main_gate and not variables.flag_cryo_gate and variables.flag_pump_load_lock:
             if not variables.flag_load_gate: # Open the main gate
                 switch_gate(2)
                 self.led_load_lock.setPixmap(self.led_green)
@@ -923,7 +923,7 @@ class Ui_OXCART(Camera, object):
                 self.diagram.setPixmap(self.diagram_close_all)
                 variables.flag_load_gate = False
         # Cryo gate
-        elif gate_num == 3 and not variables.flag_main_gate and not variables.flag_load_gate and variables.flag_pump_load_lock:
+        elif not variables.start_flag and gate_num == 3 and not variables.flag_main_gate and not variables.flag_load_gate and variables.flag_pump_load_lock:
             if not variables.flag_cryo_gate: # Open the main gate
                 switch_gate(4)
                 self.led_cryo.setPixmap(self.led_green)
@@ -945,7 +945,7 @@ class Ui_OXCART(Camera, object):
         """
         The function for Switching the Load Lock pump
         """
-        if not variables.flag_main_gate and not variables.flag_cryo_gate \
+        if not variables.start_flag and not variables.flag_main_gate and not variables.flag_cryo_gate \
                 and not variables.flag_load_gate:
             if variables.flag_pump_load_lock:
                 variables.flag_pump_load_lock_click = True
@@ -1065,32 +1065,33 @@ class Ui_OXCART(Camera, object):
                     and variables.index_wait_on_plot_start > 16 and not variables.raw_mode:
                 if variables.index_wait_on_plot_start > 16:
 
-                    # max_lenght = max(len(variables.x), len(variables.y),
-                    #                  len(variables.t), len(variables.main_v_dc_dld))
-                    # d_0 = 110
-                    # e = 1.602 * 10**(-19)
-                    # dtec_dim = 78
-                    # pix_size_x = 0.03243
-                    # pix_size_y = 0.03257
                     try:
-                        # x_n = np.array(variables.x[:max_lenght]) - 2450
-                        # y_n = np.array(variables.y[:max_lenght]) - 2450
-
-                        # x_n = x_n * pix_size_x
-                        # y_n = y_n * pix_size_y
-
-                        #
-                        # t_n = np.array(variables.t[:max_lenght]) * 27.432 * 10**(-12)
-                        #
-                        # l = np.sqrt(d_0 ** 2 + x_n ** 2 + y_n ** 2)
-
-                        # math_to_charge = (2 * np.array(variables.main_v_dc_dld[:max_lenght]) * e * t_n**2) / ((l * 10 ** -3)**2)
                         def replaceZeroes(data):
                             min_nonzero = np.min(data[np.nonzero(data)])
                             data[data == 0] = min_nonzero
                             return data
                         math_to_charge = variables.t[variables.t < 800000]
-                        math_to_charge = math_to_charge * 27.432 * 0.001 # Time in ns
+                        math_to_charge = math_to_charge * 27.432 * 0.001  # Time in ns
+                        # max_lenght = max(len(variables.x), len(variables.y),
+                        #                  len(variables.t), len(variables.main_v_dc_dld))
+                        # d_0 = 110
+                        # e = 1.602 * 10 ** (-19)
+                        # dtec_dim = 78
+                        # pix_size_x = 0.03243
+                        # pix_size_y = 0.03257
+                        # x_n = np.array(variables.x[:max_lenght]) - 2450
+                        # y_n = np.array(variables.y[:max_lenght]) - 2450
+                        #
+                        # x_n = x_n * pix_size_x
+                        # y_n = y_n * pix_size_y
+                        #
+                        # #
+                        # t_n = np.array(variables.t[:max_lenght]) * 27.432 * 10**(-12)
+                        #
+                        # l = np.sqrt(d_0 ** 2 + x_n ** 2 + y_n ** 2)
+                        #
+                        # math_to_charge = (2 * np.array(variables.main_v_dc_dld[:max_lenght]) * e * t_n**2) / ((l * 10 ** -3)**2)
+
                         self.y_tof, self.x_tof = np.histogram(math_to_charge, bins=512)
                         self.histogram.clear()
                         self.y_tof = replaceZeroes(self.y_tof)
@@ -1176,11 +1177,11 @@ class Ui_OXCART(Camera, object):
         try:
             # Update the setup parameters
             variables.ex_time = int(float(self.ex_time.text()))
+            variables.user_name = self.ex_user.text()
             variables.ex_freq = int(float(self.ex_freq.text()))
             variables.max_ions = int(float(self.max_ions.text()))
             variables.vdc_min = int(float(self.vdc_min.text()))
             variables.detection_rate = float(self.detection_rate_init.text())
-            variables.pulse_fraction = int(float(self.pulse_fraction.text()))
             variables.hit_display = int(float(self.hit_displayed.text()))
             variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
             variables.pulse_frequency = int(float(self.pulse_frequency.text()))
