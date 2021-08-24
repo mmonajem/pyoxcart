@@ -7,6 +7,8 @@ import time
 import numpy as np
 from queue import Queue
 
+from devices import initialize_devices
+
 # define some constants to distinguish the type of element placed in the queue
 QUEUE_DATA = 0
 QUEUE_ENDOFMEAS = 1
@@ -86,9 +88,11 @@ def experiment_measure(raw_mode, queue_x,
     retcode, errmsg = device.initialize()
     if retcode < 0:
         print("error during init:", retcode, errmsg)
+        print(
+            f"{initialize_devices.bcolors.FAIL}Error: Restart the TDC manually (Turn it On and Off){initialize_devices.bcolors.ENDC}")
         return -1
     else:
-        print("successfully initialized")
+        print("TDC is successfully initialized")
 
     # open a BUFFERED_DATA_CALLBACKS pipe
     bufdatacb = BufDataCB4(device.lib, device.dev_desc, raw_mode, dld_events=not raw_mode)

@@ -210,15 +210,20 @@ class OXCART:
         variables.avg_n_count = variables.ex_freq * (
                 sum(variables.main_counter[-variables.cycle_avg:]) / variables.cycle_avg)
 
-        counts_measured = variables.avg_n_count / (variables.pulse_frequency * 1000)
+        counts_measured = variables.avg_n_count / (1 + variables.pulse_frequency * 1000)
 
         counts_error = counts_target - counts_measured  # deviation from setpoint
 
         # simple proportional control with averaging
+        rate = ((variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000))
+        if rate < 0.01 and variables.specimen_voltage < 5000:
+            ramp_speed_factor = 2.5
+        else:
+            ramp_speed_factor = 1
         if counts_error > 0:
-            voltage_step = counts_error * variables.vdc_step_up
+            voltage_step = counts_error * variables.vdc_step_up * ramp_speed_factor
         elif counts_error <= 0:
-            voltage_step = counts_error * variables.vdc_step_down
+            voltage_step = counts_error * variables.vdc_step_down * ramp_speed_factor
 
         # update v_dc
         if variables.specimen_voltage < variables.vdc_max:
@@ -441,7 +446,7 @@ def main():
             print(
                 f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop takes longer than %s Millisecond{initialize_devices.bcolors.ENDC}" % (int(1000 / variables.ex_freq)))
             logger.error('Experiment loop takes longer than %s Millisecond' % (int(1000 / variables.ex_freq)))
-            print('The %s iteration time:' %index_time, ((end - start).microseconds / 1000))
+            print('%s- The iteration time:' %index_time, ((end - start).microseconds / 1000))
             index_time += 1
         time_ex_s = np.append(time_ex_s, int(end.strftime("%S")))
         time_ex_m = np.append(time_ex_m, int(end.strftime("%M")))
@@ -460,23 +465,29 @@ def main():
                 queue_stop_measurement.put(True)
             time.sleep(1)
             break
-        if variables.max_ions <= variables.total_ions:
-            print('Total number of Ions is achieved')
-            logger.info('Total number of Ions is achieved')
-            if variables.counter_source == 'TDC'or variables.counter_source == 'TDC_Raw':
-                queue_stop_measurement.put(True)
-            time.sleep(1)
-            break
-        if variables.vdc_max <= variables.specimen_voltage:
-            if flag_achieved_high_voltage == variables.ex_freq * 10:
-                print('High Voltage Max. is achieved')
-                logger.info('High Voltage Max. is achieved')
+
+        if variables.criteria_ions:
+            if variables.max_ions <= variables.total_ions:
+                print('Total number of Ions is achieved')
+                logger.info('Total number of Ions is achieved')
+                if variables.counter_source == 'TDC'or variables.counter_source == 'TDC_Raw':
+                    queue_stop_measurement.put(True)
                 time.sleep(1)
                 break
+        if variables.criteria_vdc:
+            if variables.vdc_max <= variables.specimen_voltage:
+                if flag_achieved_high_voltage == variables.ex_freq * 10:
+                    print('High Voltage Max. is achieved')
+                    logger.info('High Voltage Max. is achieved')
+                    time.sleep(1)
+                    break
             flag_achieved_high_voltage += 1
         if variables.ex_time != ex_time_temp:
             total_steps = variables.ex_time * variables.ex_freq - steps
             ex_time_temp = variables.ex_time
+        # Because experiment time is not a stop criteria, increase total_steps
+        if variables.criteria_time and steps+1==total_steps:
+            total_steps += 1
     # Stop the TDC process
     try:
         if variables.counter_source == 'TDC'or variables.counter_source == 'TDC_Raw':
@@ -596,6 +607,7 @@ def main():
         f.write('Specimen Max Achieved Voltage (V): %s\r\n' % "{:.3f}".format(variables.specimen_voltage))
         f.write('Pulse start Voltage (V): %s\r\n' % variables.v_p_min)
         f.write('Pulse Stop Voltage (V): %s\r\n' % variables.v_p_max)
+        f.write('Pulse Fraction ('+chr(37)+'): %s\r\n' % variables.pulse_fraction)
         f.write('Specimen Max Achieved Pulse Voltage (V): %s\r\n' % "{:.3f}".format(variables.pulse_voltage))
 
     # Clear up all the variables and deinitialize devices

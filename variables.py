@@ -52,6 +52,9 @@ def init():
     global flag_pump_load_lock_click
     global flag_pump_load_lock_led
     global sample_adjust
+    global criteria_time
+    global criteria_ions
+    global criteria_vdc
 
     # Statistics parameters
     global elapsed_time
@@ -146,6 +149,9 @@ def init():
     flag_pump_load_lock_click = False
     flag_pump_load_lock_led = None
     sample_adjust = False
+    criteria_time = True
+    criteria_ions = True
+    criteria_vdc = True
 
     # Run statistics=
     elapsed_time = 0.0
