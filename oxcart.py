@@ -255,17 +255,17 @@ class OXCART:
             variables.stop_flag = False
             variables.end_experiment = False
             variables.start_flag = False
-            variables.elapsed_time = 0.0
-            variables.total_ions = 0
-            variables.specimen_voltage = 0.0
+            # variables.elapsed_time = 0.0
+            # variables.total_ions = 0
+            # variables.specimen_voltage = 0.0
+            # variables.total_count = 0
+            # variables.avg_n_count = 0
+            # variables.pulse_voltage = 0.0
             variables.detection_rate = 0.0
             variables.detection_rate_elapsed = 0.0
-            variables.pulse_voltage = 0.0
-            variables.total_count = 0
             variables.count = 0
             variables.count_temp = 0
             variables.count_last = 0
-            variables.avg_n_count = 0
             variables.index_plot = 0
             variables.index_save_image = 0
             variables.index_wait_on_plot_start = 0
@@ -476,17 +476,17 @@ def main():
                 break
         if variables.criteria_vdc:
             if variables.vdc_max <= variables.specimen_voltage:
-                if flag_achieved_high_voltage == variables.ex_freq * 10:
+                if flag_achieved_high_voltage > variables.ex_freq * 10:
                     print('High Voltage Max. is achieved')
                     logger.info('High Voltage Max. is achieved')
                     time.sleep(1)
                     break
-            flag_achieved_high_voltage += 1
+                flag_achieved_high_voltage += 1
         if variables.ex_time != ex_time_temp:
             total_steps = variables.ex_time * variables.ex_freq - steps
             ex_time_temp = variables.ex_time
         # Because experiment time is not a stop criteria, increase total_steps
-        if variables.criteria_time and steps+1==total_steps:
+        if not variables.criteria_time and steps+1==total_steps:
             total_steps += 1
     # Stop the TDC process
     try:
