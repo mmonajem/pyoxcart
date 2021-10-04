@@ -1,4 +1,5 @@
-#  PyOXCART - An open source package in Python for OXCART Atom Prob ![plot](./png/logo.png)
+#  PyOXCART - An open source package in Python for OXCART Atom Prob 
+![plot](./png/logo.png)
 Oxcart is a in-house atom probe. 
 The unique feature of this device is that it has a measuring chamber made of titanium to generate a particularly low-hydrogen vacuum.
 The Oxcart is equipped with a highly efficient detector (approx. 80% detection efficiency). PyOXCART is an atom prob control software which save the data in FAIR data format.
