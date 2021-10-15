@@ -579,7 +579,10 @@ class Ui_OXCART(Camera, object):
 
     def retranslateUi(self, OXCART):
         _translate = QtCore.QCoreApplication.translate
-        OXCART.setWindowTitle(_translate("OXCART", "OXCART"))
+        OXCART.setWindowTitle(_translate("OXCART", "PyOXCART"))
+        ###
+        OXCART.setWindowIcon(QtGui.QIcon('./png/logo3.png'))
+        ###
         self.label_7.setText(_translate("OXCART", "Voltage"))
         self.start_button.setText(_translate("OXCART", "Start"))
         ###
