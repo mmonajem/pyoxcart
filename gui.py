@@ -1061,9 +1061,14 @@ class Ui_OXCART(Camera, object):
         self.x_tem = self.x_tem[1:]  # Remove the first element.
         self.x_tem = np.append(self.x_tem, self.x_tem[-1] + 1)  # Add a new value 1 higher than the last.
         self.y_tem = self.y_tem[1:]  # Remove the first element.
-        self.y_tem = np.append(self.y_tem, int(variables.temperature))
+        try:
+            self.y_tem = np.append(self.y_tem, int(variables.temperature))
+            self.data_line_tem.setData(self.x_tem, self.y_tem)
+        except:
+            print(
+                f"{initialize_devices.bcolors.FAIL}Error: Cannot read the temperature{initialize_devices.bcolors.ENDC}")
 
-        self.data_line_tem.setData(self.x_tem, self.y_tem)
+
         if variables.index_auto_scale_graph == 30:
             self.temperature.enableAutoRange(axis='x')
             self.vdc_time.enableAutoRange(axis='x')
