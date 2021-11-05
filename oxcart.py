@@ -20,7 +20,7 @@ import nidaqmx
 import tdc
 import tdc_new
 import variables
-from devices import email_send, tweet_send, initialize_devices
+from devices import email_send, tweet_send, initialize_devices, drs
 
 
 def logging():
@@ -56,7 +56,10 @@ class OXCART:
     """
 
     def __init__(self, queue_x, queue_y, queue_t, queue_dld_start_counter,
-                 queue_channel, queue_time_data, queue_tdc_start_counter, lock1, lock2):
+                 queue_channel, queue_time_data, queue_tdc_start_counter,
+                 queue_ch0_time, queue_ch0_wave,  queue_ch1_time,  queue_ch1_wave,
+                 queue_ch2_time, queue_ch2_wave, queue_ch3_time, queue_ch3_wave,
+                 lock1, lock2):
         # Queues for sharing data between tdc and main process
         # dld queues
         self.queue_x = queue_x
@@ -69,6 +72,15 @@ class OXCART:
         self.queue_time_data = queue_time_data
         self.queue_tdc_start_counter = queue_tdc_start_counter
         self.lock2 = lock2
+        # DRS queues
+        self.queue_ch0_time = queue_ch0_time
+        self.queue_ch0_wave = queue_ch0_wave
+        self.queue_ch1_time = queue_ch1_time
+        self.queue_ch1_wave = queue_ch1_wave
+        self.queue_ch2_time = queue_ch2_time
+        self.queue_ch2_wave = queue_ch2_wave
+        self.queue_ch3_time = queue_ch3_time
+        self.queue_ch3_wave = queue_ch3_wave
 
     # Initialize the V_dc for the experiment
     def initialize_v_dc(self):
@@ -156,6 +168,33 @@ class OXCART:
             if variables.end_experiment:
                 break
 
+    def reader_queue_drs(self):
+        """
+        reader of DRS queues function
+        This function is called continuously by a separate thread
+        """
+        while True:
+            while not self.queue_ch0_time.empty() or not self.queue_ch0_wave.empty() or not self.queue_ch1_time.empty() or not\
+                    self.queue_ch1_wave.empty() or not self.queue_ch2_time.empty() or not\
+                    self.queue_ch2_wave.empty() or not self.queue_ch3_time.empty() or not self.queue_ch3_wave.empty():
+                with self.lock1:
+                    length = self.queue_ch0_time.get()
+                    variables.ch0_time = np.append(variables.ch0_time, length)
+                    variables.ch0_wave = np.append(variables.ch0_wave, self.queue_ch0_wave.get())
+                    variables.ch1_time = np.append(variables.ch1_time, self.queue_ch1_time.get())
+                    variables.ch1_wave = np.append(variables.ch1_wave, self.queue_ch1_wave.get())
+                    variables.ch2_time = np.append(variables.ch2_time, self.queue_ch2_time.get())
+                    variables.ch2_wave = np.append(variables.ch2_wave, self.queue_ch2_wave.get())
+                    variables.ch3_time = np.append(variables.ch3_time, self.queue_ch3_time.get())
+                    variables.ch3_wave = np.append(variables.ch3_wave, self.queue_ch3_wave.get())
+
+                    variables.main_v_dc_dld = np.append(variables.main_v_dc_dld,
+                                                        np.tile(variables.specimen_voltage, len(length)))
+                    variables.main_v_p_dld = np.append(variables.main_v_p_dld,
+                                                       np.tile(variables.pulse_voltage, len(length)))
+            # If end of experiment flag is set break the while loop
+            if variables.end_experiment:
+                break
     def reader_queue_tdc(self):
         """
         reader of TDC queues function
@@ -198,6 +237,8 @@ class OXCART:
         elif variables.counter_source == 'pulse_counter':
             # reading detector MCP pulse counter and calculating pulses since last loop iteration
             variables.total_ions = task_counter.read(number_of_samples_per_channel=1)[0]
+        elif variables.counter_source == 'DRS':
+            pass
 
         variables.count_temp = variables.total_ions - variables.count_last
         variables.count_last = variables.total_ions
@@ -281,6 +322,15 @@ class OXCART:
             variables.time_data = np.zeros(0)
             variables.tdc_start_counter = np.zeros(0)
 
+            variables.ch0_time = np.zeros(0)
+            variables.ch0_wave = np.zeros(0)
+            variables.ch1_time = np.zeros(0)
+            variables.ch1_wave = np.zeros(0)
+            variables.ch2_time = np.zeros(0)
+            variables.ch2_wave = np.zeros(0)
+            variables.ch3_time = np.zeros(0)
+            variables.ch3_wave = np.zeros(0)
+
             variables.main_v_dc = np.zeros(0)
             variables.main_v_p = np.zeros(0)
             variables.main_counter = np.zeros(0)
@@ -343,6 +393,15 @@ def main():
         queue_tdc_start_counter = Queue(maxsize=-1, ctx=multiprocessing.get_context())
         queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
 
+        queue_ch0_time = None
+        queue_ch0_wave = None
+        queue_ch1_time = None
+        queue_ch1_wave = None
+        queue_ch2_time = None
+        queue_ch2_wave = None
+        queue_ch3_time = None
+        queue_ch3_wave = None
+
         tdc_process = multiprocessing.Process(target=tdc_new.experiment_measure, args=(variables.raw_mode, queue_x,
                                                                                        queue_y, queue_t,
                                                                                        queue_dld_start_counter,
@@ -352,6 +411,34 @@ def main():
                                                                                        queue_stop_measurement))
         tdc_process.daemon = True
         tdc_process.start()
+
+    elif variables.counter_source == 'DRS':
+        queue_ch0_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch0_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch1_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch1_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch2_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch2_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch3_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch3_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
+
+        queue_x = None
+        queue_y = None
+        queue_t = None
+        queue_dld_start_counter = None
+        queue_channel = None
+        queue_time_data = None
+        queue_tdc_start_counter = None
+
+
+        drs_process = multiprocessing.Process(target=drs.experiment_measure, args=(queue_ch0_time, queue_ch0_wave,
+                                                                                       queue_ch1_time, queue_ch1_wave,
+                                                                                       queue_ch2_time, queue_ch2_wave,
+                                                                                       queue_ch3_time, queue_ch3_wave,
+                                                                                       queue_stop_measurement))
+        drs_process.daemon = True
+        drs_process.start()
     else:
         queue_x = None
         queue_y = None
@@ -360,15 +447,25 @@ def main():
         queue_channel = None
         queue_time_data = None
         queue_tdc_start_counter = None
-        queue_stop_measurement = None
+
+        queue_ch0_time = None
+        queue_ch0_wave = None
+        queue_ch1_time = None
+        queue_ch1_wave = None
+        queue_ch2_time = None
+        queue_ch2_wave = None
+        queue_ch3_time = None
+        queue_ch3_wave = None
 
     # Lock that is used by TDC and DLD threads
     lock1 = threading.Lock()
     lock2 = threading.Lock()
     # Create the experiment object
     experiment = OXCART(queue_x, queue_y, queue_t, queue_dld_start_counter,
-                        queue_channel, queue_time_data,
-                        queue_tdc_start_counter, lock1, lock2)
+                        queue_channel, queue_time_data, queue_tdc_start_counter,
+                        queue_ch0_time, queue_ch0_wave, queue_ch1_time, queue_ch1_wave,
+                        queue_ch2_time, queue_ch2_wave, queue_ch3_time, queue_ch3_wave,
+                        lock1, lock2)
     # Initialize high voltage
     experiment.initialize_v_dc()
     logger.info('High voltage is initialized')
@@ -403,6 +500,11 @@ def main():
         read_tdc_queue_thread = threading.Thread(target=experiment.reader_queue_tdc)
         read_tdc_queue_thread.setDaemon(True)
         read_tdc_queue_thread.start()
+    elif variables.counter_source == 'DRS':
+        read_drs_queue_thread = threading.Thread(target=experiment.reader_queue_drs)
+        read_drs_queue_thread.setDaemon(True)
+        read_drs_queue_thread.start()
+
     total_steps = variables.ex_time * variables.ex_freq
     steps = 0
     flag_achieved_high_voltage = 0
@@ -497,9 +599,16 @@ def main():
                 tdc_process.join(1)
                 # Release all the resources of the TDC process
                 tdc_process.close()
+        elif variables.counter_source == 'DRS':
+            drs_process.join(3)
+            if drs_process.is_alive():
+                drs_process.terminate()
+                drs_process.join(1)
+                # Release all the resources of the TDC process
+                drs_process.close()
     except:
         print(
-            f"{initialize_devices.bcolors.WARNING}Warning: The TDC process cannot be terminated properly{initialize_devices.bcolors.ENDC}")
+            f"{initialize_devices.bcolors.WARNING}Warning: The TDC or DRS process cannot be terminated properly{initialize_devices.bcolors.ENDC}")
 
     variables.end_experiment = True
     time.sleep(1)
@@ -508,11 +617,15 @@ def main():
         read_dld_queue_thread.join(1)
     elif variables.counter_source == 'TDC_Raw':
         read_tdc_queue_thread.join(1)
+    elif variables.counter_source == 'DRS':
+        read_drs_queue_thread.join(1)
 
     if variables.counter_source == 'TDC':
         variables.total_ions = len(variables.x)
     elif variables.counter_source == 'TDC_Raw':
         variables.total_ions = int(len(variables.channel) / 4)
+    elif variables.counter_source == 'DRS':
+        pass
 
     time.sleep(1)
     print('Experiment is finished')
@@ -527,6 +640,13 @@ def main():
     elif variables.counter_source == 'TDC_Raw':
         if all(len(lst) == len(variables.channel) for lst in [variables.channel, variables.time_data,
                                                           variables.tdc_start_counter,
+                                                          variables.main_v_dc_tdc, variables.main_v_p_tdc]):
+            logger.warning('tdc data have not same length')
+    elif variables.counter_source == 'DRS':
+        if all(len(lst) == len(variables.ch0_time) for lst in [variables.ch0_wave, variables.ch1_time,
+                                                          variables.ch1_wave,variables.ch2_time,
+                                                          variables.ch2_wave,variables.ch3_time,
+                                                          variables.ch3_wave,
                                                           variables.main_v_dc_tdc, variables.main_v_p_tdc]):
             logger.warning('tdc data have not same length')
 
@@ -546,15 +666,40 @@ def main():
         f.create_dataset("dld/x", data=variables.x, dtype='i')
         f.create_dataset("dld/y", data=variables.y, dtype='i')
         f.create_dataset("dld/t", data=variables.t, dtype='i')
-        f.create_dataset("dld/start_counter", data=variables.dld_start_counter, dtype='i')
-        f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld, dtype='f')
-        f.create_dataset("dld/pulse_voltage", data=variables.main_v_dc_dld, dtype='f')
+        if variables.counter_source == 'TDC':
+            f.create_dataset("dld/start_counter", data=variables.dld_start_counter, dtype='i')
+            f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld, dtype='f')
+            f.create_dataset("dld/pulse_voltage", data=variables.main_v_dc_dld, dtype='f')
+        else:
+            f.create_dataset("dld/start_counter", data=np.zeros(0), dtype='i')
+            f.create_dataset("dld/high_voltage", data=np.zeros(0), dtype='f')
+            f.create_dataset("dld/pulse_voltage", data=np.zeros(0), dtype='f')
+
+        f.create_dataset("drs/ch0_time", data=variables.ch0_time, dtype='f')
+        f.create_dataset("drs/ch0_wave", data=variables.ch0_wave, dtype='f')
+        f.create_dataset("drs/ch1_time", data=variables.ch1_time, dtype='f')
+        f.create_dataset("drs/ch1_wave", data=variables.ch1_wave, dtype='f')
+        f.create_dataset("drs/ch2_time", data=variables.ch2_time, dtype='f')
+        f.create_dataset("drs/ch2_wave", data=variables.ch2_wave, dtype='f')
+        f.create_dataset("drs/ch3_time", data=variables.ch3_time, dtype='f')
+        f.create_dataset("drs/ch3_wave", data=variables.ch3_wave, dtype='f')
+        if variables.counter_source == 'DRS':
+            f.create_dataset("drs/high_voltage", data=variables.main_v_dc_dld, dtype='f')
+            f.create_dataset("drs/pulse_voltage", data=variables.main_v_dc_dld, dtype='f')
+        else:
+            f.create_dataset("drs/high_voltage", data=np.zeros(0), dtype='f')
+            f.create_dataset("drs/pulse_voltage", data=np.zeros(0), dtype='f')
 
         f.create_dataset("tdc/channel", data=variables.channel, dtype='i')
         f.create_dataset("tdc/time_data", data=variables.time_data, dtype='i')
-        f.create_dataset("tdc/start_counter", data=variables.tdc_start_counter, dtype='i')
-        f.create_dataset("tdc/high_voltage", data=variables.main_v_dc_tdc, dtype='f')
-        f.create_dataset("tdc/pulse_voltage", data=variables.main_v_p_tdc, dtype='f')
+        if variables.counter_source == 'TDC_Raw':
+            f.create_dataset("tdc/start_counter", data=variables.tdc_start_counter, dtype='i')
+            f.create_dataset("tdc/high_voltage", data=variables.main_v_dc_tdc, dtype='f')
+            f.create_dataset("tdc/pulse_voltage", data=variables.main_v_p_tdc, dtype='f')
+        else:
+            f.create_dataset("tdc/start_counter", data=np.zeros(0), dtype='i')
+            f.create_dataset("tdc/high_voltage", data=np.zeros(0), dtype='f')
+            f.create_dataset("tdc/pulse_voltage", data=np.zeros(0), dtype='f')
 
     logger.info('HDF5 file is created')
     variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")

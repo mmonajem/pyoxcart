@@ -535,6 +535,8 @@ class Ui_OXCART(Camera, object):
         self.counter_source.setObjectName("counter_source")
         self.counter_source.addItem("")
         self.counter_source.addItem("")
+        self.counter_source.addItem("")
+        self.counter_source.addItem("")
         self.gridLayout_3.addWidget(self.counter_source, 19, 2, 1, 1)
         OXCART.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(OXCART)
@@ -680,7 +682,9 @@ class Ui_OXCART(Camera, object):
         self.tweet.setItemText(1, _translate("OXCART", "Yes"))
         self.label_42.setText(_translate("OXCART", "Counter Source"))
         self.counter_source.setItemText(0, _translate("OXCART", "TDC"))
-        self.counter_source.setItemText(1, _translate("OXCART", "Pulse Counter"))
+        self.counter_source.setItemText(1, _translate("OXCART", "TDC_Raw"))
+        self.counter_source.setItemText(2, _translate("OXCART", "Pulse Counter"))
+        self.counter_source.setItemText(3, _translate("OXCART", "DRS"))
         self.menuFile.setTitle(_translate("OXCART", "File"))
         self.actionExit.setText(_translate("OXCART", "Exit"))
 
@@ -840,6 +844,8 @@ class Ui_OXCART(Camera, object):
                         self.counter_source.setCurrentIndex(1)
                     if text_line_b[i][1] == 'Pulse Counter':
                         self.counter_source.setCurrentIndex(2)
+                    if text_line_b[i][1] == 'DRS':
+                        self.counter_source.setCurrentIndex(3)
                 if text_line_b[i][0] == 'tweet':
                     if text_line_b[i][1] == 'NO':
                         self.tweet.setCurrentIndex(0)

@@ -101,6 +101,15 @@ def init():
     global channel
     global time_data
     global tdc_start_counter
+    # DRS parameters
+    global ch0_time
+    global ch0_wave
+    global ch1_time
+    global ch1_wave
+    global ch2_time
+    global ch2_wave
+    global ch3_time
+    global ch3_wave
 
     # Experiment variables
     global main_v_dc
@@ -195,6 +204,15 @@ def init():
     channel = np.zeros(0)
     time_data = np.zeros(0)
     tdc_start_counter = np.zeros(0)
+
+    ch0_time = np.zeros(0)
+    ch0_wave = np.zeros(0)
+    ch1_time = np.zeros(0)
+    ch1_wave = np.zeros(0)
+    ch2_time = np.zeros(0)
+    ch2_wave = np.zeros(0)
+    ch3_time = np.zeros(0)
+    ch3_wave = np.zeros(0)
 
     # Source of calculating the detected events pulse_counter or TDC
     counter_source = 'pulse_counter'
