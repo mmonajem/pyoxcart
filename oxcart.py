@@ -568,6 +568,7 @@ def main():
             time.sleep(1)
             break
 
+
         if variables.criteria_ions:
             if variables.max_ions <= variables.total_ions:
                 print('Total number of Ions is achieved')
