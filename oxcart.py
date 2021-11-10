@@ -20,7 +20,7 @@ import nidaqmx
 import tdc
 import tdc_new
 import variables
-from devices import email_send, tweet_send, initialize_devices, drs
+from devices import email_send, tweet_send, initialize_devices, drs, signal_generator
 
 
 def logging():
@@ -188,9 +188,9 @@ class OXCART:
                     variables.ch3_time = np.append(variables.ch3_time, self.queue_ch3_time.get())
                     variables.ch3_wave = np.append(variables.ch3_wave, self.queue_ch3_wave.get())
 
-                    variables.main_v_dc_dld = np.append(variables.main_v_dc_dld,
+                    variables.main_v_dc_drs = np.append(variables.main_v_dc_drs,
                                                         np.tile(variables.specimen_voltage, len(length)))
-                    variables.main_v_p_dld = np.append(variables.main_v_p_dld,
+                    variables.main_v_p_drs = np.append(variables.main_v_p_drs,
                                                        np.tile(variables.pulse_voltage, len(length)))
             # If end of experiment flag is set break the while loop
             if variables.end_experiment:
@@ -360,6 +360,8 @@ class OXCART:
             # Close the task of counter
             task_counter.stop()
             task_counter.close()
+        # Turn off the signal generator
+        signal_generator.turn_off_signal_generator()
         # Zero variables
         cleanup_variables()
         print('Clean up is finished')
@@ -466,6 +468,9 @@ def main():
                         queue_ch0_time, queue_ch0_wave, queue_ch1_time, queue_ch1_wave,
                         queue_ch2_time, queue_ch2_wave, queue_ch3_time, queue_ch3_wave,
                         lock1, lock2)
+
+    # Initialize the signal generator
+    signal_generator.initialize_signal_generator(variables.pulse_frequency)
     # Initialize high voltage
     experiment.initialize_v_dc()
     logger.info('High voltage is initialized')
@@ -568,7 +573,6 @@ def main():
             time.sleep(1)
             break
 
-
         if variables.criteria_ions:
             if variables.max_ions <= variables.total_ions:
                 print('Total number of Ions is achieved')
@@ -670,7 +674,7 @@ def main():
         if variables.counter_source == 'TDC':
             f.create_dataset("dld/start_counter", data=variables.dld_start_counter, dtype='i')
             f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld, dtype='f')
-            f.create_dataset("dld/pulse_voltage", data=variables.main_v_dc_dld, dtype='f')
+            f.create_dataset("dld/pulse_voltage", data=variables.main_v_p_dld, dtype='f')
         else:
             f.create_dataset("dld/start_counter", data=np.zeros(0), dtype='i')
             f.create_dataset("dld/high_voltage", data=np.zeros(0), dtype='f')
@@ -685,8 +689,8 @@ def main():
         f.create_dataset("drs/ch3_time", data=variables.ch3_time, dtype='f')
         f.create_dataset("drs/ch3_wave", data=variables.ch3_wave, dtype='f')
         if variables.counter_source == 'DRS':
-            f.create_dataset("drs/high_voltage", data=variables.main_v_dc_dld, dtype='f')
-            f.create_dataset("drs/pulse_voltage", data=variables.main_v_dc_dld, dtype='f')
+            f.create_dataset("drs/high_voltage", data=variables.main_v_dc_drs, dtype='f')
+            f.create_dataset("drs/pulse_voltage", data=variables.main_v_p_drs, dtype='f')
         else:
             f.create_dataset("drs/high_voltage", data=np.zeros(0), dtype='f')
             f.create_dataset("drs/pulse_voltage", data=np.zeros(0), dtype='f')

@@ -121,6 +121,8 @@ def init():
     global main_v_p_dld
     global main_v_dc_tdc
     global main_v_p_tdc
+    global main_v_dc_drs
+    global main_v_p_drs
 
     raw_mode = False
     counter = 0
@@ -226,3 +228,5 @@ def init():
     main_v_p_dld = np.zeros(0)
     main_v_dc_tdc = np.zeros(0)
     main_v_p_tdc = np.zeros(0)
+    main_v_dc_drs = np.zeros(0)
+    main_v_p_drs = np.zeros(0)

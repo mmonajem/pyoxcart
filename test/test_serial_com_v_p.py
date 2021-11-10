@@ -2,6 +2,7 @@
 import visa
 import time
 from pyvisa import constants
+
 resources = visa.ResourceManager('@py')
 print(resources.list_resources())
 # v_p = resources.open_resource('ASRL4::INSTR', baud_rate=9600, data_bits=8, parity=constants.Parity.none, stop_bits=constants.StopBits.one, write_termination="\n", read_termination="\n")

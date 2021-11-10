@@ -890,7 +890,7 @@ class Ui_OXCART(Camera, object):
             variables.detection_rate = float(self.detection_rate_init.text())
             variables.hit_display = int(float(self.hit_displayed.text()))
             variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
-            variables.pulse_frequency = int(float(self.pulse_frequency.text()))
+            variables.pulse_frequency = float(self.pulse_frequency.text())
             variables.hdf5_path = self.ex_name.text()
             variables.email = self.email.text()
             variables.cycle_avg = int(float(self.cycle_avg.text()))
@@ -1266,7 +1266,7 @@ class Ui_OXCART(Camera, object):
             variables.detection_rate = float(self.detection_rate_init.text())
             variables.hit_display = int(float(self.hit_displayed.text()))
             variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
-            variables.pulse_frequency = int(float(self.pulse_frequency.text()))
+            variables.pulse_frequency = float(self.pulse_frequency.text())
             variables.hdf5_path = self.ex_name.text()
             variables.email = self.email.text()
             variables.cycle_avg = int(float(self.cycle_avg.text()))
