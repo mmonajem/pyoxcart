@@ -44,7 +44,9 @@ def experiment_measure(queue_ch0_time, queue_ch0_wave,
                        queue_stop_measurement):
 
     drs_ox = DRS(trigger=1, test=0, delay=0, sample_frequency=2)
+    returnVale = np.array(drs_ox.reader())
 
+    returnVale
     while True:
 
         if queue_stop_measurement.empty():

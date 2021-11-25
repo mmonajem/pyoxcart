@@ -1,9 +1,3 @@
-# from pfeiffer import TPG262
-
-
-
-
-
 """This module contains drivers for the following equipment from Pfeiffer
 Vacuum:
 * TPG 262 and TPG 261 Dual Gauge. Dual-Channel Measurement and Control

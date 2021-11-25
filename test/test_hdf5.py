@@ -2,8 +2,8 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 
-# f = h5py.File('D:\\oxcart\\data\\200_Jun-07-2021_10-29_test_w3\\test_w3_data.h5', 'a')
-f = h5py.File('D:\\oxcart\\data\\243_Jun-16-2021_13-47_test\\test_data.h5', 'a')
+f = h5py.File('D:\\oxcart\\data\\200_Jun-07-2021_10-29_test_w3\\test_w3_data.h5', 'a')
+# f = h5py.File('D:\\oxcart\\data\\243_Jun-16-2021_13-47_test\\test_data.h5', 'a')
 
 def h5printR(item, leading = ''):
     for key in item:

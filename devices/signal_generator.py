@@ -6,7 +6,7 @@ def initialize_signal_generator(freq):
     resources = pyvisa.ResourceManager()
 
     freq1_command = 'C1:BSWV FRQ,%s' % (freq * 1000)
-    print(freq1_command)
+
     freq2_command = 'C2:BSWV FRQ,%s' % (freq * 1000)
 
     device_resource = "USB0::0xF4EC::0x1101::SDG6XBAD2R0601::INSTR"
