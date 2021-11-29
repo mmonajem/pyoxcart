@@ -668,43 +668,33 @@ def main():
         f.create_dataset("time/time_m", data=time_ex_m, dtype='i')
         f.create_dataset("time/time_h", data=time_ex_h, dtype='i')
 
-        f.create_dataset("dld/x", data=variables.x, dtype='i')
-        f.create_dataset("dld/y", data=variables.y, dtype='i')
-        f.create_dataset("dld/t", data=variables.t, dtype='i')
+
         if variables.counter_source == 'TDC':
+            f.create_dataset("dld/x", data=variables.x, dtype='i')
+            f.create_dataset("dld/y", data=variables.y, dtype='i')
+            f.create_dataset("dld/t", data=variables.t, dtype='i')
             f.create_dataset("dld/start_counter", data=variables.dld_start_counter, dtype='i')
             f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld, dtype='f')
             f.create_dataset("dld/pulse_voltage", data=variables.main_v_p_dld, dtype='f')
-        else:
-            f.create_dataset("dld/start_counter", data=np.zeros(0), dtype='i')
-            f.create_dataset("dld/high_voltage", data=np.zeros(0), dtype='f')
-            f.create_dataset("dld/pulse_voltage", data=np.zeros(0), dtype='f')
 
-        f.create_dataset("drs/ch0_time", data=variables.ch0_time, dtype='f')
-        f.create_dataset("drs/ch0_wave", data=variables.ch0_wave, dtype='f')
-        f.create_dataset("drs/ch1_time", data=variables.ch1_time, dtype='f')
-        f.create_dataset("drs/ch1_wave", data=variables.ch1_wave, dtype='f')
-        f.create_dataset("drs/ch2_time", data=variables.ch2_time, dtype='f')
-        f.create_dataset("drs/ch2_wave", data=variables.ch2_wave, dtype='f')
-        f.create_dataset("drs/ch3_time", data=variables.ch3_time, dtype='f')
-        f.create_dataset("drs/ch3_wave", data=variables.ch3_wave, dtype='f')
-        if variables.counter_source == 'DRS':
-            f.create_dataset("drs/high_voltage", data=variables.main_v_dc_drs, dtype='f')
-            f.create_dataset("drs/pulse_voltage", data=variables.main_v_p_drs, dtype='f')
-        else:
-            f.create_dataset("drs/high_voltage", data=np.zeros(0), dtype='f')
-            f.create_dataset("drs/pulse_voltage", data=np.zeros(0), dtype='f')
-
-        f.create_dataset("tdc/channel", data=variables.channel, dtype='i')
-        f.create_dataset("tdc/time_data", data=variables.time_data, dtype='i')
-        if variables.counter_source == 'TDC_Raw':
+        elif variables.counter_source == 'TDC_Raw':
             f.create_dataset("tdc/start_counter", data=variables.tdc_start_counter, dtype='i')
+            f.create_dataset("tdc/channel", data=variables.channel, dtype='i')
+            f.create_dataset("tdc/time_data", data=variables.time_data, dtype='i')
             f.create_dataset("tdc/high_voltage", data=variables.main_v_dc_tdc, dtype='f')
             f.create_dataset("tdc/pulse_voltage", data=variables.main_v_p_tdc, dtype='f')
-        else:
-            f.create_dataset("tdc/start_counter", data=np.zeros(0), dtype='i')
-            f.create_dataset("tdc/high_voltage", data=np.zeros(0), dtype='f')
-            f.create_dataset("tdc/pulse_voltage", data=np.zeros(0), dtype='f')
+
+        elif variables.counter_source == 'DRS':
+            f.create_dataset("drs/ch0_time", data=variables.ch0_time, dtype='f')
+            f.create_dataset("drs/ch0_wave", data=variables.ch0_wave, dtype='f')
+            f.create_dataset("drs/ch1_time", data=variables.ch1_time, dtype='f')
+            f.create_dataset("drs/ch1_wave", data=variables.ch1_wave, dtype='f')
+            f.create_dataset("drs/ch2_time", data=variables.ch2_time, dtype='f')
+            f.create_dataset("drs/ch2_wave", data=variables.ch2_wave, dtype='f')
+            f.create_dataset("drs/ch3_time", data=variables.ch3_time, dtype='f')
+            f.create_dataset("drs/ch3_wave", data=variables.ch3_wave, dtype='f')
+            f.create_dataset("drs/high_voltage", data=variables.main_v_dc_drs, dtype='f')
+            f.create_dataset("drs/pulse_voltage", data=variables.main_v_p_drs, dtype='f')
 
     logger.info('HDF5 file is created')
     variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -743,6 +733,7 @@ def main():
         f.write('Experiment Name: ' + variables.hdf5_path + '\r\n')
         f.write('Detection Rate ('+chr(37)+') : %s\r\n' % variables.detection_rate)
         f.write('Maximum Number of Ions: %s\r\n' % variables.max_ions)
+        f.write('Counter source: %s\r\n' % variables.counter_source)
         f.write('Control Refresh freq. (Hz): %s\r\n' % variables.ex_freq)
         f.write('Time bins (Sec): %s\r\n' % (1/variables.ex_freq))
         f.write('Cycle for Avg.: %s\r\n' % variables.cycle_avg)
