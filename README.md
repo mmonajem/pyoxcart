@@ -13,7 +13,18 @@ The image below is an overview of the user interface:
 ![plot](./png/screenshot.png)
 
 #  Installation
-TODO
+1- create the virtual environment via Anaconda:
+    
+    conda create -n myenv python=3.10
+
+2- Activate the virtual environment:
+
+    conda activate myenv
+    
+
+3- Install dependencies:
+    
+    pip install -r requirements.txt
 # Running an experiment
 TODO
 # Citing 

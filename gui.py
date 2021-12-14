@@ -924,7 +924,7 @@ class Ui_OXCART(Camera, object):
             now = datetime.datetime.now()
             exp_name = "%s_" % variables.counter + \
                        now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
-            variables.path = 'D:\\oxcart\\data\\%s' % exp_name
+            variables.path = 'D:\\pyoxcart\\data\\%s' % exp_name
             # Create folder to save the data
             if not os.path.isdir(variables.path):
                 os.makedirs(variables.path, mode=0o777, exist_ok=True)

@@ -652,7 +652,7 @@ def main():
                                                           variables.ch1_wave,variables.ch2_time,
                                                           variables.ch2_wave,variables.ch3_time,
                                                           variables.ch3_wave,
-                                                          variables.main_v_dc_tdc, variables.main_v_p_tdc]):
+                                                          variables.main_v_dc_drs, variables.main_v_p_drs]):
             logger.warning('tdc data have not same length')
 
     # save hdf5 file
