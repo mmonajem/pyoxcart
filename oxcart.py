@@ -25,7 +25,18 @@ from devices import email_send, tweet_send, initialize_devices, drs, signal_gene
 
 def logging():
     """
-    logging function
+    The function is used to insantiate and configute logger object for logging. 
+    The function use python native logging library.
+
+    Attributes:
+        Does not accept any arguments
+    Returns:
+        Returns the logger object which could be used log statements of following level:
+            1. INFO: "Useful information"
+            2. WARNING: "Something is not right"
+            3. DEBUG: "A debug message"
+            4. ERROR: "A Major error has happened."
+            5. CRITICAL "Fatal error. Cannot continue"
     """
     import logging
     # Gets or creates a logger
@@ -33,26 +44,19 @@ def logging():
     # set log level
     logger.setLevel(logging.INFO)
     # define file handler and set formatter
+    # Reads file path from imported "variables" file
     file_handler = logging.FileHandler(variables.path + '\\logfile.log', mode='w')
     formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
     file_handler.setFormatter(formatter)
-
     # add file handler to logger
     logger.addHandler(file_handler)
-
-    # Logs
-    # logger.debug('A debug message')
-    # logger.info('An info message')
-    # logger.warning('Something is not right.')
-    # logger.error('A Major error has happened.')
-    # logger.critical('Fatal error. Cannot continue')
-
     return logger
 
 
 class OXCART:
     """
     OXCART class
+
     """
 
     def __init__(self, queue_x, queue_y, queue_t, queue_dld_start_counter,
@@ -60,6 +64,11 @@ class OXCART:
                  queue_ch0_time, queue_ch0_wave,  queue_ch1_time,  queue_ch1_wave,
                  queue_ch2_time, queue_ch2_wave, queue_ch3_time, queue_ch3_wave,
                  lock1, lock2):
+        '''
+        This is the constructor class that accepts several initialized queues objects corresponding
+        to various parameters of the groups like dld,TDC,DRS. This constructor also objects used for
+        creating locks on resources to reduce concurrent access on resources and reduce dirty read.
+        '''
         # Queues for sharing data between tdc and main process
         # dld queues
         self.queue_x = queue_x
@@ -82,10 +91,19 @@ class OXCART:
         self.queue_ch3_time = queue_ch3_time
         self.queue_ch3_wave = queue_ch3_wave
 
-    # Initialize the V_dc for the experiment
     def initialize_v_dc(self):
         """
-        Initializing the high voltage function
+        This class method intializes the high volatge parameter: v_dc.
+        The fucntion utilizes the serial library to communicate over the 
+        COM port serially and read the corresponding v_dc parameter.
+
+        It exits if it is not able to connect on the COM Port.
+
+        Attributes:
+            Accepts only the self (class object)
+        
+        Returns:
+            Does not return anything
         """
         # Setting the com port of V_dc
         self.com_port_v_dc = serial.Serial(
@@ -110,7 +128,16 @@ class OXCART:
 
     def initialize_v_p(self):
         """
-        Initializing the pulser function
+        This class method intializes the Pulse parameter: v_p.
+        The fucntion utilizes the serial library to communicate over the 
+        COM port serially and read the corresponding v_p parameter.
+
+        Attributes:
+            Accepts only the self (class object)
+        
+        Returns:
+            Does not return anything
+
         """
         # set the port for v_p
         resources = visa.ResourceManager('@py')
@@ -124,7 +151,21 @@ class OXCART:
 
     def initialize_counter(self):
         """
-        Initializing the edge counter function
+        This class method intializes the edge counter parameter.
+        It helps counting in edges of a particular signal.
+
+        The fucntion utilizes the nidaqmx library to communicate 
+        through NI Instruments to count the edges.
+
+        NI-DAQmx can help you use National Instruments (NI) data acquisition and 
+        signal conditioning hardware
+
+        Attributes:
+            Accepts only the self (class object)
+        
+        Returns:
+            Returns the counted edges
+            
         """
         task_counter = nidaqmx.Task()
         task_counter.ci_channels.add_ci_count_edges_chan("Dev1/ctr0")
@@ -136,12 +177,22 @@ class OXCART:
     # apply command to the V_dc
     def command_v_dc(self, cmd):
         """
-        Initializing the high voltage function
+        This class method is used to send commands on the high volatge parameter: v_dc.
+        The fucntion utilizes the serial library to communicate over the 
+        COM port serially and read the corresponding v_dc parameter.
+
+        Attributes:
+            Accepts only the self (class object)
+        
+        Returns:
+            Returns the response code after executing the command.
         """
         self.com_port_v_dc.write(
             (cmd + '\r\n').encode())  # send cmd to device # might not work with older devices -> "LF" only needed!
         time.sleep(0.005)  # small sleep for response
+        #Intialize the response to returned as string
         response = ''
+        # Read the response code after execution(command write).
         while self.com_port_v_dc.in_waiting > 0:
             response = self.com_port_v_dc.readline()  # all characters received, read line till '\r\n'
         return response.decode("utf-8")
@@ -150,11 +201,23 @@ class OXCART:
 
     def reader_queue_dld(self):
         """
-        reader of DLD queues function
-        This function is called continuously by a separate thread
+        This class method runs in an infinite loop and listens and reads paramters
+        over the queues for the group: dld
+
+        This function is called continuously by a separate thread in the main function.
+
+        The values read from the queues are updates in imported "variables" file
+
+        Attributes:
+            Accepts only the self (class object)
+        
+        Returns:
+            Does not return anything
         """
         while True:
+            # Check if any value is present in queue to read from
             while not self.queue_x.empty() or not self.queue_y.empty() or not self.queue_t.empty() or not self.queue_dld_start_counter.empty():
+                # Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock1:
                     length = self.queue_x.get()
                     variables.x = np.append(variables.x, length)
@@ -170,13 +233,25 @@ class OXCART:
 
     def reader_queue_drs(self):
         """
-        reader of DRS queues function
-        This function is called continuously by a separate thread
+        This class method runs in an infinite loop and listens and reads paramters
+        over the queues for the group: DRS
+
+        This function is called continuously by a separate thread in the main function.
+
+        The values read from the queues are updates in imported "variables" file.
+        Attributes:
+            Accepts only the self (class object)
+        
+        Returns:
+            Does not return anything
         """
         while True:
+            # Check if any value is present in queue to read from
             while not self.queue_ch0_time.empty() or not self.queue_ch0_wave.empty() or not self.queue_ch1_time.empty() or not\
                     self.queue_ch1_wave.empty() or not self.queue_ch2_time.empty() or not\
                     self.queue_ch2_wave.empty() or not self.queue_ch3_time.empty() or not self.queue_ch3_wave.empty():
+
+                #Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock1:
                     length = self.queue_ch0_time.get()
                     variables.ch0_time = np.append(variables.ch0_time, length)
@@ -197,11 +272,23 @@ class OXCART:
                 break
     def reader_queue_tdc(self):
         """
-        reader of TDC queues function
-        This function is called continuously by a separate thread
+        This class method runs in an infinite loop and listens and reads paramters
+        over the queues for the group: TDC
+
+        This function is called continuously by a separate thread in the main function.
+
+        The values read from the queues are updates in imported "variables" file.
+        
+        Attributes:
+            Accepts only the self (class object)
+        
+        Returns:
+            Does not return anything
         """
         while True:
+            # Check if any value is present in queue to read from
             while not self.queue_channel.empty() or not self.queue_time_data.empty() or not self.queue_tdc_start_counter.empty():
+                #Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock2:
                     length = self.queue_channel.get()
                     variables.channel = np.append(variables.channel, length)
