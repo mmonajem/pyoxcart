@@ -148,7 +148,6 @@ class OXCART:
         try:
             self.com_port_v_p.query('*RST')
         except:
-
             self.com_port_v_p.write('VOLT %s' % (variables.v_p_min * (1 / variables.pulse_amp_per_supply_voltage)))
 
     def initialize_counter(self):

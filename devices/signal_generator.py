@@ -1,6 +1,7 @@
 import pyvisa
 import time
 
+
 def initialize_signal_generator(freq):
 
     resources = pyvisa.ResourceManager()
