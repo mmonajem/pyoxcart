@@ -60,13 +60,16 @@ class TPG26x(object):
     NAK = chr(21)  # \x15
 
     def __init__(self, port='/dev/ttyUSB0', baudrate=9600):
-        """Initialize internal variables and serial connection
-        :param port: The COM port to open. See the documentation for
-            `pyserial <http://pyserial.sourceforge.net/>`_ for an explanation
-            of the possible value. The default value is '/dev/ttyUSB0'.
-        :type port: str or int
-        :param baudrate: 9600, 19200, 38400 where 9600 is the default
-        :type baudrate: int
+        """
+        The constructor class method whihch innitialize internal variables and
+        serial connection
+        Atrributes:
+            param port: The COM port to open. See the documentation for
+                `pyserial <http://pyserial.sourceforge.net/>`_ for an explanation
+                of the possible value. The default value is '/dev/ttyUSB0'.
+                :type port: [str or int]
+            baudrate: Data transmission rate (9600, 19200, 38400 where 9600 is the default)
+                :type baudrate: [int]
         """
         # The serial connection should be setup with the following parameters:
         # 1 start bit, 8 data bits, No parity bit, 1 stop bit, no hardware
@@ -75,21 +78,31 @@ class TPG26x(object):
         self.serial = serial.Serial(port=port, baudrate=baudrate, timeout=1)
 
     def _cr_lf(self, string):
-        """Pad carriage return and line feed to a string
-        :param string: String to pad
-        :type string: str
-        :returns: the padded string
-        :rtype: str
+        """
+        Pad carriage return and line feed to a string
+        Attributes:
+            string: String to pad [str]
+        Returns:
+            string : the padded string [string]
         """
         return string + self.CR + self.LF
 
     def _send_command(self, command):
-        """Send a command and check if it is positively acknowledged
-        :param command: The command to send
-        :type command: str
-        :raises IOError: if the negative acknowledged or a unknown response
-            is returned
         """
+        Send a command and check if it is positively acknowledged
+
+        Atrributes:
+
+            command: The command to be send [str]
+
+        Raises Exception:
+            raises IOError: if the negative acknowledged or a unknown response
+            is returned
+        Returns:
+            Does not return anything
+        
+        """
+        # Write (execute command) through serial communication
         self.serial.write(self._cr_lf(command).encode())
         response = self.serial.readline().decode()
         if response == self._cr_lf(self.NAK):
@@ -101,16 +114,21 @@ class TPG26x(object):
             raise IOError(message)
 
     def _get_data(self):
-        """Get the data that is ready on the device
-        :returns: the raw data
-        :rtype:str
+        """
+        Get the data that is ready on the device
+        Attributes:
+            Does not accept any arguments
+        Returns:
+            data: raw data from serial communication line [str]
         """
         self.serial.write(self.ENQ.encode())
         data = self.serial.readline().decode()
         return data.rstrip(self.LF).rstrip(self.CR)
 
     def _clear_output_buffer(self):
-        """Clear the output buffer"""
+        """
+        Clear the output buffer
+        r"""
         time.sleep(0.1)
         just_read = 'start value'
         out = ''
@@ -120,20 +138,29 @@ class TPG26x(object):
         return out
 
     def program_number(self):
-        """Return the firmware version
-        :returns: the firmware version
-        :rtype: str
+        """
+        Return the firmware version
+
+        Attributes:
+            Does not accept any arguments
+        Returns:
+            :the firmware version [str]
         """
         self._send_command('PNR')
         return self._get_data()
 
     def pressure_gauge(self, gauge=1):
-        """Return the pressure measured by gauge X
-        :param gauge: The gauge number, 1 or 2
-        :type gauge: int
-        :raises ValueError: if gauge is not 1 or 2
-        :return: (value, (status_code, status_message))
-        :rtype: tuple
+        """
+        Return the pressure measured by gauge X
+
+        Attributes:
+            gauge: The gauge number, 1 or 2 [int]
+        Raises Exception:
+            :raises ValueError: if gauge is not 1 or 2
+        
+        Returns:
+            :a tuple the value of pressure along with status code and messge
+                (value, (status_code, status_message)) [tuple]
         """
         if gauge not in [1, 2]:
             message = 'The input gauge number can only be 1 or 2'
@@ -145,10 +172,13 @@ class TPG26x(object):
         return value, (status_code, MEASUREMENT_STATUS[status_code])
 
     def pressure_gauges(self):
-        """Return the pressures measured by the gauges
-        :return: (value1, (status_code1, status_message1), value2,
-            (status_code2, status_message2))
-        :rtype: tuple
+        """
+        Return the pressures measured by the gauges
+        Attributes:
+            Does not accept any arguments
+        Returns:
+            :(value1, (status_code1, status_message1), value2,
+                (status_code2, status_message2)) [tuple]
         """
         self._send_command('PRX')
         reply = self._get_data()
@@ -161,9 +191,15 @@ class TPG26x(object):
                 value2, (status_code2, MEASUREMENT_STATUS[status_code2]))
 
     def gauge_identification(self):
-        """Return the gauge identification
-        :return: (id_code_1, id_1, id_code_2, id_2)
-        :rtype: tuple
+        """
+        Return the gauge identification
+
+        Attributes:
+            Does not accept any arguments
+
+        Returns:
+            :(id_code_1, id_1, id_code_2, id_2) [tuples]
+
         """
         self._send_command('TID')
         reply = self._get_data()
@@ -171,23 +207,33 @@ class TPG26x(object):
         return id1, GAUGE_IDS[id1], id2, GAUGE_IDS[id2]
 
     def pressure_unit(self):
-        """Return the pressure unit
-        :return: the pressure unit
-        :rtype: str
+        """
+        Return the pressure unit
+
+        Attributes:
+            Does not accept any arguments
+        Returns:
+            :the pressure unit [str]
         """
         self._send_command('UNI')
         unit_code = int(self._get_data())
         return PRESSURE_UNITS[unit_code]
 
     def rs232_communication_test(self):
-        """RS232 communication test
-        :return: the status of the communication test
-        :rtype: bool
         """
+        This function tests the RS232 communication.
+        Attributes:
+            Does not accept any arguments
+        Returns:
+            :the status of the communication test [boolean]
+        """
+        # reset serial communication
         self._send_command('RST')
         self.serial.write(self.ENQ)
+        # Clear output buffer
         self._clear_output_buffer()
         test_string_out = ''
+        # Test serial communication
         for char in 'a1':
             self.serial.write(char)
             test_string_out += self._get_data().rstrip(self.ENQ)
@@ -199,13 +245,16 @@ class TPG362(TPG26x):
     """Driver for the TPG 261 dual channel measurement and control unit"""
 
     def __init__(self, port='/dev/ttyUSB0', baudrate=9600):
-        """Initialize internal variables and serial connection
-        :param port: The COM port to open. See the documentation for
-            `pyserial <http://pyserial.sourceforge.net/>`_ for an explanation
-            of the possible value. The default value is '/dev/ttyUSB0'.
-        :type port: str or int
-        :param baudrate: 9600, 19200, 38400 where 9600 is the default
-        :type baudrate: int
+        """
+        This construction method initializes internal variables and serial connection.
+
+        Atrributes:
+
+            port: The COM port to open. See the documentation for
+                `pyserial <http://pyserial.sourceforge.net/>`_ for an explanation
+                of the possible value. The default value is '/dev/ttyUSB0'. [str or int]
+
+            baudrate: data transmission rate (9600, 19200, 38400 where 9600 is the default) [int]
         """
         super(TPG362, self).__init__(port=port, baudrate=baudrate)
 
