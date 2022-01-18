@@ -1,7 +1,25 @@
 import pyvisa
 import time
 
+'''
+Documentation: pyvisa
+PyVISA is a Python package that enables you to control all kinds 
+of measurement devices independently of the interface 
+(e.g. GPIB, RS232, USB, Ethernet). 
+
+Module reference: "https://pyvisa.readthedocs.io/en/latest/"
+
+'''
 def initialize_signal_generator(freq):
+    '''
+    This function initializes the  signal generator fucntionality by utlizing pyvisa module
+
+    Atrributes:
+        freq: frequency at which signal need to generated
+    Returns:
+        Does not return anything
+    
+    '''
 
     resources = pyvisa.ResourceManager()
 
@@ -50,6 +68,17 @@ def initialize_signal_generator(freq):
     wave_generator.write('C2:OUTP ON') # Turn on the channel 1
 
 def turn_off_signal_generator():
+
+    '''
+    This function stops the signal generator fucntionality by utlizing pyvisa module.
+    Turns off the channels in use.
+
+    Atrributes:
+        Does not return anything
+    Returns:
+        Does not return anything
+    
+    '''
 
     resources = pyvisa.ResourceManager()
 
