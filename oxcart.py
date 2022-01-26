@@ -2,6 +2,8 @@
 This is the main script for doing experiment.
 It contains the main control loop of experiment.
 @author: Mehrpad Monajem <mehrpad.monajem@fau.de>
+
+TODO: Replace print statements with Log statements
 """
 
 import time
@@ -25,7 +27,18 @@ from devices import email_send, tweet_send, initialize_devices, drs, signal_gene
 
 def logging():
     """
-    logging function
+    The function is used to insantiate and configute logger object for logging. 
+    The function use python native logging library.
+
+    Attributes:
+        Does not accept any arguments
+    Returns:
+        Returns the logger object which could be used log statements of following level:
+            1. INFO: "Useful information"
+            2. WARNING: "Something is not right"
+            3. DEBUG: "A debug message"
+            4. ERROR: "A Major error has happened."
+            5. CRITICAL "Fatal error. Cannot continue"
     """
     import logging
     # Gets or creates a logger
@@ -33,26 +46,19 @@ def logging():
     # set log level
     logger.setLevel(logging.INFO)
     # define file handler and set formatter
+    # Reads file path from imported "variables" file
     file_handler = logging.FileHandler(variables.path + '\\logfile.log', mode='w')
     formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
     file_handler.setFormatter(formatter)
-
     # add file handler to logger
     logger.addHandler(file_handler)
-
-    # Logs
-    # logger.debug('A debug message')
-    # logger.info('An info message')
-    # logger.warning('Something is not right.')
-    # logger.error('A Major error has happened.')
-    # logger.critical('Fatal error. Cannot continue')
-
     return logger
 
 
 class OXCART:
     """
     OXCART class
+
     """
 
     def __init__(self, queue_x, queue_y, queue_t, queue_dld_start_counter,
@@ -60,6 +66,11 @@ class OXCART:
                  queue_ch0_time, queue_ch0_wave,  queue_ch1_time,  queue_ch1_wave,
                  queue_ch2_time, queue_ch2_wave, queue_ch3_time, queue_ch3_wave,
                  lock1, lock2):
+        '''
+        This is the constructor class that accepts several initialized queues objects corresponding
+        to various parameters of the groups like dld,TDC,DRS. This constructor also objects used for
+        creating locks on resources to reduce concurrent access on resources and reduce dirty read.
+        '''
         # Queues for sharing data between tdc and main process
         # dld queues
         self.queue_x = queue_x
@@ -82,10 +93,19 @@ class OXCART:
         self.queue_ch3_time = queue_ch3_time
         self.queue_ch3_wave = queue_ch3_wave
 
-    # Initialize the V_dc for the experiment
     def initialize_v_dc(self):
         """
-        Initializing the high voltage function
+        This class method intializes the high volatge parameter: v_dc.
+        The fucntion utilizes the serial library to communicate over the 
+        COM port serially and read the corresponding v_dc parameter.
+
+        It exits if it is not able to connect on the COM Port.
+
+        Attributes:
+            Accepts only the self (class object)
+        
+        Returns:
+            Does not return anything
         """
         # Setting the com port of V_dc
         self.com_port_v_dc = serial.Serial(
@@ -110,7 +130,16 @@ class OXCART:
 
     def initialize_v_p(self):
         """
-        Initializing the pulser function
+        This class method intializes the Pulse parameter: v_p.
+        The fucntion utilizes the serial library to communicate over the 
+        COM port serially and read the corresponding v_p parameter.
+
+        Attributes:
+            Accepts only the self (class object)
+        
+        Returns:
+            Does not return anything
+
         """
         # set the port for v_p
         resources = visa.ResourceManager('@py')
@@ -119,12 +148,25 @@ class OXCART:
         try:
             self.com_port_v_p.query('*RST')
         except:
-
             self.com_port_v_p.write('VOLT %s' % (variables.v_p_min * (1 / variables.pulse_amp_per_supply_voltage)))
 
     def initialize_counter(self):
         """
-        Initializing the edge counter function
+        This class method intializes the edge counter parameter.
+        It helps counting in edges of a particular signal.
+
+        The fucntion utilizes the nidaqmx library to communicate 
+        through NI Instruments to count the edges.
+
+        NI-DAQmx can help you use National Instruments (NI) data acquisition and 
+        signal conditioning hardware
+
+        Attributes:
+            Accepts only the self (class object)
+        
+        Returns:
+            Returns the counted edges
+            
         """
         task_counter = nidaqmx.Task()
         task_counter.ci_channels.add_ci_count_edges_chan("Dev1/ctr0")
@@ -136,12 +178,22 @@ class OXCART:
     # apply command to the V_dc
     def command_v_dc(self, cmd):
         """
-        Initializing the high voltage function
+        This class method is used to send commands on the high volatge parameter: v_dc.
+        The fucntion utilizes the serial library to communicate over the 
+        COM port serially and read the corresponding v_dc parameter.
+
+        Attributes:
+            Accepts only the self (class object)
+        
+        Returns:
+            Returns the response code after executing the command.
         """
         self.com_port_v_dc.write(
             (cmd + '\r\n').encode())  # send cmd to device # might not work with older devices -> "LF" only needed!
         time.sleep(0.005)  # small sleep for response
+        #Intialize the response to returned as string
         response = ''
+        # Read the response code after execution(command write).
         while self.com_port_v_dc.in_waiting > 0:
             response = self.com_port_v_dc.readline()  # all characters received, read line till '\r\n'
         return response.decode("utf-8")
@@ -150,11 +202,23 @@ class OXCART:
 
     def reader_queue_dld(self):
         """
-        reader of DLD queues function
-        This function is called continuously by a separate thread
+        This class method runs in an infinite loop and listens and reads paramters
+        over the queues for the group: dld
+
+        This function is called continuously by a separate thread in the main function.
+
+        The values read from the queues are updates in imported "variables" file
+
+        Attributes:
+            Accepts only the self (class object)
+        
+        Returns:
+            Does not return anything
         """
         while True:
+            # Check if any value is present in queue to read from
             while not self.queue_x.empty() or not self.queue_y.empty() or not self.queue_t.empty() or not self.queue_dld_start_counter.empty():
+                # Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock1:
                     length = self.queue_x.get()
                     variables.x = np.append(variables.x, length)
@@ -169,14 +233,28 @@ class OXCART:
                 break
 
     def reader_queue_drs(self):
+
         """
-        reader of DRS queues function
-        This function is called continuously by a separate thread
+        This class method runs in an infinite loop and listens and reads paramters
+        over the queues for the group: DRS
+
+        This function is called continuously by a separate thread in the main function.
+
+        The values read from the queues are updates in imported "variables" file.
+        Attributes:
+            Accepts only the self (class object)
+        
+        Returns:
+            Does not return anything
         """
+
         while True:
+            # Check if any value is present in queue to read from
             while not self.queue_ch0_time.empty() or not self.queue_ch0_wave.empty() or not self.queue_ch1_time.empty() or not\
                     self.queue_ch1_wave.empty() or not self.queue_ch2_time.empty() or not\
                     self.queue_ch2_wave.empty() or not self.queue_ch3_time.empty() or not self.queue_ch3_wave.empty():
+
+                #Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock1:
                     length = self.queue_ch0_time.get()
                     variables.ch0_time = np.append(variables.ch0_time, length)
@@ -195,13 +273,28 @@ class OXCART:
             # If end of experiment flag is set break the while loop
             if variables.end_experiment:
                 break
+
     def reader_queue_tdc(self):
+
         """
-        reader of TDC queues function
-        This function is called continuously by a separate thread
+        This class method runs in an infinite loop and listens and reads paramters
+        over the queues for the group: TDC
+
+        This function is called continuously by a separate thread in the main function.
+
+        The values read from the queues are updates in imported "variables" file.
+
+        Attributes:
+            Accepts only the self (class object)
+        
+        Returns:
+            Does not return anything
         """
+
         while True:
+            # Check if any value is present in queue to read from
             while not self.queue_channel.empty() or not self.queue_time_data.empty() or not self.queue_tdc_start_counter.empty():
+                #Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock2:
                     length = self.queue_channel.get()
                     variables.channel = np.append(variables.channel, length)
@@ -213,21 +306,27 @@ class OXCART:
             # If end of experiment flag is set break the while loop
             if variables.end_experiment:
                 break
+    
 
     def main_ex_loop(self, task_counter, counts_target):
+
         """
-        Function that is called in each loop of main function
-        1- Read the number of detected Ions(in TDC or Counter mode)
+        This class method:
+
+        1. Read the number of detected Ions(in TDC or Counter mode)
         2- Calculate the error of detection rate of desire rate
         3- Regulate the high voltage and pulser
+
+        This function is called in each loop of main function.
+
+        Atrributes:
+            task_counter: Counter edges
+            counts_target: Calculated paramter(((detection_rate/100)* pulse_frequency)/pulse_frequency)
+        
+        Returns:
+            Does not return anything
+
         """
-        # # reading DC HV
-        # v_dc = (command_v_dc(">S0A?")[5:-1])
-        # variables.specimen_voltage = float(v_dc)
-        #
-        # # reading pulser power supply voltage
-        # v_p = com_port_v_p.query('MEASure:VOLTage?')[:-3]
-        # variables.pulse_voltage = float(v_p)
 
         if variables.counter_source == 'TDC':
             variables.total_ions = len(variables.x)
@@ -287,7 +386,13 @@ class OXCART:
 
     def clear_up(self, task_counter):
         """
-        Clear global variables and deinitializing high voltage and pulser  function
+        This fucntion clears global variables and deinitialize high voltage and pulser function
+
+        Attributes:
+            Does not accept any arguments
+        Returns:
+            Does not return anything
+        
         """
         def cleanup_variables():
             """
@@ -404,6 +509,8 @@ def main():
         queue_ch3_time = None
         queue_ch3_wave = None
 
+        # Initialize and initiate a process(Refer to imported file 'tdc_new' for process function declaration )
+        # Module used: multiprocessing
         tdc_process = multiprocessing.Process(target=tdc_new.experiment_measure, args=(variables.raw_mode, queue_x,
                                                                                        queue_y, queue_t,
                                                                                        queue_dld_start_counter,
@@ -433,7 +540,8 @@ def main():
         queue_time_data = None
         queue_tdc_start_counter = None
 
-
+        # Initialize and initiate a process(Refer to imported file 'drs' for process function declaration)
+        # Module used: multiprocessing
         drs_process = multiprocessing.Process(target=drs.experiment_measure, args=(queue_ch0_time, queue_ch0_wave,
                                                                                        queue_ch1_time, queue_ch1_wave,
                                                                                        queue_ch2_time, queue_ch2_wave,
@@ -459,9 +567,11 @@ def main():
         queue_ch3_time = None
         queue_ch3_wave = None
 
-    # Lock that is used by TDC and DLD threads
+    # Initialize lock that is used by TDC and DLD threads
+    # Module used: threading 
     lock1 = threading.Lock()
     lock2 = threading.Lock()
+
     # Create the experiment object
     experiment = OXCART(queue_x, queue_y, queue_t, queue_dld_start_counter,
                         queue_channel, queue_time_data, queue_tdc_start_counter,
@@ -471,9 +581,11 @@ def main():
 
     # Initialize the signal generator
     signal_generator.initialize_signal_generator(variables.pulse_frequency)
+
     # Initialize high voltage
     experiment.initialize_v_dc()
     logger.info('High voltage is initialized')
+
     # Initialize pulser
     experiment.initialize_v_p()
     logger.info('Pulser is initialized')
@@ -483,6 +595,7 @@ def main():
         logger.info('Edge counter is initialized')
     else:
         task_counter = None
+
     # start the timer for main experiment
     variables.specimen_voltage = variables.vdc_min
     variables.pulse_voltage_min = variables.v_p_min * (1 / variables.pulse_amp_per_supply_voltage)
@@ -497,14 +610,17 @@ def main():
     counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
     logger.info('Starting the main loop')
 
+    # Initialze threads that will read from the queue for the group: dld
     if variables.counter_source == 'TDC':
         read_dld_queue_thread = threading.Thread(target=experiment.reader_queue_dld)
         read_dld_queue_thread.setDaemon(True)
         read_dld_queue_thread.start()
+    # Initialze threads that will read from the queue for the group: tdc
     elif variables.counter_source == 'TDC_Raw':
         read_tdc_queue_thread = threading.Thread(target=experiment.reader_queue_tdc)
         read_tdc_queue_thread.setDaemon(True)
         read_tdc_queue_thread.start()
+    # Initialze threads that will read from the queue for the group: drs
     elif variables.counter_source == 'DRS':
         read_drs_queue_thread = threading.Thread(target=experiment.reader_queue_drs)
         read_drs_queue_thread.setDaemon(True)
@@ -515,6 +631,7 @@ def main():
     flag_achieved_high_voltage = 0
     index_time = 0
     ex_time_temp = variables.ex_time
+
     # Main loop of experiment
     while steps < total_steps:
         # Only for initializing every thing at firs iteration
@@ -541,14 +658,10 @@ def main():
         # main loop function
         experiment.main_ex_loop(task_counter, counts_target)
         end = datetime.datetime.now()
-        # print('control loop takes:', ((end - start).microseconds / 1000), 'ms')
         # If the main experiment function takes less than experiment frequency we have to waite
         if (1000 / variables.ex_freq) > ((end - start).microseconds / 1000):  # time in milliseconds
             sleep_time = ((1000 / variables.ex_freq) - ((end - start).microseconds / 1000))
             time.sleep(sleep_time / 1000)
-            # end2 = datetime.datetime.now()
-            # print('wait for remaining cycle time', sleep_time, 'ms')
-            # print('Entire control loop time:', ((end2 - start).microseconds / 1000), 'ms')
         else:
             print(
                 f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop takes longer than %s Millisecond{initialize_devices.bcolors.ENDC}" % (int(1000 / variables.ex_freq)))
@@ -560,7 +673,6 @@ def main():
         time_ex_h = np.append(time_ex_h, int(end.strftime("%H")))
         end_main_ex_loop = time.time()
         variables.elapsed_time = end_main_ex_loop - start_main_ex
-
 
         # Counter of iteration
         time_counter = np.append(time_counter, steps)

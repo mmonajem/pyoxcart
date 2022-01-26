@@ -1,6 +1,7 @@
 import pyvisa
 import time
 
+
 '''
 Documentation: pyvisa
 PyVISA is a Python package that enables you to control all kinds 
@@ -10,6 +11,9 @@ of measurement devices independently of the interface
 Module reference: "https://pyvisa.readthedocs.io/en/latest/"
 
 '''
+
+
+
 def initialize_signal_generator(freq):
     '''
     This function initializes the  signal generator fucntionality by utlizing pyvisa module
