@@ -21,15 +21,40 @@ class bcolors:
 
 # apply command to the Cryovac
 def command_cryovac(cmd, com_port_cryovac):
+    '''
+    This fucnction executes(writes) command on cryovac through serial communication.
+    Waits and reads the response code after executing the command from the device.
+
+    Attributes:
+        com_port_cryovac: object for serial communication (Initilized in gui.py)
+    Returns:
+        Returns the response code after executing the commands. [string]
+    '''
     com_port_cryovac.write(
         (cmd + '\r\n').encode())  # send cmd to device # might not work with older devices -> "LF" only needed!
     time.sleep(0.1)  # small sleep for response
     response = ''
+    # Wait for the complete response code.
     while com_port_cryovac.in_waiting > 0:
         response = com_port_cryovac.readline()  # all characters received, read line till '\r\n'
     return response.decode("utf-8")
 
 def command_edwards(cmd, lock, E_AGC, status=None):
+    '''
+    This function sets flags based on parameters in imported "variables" file.
+    Execute commands utilizing imported "edwards_tic" file (if command = pressure) to read value.
+    Returns response(Value read) after executing the command.
+
+    Attributes:
+        lock: Lock object to acquire lock on variables module to avoid concurrent changes.
+        E_AGC : Object of EdwardsAGC class from edwards_tic module which intilizes and sets 
+                serial communication parameters
+        status: [Default parameter] type of lock [Need a review]
+    Returns:
+        reponse: Returns the reponse code after the executing the command.
+        
+
+    '''
     if variables.flag_pump_load_lock_click and variables.flag_pump_load_lock and status == 'load_lock':
         E_AGC.comm('!C910 0')  # Backing Pump off
         E_AGC.comm('!C904 0')  # Turbo Pump off
@@ -47,37 +72,91 @@ def command_edwards(cmd, lock, E_AGC, status=None):
             variables.flag_pump_load_lock_led = True
             time.sleep(1)
     if cmd == 'presure':
+        # Execute command utlizing  EdwardsAGC class from edwards_tic module as an interface to read value.
         response_tmp = E_AGC.comm('?V911')
+
+        # Convert raw response  to sane value
         response_tmp = float(response_tmp.replace(';', ' ').split()[1])
+
+        # Set the flags based on the acquired reponse 
         if response_tmp < 90 and status == 'load_lock':
             variables.flag_pump_load_lock_led = False
         elif response_tmp >= 90 and status == 'load_lock':
             variables.flag_pump_load_lock_led = True
         response = E_AGC.comm('?V940')
+    # No other cmd type allowed apart from pressure
     else:
         print('Unknown command for Edwards TIC Load Lock')
 
     return response
 
 def initialize_cryovac(com_port_cryovac):
+    '''
+     This fucntion sets the communication port of Cryovac. 
+     Update the values in the imported "variables file"
+
+    Attributes:
+        com_port_cryovac: object for serial communication (Initilized in gui.py)
+    Returns:
+        Does not return anything
+    '''
     # Setting the com port of Cryovac
     output = command_cryovac('getOutput', com_port_cryovac)
+    # Storing the parameters in imported "variables" file.
     variables.temperature = float(output.split()[0].replace(',', ''))
 
 def initialize_edwards_tic_load_lock():
+    '''
+    This function initialzes TIC load lock parameters.
+    It does so by executing command on the devices to read value
+    and utlizes the response to update the load lock parameters.
+
+    Attributes:
+        Does not accept any arguments
+    
+    Returns:
+        Does not return anything
+    
+    '''
     E_AGC_ll = EdwardsAGC(variables.COM_PORT_edwards_ll)
+    # Execute command to read value(response)
     response = command_edwards('presure', lock=None, E_AGC=E_AGC_ll)
+    # Update the load lock parameters
     variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
     variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
 
 def initialize_edwards_tic_buffer_chamber():
+    '''
+    This function initialzes TIC buffer chamber parameters.
+    It does so by executing command on the devices to read value
+    and utlizes the response to update the load lock parameters.
+
+    Attributes:
+        Does not accept any arguments
+    
+    Returns:
+        Does not return anything
+    
+    '''
+
     E_AGC_bc = EdwardsAGC(variables.COM_PORT_edwards_bc)
     response = command_edwards('presure', lock=None, E_AGC=E_AGC_bc, )
     variables.vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
 
 def initialize_pfeiffer_gauges():
     """
-    The function for initializing Pfeiffer gauge
+    This function initialzes Pfeiffer gauge parameters.
+    It does so by executing command on the devices to read value.
+    Utlizes the TPG362 class(inherits TPG26x) to execute command: 
+        Reponsible for driver for the TPG 261 and TPG 262 dual channel measurement and control unit.
+    Utlizes the response to update the load lock parameters.
+
+    Attributes:
+        Does not accept any arguments
+    
+    Returns:
+        Does not return anything
+    
     """
     tpg = TPG362(port=variables.COM_PORT_pfeiffer)
     value, _ = tpg.pressure_gauge(2)
@@ -89,7 +168,21 @@ def initialize_pfeiffer_gauges():
 
 def gauges_update(lock, com_port_cryovac):
     """
-    The function for reading gauges
+    This function is used for reading gauge parameters.
+    It does so by executing command on the devices to read value.
+    Interface Used:
+        Utlizes the TPG362 class(inherits TPG26x) to execute command: 
+            Reponsible for driver for the TPG 261 and TPG 262 dual channel measurement and control unit.
+        Utlizes EdwardsAGC : Primitive driver for Edwards Active Gauge Controler
+
+    Utlizes the response to update the load lock parameters.
+
+    Attributes:
+        com_port_cryovac: object for serial communication (Initilized in gui.py)
+    
+    Returns:
+        Does not return anything
+    
     """
     tpg = TPG362(port=variables.COM_PORT_pfeiffer)
     E_AGC_ll = EdwardsAGC(variables.COM_PORT_edwards_ll)

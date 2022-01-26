@@ -13,12 +13,26 @@ drs_lib = ctypes.CDLL("drs_lib/drs_lib.dll")
 
 
 class DRS(object):
+    '''
+    This class setups the parameters for the DRS group and allow users to read experiment
+    DRS values. 
+    '''
     def __init__(self, trigger, test, delay, sample_frequency):
-        # trigger=0 --> Internal trigger
-        # trigger=1 --> External rigger
-        # test=0 --> Test mode off
-        # test=1 --> test mode - connect 100 MHz clock connected to all channels
-        # Trigger delay in ns
+
+        '''
+        Constructor function which initializes function parameters.
+
+        Attributes:
+            trigger:  trigger=0 --> Internal trigger
+                      trigger=1 --> External rigger
+            test:  test=1 --> test mode - 
+                   connect 100 MHz clock connected to all channels
+            delay: Trigger delay in nanosecond
+            sample_frequency: sample frequency at which the data is being captured
+            
+        '''
+        
+       
         drs_lib.Drs_new.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float]
         drs_lib.Drs_new.restype = ctypes.c_void_p
         drs_lib.Drs_reader.argtypes = [ctypes.c_void_p]
@@ -28,10 +42,27 @@ class DRS(object):
         self.obj = drs_lib.Drs_new(trigger, test, delay, sample_frequency)
 
     def reader(self, ):
+        '''
+        This class method reads and returns the DRS value utilizing the drs_lib.
+
+        Attributes:
+            Does not accept any arguments
+        Returns:
+            data: Return the read DRS value.
+        '''
         data = drs_lib.Drs_reader(self.obj)
         return data
 
     def delete_drs_ox(self):
+        '''
+        This class method destroys the object
+
+        Attributes:
+            Does not accept any arguments
+        Returns:
+            Does not return anything
+
+        '''
         drs_lib.Drs_delete_drs_ox(self.obj)
 
 
@@ -42,6 +73,23 @@ def experiment_measure(queue_ch0_time, queue_ch0_wave,
                         queue_ch2_time, queue_ch2_wave,
                         queue_ch3_time, queue_ch3_wave,
                        queue_stop_measurement):
+    '''
+    This function continosly reads the DRS data and put the data into 
+    the queue. Exits when reads queue_stop_measurement is empty.
+
+    Attributes:
+        Accepts different queues objects of different channels and parameters
+        Channels:
+            Channel 1
+            Channel 1
+            Channel 2
+            Channel 3
+        Parameters:
+            time
+            wave
+    Return :
+        Does not return anything
+    '''
 
     drs_ox = DRS(trigger=1, test=0, delay=0, sample_frequency=2)
     returnVale = np.array(drs_ox.reader())
