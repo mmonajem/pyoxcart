@@ -20,7 +20,7 @@ def send_email(email, subject, message):
     Return:
         Does not return anything
     '''
-    with open('../png/email_pass.txt') as f:
+    with open('../gui_png/email_pass.txt') as f:
         password = str(f.readlines()[0])
     receiver_email = email
 

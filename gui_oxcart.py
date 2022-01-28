@@ -21,7 +21,7 @@ import pyqtgraph.exporters
 import serial.tools.list_ports
 from pypylon import pylon
 # Local project scripts
-import oxcart
+from apt_ex import apt_oxcart
 import variables
 from devices.camera import Camera
 from devices import initialize_devices
@@ -583,7 +583,7 @@ class Ui_OXCART(Camera, object):
         _translate = QtCore.QCoreApplication.translate
         OXCART.setWindowTitle(_translate("OXCART", "PyOXCART"))
         ###
-        OXCART.setWindowIcon(QtGui.QIcon('./png/logo3.png'))
+        OXCART.setWindowIcon(QtGui.QIcon('gui_png/logo3.png'))
         ###
         self.label_7.setText(_translate("OXCART", "Voltage"))
         self.start_button.setText(_translate("OXCART", "Start"))
@@ -771,12 +771,12 @@ class Ui_OXCART(Camera, object):
         self.timer3.start()
 
         # Diagram and LEDs ##############
-        self.diagram_close_all = QPixmap('.\png\close_all.png')
-        self.diagram_main_open = QPixmap('.\png\main_open.png')
-        self.diagram_load_open = QPixmap('.\png\load_open.png')
-        self.diagram_cryo_open = QPixmap('.\png\cryo_open.png')
-        self.led_red = QPixmap('.\png\led-red-on.png')
-        self.led_green = QPixmap('.\png\green-led-on.png')
+        self.diagram_close_all = QPixmap('gui_png\close_all.png')
+        self.diagram_main_open = QPixmap('gui_png\main_open.png')
+        self.diagram_load_open = QPixmap('gui_png\load_open.png')
+        self.diagram_cryo_open = QPixmap('gui_png\cryo_open.png')
+        self.led_red = QPixmap('gui_png\led-red-on.png')
+        self.led_green = QPixmap('gui_png\green-led-on.png')
 
         self.diagram.setPixmap(self.diagram_close_all)
         self.led_main_chamber.setPixmap(self.led_red)
@@ -918,7 +918,7 @@ class Ui_OXCART(Camera, object):
                 variables.tweet = True
 
             # Read the experiment counter
-            with open('./png/counter.txt') as f:
+            with open('gui_png/counter_oxcart.txt') as f:
                 variables.counter = int(f.readlines()[0])
             # Current time and date
             now = datetime.datetime.now()
@@ -928,7 +928,7 @@ class Ui_OXCART(Camera, object):
             # Create folder to save the data
             if not os.path.isdir(variables.path):
                 os.makedirs(variables.path, mode=0o777, exist_ok=True)
-            # start the run methos of MainThread Class, which is main function of oxcart.py
+            # start the run methos of MainThread Class, which is main function of apt_oxcart.py
             self.thread.start()
             if self.parameters_source.currentText() == 'TextLine':
                 variables.index_line += 1 # increase the index line of TextLine to read the second line in next step
@@ -944,7 +944,7 @@ class Ui_OXCART(Camera, object):
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(True)
         QScreen.grabWindow(app.primaryScreen(),
-                           QApplication.desktop().winId()).save(variables.path + '\\screenshot.png')
+                           QApplication.desktop().winId()).save(variables.path + '\\screenshot.gui_png')
         if variables.index_line < self.num_line: # Do next experiment in case of TextLine
             self.thread_main()
         else:
@@ -1206,13 +1206,13 @@ class Ui_OXCART(Camera, object):
             # save plots to the file
             if variables.index_plot_save % 100 == 0:
                 exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
-                exporter.export(variables.path + '\\v_dc_p_%s.png' % variables.index_plot_save)
+                exporter.export(variables.path + '\\v_dc_p_%s.gui_png' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
-                exporter.export(variables.path + '\\detection_rate_%s.png' % variables.index_plot_save)
+                exporter.export(variables.path + '\\detection_rate_%s.gui_png' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.visualization.plotItem)
-                exporter.export(variables.path + '\\visualization_%s.png' % variables.index_plot_save)
+                exporter.export(variables.path + '\\visualization_%s.gui_png' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
-                exporter.export(variables.path + '\\tof_%s.png' % variables.index_plot_save)
+                exporter.export(variables.path + '\\tof_%s.gui_png' % variables.index_plot_save)
 
             # Increase the index
             variables.index_plot_save += 1
@@ -1343,12 +1343,13 @@ class MainThread(QThread):
     The run method create thread of main function in the OXCART script
     """
     signal = pyqtSignal('PyQt_PyObject')
+
     def __init__(self, ):
         QThread.__init__(self, )
         # run method gets called when we start the thread
 
     def run(self):
-        main_thread = oxcart.main()
+        main_thread = apt_oxcart.main()
         self.signal.emit(main_thread)
 
 
@@ -1433,8 +1434,8 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     # get display resolution
     screen_resolution = app.desktop().screenGeometry()
-    width, height = screen_resolution.width(), screen_resolution.height()
-    print('Screen size is:(%s,%s)' % (width, height))
+    # width, height = screen_resolution.width(), screen_resolution.height()
+    # print('Screen size is:(%s,%s)' % (width, height))
     OXCART = QtWidgets.QMainWindow()
     lock = threading.Lock()
     ui = Ui_OXCART(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock)

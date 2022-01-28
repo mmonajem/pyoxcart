@@ -26,7 +26,7 @@ def command_cryovac(cmd, com_port_cryovac):
     Waits and reads the response code after executing the command from the device.
 
     Attributes:
-        com_port_cryovac: object for serial communication (Initilized in gui.py)
+        com_port_cryovac: object for serial communication (Initilized in gui_oxcart.py)
     Returns:
         Returns the response code after executing the commands. [string]
     '''
@@ -96,7 +96,7 @@ def initialize_cryovac(com_port_cryovac):
      Update the values in the imported "variables file"
 
     Attributes:
-        com_port_cryovac: object for serial communication (Initilized in gui.py)
+        com_port_cryovac: object for serial communication (Initilized in gui_oxcart.py)
     Returns:
         Does not return anything
     '''
@@ -178,7 +178,7 @@ def gauges_update(lock, com_port_cryovac):
     Utlizes the response to update the load lock parameters.
 
     Attributes:
-        com_port_cryovac: object for serial communication (Initilized in gui.py)
+        com_port_cryovac: object for serial communication (Initilized in gui_oxcart.py)
     
     Returns:
         Does not return anything

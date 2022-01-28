@@ -29,10 +29,9 @@ Created on Thu Sep 19 16:07:32 2019
 Test of the user callbacks interface.
 """
 
-import scTDC
+from tdc_surface_concept import scTDC
 # import sys
 import timeit
-
 
 # -----------------------------------------------------------------------------
 # example 1 of deriving from sctdc_usercallbacks_pipe

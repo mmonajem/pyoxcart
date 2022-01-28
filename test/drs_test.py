@@ -12,7 +12,7 @@ import time
 import h5py
 
 # load the library
-drs_lib = ctypes.CDLL("../drs_lib/drs_lib.dll")
+drs_lib = ctypes.CDLL("../drs/drs.dll")
 
 
 class DRS(object):

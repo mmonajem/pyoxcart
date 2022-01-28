@@ -290,7 +290,8 @@ class scTDClib:
     def __init__(self):
         """loads the shared library"""
         if os.name == 'nt':
-            self.lib = ctypes.WinDLL("scTDC1.dll")
+            os.chdir(os.getcwd() + '\\tdc_surface_concept\\') # directory has to be changed to be changed to the directory of dlls
+            self.lib = ctypes.WinDLL('scTDC1.dll')
             self.lib.sc_tdc_init_inifile.argtypes = [ctypes.c_char_p]
             self.lib.sc_get_err_msg.argtypes = [ctypes.c_int, ctypes.c_char_p]
         else:
@@ -457,6 +458,7 @@ class scTDC_hdf5lib:
     def __init__(self):
         """loads the shared library scTDC_hdf5"""
         if os.name == 'nt':
+            os.chdir(os.getcwd() + '\\tdc_surface_concept\\')  # directory has to be changed to be changed to the directory of dlls
             self.lib = ctypes.WinDLL("scTDC_hdf50.dll")
         else:
             self.lib = ctypes.CDLL("libscTDC_hdf5.so.0")

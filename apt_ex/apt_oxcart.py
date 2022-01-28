@@ -19,10 +19,11 @@ import serial.tools.list_ports
 import pyvisa as visa
 import nidaqmx
 # Local project scripts
-import tdc
-import tdc_new
 import variables
-from devices import email_send, tweet_send, initialize_devices, drs, signal_generator
+from devices import email_send, tweet_send, initialize_devices, signal_generator
+from tdc_surface_concept import tdc
+from drs import drs
+from tools import hdf5_creator, experiment_statistics
 
 
 def logging():
@@ -511,7 +512,7 @@ def main():
 
         # Initialize and initiate a process(Refer to imported file 'tdc_new' for process function declaration )
         # Module used: multiprocessing
-        tdc_process = multiprocessing.Process(target=tdc_new.experiment_measure, args=(variables.raw_mode, queue_x,
+        tdc_process = multiprocessing.Process(target=tdc.experiment_measure, args=(variables.raw_mode, queue_x,
                                                                                        queue_y, queue_t,
                                                                                        queue_dld_start_counter,
                                                                                        queue_channel,
@@ -543,10 +544,10 @@ def main():
         # Initialize and initiate a process(Refer to imported file 'drs' for process function declaration)
         # Module used: multiprocessing
         drs_process = multiprocessing.Process(target=drs.experiment_measure, args=(queue_ch0_time, queue_ch0_wave,
-                                                                                       queue_ch1_time, queue_ch1_wave,
-                                                                                       queue_ch2_time, queue_ch2_wave,
-                                                                                       queue_ch3_time, queue_ch3_wave,
-                                                                                       queue_stop_measurement))
+                                                                                   queue_ch1_time, queue_ch1_wave,
+                                                                                   queue_ch2_time, queue_ch2_wave,
+                                                                                   queue_ch3_time, queue_ch3_wave,
+                                                                                   queue_stop_measurement))
         drs_process.daemon = True
         drs_process.start()
     else:
@@ -752,7 +753,7 @@ def main():
     if variables.counter_source == 'TDC':
         if all(len(lst) == len(variables.x) for lst in [variables.x, variables.y,
                                                     variables.t, variables.dld_start_counter,
-                                                    variables.main_v_dc_dld, variables.main_v_dc_dld]):
+                                                    variables.main_v_dc_dld, variables.main_v_p_dld]):
             logger.warning('dld data have not same length')
     elif variables.counter_source == 'TDC_Raw':
         if all(len(lst) == len(variables.channel) for lst in [variables.channel, variables.time_data,
@@ -767,52 +768,13 @@ def main():
                                                           variables.main_v_dc_drs, variables.main_v_p_drs]):
             logger.warning('tdc data have not same length')
 
-    # save hdf5 file
-    with h5py.File(variables.path + '\\%s_data.h5' % variables.hdf5_path, "w") as f:
-        f.create_dataset("oxcart/high_voltage", data=variables.main_v_dc, dtype='f')
-        f.create_dataset("oxcart/pulse_voltage", data=variables.main_v_p, dtype='f')
-        f.create_dataset("oxcart/num_events", data=variables.main_counter, dtype='i')
-        f.create_dataset('oxcart/temperature', data=variables.main_temperature, dtype='f')
-        f.create_dataset('oxcart/main_chamber_vacuum', data=variables.main_chamber_vacuum, dtype='f')
-        f.create_dataset("oxcart/time_counter", data=time_counter, dtype='i')
 
-        f.create_dataset("time/time_s", data=time_ex_s, dtype='i')
-        f.create_dataset("time/time_m", data=time_ex_m, dtype='i')
-        f.create_dataset("time/time_h", data=time_ex_h, dtype='i')
-
-
-        if variables.counter_source == 'TDC':
-            f.create_dataset("dld/x", data=variables.x, dtype='i')
-            f.create_dataset("dld/y", data=variables.y, dtype='i')
-            f.create_dataset("dld/t", data=variables.t, dtype='i')
-            f.create_dataset("dld/start_counter", data=variables.dld_start_counter, dtype='i')
-            f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld, dtype='f')
-            f.create_dataset("dld/pulse_voltage", data=variables.main_v_p_dld, dtype='f')
-
-        elif variables.counter_source == 'TDC_Raw':
-            f.create_dataset("tdc/start_counter", data=variables.tdc_start_counter, dtype='i')
-            f.create_dataset("tdc/channel", data=variables.channel, dtype='i')
-            f.create_dataset("tdc/time_data", data=variables.time_data, dtype='i')
-            f.create_dataset("tdc/high_voltage", data=variables.main_v_dc_tdc, dtype='f')
-            f.create_dataset("tdc/pulse_voltage", data=variables.main_v_p_tdc, dtype='f')
-
-        elif variables.counter_source == 'DRS':
-            f.create_dataset("drs/ch0_time", data=variables.ch0_time, dtype='f')
-            f.create_dataset("drs/ch0_wave", data=variables.ch0_wave, dtype='f')
-            f.create_dataset("drs/ch1_time", data=variables.ch1_time, dtype='f')
-            f.create_dataset("drs/ch1_wave", data=variables.ch1_wave, dtype='f')
-            f.create_dataset("drs/ch2_time", data=variables.ch2_time, dtype='f')
-            f.create_dataset("drs/ch2_wave", data=variables.ch2_wave, dtype='f')
-            f.create_dataset("drs/ch3_time", data=variables.ch3_time, dtype='f')
-            f.create_dataset("drs/ch3_wave", data=variables.ch3_wave, dtype='f')
-            f.create_dataset("drs/high_voltage", data=variables.main_v_dc_drs, dtype='f')
-            f.create_dataset("drs/pulse_voltage", data=variables.main_v_p_drs, dtype='f')
 
     logger.info('HDF5 file is created')
     variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
     # Save new value of experiment counter
-    with open('./png/counter.txt', 'w') as f:
+    with open('./gui_png/counter_oxcart.txt', 'w') as f:
         f.write(str(variables.counter + 1))
         logger.info('Experiment counter is increased')
 
@@ -839,29 +801,11 @@ def main():
         logger.info('Email is sent')
         email_send.send_email(variables.email, subject, message)
 
+    # save data in hdf5 file
+    hdf5_creator.hdf_creator_oxcart(time_counter, time_ex_s, time_ex_m, time_ex_h)
+
     # save setup parameters and run statistics in a txt file
-    with open(variables.path + '\\parameters.txt', 'w') as f:
-        f.write('Username: ' + variables.user_name + '\r\n')
-        f.write('Experiment Name: ' + variables.hdf5_path + '\r\n')
-        f.write('Detection Rate ('+chr(37)+') : %s\r\n' % variables.detection_rate)
-        f.write('Maximum Number of Ions: %s\r\n' % variables.max_ions)
-        f.write('Counter source: %s\r\n' % variables.counter_source)
-        f.write('Control Refresh freq. (Hz): %s\r\n' % variables.ex_freq)
-        f.write('Time bins (Sec): %s\r\n' % (1/variables.ex_freq))
-        f.write('Cycle for Avg.: %s\r\n' % variables.cycle_avg)
-        f.write('K_p Upwards: %s\r\n' % variables.vdc_step_up)
-        f.write('K_p Downwards: %s\r\n' % variables.vdc_step_down)
-        f.write('Experiment Elapsed Time (Sec): %s\r\n' % "{:.3f}".format(variables.elapsed_time))
-        f.write('Experiment Total Ions: %s\r\n' % variables.total_ions)
-        f.write('Email: ' + variables.email + '\r\n')
-        f.write('Twitter: %s\r\n' % variables.tweet)
-        f.write('Specimen start Voltage (V): %s\r\n' % variables.vdc_min)
-        f.write('Specimen Stop Voltage (V): %s\r\n' % variables.vdc_max)
-        f.write('Specimen Max Achieved Voltage (V): %s\r\n' % "{:.3f}".format(variables.specimen_voltage))
-        f.write('Pulse start Voltage (V): %s\r\n' % variables.v_p_min)
-        f.write('Pulse Stop Voltage (V): %s\r\n' % variables.v_p_max)
-        f.write('Pulse Fraction ('+chr(37)+'): %s\r\n' % variables.pulse_fraction)
-        f.write('Specimen Max Achieved Pulse Voltage (V): %s\r\n' % "{:.3f}".format(variables.pulse_voltage))
+    experiment_statistics.save_statistics_apt_oxcart()
 
     # Clear up all the variables and deinitialize devices
     experiment.clear_up(task_counter)

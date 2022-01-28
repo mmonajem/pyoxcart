@@ -2,7 +2,7 @@
 This is the main new script for reading TDC.
 @author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
-import scTDC
+from tdc_surface_concept import scTDC
 import time
 import numpy as np
 from queue import Queue
@@ -111,7 +111,7 @@ def experiment_measure(raw_mode, queue_x,
                        queue_stop_measurement):
     """
     measurement function: This function is called in a process by 
-                          oxcart.py tp read data from the queue.
+                          apt_oxcart.py tp read data from the queue.
     Atrributes:
         DLD Queues: Queues that contains DLD data
             queue_y: Queue for grp: DLD and parameter: y
@@ -123,7 +123,7 @@ def experiment_measure(raw_mode, queue_x,
             queue_tdc_start_counter: Queue for grp: TDC and parameter: start_counter
 
         Stop measurement flag: queue
-            Queue for stop the measurement. This queue is set to True from oxcart.py
+            Queue for stop the measurement. This queue is set to True from apt_oxcart.py
 
     Returns
         Does not return anything

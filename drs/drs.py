@@ -9,7 +9,7 @@ from numpy.ctypeslib import ndpointer
 import numpy as np
 
 # load the library
-drs_lib = ctypes.CDLL("drs_lib/drs_lib.dll")
+drs_lib = ctypes.CDLL("./drs/drs_lib.dll")
 
 
 class DRS(object):
@@ -43,7 +43,7 @@ class DRS(object):
 
     def reader(self, ):
         '''
-        This class method reads and returns the DRS value utilizing the drs_lib.
+        This class method reads and returns the DRS value utilizing the drs.
 
         Attributes:
             Does not accept any arguments

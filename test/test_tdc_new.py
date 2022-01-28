@@ -1,5 +1,4 @@
-
-import scTDC
+from tdc_surface_concept import scTDC
 import time
 import timeit
 import numpy as np
@@ -12,7 +11,7 @@ EXPOSURE_MS = 3000         # exposure duration in milliseconds
 
 if not raw_mode:
     DATA_FIELD_SEL1 = \
-          scTDC.SC_DATA_FIELD_DIF1 \
+        scTDC.SC_DATA_FIELD_DIF1 \
         | scTDC.SC_DATA_FIELD_DIF2 \
         | scTDC.SC_DATA_FIELD_TIME \
         | scTDC.SC_DATA_FIELD_START_COUNTER
