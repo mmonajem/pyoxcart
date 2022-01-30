@@ -11,7 +11,8 @@ In the first step, we provide a GUI to control the Oxcart atom probe. This syste
 Therefore, this control system provides the basis of a fully FAIR atom probe data collection and analysis chain.  
 This repository contains the GUI and program, which control, visualize, and do the atom probe experiment.
 The image below is an overview of the user interface:
-![plot](gui_png/screenshot.png)
+![plot](gui_png/oxcart_gui.png)
+![plot](gui_png/physic_gui.png)
 
 #  Installation
 1- create the virtual environment via Anaconda:
