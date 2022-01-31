@@ -8,7 +8,6 @@ TODO: Replace print statements with Log statements
 
 import time
 import datetime
-import h5py
 import multiprocessing
 from multiprocessing.queues import Queue
 import threading
@@ -19,11 +18,10 @@ import serial.tools.list_ports
 import pyvisa as visa
 import nidaqmx
 # Local project scripts
-import variables
 from devices import email_send, tweet_send, initialize_devices, signal_generator
 from tdc_surface_concept import tdc
 from drs import drs
-from tools import hdf5_creator, experiment_statistics
+from tools import hdf5_creator, experiment_statistics, variables
 
 
 def logging():
@@ -333,7 +331,7 @@ class OXCART:
             variables.total_ions = len(variables.x)
         elif  variables.counter_source == 'TDC_Raw':
             if len(variables.channel) > 0:
-                variables.total_ions = int(len(variables.channel)/4)
+                variables.total_ions = int(len(variables.channel) / 4)
         elif variables.counter_source == 'pulse_counter':
             # reading detector MCP pulse counter and calculating pulses since last loop iteration
             variables.total_ions = task_counter.read(number_of_samples_per_channel=1)[0]
@@ -513,12 +511,12 @@ def main():
         # Initialize and initiate a process(Refer to imported file 'tdc_new' for process function declaration )
         # Module used: multiprocessing
         tdc_process = multiprocessing.Process(target=tdc.experiment_measure, args=(variables.raw_mode, queue_x,
-                                                                                       queue_y, queue_t,
-                                                                                       queue_dld_start_counter,
-                                                                                       queue_channel,
-                                                                                       queue_time_data,
-                                                                                       queue_tdc_start_counter,
-                                                                                       queue_stop_measurement))
+                                                                                   queue_y, queue_t,
+                                                                                   queue_dld_start_counter,
+                                                                                   queue_channel,
+                                                                                   queue_time_data,
+                                                                                   queue_tdc_start_counter,
+                                                                                   queue_stop_measurement))
         tdc_process.daemon = True
         tdc_process.start()
 
@@ -752,20 +750,20 @@ def main():
     # Check the length of arrays to be equal
     if variables.counter_source == 'TDC':
         if all(len(lst) == len(variables.x) for lst in [variables.x, variables.y,
-                                                    variables.t, variables.dld_start_counter,
-                                                    variables.main_v_dc_dld, variables.main_v_p_dld]):
+                                                        variables.t, variables.dld_start_counter,
+                                                        variables.main_v_dc_dld, variables.main_v_p_dld]):
             logger.warning('dld data have not same length')
     elif variables.counter_source == 'TDC_Raw':
         if all(len(lst) == len(variables.channel) for lst in [variables.channel, variables.time_data,
-                                                          variables.tdc_start_counter,
-                                                          variables.main_v_dc_tdc, variables.main_v_p_tdc]):
+                                                              variables.tdc_start_counter,
+                                                              variables.main_v_dc_tdc, variables.main_v_p_tdc]):
             logger.warning('tdc data have not same length')
     elif variables.counter_source == 'DRS':
         if all(len(lst) == len(variables.ch0_time) for lst in [variables.ch0_wave, variables.ch1_time,
-                                                          variables.ch1_wave,variables.ch2_time,
-                                                          variables.ch2_wave,variables.ch3_time,
-                                                          variables.ch3_wave,
-                                                          variables.main_v_dc_drs, variables.main_v_p_drs]):
+                                                               variables.ch1_wave, variables.ch2_time,
+                                                               variables.ch2_wave, variables.ch3_time,
+                                                               variables.ch3_wave,
+                                                               variables.main_v_dc_drs, variables.main_v_p_drs]):
             logger.warning('tdc data have not same length')
 
 
@@ -774,7 +772,7 @@ def main():
     variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
     # Save new value of experiment counter
-    with open('./gui_png/counter_oxcart.txt', 'w') as f:
+    with open('./files/counter_oxcart.txt', 'w') as f:
         f.write(str(variables.counter + 1))
         logger.info('Experiment counter is increased')
 

@@ -3,7 +3,7 @@ import serial.tools.list_ports
 
 from devices.pfeiffer_gauges import TPG362
 from devices.edwards_tic import EdwardsAGC
-import variables
+from tools import variables
 
 # get available COM ports and store as list
 com_ports = list(serial.tools.list_ports.comports())

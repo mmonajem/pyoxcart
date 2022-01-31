@@ -17,12 +17,11 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QScreen, QPixmap, QImage
 import pyqtgraph as pg
 import pyqtgraph.exporters
-# Serial ports and Camera libraries
-import serial.tools.list_ports
-from pypylon import pylon
-# Local project scripts
+
+
+# Local module and scripts
 from apt_ex import apt_oxcart
-import variables
+from tools import variables
 from devices.camera import Camera
 from devices import initialize_devices
 
@@ -583,7 +582,7 @@ class Ui_OXCART(Camera, object):
         _translate = QtCore.QCoreApplication.translate
         OXCART.setWindowTitle(_translate("OXCART", "PyOXCART"))
         ###
-        OXCART.setWindowIcon(QtGui.QIcon('gui_png/logo3.png'))
+        OXCART.setWindowIcon(QtGui.QIcon('../files/logo3.png'))
         ###
         self.label_7.setText(_translate("OXCART", "Voltage"))
         self.start_button.setText(_translate("OXCART", "Start"))
@@ -771,12 +770,12 @@ class Ui_OXCART(Camera, object):
         self.timer3.start()
 
         # Diagram and LEDs ##############
-        self.diagram_close_all = QPixmap('gui_png\close_all.png')
-        self.diagram_main_open = QPixmap('gui_png\main_open.png')
-        self.diagram_load_open = QPixmap('gui_png\load_open.png')
-        self.diagram_cryo_open = QPixmap('gui_png\cryo_open.png')
-        self.led_red = QPixmap('gui_png\led-red-on.png')
-        self.led_green = QPixmap('gui_png\green-led-on.png')
+        self.diagram_close_all = QPixmap('../files/close_all.png')
+        self.diagram_main_open = QPixmap('../files/main_open.png')
+        self.diagram_load_open = QPixmap('../files/load_open.png')
+        self.diagram_cryo_open = QPixmap('../files/cryo_open.png')
+        self.led_red = QPixmap('../files/led-red-on.png')
+        self.led_green = QPixmap('../files/green-led-on.png')
 
         self.diagram.setPixmap(self.diagram_close_all)
         self.led_main_chamber.setPixmap(self.led_red)
@@ -918,7 +917,7 @@ class Ui_OXCART(Camera, object):
                 variables.tweet = True
 
             # Read the experiment counter
-            with open('gui_png/counter_oxcart.txt') as f:
+            with open('../files/counter_oxcart.txt') as f:
                 variables.counter = int(f.readlines()[0])
             # Current time and date
             now = datetime.datetime.now()
@@ -944,7 +943,7 @@ class Ui_OXCART(Camera, object):
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(True)
         QScreen.grabWindow(app.primaryScreen(),
-                           QApplication.desktop().winId()).save(variables.path + '\\screenshot.gui_png')
+                           QApplication.desktop().winId()).save(variables.path + '\\screenshot.files')
         if variables.index_line < self.num_line: # Do next experiment in case of TextLine
             self.thread_main()
         else:
@@ -1158,7 +1157,7 @@ class Ui_OXCART(Camera, object):
                             min_nonzero = np.min(data[np.nonzero(data)])
                             data[data == 0] = min_nonzero
                             return data
-                        math_to_charge = variables.t * 27.432/(1000 * 4)  # Time in ns
+                        math_to_charge = variables.t * 27.432 / (1000 * 4)  # Time in ns
                         math_to_charge = math_to_charge[math_to_charge < 5000]
                         # max_lenght = max(len(variables.x), len(variables.y),
                         #                  len(variables.t), len(variables.main_v_dc_dld))
@@ -1206,13 +1205,13 @@ class Ui_OXCART(Camera, object):
             # save plots to the file
             if variables.index_plot_save % 100 == 0:
                 exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
-                exporter.export(variables.path + '\\v_dc_p_%s.gui_png' % variables.index_plot_save)
+                exporter.export(variables.path + '\\v_dc_p_%s.files' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
-                exporter.export(variables.path + '\\detection_rate_%s.gui_png' % variables.index_plot_save)
+                exporter.export(variables.path + '\\detection_rate_%s.files' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.visualization.plotItem)
-                exporter.export(variables.path + '\\visualization_%s.gui_png' % variables.index_plot_save)
+                exporter.export(variables.path + '\\visualization_%s.files' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
-                exporter.export(variables.path + '\\tof_%s.gui_png' % variables.index_plot_save)
+                exporter.export(variables.path + '\\tof_%s.files' % variables.index_plot_save)
 
             # Increase the index
             variables.index_plot_save += 1
@@ -1353,92 +1352,4 @@ class MainThread(QThread):
         self.signal.emit(main_thread)
 
 
-if __name__ == "__main__":
 
-    # Initialize global experiment variables
-    variables.init()
-    # Cryovac initialized
-    try:
-        com_port_cryovac = serial.Serial(
-            port=initialize_devices.com_ports[variables.com_port_idx_cryovac].device,  # chosen COM port
-            baudrate=9600,  # 115200
-            bytesize=serial.EIGHTBITS,  # 8
-            parity=serial.PARITY_NONE,  # N
-            stopbits=serial.STOPBITS_ONE  # 1
-        )
-        initialize_devices.initialize_cryovac(com_port_cryovac)
-    except Exception as e:
-        print('Can not initialize the Cryovac')
-        print(e)
-    # Main and Buffer vacuum gauges
-    try:
-        initialize_devices.initialize_pfeiffer_gauges()
-    except Exception as e:
-        print('Can not initialize the Pfeiffer gauges')
-        print(e)
-    # Buffer Backing vacuum gauges
-    try:
-        initialize_devices.initialize_edwards_tic_buffer_chamber()
-    except Exception as e:
-        print('Can not initialize the buffer vacuum gauges')
-        print(e)
-    # Load Lock vacuum gauges
-    try:
-        initialize_devices.initialize_edwards_tic_load_lock()
-    except Exception as e:
-        print('Can not initialize the Edwards gauges')
-        print(e)
-
-    # Cameras thread
-    try:
-        # Limits the amount of cameras used for grabbing.
-        # The bandwidth used by a FireWire camera device can be limited by adjusting the packet size.
-        maxCamerasToUse = 2
-        # The exit code of the sample application.
-        exitCode = 0
-        # Get the transport layer factory.
-        tlFactory = pylon.TlFactory.GetInstance()
-        # Get all attached devices and exit application if no device is found.
-        devices = tlFactory.EnumerateDevices()
-
-        if len(devices) == 0:
-            raise pylon.RuntimeException("No camera present.")
-
-        # Create an array of instant cameras for the found devices and avoid exceeding a maximum number of devices.
-        cameras = pylon.InstantCameraArray(min(len(devices), maxCamerasToUse))
-
-        # Create and attach all Pylon Devices.
-        for i, cam in enumerate(cameras):
-            cam.Attach(tlFactory.CreateDevice(devices[i]))
-        converter = pylon.ImageFormatConverter()
-
-        # converting to opencv bgr format
-        converter.OutputPixelFormat = pylon.PixelType_BGR8packed
-        converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
-
-        camera = Camera(devices, tlFactory, cameras, converter)
-
-    except:
-        print('Can not initialize the Cameras')
-    # Thread for reading cameras
-    lock2 = threading.Lock()
-    camera_thread = threading.Thread(target=camera.update_cameras, args=(lock2,))
-    camera_thread.setDaemon(True)
-    camera_thread.start()
-    lock1 = threading.Lock()
-    # Thread for reading gauges
-    gauges_thread = threading.Thread(target=initialize_devices.gauges_update, args=(lock1, com_port_cryovac))
-    gauges_thread.setDaemon(True)
-    gauges_thread.start()
-
-    app = QtWidgets.QApplication(sys.argv)
-    # get display resolution
-    screen_resolution = app.desktop().screenGeometry()
-    # width, height = screen_resolution.width(), screen_resolution.height()
-    # print('Screen size is:(%s,%s)' % (width, height))
-    OXCART = QtWidgets.QMainWindow()
-    lock = threading.Lock()
-    ui = Ui_OXCART(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock)
-    ui.setupUi(OXCART)
-    OXCART.show()
-    sys.exit(app.exec_())

@@ -8,7 +8,6 @@ TODO: Replace print statements with Log statements
 
 import time
 import datetime
-import h5py
 import multiprocessing
 from multiprocessing.queues import Queue
 import threading
@@ -18,9 +17,9 @@ import numpy as np
 import serial.tools.list_ports
 # Local project scripts
 from tdc_roentec import tdc
-import variables
 from devices import email_send, initialize_devices
-from tools import hdf5_creator, experiment_statistics
+from tools import hdf5_creator, experiment_statistics, variables
+
 
 def logging():
     """
@@ -450,8 +449,8 @@ def main():
     # Check the length of arrays to be equal
     if variables.counter_source == 'TDC':
         if all(len(lst) == len(variables.x) for lst in [variables.x, variables.y,
-                                                    variables.t, variables.dld_start_counter,
-                                                    variables.main_v_dc_dld]):
+                                                        variables.t, variables.dld_start_counter,
+                                                        variables.main_v_dc_dld]):
             logger.warning('dld data have not same length')
 
     # save data in hdf5 file
@@ -462,7 +461,7 @@ def main():
     variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
     # Save new value of experiment counter
-    with open('../gui_png/counter_oxcart.txt', 'w') as f:
+    with open('../files/counter_oxcart.txt', 'w') as f:
         f.write(str(variables.counter + 1))
         logger.info('Experiment counter is increased')
 

@@ -1,8 +1,6 @@
 import h5py
 
-import variables
-
-
+from tools import variables
 
 
 def hdf_creator_oxcart(time_counter, time_ex_s, time_ex_m, time_ex_h):

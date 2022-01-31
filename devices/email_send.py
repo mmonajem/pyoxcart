@@ -1,8 +1,6 @@
 import smtplib, ssl
 import datetime
 
-import variables
-
 port = 465  # For SSL
 smtp_server = "smtp.gmail.com"
 sender_email = "oxcart.ap@gmail.com"
@@ -20,7 +18,7 @@ def send_email(email, subject, message):
     Return:
         Does not return anything
     '''
-    with open('../gui_png/email_pass.txt') as f:
+    with open('../files/email_pass.txt') as f:
         password = str(f.readlines()[0])
     receiver_email = email
 

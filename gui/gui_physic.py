@@ -1,11 +1,10 @@
 """
-This is the main script of main GUI of the OXCART Atom Probe.
+This is the main script of main GUI of the simple Atom Probe control GUI.
 @author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
 
 import sys
 import numpy as np
-import time
 import threading
 import datetime
 import os
@@ -13,14 +12,13 @@ import os
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QScreen, QPixmap, QImage
+from PyQt5.QtGui import QScreen
 import pyqtgraph as pg
 import pyqtgraph.exporters
-# Serial ports
-import serial.tools.list_ports
-# Local project scripts
+
+# Local module and scripts
 from apt_ex import apt_physic
-import variables
+from tools import variables
 from devices import initialize_devices
 
 class Ui_APT_Physic(object):
@@ -293,7 +291,7 @@ class Ui_APT_Physic(object):
         _translate = QtCore.QCoreApplication.translate
         APT_Physic.setWindowTitle(_translate("APT_Physic", "APT Control Software"))
         ###
-        APT_Physic.setWindowIcon(QtGui.QIcon('gui_png/logo3.png'))
+        APT_Physic.setWindowIcon(QtGui.QIcon('../files/logo3.png'))
         ###
         self.label_7.setText(_translate("APT_Physic", "Voltage"))
         ###
@@ -447,7 +445,7 @@ class Ui_APT_Physic(object):
             variables.criteria_vdc = False
 
         # Read the experiment counter
-        with open('gui_png/counter_physic.txt') as f:
+        with open('../files/counter_physic.txt') as f:
             variables.counter = int(f.readlines()[0])
         # Current time and date
         now = datetime.datetime.now()
@@ -467,7 +465,7 @@ class Ui_APT_Physic(object):
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(True)
         QScreen.grabWindow(app.primaryScreen(),
-                           QApplication.desktop().winId()).save(variables.path + '\\screenshot.gui_png')
+                           QApplication.desktop().winId()).save(variables.path + '\\screenshot.files')
         if variables.index_line < self.num_line:  # Do next experiment in case of TextLine
             self.thread_main()
         else:
@@ -616,13 +614,13 @@ class Ui_APT_Physic(object):
             # save plots to the file
             if variables.index_plot_save % 100 == 0:
                 exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
-                exporter.export(variables.path + '\\v_dc_p_%s.gui_png' % variables.index_plot_save)
+                exporter.export(variables.path + '\\v_dc_p_%s.files' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
-                exporter.export(variables.path + '\\detection_rate_%s.gui_png' % variables.index_plot_save)
+                exporter.export(variables.path + '\\detection_rate_%s.files' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.visualization.plotItem)
-                exporter.export(variables.path + '\\visualization_%s.gui_png' % variables.index_plot_save)
+                exporter.export(variables.path + '\\visualization_%s.files' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
-                exporter.export(variables.path + '\\tof_%s.gui_png' % variables.index_plot_save)
+                exporter.export(variables.path + '\\tof_%s.files' % variables.index_plot_save)
 
             # Increase the index
             variables.index_plot_save += 1
@@ -712,15 +710,4 @@ class MainThread(QThread):
         self.signal.emit(main_thread)
 
 
-if __name__ == "__main__":
 
-    # Initialize global experiment variables
-    variables.init()
-
-    app = QtWidgets.QApplication(sys.argv)
-    APT_Physic = QtWidgets.QMainWindow()
-    lock = threading.Lock()
-    ui = Ui_APT_Physic(lock)
-    ui.setupUi(APT_Physic)
-    APT_Physic.show()
-    sys.exit(app.exec_())
