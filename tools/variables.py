@@ -97,6 +97,7 @@ def init():
     global y
     global t
     global dld_start_counter
+    global time_stamp
     # TDC parameters
     global channel
     global time_data
@@ -202,6 +203,7 @@ def init():
     y = np.zeros(0)
     t = np.zeros(0)
     dld_start_counter = np.zeros(0)
+    time_stamp = np.zeros(0)
 
     channel = np.zeros(0)
     time_data = np.zeros(0)

@@ -12,7 +12,7 @@ import time
 import h5py
 
 # load the library
-drs_lib = ctypes.CDLL("../drs/drs.dll")
+drs_lib = ctypes.CDLL("../drs/drs_lib.dll")
 
 
 class DRS(object):
@@ -39,8 +39,8 @@ class DRS(object):
 
 
 # Create drs object and initialize the drs board
+drs_ox = DRS(trigger=0, test=1, delay=0, sample_frequency=2)
 
-drs_ox = DRS(trigger=1, test=1, delay=0, sample_frequency=2)
 # code
 for i in range(5):
     # Read the data from drs

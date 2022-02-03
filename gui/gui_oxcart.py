@@ -24,15 +24,17 @@ from apt_ex import apt_oxcart
 from tools import variables
 from devices.camera import Camera
 from devices import initialize_devices
+from tools.module_dir import MODULE_DIR
 
 
 class Ui_OXCART(Camera, object):
     """
     The GUI class of the Oxcart
     """
-    def __init__(self, devices, tlFactory, cameras, converter, lock):
+    def __init__(self, devices, tlFactory, cameras, converter, lock, app):
         super().__init__(devices, tlFactory, cameras, converter) # Cameras variables and converter
         self.lock = lock # Lock for thread ...
+        self.app = app
 
     def setupUi(self, OXCART):
         OXCART.setObjectName("OXCART")
@@ -580,7 +582,7 @@ class Ui_OXCART(Camera, object):
 
     def retranslateUi(self, OXCART):
         _translate = QtCore.QCoreApplication.translate
-        OXCART.setWindowTitle(_translate("OXCART", "PyOXCART"))
+        OXCART.setWindowTitle(_translate("OXCART", "APT Control Software"))
         ###
         OXCART.setWindowIcon(QtGui.QIcon('../files/logo3.png'))
         ###
@@ -917,13 +919,15 @@ class Ui_OXCART(Camera, object):
                 variables.tweet = True
 
             # Read the experiment counter
-            with open('../files/counter_oxcart.txt') as f:
+            with open('./files/counter_oxcart.txt') as f:
                 variables.counter = int(f.readlines()[0])
             # Current time and date
             now = datetime.datetime.now()
             exp_name = "%s_" % variables.counter + \
                        now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
-            variables.path = 'D:\\pyoxcart\\data\\%s' % exp_name
+
+
+            variables.path = os.path.join(os.path.split(MODULE_DIR)[0], 'data\\%s' % exp_name)
             # Create folder to save the data
             if not os.path.isdir(variables.path):
                 os.makedirs(variables.path, mode=0o777, exist_ok=True)
@@ -936,13 +940,13 @@ class Ui_OXCART(Camera, object):
             self.Error.setText(_translate("OXCART",
                                           "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all "
                                           "Gates !!!</span></p></body></html>"))
-    def finished_thread_main(self):
+    def finished_thread_main(self,):
         """
         The function that is run after end of experiment(MainThread)
         """
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(True)
-        QScreen.grabWindow(app.primaryScreen(),
+        QScreen.grabWindow(self.app.primaryScreen(),
                            QApplication.desktop().winId()).save(variables.path + '\\screenshot.files')
         if variables.index_line < self.num_line: # Do next experiment in case of TextLine
             self.thread_main()

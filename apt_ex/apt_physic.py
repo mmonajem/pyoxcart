@@ -51,13 +51,13 @@ def logging():
     return logger
 
 
-class OXCART:
+class apt_simple:
     """
-    OXCART class
+    apt_simple class
 
     """
 
-    def __init__(self, queue_x, queue_y, queue_t, queue_dld_start_counter, lock1):
+    def __init__(self, queue_x, queue_y, queue_tof, queue_time_stamp, lock1):
         '''
         This is the constructor class that accepts several initialized queues objects corresponding
         to various parameters of the groups like dld,TDC,DRS. This constructor also objects used for
@@ -67,8 +67,8 @@ class OXCART:
         # dld queues
         self.queue_x = queue_x
         self.queue_y = queue_y
-        self.queue_t = queue_t
-        self.queue_dld_start_counter = queue_dld_start_counter
+        self.queue_tof = queue_tof
+        self.queue_time_stamp = queue_time_stamp
         self.lock1 = lock1
 
 
@@ -150,15 +150,15 @@ class OXCART:
         """
         while True:
             # Check if any value is present in queue to read from
-            while not self.queue_x.empty() or not self.queue_y.empty() or not self.queue_t.empty() or not self.queue_dld_start_counter.empty():
+            while not self.queue_x.empty() or not self.queue_y.empty() or not self.queue_tof.empty() or not self.queue_time_stamp.empty():
                 # Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock1:
                     length = self.queue_x.get()
                     variables.x = np.append(variables.x, length)
                     variables.y = np.append(variables.y, self.queue_y.get())
-                    variables.t = np.append(variables.t, self.queue_t.get())
-                    variables.dld_start_counter = np.append(variables.dld_start_counter,
-                                                            self.queue_dld_start_counter.get())
+                    variables.t = np.append(variables.t, self.queue_tof.get())
+                    variables.time_stamp = np.append(variables.dld_start_counter,
+                                                            self.queue_time_stamp.get())
                     variables.main_v_dc_dld = np.append(variables.main_v_dc_dld, np.tile(variables.specimen_voltage, len(length)))
             # If end of experiment flag is set break the while loop
             if variables.end_experiment:
@@ -296,13 +296,13 @@ def main():
     if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
         queue_x = Queue(maxsize=-1, ctx=multiprocessing.get_context())
         queue_y = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-        queue_t = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-        queue_dld_start_counter = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_tof = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_time_stamp = Queue(maxsize=-1, ctx=multiprocessing.get_context())
         queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
 
         tdc_process = multiprocessing.Process(target=tdc.experiment_measure, args=(queue_x,
-                                                                                   queue_y, queue_t,
-                                                                                   queue_dld_start_counter,
+                                                                                   queue_y, queue_tof,
+                                                                                   queue_time_stamp,
                                                                                    queue_stop_measurement))
 
         tdc_process.daemon = True
@@ -313,7 +313,7 @@ def main():
     lock1 = threading.Lock()
 
     # Create the experiment object
-    experiment = OXCART(queue_x, queue_y, queue_t, queue_dld_start_counter,
+    experiment = apt_simple(queue_x, queue_y, queue_tof, queue_time_stamp,
                         lock1)
 
 
@@ -461,7 +461,7 @@ def main():
     variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
     # Save new value of experiment counter
-    with open('../files/counter_oxcart.txt', 'w') as f:
+    with open('./files/counter_physic.txt', 'w') as f:
         f.write(str(variables.counter + 1))
         logger.info('Experiment counter is increased')
 
@@ -469,7 +469,7 @@ def main():
     logger.info('Total number of Ions is: %s' % variables.total_ions)
 
     # send an email
-    subject = 'Oxcart Experiment {} Report'.format(variables.hdf5_path)
+    subject = 'apt_simple Experiment {} Report'.format(variables.hdf5_path)
     elapsed_time_temp = float("{:.3f}".format(variables.elapsed_time))
     message = 'The experiment was started at: {}\n' \
               'The experiment was ended at: {}\n' \

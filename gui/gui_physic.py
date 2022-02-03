@@ -20,6 +20,7 @@ import pyqtgraph.exporters
 from apt_ex import apt_physic
 from tools import variables
 from devices import initialize_devices
+from tools.module_dir import MODULE_DIR
 
 class Ui_APT_Physic(object):
     """
@@ -445,13 +446,13 @@ class Ui_APT_Physic(object):
             variables.criteria_vdc = False
 
         # Read the experiment counter
-        with open('../files/counter_physic.txt') as f:
+        with open('./files/counter_physic.txt') as f:
             variables.counter = int(f.readlines()[0])
         # Current time and date
         now = datetime.datetime.now()
         exp_name = "%s_" % variables.counter + \
                    now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
-        variables.path = './data/%s' % exp_name
+        variables.path = os.path.join(os.path.split(MODULE_DIR)[0], 'data\\%s' % exp_name)
         # Create folder to save the data
         if not os.path.isdir(variables.path):
             os.makedirs(variables.path, mode=0o777, exist_ok=True)

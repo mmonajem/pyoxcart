@@ -54,9 +54,9 @@ def logging():
     return logger
 
 
-class OXCART:
+class apt_advance:
     """
-    OXCART class
+    apt_advance class
 
     """
 
@@ -572,7 +572,7 @@ def main():
     lock2 = threading.Lock()
 
     # Create the experiment object
-    experiment = OXCART(queue_x, queue_y, queue_t, queue_dld_start_counter,
+    experiment = apt_advance(queue_x, queue_y, queue_t, queue_dld_start_counter,
                         queue_channel, queue_time_data, queue_tdc_start_counter,
                         queue_ch0_time, queue_ch0_wave, queue_ch1_time, queue_ch1_wave,
                         queue_ch2_time, queue_ch2_wave, queue_ch3_time, queue_ch3_wave,

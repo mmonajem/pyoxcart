@@ -20,9 +20,9 @@ from gui import gui_oxcart, gui_physic
 
 if __name__ == "__main__":
 
-    mode = 'simple'
+    mode = 'advance'
 
-    if mode == 'advance':
+    if mode == 'simple':
 
         # Initialize global experiment variables
         variables.init()
@@ -107,7 +107,7 @@ if __name__ == "__main__":
         # print('Screen size is:(%s,%s)' % (width, height))
         OXCART = QtWidgets.QMainWindow()
         lock = threading.Lock()
-        ui = gui_oxcart.Ui_OXCART(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock)
+        ui = gui_oxcart.Ui_OXCART(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock, app)
         ui.setupUi(OXCART)
         OXCART.show()
         sys.exit(app.exec_())
