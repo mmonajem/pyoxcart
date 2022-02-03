@@ -26,8 +26,9 @@ class Ui_APT_Physic(object):
     """
     The GUI class of the Oxcart
     """
-    def __init__(self, lock):
+    def __init__(self, lock, app):
         self.lock = lock # Lock for thread ...
+        self.app = app
 
     def setupUi(self, APT_Physic):
         APT_Physic.setObjectName("APT_Physic")
@@ -452,7 +453,7 @@ class Ui_APT_Physic(object):
         now = datetime.datetime.now()
         exp_name = "%s_" % variables.counter + \
                    now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
-        variables.path = os.path.join(os.path.split(MODULE_DIR)[0], 'data\\%s' % exp_name)
+        variables.path = os.path.join(os.path.split(MODULE_DIR)[0], 'data_physic\\%s' % exp_name)
         # Create folder to save the data
         if not os.path.isdir(variables.path):
             os.makedirs(variables.path, mode=0o777, exist_ok=True)
@@ -465,12 +466,8 @@ class Ui_APT_Physic(object):
         """
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(True)
-        QScreen.grabWindow(app.primaryScreen(),
-                           QApplication.desktop().winId()).save(variables.path + '\\screenshot.files')
-        if variables.index_line < self.num_line:  # Do next experiment in case of TextLine
-            self.thread_main()
-        else:
-            variables.index_line = 0
+        QScreen.grabWindow(self.app.primaryScreen(),
+                           QApplication.desktop().winId()).save(variables.path + '/screenshot.png')
 
     def stop_ex(self):
         """
@@ -615,13 +612,13 @@ class Ui_APT_Physic(object):
             # save plots to the file
             if variables.index_plot_save % 100 == 0:
                 exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
-                exporter.export(variables.path + '\\v_dc_p_%s.files' % variables.index_plot_save)
+                exporter.export(variables.path + '/v_dc_p_%s.png' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
-                exporter.export(variables.path + '\\detection_rate_%s.files' % variables.index_plot_save)
+                exporter.export(variables.path + '/detection_rate_%s.png' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.visualization.plotItem)
-                exporter.export(variables.path + '\\visualization_%s.files' % variables.index_plot_save)
+                exporter.export(variables.path + '/visualization_%s.png' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
-                exporter.export(variables.path + '\\tof_%s.files' % variables.index_plot_save)
+                exporter.export(variables.path + '/tof_%s.png' % variables.index_plot_save)
 
             # Increase the index
             variables.index_plot_save += 1
@@ -656,6 +653,7 @@ class Ui_APT_Physic(object):
             variables.ex_freq = int(float(self.ex_freq.text()))
             variables.max_ions = int(float(self.max_ions.text()))
             variables.vdc_min = int(float(self.vdc_min.text()))
+
             variables.detection_rate = float(self.detection_rate_init.text())
             variables.hit_display = int(float(self.hit_displayed.text()))
             variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100

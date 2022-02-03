@@ -20,9 +20,9 @@ from gui import gui_oxcart, gui_physic
 
 if __name__ == "__main__":
 
-    mode = 'advance'
+    mode = 'simple'
 
-    if mode == 'simple':
+    if mode == 'advance':
 
         # Initialize global experiment variables
         variables.init()
@@ -120,7 +120,7 @@ if __name__ == "__main__":
         app = QtWidgets.QApplication(sys.argv)
         APT_Physic = QtWidgets.QMainWindow()
         lock = threading.Lock()
-        ui = gui_physic.Ui_APT_Physic(lock)
+        ui = gui_physic.Ui_APT_Physic(lock, app)
         ui.setupUi(APT_Physic)
         APT_Physic.show()
         sys.exit(app.exec_())

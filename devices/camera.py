@@ -71,10 +71,10 @@ class Camera:
 
             # Store the captured processed image at a desired location.
             if variables.index_save_image % 100 == 0 and variables.start_flag:
-                cv2.imwrite(variables.path + "\\side_%s.files" % variables.index_save_image, img0_orig)
-                cv2.imwrite(variables.path + "\\side_zoom_%s.files" % variables.index_save_image, img0_zoom)
-                cv2.imwrite(variables.path + '\\bottom_%s.files' % variables.index_save_image, img1_orig)
-                cv2.imwrite(variables.path + '\\bottom_zoom_%s.files' % variables.index_save_image, img1_zoom)
+                cv2.imwrite(variables.path + "/side_%s.png" % variables.index_save_image, img0_orig)
+                cv2.imwrite(variables.path + "/side_zoom_%s.png" % variables.index_save_image, img0_zoom)
+                cv2.imwrite(variables.path + '/bottom_%s.png' % variables.index_save_image, img1_orig)
+                cv2.imwrite(variables.path + '/bottom_zoom_%s.png' % variables.index_save_image, img1_zoom)
             
             # The function cv::drawMarker draws a marker on a given position in the image. 
             img0_zoom_marker = cv2.drawMarker(img0_zoom, (1050, 310), (0, 0, 255), markerType=cv2.MARKER_TRIANGLE_UP,
@@ -95,10 +95,10 @@ class Camera:
 
             # Store the captured processed image at a desired location.
             if variables.index_save_image % 100 == 0 and variables.start_flag:
-                cv2.imwrite(variables.path + "\\side_%s.files" % variables.index_save_image, img0_orig)
-                cv2.imwrite(variables.path + "\\side_zoom_%s.files" % variables.index_save_image, img0_zoom)
-                cv2.imwrite(variables.path + '\\bottom_%s.files' % variables.index_save_image, img1_orig)
-                cv2.imwrite(variables.path + '\\bottom_zoom_%s.files' % variables.index_save_image, img1_zoom)
+                cv2.imwrite(variables.path + "/side_%s.png" % variables.index_save_image, img0_orig)
+                cv2.imwrite(variables.path + "/side_zoom_%s.png" % variables.index_save_image, img0_zoom)
+                cv2.imwrite(variables.path + '/bottom_%s.png' % variables.index_save_image, img1_orig)
+                cv2.imwrite(variables.path + '/bottom_zoom_%s.png' % variables.index_save_image, img1_zoom)
 
             grabResult0.Release()
             grabResult1.Release()

@@ -8,6 +8,7 @@ import ctypes
 from numpy.ctypeslib import ndpointer
 import numpy as np
 import threading
+import time
 
 # load the library
 tdc_lib = ctypes.CDLL("./tdc_roentec/simple_read_TDC8HP_x64.dll")
@@ -69,13 +70,13 @@ def reader(tdc, queue_x, queue_y,
         for i in range(4):
             tem_arr = returnVale[i,:]
             if(len(tem_arr[tem_arr >= -10]) > 1 and i == 0):
-                queue_x.put(data[0, :])
+                queue_x.put(tem_arr)
             elif (len(tem_arr[tem_arr >= -10]) > 1 and i == 1):
-                queue_y.put(data[0, :])
+                queue_y.put(tem_arr)
             elif (len(tem_arr[tem_arr >= -10]) > 1 and i == 2):
-                queue_tof.put(data[0, :])
+                queue_tof.put(tem_arr)
             elif (len(tem_arr[tem_arr >= -10]) > 1 and i == 3):
-                queue_time_stamp.put(data[0, :])
+                queue_time_stamp.put(tem_arr)
 
         time.sleep(0.01)
 

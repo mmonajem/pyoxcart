@@ -947,7 +947,7 @@ class Ui_OXCART(Camera, object):
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(True)
         QScreen.grabWindow(self.app.primaryScreen(),
-                           QApplication.desktop().winId()).save(variables.path + '\\screenshot.files')
+                           QApplication.desktop().winId()).save(variables.path + '\screenshot.png')
         if variables.index_line < self.num_line: # Do next experiment in case of TextLine
             self.thread_main()
         else:
@@ -1209,13 +1209,13 @@ class Ui_OXCART(Camera, object):
             # save plots to the file
             if variables.index_plot_save % 100 == 0:
                 exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
-                exporter.export(variables.path + '\\v_dc_p_%s.files' % variables.index_plot_save)
+                exporter.export(variables.path + '/v_dc_p_%s.png' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
-                exporter.export(variables.path + '\\detection_rate_%s.files' % variables.index_plot_save)
+                exporter.export(variables.path + '/detection_rate_%s.png' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.visualization.plotItem)
-                exporter.export(variables.path + '\\visualization_%s.files' % variables.index_plot_save)
+                exporter.export(variables.path + '/visualization_%s.png' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
-                exporter.export(variables.path + '\\tof_%s.files' % variables.index_plot_save)
+                exporter.export(variables.path + '/tof_%s.png' % variables.index_plot_save)
 
             # Increase the index
             variables.index_plot_save += 1

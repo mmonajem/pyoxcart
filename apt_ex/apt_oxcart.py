@@ -369,9 +369,9 @@ class apt_advance:
             if variables.specimen_voltage >= variables.vdc_min:
                 specimen_voltage_temp = variables.specimen_voltage + voltage_step
                 if specimen_voltage_temp > variables.specimen_voltage:
-                    variables.specimen_voltage = specimen_voltage_temp
                     # sending VDC via serial
-                    self.command_v_dc(">S0 %s" % (variables.specimen_voltage))
+                    self.command_v_dc(">S0 %s" % (specimen_voltage_temp))
+                    variables.specimen_voltage = specimen_voltage_temp
 
         # update pulse voltage v_p
         new_vp = variables.specimen_voltage * variables.pulse_fraction * \

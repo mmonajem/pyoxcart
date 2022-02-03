@@ -157,7 +157,7 @@ class apt_simple:
                     variables.x = np.append(variables.x, length)
                     variables.y = np.append(variables.y, self.queue_y.get())
                     variables.t = np.append(variables.t, self.queue_tof.get())
-                    variables.time_stamp = np.append(variables.dld_start_counter,
+                    variables.time_stamp = np.append(variables.time_stamp,
                                                             self.queue_time_stamp.get())
                     variables.main_v_dc_dld = np.append(variables.main_v_dc_dld, np.tile(variables.specimen_voltage, len(length)))
             # If end of experiment flag is set break the while loop
@@ -177,7 +177,6 @@ class apt_simple:
         This function is called in each loop of main function.
 
         Atrributes:
-            task_counter: Counter edges
             counts_target: Calculated paramter(((detection_rate/100)* pulse_frequency)/pulse_frequency)
 
         Returns:
@@ -193,7 +192,6 @@ class apt_simple:
 
         # saving the values of high dc voltage, pulse, and current iteration ions
         variables.main_v_dc = np.append(variables.main_v_dc, variables.specimen_voltage)
-        # variables.main_v_p = np.append(variables.main_v_p, variables.pulse_voltage)
         variables.main_counter = np.append(variables.main_counter, variables.count_temp)
         # averaging count rate of N_averg counts
         variables.avg_n_count = variables.ex_freq * (
@@ -219,12 +217,12 @@ class apt_simple:
             if variables.specimen_voltage >= variables.vdc_min:
                 specimen_voltage_temp = variables.specimen_voltage + voltage_step
                 if specimen_voltage_temp > variables.specimen_voltage:
-                    variables.specimen_voltage = specimen_voltage_temp
                     # sending VDC via serial
-                    self.command_v_dc(">S0 %s" % (variables.specimen_voltage))
+                    self.command_v_dc(">S0 %s" % (specimen_voltage_temp))
+                    variables.specimen_voltage = specimen_voltage_temp
 
 
-    def clear_up(self, task_counter):
+    def clear_up(self,):
         """
         This fucntion clears global variables and deinitialize high voltage and pulser function
 
@@ -323,8 +321,6 @@ def main():
 
 
     # start the timer for main experiment
-    variables.specimen_voltage = variables.vdc_min
-
     time_ex_s = np.zeros(0)
     time_ex_m = np.zeros(0)
     time_ex_h = np.zeros(0)
@@ -359,13 +355,13 @@ def main():
             time.sleep(4)
             # Total experiment time variable
             start_main_ex = time.time()
-
             print('Experiment is started')
             logger.info('Experiment is started')
+            # set the start specimen_voltage
+            variables.specimen_voltage = variables.vdc_min
         # Measure time
         start = datetime.datetime.now()
         # main loop function
-        # experiment.main_ex_loop(task_counter, counts_target)
         experiment.main_ex_loop(counts_target)
         end = datetime.datetime.now()
         # If the main experiment function takes less than experiment frequency we have to waite
