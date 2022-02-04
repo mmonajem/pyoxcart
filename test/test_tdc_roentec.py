@@ -11,7 +11,7 @@ import threading
 import time
 
 # load the library
-tdc_lib = ctypes.CDLL("./tdc_roentec/simple_read_TDC8HP_x64.dll")
+tdc_lib = ctypes.CDLL("../tdc_roentec/simple_read_TDC8HP_x64.dll")
 
 
 class tdc_roentec(object):
@@ -104,4 +104,10 @@ def experiment_measure(queue_x, queue_y,
     tdc.run_tdc()
 
 
+queue_x = np.zeros(0)
+queue_y = np.zeros(0)
+queue_tof = np.zeros(0)
+queue_time_stamp = np.zeros(0)
+experiment_measure(queue_x, queue_y,
+                       queue_tof, queue_time_stamp, queue_stop_measurement=True)
 
