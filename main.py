@@ -3,6 +3,7 @@ This is the main script is load the GUI base on the configuration file.
 @author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
 
+from dataclasses import dataclass
 import sys
 import threading
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -11,16 +12,23 @@ import serial.tools.list_ports
 from pypylon import pylon
 
 # Local module and scripts
-from tools import variables
+from tools import variables,read_files
 from devices.camera import Camera
 from devices import initialize_devices
 from gui import gui_oxcart, gui_physic
+import json
+
+configFile= 'config.json'
+
 
 
 
 if __name__ == "__main__":
 
-    mode = 'simple'
+    data = read_files.read_json_file(configFile)
+    mode = data['mode']
+    
+    
 
     if mode == 'advance':
 
