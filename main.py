@@ -28,7 +28,6 @@ if __name__ == "__main__":
     data = read_files.read_json_file(configFile)
     mode = data['mode']
     
-    
 
     if mode == 'advance':
 

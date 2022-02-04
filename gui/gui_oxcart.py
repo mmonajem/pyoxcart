@@ -772,12 +772,12 @@ class Ui_OXCART(Camera, object):
         self.timer3.start()
 
         # Diagram and LEDs ##############
-        self.diagram_close_all = QPixmap('../files/close_all.png')
-        self.diagram_main_open = QPixmap('../files/main_open.png')
-        self.diagram_load_open = QPixmap('../files/load_open.png')
-        self.diagram_cryo_open = QPixmap('../files/cryo_open.png')
-        self.led_red = QPixmap('../files/led-red-on.png')
-        self.led_green = QPixmap('../files/green-led-on.png')
+        self.diagram_close_all = QPixmap('./files/close_all.png')
+        self.diagram_main_open = QPixmap('./files/main_open.png')
+        self.diagram_load_open = QPixmap('./files/load_open.png')
+        self.diagram_cryo_open = QPixmap('./files/cryo_open.png')
+        self.led_red = QPixmap('./files/led-red-on.png')
+        self.led_green = QPixmap('./files/green-led-on.png')
 
         self.diagram.setPixmap(self.diagram_close_all)
         self.led_main_chamber.setPixmap(self.led_red)
