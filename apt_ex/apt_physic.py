@@ -16,7 +16,7 @@ import numpy as np
 # Serial ports and NI
 import serial.tools.list_ports
 # Local project scripts
-from tdc_roentec import tdc
+from tdc_roentdec import tdc
 from devices import email_send, initialize_devices
 from tools import hdf5_creator, experiment_statistics, variables
 

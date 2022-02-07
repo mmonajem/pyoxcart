@@ -11,7 +11,7 @@ import threading
 import time
 
 # load the library
-tdc_lib = ctypes.CDLL("../tdc_roentec/simple_read_TDC8HP_x64.dll")
+tdc_lib = ctypes.CDLL("../tdc_roentdec/simple_read_TDC8HP_x64.dll")
 
 
 class tdc_roentec(object):
