@@ -1,3 +1,4 @@
 {
-	"mode": "advance"
+	"mode": "advance",
+	"visualization": "tof"
 }

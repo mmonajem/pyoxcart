@@ -25,11 +25,9 @@ configFile= 'config.json'
 
 if __name__ == "__main__":
 
-    data = read_files.read_json_file(configFile)
-    mode = data['mode']
-    
+    conf = read_files.read_json_file(configFile)
 
-    if mode == 'advance':
+    if conf['mode'] == 'advance':
 
         # Initialize global experiment variables
         variables.init()
@@ -114,12 +112,12 @@ if __name__ == "__main__":
         # print('Screen size is:(%s,%s)' % (width, height))
         OXCART = QtWidgets.QMainWindow()
         lock = threading.Lock()
-        ui = gui_oxcart.Ui_OXCART(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock, app)
+        ui = gui_oxcart.Ui_OXCART(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock, app, conf)
         ui.setupUi(OXCART)
         OXCART.show()
         sys.exit(app.exec_())
 
-    elif mode == 'simple':
+    elif conf['mode'] == 'simple':
 
         # Initialize global experiment variables
         variables.init()
@@ -127,7 +125,7 @@ if __name__ == "__main__":
         app = QtWidgets.QApplication(sys.argv)
         APT_Physic = QtWidgets.QMainWindow()
         lock = threading.Lock()
-        ui = gui_physic.Ui_APT_Physic(lock, app)
+        ui = gui_physic.Ui_APT_Physic(lock, app, conf)
         ui.setupUi(APT_Physic)
         APT_Physic.show()
         sys.exit(app.exec_())

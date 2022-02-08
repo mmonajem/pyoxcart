@@ -740,7 +740,7 @@ background: rgb(193, 193, 193)
              <string notr="true">QWidget{
 border: 2px solid gray;
 border-radius: 10px;
-padding: 0 8px;
+padding: 4 4px;
 }</string>
             </property>
            </widget>
@@ -757,7 +757,7 @@ padding: 0 8px;
              <string notr="true">QWidget{
 border: 2px solid gray;
 border-radius: 10px;
-padding: 0 8px;
+padding: 4 4px;
 }</string>
             </property>
            </widget>
@@ -860,7 +860,7 @@ padding: 0 8px;
              <string notr="true">QWidget{
 border: 2px solid gray;
 border-radius: 10px;
-padding: 0 8px;
+padding: 4 4px;
 }</string>
             </property>
            </widget>
@@ -877,7 +877,7 @@ padding: 0 8px;
              <string notr="true">QWidget{
 border: 2px solid gray;
 border-radius: 10px;
-padding: 0 8px;
+padding: 4 4px;
 }</string>
             </property>
            </widget>

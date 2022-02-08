@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>3414</width>
-    <height>1800</height>
+    <height>1784</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,6 +15,19 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_9">
+    <item row="1" column="0">
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
     <item row="0" column="0">
      <layout class="QGridLayout" name="gridLayout_8">
       <item row="0" column="0" rowspan="3">
@@ -49,7 +62,7 @@
              <string notr="true">QWidget{
 border: 2px solid gray;
 border-radius: 10px;
-padding: 0 8px;
+padding: 4 4px;
 }</string>
             </property>
             <property name="text">
@@ -300,6 +313,16 @@ background: rgb(223,223,233)
                 <item>
                  <property name="text">
                   <string>TDC</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>TDC_Raw</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>DRS</string>
                  </property>
                 </item>
                 <item>
@@ -998,7 +1021,7 @@ background: rgb(193, 193, 193)
           <property name="minimumSize">
            <size>
             <width>2580</width>
-            <height>140</height>
+            <height>80</height>
            </size>
           </property>
           <property name="styleSheet">
@@ -1150,6 +1173,12 @@ background: rgb(193, 193, 193)
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <widget class="QGraphicsView" name="vdc_time">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>1</horstretch>
+              <verstretch>1</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>500</width>
@@ -1160,13 +1189,19 @@ background: rgb(193, 193, 193)
              <string notr="true">QWidget{
 border: 2px solid gray;
 border-radius: 10px;
-padding: 0 8px;
+padding: 4 4px;
 }</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QGraphicsView" name="detection_rate_viz">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>1</horstretch>
+              <verstretch>1</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>500</width>
@@ -1177,7 +1212,7 @@ padding: 0 8px;
              <string notr="true">QWidget{
 border: 2px solid gray;
 border-radius: 10px;
-padding: 0 8px;
+padding: 4 4px;
 }</string>
             </property>
            </widget>
@@ -1270,6 +1305,12 @@ padding: 0 8px;
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <widget class="QGraphicsView" name="visualization">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>1</horstretch>
+              <verstretch>1</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>500</width>
@@ -1280,13 +1321,19 @@ padding: 0 8px;
              <string notr="true">QWidget{
 border: 2px solid gray;
 border-radius: 10px;
-padding: 0 8px;
+padding: 4 4px;
 }</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QGraphicsView" name="graphicsView">
+           <widget class="QGraphicsView" name="histogram">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>1</horstretch>
+              <verstretch>1</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>500</width>
@@ -1297,8 +1344,11 @@ padding: 0 8px;
              <string notr="true">QWidget{
 border: 2px solid gray;
 border-radius: 10px;
-padding: 0 8px;
+padding: 4 4px;
 }</string>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
             </property>
            </widget>
           </item>
@@ -1433,6 +1483,12 @@ padding: 0 8px;
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
            <widget class="QLabel" name="cam_b_o">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>1</horstretch>
+              <verstretch>1</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>500</width>
@@ -1449,7 +1505,7 @@ padding: 0 8px;
              <string notr="true">QWidget{
 border: 2px solid gray;
 border-radius: 10px;
-padding: 0 8px;
+padding: 4 4px;
 }</string>
             </property>
             <property name="text">
@@ -1475,7 +1531,7 @@ padding: 0 8px;
              <string notr="true">QWidget{
 border: 2px solid gray;
 border-radius: 10px;
-padding: 0 8px;
+padding: 4 4px;
 }</string>
             </property>
             <property name="text">
@@ -1488,7 +1544,13 @@ padding: 0 8px;
         <item row="1" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
-           <widget class="QLabel" name="cam_s_d">
+           <widget class="QLabel" name="cam_s_o">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>1</horstretch>
+              <verstretch>1</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>500</width>
@@ -1499,7 +1561,7 @@ padding: 0 8px;
              <string notr="true">QWidget{
 border: 2px solid gray;
 border-radius: 10px;
-padding: 0 8px;
+padding: 4 4px;
 }</string>
             </property>
             <property name="text">
@@ -1508,7 +1570,7 @@ padding: 0 8px;
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="cam_s_o">
+           <widget class="QLabel" name="cam_s_d">
             <property name="minimumSize">
              <size>
               <width>1200</width>
@@ -1525,7 +1587,7 @@ padding: 0 8px;
              <string notr="true">QWidget{
 border: 2px solid gray;
 border-radius: 10px;
-padding: 0 8px;
+padding: 4 4px;
 }</string>
             </property>
             <property name="text">
@@ -1688,7 +1750,7 @@ padding: 0 8px;
        <layout class="QGridLayout" name="gridLayout_17">
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout_6">
-          <item row="1" column="0" rowspan="2">
+          <item row="1" column="1" rowspan="2">
            <widget class="QLabel" name="led_pump_load_lock">
             <property name="text">
              <string>pump</string>
@@ -1698,7 +1760,7 @@ padding: 0 8px;
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="3" column="1">
            <widget class="QPushButton" name="pump_load_lock_switch">
             <property name="styleSheet">
              <string notr="true">QPushButton{
@@ -1710,7 +1772,7 @@ background: rgb(193, 193, 193)
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
+          <item row="4" column="1">
            <spacer name="verticalSpacer_32">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -1723,7 +1785,7 @@ background: rgb(193, 193, 193)
             </property>
            </spacer>
           </item>
-          <item row="0" column="0">
+          <item row="0" column="1">
            <spacer name="verticalSpacer_30">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -1732,6 +1794,19 @@ background: rgb(193, 193, 193)
              <size>
               <width>20</width>
               <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="3" column="0">
+           <spacer name="horizontalSpacer_32">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
              </size>
             </property>
            </spacer>
@@ -2040,6 +2115,13 @@ padding: 0 8px;
               <height>200</height>
              </size>
             </property>
+            <property name="styleSheet">
+             <string notr="true">QWidget{
+border: 2px solid gray;
+border-radius: 10px;
+padding: 4 4px;
+}</string>
+            </property>
            </widget>
           </item>
           <item>
@@ -2124,7 +2206,7 @@ background: rgb(193, 193, 193)
           <property name="minimumSize">
            <size>
             <width>800</width>
-            <height>30</height>
+            <height>50</height>
            </size>
           </property>
           <property name="font">
