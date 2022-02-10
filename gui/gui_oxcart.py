@@ -11,7 +11,7 @@ import threading
 import datetime
 import os
 # PyQt and PyQtgraph libraries
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, QtSvg
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QScreen, QPixmap, QImage
@@ -66,6 +66,7 @@ class Ui_OXCART(Camera, object):
 "border: 2px solid gray;\n"
 "border-radius: 10px;\n"
 "padding: 4 4px;\n"
+"background: rgb(255, 255, 255)"                                   
 "}")
         self.diagram.setText("")
         self.diagram.setObjectName("diagram")
@@ -1489,7 +1490,8 @@ class Ui_OXCART(Camera, object):
             self.x_tem = np.append(self.x_tem, self.x_tem[-1] + 1)  # Add a new value 1 higher than the last.
             self.y_tem = self.y_tem[1:]  # Remove the first element.
             try:
-                    self.y_tem = np.append(self.y_tem, int(variables.temperature))
+                    # self.y_tem = np.append(self.y_tem, int(variables.temperature))
+                    self.y_tem = np.append(self.y_tem, int(35.55))
                     self.data_line_tem.setData(self.x_tem, self.y_tem)
             except:
                     print(
@@ -1657,7 +1659,7 @@ class Ui_OXCART(Camera, object):
             # update temperature and vacuum gages
             self.temp.display(variables.temperature)
             self.vacuum_main.display(variables.vacuum_main)
-            self.vacuum_buffer.display(variables.vacuum_buffer)
+            self.vacuum_buffer.display('{:.2e}'.format(float(variables.vacuum_buffer)))
             self.vacuum_buffer_back.display('{:.2e}'.format(variables.vacuum_buffer_backing))
             self.vacuum_load_lock.display('{:.2e}'.format(variables.vacuum_load_lock))
             self.vacuum_load_lock_back.display('{:.2e}'.format(variables.vacuum_load_lock_backing))
