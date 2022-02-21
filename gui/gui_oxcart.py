@@ -1340,10 +1340,10 @@ class Ui_OXCART(Camera, object):
                             variables.counter = int(f.readlines()[0])
                     # Current time and date
                     now = datetime.datetime.now()
-                    exp_name = "%s_" % variables.counter + \
+                    variables.exp_name = "%s_" % variables.counter + \
                                now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
 
-                    variables.path = os.path.join(os.path.split(MODULE_DIR)[0], 'data\\%s' % exp_name)
+                    variables.path = os.path.join(os.path.split(MODULE_DIR)[0], 'data\\%s' % variables.exp_name)
                     # Create folder to save the data
                     if not os.path.isdir(variables.path):
                             os.makedirs(variables.path, mode=0o777, exist_ok=True)

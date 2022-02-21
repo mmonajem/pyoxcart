@@ -5,7 +5,7 @@ from tools import variables
 
 def hdf_creator_oxcart(time_counter, time_ex_s, time_ex_m, time_ex_h):
     # save hdf5 file
-    with h5py.File(variables.path + '\\%s_data.h5' % variables.hdf5_path, "w") as f:
+    with h5py.File(variables.path + '\\data_%s.h5' % variables.exp_name, "w") as f:
         f.create_dataset("apt/high_voltage", data=variables.main_v_dc, dtype='f')
         f.create_dataset("apt/pulse_voltage", data=variables.main_v_p, dtype='f')
         f.create_dataset("apt/num_events", data=variables.main_counter, dtype='i')
@@ -47,7 +47,7 @@ def hdf_creator_oxcart(time_counter, time_ex_s, time_ex_m, time_ex_h):
 def hdf_creator_physic(time_counter, time_ex_s, time_ex_m, time_ex_h):
 
     # save hdf5 file
-    with h5py.File(variables.path + '\\%s_data.h5' % variables.hdf5_path, "w") as f:
+    with h5py.File(variables.path + '\\data_%s.h5' % variables.exp_name, "w") as f:
         f.create_dataset("apt/high_voltage", data=variables.main_v_dc, dtype='f')
         f.create_dataset("apt/num_events", data=variables.main_counter, dtype='i')
         f.create_dataset("apt/time_counter", data=time_counter, dtype='i')

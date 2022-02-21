@@ -56,6 +56,7 @@ def init():
     global criteria_ions
     global criteria_vdc
     global point_size_detec_map
+    global exp_name
 
     # Statistics parameters
     global elapsed_time
@@ -166,6 +167,7 @@ def init():
     criteria_ions = True
     criteria_vdc = True
     point_size_detec_map = 1
+    exp_name = ''
 
     # Run statistics=
     elapsed_time = 0.0
