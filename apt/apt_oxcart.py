@@ -2,8 +2,6 @@
 This is the main script for doing experiment.
 It contains the main control loop of experiment.
 @author: Mehrpad Monajem <mehrpad.monajem@fau.de>
-
-TODO: Replace print statements with Log statements
 """
 
 import time
@@ -21,37 +19,7 @@ import nidaqmx
 from devices import email_send, tweet_send, initialize_devices, signal_generator
 from tdc_surface_concept import tdc
 from drs import drs
-from tools import hdf5_creator, experiment_statistics, variables
-
-
-def logging():
-    """
-    The function is used to instantiate and configure logger object for logging.
-    The function use python native logging library.
-
-    Attributes:
-        Does not accept any arguments
-    Returns:
-        Returns the logger object which could be used log statements of following level:
-            1. INFO: "Useful information"
-            2. WARNING: "Something is not right"
-            3. DEBUG: "A debug message"
-            4. ERROR: "A Major error has happened."
-            5. CRITICAL "Fatal error. Cannot continue"
-    """
-    import logging
-    # Gets or creates a logger
-    logger = logging.getLogger(__name__)
-    # set log level
-    logger.setLevel(logging.INFO)
-    # define file handler and set formatter
-    # Reads file path from imported "variables" file
-    file_handler = logging.FileHandler(variables.path + '\\logfile.log', mode='w')
-    formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
-    file_handler.setFormatter(formatter)
-    # add file handler to logger
-    logger.addHandler(file_handler)
-    return logger
+from tools import hdf5_creator, experiment_statistics, variables, loggi
 
 
 class APT_VOLTAGE:
@@ -485,7 +453,7 @@ def main():
     8- Send email and tweet
     """
     # Initialize logger
-    logger = logging()
+    logger = loggi.get_logging()
     logger.info('Experiment is starting')
 
     variables.start_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -652,7 +620,7 @@ def main():
             # Total experiment time variable
             start_main_ex = time.time()
 
-            print('Experiment is started')
+
             logger.info('Experiment is started')
         # Measure time
         start = datetime.datetime.now()
@@ -680,7 +648,6 @@ def main():
         time_counter = np.append(time_counter, steps)
         steps += 1
         if variables.stop_flag:
-            print('Experiment is stopped by user')
             logger.info('Experiment is stopped by user')
             if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
                 queue_stop_measurement.put(True)
@@ -689,7 +656,6 @@ def main():
 
         if variables.criteria_ions:
             if variables.max_ions <= variables.total_ions:
-                print('Total number of Ions is achieved')
                 logger.info('Total number of Ions is achieved')
                 if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
                     queue_stop_measurement.put(True)
@@ -698,7 +664,6 @@ def main():
         if variables.criteria_vdc:
             if variables.vdc_max <= variables.specimen_voltage:
                 if flag_achieved_high_voltage > variables.ex_freq * 10:
-                    print('High Voltage Max. is achieved')
                     logger.info('High Voltage Max. is achieved')
                     time.sleep(1)
                     break
@@ -747,7 +712,6 @@ def main():
         pass
 
     time.sleep(1)
-    print('Experiment is finished')
     logger.info('Experiment is finished')
 
     # Check the length of arrays to be equal
