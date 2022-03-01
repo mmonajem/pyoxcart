@@ -20,16 +20,16 @@ import pyqtgraph.exporters
 
 
 # Local module and scripts
-from apt import apt_oxcart
+from apt import apt_voltage
 from tools import variables, tof2mc_simple
 from devices.camera import Camera
 from devices import initialize_devices
 from tools.module_dir import MODULE_DIR
 
 
-class Ui_OXCART(Camera, object):
+class UI_APT_M(Camera, object):
     """
-    The GUI class of advance mode (oxcart)
+    The GUI class of voltage mode (oxcart)
     """
     def __init__(self, devices, tlFactory, cameras, converter, lock, app, conf):
         super().__init__(devices, tlFactory, cameras, converter) # Cameras variables and converter
@@ -1347,7 +1347,7 @@ class Ui_OXCART(Camera, object):
                     # Create folder to save the data
                     if not os.path.isdir(variables.path):
                             os.makedirs(variables.path, mode=0o777, exist_ok=True)
-                    # start the run methos of MainThread Class, which is main function of apt_oxcart.py
+                    # start the run methos of MainThread Class, which is main function of apt_voltage.py
                     self.thread.start()
                     if self.parameters_source.currentText() == 'TextLine':
                             variables.index_line += 1  # increase the index line of TextLine to read the second line in next step
@@ -1377,7 +1377,6 @@ class Ui_OXCART(Camera, object):
             if variables.start_flag == True:
                     variables.stop_flag = True  # Set the STOP flag
                     self.stop_button.setEnabled(False)  # Disable the stop button
-                    print('STOP Flag is set:', variables.stop_flag)
 
     def gates(self, gate_num):
             """
@@ -1774,5 +1773,5 @@ class MainThread(QThread):
             # run method gets called when we start the thread
 
     def run(self):
-            main_thread = apt_oxcart.main()
+            main_thread = apt_voltage.main()
             self.signal.emit(main_thread)

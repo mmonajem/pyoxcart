@@ -17,14 +17,14 @@ import pyqtgraph as pg
 import pyqtgraph.exporters
 
 # Local module and scripts
-from apt import apt_physic
+from apt import apt_laser
 from tools import variables, tof2mc_simple
 from devices import initialize_devices
 from tools.module_dir import MODULE_DIR
 
-class Ui_APT_Physic(object):
+class UI_APT_L(object):
     """
-    The GUI class of simple mode (APT_physic)
+    The GUI class of laser mode (APT laser mode)
     """
     def __init__(self, lock, app, conf):
         self.lock = lock # Lock for thread ...
@@ -607,7 +607,7 @@ class Ui_APT_Physic(object):
         # Create folder to save the data
         if not os.path.isdir(variables.path):
             os.makedirs(variables.path, mode=0o777, exist_ok=True)
-        # start the run methos of MainThread Class, which is main function of apt_oxcart.py
+        # start the run methos of MainThread Class, which is main function of apt_voltage.py
         self.thread.start()
 
     def finished_thread_main(self):
@@ -626,7 +626,6 @@ class Ui_APT_Physic(object):
         if variables.start_flag == True:
             variables.stop_flag = True  # Set the STOP flag
             self.stop_button.setEnabled(False)  # Disable the stop button
-            print('STOP Flag is set:', variables.stop_flag)
 
 
     def thread_worker(self, target):
@@ -852,5 +851,5 @@ class MainThread(QThread):
         # run method gets called when we start the thread
 
     def run(self):
-        main_thread = apt_physic.main()
+        main_thread = apt_laser.main()
         self.signal.emit(main_thread)

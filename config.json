@@ -1,5 +1,5 @@
 {
-	"mode": "voltage_pulse_mode",
+	"mode": "laser_pulse_mode",
 	"visualization": "tof",
 	"COM_PORT_idx_cryovac": 3,
 	"COM_PORT_idx_V_dc": 4,

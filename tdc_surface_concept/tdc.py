@@ -112,7 +112,7 @@ def experiment_measure(raw_mode, queue_x,
                        queue_stop_measurement):
     """
     measurement function: This function is called in a process by 
-                          apt_oxcart.py tp read data from the queue.
+                          apt_voltage.py tp read data from the queue.
     Attributes:
         DLD Queues: Queues that contains DLD data
             queue_y: Queue for grp: DLD and parameter: y
@@ -124,7 +124,7 @@ def experiment_measure(raw_mode, queue_x,
             queue_tdc_start_counter: Queue for grp: TDC and parameter: start_counter
 
         Stop measurement flag: queue
-            Queue for stop the measurement. This queue is set to True from apt_oxcart.py
+            Queue for stop the measurement. This queue is set to True from apt_voltage.py
 
     Returns
         Does not return anything
@@ -188,7 +188,6 @@ def experiment_measure(raw_mode, queue_x,
                 if errorcheck(retcode) < 0:
                     return -1
             else:
-                print('TDC loop is break in child process')
                 break
         else:  # unknown event
             break  # break out of the event loop
