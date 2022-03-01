@@ -23,7 +23,7 @@ from tools import hdf5_creator, experiment_statistics, variables
 
 def logging():
     """
-    The function is used to insantiate and configute logger object for logging.
+    The function is used to instantiate and configure logger object for logging.
     The function use python native logging library.
 
     Attributes:
@@ -58,24 +58,24 @@ class apt_simple:
     """
 
     def __init__(self, queue_x, queue_y, queue_tof, queue_time_stamp, lock1):
-        '''
+        """
         This is the constructor class that accepts several initialized queues objects corresponding
         to various parameters of the groups like dld,TDC,DRS. This constructor also objects used for
         creating locks on resources to reduce concurrent access on resources and reduce dirty read.
-        '''
+        """
         # Queues for sharing data between tdc and main process
         # dld queues
+        self.com_port_v_dc = None
         self.queue_x = queue_x
         self.queue_y = queue_y
         self.queue_tof = queue_tof
         self.queue_time_stamp = queue_time_stamp
         self.lock1 = lock1
 
-
     def initialize_v_dc(self):
         """
-        This class method intializes the high volatge parameter: v_dc.
-        The fucntion utilizes the serial library to communicate over the
+        This class method initializes the high voltage parameter: v_dc.
+        The function utilizes the serial library to communicate over the
         COM port serially and read the corresponding v_dc parameter.
 
         It exits if it is not able to connect on the COM Port.
@@ -88,7 +88,7 @@ class apt_simple:
         """
         # Setting the com port of V_dc
         self.com_port_v_dc = serial.Serial(
-            port=initialize_devices.com_ports[variables.com_port_idx_V_dc].device,  # chosen COM port
+            port=initialize_devices.com_ports[variables.COM_PORT_idx_V_dc].device,  # chosen COM port
             baudrate=115200,  # 115200
             bytesize=serial.EIGHTBITS,  # 8
             parity=serial.PARITY_NONE,  # N
@@ -107,12 +107,11 @@ class apt_simple:
             print("Couldn't open Port!")
             exit()
 
-
     # apply command to the V_dc
     def command_v_dc(self, cmd):
         """
-        This class method is used to send commands on the high volatge parameter: v_dc.
-        The fucntion utilizes the serial library to communicate over the
+        This class method is used to send commands on the high voltage parameter: v_dc.
+        The function utilizes the serial library to communicate over the
         COM port serially and read the corresponding v_dc parameter.
 
         Attributes:
@@ -124,18 +123,16 @@ class apt_simple:
         self.com_port_v_dc.write(
             (cmd + '\r\n').encode())  # send cmd to device # might not work with older devices -> "LF" only needed!
         time.sleep(0.005)  # small sleep for response
-        #Intialize the response to returned as string
+        # Intialize the response to returned as string
         response = ''
         # Read the response code after execution(command write).
         while self.com_port_v_dc.in_waiting > 0:
             response = self.com_port_v_dc.readline()  # all characters received, read line till '\r\n'
         return response.decode("utf-8")
 
-
-
     def reader_queue_dld(self):
         """
-        This class method runs in an infinite loop and listens and reads paramters
+        This class method runs in an infinite loop and listens and reads parameters
         over the queues for the group: dld
 
         This function is called continuously by a separate thread in the main function.
@@ -158,12 +155,12 @@ class apt_simple:
                     variables.y = np.append(variables.y, self.queue_y.get())
                     variables.t = np.append(variables.t, self.queue_tof.get())
                     variables.time_stamp = np.append(variables.time_stamp,
-                                                            self.queue_time_stamp.get())
-                    variables.main_v_dc_dld = np.append(variables.main_v_dc_dld, np.tile(variables.specimen_voltage, len(length)))
+                                                     self.queue_time_stamp.get())
+                    variables.main_v_dc_dld = np.append(variables.main_v_dc_dld,
+                                                        np.tile(variables.specimen_voltage, len(length)))
             # If end of experiment flag is set break the while loop
             if variables.end_experiment:
                 break
-
 
     def main_ex_loop(self, counts_target):
 
@@ -176,8 +173,8 @@ class apt_simple:
 
         This function is called in each loop of main function.
 
-        Atrributes:
-            counts_target: Calculated paramter(((detection_rate/100)* pulse_frequency)/pulse_frequency)
+        Attributes:
+            counts_target: Calculated parameter(((detection_rate/100)* pulse_frequency)/pulse_frequency)
 
         Returns:
             Does not return anything
@@ -221,10 +218,9 @@ class apt_simple:
                     self.command_v_dc(">S0 %s" % (specimen_voltage_temp))
                     variables.specimen_voltage = specimen_voltage_temp
 
-
-    def clear_up(self,):
+    def clear_up(self, ):
         """
-        This fucntion clears global variables and deinitialize high voltage and pulser function
+        This function clears global variables and deinitialize high voltage and pulser function
 
         Attributes:
             Does not accept any arguments
@@ -232,6 +228,7 @@ class apt_simple:
             Does not return anything
 
         """
+
         def cleanup_variables():
             """
             Clear up all the global variables
@@ -260,7 +257,6 @@ class apt_simple:
             variables.main_v_dc_dld = np.zeros(0)
             variables.main_v_dc_tdc = np.zeros(0)
 
-
         print('starting to clean up')
         # save the data to the HDF5
 
@@ -271,6 +267,7 @@ class apt_simple:
         # Zero variables
         cleanup_variables()
         print('Clean up is finished')
+
 
 def main():
     """
@@ -312,13 +309,11 @@ def main():
 
     # Create the experiment object
     experiment = apt_simple(queue_x, queue_y, queue_tof, queue_time_stamp,
-                        lock1)
-
+                            lock1)
 
     # Initialize high voltage
     experiment.initialize_v_dc()
     logger.info('High voltage is initialized')
-
 
     # start the timer for main experiment
     time_ex_s = np.zeros(0)
@@ -334,7 +329,6 @@ def main():
         read_dld_queue_thread = threading.Thread(target=experiment.reader_queue_dld)
         read_dld_queue_thread.setDaemon(True)
         read_dld_queue_thread.start()
-
 
     total_steps = variables.ex_time * variables.ex_freq
     steps = 0
@@ -370,9 +364,10 @@ def main():
             time.sleep(sleep_time / 1000)
         else:
             print(
-                f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop takes longer than %s Millisecond{initialize_devices.bcolors.ENDC}" % (int(1000 / variables.ex_freq)))
+                f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop takes longer than %s Millisecond{initialize_devices.bcolors.ENDC}" % (
+                    int(1000 / variables.ex_freq)))
             logger.error('Experiment loop takes longer than %s Millisecond' % (int(1000 / variables.ex_freq)))
-            print('%s- The iteration time:' %index_time, ((end - start).microseconds / 1000))
+            print('%s- The iteration time:' % index_time, ((end - start).microseconds / 1000))
             index_time += 1
         time_ex_s = np.append(time_ex_s, int(end.strftime("%S")))
         time_ex_m = np.append(time_ex_m, int(end.strftime("%M")))
@@ -396,7 +391,7 @@ def main():
             if variables.max_ions <= variables.total_ions:
                 print('Total number of Ions is achieved')
                 logger.info('Total number of Ions is achieved')
-                if variables.counter_source == 'TDC'or variables.counter_source == 'TDC_Raw':
+                if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
                     queue_stop_measurement.put(True)
                 time.sleep(1)
                 break
@@ -412,7 +407,7 @@ def main():
             total_steps = variables.ex_time * variables.ex_freq - steps
             ex_time_temp = variables.ex_time
         # Because experiment time is not a stop criteria, increase total_steps
-        if not variables.criteria_time and steps+1==total_steps:
+        if not variables.criteria_time and steps + 1 == total_steps:
             total_steps += 1
     # Stop the TDC process
     try:
@@ -451,7 +446,6 @@ def main():
 
     # save data in hdf5 file
     hdf5_creator.hdf_creator_physic(time_counter, time_ex_s, time_ex_m, time_ex_h)
-
 
     logger.info('HDF5 file is created')
     variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")

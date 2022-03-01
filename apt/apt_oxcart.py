@@ -26,7 +26,7 @@ from tools import hdf5_creator, experiment_statistics, variables
 
 def logging():
     """
-    The function is used to insantiate and configute logger object for logging. 
+    The function is used to instantiate and configure logger object for logging.
     The function use python native logging library.
 
     Attributes:
@@ -54,22 +54,22 @@ def logging():
     return logger
 
 
-class apt_advance:
+class APT_VOLTAGE:
     """
-    apt_advance class
+    APT_VOLTAGE class
 
     """
 
     def __init__(self, queue_x, queue_y, queue_t, queue_dld_start_counter,
                  queue_channel, queue_time_data, queue_tdc_start_counter,
-                 queue_ch0_time, queue_ch0_wave,  queue_ch1_time,  queue_ch1_wave,
+                 queue_ch0_time, queue_ch0_wave, queue_ch1_time, queue_ch1_wave,
                  queue_ch2_time, queue_ch2_wave, queue_ch3_time, queue_ch3_wave,
                  lock1, lock2):
-        '''
+        """
         This is the constructor class that accepts several initialized queues objects corresponding
         to various parameters of the groups like dld,TDC,DRS. This constructor also objects used for
         creating locks on resources to reduce concurrent access on resources and reduce dirty read.
-        '''
+        """
         # Queues for sharing data between tdc and main process
         # dld queues
         self.queue_x = queue_x
@@ -94,8 +94,8 @@ class apt_advance:
 
     def initialize_v_dc(self):
         """
-        This class method intializes the high volatge parameter: v_dc.
-        The fucntion utilizes the serial library to communicate over the 
+        This class method initializes the high voltage parameter: v_dc.
+        The function utilizes the serial library to communicate over the
         COM port serially and read the corresponding v_dc parameter.
 
         It exits if it is not able to connect on the COM Port.
@@ -108,7 +108,7 @@ class apt_advance:
         """
         # Setting the com port of V_dc
         self.com_port_v_dc = serial.Serial(
-            port=initialize_devices.com_ports[variables.com_port_idx_V_dc].device,  # chosen COM port
+            port=initialize_devices.com_ports[variables.COM_PORT_idx_V_dc].device,  # chosen COM port
             baudrate=115200,  # 115200
             bytesize=serial.EIGHTBITS,  # 8
             parity=serial.PARITY_NONE,  # N
@@ -129,7 +129,7 @@ class apt_advance:
 
     def initialize_v_p(self):
         """
-        This class method intializes the Pulse parameter: v_p.
+        This class method initializes the Pulse parameter: v_p.
         The fucntion utilizes the serial library to communicate over the 
         COM port serially and read the corresponding v_p parameter.
 
@@ -151,10 +151,10 @@ class apt_advance:
 
     def initialize_counter(self):
         """
-        This class method intializes the edge counter parameter.
-        It helps counting in edges of a particular signal.
+        This class method initializes the edge counter parameter.
+        It helps to count the riding edges of a detector  signal.
 
-        The fucntion utilizes the nidaqmx library to communicate 
+        The function utilizes the nidaqmx library to communicate
         through NI Instruments to count the edges.
 
         NI-DAQmx can help you use National Instruments (NI) data acquisition and 
@@ -177,8 +177,8 @@ class apt_advance:
     # apply command to the V_dc
     def command_v_dc(self, cmd):
         """
-        This class method is used to send commands on the high volatge parameter: v_dc.
-        The fucntion utilizes the serial library to communicate over the 
+        This class method is used to send commands on the high voltage parameter: v_dc.
+        The function utilizes the serial library to communicate over the
         COM port serially and read the corresponding v_dc parameter.
 
         Attributes:
@@ -190,18 +190,16 @@ class apt_advance:
         self.com_port_v_dc.write(
             (cmd + '\r\n').encode())  # send cmd to device # might not work with older devices -> "LF" only needed!
         time.sleep(0.005)  # small sleep for response
-        #Intialize the response to returned as string
+        # Initialize the response to returned as string
         response = ''
         # Read the response code after execution(command write).
         while self.com_port_v_dc.in_waiting > 0:
             response = self.com_port_v_dc.readline()  # all characters received, read line till '\r\n'
         return response.decode("utf-8")
 
-
-
     def reader_queue_dld(self):
         """
-        This class method runs in an infinite loop and listens and reads paramters
+        This class method runs in an infinite loop and listens and reads parameters
         over the queues for the group: dld
 
         This function is called continuously by a separate thread in the main function.
@@ -225,8 +223,10 @@ class apt_advance:
                     variables.t = np.append(variables.t, self.queue_t.get())
                     variables.dld_start_counter = np.append(variables.dld_start_counter,
                                                             self.queue_dld_start_counter.get())
-                    variables.main_v_dc_dld = np.append(variables.main_v_dc_dld, np.tile(variables.specimen_voltage, len(length)))
-                    variables.main_v_p_dld = np.append(variables.main_v_p_dld, np.tile(variables.pulse_voltage, len(length)))
+                    variables.main_v_dc_dld = np.append(variables.main_v_dc_dld,
+                                                        np.tile(variables.specimen_voltage, len(length)))
+                    variables.main_v_p_dld = np.append(variables.main_v_p_dld,
+                                                       np.tile(variables.pulse_voltage, len(length)))
             # If end of experiment flag is set break the while loop
             if variables.end_experiment:
                 break
@@ -234,7 +234,7 @@ class apt_advance:
     def reader_queue_drs(self):
 
         """
-        This class method runs in an infinite loop and listens and reads paramters
+        This class method runs in an infinite loop and listens and reads parameters
         over the queues for the group: DRS
 
         This function is called continuously by a separate thread in the main function.
@@ -249,11 +249,10 @@ class apt_advance:
 
         while True:
             # Check if any value is present in queue to read from
-            while not self.queue_ch0_time.empty() or not self.queue_ch0_wave.empty() or not self.queue_ch1_time.empty() or not\
-                    self.queue_ch1_wave.empty() or not self.queue_ch2_time.empty() or not\
+            while not self.queue_ch0_time.empty() or not self.queue_ch0_wave.empty() or not self.queue_ch1_time.empty() or not \
+                    self.queue_ch1_wave.empty() or not self.queue_ch2_time.empty() or not \
                     self.queue_ch2_wave.empty() or not self.queue_ch3_time.empty() or not self.queue_ch3_wave.empty():
-
-                #Utilize locking mechanism to avoid concurrent use of resources and dirty reads
+                # Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock1:
                     length = self.queue_ch0_time.get()
                     variables.ch0_time = np.append(variables.ch0_time, length)
@@ -276,7 +275,7 @@ class apt_advance:
     def reader_queue_tdc(self):
 
         """
-        This class method runs in an infinite loop and listens and reads paramters
+        This class method runs in an infinite loop and listens and reads parameters
         over the queues for the group: TDC
 
         This function is called continuously by a separate thread in the main function.
@@ -293,19 +292,20 @@ class apt_advance:
         while True:
             # Check if any value is present in queue to read from
             while not self.queue_channel.empty() or not self.queue_time_data.empty() or not self.queue_tdc_start_counter.empty():
-                #Utilize locking mechanism to avoid concurrent use of resources and dirty reads
+                # Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock2:
                     length = self.queue_channel.get()
                     variables.channel = np.append(variables.channel, length)
                     variables.time_data = np.append(variables.time_data, self.queue_time_data.get())
                     variables.tdc_start_counter = np.append(variables.tdc_start_counter,
                                                             self.queue_tdc_start_counter.get())
-                    variables.main_v_dc_tdc = np.append(variables.main_v_dc_tdc, np.tile(variables.specimen_voltage, len(length)))
-                    variables.main_v_p_tdc = np.append(variables.main_v_p_tdc, np.tile(variables.pulse_voltage, len(length)))
+                    variables.main_v_dc_tdc = np.append(variables.main_v_dc_tdc,
+                                                        np.tile(variables.specimen_voltage, len(length)))
+                    variables.main_v_p_tdc = np.append(variables.main_v_p_tdc,
+                                                       np.tile(variables.pulse_voltage, len(length)))
             # If end of experiment flag is set break the while loop
             if variables.end_experiment:
                 break
-    
 
     def main_ex_loop(self, task_counter, counts_target):
 
@@ -318,9 +318,9 @@ class apt_advance:
 
         This function is called in each loop of main function.
 
-        Atrributes:
+        Attributes:
             task_counter: Counter edges
-            counts_target: Calculated paramter(((detection_rate/100)* pulse_frequency)/pulse_frequency)
+            counts_target: Calculated parameter(((detection_rate/100)* pulse_frequency)/pulse_frequency)
         
         Returns:
             Does not return anything
@@ -329,7 +329,7 @@ class apt_advance:
 
         if variables.counter_source == 'TDC':
             variables.total_ions = len(variables.x)
-        elif  variables.counter_source == 'TDC_Raw':
+        elif variables.counter_source == 'TDC_Raw':
             if len(variables.channel) > 0:
                 variables.total_ions = int(len(variables.channel) / 4)
         elif variables.counter_source == 'pulse_counter':
@@ -370,13 +370,13 @@ class apt_advance:
                 specimen_voltage_temp = variables.specimen_voltage + voltage_step
                 if specimen_voltage_temp > variables.specimen_voltage:
                     # sending VDC via serial
-                    self.command_v_dc(">S0 %s" % (specimen_voltage_temp))
+                    self.command_v_dc(">S0 %s" % specimen_voltage_temp)
                     variables.specimen_voltage = specimen_voltage_temp
 
         # update pulse voltage v_p
         new_vp = variables.specimen_voltage * variables.pulse_fraction * \
                  (1 / variables.pulse_amp_per_supply_voltage)
-        if new_vp < variables.pulse_voltage_max and new_vp > variables.pulse_voltage_min:
+        if variables.pulse_voltage_max > new_vp > variables.pulse_voltage_min:
             self.com_port_v_p.write('VOLT %s' % new_vp)
             variables.pulse_voltage = new_vp * variables.pulse_amp_per_supply_voltage
 
@@ -385,7 +385,7 @@ class apt_advance:
 
     def clear_up(self, task_counter):
         """
-        This fucntion clears global variables and deinitialize high voltage and pulser function
+        This function clears global variables and deinitialize high voltage and pulser function
 
         Attributes:
             Does not accept any arguments
@@ -393,6 +393,7 @@ class apt_advance:
             Does not return anything
         
         """
+
         def cleanup_variables():
             """
             Clear up all the global variables
@@ -469,6 +470,7 @@ class apt_advance:
         # Zero variables
         cleanup_variables()
         print('Clean up is finished')
+
 
 def main():
     """
@@ -572,11 +574,11 @@ def main():
     lock2 = threading.Lock()
 
     # Create the experiment object
-    experiment = apt_advance(queue_x, queue_y, queue_t, queue_dld_start_counter,
-                        queue_channel, queue_time_data, queue_tdc_start_counter,
-                        queue_ch0_time, queue_ch0_wave, queue_ch1_time, queue_ch1_wave,
-                        queue_ch2_time, queue_ch2_wave, queue_ch3_time, queue_ch3_wave,
-                        lock1, lock2)
+    experiment = APT_VOLTAGE(queue_x, queue_y, queue_t, queue_dld_start_counter,
+                             queue_channel, queue_time_data, queue_tdc_start_counter,
+                             queue_ch0_time, queue_ch0_wave, queue_ch1_time, queue_ch1_wave,
+                             queue_ch2_time, queue_ch2_wave, queue_ch3_time, queue_ch3_wave,
+                             lock1, lock2)
 
     # Initialize the signal generator
     signal_generator.initialize_signal_generator(variables.pulse_frequency)
@@ -609,17 +611,17 @@ def main():
     counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
     logger.info('Starting the main loop')
 
-    # Initialze threads that will read from the queue for the group: dld
+    # Initialize threads that will read from the queue for the group: dld
     if variables.counter_source == 'TDC':
         read_dld_queue_thread = threading.Thread(target=experiment.reader_queue_dld)
         read_dld_queue_thread.setDaemon(True)
         read_dld_queue_thread.start()
-    # Initialze threads that will read from the queue for the group: tdc
+    # Initialize threads that will read from the queue for the group: tdc
     elif variables.counter_source == 'TDC_Raw':
         read_tdc_queue_thread = threading.Thread(target=experiment.reader_queue_tdc)
         read_tdc_queue_thread.setDaemon(True)
         read_tdc_queue_thread.start()
-    # Initialze threads that will read from the queue for the group: drs
+    # Initialize threads that will read from the queue for the group: drs
     elif variables.counter_source == 'DRS':
         read_drs_queue_thread = threading.Thread(target=experiment.reader_queue_drs)
         read_drs_queue_thread.setDaemon(True)
@@ -663,9 +665,10 @@ def main():
             time.sleep(sleep_time / 1000)
         else:
             print(
-                f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop takes longer than %s Millisecond{initialize_devices.bcolors.ENDC}" % (int(1000 / variables.ex_freq)))
+                f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop takes longer than %s Millisecond{initialize_devices.bcolors.ENDC}" % (
+                    int(1000 / variables.ex_freq)))
             logger.error('Experiment loop takes longer than %s Millisecond' % (int(1000 / variables.ex_freq)))
-            print('%s- The iteration time:' %index_time, ((end - start).microseconds / 1000))
+            print('%s- The iteration time:' % index_time, ((end - start).microseconds / 1000))
             index_time += 1
         time_ex_s = np.append(time_ex_s, int(end.strftime("%S")))
         time_ex_m = np.append(time_ex_m, int(end.strftime("%M")))
@@ -688,7 +691,7 @@ def main():
             if variables.max_ions <= variables.total_ions:
                 print('Total number of Ions is achieved')
                 logger.info('Total number of Ions is achieved')
-                if variables.counter_source == 'TDC'or variables.counter_source == 'TDC_Raw':
+                if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
                     queue_stop_measurement.put(True)
                 time.sleep(1)
                 break
@@ -704,11 +707,11 @@ def main():
             total_steps = variables.ex_time * variables.ex_freq - steps
             ex_time_temp = variables.ex_time
         # Because experiment time is not a stop criteria, increase total_steps
-        if not variables.criteria_time and steps+1==total_steps:
+        if not variables.criteria_time and steps + 1 == total_steps:
             total_steps += 1
     # Stop the TDC process
     try:
-        if variables.counter_source == 'TDC'or variables.counter_source == 'TDC_Raw':
+        if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
             tdc_process.join(3)
             if tdc_process.is_alive():
                 tdc_process.terminate()
@@ -765,8 +768,6 @@ def main():
                                                                variables.ch3_wave,
                                                                variables.main_v_dc_drs, variables.main_v_p_drs]):
             logger.warning('tdc data have not same length')
-
-
 
     logger.info('HDF5 file is created')
     variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")

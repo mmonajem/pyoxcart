@@ -15,18 +15,18 @@ tdc_lib = ctypes.CDLL("../tdc_roentdec/simple_read_TDC8HP_x64.dll")
 
 
 class tdc_roentec(object):
-    '''
+    """
     This class setups the parameters for the tdc and allow users to read experiment
     tdc values.
-    '''
+    """
 
     def __init__(self,):
-        '''
+        """
         Constructor function which initializes function parameters.
 
         Attributes:
 
-        '''
+        """
 
         # tdc_lib.Drs_new.argtypes = [ctypes.c_void_p]
         tdc_lib.Warraper_tdc_new.restype = ctypes.c_void_p
@@ -37,19 +37,19 @@ class tdc_roentec(object):
         self.obj = tdc_lib.Warraper_tdc_new()
 
     def reader_tdc(self, ):
-        '''
-        This class method reads and returns the DRS value utilizing the drs.
+        """
+        This class method reads and returns the DRS value utilizing the TDC.
 
         Attributes:
             Does not accept any arguments
         Returns:
             data: Return the read DRS value.
-        '''
+        """
         data = tdc_lib.reader_tdc(self.obj)
         return data
 
     def run_tdc(self):
-        '''
+        """
         This class method destroys the object
 
         Attributes:
@@ -57,7 +57,7 @@ class tdc_roentec(object):
         Returns:
             Does not return anything
 
-        '''
+        """
         tdc_lib.run_tdc(self.obj)
 
 
@@ -83,7 +83,7 @@ def reader(tdc, queue_x, queue_y,
 
 def experiment_measure(queue_x, queue_y,
                        queue_tof, queue_time_stamp, queue_stop_measurement):
-    '''
+    """
     This function
 
     Attributes:
@@ -92,7 +92,7 @@ def experiment_measure(queue_x, queue_y,
 
     Return :
         Does not return anything
-    '''
+    """
 
     tdc = tdc_roentec()
 

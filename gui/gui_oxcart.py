@@ -20,7 +20,7 @@ import pyqtgraph.exporters
 
 
 # Local module and scripts
-from apt_ex import apt_oxcart
+from apt import apt_oxcart
 from tools import variables, tof2mc_simple
 from devices.camera import Camera
 from devices import initialize_devices
@@ -1343,7 +1343,7 @@ class Ui_OXCART(Camera, object):
                     variables.exp_name = "%s_" % variables.counter + \
                                now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
 
-                    variables.path = os.path.join(os.path.split(MODULE_DIR)[0], 'data\\%s' % variables.exp_name)
+                    variables.path = os.path.join(os.path.split(MODULE_DIR)[0], 'data_voltage_pulse_mode\\%s' % variables.exp_name)
                     # Create folder to save the data
                     if not os.path.isdir(variables.path):
                             os.makedirs(variables.path, mode=0o777, exist_ok=True)
@@ -1590,12 +1590,12 @@ class Ui_OXCART(Camera, object):
                                             elif self.conf["visualization"] == 'mc':
                                                     max_lenght = max(len(variables.x), len(variables.y),
                                                                      len(variables.t), len(variables.main_v_dc_dld))
-                                                    viz = tof2mc_simple.tof_bin2mcSimple(variables.t[:max_lenght], 0,
-                                                                                         variables.main_v_dc_dld[
-                                                                                         :max_lenght],
-                                                                                         variables.x[:max_lenght],
-                                                                                         variables.x[:max_lenght],
-                                                                                         flightPathLength=110)
+                                                    viz = tof2mc_simple.tof_bin2mc(variables.t[:max_lenght], 0,
+                                                                                   variables.main_v_dc_dld[
+                                                                                   :max_lenght],
+                                                                                   variables.x[:max_lenght],
+                                                                                   variables.x[:max_lenght],
+                                                                                   flightPathLength=110)
 
                                             self.y_tof, self.x_tof = np.histogram(viz, bins=512)
                                             self.histogram.clear()

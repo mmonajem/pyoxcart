@@ -2,20 +2,24 @@
 This is the main script of all global variables.
 @author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
+
 import numpy as np
 
-com_port_idx_cryovac = 3
-COM_PORT_pfeiffer = 'COM5'
-COM_PORT_edwards_bc = 'COM2'
-COM_PORT_edwards_ll = 'COM1'
-com_port_idx_V_dc = 4
-com_port_idx_V_p = 0
 
+def init(conf):
 
-def init():
     """
     Initializing of global variables function
     """
+    # Device Ports
+    global COM_PORT_idx_cryovac
+    global COM_PORT_idx_V_dc
+    global COM_PORT_idx_V_p
+    global COM_PORT_pfeiffer
+    global COM_PORT_edwards_bc
+    global COM_PORT_edwards_ll
+    global COM_PORT_SIGLENT
+
     # Setup parameters
     global raw_mode
     global counter_source
@@ -125,6 +129,15 @@ def init():
     global main_v_p_tdc
     global main_v_dc_drs
     global main_v_p_drs
+
+    # Device ports
+    COM_PORT_idx_cryovac = conf['COM_PORT_idx_cryovac']
+    COM_PORT_idx_V_dc = conf['COM_PORT_idx_V_dc']
+    COM_PORT_idx_V_p = conf['COM_PORT_idx_V_p']
+    COM_PORT_pfeiffer = conf['COM_PORT_pfeiffer']
+    COM_PORT_edwards_bc = conf['COM_PORT_edwards_bc']
+    COM_PORT_edwards_ll = conf['COM_PORT_edwards_ll']
+    COM_PORT_SIGLENT = conf["COM_PORT_SIGLENT"]
 
     raw_mode = False
     counter = 0

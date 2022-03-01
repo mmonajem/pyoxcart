@@ -4,10 +4,9 @@ import timeit
 import numpy as np
 from queue import Queue
 
-
 raw_mode = False
-NR_OF_MEASUREMENTS = 10    # number of measurements
-EXPOSURE_MS = 3000         # exposure duration in milliseconds
+NR_OF_MEASUREMENTS = 10  # number of measurements
+EXPOSURE_MS = 3000  # exposure duration in milliseconds
 
 if not raw_mode:
     DATA_FIELD_SEL1 = \
@@ -24,13 +23,14 @@ elif raw_mode:
 QUEUE_DATA = 0
 QUEUE_ENDOFMEAS = 1
 
+
 class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
     def __init__(self, lib, dev_desc,
                  data_field_selection=DATA_FIELD_SEL1,
                  max_buffered_data_len=500000,
                  dld_events=not raw_mode):
         super().__init__(lib, dev_desc, data_field_selection,  # <-- mandatory!
-                         max_buffered_data_len, dld_events)    # <-- mandatory!
+                         max_buffered_data_len, dld_events)  # <-- mandatory!
 
         self.queue = Queue()
         self.end_of_meas = False
@@ -55,6 +55,7 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
         # setting end_of_meas, we remember that the next on_data delivers the
         # remaining data of this measurement
         return True
+
 
 # -----------------------------------------------------------------------------
 
@@ -90,7 +91,6 @@ def test4():
     if errorcheck(retcode) < 0:
         return -1
 
-
     meas_remaining = NR_OF_MEASUREMENTS
     while True:
         eventtype, data = bufdatacb.queue.get()  # waits until element available
@@ -98,10 +98,10 @@ def test4():
             if not raw_mode:
                 print(len(data["start_counter"]))
                 a = np.array((data["start_counter"],
-                          data["dif1"], data["dif2"], data["time"]))
+                              data["dif1"], data["dif2"], data["time"]))
             elif raw_mode:
                 a = np.array((data["channel"], data["start_counter"],
-                      data["time"]))
+                              data["time"]))
         elif eventtype == QUEUE_ENDOFMEAS:
             # data_to_textfile.write_measurement_separator()
 
@@ -115,18 +115,19 @@ def test4():
                     return -1
             else:
                 break
-        else: # unknown event
-            break # break out of the event loop
+        else:  # unknown event
+            break  # break out of the event loop
 
     end = timeit.default_timer()
-    print("\ntime elapsed : ", end-start, "s")
+    print("\ntime elapsed : ", end - start, "s")
 
     time.sleep(0.1)
     # clean up
-    bufdatacb.close() # closes the user callbacks pipe, method inherited from base class
+    bufdatacb.close()  # closes the user callbacks pipe, method inherited from base class
     device.deinitialize()
 
     return 0
+
 
 if __name__ == "__main__":
     test4()

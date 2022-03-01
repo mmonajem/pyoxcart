@@ -12,35 +12,33 @@ import serial.tools.list_ports
 from pypylon import pylon
 
 # Local module and scripts
-from tools import variables,read_files
+from tools import variables, read_files
 from devices.camera import Camera
 from devices import initialize_devices
 from gui import gui_oxcart, gui_physic
 import json
 
-configFile= 'config.json'
-
-
-
+configFile = 'config.json'
 
 if __name__ == "__main__":
 
     conf = read_files.read_json_file(configFile)
 
-    if conf['mode'] == 'advance':
+    if conf['mode'] == 'voltage_pulse_mode':
 
         # Initialize global experiment variables
-        variables.init()
+        variables.init(conf)
+
         # Cryovac initialized
         try:
-            com_port_cryovac = serial.Serial(
-                port=initialize_devices.com_ports[variables.com_port_idx_cryovac].device,  # chosen COM port
+            com_port_idx_cryovac = serial.Serial(
+                port=initialize_devices.com_ports[variables.COM_PORT_idx_cryovac].device,  # chosen COM port
                 baudrate=9600,  # 115200
                 bytesize=serial.EIGHTBITS,  # 8
                 parity=serial.PARITY_NONE,  # N
                 stopbits=serial.STOPBITS_ONE  # 1
             )
-            initialize_devices.initialize_cryovac(com_port_cryovac)
+            initialize_devices.initialize_cryovac(com_port_idx_cryovac)
         except Exception as e:
             print('Can not initialize the Cryovac')
             print(e)
@@ -94,6 +92,7 @@ if __name__ == "__main__":
 
         except:
             print('Can not initialize the Cameras')
+
         # Thread for reading cameras
         lock2 = threading.Lock()
         camera_thread = threading.Thread(target=camera.update_cameras, args=(lock2,))
@@ -101,7 +100,7 @@ if __name__ == "__main__":
         camera_thread.start()
         lock1 = threading.Lock()
         # Thread for reading gauges
-        gauges_thread = threading.Thread(target=initialize_devices.gauges_update, args=(lock1, com_port_cryovac))
+        gauges_thread = threading.Thread(target=initialize_devices.gauges_update, args=(lock1, com_port_idx_cryovac))
         gauges_thread.setDaemon(True)
         gauges_thread.start()
 
@@ -117,10 +116,10 @@ if __name__ == "__main__":
         OXCART.show()
         sys.exit(app.exec_())
 
-    elif conf['mode'] == 'simple':
+    elif conf['mode'] == 'laser_pulse_mode':
 
         # Initialize global experiment variables
-        variables.init()
+        variables.init(conf)
 
         app = QtWidgets.QApplication(sys.argv)
         APT_Physic = QtWidgets.QMainWindow()

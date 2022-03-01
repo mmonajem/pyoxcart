@@ -61,14 +61,14 @@ class TPG26x(object):
 
     def __init__(self, port='/dev/ttyUSB0', baudrate=9600):
         """
-        The constructor class method whihch innitialize internal variables and
+        The constructor class method which initialize internal variables and
         serial connection
-        Atrributes:
+        Attributes:
             param port: The COM port to open. See the documentation for
                 `pyserial <http://pyserial.sourceforge.net/>`_ for an explanation
                 of the possible value. The default value is '/dev/ttyUSB0'.
                 :type port: [str or int]
-            baudrate: Data transmission rate (9600, 19200, 38400 where 9600 is the default)
+            baud-rate: Data transmission rate (9600, 19200, 38400 where 9600 is the default)
                 :type baudrate: [int]
         """
         # The serial connection should be setup with the following parameters:
@@ -91,12 +91,12 @@ class TPG26x(object):
         """
         Send a command and check if it is positively acknowledged
 
-        Atrributes:
+        Attributes:
 
-            command: The command to be send [str]
+            command: The command to be sent [str]
 
         Raises Exception:
-            raises IOError: if the negative acknowledged or a unknown response
+            raises IOError: if the negative acknowledged or an unknown response
             is returned
         Returns:
             Does not return anything
@@ -159,7 +159,7 @@ class TPG26x(object):
             :raises ValueError: if gauge is not 1 or 2
         
         Returns:
-            :a tuple the value of pressure along with status code and messge
+            :a tuple the value of pressure along with status code and message
                 (value, (status_code, status_message)) [tuple]
         """
         if gauge not in [1, 2]:
@@ -248,13 +248,13 @@ class TPG362(TPG26x):
         """
         This construction method initializes internal variables and serial connection.
 
-        Atrributes:
+        Attributes:
 
             port: The COM port to open. See the documentation for
                 `pyserial <http://pyserial.sourceforge.net/>`_ for an explanation
                 of the possible value. The default value is '/dev/ttyUSB0'. [str or int]
 
-            baudrate: data transmission rate (9600, 19200, 38400 where 9600 is the default) [int]
+            baud-rate: data transmission rate (9600, 19200, 38400 where 9600 is the default) [int]
         """
         super(TPG362, self).__init__(port=port, baudrate=baudrate)
 

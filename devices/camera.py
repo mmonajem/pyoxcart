@@ -1,4 +1,3 @@
-
 import time
 import cv2
 import numpy as np
@@ -8,19 +7,18 @@ from tools import variables
 
 
 class Camera:
-
-    '''
+    """
         This camera modules is designed to setup and intiate the camera in the installation.
-        This camera module allows user to capture images using the installed cameras, 
+        This camera module allows user to capture images using the installed cameras,
         process the image and display as per desired window size.
 
-    '''
+    """
 
     def __init__(self, devices, tlFactory, cameras, converter):
-        '''
+        """
         Constructor function which intializes and setups all variables
         and parameter for the class.
-        '''
+        """
         self.devices = devices
         self.tlFactory = tlFactory
         self.cameras = cameras
@@ -34,7 +32,7 @@ class Camera:
 
     def update_cameras(self, lock):
 
-        '''
+        """
         Note : Changed function to break it down into simpler functions
 
         This class method setup the cameras to capture the required images. It initiates
@@ -46,14 +44,14 @@ class Camera:
         Returns:
             Does not return anything.
 
-        '''
+        """
         self.cameras.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
         while self.cameras.IsGrabbing():
-            
+
             # Fetch the raw images from camera
             grabResult0 = self.cameras[0].RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
             grabResult1 = self.cameras[1].RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
-            
+
             image0 = self.converter.Convert(grabResult0)
             img0 = image0.GetArray()
             image1 = self.converter.Convert(grabResult1)
@@ -75,7 +73,7 @@ class Camera:
                 cv2.imwrite(variables.path + "/side_zoom_%s.png" % variables.index_save_image, img0_zoom)
                 cv2.imwrite(variables.path + '/bottom_%s.png' % variables.index_save_image, img1_orig)
                 cv2.imwrite(variables.path + '/bottom_zoom_%s.png' % variables.index_save_image, img1_zoom)
-            
+
             # The function cv::drawMarker draws a marker on a given position in the image. 
             img0_zoom_marker = cv2.drawMarker(img0_zoom, (1050, 310), (0, 0, 255), markerType=cv2.MARKER_TRIANGLE_UP,
                                               markerSize=40, thickness=2, line_type=cv2.LINE_AA)
@@ -106,11 +104,9 @@ class Camera:
             if variables.sample_adjust:
                 self.camera_s_d()
                 variables.sample_adjust = False
-    
-     
 
     def light_switch(self, ):
-        '''
+        """
             This class methid sets the Exposure time based on a flag.
             It reads the flag from the imported "vairables" file.
 
@@ -118,7 +114,7 @@ class Camera:
                 Does not accept any arguments.
             Return:
                 Does not return anything.
-        '''
+        """
         if not variables.light:
             self.cameras[0].Open()
             self.cameras[0].ExposureTime.SetValue(2000)
@@ -135,7 +131,7 @@ class Camera:
             variables.sample_adjust = False
 
     def camera_s_d(self, ):
-        '''
+        """
         This class method captures the images through the cameras, processes it
         and displays the processed image. Utilizes OpenCv module and Numpy modules
         to process the captured image. Utlizes OpenCV module to display the captured
@@ -145,14 +141,14 @@ class Camera:
             Does not accept any arguments
         Return
             Does not return anything.
-        '''
+        """
 
         # The exit code of the sample application.
         img0 = []
         img1 = []
         windowName = 'Sample Alignment'
 
-        # Intiates a while loop which checks if the camera is grabbing the images.
+        # Initiates a while loop which checks if the camera is grabbing the images.
         while self.cameras.IsGrabbing():
             if not self.cameras.IsGrabbing():
                 break
@@ -197,7 +193,7 @@ class Camera:
                     # Resize the window
                     cv2.resizeWindow(windowName, 2500, 1200)
                     # displays image in specified window
-                    cv2.imshow(windowName, vis)  
+                    cv2.imshow(windowName, vis)
                     k = cv2.waitKey(1)
                     # Close all windows when ESC key is pressed.
                     if k == 27:  # If press ESC key

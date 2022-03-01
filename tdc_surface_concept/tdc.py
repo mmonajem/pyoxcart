@@ -15,9 +15,10 @@ QUEUE_ENDOFMEAS = 1
 
 
 class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
-    '''
+    """
     The class inherits from python wrapper module scTDC and class: buffered_data_callbacks_pipe
-    '''
+    """
+
     def __init__(self, lib, dev_desc, raw_mode, dld_events,
                  max_buffered_data_len=500000):
         if not raw_mode:
@@ -32,11 +33,10 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
                 | scTDC.SC_DATA_FIELD_CHANNEL \
                 | scTDC.SC_DATA_FIELD_START_COUNTER
 
-        
         '''
         Initialize the base class: scTDC.buffered_data_callbacks_pipe
 
-        Atrributes
+        Attributes
             lib : scTDClib- a scTDClib object.
             dev_desc : int
                 device descriptor as returned by sc_tdc_init_inifile(...).
@@ -55,7 +55,7 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
                 type of events may be available. The default is True.
         '''
         super().__init__(lib, dev_desc, data_field_selection,  # <-- mandatory!
-                         max_buffered_data_len, dld_events)    # <-- mandatory!
+                         max_buffered_data_len, dld_events)  # <-- mandatory!
 
         # Initialize the queue object
         self.queue = Queue()
@@ -63,7 +63,7 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
         self.end_of_meas = False
 
     def on_data(self, d):
-        '''
+        """
         This class method fucntion
             1. Makes a dict that contains copies of numpy arrays in d ("deep copy")
             2. Start with an empty dict, insert basic values by simple assignment,
@@ -72,7 +72,7 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
             d: [dictionary]
         Returns:
             Does not return anything
-        '''
+        """
         dcopy = {}
         for k in d.keys():
             if isinstance(d[k], np.ndarray):
@@ -85,19 +85,20 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
             self.queue.put((QUEUE_ENDOFMEAS, None))
 
     def on_end_of_meas(self):
-        '''
+        """
         This class method set end_of_meas to True
 
         Atrributes:
             Does not accept any argument
         Retuns
             True [boolean]
-        '''
+        """
 
         self.end_of_meas = True
         # setting end_of_meas, we remember that the next on_data delivers the
         # remaining data of this measurement
         return True
+
 
 # -----------------------------------------------------------------------------
 
@@ -112,7 +113,7 @@ def experiment_measure(raw_mode, queue_x,
     """
     measurement function: This function is called in a process by 
                           apt_oxcart.py tp read data from the queue.
-    Atrributes:
+    Attributes:
         DLD Queues: Queues that contains DLD data
             queue_y: Queue for grp: DLD and parameter: y
             queue_t: Queue for grp: DLD and parameter: t
@@ -145,17 +146,17 @@ def experiment_measure(raw_mode, queue_x,
     bufdatacb = BufDataCB4(device.lib, device.dev_desc, raw_mode, dld_events=not raw_mode)
 
     def errorcheck(retcode):
-        '''
-        This fucntion define a closure that checks return codes for errors and does clean up.
-        
+        """
+        This function define a closure that checks return codes for errors and does clean up.
+
         Attributes:
             retcode: Return code
-        
+
         Returns:
             0: if success return code or return code > 0 [int]
             -1: if return code is error code or less than 0 [int]
 
-        '''
+        """
         if retcode < 0:
             print(device.lib.sc_get_err_msg(retcode))
             bufdatacb.close()
@@ -164,13 +165,11 @@ def experiment_measure(raw_mode, queue_x,
         else:
             return 0
 
-
     # start a first measurement
     retcode = bufdatacb.start_measurement(300)
     if errorcheck(retcode) < 0:
         return -1
 
-    # TODO: No time.sleep() in infinite loop: could utilze execessive CPU
     while True:
         eventtype, data = bufdatacb.queue.get()  # waits until element available
         if eventtype == QUEUE_DATA:
@@ -191,16 +190,14 @@ def experiment_measure(raw_mode, queue_x,
             else:
                 print('TDC loop is break in child process')
                 break
-        else: # unknown event
-            break # break out of the event loop
+        else:  # unknown event
+            break  # break out of the event loop
         # print('tdc process time:', time.time() - start)
 
     time.sleep(0.1)
     # clean up
     # closes the user callbacks pipe, method inherited from base class
-    bufdatacb.close() 
+    bufdatacb.close()
     device.deinitialize()
 
     return 0
-
-
