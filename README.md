@@ -1,6 +1,6 @@
 # APT_PyControl 
 # A modular, FAIR open-source python atom probe tomography control software package
-![plot](files/logo.png)
+![plot](apt_pycontrol/files/logo.png)
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
 
 Today, the vast majority of atom probe instruments in use are commercial systems with proprietary software. 
@@ -8,12 +8,12 @@ This is limiting for many experiments where low-level access to machine control 
 In the beginning this package was implemented for the OXCART atom probe, which is an in-house atom probe. 
 The unique feature of OXCART atom probe is that it has a measuring chamber made of titanium to generate a particularly low-hydrogen vacuum.
 It was equipped with a highly efficient detector (approx. 80% detection efficiency). 
-![plot](files/oxcart.png)
+![plot](apt_pycontrol/files/oxcart.png)
 APT_PyControl package provides the basis of a fully FAIR atom probe data collection and analysis chain.  
 This repository contains the GUI and control program, which control, visualize, and do the atom probe experiment.
 The images below are an overview of the two version of user interface:
-![plot](files/oxcart_gui.png)
-![plot](files/physic_gui.png)
+![plot](apt_pycontrol/files/oxcart_gui.png)
+![plot](apt_pycontrol/files/physic_gui.png)
 
 #  Installation
 1- create the virtual environment via Anaconda:

@@ -1,0 +1,11 @@
+{
+	"mode": "laser_pulse_mode",
+	"visualization": "tof",
+	"COM_PORT_idx_cryovac": 3,
+	"COM_PORT_idx_V_dc": 4,
+	"COM_PORT_idx_V_p": 0,
+	"COM_PORT_pfeiffer": "COM5",
+	"COM_PORT_edwards_bc": "COM2",
+	"COM_PORT_edwards_ll": "COM1",
+	"COM_PORT_SIGLENT": "USB0::0xF4EC::0x1101::SDG6XBAD2R0601::INSTR"
+}
