@@ -98,7 +98,7 @@ class APT_VOLTAGE:
     def initialize_v_p(self):
         """
         This class method initializes the Pulse parameter: v_p.
-        The fucntion utilizes the serial library to communicate over the 
+        The function utilizes the serial library to communicate over the
         COM port serially and read the corresponding v_p parameter.
 
         Attributes:

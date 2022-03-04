@@ -15,7 +15,7 @@ from pypylon import pylon
 from tools import variables, read_files
 from devices.camera import Camera
 from devices import initialize_devices
-from gui import gui_oxcart, gui_physic
+from gui import gui_voltage_mode, gui_laser_mode
 import json
 
 configFile = 'config.json'
@@ -111,7 +111,7 @@ if __name__ == "__main__":
         # print('Screen size is:(%s,%s)' % (width, height))
         OXCART = QtWidgets.QMainWindow()
         lock = threading.Lock()
-        ui = gui_oxcart.UI_APT_M(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock, app, conf)
+        ui = gui_voltage_mode.UI_APT_M(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock, app, conf)
         ui.setupUi(OXCART)
         OXCART.show()
         sys.exit(app.exec_())
@@ -124,7 +124,7 @@ if __name__ == "__main__":
         app = QtWidgets.QApplication(sys.argv)
         APT_Physic = QtWidgets.QMainWindow()
         lock = threading.Lock()
-        ui = gui_physic.UI_APT_L(lock, app, conf)
+        ui = gui_laser_mode.UI_APT_L(lock, app, conf)
         ui.setupUi(APT_Physic)
         APT_Physic.show()
         sys.exit(app.exec_())
