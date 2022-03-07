@@ -9,7 +9,7 @@ author = u"Mehrpad Monajem"
 authors = [
     "Mehrpad Monajem",
 ]
-description = 'Interferometric scattering microscopy with Python'
+description = 'Atom Probe Tomography Experiment Control with Python'
 name = 'apt_pycontrol'
 year = "2022"
 

@@ -18,7 +18,7 @@ The images below are an overview of the two version of user interface:
 #  Installation
 1- create the virtual environment via Anaconda:
     
-    conda create -n myenv python=3.10
+    conda create -n myenv 
 
 2- Activate the virtual environment:
 
@@ -27,7 +27,7 @@ The images below are an overview of the two version of user interface:
 
 3- Install dependencies:
     
-    pip install -r requirements.txt
+    pip install -e .
 # Running an experiment
 TODO
 # Citing 
