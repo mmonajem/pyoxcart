@@ -14,7 +14,10 @@ import numpy as np
 # Serial ports and NI
 import serial.tools.list_ports
 import pyvisa as visa
-import nidaqmx
+try:
+    import nidaqmx
+except:
+    print('Please install nidaqmx')
 # Local project scripts
 from apt_pycontrol.devices import email_send, tweet_send, initialize_devices, signal_generator
 from apt_pycontrol.tdc_surface_concept import tdc

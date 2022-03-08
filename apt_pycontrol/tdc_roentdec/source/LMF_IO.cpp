@@ -4365,11 +4365,9 @@ void LMF_IO::WriteEventHeader(unsigned __int64 timestamp, unsigned __int32 cnt[]
 
 
 
-
-
-
-
-
+__int64 LMF_IO::NumberWrittenEvents() {
+	return uint64_number_of_written_events;
+}
 
 
 
@@ -4388,6 +4386,7 @@ void LMF_IO::WriteTDCData(unsigned __int64 timestamp, unsigned __int32 cnt[], __
 	}
 	
 	++uint64_number_of_written_events;
+
 
 	WriteEventHeader(timestamp,cnt);
 

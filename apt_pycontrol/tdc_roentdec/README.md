@@ -1,3 +1,3 @@
-#  Python wrapper for Roentec TDC
+#  Python wrapper for Roentdec TDC
 
-This folder contains dlls and python wrapper for Roentec tdc.
+This folder contains dlls and python wrapper for Roentdec tdc.

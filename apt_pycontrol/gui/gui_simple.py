@@ -16,7 +16,7 @@ import pyqtgraph as pg
 import pyqtgraph.exporters
 
 # Local module and scripts
-from apt_pycontrol.apt import apt_laser
+from apt_pycontrol.apt import apt_tdc_roetdec
 from apt_pycontrol.tools import variables
 from apt_pycontrol.tools import tof2mc_simple
 from apt_pycontrol.devices import initialize_devices
@@ -851,5 +851,5 @@ class MainThread(QThread):
         # run method gets called when we start the thread
 
     def run(self):
-        main_thread = apt_laser.main()
+        main_thread = apt_tdc_roetdec.main()
         self.signal.emit(main_thread)

@@ -1,5 +1,8 @@
+try:
+    import nidaqmx
+except:
+    print('Please install nidaqmx')
 
-import nidaqmx
 import time
 
 

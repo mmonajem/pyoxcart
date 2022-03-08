@@ -703,6 +703,8 @@ public:
 
 	unsigned __int64 GetLastLevelInfo();
 
+	__int64			NumberWrittenEvents();
+
 	bool			Clone(LMF_IO * clone);
 
 	void			WriteTDCData(double timestamp,unsigned __int32 cnt[],__int32 *tdc);

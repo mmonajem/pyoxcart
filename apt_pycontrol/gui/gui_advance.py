@@ -19,7 +19,7 @@ import pyqtgraph.exporters
 
 
 # Local module and scripts
-from apt_pycontrol.apt import apt_voltage
+from apt_pycontrol.apt import apt_tdc_surface_consept
 from apt_pycontrol.tools import variables
 from apt_pycontrol.tools import tof2mc_simple
 from apt_pycontrol.devices.camera import Camera
@@ -1773,5 +1773,5 @@ class MainThread(QThread):
             # run method gets called when we start the thread
 
     def run(self):
-            main_thread = apt_voltage.main()
+            main_thread = apt_tdc_surface_consept.main()
             self.signal.emit(main_thread)

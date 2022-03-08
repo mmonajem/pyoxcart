@@ -25,9 +25,9 @@ The images below are an overview of the two version of user interface:
     conda activate myenv
     
 
-3- Install dependencies:
+3- Install package:
     
-    pip install -e .
+    python -m pip install -e .
 # Running an experiment
 TODO
 # Citing 

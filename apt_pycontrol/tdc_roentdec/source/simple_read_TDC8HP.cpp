@@ -1,10 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 //
 //	written by Achim Czasch (RoentDek Handels Gmbh)
+//  Modified by Mehrpad Monajem (mehrpad.monajem@fau.de)
 //
 //////////////////////////////////////////////////////////////////////////////////////////
-
-#include <queue>
 
 #include "tdcmanager.h"
 #include "afx.h" // only needed for the CStrings in this example
@@ -36,14 +35,17 @@ class Wrraper_tdc
 {
 public:
 	Wrraper_tdc();
-	double* reader_tdc();
+	int init_tdc();
 	int run_tdc();
+	int stop_tdc();
+	float* get_data_tdc();
+
 
 private:
-	queue<double> x;
-	queue<double> y;
-	queue<double> tof;
-	queue<double> time_stamp;
+
+	// now configure the TDC:
+	TDCManager* manager = new TDCManager(0x1A13, 0x0001);
+	LMF_IO* LMF = new LMF_IO(NUM_CHANNELS, NUM_IONS);
 
 };
 
@@ -52,62 +54,16 @@ Wrraper_tdc::Wrraper_tdc()
 
 };
 
-double* Wrraper_tdc::reader_tdc()
+
+
+int Wrraper_tdc::init_tdc()
 {
-
-
-	//printf("Reading the queues\n");
-	queue<double> gx = x;
-	x = {};
-	queue<double> gy = y;
-	y = {};
-	queue<double> gtof = tof;
-	tof = {};
-	queue<double> gtime_stamp = time_stamp;
-	time_stamp = {};
-
-	double* array_tem = new double[4*10000];
-	double array[4][10000];
-
-	int size = gx.size();
-
-	if (size == gy.size() && size == gtof.size() && size == gtime_stamp.size()) {
-		int index = 0;
-		while (!gx.empty()) {
-			array[0][index] = gx.front();
-			gx.pop();
-			array[1][index] = gy.front();
-			gy.pop();
-			array[2][index] = gtof.front();
-			gtof.pop();
-			array[3][index] = gtime_stamp.front();
-			gtime_stamp.pop();
-			index = index + 1;
-		}
-	}
-
-	for (int i = 0; i < 8; ++i) {
-		for (int j = 0; j < 1024; ++j) {
-			// mapping 1D array to 2D array
-			array_tem[i * 10000 + j] = array[i][j];
-		}
-	}
-	return array_tem;
-};
-
-int Wrraper_tdc::run_tdc()
-{
-	trigger_channel = 8 - 1; // 1st TDC channel has index 0
-
-	printf("hit q to quit.\n");
-
-	unsigned __int64 ui64_HPTDC_AbsoluteTimeStamp = 0;
 
 	//  --------------------------------------------------------
 	//	read Header information of template LMF-file (ignore this part)
-	LMF_IO* LMF = new LMF_IO(NUM_CHANNELS, NUM_IONS);
-	char template_name[270];
-	sprintf(template_name, "%s", "apt");
+	char template_name[270] = "simple_read_TDC8HP_x64.exp";
+
+
 	while (strlen(template_name) > 0) {
 		if (template_name[strlen(template_name) - 1] == '\\' || template_name[strlen(template_name) - 1] == '/') {
 			break;
@@ -115,20 +71,16 @@ int Wrraper_tdc::run_tdc()
 		template_name[strlen(template_name) - 1] = 0;
 	}
 
-
 	sprintf(template_name + strlen(template_name), "%s", "CoboldPC2011R5-2_Header-Tempalte_1TDC8HP.lmf");
 
 	if (!LMF->OpenInputLMF(template_name)) {
 		printf("error: could not open the template file\n%s\n", template_name);
 		printf("It must be in the same folder as the exe.\n");
-		return false;
+		return 1;
 	}
 	LMF->CloseInputLMF();
 	//  --------------------------------------------------------
 
-
-	// now configure the TDC:
-	TDCManager* manager = new TDCManager(0x1A13, 0x0001);
 	if (!manager) return 0;
 
 	manager->Init();
@@ -140,9 +92,10 @@ int Wrraper_tdc::run_tdc()
 	double tdc_binsize = myTDC.resolution * 1.e9;
 	double timestamp_binsize = tdc_binsize;
 
+
 	// note: please do not confuse binsize with resolution. The real (internal) binsize of each channel is 25 ps.
 	//       Therefore the resolution of a measured time (e.g. channel 1 vs. trigger channel) is sqrt(2)*25ps = 34ps FWHM = 14.5 ps RMS. 
-
+	
 	// now reconfigure the TDC (necessary after all parameters are set):
 	manager->Reconfigure();
 
@@ -159,65 +112,17 @@ int Wrraper_tdc::run_tdc()
 	LMF->frequency = 1.;
 	LMF->OpenOutputLMF("output.lmf");
 
-	//  now read events from TDC
-	unsigned __int32	CNT[8];
-	__int32				TDC_data[8][10];
+	return 0;
+};
 
+int Wrraper_tdc::run_tdc()
+{
 	manager->Start();
-	__int64 recorded_triggers = 0;
+	return 0;
+};
 
-	__int64 last_tick_ms = GetTickCount64();
-
-	// The calibration factors 
-	__int64 fu = 1;
-	__int64 fv = 1;
-
-
-	while (true) {
-		++recorded_triggers;
-		memset(TDC_data, 0, sizeof(TDC_data));	// clear TDC_data[] array
-
-		bool group_is_complete = false;
-		while (!group_is_complete) {
-			group_is_complete = PCIGetTDC_25psGroupMode_TDC8HP(manager, CNT, TDC_data, 8, 10, ui64_HPTDC_AbsoluteTimeStamp);
-			if (!group_is_complete) {
-				Sleep(1);
-				if (_kbhit())
-					break;
-			}
-		}
-
-		// Calculate the X, Y, Time of Flight , and Time_stamp
-		double X = (TDC_data[1][0] - TDC_data[0][0]) * fu; 
-		double Y = (X - 2. * (TDC_data[3][0] - TDC_data[2][0]) * fv) / sqrt(3);
-		double TOF = (TDC_data[0][0] + TDC_data[1][0]) / 2;
-		double TIME_STAMP = ui64_HPTDC_AbsoluteTimeStamp;
-
-		// push calculated values to the qeues
-		x.push(X);
-		y.push(Y);
-		tof.push(TOF);
-		time_stamp.push(TIME_STAMP);
-
-		LMF->WriteTDCData(ui64_HPTDC_AbsoluteTimeStamp, CNT, &TDC_data[0][0]);
-
-
-
-		if (recorded_triggers % 1000) {
-			__int64 tt = GetTickCount64();
-			if (tt - last_tick_ms > 500) {
-				if (_kbhit()) {
-					char c = _getch();
-					if (c == 'q') break;
-					printf("hit q to exit.\n");
-					while (_kbhit()) _getch();
-				}
-				last_tick_ms = tt;
-			}
-		}
-	}
-
-
+int Wrraper_tdc::stop_tdc()
+{
 	// stop TDC
 	printf("stopping the TDC.\n");
 	manager->Stop();
@@ -226,21 +131,158 @@ int Wrraper_tdc::run_tdc()
 	manager->CleanUp(); // cleanup is necessary before delete.
 	delete (TDCManager*)manager;
 
-
-
 	if (LMF) {
 		LMF->CloseOutputLMF();
 		delete LMF;
 	}
+
 	return 0;
+};
+
+
+float* Wrraper_tdc::get_data_tdc()
+{
+	trigger_channel = 8 - 1; // 1st TDC channel has index 0
+
+	unsigned __int64 ui64_HPTDC_AbsoluteTimeStamp = 0;
+
+
+	// note: please do not confuse binsize with resolution. The real (internal) binsize of each channel is 25 ps.
+	//       Therefore the resolution of a measured time (e.g. channel 1 vs. trigger channel) is sqrt(2)*25ps = 34ps FWHM = 14.5 ps RMS. 
+
+
+	//  now read events from TDC
+	unsigned __int32	CNT[8];
+	__int32				TDC_data[8][10];
+
+	
+	__int64 recorded_triggers = 0;
+
+	//__int64 last_tick_ms = GetTickCount64();
+
+
+	++recorded_triggers;
+	memset(TDC_data, 0, sizeof(TDC_data));	// clear TDC_data[] array
+
+	//manager->Continue();
+
+	bool group_is_complete = false;
+	while (!group_is_complete) {
+		group_is_complete = PCIGetTDC_25psGroupMode_TDC8HP(manager, CNT, TDC_data, 8, 10, ui64_HPTDC_AbsoluteTimeStamp);
+		if (!group_is_complete) {
+			Sleep(1);
+		}
+	}
+
+	//manager->Pause();
+
+	// It is possible to calculate the X, Y, ToF, Time_stamp and send them, instead of the TDC data
+	// Calculate the X, Y, Time of Flight, and Time_stamp
+	//float fu = 1;
+	//float fv = 1;
+	//float X = (TDC_data[1][0] - TDC_data[0][0]) * fu; 
+	//float Y = (X - 2. * (TDC_data[3][0] - TDC_data[2][0]) * fv) / sqrt(3);
+	//float TOF = abs(TDC_data[7][0] - TDC_data[6][0]);
+
+
+	LMF->WriteTDCData(ui64_HPTDC_AbsoluteTimeStamp, CNT, &TDC_data[0][0]);
+
+	float* array_tem = new float[9];
+
+	for (int i = 0; i < 10; ++i) {
+		if (i < 8) {
+			array_tem[i] = static_cast<float>(TDC_data[i][0]);
+		}
+		else {
+			array_tem[i] = ui64_HPTDC_AbsoluteTimeStamp;
+		}
+		
+	}
+
+	return array_tem;
 }
+
+/*
+// Version 2 of get_data_tdc with buffering the data to reduce returning number to python
+// It buffers 1000 event and then return the result to Python wrraper.
+float* Wrraper_tdc::get_data_tdc()
+{
+	trigger_channel = 8 - 1; // 1st TDC channel has index 0
+
+	unsigned __int64 ui64_HPTDC_AbsoluteTimeStamp = 0;
+
+
+	// note: please do not confuse binsize with resolution. The real (internal) binsize of each channel is 25 ps.
+	//       Therefore the resolution of a measured time (e.g. channel 1 vs. trigger channel) is sqrt(2)*25ps = 34ps FWHM = 14.5 ps RMS. 
+
+
+	//  now read events from TDC
+	unsigned __int32	CNT[8];
+	__int32				TDC_data[8][10];
+
+
+	__int64 recorded_triggers = 0;
+
+	//__int64 last_tick_ms = GetTickCount64();
+
+	float* array_tem = new float[9*1000];
+
+	while (true) {
+
+		memset(TDC_data, 0, sizeof(TDC_data));	// clear TDC_data[] array
+
+		//manager->Continue();
+
+		bool group_is_complete = false;
+		while (!group_is_complete) {
+			group_is_complete = PCIGetTDC_25psGroupMode_TDC8HP(manager, CNT, TDC_data, 8, 10, ui64_HPTDC_AbsoluteTimeStamp);
+			if (!group_is_complete) {
+				Sleep(1);
+			}
+		}
+
+		//manager->Pause();
+
+		// It is possible to calculate the X, Y, ToF, Time_stamp and send them, instead of the TDC data
+		// Calculate the X, Y, Time of Flight, and Time_stamp
+		//float fu = 1;
+		//float fv = 1;
+		//float X = (TDC_data[1][0] - TDC_data[0][0]) * fu; 
+		//float Y = (X - 2. * (TDC_data[3][0] - TDC_data[2][0]) * fv) / sqrt(3);
+		//float TOF = abs(TDC_data[7][0] - TDC_data[6][0]);
+
+
+		LMF->WriteTDCData(ui64_HPTDC_AbsoluteTimeStamp, CNT, &TDC_data[0][0]);
+
+		float* array_tem = new float[9];
+
+		for (int i = 0; i < 10; ++i) {
+			if (i < 8) {
+				array_tem[i] = static_cast<float>(TDC_data[i + 9 * recorded_triggers][0]);
+			}
+			else {
+				array_tem[i] = ui64_HPTDC_AbsoluteTimeStamp;
+			}
+
+		}
+
+		if (recorded_triggers % 1000) {
+			break;
+		}
+	}
+	++recorded_triggers;
+	return array_tem;
+}
+*/
 
 // Define C functions for the C++ class - as ctypes can only talk to C...
 extern "C"
 {
 	__declspec(dllexport) Wrraper_tdc* Warraper_tdc_new() { return new Wrraper_tdc(); }
-	__declspec(dllexport) double* reader(Wrraper_tdc* Wrraper_tdc) { return Wrraper_tdc->reader_tdc(); }
+	__declspec(dllexport) int init_tdc(Wrraper_tdc* Wrraper_tdc) { return Wrraper_tdc->init_tdc(); }
 	__declspec(dllexport) int run_tdc(Wrraper_tdc* Wrraper_tdc) { return Wrraper_tdc->run_tdc(); }
+	__declspec(dllexport) int stop_tdc(Wrraper_tdc* Wrraper_tdc) { return Wrraper_tdc->stop_tdc(); }
+	__declspec(dllexport) float* get_data_tdc(Wrraper_tdc* Wrraper_tdc) { return Wrraper_tdc->get_data_tdc(); }
 }
 
 
@@ -248,7 +290,6 @@ extern "C"
 int main(int argc, char* argv[], char* envp[])
 //////////////////////////////////////////////////////////////////////////////////////////
 {
-	
 	return 0;
 }
 

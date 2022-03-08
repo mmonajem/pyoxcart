@@ -15,8 +15,8 @@ from apt_pycontrol.tools import variables
 from apt_pycontrol.tools import read_files
 from apt_pycontrol.devices.camera import Camera
 from apt_pycontrol.devices import initialize_devices
-from apt_pycontrol.gui import gui_laser_mode
-from apt_pycontrol.gui import gui_voltage_mode
+from apt_pycontrol.gui import gui_simple
+from apt_pycontrol.gui import gui_advance
 
 configFile = 'config.json'
 
@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     conf = read_files.read_json_file(configFile)
 
-    if conf['mode'] == 'voltage_pulse_mode':
+    if conf['mode'] == 'advance':
 
         # Initialize global experiment variables
         variables.init(conf)
@@ -111,12 +111,12 @@ if __name__ == "__main__":
         # print('Screen size is:(%s,%s)' % (width, height))
         OXCART = QtWidgets.QMainWindow()
         lock = threading.Lock()
-        ui = gui_voltage_mode.UI_APT_M(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock, app, conf)
+        ui = gui_advance.UI_APT_M(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock, app, conf)
         ui.setupUi(OXCART)
         OXCART.show()
         sys.exit(app.exec_())
 
-    elif conf['mode'] == 'laser_pulse_mode':
+    elif conf['mode'] == 'simple':
 
         # Initialize global experiment variables
         variables.init(conf)
@@ -124,7 +124,7 @@ if __name__ == "__main__":
         app = QtWidgets.QApplication(sys.argv)
         APT_Physic = QtWidgets.QMainWindow()
         lock = threading.Lock()
-        ui = gui_laser_mode.UI_APT_L(lock, app, conf)
+        ui = gui_simple.UI_APT_L(lock, app, conf)
         ui.setupUi(APT_Physic)
         APT_Physic.show()
         sys.exit(app.exec_())

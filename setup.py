@@ -6,11 +6,8 @@ import sys
 
 author = u"Mehrpad Monajem"
 # authors in alphabetical order
-authors = [
-    "Mehrpad Monajem",
-]
 description = 'Atom Probe Tomography Experiment Control with Python'
-name = 'apt_pycontrol'
+name = 'APT_PyControl'
 year = "2022"
 
 
