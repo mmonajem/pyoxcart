@@ -20,13 +20,13 @@ except:
     print('Please install nidaqmx')
 # Local project scripts
 from apt_pycontrol.devices import email_send, tweet_send, initialize_devices, signal_generator
-from apt_pycontrol.tdc_surface_concept import tdc
+from apt_pycontrol.tdc_surface_concept import tdc_surface_consept
 from apt_pycontrol.drs import drs
 from apt_pycontrol.tools import hdf5_creator, experiment_statistics, variables
 from apt_pycontrol.tools import loggi
 
 
-class APT_VOLTAGE:
+class APT_ADVANCE:
     """
     APT_VOLTAGE class
 
@@ -487,7 +487,7 @@ def main():
 
         # Initialize and initiate a process(Refer to imported file 'tdc_new' for process function declaration )
         # Module used: multiprocessing
-        tdc_process = multiprocessing.Process(target=tdc.experiment_measure, args=(variables.raw_mode, queue_x,
+        tdc_process = multiprocessing.Process(target=tdc_surface_consept.experiment_measure, args=(variables.raw_mode, queue_x,
                                                                                    queue_y, queue_t,
                                                                                    queue_dld_start_counter,
                                                                                    queue_channel,
@@ -549,7 +549,7 @@ def main():
     lock2 = threading.Lock()
 
     # Create the experiment object
-    experiment = APT_VOLTAGE(queue_x, queue_y, queue_t, queue_dld_start_counter,
+    experiment = APT_ADVANCE(queue_x, queue_y, queue_t, queue_dld_start_counter,
                              queue_channel, queue_time_data, queue_tdc_start_counter,
                              queue_ch0_time, queue_ch0_wave, queue_ch1_time, queue_ch1_wave,
                              queue_ch2_time, queue_ch2_wave, queue_ch3_time, queue_ch3_wave,

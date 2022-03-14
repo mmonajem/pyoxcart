@@ -117,6 +117,16 @@ def init(conf):
     global ch3_time
     global ch3_wave
 
+    # TDC Roentdec parameters
+    global ch0
+    global ch1
+    global ch2
+    global ch3
+    global ch4
+    global ch5
+    global ch6
+    global ch7
+
     # Experiment variables
     global main_v_dc
     global main_v_p
@@ -232,6 +242,15 @@ def init(conf):
     ch2_wave = np.zeros(0)
     ch3_time = np.zeros(0)
     ch3_wave = np.zeros(0)
+
+    ch0 = np.zeros(0)
+    ch1 = np.zeros(0)
+    ch2 = np.zeros(0)
+    ch3 = np.zeros(0)
+    ch4 = np.zeros(0)
+    ch5 = np.zeros(0)
+    ch6 = np.zeros(0)
+    ch7 = np.zeros(0)
 
     # Source of calculating the detected events pulse_counter or TDC
     counter_source = 'pulse_counter'

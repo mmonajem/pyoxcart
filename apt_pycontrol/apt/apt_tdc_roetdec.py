@@ -14,19 +14,22 @@ import numpy as np
 # Serial ports and NI
 import serial.tools.list_ports
 # Local project scripts
-from apt_pycontrol.tdc_roentdec import tdc
+from apt_pycontrol.tdc_roentdec import tdc_roentdec
 from apt_pycontrol.devices import email_send, initialize_devices
 from apt_pycontrol.tools import hdf5_creator, experiment_statistics, variables
 from apt_pycontrol.tools import loggi
 
 
-class APT_LASER:
+class APT_SIMPLE:
     """
     apt_simple class
 
     """
 
-    def __init__(self, queue_x, queue_y, queue_tof, queue_time_stamp, lock1):
+    def __init__(self, queue_x, queue_y, queue_tof, queue_AbsoluteTimeStamp,
+                           queue_ch0, queue_ch1, queue_ch2, queue_ch3,
+                           queue_ch4, queue_ch5, queue_ch6, queue_ch7,
+                            queue_stop_measurement, lock1):
         """
         This is the constructor class that accepts several initialized queues objects corresponding
         to various parameters of the groups like dld,TDC,DRS. This constructor also objects used for
@@ -38,7 +41,16 @@ class APT_LASER:
         self.queue_x = queue_x
         self.queue_y = queue_y
         self.queue_tof = queue_tof
-        self.queue_time_stamp = queue_time_stamp
+        self.queue_AbsoluteTimeStamp = queue_AbsoluteTimeStamp
+        self.queue_ch0 = queue_ch0
+        self.queue_ch1 = queue_ch1
+        self.queue_ch2 = queue_ch2
+        self.queue_ch3 = queue_ch3
+        self.queue_ch4 = queue_ch4
+        self.queue_ch5 = queue_ch5
+        self.queue_ch6 = queue_ch6
+        self.queue_ch7 = queue_ch7
+        self.queue_stop_measurement = queue_stop_measurement
         self.lock1 = lock1
 
     def initialize_v_dc(self):
@@ -116,7 +128,9 @@ class APT_LASER:
         """
         while True:
             # Check if any value is present in queue to read from
-            while not self.queue_x.empty() or not self.queue_y.empty() or not self.queue_tof.empty() or not self.queue_time_stamp.empty():
+            while not self.queue_x.empty() or not self.queue_y.empty() or not self.queue_tof.empty() or not self.queue_AbsoluteTimeStamp.empty() \
+                    or not self.queue_ch0.empty() or not self.queue_ch1.empty() or not self.queue_ch2.empty() or not self.queue_ch3.empty() \
+                    or not self.queue_ch4.empty() or not self.queue_ch5.empty() or not self.queue_ch6.empty() or not self.queue_ch7.empty():
                 # Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock1:
                     length = self.queue_x.get()
@@ -124,7 +138,16 @@ class APT_LASER:
                     variables.y = np.append(variables.y, self.queue_y.get())
                     variables.t = np.append(variables.t, self.queue_tof.get())
                     variables.time_stamp = np.append(variables.time_stamp,
-                                                     self.queue_time_stamp.get())
+                                                     self.queue_AbsoluteTimeStamp.get())
+                    variables.ch0 = np.append(variables.ch0, self.queue_ch0.get())
+                    variables.ch1 = np.append(variables.ch1, self.queue_ch1.get())
+                    variables.ch2 = np.append(variables.ch2, self.queue_ch2.get())
+                    variables.ch3 = np.append(variables.ch3, self.queue_ch3.get())
+                    variables.ch4 = np.append(variables.ch4, self.queue_ch4.get())
+                    variables.ch5 = np.append(variables.ch5, self.queue_ch5.get())
+                    variables.ch6 = np.append(variables.ch6, self.queue_ch6.get())
+                    variables.ch7 = np.append(variables.ch7, self.queue_ch7.get())
+
                     variables.main_v_dc_dld = np.append(variables.main_v_dc_dld,
                                                         np.tile(variables.specimen_voltage, len(length)))
             # If end of experiment flag is set break the while loop
@@ -261,13 +284,22 @@ def main():
         queue_x = Queue(maxsize=-1, ctx=multiprocessing.get_context())
         queue_y = Queue(maxsize=-1, ctx=multiprocessing.get_context())
         queue_tof = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-        queue_time_stamp = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_AbsoluteTimeStamp = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch0 = Queue(maxsize=1, ctx=multiprocessing.get_context())
+        queue_ch1 = Queue(maxsize=1, ctx=multiprocessing.get_context())
+        queue_ch2 = Queue(maxsize=1, ctx=multiprocessing.get_context())
+        queue_ch3 = Queue(maxsize=1, ctx=multiprocessing.get_context())
+        queue_ch4 = Queue(maxsize=1, ctx=multiprocessing.get_context())
+        queue_ch5 = Queue(maxsize=1, ctx=multiprocessing.get_context())
+        queue_ch6 = Queue(maxsize=1, ctx=multiprocessing.get_context())
+        queue_ch7 = Queue(maxsize=1, ctx=multiprocessing.get_context())
         queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
 
-        tdc_process = multiprocessing.Process(target=tdc.experiment_measure, args=(queue_x,
-                                                                                   queue_y, queue_tof,
-                                                                                   queue_time_stamp,
-                                                                                   queue_stop_measurement))
+        tdc_process = multiprocessing.Process(target=tdc_roentdec.experiment_measure, args=(queue_x, queue_y, queue_tof, queue_AbsoluteTimeStamp,
+                           queue_ch0, queue_ch1, queue_ch2, queue_ch3,
+                           queue_ch4, queue_ch5, queue_ch6, queue_ch7,
+                           queue_stop_measurement))
+
 
         tdc_process.daemon = True
         tdc_process.start()
@@ -277,8 +309,10 @@ def main():
     lock1 = threading.Lock()
 
     # Create the experiment object
-    experiment = APT_LASER(queue_x, queue_y, queue_tof, queue_time_stamp,
-                            lock1)
+    experiment = APT_SIMPLE(queue_x, queue_y, queue_tof, queue_AbsoluteTimeStamp,
+                           queue_ch0, queue_ch1, queue_ch2, queue_ch3,
+                           queue_ch4, queue_ch5, queue_ch6, queue_ch7,
+                           queue_stop_measurement, lock1)
 
     # Initialize high voltage
     experiment.initialize_v_dc()
