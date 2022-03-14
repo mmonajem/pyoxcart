@@ -241,7 +241,17 @@ class APT_SIMPLE:
             variables.x = np.zeros(0)
             variables.y = np.zeros(0)
             variables.t = np.zeros(0)
-            variables.dld_start_counter = np.zeros(0)
+            variables.time_stamp = np.zeros(0)
+
+            variables.ch0 = np.zeros(0)
+            variables.ch1 = np.zeros(0)
+            variables.ch2 = np.zeros(0)
+            variables.ch3 = np.zeros(0)
+            variables.ch4 = np.zeros(0)
+            variables.ch5 = np.zeros(0)
+            variables.ch6 = np.zeros(0)
+            variables.ch7 = np.zeros(0)
+
 
             #
             variables.main_v_dc = np.zeros(0)
@@ -438,8 +448,11 @@ def main():
     # Check the length of arrays to be equal
     if variables.counter_source == 'TDC':
         if all(len(lst) == len(variables.x) for lst in [variables.x, variables.y,
-                                                        variables.t, variables.dld_start_counter,
-                                                        variables.main_v_dc_dld]):
+                                                        variables.t, variables.time_stamp,
+                                                        variables.main_v_dc_dld, variables.ch0,
+                                                        variables.ch0, variables.ch1, variables.ch2,
+                                                        variables.ch3, variables.ch4, variables.ch5,
+                                                        variables.ch6, variables.ch7]):
             logger.warning('dld data have not same length')
 
     # save data in hdf5 file
