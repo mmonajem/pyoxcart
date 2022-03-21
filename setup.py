@@ -17,6 +17,7 @@ try:
 except BaseException:
     version = "unknown"
 
+    # packages=['calibration'],
 setup(
     name=name,
     author=author,
@@ -24,6 +25,12 @@ setup(
     url='https://github.com/mmonajem/apt_pycontrol',
     version=version,
     packages=find_packages(),
+    entry_points={
+            'console_scripts': [
+                'my_start=my_package.__main__:main',
+            ]
+    },
+    data_files=[('my_data', ['test/data'])],
     package_dir={name: name},
     include_package_data=True,
     license="GPL v3",
