@@ -7,13 +7,13 @@ import sys
 author = u"Mehrpad Monajem"
 # authors in alphabetical order
 description = 'Atom Probe Tomography Experiment Control with Python'
-name = 'APT_PyControl'
+name = 'PyCCAPT'
 year = "2022"
 
 
 sys.path.insert(0, realpath(dirname(__file__))+"/"+name)
 try:
-    from apt_pycontrol import version
+    from pyccapt import version
 except BaseException:
     version = "unknown"
 

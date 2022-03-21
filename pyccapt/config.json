@@ -1,0 +1,17 @@
+{
+	"mode": "simple",
+	"visualization": "tof",
+	"tdc": "on",
+	"camera": "on",
+	"gates": "Dev2/port0/",
+	"pump": "on",
+	"COM_PORT_cryo": 3,
+	"COM_PORT_V_dc": 4,
+	"COM_PORT_V_p": "ASRL4::INSTR",
+	"COM_PORT_gauge_mc": "COM5",
+	"COM_PORT_gauge_bc": "COM2",
+	"COM_PORT_gauge_ll": "COM1",
+	"COM_PORT_signal_generator": "USB0::0xF4EC::0x1101::SDG6XBAD2R0601::INSTR",
+	"COM_PORT_NI_counter": "Dev1/ctr0"
+}
+
