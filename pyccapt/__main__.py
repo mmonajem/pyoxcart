@@ -130,10 +130,10 @@ def run():
         OXCART = QtWidgets.QMainWindow()
         lock = threading.Lock()
         if conf['camera'] != "off":
-            ui = gui_advance.UI_APT_M(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock, app,
+            ui = gui_advance.UI_APT_A(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock, app,
                                       conf)
         else:
-            ui = gui_advance.UI_APT_M(None, None, None, None, lock, app, conf)
+            ui = gui_advance.UI_APT_A(None, None, None, None, lock, app, conf)
         ui.setupUi(OXCART)
         OXCART.show()
         sys.exit(app.exec_())
@@ -146,7 +146,7 @@ def run():
         app = QtWidgets.QApplication(sys.argv)
         APT_Physic = QtWidgets.QMainWindow()
         lock = threading.Lock()
-        ui = gui_simple.UI_APT_L(lock, app, conf)
+        ui = gui_simple.UI_APT_S(lock, app, conf)
         ui.setupUi(APT_Physic)
         APT_Physic.show()
         sys.exit(app.exec_())
