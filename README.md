@@ -27,6 +27,9 @@ The images below are an overview of the two version of user interface:
 3- Install package:
     
     python -m pip install -e .
+
+# Edite the GUI with Qt-Designer and run command below to create your own GUI
+    pyuic5 -x gui_simple_layout.ui -o gui_simple_layout.py
 # Running an experiment
 TODO
 # Citing 
