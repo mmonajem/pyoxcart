@@ -6,7 +6,7 @@ import sys
 
 author = u"Mehrpad Monajem"
 # authors in alphabetical order
-description = 'Atom Probe Tomography Experiment Control with Python'
+description = 'A package for controlling APT experiment and calibration the APT data'
 name = 'PyCCAPT'
 year = "2022"
 
@@ -22,13 +22,13 @@ setup(
     name=name,
     author=author,
     author_email='mehrpad.monajem@fau.de',
-    url='https://github.com/mmonajem/apt_pycontrol',
-    version=version,
+    url='https://github.com/mmonajem/pyccapt',
+    version='0.0.1',
     packages=find_packages(),
     entry_points={
-            'console_scripts': [
-                'my_start=my_package.__main__:main',
-            ]
+            'console_scripts': {
+                'pyccapt=pyccapt.__main__:main',
+                }
     },
     data_files=[('my_data', ['test/data'])],
     package_dir={name: name},
@@ -55,7 +55,9 @@ setup(
                         "pypylon",
                         "tweepy",
                         "pyvisa",
+                        "pyvisa-py",
                         "pyserial",
+                        "tables",
                       ],
     # not to be confused with definitions in pyproject.toml [build-system]
     setup_requires=["pytest-runner"],
@@ -64,7 +66,8 @@ setup(
     keywords=[],
     classifiers=['Operating System :: Windows',
                  'Programming Language :: Python :: 3',
-                 'Topic :: Scientific/Engineering :: Visualization',
+                 'Programming Language :: Python :: 3.8',
+                 'Topic :: Scientific/Engineering :: Visualization :: Atom Probe Tomography',
                  'Intended Audience :: Science/Research',
                  ],
     platforms=['ALL'],

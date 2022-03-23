@@ -1,9 +1,17 @@
+"""
+This is the main script of main GUI of the OXCART Atom Probe.
+@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import RectangleSelector, EllipseSelector
 from matplotlib.patches import Circle
 import pandas as pd
-import selector, variables, data_tools
+
+
+from pyccapt.calibration import selectors_data
+from pyccapt.calibration import variables, data_tools
 
 
 def fetch_dataset_from_dld_grp(filename:"type: string - Path to hdf5(.h5) file")->"type:list - list of dataframes":
@@ -27,7 +35,7 @@ def concatenate_dataframes_of_dld_grp(dataframeList:"type:list - list of datafra
     return dld_masterDataframe
 
 
-def plot_graph_for_dld_high_voltage(ax1:"type:object", dldGroupStorage:"type:list - list of dataframes"):
+def plot_graph_for_dld_high_voltage(ax1:"type:object", dldGroupStorage:"type:list - list of dataframes", save_name=None):
     # Plot tof and high voltage
     y = dldGroupStorage[3]  # dld_t
     y.loc[y['values'] > 5000, 'values'] = 0
@@ -54,13 +62,15 @@ def plot_graph_for_dld_high_voltage(ax1:"type:object", dldGroupStorage:"type:lis
     ax2.plot(xaxis, high_voltage, color='r', linewidth=2)
     ax2.set_ylabel("DC voltage [V]", color="blue", fontsize=14)
     rectangle_box_selector(ax2)
-    plt.connect('key_press_event', selector.toggle_selector)
+    plt.connect('key_press_event', selectors_data.toggle_selector)
+    if save_name != None:
+        plt.savefig("%s.png" %save_name, format="png", dpi=600)
     plt.show(block=True)
 
 
 def rectangle_box_selector(axisObject:"type:object"):
     # drawtype is 'box' or 'line' or 'none'
-    selector.toggle_selector.RS = RectangleSelector(axisObject, selector.line_select_callback,
+    selectors_data.toggle_selector.RS = RectangleSelector(axisObject, selectors_data.line_select_callback,
                                                     useblit=True,
                                                     button=[1, 3],  # don't use middle button
                                                     minspanx=1, minspany=1,
@@ -75,21 +85,18 @@ def crop_dataset(dld_masterDataframe:"type:list - list of dataframes")->"type:li
 
 
 def elliptical_shape_selector(axisObject:"type:object", figureObject:"type:object"):
-    # Helper
-    # axisObject = ax1
-    # figureObject = fig1
-    selector.toggle_selector.ES = EllipseSelector(axisObject, selector.onselect, useblit=True,
+
+    selectors_data.toggle_selector.ES = EllipseSelector(axisObject, selectors_data.onselect, useblit=True,
                                                   button=[1, 3],  # don't use middle button
                                                   minspanx=1, minspany=1,
                                                   spancoords='pixels',
                                                   interactive=True)
-    figureObject.canvas.mpl_connect('key_press_event', selector.toggle_selector)
+    figureObject.canvas.mpl_connect('key_press_event', selectors_data.toggle_selector)
 
 
-def plot_crop_FDM(data_crop:"type:list  - cropped list content"):
+def plot_crop_FDM(ax1, fig1, data_crop:"type:list  - cropped list content", save_name=None):
     # Plot and crop FDM
 
-    fig1, ax1 = plt.subplots(figsize=(4, 4))
     FDM, xedges, yedges = np.histogram2d(data_crop[:, 4], data_crop[:, 5], bins=(256, 256))
 
     FDM[FDM == 0] = 1  # to have zero after apply log
@@ -103,12 +110,13 @@ def plot_crop_FDM(data_crop:"type:list  - cropped list content"):
     plt.title("FDM")
     plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
     elliptical_shape_selector(ax1, fig1)
+    if save_name != None:
+        plt.savefig("%s.png" %save_name, format="png", dpi=600)
     plt.show(block=True)
 
 
-def plot_FDM_after_selection(data_crop:"type:list  - cropped list content"):
+def plot_FDM_after_selection(ax1, fig1,data_crop:"type:list  - cropped list content", save_name=None):
     # Plot FDM with selected part
-    fig1, ax1 = plt.subplots(figsize=(4, 4))
     FDM, xedges, yedges = np.histogram2d(data_crop[:, 4], data_crop[:, 5], bins=(256, 256))
     FDM[FDM == 0] = 1  # to have zero after apply log
     FDM = np.log(FDM)
@@ -122,6 +130,8 @@ def plot_FDM_after_selection(data_crop:"type:list  - cropped list content"):
     print('x:', variables.selected_x_fdm, 'y:', variables.selected_y_fdm, 'roi:', variables.roi_fdm)
     circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, color='b', fill=False)
     ax1.add_patch(circ)
+    if save_name != None:
+        plt.savefig("%s.png" %save_name, format="png", dpi=600)
     plt.show(block=True)
 
 
@@ -133,9 +143,8 @@ def crop_data_after_selection(data_crop:"type:list  - cropped list content")->li
     return data_crop[np.array(mask_fdm)]
 
 
-def plot_FDM(data_crop:"type:list  - cropped list content"):
+def plot_FDM(ax1, fig1, data_crop:"type:list  - cropped list content", save_name=None):
     # Plot FDM
-    fig1, ax1 = plt.subplots(figsize=(4, 4))
     FDM, xedges, yedges = np.histogram2d(data_crop[:, 4], data_crop[:, 5], bins=(256, 256))
     FDM[FDM == 0] = 1  # to have zero after apply log
     FDM = np.log(FDM)
@@ -146,6 +155,8 @@ def plot_FDM(data_crop:"type:list  - cropped list content"):
     ax1.set_ylabel("y [mm]", color="red", fontsize=14)
     plt.title("FDM")
     plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
+    if save_name != None:
+        plt.savefig("%s.png" %save_name, format="png", dpi=600)
     plt.show(block=True)
 
 
@@ -162,19 +173,4 @@ def save_croppped_data_to_hdf5(data_crop:"type:list  - cropped list content",
                                           'dld/x', 'dld/y'])
     data_tools.store_df_to_hdf(filename, hdf5Dataframe, hierarchyName)
 
-# def main():
-#     dldGroupStorage = fetch_dataset_from_dld_grp()
-#     dld_masterDataframe = concatenate_dataframes_of_dld_grp(dldGroupStorage)
-#     fig1, ax1 = plt.subplots(figsize=(6, 3))
-#     plot_graph_for_dld_high_voltage(ax1, dldGroupStorage)
-#     print('Min Idx:', variables.selected_x1, 'Max Idx:', variables.selected_x2)
-#     data_crop = crop_dataset(dld_masterDataframe)
-#     plot_crop_FDM(data_crop)
-#     plot_FDM_after_selection(data_crop)
-#     data_crop_FDM = crop_data_after_selection(data_crop)
-#     plot_FDM(data_crop_FDM)
-#     save_croppped_data_to_hdf5(data_crop_FDM, dld_masterDataframe)
-#
-#
-# if __name__ == "__main__":
-#     main()
+

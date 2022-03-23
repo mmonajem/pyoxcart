@@ -5,11 +5,11 @@ This is the main new script for reading DRS digitizer.
 
 # import the module
 import ctypes
+import os
 from numpy.ctypeslib import ndpointer
 import numpy as np
 
-# load the library
-drs_lib = ctypes.CDLL("./drs/drs_lib.dll")
+from pyccapt.tools.module_dir import MODULE_DIR
 
 
 class DRS(object):
@@ -32,13 +32,21 @@ class DRS(object):
 
         """
 
-        drs_lib.Drs_new.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float]
-        drs_lib.Drs_new.restype = ctypes.c_void_p
-        drs_lib.Drs_reader.argtypes = [ctypes.c_void_p]
-        drs_lib.Drs_reader.restype = ndpointer(dtype=ctypes.c_float, shape=(8 * 1024,))
-        drs_lib.Drs_delete_drs_ox.restype = ctypes.c_void_p
-        drs_lib.Drs_delete_drs_ox.argtypes = [ctypes.c_void_p]
-        self.obj = drs_lib.Drs_new(trigger, test, delay, sample_frequency)
+        # load the library
+        try:
+            # load the library
+            os.chdir(os.path.split(MODULE_DIR)[0] + '\\drs\\')
+            self.drs_lib = ctypes.CDLL("./drs_lib.dll")
+        except:
+            print("DRS DLL was not found")
+
+        self.drs_lib.Drs_new.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float]
+        self.drs_lib.Drs_new.restype = ctypes.c_void_p
+        self.drs_lib.Drs_reader.argtypes = [ctypes.c_void_p]
+        self.drs_lib.Drs_reader.restype = ndpointer(dtype=ctypes.c_float, shape=(8 * 1024,))
+        self.drs_lib.Drs_delete_drs_ox.restype = ctypes.c_void_p
+        self.drs_lib.Drs_delete_drs_ox.argtypes = [ctypes.c_void_p]
+        self.obj = self.drs_lib.Drs_new(trigger, test, delay, sample_frequency)
 
     def reader(self, ):
         """
@@ -49,7 +57,7 @@ class DRS(object):
         Returns:
             data: Return the read DRS value.
         """
-        data = drs_lib.Drs_reader(self.obj)
+        data = self.drs_lib.Drs_reader(self.obj)
         return data
 
     def delete_drs_ox(self):
@@ -62,7 +70,7 @@ class DRS(object):
             Does not return anything
 
         """
-        drs_lib.Drs_delete_drs_ox(self.obj)
+        self.drs_lib.Drs_delete_drs_ox(self.obj)
 
 
 # Create drs object and initialize the drs board

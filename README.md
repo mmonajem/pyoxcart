@@ -1,5 +1,5 @@
 # PyCCAPT 
-# A modular, FAIR open-source python atom probe tomography control software package
+# A modular, FAIR open-source python atom probe tomography control and calibration software package
 ![plot](pyccapt/files/logo.png)
 
 Today, the vast majority of atom probe instruments in use are commercial systems with proprietary software. 
@@ -22,11 +22,10 @@ The images below are an overview of the two version of user interface:
 2- Activate the virtual environment:
 
     conda activate myenv
-    
 
-3- Install package:
+3- Install package locally:
     
-    python -m pip install -e .
+    pip install -e .
 
 # Edite the GUI with Qt-Designer and run command below to create your own GUI
     pyuic5 -x gui_simple_layout.ui -o gui_simple_layout.py

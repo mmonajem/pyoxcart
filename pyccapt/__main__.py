@@ -4,6 +4,7 @@ This is the main script is load the GUI base on the configuration file.
 """
 
 import sys
+import os
 import threading
 from PyQt5 import QtWidgets
 # Serial ports and Camera libraries
@@ -18,10 +19,19 @@ from pyccapt.devices import initialize_devices
 from pyccapt.gui import gui_simple
 from pyccapt.gui import gui_advance
 
+from pyccapt.tools.module_dir import MODULE_DIR
 
-def run():
-    configFile = 'config.json'
-    conf = read_files.read_json_file(configFile)
+def main():
+    try:
+        # load the Json file
+        configFile = 'config.json'
+        os.chdir(os.path.split(MODULE_DIR)[0])
+        conf = read_files.read_json_file(configFile)
+    except Exception as e:
+        print("The config.json was not found")
+        print(e)
+
+
     if conf['mode'] == 'advance':
 
         # Initialize global experiment variables
@@ -157,4 +167,4 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    main()

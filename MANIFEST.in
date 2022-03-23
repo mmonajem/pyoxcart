@@ -1,0 +1,5 @@
+global-include *.py
+include pyccapt/files/*
+include pyccapt/rdc_roentdec/*
+include pyccapt/rdc_surface_concept/*
+include pyccapt/tutorials/*

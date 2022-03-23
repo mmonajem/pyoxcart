@@ -1,8 +1,6 @@
 import time
-try:
-    import cv2
-except:
-    print('Please install opencv2')
+import cv2
+
 import numpy as np
 
 from pypylon import pylon

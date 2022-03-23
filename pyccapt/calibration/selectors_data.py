@@ -3,7 +3,7 @@ This is file contains tools for mass calibration process.
 @author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
 
-from apt_pyanalysis.tools import variables
+from pyccapt.calibration import variables
 
 
 def onselect(eclick, erelease):
