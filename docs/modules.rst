@@ -1,7 +1,7 @@
-apt_pycontrol
-=============
+pyccapt
+=======
 
 .. toctree::
    :maxdepth: 4
 
-   apt_pycontrol
+   pyccapt

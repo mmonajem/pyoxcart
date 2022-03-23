@@ -10,17 +10,31 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+# import os
+# import sys
+# sys.path.insert(0, os.path.abspath('.'))
+
+
+# -- Project information -----------------------------------------------------
+
 import os
 import os.path as op
 import sys
 
 sys.path.insert(0, os.path.abspath('..'))
 
-import apt_pycontrol
+import pyccapt
 # include parent directory
 pdir = op.dirname(op.dirname(op.abspath(__file__)))
 # include extensions
 sys.path.append(op.abspath('extensions'))
+
+project = 'PyCCAPT'
+copyright = '2022, Mehrpad Monajem'
+author = 'Mehrpad Monajem'
+
+# The full version, including alpha/beta/rc tags
+release = '0.0.1'
 
 env_flag = os.getenv("status_flag")
 
@@ -29,16 +43,6 @@ if env_flag != None:
     status_flag = 'HTML'
 else:
     status_flag = 'HTML'  # default device name
-
-
-# -- Project information -----------------------------------------------------
-
-project = 'APT_PyControl'
-copyright = '2022, Mehrpad Monajem'
-author = 'Mehrpad Monajem'
-
-# The full version, including alpha/beta/rc tags
-release = '1.0.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -87,7 +91,7 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_logo = "./Fig/PiSCAT_logo_bg.png"
+html_logo = "../pyccapt/files/logo4.png"
 
 html_css_files = [
     'widestyle.css',
