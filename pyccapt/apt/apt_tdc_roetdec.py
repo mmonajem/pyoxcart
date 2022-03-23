@@ -68,28 +68,27 @@ class APT_SIMPLE:
         Returns:
             Does not return anything
         """
-        if self.conf['COM_PORT_V_dc'] != "off":
-            try:
-                # Setting the com port of V_dc
-                self.com_port_v_dc = serial.Serial(
-                    port=initialize_devices.com_ports[variables.COM_PORT_V_dc].device,  # chosen COM port
-                    baudrate=115200,  # 115200
-                    bytesize=serial.EIGHTBITS,  # 8
-                    parity=serial.PARITY_NONE,  # N
-                    stopbits=serial.STOPBITS_ONE  # 1
-                )
-                # configure the COM port to talk to. Default values: 115200,8,N,1
-                if self.com_port_v_dc.is_open:
-                    self.com_port_v_dc.flushInput()
-                    self.com_port_v_dc.flushOutput()
+        try:
+            # Setting the com port of V_dc
+            self.com_port_v_dc = serial.Serial(
+                port=initialize_devices.com_ports[variables.COM_PORT_V_dc].device,  # chosen COM port
+                baudrate=115200,  # 115200
+                bytesize=serial.EIGHTBITS,  # 8
+                parity=serial.PARITY_NONE,  # N
+                stopbits=serial.STOPBITS_ONE  # 1
+            )
+            # configure the COM port to talk to. Default values: 115200,8,N,1
+            if self.com_port_v_dc.is_open:
+                self.com_port_v_dc.flushInput()
+                self.com_port_v_dc.flushOutput()
 
-                    cmd_list = [">S1 3.0e-4", ">S0B 0", ">S0 %s" % variables.vdc_min, "F0", ">S0?", ">DON?",
-                                ">S0A?"]
-                    for cmd in range(len(cmd_list)):
-                        self.command_v_dc(cmd_list[cmd])
-            except Exception as e:
-                print("Couldn't open Port!")
-                print(e)
+                cmd_list = [">S1 3.0e-4", ">S0B 0", ">S0 %s" % variables.vdc_min, "F0", ">S0?", ">DON?",
+                            ">S0A?"]
+                for cmd in range(len(cmd_list)):
+                    self.command_v_dc(cmd_list[cmd])
+        except Exception as e:
+            print("Couldn't open Port!")
+            print(e)
 
     # apply command to the V_dc
     def command_v_dc(self, cmd):
@@ -209,7 +208,7 @@ class APT_SIMPLE:
             if variables.specimen_voltage >= variables.vdc_min:
                 specimen_voltage_temp = variables.specimen_voltage + voltage_step
                 if specimen_voltage_temp > variables.specimen_voltage:
-                    if self.conf['COM_PORT_V_dc'] != "off":
+                    if self.conf['v_dc'] != "off":
                         # sending VDC via serial
                         self.command_v_dc(">S0 %s" % (specimen_voltage_temp))
                     variables.specimen_voltage = specimen_voltage_temp
@@ -266,7 +265,7 @@ class APT_SIMPLE:
         print('starting to clean up')
         # save the data to the HDF5
 
-        if self.conf['COM_PORT_V_dc'] != "off":
+        if self.conf['v_dc'] != "off":
             # Switch off the v_dc
             self.command_v_dc('F0')
             self.com_port_v_dc.close()
@@ -344,7 +343,7 @@ def main(conf):
                            queue_ch4, queue_ch5, queue_ch6, queue_ch7,
                            queue_stop_measurement, lock1, conf)
 
-    if conf['COM_PORT_V_dc'] != "off":
+    if conf['v_dc'] != "off":
         # Initialize high voltage
         experiment.initialize_v_dc()
         logger.info('High voltage is initialized')
@@ -375,7 +374,7 @@ def main(conf):
     while steps < total_steps:
         # Only for initializing every thing at firs iteration
         if steps == 0:
-            if conf['COM_PORT_V_dc'] != "off":
+            if conf['v_dc'] != "off":
                 # Turn on the v_dc and
                 experiment.command_v_dc("F1")
                 time.sleep(0.5)

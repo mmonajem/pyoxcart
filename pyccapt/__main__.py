@@ -27,7 +27,7 @@ def run():
         # Initialize global experiment variables
         variables.init(conf)
         # Config the port for cryo
-        if conf['COM_PORT_cryo'] == "off":
+        if conf['cryo'] == "off":
             print('The cryo temperature monitoring is off')
             com_port_idx_cryovac = None
         else:
@@ -45,33 +45,36 @@ def run():
                 print('Can not initialize the Cryovac')
                 print(e)
 
-        if conf['COM_PORT_gauge_mc'] == "off":
-            print('The main chamber gauge is off')
+        if conf['gauges'] != "off":
+            if conf['COM_PORT_gauge_mc'] == "off":
+                print('The main chamber gauge is off')
+            else:
+                # Config the port for Main and Buffer vacuum gauges
+                try:
+                    initialize_devices.initialize_pfeiffer_gauges()
+                except Exception as e:
+                    print('Can not initialize the Pfeiffer gauges')
+                    print(e)
+            if conf['COM_PORT_gauge_bc'] == "off":
+                print('The buffer chamber gauge is off')
+            else:
+                # Config the port for Buffer chamber vacuum gauges
+                try:
+                    initialize_devices.initialize_edwards_tic_buffer_chamber(conf)
+                except Exception as e:
+                    print('Can not initialize the buffer vacuum gauges')
+                    print(e)
+            if conf['COM_PORT_gauge_ll'] == "off":
+                print('The load lock gauge is off')
+            else:
+                # Config the port for Load Lock vacuum gauges
+                try:
+                    initialize_devices.initialize_edwards_tic_load_lock(conf)
+                except Exception as e:
+                    print('Can not initialize the load lock gauges')
+                    print(e)
         else:
-            # Config the port for Main and Buffer vacuum gauges
-            try:
-                initialize_devices.initialize_pfeiffer_gauges()
-            except Exception as e:
-                print('Can not initialize the Pfeiffer gauges')
-                print(e)
-        if conf['COM_PORT_gauge_bc'] == "off":
-            print('The buffer chamber gauge is off')
-        else:
-            # Config the port for Buffer chamber vacuum gauges
-            try:
-                initialize_devices.initialize_edwards_tic_buffer_chamber(conf)
-            except Exception as e:
-                print('Can not initialize the buffer vacuum gauges')
-                print(e)
-        if conf['COM_PORT_gauge_ll'] == "off":
-            print('The load lock gauge is off')
-        else:
-            # Config the port for Load Lock vacuum gauges
-            try:
-                initialize_devices.initialize_edwards_tic_load_lock(conf)
-            except Exception as e:
-                print('Can not initialize the load lock gauges')
-                print(e)
+            print('Gauges are off')
 
         if conf['camera'] == "off":
             print('The camera is off')
@@ -116,11 +119,12 @@ def run():
                 print(e)
 
         lock1 = threading.Lock()
-        # Thread for reading gauges
-        gauges_thread = threading.Thread(target=initialize_devices.gauges_update,
-                                         args=(conf, lock1, com_port_idx_cryovac))
-        gauges_thread.setDaemon(True)
-        gauges_thread.start()
+        if conf['gauges'] != "off":
+            # Thread for reading gauges
+            gauges_thread = threading.Thread(target=initialize_devices.gauges_update,
+                                             args=(conf, lock1, com_port_idx_cryovac))
+            gauges_thread.setDaemon(True)
+            gauges_thread.start()
 
         app = QtWidgets.QApplication(sys.argv)
         # get display resolution

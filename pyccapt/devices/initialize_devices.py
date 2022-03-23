@@ -194,7 +194,6 @@ def gauges_update(conf, lock, com_port_cryovac):
         Does not return anything
     
     """
-
     if conf['COM_PORT_gauge_mc'] != "off":
         tpg = TPG362(port=variables.COM_PORT_gauge_mc)
     if conf['COM_PORT_gauge_bc'] != "off":
@@ -202,7 +201,7 @@ def gauges_update(conf, lock, com_port_cryovac):
     if conf['COM_PORT_gauge_ll'] != "off":
         E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll)
     while True:
-        if conf['COM_PORT_cryo'] != "off":
+        if conf['cryo'] != "off":
             #  Temperature update
             output = command_cryovac('getOutput', com_port_cryovac)
             with lock:

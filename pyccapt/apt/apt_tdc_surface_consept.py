@@ -14,11 +14,8 @@ import numpy as np
 # Serial ports and NI
 import serial.tools.list_ports
 import pyvisa as visa
+import nidaqmx
 
-try:
-    import nidaqmx
-except:
-    print('Please install nidaqmx')
 # Local project scripts
 from pyccapt.devices import email_send, tweet_send, initialize_devices, signal_generator
 from pyccapt.tdc_surface_concept import tdc_surface_consept
@@ -115,15 +112,15 @@ class APT_ADVANCE:
             Does not return anything
 
         """
-        if self.conf['COM_PORT_V_p'] != "off":
-            # set the port for v_p
-            resources = visa.ResourceManager('@py')
-            self.com_port_v_p = resources.open_resource(variables.COM_PORT_V_p)
 
-            try:
-                self.com_port_v_p.query('*RST')
-            except:
-                self.com_port_v_p.write('VOLT %s' % (variables.v_p_min * (1 / variables.pulse_amp_per_supply_voltage)))
+        # set the port for v_p
+        resources = visa.ResourceManager('@py')
+        self.com_port_v_p = resources.open_resource(variables.COM_PORT_V_p)
+
+        try:
+            self.com_port_v_p.query('*RST')
+        except:
+            self.com_port_v_p.write('VOLT %s' % (variables.v_p_min * (1 / variables.pulse_amp_per_supply_voltage)))
 
     def initialize_counter(self):
         """
@@ -346,7 +343,7 @@ class APT_ADVANCE:
                 specimen_voltage_temp = variables.specimen_voltage + voltage_step
                 if specimen_voltage_temp > variables.specimen_voltage:
                     # sending VDC via serial
-                    if self.conf['COM_PORT_V_dc'] != "off":
+                    if self.conf['v_dc'] != "off":
                         self.command_v_dc(">S0 %s" % specimen_voltage_temp)
                     variables.specimen_voltage = specimen_voltage_temp
 
@@ -354,7 +351,7 @@ class APT_ADVANCE:
         new_vp = variables.specimen_voltage * variables.pulse_fraction * \
                  (1 / variables.pulse_amp_per_supply_voltage)
         if variables.pulse_voltage_max > new_vp > variables.pulse_voltage_min:
-            if self.conf['COM_PORT_V_p'] != "off":
+            if self.conf['v_p'] != "off":
                 self.com_port_v_p.write('VOLT %s' % new_vp)
             variables.pulse_voltage = new_vp * variables.pulse_amp_per_supply_voltage
 
@@ -428,23 +425,25 @@ class APT_ADVANCE:
 
         # save the data to the HDF5
 
-        if self.conf['COM_PORT_V_dc'] != "off":
+        if self.conf['v_dc'] != "off":
             # Switch off the v_dc
             self.command_v_dc('F0')
             self.com_port_v_dc.close()
 
-        if self.conf['COM_PORT_V_p'] != "off":
+        if self.conf['v_p'] != "off":
             # Switch off the v_p
             self.com_port_v_p.write('VOLT 0')
             self.com_port_v_p.write('OUTPut OFF')
             self.com_port_v_p.close()
 
-        if variables.counter_source == 'pulse_counter':
-            # Close the task of counter
-            task_counter.stop()
-            task_counter.close()
-        # Turn off the signal generator
-        signal_generator.turn_off_signal_generator()
+        if self.conf['edge_counter'] != "off":
+            if variables.counter_source == 'pulse_counter':
+                # Close the task of counter
+                task_counter.stop()
+                task_counter.close()
+        if self.conf['signal_generator'] != "off":
+            # Turn off the signal generator
+            signal_generator.turn_off_signal_generator()
         # Zero variables
         cleanup_variables()
         self.logger.info('Clean up is finished')
@@ -559,15 +558,16 @@ def main(conf):
                              queue_ch2_time, queue_ch2_wave, queue_ch3_time, queue_ch3_wave,
                              lock1, lock2, logger, conf)
 
-    # Initialize the signal generator
-    signal_generator.initialize_signal_generator(variables.pulse_frequency)
+    if conf['signal_generator'] != "off":
+        # Initialize the signal generator
+        signal_generator.initialize_signal_generator(variables.pulse_frequency)
 
-    if conf['COM_PORT_V_dc'] != 'off':
+    if conf['v_dc'] != 'off':
         # Initialize high voltage
         experiment.initialize_v_dc()
         logger.info('High voltage is initialized')
 
-    if conf['COM_PORT_V_p'] != 'off':
+    if conf['v_p'] != 'off':
         # Initialize pulser
         experiment.initialize_v_p()
         logger.info('Pulser is initialized')
@@ -620,13 +620,13 @@ def main(conf):
         # Only for initializing every thing at firs iteration
         if steps == 0:
             # Turn on the v_dc and v_p
-            if conf['COM_PORT_V_p'] != "off":
+            if conf['v_p'] != "off":
                 experiment.com_port_v_p.write('OUTPut ON')
                 time.sleep(0.5)
-            if conf['COM_PORT_V_dc'] != "off":
+            if conf['v_dc'] != "off":
                 experiment.command_v_dc("F1")
                 time.sleep(0.5)
-            if conf['COM_PORT_NI_counter'] != "off":
+            if conf['edge_counter'] != "off":
                 if variables.counter_source == 'pulse_counter':
                     # start the Counter
                     task_counter.start()

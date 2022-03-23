@@ -935,6 +935,7 @@ class UI_APT_S(object):
                                                                                    variables.x[:max_lenght],
                                                                                    variables.x[:max_lenght],
                                                                                    flightPathLength=110)
+                                                    viz = viz[viz < 200]
 
                                             self.y_tof, self.x_tof = np.histogram(viz, bins=512)
                                             self.histogram.clear()
