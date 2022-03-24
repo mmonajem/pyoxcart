@@ -27,10 +27,17 @@ The images below are an overview of the two version of user interface:
     
     pip install -e .
 
-# Edite the GUI with Qt-Designer and run command below to create your own GUI
-    pyuic5 -x gui_simple_layout.ui -o gui_simple_layout.py
+# Edite GUI 
+
+Edite the GUI with Qt-Designer and run command below to create your own GUI
+UI (simple or advance) in the GUI module. 
+
+    pyuic5 -x gui_simple_layout.ui -o gui_simple_layout.py. You should then merge the created file with the targeted 
+
 # Running an experiment
-TODO
+
+modify the congig.json file. Type pyccapt in your command line.
+
 # Citing 
 TODO
 
