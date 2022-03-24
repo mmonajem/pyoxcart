@@ -181,6 +181,7 @@ def gauges_update(conf, lock, com_port_cryovac):
     This function is used for reading gauge parameters.
     It does so by executing command on the devices to read value.
     Interface Used:
+
         Utilizes the TPG362 class(inherits TPG26x) to execute command:
             Responsible for driver for the TPG 261 and TPG 262 dual channel measurement and control unit.
         Utilizes EdwardsAGC : Primitive driver for Edwards Active Gauge Controller

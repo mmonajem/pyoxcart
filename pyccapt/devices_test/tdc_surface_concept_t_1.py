@@ -29,7 +29,7 @@ Created on Thu Sep 19 16:07:32 2019
 Test of the user callbacks interface.
 """
 
-from apt_pycontrol.tdc_surface_concept import scTDC
+from pyccapt.tdc_surface_concept import scTDC
 # import sys
 import timeit
 

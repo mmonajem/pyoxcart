@@ -4,7 +4,6 @@ This is file contains tools for mass calibration process.
 """
 
 import numpy as np
-
 from scipy.signal import find_peaks, peak_widths
 import matplotlib.pyplot as plt
 import math
@@ -12,7 +11,7 @@ from scipy.optimize import curve_fit
 from mpl_toolkits.mplot3d import Axes3D
 from scipy import interpolate
 
-from apt_pyanalysis.tools import variables, intractive_point_identification
+from pyccapt.calibration import variables, intractive_point_identification
 
 
 def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False, prominence=500, distance=None,

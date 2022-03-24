@@ -6,17 +6,17 @@
 Welcome to PyCCAPT's documentation!
 ===================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
 
 PyCCAPT Packages
 ===================
 
 .. toctree::
    :maxdepth: 4
+
    pyccapt
+   pyccapt.apt
+   setup
+   tests
 
 
 

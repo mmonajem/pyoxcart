@@ -1236,7 +1236,7 @@ class UI_APT_A(Camera, object):
         UI_APT_A.setWindowTitle(_translate("UI_APT_A", "OXCART"))
         ###
         UI_APT_A.setWindowTitle(_translate("OXCART", "APT Control Software"))
-        UI_APT_A.setWindowIcon(QtGui.QIcon('../files/logo3.png'))
+        UI_APT_A.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
         ###
         self.pump_load_lock_switch.setText(_translate("UI_APT_A", "Load Lock Pump"))
         self.led_pump_load_lock.setText(_translate("UI_APT_A", "pump"))

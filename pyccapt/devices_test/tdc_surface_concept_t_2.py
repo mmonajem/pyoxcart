@@ -1,4 +1,4 @@
-from apt_pycontrol.tdc_surface_concept import scTDC
+from pyccapt.tdc_surface_concept import scTDC
 import time
 import timeit
 import numpy as np

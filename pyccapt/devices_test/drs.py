@@ -10,9 +10,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
-# load the library
-drs_lib = ctypes.CDLL("../drs/drs_lib.dll")
-
 
 class DRS(object):
     def __init__(self, trigger, test, delay, sample_frequency):
@@ -21,20 +18,23 @@ class DRS(object):
         # test=0 --> Test mode off
         # test=1 --> test mode - connect 100 MHz clock connected to all channels
         # Trigger delay in ns
-        drs_lib.Drs_new.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float]
-        drs_lib.Drs_new.restype = ctypes.c_void_p
-        drs_lib.Drs_reader.argtypes = [ctypes.c_void_p]
-        drs_lib.Drs_reader.restype = ndpointer(dtype=ctypes.c_float, shape=(8 * 1024,))
-        drs_lib.Drs_delete_drs_ox.restype = ctypes.c_void_p
-        drs_lib.Drs_delete_drs_ox.argtypes = [ctypes.c_void_p]
-        self.obj = drs_lib.Drs_new(trigger, test, delay, sample_frequency)
+        # load the library
+        self.drs_lib = ctypes.CDLL("../drs/drs_lib.dll")
+        self.drs_lib.Drs_new.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float]
+        self.drs_lib.Drs_new.restype = ctypes.c_void_p
+        self.drs_lib.Drs_reader.argtypes = [ctypes.c_void_p]
+        self.drs_lib.Drs_reader.restype = ndpointer(dtype=ctypes.c_float, shape=(8 * 1024,))
+        self.drs_lib.Drs_delete_drs_ox.restype = ctypes.c_void_p
+        self.drs_lib.Drs_delete_drs_ox.argtypes = [ctypes.c_void_p]
+        self.obj = self.drs_lib.Drs_new(trigger, test, delay, sample_frequency)
 
     def reader(self, ):
-        data = drs_lib.Drs_reader(self.obj)
+        data = self.drs_lib.Drs_reader(self.obj)
         return data
 
     def delete_drs_ox(self):
-        drs_lib.Drs_delete_drs_ox(self.obj)
+        self.drs_lib.Drs_delete_drs_ox(self.obj)
+
 
 if __name__ == '__main__':
     # Create drs object and initialize the drs board

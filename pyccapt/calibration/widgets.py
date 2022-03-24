@@ -1,6 +1,6 @@
 import ipywidgets as widgets
 
-from apt_pyanalysis.tools  import variables
+from pyccapt.calibration import variables
 
 # Stores values currently selected element in dropdown.
 elementDict = {}
@@ -105,10 +105,11 @@ def onClickReset(b):
 
 def on_change(change):
     """
-    This is a callback fucntion which observes change in the dropdown widget.
+    This is a callback function which observes change in the dropdown widget.
     It updates the element and its corresponding weight/mass based on the selection from the dropdown.
     Updates the selected value in a global dict. [This dict could be replaced by a single variable]
-    Atrributes:
+
+    Attributes:
         Accepts only a internal object as an argument
     Returns:
         Does not return anything
@@ -126,6 +127,7 @@ def on_change_charge(change):
     This is a callback function which observes change in the dropdown widget.
     It updates the element and its corresponding weight/mass based on the selection from the dropdown.
     Updates the selected value in a global dict. [This dict could be replaced by a single variable]
+
     Attributes:
         Accepts only a internal object as an argument
     Returns:

@@ -90,7 +90,8 @@ def confirm(prompt):
 
 
 def copy_tutorials(target_root):
-    """Copies the PiSCAT tutorials to a given directory.
+    """
+    Copies the PyCCAPT tutorials to a given directory.
     Parameters
     ----------
     target_root: pathlib.Path
@@ -115,7 +116,8 @@ def copy_tutorials(target_root):
 
 
 def start_tutorials():
-    """Copy the PiSCAT tutorials to the target directory and start Jupyter server
+    """
+    Copy the PyCCAPT tutorials to the target directory and start Jupyter server
     The target directory is the first argument of sys.argv.
     """
 

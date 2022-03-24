@@ -691,7 +691,7 @@ class UI_APT_S(object):
         self.label_11.setText(_translate("UI_APT_S", "Run Statistics"))
         self.label_13.setText(_translate("UI_APT_S", "Total Ions"))
         ###
-        UI_APT_S.setWindowIcon(QtGui.QIcon('../files/logo3.png'))
+        UI_APT_S.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
         self._translate = QtCore.QCoreApplication.translate
         self.start_button.clicked.connect(self.thread_main)
         self.thread = MainThread(self.conf)

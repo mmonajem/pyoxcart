@@ -1,7 +1,7 @@
 import math
 import matplotlib.pyplot as plt
 
-from apt_pyanalysis.tools import variables
+from pyccapt.calibration import variables
 
 
 class AnnoteFinder(object):

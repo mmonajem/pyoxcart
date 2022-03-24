@@ -51,12 +51,12 @@ else:
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+                'sphinx.ext.napoleon',
                 'sphinx.ext.autodoc',
                 'sphinx.ext.autosummary',
                 'sphinx.ext.intersphinx',
                 'sphinx.ext.mathjax',
                 'sphinx.ext.viewcode',
-                'sphinx.ext.napoleon',
                 'nbsphinx',
                 'recommonmark',
                 'sphinx_markdown_tables',
