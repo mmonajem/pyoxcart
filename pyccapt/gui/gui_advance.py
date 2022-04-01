@@ -1736,8 +1736,7 @@ class UI_APT_A(Camera, object):
             self.x_tem = np.append(self.x_tem, self.x_tem[-1] + 1)  # Add a new value 1 higher than the last.
             self.y_tem = self.y_tem[1:]  # Remove the first element.
             try:
-                    # self.y_tem = np.append(self.y_tem, int(variables.temperature))
-                    self.y_tem = np.append(self.y_tem, int(35.55))
+                    self.y_tem = np.append(self.y_tem, int(variables.temperature))
                     self.data_line_tem.setData(self.x_tem, self.y_tem)
             except Exception as e:
                     print(

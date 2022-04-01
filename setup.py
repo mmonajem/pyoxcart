@@ -23,7 +23,7 @@ setup(
     author=author,
     author_email='mehrpad.monajem@fau.de',
     url='https://github.com/mmonajem/pyccapt',
-    version='0.0.1',
+    version=version,
     packages=find_packages(),
     entry_points={
             'console_scripts': {

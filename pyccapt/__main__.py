@@ -21,6 +21,7 @@ from pyccapt.gui import gui_advance
 
 from pyccapt.tools.module_dir import MODULE_DIR
 
+
 def main():
     try:
         # load the Json file

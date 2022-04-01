@@ -150,8 +150,8 @@ def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False,
             af = intractive_point_identification.AnnoteFinder(peakLocIs[:, 0], peakLocIs[:, 1], annotes, ax=ax1)
             fig1.canvas.mpl_connect('button_press_event', af)
         if fig_name != None:
-            plt.savefig("%s.svg" % fig_name, format="svg", dpi=1200)
-            plt.savefig("%s.png" % fig_name, format="png", dpi=1200)
+            plt.savefig(variables.result_path + "//mc_%s.svg" % fig_name, format="svg", dpi=1200)
+            plt.savefig(variables.result_path + "//mc_%s.png" % fig_name, format="png", dpi=1200)
         plt.show()
     else:
         plt.close(fig1)
@@ -167,7 +167,7 @@ def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False,
         return max_hist, edges, peakLocIs, max_paek_edges
 
 
-def history_ex(mc, dld_highVoltage, mean_t=1.5, plot=False):
+def history_ex(mc, dld_highVoltage, mean_t=1.5, plot=False, fig_name=None):
     MAXMC = 100  # maximum mc that makes sense
     HISTORYPIX = 1024  # number of pixels in the hit sequence tof image
     TOFPIX = 512  # number of vertical pixels for tof image
@@ -220,12 +220,15 @@ def history_ex(mc, dld_highVoltage, mean_t=1.5, plot=False):
         plt.title("Experiment history")
         plt.imshow(mcImage.T, extent=extent, origin='lower', aspect="auto")
         # ax1.grid(axis='y', color='0.95')
+        if fig_name != None:
+            plt.savefig(variables.result_path + "//ex_his_%s.svg" % fig_name, format="svg", dpi=1200)
+            plt.savefig(variables.result_path + "//ex_his_%s.png" % fig_name, format="png", dpi=1200)
         plt.show()
 
     return [peak_begin, peak_end]  # peaks as beginning/end
 
 
-def voltage_corr(highVoltage, mc, fitPeak, ionsPerFitSegment, plot=False):
+def voltage_corr(highVoltage, mc, fitPeak, ionsPerFitSegment, plot=False, fig_name=None):
     def voltage_corr(x, a, b, c):
         # return (np.sqrt(b + x + c*(x**2))) * a
         return a * (x ** 2) + b * x + c
@@ -269,11 +272,14 @@ def voltage_corr(highVoltage, mc, fitPeak, ionsPerFitSegment, plot=False):
         ax1.set_ylabel("correction factor", color="red", fontsize=20)
         ax1.tick_params(axis='both', which='major', labelsize=12)
         ax1.tick_params(axis='both', which='minor', labelsize=10)
+        if fig_name != None:
+            plt.savefig(variables.result_path + "//vol_cor_%s.svg" % fig_name, format="svg", dpi=1200)
+            plt.savefig(variables.result_path + "//vol_cor_%s.png" % fig_name, format="png", dpi=1200)
         plt.show()
     return voltage_corr(highVoltage, a, b, c)
 
 
-def bowl_corr(x, y, mc, mcIdeal=27, mc_min=25, mc_max=29, plot=False):
+def bowl_corr(x, y, mc, mcIdeal, mc_min, mc_max, plot=False, fig_name=None):
     def bowl_corr_fit(data_xy, a, b, c, d, e, f):
         x = data_xy[0]
         y = data_xy[1]
@@ -310,7 +316,9 @@ def bowl_corr(x, y, mc, mcIdeal=27, mc_min=25, mc_max=29, plot=False):
         ax.set_zlabel('Z data')
         ax.tick_params(axis='both', which='major', labelsize=12)
         ax.tick_params(axis='both', which='minor', labelsize=10)
-
+        if fig_name != None:
+            plt.savefig(variables.result_path + "//bowl_cor_%s.svg" % fig_name, format="svg", dpi=1200)
+            plt.savefig(variables.result_path + "//bowl_cor_%s.png" % fig_name, format="png", dpi=1200)
         plt.show()
     corr = bowl_corr_fit([x, y], *parameters)
     return corr / mcIdeal

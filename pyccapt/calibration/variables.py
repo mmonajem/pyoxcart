@@ -1,7 +1,11 @@
-
+"""
+This is the main script is load the GUI base on the configuration file.
+@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
+"""
 
 
 def init():
+
     global selected_x_fdm
     global selected_y_fdm
     global roi_fdm
@@ -13,6 +17,9 @@ def init():
     global listMaterial
 
     global peaks_idx
+
+    global result_path
+    global path
 
 
     selected_x_fdm = 0
@@ -26,3 +33,6 @@ def init():
     listMaterial = []
 
     peaks_idx = []
+
+    result_path = ''
+    path = ''

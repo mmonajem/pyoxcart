@@ -1,4 +1,7 @@
-
+"""
+This is the main script is load the GUI base on the configuration file.
+@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
+"""
 import visa
 import time
 from pyvisa import constants
@@ -27,6 +30,9 @@ if __name__ == '__main__':
         time.sleep(5)
 
         v_p.write('OUTPut ON')
+        time.sleep(5)
+
+        print(v_p.query('VOLT?'))
         time.sleep(5)
 
         v_p.write('OUTPut OFF')

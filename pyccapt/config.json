@@ -2,7 +2,7 @@
 	"mode": "advance",
 	"visualization": "tof",
 	"tdc": "on",
-	"camera": "off",
+	"camera": "on",
 	"pump": "on",
 	"gates": "on",
 	"v_dc": "on",
