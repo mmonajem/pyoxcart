@@ -1,0 +1,40 @@
+Installation
+============
+
+From PyPi
+---------
+
+To install PyCCAPT using PyPi, enter the following command in the console:
+
+``pip install pyccapt``
+
+
+Local installation of PyCCAPT
+----------------------------
+Clone/download this repository and unzip it. In the project directory enter the following command:
+
+``pip install -e .``
+
+
+Running PyCCAPT GUI
+------------------
+Once the installation is done and the python environment is activated, enter the following command in the
+console:
+
+``pyccapt``
+
+
+Running PyCCAPT Tutorials
+------------------------
+Once the installation is done and the python environment is activated, enter the following command in the console:
+
+``python -m pyccapt.Tutorials``
+
+
+Testing
+-------
+To run the tests, please activate the PyCCAPT virtual environment. In the project directory,
+in the console, enter the following command:
+
+``python setup.py test``
+

@@ -1,7 +1,6 @@
 """
-This is the main script for doing experiment.
+This is the main script for controlling the experiment.
 It contains the main control loop of experiment.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
 
 import time
@@ -22,8 +21,7 @@ from pyccapt.tools import loggi
 
 class APT_SIMPLE:
     """
-    apt_simple class
-
+    APT_VOLTAGE class is a main class for controlling laser atom probe with Roentdec TDC.
     """
 
     def __init__(self, queue_x, queue_y, queue_tof, queue_AbsoluteTimeStamp,
@@ -32,7 +30,7 @@ class APT_SIMPLE:
                             queue_stop_measurement, lock1, conf):
         """
         This is the constructor class that accepts several initialized queues objects corresponding
-        to various parameters of the groups like dld,TDC,DRS. This constructor also objects used for
+        to various parameters of the groups like dld,TDC. This constructor also objects used for
         creating locks on resources to reduce concurrent access on resources and reduce dirty read.
         """
         # Queues for sharing data between tdc and main process
@@ -56,9 +54,10 @@ class APT_SIMPLE:
 
     def initialize_v_dc(self):
         """
-        This class method initializes the high voltage parameter: v_dc.
+        This class method initializes the high voltage device:.
         The function utilizes the serial library to communicate over the
         COM port serially and read the corresponding v_dc parameter.
+        The COM port number has to be enter in the config file.
 
         It exits if it is not able to connect on the COM Port.
 
@@ -115,12 +114,13 @@ class APT_SIMPLE:
 
     def reader_queue_dld(self):
         """
-        This class method runs in an infinite loop and listens and reads parameters
+        This class method runs in an infinite loop and listens and reads dld queues.
         over the queues for the group: dld
 
         This function is called continuously by a separate thread in the main function.
 
         The values read from the queues are updates in imported "variables" file
+
 
         Attributes:
             Accepts only the self (class object)
@@ -159,6 +159,7 @@ class APT_SIMPLE:
     def main_ex_loop(self, counts_target):
 
         """
+        This function is contaion all methods that itretively has to run to control the exprement.
         This class method:
 
         1. Read the number of detected Ions(in TDC or Counter mode)
@@ -216,6 +217,7 @@ class APT_SIMPLE:
     def clear_up(self, ):
         """
         This function clears global variables and deinitialize high voltage and pulser function
+        and clear up global variables
 
         Attributes:
             Does not accept any arguments

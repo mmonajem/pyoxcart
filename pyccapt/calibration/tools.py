@@ -76,7 +76,7 @@ def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False,
     else:
         y, x = np.histogram(mc, x)
 
-    fig1, ax1 = plt.subplots(figsize=(8, 4))
+
 
     # y, x, _ = plt.hist(mc, x,  log=True)
     if peaks_find:
@@ -106,6 +106,7 @@ def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False,
                     peakLocIs = np.expand_dims(peakLocIs_tmp, 0)
 
     if plot:
+        fig1, ax1 = plt.subplots(figsize=(8, 4))
         y, x, _ = plt.hist(mc, x, log=True)
         ax1.set_xlabel("mass-to-charge-state ratio [Da]", color="red", fontsize=10)
         if mode == 'count':
@@ -150,11 +151,9 @@ def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False,
             af = intractive_point_identification.AnnoteFinder(peakLocIs[:, 0], peakLocIs[:, 1], annotes, ax=ax1)
             fig1.canvas.mpl_connect('button_press_event', af)
         if fig_name != None:
-            plt.savefig(variables.result_path + "//mc_%s.svg" % fig_name, format="svg", dpi=1200)
-            plt.savefig(variables.result_path + "//mc_%s.png" % fig_name, format="png", dpi=1200)
+            plt.savefig(variables.result_path + "//mc_%s.svg" % fig_name, format="svg", dpi=600)
+            plt.savefig(variables.result_path + "//mc_%s.png" % fig_name, format="png", dpi=600)
         plt.show()
-    else:
-        plt.close(fig1)
 
     if 'peakLocIs' in locals():
         max_paek_edges = [x[int(results_half[2][i])], x[int(results_half[3][i])]]
@@ -206,7 +205,6 @@ def history_ex(mc, dld_highVoltage, mean_t=1.5, plot=False, fig_name=None):
     peak_begin = index_min * 100 / 512
     peak_end = index_max * 100 / 512
 
-
     #### plotting data history
     if plot:
         fig1, ax1 = plt.subplots(figsize=(6, 3))
@@ -220,16 +218,16 @@ def history_ex(mc, dld_highVoltage, mean_t=1.5, plot=False, fig_name=None):
         plt.title("Experiment history")
         plt.imshow(mcImage.T, extent=extent, origin='lower', aspect="auto")
         # ax1.grid(axis='y', color='0.95')
-        if fig_name != None:
-            plt.savefig(variables.result_path + "//ex_his_%s.svg" % fig_name, format="svg", dpi=1200)
-            plt.savefig(variables.result_path + "//ex_his_%s.png" % fig_name, format="png", dpi=1200)
+        if fig_name is not None:
+            plt.savefig(variables.result_path + "//ex_his_%s.svg" % fig_name, format="svg", dpi=600)
+            plt.savefig(variables.result_path + "//ex_his_%s.png" % fig_name, format="png", dpi=600)
         plt.show()
 
     return [peak_begin, peak_end]  # peaks as beginning/end
 
 
 def voltage_corr(highVoltage, mc, fitPeak, ionsPerFitSegment, plot=False, fig_name=None):
-    def voltage_corr(x, a, b, c):
+    def voltage_corr_f(x, a, b, c):
         # return (np.sqrt(b + x + c*(x**2))) * a
         return a * (x ** 2) + b * x + c
 
@@ -254,29 +252,31 @@ def voltage_corr(highVoltage, mc, fitPeak, ionsPerFitSegment, plot=False, fig_na
             pkLoc = np.append(pkLoc, np.median(mcBin))
             VDC = np.append(VDC, np.mean(highVoltage[np.array(mask)]))
 
-    corr = pkLoc / pkLoc[0]
+    corr = pkLoc/ pkLoc[0]
 
     # 'peak location vs DC voltage'
 
     # Do the fit, defining the fitting function in-line
-    fitresult, _ = curve_fit(voltage_corr, VDC, corr)
+    fitresult, _ = curve_fit(voltage_corr_f, VDC, corr)
 
     a, b, c = fitresult
-    if plot:
-        fig1, ax1 = plt.subplots(figsize=(6, 3))
-        ax2 = ax1.twinx()
+    if plot or fig_name is not None:
+        fig1, ax1 = plt.subplots(figsize=(8, 6))
         ax1.scatter(VDC, corr)
-        ax2.plot(VDC, voltage_corr(VDC, a, b, c))
+        ax1.plot(VDC, voltage_corr_f(VDC, a, b, c))
         plt.title("Peak location vs DC voltage")
         ax1.set_xlabel("DC voltage", color="red", fontsize=20)
-        ax1.set_ylabel("correction factor", color="red", fontsize=20)
-        ax1.tick_params(axis='both', which='major', labelsize=12)
-        ax1.tick_params(axis='both', which='minor', labelsize=10)
-        if fig_name != None:
-            plt.savefig(variables.result_path + "//vol_cor_%s.svg" % fig_name, format="svg", dpi=1200)
-            plt.savefig(variables.result_path + "//vol_cor_%s.png" % fig_name, format="png", dpi=1200)
-        plt.show()
-    return voltage_corr(highVoltage, a, b, c)
+        ax1.set_ylabel(r"$F_V$", color="red", fontsize=20)
+        # ax1.tick_params(axis='both', which='major', labelsize=12)
+        # ax1.tick_params(axis='both', which='minor', labelsize=10)
+        if fig_name is not None:
+            plt.savefig(variables.result_path + "//vol_cor_%s.svg" % fig_name, format="svg", dpi=600)
+            plt.savefig(variables.result_path + "//vol_cor_%s.png" % fig_name, format="png", dpi=600)
+        if plot:
+            plt.show()
+        else:
+            plt.close()
+    return voltage_corr_f(highVoltage, a, b, c)
 
 
 def bowl_corr(x, y, mc, mcIdeal, mc_min, mc_max, plot=False, fig_name=None):
@@ -292,15 +292,15 @@ def bowl_corr(x, y, mc, mcIdeal, mc_min, mc_max, plot=False, fig_name=None):
 
     parameters, covariance = curve_fit(bowl_corr_fit, [detxIn, detyIn], mcIn)
 
-    if plot:
+    if plot or fig_name is not None:
         # create surface function model
         # setup data points for calculating surface model
-        model_x_data = np.linspace(min(detxIn), max(detxIn), 30)
-        model_y_data = np.linspace(min(detyIn), max(detyIn), 30)
+        model_x_data = np.linspace(-38, 38, 30)
+        model_y_data = np.linspace(-38, 38, 30)
         # create coordinate arrays for vectorized evaluations
         X, Y = np.meshgrid(model_x_data, model_y_data)
         # calculate Z coordinate array
-        Z = bowl_corr_fit(np.array([X, Y]), *parameters)
+        Z = bowl_corr_fit(np.array([X, Y]), *parameters) / mcIdeal
 
         # setup figure object
         fig = plt.figure()
@@ -311,15 +311,19 @@ def bowl_corr(x, y, mc, mcIdeal, mc_min, mc_max, plot=False, fig_name=None):
         # plot input data
         # ax.scatter(detxIn, detyIn, mcIn, color='red')
         # set plot descriptions
-        ax.set_xlabel('X data')
-        ax.set_ylabel('Y data')
-        ax.set_zlabel('Z data')
-        ax.tick_params(axis='both', which='major', labelsize=12)
-        ax.tick_params(axis='both', which='minor', labelsize=10)
-        if fig_name != None:
-            plt.savefig(variables.result_path + "//bowl_cor_%s.svg" % fig_name, format="svg", dpi=1200)
-            plt.savefig(variables.result_path + "//bowl_cor_%s.png" % fig_name, format="png", dpi=1200)
-        plt.show()
+        ax.set_xlabel('X', color="red", fontsize=20)
+        ax.set_ylabel('Y', color="red", fontsize=20)
+        ax.set_zlabel(r"$F_B$", color="red", fontsize=20)
+
+        # ax.tick_params(axis='both', which='major', labelsize=12)
+        # ax.tick_params(axis='both', which='minor', labelsize=10)
+        if fig_name is not None:
+            plt.savefig(variables.result_path + "//bowl_cor_%s.svg" % fig_name, format="svg", dpi=600, bbox_index='tight')
+            plt.savefig(variables.result_path + "//bowl_cor_%s.png" % fig_name, format="png", dpi=600, bbox_index='tight')
+        if plot:
+            plt.show()
+        else:
+            plt.close()
     corr = bowl_corr_fit([x, y], *parameters)
     return corr / mcIdeal
 

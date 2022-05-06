@@ -1,7 +1,6 @@
 """
-This is the main script for doing experiment.
+This is the main script for controlling the experiment.
 It contains the main control loop of experiment.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
 
 import time
@@ -26,10 +25,8 @@ from pyccapt.tools import loggi
 
 class APT_ADVANCE:
     """
-    APT_VOLTAGE class
-
+    APT_VOLTAGE class is a main class for controlling voltage atom probe with Surface Consept TDC.
     """
-
     def __init__(self, queue_x, queue_y, queue_t, queue_dld_start_counter,
                  queue_channel, queue_time_data, queue_tdc_start_counter,
                  queue_ch0_time, queue_ch0_wave, queue_ch1_time, queue_ch1_wave,
@@ -66,15 +63,16 @@ class APT_ADVANCE:
 
     def initialize_v_dc(self):
         """
-        This class method initializes the high voltage parameter: v_dc.
+        This class method initializes the high voltage device:.
         The function utilizes the serial library to communicate over the
         COM port serially and read the corresponding v_dc parameter.
+        The COM port number has to be enter in the config file.
 
         It exits if it is not able to connect on the COM Port.
 
         Attributes:
             Accepts only the self (class object)
-        
+
         Returns:
             Does not return anything
         """
@@ -101,9 +99,10 @@ class APT_ADVANCE:
 
     def initialize_v_p(self):
         """
-        This class method initializes the Pulse parameter: v_p.
+        This class method initializes the Pulser device:
         The function utilizes the serial library to communicate over the
         COM port serially and read the corresponding v_p parameter.
+        The COM port number has to be enter in the config file.
 
         Attributes:
             Accepts only the self (class object)
@@ -124,7 +123,7 @@ class APT_ADVANCE:
 
     def initialize_counter(self):
         """
-        This class method initializes the edge counter parameter.
+        This class method initializes the edge counter of National Instrument.
         It helps to count the riding edges of a detector  signal.
 
         The function utilizes the nidaqmx library to communicate
@@ -147,7 +146,7 @@ class APT_ADVANCE:
 
         return task_counter
 
-    # apply command to the V_dc
+
     def command_v_dc(self, cmd):
         """
         This class method is used to send commands on the high voltage parameter: v_dc.
@@ -172,7 +171,7 @@ class APT_ADVANCE:
 
     def reader_queue_dld(self):
         """
-        This class method runs in an infinite loop and listens and reads parameters
+        This class method runs in an infinite loop and listens and reads dld queues.
         over the queues for the group: dld
 
         This function is called continuously by a separate thread in the main function.
@@ -207,7 +206,7 @@ class APT_ADVANCE:
     def reader_queue_drs(self):
 
         """
-        This class method runs in an infinite loop and listens and reads parameters
+        This class method runs in an infinite loop and listens and reads DRS queues.
         over the queues for the group: DRS
 
         This function is called continuously by a separate thread in the main function.
@@ -248,7 +247,8 @@ class APT_ADVANCE:
     def reader_queue_tdc(self):
 
         """
-        This class method runs in an infinite loop and listens and reads parameters
+        This class method runs in an infinite loop and listens and reads TDC queues.
+        TDC data is the raw data which contains the channel number and the time stamp.
         over the queues for the group: TDC
 
         This function is called continuously by a separate thread in the main function.
@@ -283,6 +283,7 @@ class APT_ADVANCE:
     def main_ex_loop(self, task_counter, counts_target):
 
         """
+        This function is contaion all methods that itretively has to run to control the exprement.
         This class method:
 
         1. Read the number of detected Ions(in TDC or Counter mode)
@@ -293,7 +294,7 @@ class APT_ADVANCE:
 
         Attributes:
             task_counter: Counter edges
-            counts_target: Calculated parameter(((detection_rate/100)* pulse_frequency)/pulse_frequency)
+            counts_target:
         
         Returns:
             Does not return anything
@@ -323,6 +324,10 @@ class APT_ADVANCE:
                 sum(variables.main_counter[-variables.cycle_avg:]) / variables.cycle_avg)
 
         counts_measured = variables.avg_n_count / (1 + variables.pulse_frequency * 1000)
+
+        # variables.avg_n_count = np.sum(variables.main_counter[-variables.cycle_avg:])
+        #
+        # counts_measured = variables.avg_n_count / (1 + variables.pulse_frequency * 1000)
 
         counts_error = counts_target - counts_measured  # deviation from setpoint
 
@@ -361,6 +366,7 @@ class APT_ADVANCE:
     def clear_up(self, task_counter):
         """
         This function clears global variables and deinitialize high voltage and pulser function
+        and clear up global variables
 
         Attributes:
             Does not accept any arguments
@@ -474,6 +480,27 @@ def main(conf):
             queue_y = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_t = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_dld_start_counter = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+            queue_channel = None
+            queue_time_data = None
+            queue_tdc_start_counter = None
+            queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
+
+            # Initialize and initiate a process(Refer to imported file 'tdc_new' for process function declaration )
+            # Module used: multiprocessing
+            tdc_process = multiprocessing.Process(target=tdc_surface_consept.experiment_measure,
+                                                  args=(variables.raw_mode, queue_x,
+                                                        queue_y, queue_t,
+                                                        queue_dld_start_counter,
+                                                        queue_channel,
+                                                        queue_time_data,
+                                                        queue_tdc_start_counter,
+                                                        queue_stop_measurement))
+
+        elif variables.counter_source == 'TDC_Raw':
+            queue_x = None
+            queue_y = None
+            queue_t = None
+            queue_dld_start_counter = None
             queue_channel = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_time_data = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_tdc_start_counter = Queue(maxsize=-1, ctx=multiprocessing.get_context())
@@ -489,45 +516,45 @@ def main(conf):
                                                         queue_time_data,
                                                         queue_tdc_start_counter,
                                                         queue_stop_measurement))
-            tdc_process.daemon = True
-            tdc_process.start()
+        tdc_process.daemon = True
+        tdc_process.start()
 
-            queue_ch0_time = None
-            queue_ch0_wave = None
-            queue_ch1_time = None
-            queue_ch1_wave = None
-            queue_ch2_time = None
-            queue_ch2_wave = None
-            queue_ch3_time = None
-            queue_ch3_wave = None
-        elif variables.counter_source == 'DRS':
-            queue_ch0_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            queue_ch0_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            queue_ch1_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            queue_ch1_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            queue_ch2_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            queue_ch2_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            queue_ch3_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            queue_ch3_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
+        queue_ch0_time = None
+        queue_ch0_wave = None
+        queue_ch1_time = None
+        queue_ch1_wave = None
+        queue_ch2_time = None
+        queue_ch2_wave = None
+        queue_ch3_time = None
+        queue_ch3_wave = None
+    elif variables.counter_source == 'DRS':
+        queue_ch0_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch0_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch1_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch1_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch2_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch2_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch3_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_ch3_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+        queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
 
-            queue_x = None
-            queue_y = None
-            queue_t = None
-            queue_dld_start_counter = None
-            queue_channel = None
-            queue_time_data = None
-            queue_tdc_start_counter = None
+        queue_x = None
+        queue_y = None
+        queue_t = None
+        queue_dld_start_counter = None
+        queue_channel = None
+        queue_time_data = None
+        queue_tdc_start_counter = None
 
-            # Initialize and initiate a process(Refer to imported file 'drs' for process function declaration)
-            # Module used: multiprocessing
-            drs_process = multiprocessing.Process(target=drs.experiment_measure, args=(queue_ch0_time, queue_ch0_wave,
-                                                                                       queue_ch1_time, queue_ch1_wave,
-                                                                                       queue_ch2_time, queue_ch2_wave,
-                                                                                       queue_ch3_time, queue_ch3_wave,
-                                                                                       queue_stop_measurement))
-            drs_process.daemon = True
-            drs_process.start()
+        # Initialize and initiate a process(Refer to imported file 'drs' for process function declaration)
+        # Module used: multiprocessing
+        drs_process = multiprocessing.Process(target=drs.experiment_measure, args=(queue_ch0_time, queue_ch0_wave,
+                                                                                   queue_ch1_time, queue_ch1_wave,
+                                                                                   queue_ch2_time, queue_ch2_wave,
+                                                                                   queue_ch3_time, queue_ch3_wave,
+                                                                                   queue_stop_measurement))
+        drs_process.daemon = True
+        drs_process.start()
     else:
         queue_x = None
         queue_y = None
@@ -590,6 +617,7 @@ def main(conf):
     time_counter = np.zeros(0)
 
     counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
+    # counts_target = variables.detection_rate / 100
     logger.info('Starting the main loop')
 
     if conf['tdc'] != "off":

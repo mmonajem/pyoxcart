@@ -6,7 +6,8 @@ This is the main script of main GUI of the OXCART Atom Probe.
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import RectangleSelector, EllipseSelector
-from matplotlib.patches import Circle
+from matplotlib.patches import Circle, Rectangle
+
 import pandas as pd
 
 
@@ -35,13 +36,18 @@ def concatenate_dataframes_of_dld_grp(dataframeList:"type:list - list of datafra
     return dld_masterDataframe
 
 
-def plot_graph_for_dld_high_voltage(ax1:"type:object", dldGroupStorage:"type:list - list of dataframes", save_name=None):
+def plot_graph_for_dld_high_voltage(ax1:"type:object", dldGroupStorage:"type:list - list of dataframes",
+                                    rect=None, save_name=None):
+
     # Plot tof and high voltage
     y = dldGroupStorage[3]  # dld_t
     y.loc[y['values'] > 5000, 'values'] = 0
     yaxis = y['values'].to_numpy()
-    # y[y>5000] = 0
     xaxis = np.arange(len(yaxis))
+
+    high_voltage = dldGroupStorage[0]['values'].to_numpy()
+
+
     heatmap, xedges, yedges = np.histogram2d(xaxis, yaxis, bins=(1200, 800))
     heatmap[heatmap == 0] = 1  # to have zero after apply log
     heatmap = np.log(heatmap)
@@ -56,17 +62,22 @@ def plot_graph_for_dld_high_voltage(ax1:"type:object", dldGroupStorage:"type:lis
     # plot high voltage curve
     ax2 = ax1.twinx()
 
-    # dldGroupStorage[0] --> dld/high_voltage
-    high_voltage = dldGroupStorage[0]['values'].to_numpy()
-    xaxis = np.arange(len(high_voltage))
-    ax2.plot(xaxis, high_voltage, color='r', linewidth=2)
+    xaxis2 = np.arange(len(high_voltage))
+    ax2.plot(xaxis2, high_voltage, color='r', linewidth=2)
     ax2.set_ylabel("DC voltage [V]", color="blue", fontsize=14)
-    rectangle_box_selector(ax2)
-    plt.connect('key_press_event', selectors_data.toggle_selector)
-    if save_name != None:
-        plt.savefig("%s.png" %save_name, format="png", dpi=600)
-    plt.show(block=True)
+    if rect is None:
+        rectangle_box_selector(ax2)
+        plt.connect('key_press_event', selectors_data.toggle_selector)
+    else:
+        left, bottom, width, height = (variables.selected_x1, 0, variables.selected_x2-variables.selected_x1, np.max(yaxis))
+        rect = Rectangle((left, bottom), width, height, fill=True, alpha=0.2, color="r", linewidth=2)
+        ax1.add_patch(rect)
 
+    if save_name is not None:
+        plt.savefig("%s.png" %save_name, format="png", dpi=600)
+        plt.savefig("%s.svg" %save_name, format="svg", dpi=600)
+
+    plt.show(block=True)
 
 def rectangle_box_selector(axisObject:"type:object"):
     # drawtype is 'box' or 'line' or 'none'
@@ -112,6 +123,7 @@ def plot_crop_FDM(ax1, fig1, data_crop:"type:list  - cropped list content", save
     elliptical_shape_selector(ax1, fig1)
     if save_name != None:
         plt.savefig("%s.png" %save_name, format="png", dpi=600)
+        plt.savefig("%s.svg" %save_name, format="svg", dpi=600)
     plt.show(block=True)
 
 
@@ -128,10 +140,12 @@ def plot_FDM_after_selection(ax1, fig1,data_crop:"type:list  - cropped list cont
     plt.title("FDM")
     plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
     print('x:', variables.selected_x_fdm, 'y:', variables.selected_y_fdm, 'roi:', variables.roi_fdm)
-    circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, color='b', fill=False)
+    circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
+                  alpha=0.2, color='r', linewidth=1)
     ax1.add_patch(circ)
     if save_name != None:
         plt.savefig("%s.png" %save_name, format="png", dpi=600)
+        plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
     plt.show(block=True)
 
 
@@ -157,20 +171,19 @@ def plot_FDM(ax1, fig1, data_crop:"type:list  - cropped list content", save_name
     plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
     if save_name != None:
         plt.savefig("%s.png" %save_name, format="png", dpi=600)
+        plt.savefig("%s.svg" %save_name, format="svg", dpi=600)
     plt.show(block=True)
 
 
 def save_croppped_data_to_hdf5(data_crop:"type:list  - cropped list content",
                                dld_masterDataframe:"type:list - list of dataframes", 
                                name:"type:string - name of h5 file"):
-    # save the croped data
-
-    filename = '%s_cropped.h5' % name
+    # save the cropped data
     hierarchyName = 'df'
     print('tofCropLossPct', (1 - len(data_crop) / len(dld_masterDataframe)) * 100)
     hdf5Dataframe = pd.DataFrame(data=data_crop,
                                  columns=['dld/high_voltage', 'dld/pulse_voltage', 'dld/start_counter', 'dld/t',
                                           'dld/x', 'dld/y'])
-    data_tools.store_df_to_hdf(filename, hdf5Dataframe, hierarchyName)
+    data_tools.store_df_to_hdf(name, hdf5Dataframe, hierarchyName)
 
 
