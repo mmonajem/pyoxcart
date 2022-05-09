@@ -31,6 +31,7 @@ PyCCAPT:
    pyccapt
    code_reference
    appendix
+   license
    bibliography
 
 
