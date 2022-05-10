@@ -7,8 +7,8 @@ import sys
 
 author = u"Mehrpad Monajem"
 # authors in alphabetical order
-description = 'A package for controlling APT experiment and calibration the APT data'
-name = 'PyCCAPT'
+description = 'A package for controlling APT experiment'
+name = 'PyCCAPT_Calibration'
 year = "2022"
 
 
@@ -25,20 +25,9 @@ setup(
     author_email='mehrpad.monajem@fau.de',
     url='https://github.com/mmonajem/pyccapt',
     version=version,
-    entry_points={
-            'console_scripts': {
-                'pyccapt=pyccapt.__main__:main',
-                }
-    },
     data_files=[('my_data', ['test/data'])],
-    package_dir={
-        'pyccapt': './pyccapt',
-        'pyccapt.tests': './tests',
-    },
-    packages=['pyccapt.control', 'pyccapt.calibration','pyccapt.control.apt', 'pyccapt.control.devices',
-              'pyccapt.control.devices_test', 'pyccapt.control.drs', 'pyccapt.control.gui', 'pyccapt.control.tdc_roentdec',
-              'pyccapt.control.tdc_surface_concept', 'pyccapt.control.tools','pyccapt.calibration.tools',
-              'pyccapt.calibration.tutorials', 'tests'],
+    package_dir={'pyccapt.calibration': './pyccapt/calibration'},
+    packages=['pyccapt.calibration', 'pyccapt.calibration.tools', 'pyccapt.calibration.tutorials'],
     include_package_data=True,
     license="GPL v3",
     description=description,
@@ -49,8 +38,6 @@ setup(
                         "matplotlib",
                         "opencv-python",
                         "pandas",
-                        "PyQt5",
-                        "pyqtgraph",
                         "scikit_learn",
                         "ipywidgets",
                         "networkx",
@@ -58,12 +45,6 @@ setup(
                         "requests",
                         "wget",
                         "h5py",
-                        "nidaqmx",
-                        "pypylon",
-                        "tweepy",
-                        "pyvisa",
-                        "pyvisa-py",
-                        "pyserial",
                         "tables",
                       ],
     # not to be confused with definitions in pyproject.toml [build-system]

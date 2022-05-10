@@ -12,14 +12,10 @@ import serial.tools.list_ports
 from pypylon import pylon
 
 # Local module and scripts
-from pyccapt.tools import variables
-from pyccapt.tools import read_files
-from pyccapt.devices.camera import Camera
-from pyccapt.devices import initialize_devices
-from pyccapt.gui import gui_simple
-from pyccapt.gui import gui_advance
-
-from pyccapt.tools.module_dir import MODULE_DIR
+from pyccapt.control.tools import read_files, variables
+from pyccapt.control.devices import initialize_devices
+from pyccapt.control.gui import gui_simple, gui_advance
+from pyccapt.control.module_dir import MODULE_DIR
 
 
 def main():
@@ -31,7 +27,6 @@ def main():
     except Exception as e:
         print("The config.json was not found")
         print(e)
-
 
     if conf['mode'] == 'advance':
 
