@@ -1,85 +1,31 @@
 pyccapt.calibration package
 ===========================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyccapt.calibration.mc
+   pyccapt.calibration.tools
+   pyccapt.calibration.tutorials
+
 Submodules
 ----------
 
-pyccapt.calibration.calibration module
+pyccapt.calibration.module\_dir module
 --------------------------------------
 
-.. automodule:: pyccapt.calibration.calibration
+.. automodule:: pyccapt.calibration.module_dir
    :members:
    :undoc-members:
    :show-inheritance:
 
-pyccapt.calibration.data\_loadcrop module
------------------------------------------
-
-.. automodule:: pyccapt.calibration.data_loadcrop
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pyccapt.calibration.data\_tools module
---------------------------------------
-
-.. automodule:: pyccapt.calibration.data_tools
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pyccapt.calibration.intractive\_point\_identification module
-------------------------------------------------------------
-
-.. automodule:: pyccapt.calibration.intractive_point_identification
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pyccapt.calibration.mc\_tools module
-------------------------------------
-
-.. automodule:: pyccapt.calibration.mc_tools
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pyccapt.calibration.regression module
--------------------------------------
-
-.. automodule:: pyccapt.calibration.regression
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pyccapt.calibration.selectors\_data module
-------------------------------------------
-
-.. automodule:: pyccapt.calibration.selectors_data
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pyccapt.calibration.tools module
+pyccapt.calibration.setup module
 --------------------------------
 
-.. automodule:: pyccapt.calibration.tools
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pyccapt.calibration.variables module
-------------------------------------
-
-.. automodule:: pyccapt.calibration.variables
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pyccapt.calibration.widgets module
-----------------------------------
-
-.. automodule:: pyccapt.calibration.widgets
+.. automodule:: pyccapt.calibration.setup
    :members:
    :undoc-members:
    :show-inheritance:

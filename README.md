@@ -32,7 +32,7 @@ The images below are an overview of the two version of user interface:
 #  Installation
 1- create the virtual environment via Anaconda:
     
-    conda create -n myenv 
+    conda create -n pyccapt python=3.8 
 
 2- Activate the virtual environment:
 
