@@ -1,3 +1,7 @@
+"""
+This is the main script for controlling the BASLER Cameras.
+"""
+
 import time
 import cv2
 
@@ -9,10 +13,9 @@ from pyccapt.control.tools import variables
 
 class Camera:
     """
-        This camera modules is designed to setup and intiate the camera in the installation.
+        This camera modules is designed to setup and initiate the camera in the installation.
         This camera module allows user to capture images using the installed cameras,
         process the image and display as per desired window size.
-
     """
 
     def __init__(self, devices, tlFactory, cameras, converter):
@@ -20,6 +23,7 @@ class Camera:
         Constructor function which intializes and setups all variables
         and parameter for the class.
         """
+
         self.devices = devices
         self.tlFactory = tlFactory
         self.cameras = cameras
@@ -32,7 +36,6 @@ class Camera:
         self.cameras[1].ExposureTime.SetValue(350000)
 
     def update_cameras(self, lock):
-
         """
         Note : Changed function to break it down into simpler functions
 
@@ -44,7 +47,6 @@ class Camera:
             lock: object to acquire and release locks.
         Returns:
             Does not return anything.
-
         """
         self.cameras.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
         while self.cameras.IsGrabbing():
@@ -108,8 +110,8 @@ class Camera:
 
     def light_switch(self, ):
         """
-            This class methid sets the Exposure time based on a flag.
-            It reads the flag from the imported "vairables" file.
+            This class method sets the Exposure time based on a flag.
+            It reads the flag from the imported "variables" file.
 
             Attributes:
                 Does not accept any arguments.
@@ -135,7 +137,7 @@ class Camera:
         """
         This class method captures the images through the cameras, processes it
         and displays the processed image. Utilizes OpenCv module and Numpy modules
-        to process the captured image. Utlizes OpenCV module to display the captured
+        to process the captured image. Utilizes OpenCV module to display the captured
         image in a window.
 
         Attributes:
@@ -201,8 +203,9 @@ class Camera:
                         print('ESC')
                         cv2.destroyAllWindows()
                         break
+
             except:
-                pass
+                print('Grabbing failed')
 
             grabResult.Release()
             time.sleep(0.05)

@@ -1,6 +1,5 @@
 """
-This is the main script of main GUI of the OXCART Atom Probe.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
+This is the main script of main GUI of the advance Atom Probe.
 """
 
 import numpy as np
@@ -27,7 +26,7 @@ from pyccapt.control.module_dir import MODULE_DIR
 
 class UI_APT_A(Camera, object):
     """
-    The GUI class of voltage mode (oxcart)
+    The GUI class of advance atom probe GUI
     """
 
     def __init__(self, devices, tlFactory, cameras, converter, lock, app, conf):
@@ -1834,12 +1833,12 @@ class UI_APT_A(Camera, object):
                                             elif self.conf["visualization"] == 'mc':
                                                     max_lenght = max(len(variables.x), len(variables.y),
                                                                      len(variables.t), len(variables.main_v_dc_dld))
-                                                    viz = tof2mc_simple.tof_bin2mc(variables.t[:max_lenght], 0,
+                                                    viz = tof2mc_simple.tof_bin2mc_sc(variables.t[:max_lenght], 0,
                                                                                    variables.main_v_dc_dld[
                                                                                    :max_lenght],
                                                                                    variables.x[:max_lenght],
                                                                                    variables.x[:max_lenght],
-                                                                                   flightPathLength=110)
+                                                                                      flightPathLength=110)
                                                     viz = viz[viz < 200]
 
                                             self.y_tof, self.x_tof = np.histogram(viz, bins=512)
@@ -2011,7 +2010,7 @@ class UI_APT_A(Camera, object):
 class MainThread(QThread):
     """
     A class for creating main_thread
-    The run method create thread of main function in the OXCART script
+    The run method create thread of main function in the voltage atom prob script
     """
     signal = pyqtSignal('PyQt_PyObject')
 

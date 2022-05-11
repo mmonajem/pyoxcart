@@ -1,3 +1,7 @@
+"""
+This is the script for saving the hdf5 file containing the experiment data.
+"""
+
 import h5py
 
 from pyccapt.control.tools import variables

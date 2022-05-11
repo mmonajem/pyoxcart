@@ -1,5 +1,5 @@
-
-"""This module contains drivers for the following equipment from Pfeiffer
+"""
+This module contains drivers for the following equipment from Pfeiffer
 Vacuum:
 * TPG 262 and TPG 261 Dual Gauge. Dual-Channel Measurement and Control
     Unit for Compact Gauges
@@ -63,6 +63,7 @@ class TPG26x(object):
         """
         The constructor class method which initialize internal variables and
         serial connection
+
         Attributes:
             param port: The COM port to open. See the documentation for
                 `pyserial <http://pyserial.sourceforge.net/>`_ for an explanation
@@ -71,6 +72,7 @@ class TPG26x(object):
             baud-rate: Data transmission rate (9600, 19200, 38400 where 9600 is the default)
                 :type baudrate: [int]
         """
+
         # The serial connection should be setup with the following parameters:
         # 1 start bit, 8 data bits, No parity bit, 1 stop bit, no hardware
         # handshake. These are all default for Serial and therefore not input
@@ -80,8 +82,10 @@ class TPG26x(object):
     def _cr_lf(self, string):
         """
         Pad carriage return and line feed to a string
+
         Attributes:
             string: String to pad [str]
+
         Returns:
             string : the padded string [string]
         """
@@ -116,8 +120,10 @@ class TPG26x(object):
     def _get_data(self):
         """
         Get the data that is ready on the device
+
         Attributes:
             Does not accept any arguments
+
         Returns:
             data: raw data from serial communication line [str]
         """
@@ -128,7 +134,8 @@ class TPG26x(object):
     def _clear_output_buffer(self):
         """
         Clear the output buffer
-        r"""
+        """
+
         time.sleep(0.1)
         just_read = 'start value'
         out = ''
@@ -143,9 +150,11 @@ class TPG26x(object):
 
         Attributes:
             Does not accept any arguments
+
         Returns:
             :the firmware version [str]
         """
+
         self._send_command('PNR')
         return self._get_data()
 
@@ -162,6 +171,7 @@ class TPG26x(object):
             :a tuple the value of pressure along with status code and message
                 (value, (status_code, status_message)) [tuple]
         """
+
         if gauge not in [1, 2]:
             message = 'The input gauge number can only be 1 or 2'
             raise ValueError(message)
@@ -174,8 +184,10 @@ class TPG26x(object):
     def pressure_gauges(self):
         """
         Return the pressures measured by the gauges
+
         Attributes:
             Does not accept any arguments
+
         Returns:
             :(value1, (status_code1, status_message1), value2,
                 (status_code2, status_message2)) [tuple]
@@ -212,9 +224,11 @@ class TPG26x(object):
 
         Attributes:
             Does not accept any arguments
+
         Returns:
             :the pressure unit [str]
         """
+
         self._send_command('UNI')
         unit_code = int(self._get_data())
         return PRESSURE_UNITS[unit_code]
@@ -223,10 +237,13 @@ class TPG26x(object):
         """
         This function tests the RS232 communication.
         Attributes:
+
             Does not accept any arguments
+
         Returns:
             :the status of the communication test [boolean]
         """
+
         # reset serial communication
         self._send_command('RST')
         self.serial.write(self.ENQ)

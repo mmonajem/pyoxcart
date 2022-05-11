@@ -1,3 +1,7 @@
+"""
+This is the script for testing signal generator.
+"""
+
 import pyvisa
 import time
 

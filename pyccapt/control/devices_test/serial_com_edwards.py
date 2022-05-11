@@ -1,4 +1,6 @@
-""" Driver and simple test case for Edwards Active Gauge Controler """
+"""
+This is the script for testing Edwaards guges.
+"""
 from __future__ import print_function
 import serial
 
@@ -8,16 +10,8 @@ class EdwardsAGC(object):
     Complete manual found at
     http://www.idealvac.com/files/brochures/Edwards_AGC_D386-52-880_IssueM.pdf """
 
-
-
-
-
     def __init__(self, port='COM1'):
         self.serial = serial.Serial(port, baudrate=9600, timeout=0.5)
-
-
-
-
 
     def comm(self, command):
         """ Implements basic communication """
@@ -31,9 +25,6 @@ class EdwardsAGC(object):
         complete_string = complete_string.strip()
         return complete_string
 
-
-
-
     def gauge_type(self, gauge_number):
         """ Return the type of gauge """
         types = {0: 'Not Fitted', 1: '590 CM capacitance manometer',
@@ -44,17 +35,11 @@ class EdwardsAGC(object):
         gauge_type = types[type_number]
         return gauge_type
 
-
-
-
     def read_pressure(self, gauge_number):
         """ Read the pressure of a gauge """
         pressure_string = self.comm('?V ' + str(gauge_number))
         pressure_value = float(pressure_string)
         return pressure_value
-
-
-
 
     def pressure_unit(self, gauge_number):
         """ Read the unit of a gauge """
@@ -64,16 +49,10 @@ class EdwardsAGC(object):
         unit = units[unit_number]
         return unit
 
-
-
-
     def current_error(self):
         """ Read the current error code """
         error_code = self.comm('?SY')
         return error_code
-
-
-
 
     def my_commands(self):
         """ Return the software version of the controller """

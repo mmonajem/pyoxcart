@@ -1,7 +1,7 @@
 """
-This is the main script is load the GUI base on the configuration file.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
+This is the script for testing pulser.
 """
+
 import visa
 import time
 from pyvisa import constants

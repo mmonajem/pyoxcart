@@ -1,3 +1,7 @@
+"""
+This is the main old version script for reading TDC Surface Concept .
+"""
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -29,7 +33,7 @@ Created on Thu Sep 19 16:07:32 2019
 Test of the user callbacks interface.
 """
 
-from pyccapt.control.control.tdc_surface_concept import scTDC
+from pyccapt.control.tdc_surface_concept import scTDC
 # import sys
 import timeit
 

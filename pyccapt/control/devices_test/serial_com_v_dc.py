@@ -1,3 +1,7 @@
+"""
+This is the script for testing high voltage power supply FUG.
+"""
+
 ##
  # @file serial_com.py
  #

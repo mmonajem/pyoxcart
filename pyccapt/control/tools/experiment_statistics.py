@@ -1,3 +1,7 @@
+"""
+This is the script for saving the statistics of experiment in a txt file.
+"""
+
 from pyccapt.control.tools import variables
 
 

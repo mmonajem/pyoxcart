@@ -1,6 +1,5 @@
 """
 This is the main script is load the GUI base on the configuration file.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
 
 import sys

@@ -1,3 +1,7 @@
+"""
+This is the script for testing BASLER cameras.
+"""
+
 # Grab_MultipleCameras.cpp
 # ============================================================================
 # This sample illustrates how to grab and process images from multiple cameras

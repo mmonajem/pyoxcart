@@ -1,4 +1,8 @@
-from pyccapt.control.control.tdc_surface_concept import scTDC
+"""
+This is the main vew script for reading TDC Surface Concept .
+"""
+
+from pyccapt.control.tdc_surface_concept import scTDC
 import time
 import timeit
 import numpy as np

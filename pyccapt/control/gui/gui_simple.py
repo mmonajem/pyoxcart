@@ -1,6 +1,5 @@
 """
 This is the main script of main GUI of the simple Atom Probe control GUI.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
 
 import numpy as np
@@ -23,8 +22,9 @@ from pyccapt.control.module_dir import MODULE_DIR
 
 class UI_APT_S(object):
     """
-    The GUI class of laser mode (APT laser mode)
+    The GUI class of simple atom probe GUI
     """
+
     def __init__(self, lock, app, conf):
         self.lock = lock # Lock for thread ...
         self.app = app
@@ -929,11 +929,11 @@ class UI_APT_S(object):
                                             elif self.conf["visualization"] == 'mc':
                                                     max_lenght = max(len(variables.x), len(variables.y),
                                                                      len(variables.t), len(variables.main_v_dc_dld))
-                                                    viz = tof2mc_simple.tof_bin2mc(variables.t[:max_lenght], 0,
+                                                    viz = tof2mc_simple.tof_bin2mc_sc(variables.t[:max_lenght], 0,
                                                                                    variables.main_v_dc_dld[:max_lenght],
                                                                                    variables.x[:max_lenght],
                                                                                    variables.x[:max_lenght],
-                                                                                   flightPathLength=110)
+                                                                                      flightPathLength=110)
                                                     viz = viz[viz < 200]
 
                                             self.y_tof, self.x_tof = np.histogram(viz, bins=512)
@@ -1052,11 +1052,13 @@ class UI_APT_S(object):
                     print(
                             f"{initialize_devices.bcolors.FAIL}Error: Cannot update setup parameters{initialize_devices.bcolors.ENDC}")
 
+
 class MainThread(QThread):
     """
     A class for creating main_thread for the APT experiments
     The run method create thread of main function in the experiment script
     """
+
     signal = pyqtSignal('PyQt_PyObject')
 
     def __init__(self, conf):

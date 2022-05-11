@@ -1,6 +1,5 @@
 """
 This is the main new script for reading DRS digitizer.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
 
 # import the module
@@ -29,7 +28,6 @@ class DRS(object):
                    connect 100 MHz clock connected to all channels
             delay: Trigger delay in nanosecond
             sample_frequency: sample frequency at which the data is being captured
-
         """
 
         # load the library
@@ -54,9 +52,11 @@ class DRS(object):
 
         Attributes:
             Does not accept any arguments
+
         Returns:
             data: Return the read DRS value.
         """
+
         data = self.drs_lib.Drs_reader(self.obj)
         return data
 
@@ -66,10 +66,11 @@ class DRS(object):
 
         Attributes:
             Does not accept any arguments
+
         Returns:
             Does not return anything
-
         """
+
         self.drs_lib.Drs_delete_drs_ox(self.obj)
 
 
@@ -94,6 +95,7 @@ def experiment_measure(queue_ch0_time, queue_ch0_wave,
         Parameters:
             time
             wave
+
     Return :
         Does not return anything
     """

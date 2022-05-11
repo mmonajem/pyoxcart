@@ -1,11 +1,13 @@
+"""
+This is the script for testing National Instrument edge counter.
+"""
+
 try:
     import nidaqmx
 except:
     print('Please install nidaqmx')
 
 import time
-
-
 
 if __name__ == '__main__':
     task_counter = nidaqmx.Task()

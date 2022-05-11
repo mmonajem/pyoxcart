@@ -1,3 +1,7 @@
+"""
+This is the main script for initializing and controlling signal generator.
+"""
+
 import pyvisa
 import time
 
@@ -10,6 +14,7 @@ def initialize_signal_generator(freq):
 
     Attributes:
         freq: frequency at which signal need to generated
+
     Returns:
         Does not return anything
 
@@ -70,6 +75,7 @@ def turn_off_signal_generator():
 
     Attributes:
         Does not return anything
+
     Returns:
         Does not return anything
 

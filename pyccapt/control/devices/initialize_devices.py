@@ -1,3 +1,7 @@
+"""
+This is the main script for initializing Edward and Pfeifer gauges.
+"""
+
 import time
 import serial.tools.list_ports
 
@@ -29,9 +33,11 @@ def command_cryovac(cmd, com_port_cryovac):
 
     Attributes:
         com_port_cryovac: object for serial communication (Initilized in gui_oxcart.py)
+
     Returns:
         Returns the response code after executing the commands. [string]
     """
+
     com_port_cryovac.write(
         (cmd + '\r\n').encode())  # send cmd to device # might not work with older devices -> "LF" only needed!
     time.sleep(0.1)  # small sleep for response
@@ -53,11 +59,11 @@ def command_edwards(conf, cmd, lock, E_AGC, status=None):
         E_AGC : Object of EdwardsAGC class from edwards_tic module which initializes and sets
                 serial communication parameters
         status: [Default parameter] type of lock [Need a review]
+
     Returns:
         response: Returns the response code after the executing the command.
-
-
     """
+
     if conf['pump'] != "off":
         if variables.flag_pump_load_lock_click and variables.flag_pump_load_lock and status == 'load_lock':
             E_AGC.comm('!C910 0')  # Backing Pump off
@@ -103,6 +109,7 @@ def initialize_cryovac(com_port_cryovac):
 
     Attributes:
         com_port_cryovac: object for serial communication (Initialized in gui_oxcart.py)
+
     Returns:
         Does not return anything
     """
@@ -124,8 +131,8 @@ def initialize_edwards_tic_load_lock(conf):
 
     Returns:
         Does not return anything
-
     """
+
     E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll)
     # Execute command to read value(response)
     response = command_edwards(conf, 'presure', lock=None, E_AGC=E_AGC_ll)
@@ -145,7 +152,6 @@ def initialize_edwards_tic_buffer_chamber(conf):
 
     Returns:
         Does not return anything
-
     """
 
     E_AGC_bc = EdwardsAGC(variables.COM_PORT_gauge_bc)

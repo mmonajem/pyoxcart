@@ -1,3 +1,7 @@
+"""
+This is the script for reading the json file.
+"""
+
 import json
 
 

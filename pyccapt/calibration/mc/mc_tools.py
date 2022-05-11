@@ -1,6 +1,5 @@
 """
 This is file contains tools for mass calibration process.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
 
 import numpy as np

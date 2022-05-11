@@ -1,3 +1,7 @@
+"""
+This is the script for testing cryovac TIC 500.
+"""
+
 import serial.tools.list_ports
 import time
 # get available COM ports and store as list

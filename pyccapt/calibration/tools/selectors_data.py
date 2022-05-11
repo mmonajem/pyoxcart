@@ -1,9 +1,8 @@
 """
 This is file contains tools for mass calibration process.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
 
-from pyccapt.calibration import variables
+from pyccapt.calibration.tools import variables
 
 
 def onselect(eclick, erelease):

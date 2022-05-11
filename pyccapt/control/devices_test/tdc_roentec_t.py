@@ -1,6 +1,5 @@
 """
 This is the main new script for reading TDC Roentec.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
 
 # import the module
@@ -10,12 +9,12 @@ import numpy as np
 import time
 import os
 
-from pyccapt.control.control.tools.module_dir import MODULE_DIR
+from pyccapt.control.module_dir import MODULE_DIR
 
 # load the library
 
 os.chdir(os.path.split(MODULE_DIR)[
-             0] + '\\tdc_roentdec\\')  # directory has to be changed to be changed to the directory of dlls
+             0] + '\\control\\tdc_roentdec\\')  # directory has to be changed to be changed to the directory of dlls
 tdc_lib = ctypes.CDLL("../tdc_roentdec/wrapper_read_TDC8HP_x64.dll")
 
 
@@ -50,9 +49,11 @@ class tdc_roentec(object):
 
         Attributes:
             Does not accept any arguments
+
         Returns:
             data: Return the read DRS value.
         """
+
         return tdc_lib.stop_tdc(self.obj)
 
     def init_tdc(self, ):
@@ -61,9 +62,11 @@ class tdc_roentec(object):
 
         Attributes:
             Does not accept any arguments
+
         Returns:
             data: Return the read DRS value.
         """
+
         tdc_lib.init_tdc(self.obj)
 
     def run_tdc(self, ):
@@ -72,9 +75,9 @@ class tdc_roentec(object):
 
         Attributes:
             Does not accept any arguments
+
         Returns:
             Does not return anything
-
         """
         tdc_lib.run_tdc(self.obj)
 
@@ -84,9 +87,9 @@ class tdc_roentec(object):
 
         Attributes:
             Does not accept any arguments
+
         Returns:
             Does not return anything
-
         """
         data = tdc_lib.get_data_tdc_buf(self.obj)
         return data
@@ -97,7 +100,6 @@ def experiment_measure_buf(buffer_size, time_out):
     This function
 
     Attributes:
-
         Parameters:
 
     Return :

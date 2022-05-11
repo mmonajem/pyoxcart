@@ -1,9 +1,14 @@
+"""
+This is the main script for Reading the Edward gauges.
+"""
+
+
 import serial
 
 
 class EdwardsAGC(object):
     """
-    Primitive driver for Edwards Active Gauge Controler
+    Primitive driver for Edwards Active Gauge Controller
     Complete manual found at
     http://www.idealvac.com/files/brochures/Edwards_AGC_D386-52-880_IssueM.pdf 
     """
@@ -27,11 +32,9 @@ class EdwardsAGC(object):
 
         Attributes:
             command: command to be written on serial line
-        
         Returns:
             Returns the string read through serial 
 
-         
         """
         comm = command + "\r\n"
         self.serial.write(comm.encode())

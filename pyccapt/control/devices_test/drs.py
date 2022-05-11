@@ -1,7 +1,5 @@
 """
-This is the main script for testing drs digitizer.
-It contains the main control loop of experiment.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
+This is the script for testing DRS digitizer.
 """
 # import the module
 import ctypes

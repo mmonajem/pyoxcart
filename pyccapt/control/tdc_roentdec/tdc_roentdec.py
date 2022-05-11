@@ -1,12 +1,12 @@
 """
-This is the main new script for reading TDC Roentec.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
+This is the main script for reading TDC Roentec.
 """
 
 # import the module
 import os
 import ctypes
 from numpy.ctypeslib import ndpointer
+import numpy as np
 
 from pyccapt.control.module_dir import MODULE_DIR
 
@@ -19,6 +19,7 @@ class tdc_dec(object):
     This class setups the parameters for the tdc and allow users to read experiment
     tdc values.
     """
+
     def __init__(self, tdc_lib, buf_size, time_out):
         """
         Constructor function which initializes function parameters.
@@ -45,9 +46,11 @@ class tdc_dec(object):
 
         Attributes:
             Does not accept any arguments
+
         Returns:
             data: Return the read DRS value.
         """
+
         return self.tdc_lib.stop_tdc(self.obj)
 
     def init_tdc(self, ):
@@ -56,6 +59,7 @@ class tdc_dec(object):
 
         Attributes:
             Does not accept any arguments
+
         Returns:
             data: Return the read DRS value.
         """
@@ -67,10 +71,11 @@ class tdc_dec(object):
 
         Attributes:
             Does not accept any arguments
+
         Returns:
             Does not return anything
-
         """
+
         self.tdc_lib.run_tdc(self.obj)
 
 
@@ -80,9 +85,9 @@ class tdc_dec(object):
 
         Attributes:
             Does not accept any arguments
+
         Returns:
             Does not return anything
-
         """
         data = self.tdc_lib.get_data_tdc_buf(self.obj)
         return data

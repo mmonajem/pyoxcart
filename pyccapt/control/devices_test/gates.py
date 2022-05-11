@@ -1,7 +1,10 @@
+"""
+This is the script for testing gates with National Instrument digital I/O.
+"""
+
 import nidaqmx
 import time
-from nidaqmx.constants import (
-    LineGrouping)
+
 if __name__ == '__main__':
 	with nidaqmx.Task() as task:
 		task.do_channels.add_do_chan('Dev2/port0/line1')

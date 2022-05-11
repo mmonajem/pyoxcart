@@ -1,6 +1,10 @@
+"""
+This is the script containing widgets for ions selection from isotopic table.
+"""
+
 import ipywidgets as widgets
 
-from pyccapt.calibration import variables
+from pyccapt.calibration.tools import variables
 
 # Stores values currently selected element in dropdown.
 elementDict = {}
@@ -16,6 +20,7 @@ def dropdownWidget(elementsList, dropdownLabel):
     Attributes:
         elementsList: List of element with its correponding mass/weight [list]
                       For eg: [('H',1.01),('He',3.02)]
+
     Returns:
         dropdown: object for the created widget [object]
 
@@ -36,6 +41,7 @@ def buttonWidget(buttonText):
 
     Attributes:
         buttonText:  Text to be displayed on the button [string]
+
     Returns:
         button: object for the created widget [object]
     """
@@ -56,6 +62,7 @@ def onClickAdd(b):
 
     Attributes:
         Accepts only a internal object as an argument
+
     Returns:
         Does not return anything
     """
@@ -75,6 +82,7 @@ def onClickDelete(b):
 
     Attributes:
         Accepts only a internal object as an argument
+
     Returns:
         Does not return anything
     """
@@ -96,6 +104,7 @@ def onClickReset(b):
 
     Attributes:
         Accepts only a internal object as an argument
+
     Returns:
         Does not return anything
     """
@@ -111,6 +120,7 @@ def on_change(change):
 
     Attributes:
         Accepts only a internal object as an argument
+
     Returns:
         Does not return anything
     """
@@ -130,6 +140,7 @@ def on_change_charge(change):
 
     Attributes:
         Accepts only a internal object as an argument
+
     Returns:
         Does not return anything
     """

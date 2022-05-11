@@ -1,6 +1,5 @@
 """
 This is the main script of all global variables.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
 
 import numpy as np

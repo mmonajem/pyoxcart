@@ -1,6 +1,5 @@
 """
 This is file contains tools for mass calibration process.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
 """
 
 import os
@@ -12,7 +11,7 @@ from scipy.optimize import curve_fit
 from mpl_toolkits.mplot3d import Axes3D
 from scipy import interpolate
 
-from pyccapt.calibration import intractive_point_identification, variables
+from pyccapt.calibration.tools import intractive_point_identification, variables
 
 
 def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False, prominence=500, distance=None,

@@ -1,6 +1,5 @@
 """
-This is the main new script for reading TDC.
-@author: Mehrpad Monajem <mehrpad.monajem@fau.de>
+This is the main script for reading TDC.
 """
 
 import time
@@ -68,11 +67,14 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
             1. Makes a dict that contains copies of numpy arrays in d ("deep copy")
             2. Start with an empty dict, insert basic values by simple assignment,
             3. Insert numpy arrays using the copy method of the source array
+
         Attributes:
             d: [dictionary]
+
         Returns:
             Does not return anything
         """
+
         dcopy = {}
         for k in d.keys():
             if isinstance(d[k], np.ndarray):
@@ -88,9 +90,10 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
         """
         This class method set end_of_meas to True
 
-        Atrributes:
+        Attributes:
             Does not accept any argument
-        Retuns
+
+        Returns:
             True [boolean]
         """
 
@@ -155,7 +158,6 @@ def experiment_measure(raw_mode, queue_x,
         Returns:
             0: if success return code or return code > 0 [int]
             -1: if return code is error code or less than 0 [int]
-
         """
         if retcode < 0:
             print(device.lib.sc_get_err_msg(retcode))
