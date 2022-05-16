@@ -27,6 +27,7 @@ PyCCAPT:
    :caption: Contents:
 
    installation
+   configuration
    tutorials
    pyccapt
    code_reference

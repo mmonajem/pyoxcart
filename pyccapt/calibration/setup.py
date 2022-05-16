@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from os.path import exists, dirname, realpath
-from setuptools import find_packages, setup
+from os.path import exists, dirname, realpath, join, abspath
+
+from setuptools import setup
 import sys
 
 
@@ -12,22 +13,22 @@ name = 'PyCCAPT_Calibration'
 year = "2022"
 
 
-sys.path.insert(0, realpath(dirname(__file__))+"/"+name)
+# sys.path.insert(0, abspath(join(__file__, "../../")))
 
 try:
     from pyccapt import version
 except BaseException:
-    version = "unknown"
+    version = "0.0.2"
 
 setup(
     name=name,
+    namespace_packages=['pyccapt'],
     author=author,
     author_email='mehrpad.monajem@fau.de',
     url='https://github.com/mmonajem/pyccapt',
     version=version,
-    data_files=[('my_data', ['test/data'])],
-    package_dir={'pyccapt.calibration': './pyccapt/calibration'},
-    packages=['pyccapt.calibration', 'pyccapt.calibration.tools', 'pyccapt.calibration.tutorials'],
+    data_files=[('my_data', ['../../tests/data'])],
+    packages=[ 'pyccapt.mc', 'pyccapt.calibration_tools', 'pyccapt.tutorials'],
     include_package_data=True,
     license="GPL v3",
     description=description,
@@ -52,10 +53,11 @@ setup(
     python_requires=">=3.8",
     tests_require=["pytest", "pytest-mock"],
     keywords=[],
-    classifiers=['Operating System :: Windows',
+    classifiers=['Operating System :: OS Independent',
                  'Programming Language :: Python :: 3',
-                 'Topic :: Scientific/Engineering :: Visualization :: Atom Probe Tomography',
+                 'Topic :: Scientific/Engineering :: Visualization',
                  'Intended Audience :: Science/Research',
                  ],
     platforms=['ALL'],
+    zip_safe=False,
 )

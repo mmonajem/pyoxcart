@@ -1,7 +1,7 @@
 Introduction to the tutorials for APT data calibration
 ============================================================
 
-In this set of tutorials, we see how we can calibrate the data with PyCCAPT.
+In the following tutorials, we see how we can calibrate the data with PyCCAPT.
 
 
 

@@ -1,9 +1,10 @@
 # PyCCAPT 
-# A modular, FAIR open-source python atom probe tomography control and calibration software package
+# A modular, FAIR open-source python atom probe tomography software package for controlling experiment and calibrating data 
 ![plot](pyccapt/files/logo.png)
-[![Documentation Status](https://readthedocs.org/projects/crappy/badge/?version=latest)](https://crappy.readthedocs.io/en/latest/?badge=latest)
-[![PyPi version](https://badgen.net/pypi/v/crappy/)](https://pypi.org/project/crappy)
+[![Documentation Status](https://readthedocs.org/projects/pyccapt/badge/?version=latest)](https://crappy.readthedocs.io/en/latest/?badge=latest)
+[![PyPi version](https://badgen.net/pypi/v/pyccapt/)](https://pypi.org/project/pyccapt)
 
+/pypi/license/pip
 This package aims to provide an open-source software for controlind atom probe systems and calibrate 
 the data. The package is modular and can be used in a wide range of applications.
 
@@ -32,15 +33,25 @@ The images below are an overview of the two version of user interface:
 #  Installation
 1- create the virtual environment via Anaconda:
     
-    conda create -n pyccapt python=3.8 
+    conda create -n apt_env python=3.8 
 
 2- Activate the virtual environment:
 
-    conda activate myenv
+    conda activate apt_env
 
 3- Install package locally:
     
     pip install -e .
+
+if you want to only install control package then:
+    
+    pip install -e ./pyccapt/control
+
+
+or for calibration package:
+
+    pip install -e ./pyccapt/calibration
+
 --------------
 # Documentation
 
@@ -68,5 +79,5 @@ Please report bugs, issues, ask for help or give feedback in the [github section
 
 -----------
 # Citing 
-TODO
+
 

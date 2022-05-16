@@ -36,14 +36,6 @@ pyccapt.control.devices\_test.gates module
    :undoc-members:
    :show-inheritance:
 
-pyccapt.control.devices\_test.multiprocessing module
-----------------------------------------------------
-
-.. automodule:: pyccapt.control.devices_test.multiprocessing
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 pyccapt.control.devices\_test.serial\_com\_cryovac module
 ---------------------------------------------------------
 

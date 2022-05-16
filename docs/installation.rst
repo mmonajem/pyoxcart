@@ -1,5 +1,5 @@
 Installation
-============
+===============================
 
 From PyPi
 ---------
@@ -15,8 +15,15 @@ Clone/download this repository and unzip it. In the project directory enter the 
 
 ``pip install -e .``
 
+to install the control packages, enter the following command:
 
-Running PyCCAPT GUI
+``pip install -e ./pyccapt/control``
+
+and to to install the calibration packages separately, enter the following command:
+
+``pip install -e ./pyccapt/calibration``
+
+Running PyCCAPT control GUI
 ------------------
 Once the installation is done and the python environment is activated, enter the following command in the
 console:
