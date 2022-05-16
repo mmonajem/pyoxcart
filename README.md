@@ -1,7 +1,7 @@
 # PyCCAPT 
 # A modular, FAIR open-source python atom probe tomography software package for controlling experiment and calibrating data 
 ![plot](pyccapt/files/logo.png)
-[![Documentation Status](https://readthedocs.org/projects/pyccapt/badge/?version=latest)](https://crappy.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/pyccapt/badge/?version=latest)](https://pyccapt.readthedocs.io/en/latest/?badge=latest)
 [![PyPi version](https://badgen.net/pypi/v/pyccapt/)](https://pypi.org/project/pyccapt)
 
 /pypi/license/pip
@@ -56,7 +56,7 @@ or for calibration package:
 # Documentation
 
 The latest versions of the documentation can be accessed on our
-[ReadTheDocs](https://crappy.readthedocs.io/) page. It contains descriptions of
+[ReadTheDocs](https://pyccapt.readthedocs.io/en/latest/?#) page. It contains descriptions of
 Crappy's features, tutorials, and other useful information.
 
 --------------------
