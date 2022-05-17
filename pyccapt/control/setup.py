@@ -15,7 +15,7 @@ year = "2022"
 try:
     from pyccapt import version
 except BaseException:
-    version = "0.0.2"
+    version = "0.0.32"
 
 setup(
     name=name,

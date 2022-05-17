@@ -39,18 +39,32 @@ The images below are an overview of the two version of user interface:
 
     conda activate apt_env
 
-3- Install package locally:
+3- Install the package:
+
+    pip install pyccapt
+
+if you want to only install control package then:
+
+    pip install pyccapt-control
+
+or for calibration package:
+
+    pip install pyccapt-calibration
+
+4- Install package locally:
     
     pip install -e .
 
 if you want to only install control package then:
     
-    pip install -e ./pyccapt/control
-
+    cd pyccapt/control
+    pip install -e .
 
 or for calibration package:
 
-    pip install -e ./pyccapt/calibration
+    cd pyccapt/calibration
+    pip install -e .
+
 
 --------------
 # Documentation

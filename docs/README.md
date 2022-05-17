@@ -5,6 +5,7 @@ The documentation uses `Sphinx` including some extensions.
 ## Install requirements
 
 ```
+cd docs
 pip install -r requirements.txt
 ```
 ## Create rst files

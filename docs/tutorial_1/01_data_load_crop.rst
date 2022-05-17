@@ -10,11 +10,11 @@ Selection of Depth and Areal Regions
     # import libraries
     import os
     import matplotlib.pyplot as plt
-    
+
     # import local modules
     from pyccapt.calibration import variables, data_loadcrop
     from pyccapt.tools.module_dir import MODULE_DIR
-    
+
 
 :math:`\text{Path to the dataset}`
 
@@ -26,8 +26,8 @@ Selection of Depth and Areal Regions
     # dataset_name = 'OLO_W_6_data'
     # dataset_name = 'OLO_Ni_8_data'
     # dataset_name = 'X6Cr17_2V30Min_5_data'
-    
-    
+
+
     variables.init()
     variables.path = os.path.join(os.path.split(os.path.split(MODULE_DIR)[0])[0], 'tests//data')
     variables.result_path = os.path.join(os.path.split(os.path.split(MODULE_DIR)[0])[0], 'tests/results/load_crop/' + dataset_name)
@@ -36,7 +36,7 @@ Selection of Depth and Areal Regions
     # dataset name
     filename = variables.path + '//' + dataset_name + '.h5'
     savename = variables.result_path + '//' + dataset_name + '_cropped' + '.h5'
-    
+
     # Create data farame out of hdf5 file dataset
     dldGroupStorage = data_loadcrop.fetch_dataset_from_dld_grp(filename)
     dld_masterDataframe = data_loadcrop.concatenate_dataframes_of_dld_grp(dldGroupStorage)
@@ -45,7 +45,7 @@ Selection of Depth and Areal Regions
 .. parsed-literal::
 
     {'dld': ['high_voltage', 'pulse_voltage', 'start_counter', 't', 'x', 'y'], 'oxcart': ['high_voltage', 'main_chamber_vacuum', 'num_events', 'pulse_voltage', 'temperature', 'time_counter'], 'tdc': ['channel', 'high_voltage', 'pulse_voltage', 'start_counter', 'time_data'], 'time': ['time_h', 'time_m', 'time_s']}
-    
+
 
 :math:`\textbf {Crop and select the stable projection(right side) of below plotted graph}`
 :math:`\text{In the Experiment history plot below you should select the ions. After selectiong the ions with a rectangle you can continue and run the next cell. }`
@@ -54,8 +54,8 @@ Selection of Depth and Areal Regions
 
     fig1, ax1 = plt.subplots(figsize=(8, 4))
     data_loadcrop.plot_graph_for_dld_high_voltage(ax1, dldGroupStorage, save_name = variables.result_path + '//ex_hist_' + dataset_name)
-    
-    
+
+
 
 
 
@@ -82,7 +82,7 @@ Selection of Depth and Areal Regions
 .. parsed-literal::
 
     Min Idx: 40221.36804642214 Max Idx: 1998486.585788357
-    
+
 
 .. code:: ipython3
 
@@ -149,7 +149,7 @@ Selection of Depth and Areal Regions
 .. parsed-literal::
 
     x: 2.1137056012834776 y: 1.3360024762570717 roi: 34.16040286244369
-    
+
 
 :math:`\text {The final selected data after processing is shown below.}`
 
@@ -185,4 +185,3 @@ Selection of Depth and Areal Regions
 .. parsed-literal::
 
     tofCropLossPct 7.413286431497557
-    

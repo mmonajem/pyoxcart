@@ -17,7 +17,7 @@ year = "2022"
 try:
     from pyccapt import version
 except BaseException:
-    version = "0.0.2"
+    version = "0.0.32"
 
 setup(
     name=name,
@@ -33,7 +33,7 @@ setup(
     },
     data_files=[('my_data', ['./tests/data'])],
 
-    packages=find_namespace_packages(include=['pyccapt.calibration.*', 'pyccapt.control.*']),
+    packages=find_namespace_packages(include=['pyccapt.calibration.pyccapt.*', 'pyccapt.control.pyccapt.*']),
     include_package_data=True,
     license="GPL v3",
     description=description,
