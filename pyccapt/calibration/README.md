@@ -44,7 +44,10 @@ Crappy's features, tutorials, and other useful information.
 ---------------------
 # Start with the tutorial
 
-
+To get started with the tutorial, please follow the instructions below. 
+First download the data files from the sample [datasets](https://pyccapt.readthedocs.io/en/latest/download_tutorial_data.html) links. Then open
+the juypter notebook and then open first tutorial. You can follow 
+the tutorial by clicking on the next button in the [document](https://pyccapt.readthedocs.io/en/latest/tutorial_1/01_data_load_crop.html).
 
 ------------------
 # Bug reports

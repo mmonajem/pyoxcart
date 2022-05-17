@@ -42,7 +42,9 @@ Crappy's features, tutorials, and other useful information.
 
 
 ---------------------
-# Start with the tutorial
+# Start with the GUI
+
+To start with the GUI, you have to first set the parameters in the [JSON](https://pyccapt.readthedocs.io/en/latest/configuration.html) file.
 
 
 

@@ -8,6 +8,14 @@ To install PyCCAPT using PyPi, enter the following command in the console:
 
 ``pip install pyccapt``
 
+to install the control packages, enter the following command:
+
+``pip install pyccapt-control``
+
+and to to install the calibration packages separately, enter the following command:
+
+``pip install pyccapt-calibration``
+
 
 Local installation of PyCCAPT
 ----------------------------
@@ -17,11 +25,12 @@ Clone/download this repository and unzip it. In the project directory enter the 
 
 to install the control packages, enter the following command:
 
-``pip install -e ./pyccapt/control``
+``cd pyccapt/control && pip install -e .``
 
 and to to install the calibration packages separately, enter the following command:
 
-``pip install -e ./pyccapt/calibration``
+``cd pyccapt/calibration && pip install -e .``
+
 
 Running PyCCAPT control GUI
 ------------------
