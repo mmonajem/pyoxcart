@@ -53,8 +53,8 @@ class APT_SIMPLE:
         self.lock1 = lock1
         self.conf = conf
         self.logger = logging.getLogger()
-        self.logger.setLevel(self.logging.INFO)
-        formatter = self.logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
+        self.logger.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
                               '%m-%d-%Y %H:%M:%S')
         file_handler = logging.FileHandler('apt_tdc_roetdec.log')
         file_handler.setLevel(logging.DEBUG)
@@ -213,8 +213,8 @@ class APT_SIMPLE:
         self.logger.info("Function - main_ex_loop | main_counter | value - {}| type - {}".format(variables.main_counter,type(variables.main_counter)))
         self.logger.info("Function - main_ex_loop | avg_n_count | value - {}| type - {}".format(variables.avg_n_count,type(variables.avg_n_count)))
         self.logger.info("Function - main_ex_loop | ex_freq | value - {}| type - {}".format(variables.ex_freq,type(variables.ex_freq)))
-        self.logger.info("Function - main_ex_loop | counts_measured | value - {}| type - {}".format(variables.counts_measured,type(variables.counts_measured)))
-        self.logger.info("Function - main_ex_loop | counts_error | value - {}| type - {}".format(variables.counts_error,type(variables.counts_error)))
+        self.logger.info("Function - main_ex_loop | counts_measured | value - {}| type - {}".format(counts_measured,type(variables.counts_measured)))
+        self.logger.info("Function - main_ex_loop | counts_error | value - {}| type - {}".format(counts_error,type(variables.counts_error)))
         self.logger.info("Function - main_ex_loop | count_temp | value - {}| type - {}".format(variables.count_temp,type(variables.count_temp)))
 
         # simple proportional control with averaging
