@@ -213,9 +213,8 @@ class APT_SIMPLE:
         self.logger.info("Function - main_ex_loop | main_counter | value - {}| type - {}".format(variables.main_counter,type(variables.main_counter)))
         self.logger.info("Function - main_ex_loop | avg_n_count | value - {}| type - {}".format(variables.avg_n_count,type(variables.avg_n_count)))
         self.logger.info("Function - main_ex_loop | ex_freq | value - {}| type - {}".format(variables.ex_freq,type(variables.ex_freq)))
-        self.logger.info("Function - main_ex_loop | counts_measured | value - {}| type - {}".format(counts_measured,type(variables.counts_measured)))
-        self.logger.info("Function - main_ex_loop | counts_error | value - {}| type - {}".format(counts_error,type(variables.counts_error)))
-        self.logger.info("Function - main_ex_loop | count_temp | value - {}| type - {}".format(variables.count_temp,type(variables.count_temp)))
+        self.logger.info("Function - main_ex_loop | counts_measured | value - {}| type - {}".format(counts_measured,type(counts_measured)))
+        self.logger.info("Function - main_ex_loop | counts_error | value - {}| type - {}".format(counts_error,type(counts_error)))
 
         # simple proportional control with averaging
         rate = ((variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000))
