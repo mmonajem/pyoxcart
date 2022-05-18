@@ -473,7 +473,7 @@ def main(conf):
 
     variables.start_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
-    if conf['tdc'] != "off":
+    if conf['tdc'] != "off" and variables.counter_source != 'DRS' and variables.counter_source != 'pulse_counter':
         # Create and start the TDC process and related queues
         if variables.counter_source == 'TDC':
             queue_x = Queue(maxsize=-1, ctx=multiprocessing.get_context())

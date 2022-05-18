@@ -8,7 +8,6 @@ import os
 from numpy.ctypeslib import ndpointer
 import numpy as np
 
-from pyccapt.control_tools import module_dir
 
 
 class DRS(object):
@@ -31,10 +30,11 @@ class DRS(object):
         """
 
         # load the library
+
         try:
             # load the library
-            dir = module_dir()
-            os.chdir(os.path.split(dir)[0] + '\\control\\drs\\')
+            p = os.path.abspath(os.path.join(__file__, "../."))
+            os.chdir(p)
             self.drs_lib = ctypes.CDLL("./drs_lib.dll")
         except:
             print("DRS DLL was not found")
@@ -59,6 +59,7 @@ class DRS(object):
         """
 
         data = self.drs_lib.Drs_reader(self.obj)
+        print(data)
         return data
 
     def delete_drs_ox(self):
