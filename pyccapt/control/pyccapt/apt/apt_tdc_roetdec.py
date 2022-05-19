@@ -59,6 +59,7 @@ class APT_SIMPLE:
         file_handler = logging.FileHandler('apt_tdc_roetdec.log')
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
+        self.log.addHandler(file_handler)
 
     def initialize_v_dc(self):
         """

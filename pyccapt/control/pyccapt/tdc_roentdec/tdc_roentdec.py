@@ -8,7 +8,7 @@ import os.path as path
 import ctypes
 from numpy.ctypeslib import ndpointer
 import numpy as np
-
+import logging
 from pyccapt.control_tools import module_dir
 
 buf_size = 30000
@@ -40,6 +40,14 @@ class tdc_dec(object):
         tdc_lib.get_data_tdc_buf.argtypes =[ctypes.c_void_p]
         self.obj = tdc_lib.Warraper_tdc_new(buf_size, time_out)
         self.tdc_lib = tdc_lib
+        self.log = logging.getLogger()
+        self.log.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
+                              '%m-%d-%Y %H:%M:%S')
+        file_handler = logging.FileHandler('tdc_roentdc.log')
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+        self.log.addHandler(file_handler)
 
     def stop_tdc(self, ):
         """
@@ -91,6 +99,8 @@ class tdc_dec(object):
             Does not return anything
         """
         data = self.tdc_lib.get_data_tdc_buf(self.obj)
+        self.log.info("Function - get_data_tdc_buf | response - > {} | type -> {}".format(data,type(data)))
+
         return data
 
 
@@ -124,6 +134,7 @@ def experiment_measure(queue_x, queue_y, queue_t, queue_AbsoluteTimeStamp,
         p = p + '\\control\\pyccapt\\tdc_roentdec\\'
         os.chdir(p)
         tdc_lib = ctypes.CDLL("./wrapper_read_TDC8HP_x64.dll")
+
     except:
         print("TDC DLL was not found")
 

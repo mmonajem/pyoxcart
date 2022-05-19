@@ -3,12 +3,29 @@ This is the script for saving the hdf5 file containing the experiment data.
 """
 
 import h5py
+import logging
 
 from pyccapt.control_tools import variables
+
+log = logging.getLogger()
+log.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
+                              '%m-%d-%Y %H:%M:%S')
+file_handler = logging.FileHandler('hdf5_creator.log')
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(formatter)
+log.addHandler(file_handler)
 
 
 def hdf_creator_oxcart(time_counter, time_ex_s, time_ex_m, time_ex_h):
     # save hdf5 file
+    log.info("Function - hdf_creator_oxcart | time_counter- > {} | type - {}".format(time_counter,type(time_counter)))
+    log.info("Function - hdf_creator_oxcart | time_ex_s- > {} | type - {}".format(time_ex_s,type(time_ex_s))) 
+    log.info("Function - hdf_creator_oxcart | time_ex_m- > {} | type - {}".format(time_ex_m,type(time_ex_m))) 
+    log.info("Function - hdf_creator_oxcart | time_ex_h- > {} | type - {}".format(time_ex_h,type(time_ex_h))) 
+
+
+
     with h5py.File(variables.path + '\\data_%s.h5' % variables.exp_name, "w") as f:
         f.create_dataset("apt/high_voltage", data=variables.main_v_dc, dtype='f')
         f.create_dataset("apt/pulse_voltage", data=variables.main_v_p, dtype='f')

@@ -9,7 +9,7 @@ from numpy.ctypeslib import ndpointer
 import numpy as np
 
 from pyccapt.control_tools import module_dir
-
+import logging
 
 class DRS(object):
     """
@@ -46,6 +46,14 @@ class DRS(object):
         self.drs_lib.Drs_delete_drs_ox.restype = ctypes.c_void_p
         self.drs_lib.Drs_delete_drs_ox.argtypes = [ctypes.c_void_p]
         self.obj = self.drs_lib.Drs_new(trigger, test, delay, sample_frequency)
+        self.log = logging.getLogger()
+        self.log.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
+                              '%m-%d-%Y %H:%M:%S')
+        file_handler = logging.FileHandler('drs.log')
+        file_handler.setLevel(logging.INFO)
+        file_handler.setFormatter(formatter)
+        self.log.addHandler(file_handler)
 
     def reader(self, ):
         """
@@ -59,6 +67,8 @@ class DRS(object):
         """
 
         data = self.drs_lib.Drs_reader(self.obj)
+        self.log.info("Function - reader | response - > {} | type -> {}".format(data,type(data)))
+
         return data
 
     def delete_drs_ox(self):
