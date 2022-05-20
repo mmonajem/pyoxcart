@@ -9,10 +9,10 @@ log_tof = logging.getLogger()
 log_tof.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
                               '%m-%d-%Y %H:%M:%S')
-file_handler = logging.FileHandler('tof2mc_simple.log')
-file_handler.setLevel(logging.DEBUG)
-file_handler.setFormatter(formatter)
-log_tof.addHandler(file_handler)
+file_handler_tof = logging.FileHandler('tof2mc_simple.log')
+file_handler_tof.setLevel(logging.DEBUG)
+file_handler_tof.setFormatter(formatter)
+log_tof.addHandler(file_handler_tof)
 log_tof.propagate = False
 
  
