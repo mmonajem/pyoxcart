@@ -5,7 +5,7 @@ This is the script containing simple version of m/c calculation.
 import numpy as np
 import logging
 
-log_tof = logging.getLogger()
+log_tof = logging.getLogger('tof2mc_simple')
 log_tof.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
                               '%m-%d-%Y %H:%M:%S')

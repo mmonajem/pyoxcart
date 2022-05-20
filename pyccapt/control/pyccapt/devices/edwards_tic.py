@@ -27,7 +27,7 @@ class EdwardsAGC(object):
         self.port = port
         self.serial = serial.Serial(self.port, baudrate=9600, timeout=0.5)
 
-        self.log = logging.getLogger()
+        self.log = logging.getLogger('edwards_tic')
         self.log.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
                               '%m-%d-%Y %H:%M:%S')
@@ -48,7 +48,7 @@ class EdwardsAGC(object):
 
         """
         comm = command + "\r\n"
-        self.log.info("Function - comm | Command - > {}".format(command))
+        self.log.info("Function - comm | Command - > {} | type -> {} ".format(command,type(command)))
         self.log.info("Function - comm | Comm - > {}".format(comm))
         self.serial.write(comm.encode())
         complete_string = self.serial.readline().decode()

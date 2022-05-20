@@ -44,7 +44,7 @@ class DRS(object):
         self.drs_lib.Drs_delete_drs_ox.restype = ctypes.c_void_p
         self.drs_lib.Drs_delete_drs_ox.argtypes = [ctypes.c_void_p]
         self.obj = self.drs_lib.Drs_new(trigger, test, delay, sample_frequency)
-        self.log = logging.getLogger()
+        self.log = logging.getLogger('drs')
         self.log.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
                               '%m-%d-%Y %H:%M:%S')

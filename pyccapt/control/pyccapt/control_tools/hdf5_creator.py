@@ -7,7 +7,7 @@ import logging
 
 from pyccapt.control_tools import variables
 
-log = logging.getLogger()
+log = logging.getLogger('hdf5_creator')
 log.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
                               '%m-%d-%Y %H:%M:%S')

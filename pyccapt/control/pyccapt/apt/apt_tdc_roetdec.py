@@ -52,7 +52,7 @@ class APT_SIMPLE:
         self.queue_stop_measurement = queue_stop_measurement
         self.lock1 = lock1
         self.conf = conf
-        self.log = logging.getLogger()
+        self.log = logging.getLogger('apt_tdc_roetdec')
         self.log.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
                               '%m-%d-%Y %H:%M:%S')

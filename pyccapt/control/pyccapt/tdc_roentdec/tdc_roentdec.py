@@ -38,7 +38,7 @@ class tdc_dec(object):
         tdc_lib.get_data_tdc_buf.argtypes =[ctypes.c_void_p]
         self.obj = tdc_lib.Warraper_tdc_new(buf_size, time_out)
         self.tdc_lib = tdc_lib
-        self.log = logging.getLogger()
+        self.log = logging.getLogger('tdc_roentdc')
         self.log.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
                               '%m-%d-%Y %H:%M:%S')

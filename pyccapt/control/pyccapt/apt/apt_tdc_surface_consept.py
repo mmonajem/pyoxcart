@@ -61,7 +61,7 @@ class APT_ADVANCE:
         self.queue_ch3_wave = queue_ch3_wave
         self.logger = logger
         self.conf = conf
-        self.log = logging.getLogger()
+        self.log = logging.getLogger('apt_tdc_surface_consept')
         self.log.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
                               '%m-%d-%Y %H:%M:%S')
