@@ -9,12 +9,12 @@ log = logging.getLogger()
 log.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
                               '%m-%d-%Y %H:%M:%S')
-file_handler = logging.FileHandler('hdf5_creator.log')
+file_handler = logging.FileHandler('tof2mc_simple.log')
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
 log.addHandler(file_handler)
 
-
+ 
 def tof_bin2mc_sc(t, t0, V, xDet, yDet, flightPathLength):
     """
     Calculate the m/c for Surface Concept delay line.
@@ -63,7 +63,7 @@ def tof_bin2mc_ro(t, t0, V, xDet, yDet, flightPathLength):
     """
     Calculate the m/c for Roentdec delay line.
     """
-    
+
     log.info("Function - tof_bin2mc_ro | t- > {} | type - {}".format(t,type(t)))
     log.info("Function - tof_bin2mc_ro | t0- > {} | type - {}".format(t0,type(t0)))
     log.info("Function - tof_bin2mc_ro | V- > {} | type - {}".format(V,type(V)))
