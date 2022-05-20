@@ -38,14 +38,14 @@ class tdc_dec(object):
         tdc_lib.get_data_tdc_buf.argtypes =[ctypes.c_void_p]
         self.obj = tdc_lib.Warraper_tdc_new(buf_size, time_out)
         self.tdc_lib = tdc_lib
-        self.log = logging.getLogger('tdc_roentdc')
-        self.log.setLevel(logging.INFO)
+        self.log_tdc_roentdc = logging.getLogger('tdc_roentdc')
+        self.log_tdc_roentdc .setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
                               '%m-%d-%Y %H:%M:%S')
-        file_handler = logging.FileHandler('tdc_roentdc.log')
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(formatter)
-        self.log.addHandler(file_handler)
+        file_handler_tdc_roentdc = logging.FileHandler('tdc_roentdc.log')
+        file_handler_tdc_roentdc.setLevel(logging.DEBUG)
+        file_handler_tdc_roentdc.setFormatter(formatter)
+        self.log_tdc_roentdc .addHandler(file_handler_tdc_roentdc)
 
     def stop_tdc(self, ):
         """
@@ -97,7 +97,7 @@ class tdc_dec(object):
             Does not return anything
         """
         data = self.tdc_lib.get_data_tdc_buf(self.obj)
-        self.log.info("Function - get_data_tdc_buf | response - > {} | type -> {}".format(data,type(data)))
+        self.log_tdc_roentdc .info("Function - get_data_tdc_buf | response - > {} | type -> {}".format(data,type(data)))
 
         return data
 

@@ -52,14 +52,14 @@ class APT_SIMPLE:
         self.queue_stop_measurement = queue_stop_measurement
         self.lock1 = lock1
         self.conf = conf
-        self.log = logging.getLogger('apt_tdc_roetdec')
-        self.log.setLevel(logging.INFO)
+        self.log_apt_tdc_roetdec = logging.getLogger('apt_tdc_roetdec')
+        self.log_apt_tdc_roetdec.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
                               '%m-%d-%Y %H:%M:%S')
-        file_handler = logging.FileHandler('apt_tdc_roetdec.log')
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(formatter)
-        self.log.addHandler(file_handler)
+        file_handler_apt_tdc_roetdec = logging.FileHandler('apt_tdc_roetdec.log')
+        file_handler_apt_tdc_roetdec.setLevel(logging.DEBUG)
+        file_handler_apt_tdc_roetdec.setFormatter(formatter)
+        self.log_apt_tdc_roetdec.addHandler(file_handler_apt_tdc_roetdec)
 
     def initialize_v_dc(self):
         """
@@ -78,7 +78,7 @@ class APT_SIMPLE:
         """
         try:
             # Setting the com port of V_dc
-            self.log.info("Function - initialize_v_dc | Port selection -> {}".format(initialize_devices.com_ports[variables.COM_PORT_V_dc].device))
+            self.log_apt_tdc_roetdec.info("Function - initialize_v_dc | Port selection -> {}".format(initialize_devices.com_ports[variables.COM_PORT_V_dc].device))
             self.com_port_v_dc = serial.Serial(
                 port=initialize_devices.com_ports[variables.COM_PORT_V_dc].device,  # chosen COM port
                 baudrate=115200,  # 115200
@@ -86,7 +86,7 @@ class APT_SIMPLE:
                 parity=serial.PARITY_NONE,  # N
                 stopbits=serial.STOPBITS_ONE  # 1
             )
-            self.log.info("Function - initialize_v_dc | Successful Port Open - O/p of serial variable - > {}".format(self.com_port_v_dc))
+            self.log_apt_tdc_roetdec.info("Function - initialize_v_dc | Successful Port Open - O/p of serial variable - > {}".format(self.com_port_v_dc))
 
             # configure the COM port to talk to. Default values: 115200,8,N,1
             if self.com_port_v_dc.is_open:
@@ -98,10 +98,10 @@ class APT_SIMPLE:
                 for cmd in range(len(cmd_list)):
                     self.command_v_dc(cmd_list[cmd])
         except Exception as e:
-            self.log.error("Function - initialize_v_dc | Port error - O/p of serial variable - > {} ".format(self.com_port_v_dc))
+            self.log_apt_tdc_roetdec.error("Function - initialize_v_dc | Port error - O/p of serial variable - > {} ".format(self.com_port_v_dc))
             print("Couldn't open Port!")
             print(e)
-            self.log.error("Function - initialize_v_dc | Port error - Error stack - > {} ".format(e))
+            self.log_apt_tdc_roetdec.error("Function - initialize_v_dc | Port error - Error stack - > {} ".format(e))
 
     # apply command to the V_dc
     def command_v_dc(self, cmd):
@@ -125,7 +125,7 @@ class APT_SIMPLE:
         while self.com_port_v_dc.in_waiting > 0:
             response = self.com_port_v_dc.readline()  # all characters received, read line till '\r\n'
         response = response.decode("utf-8")
-        self.log.info("Function - command_v_dc | response - {} ".format(response))
+        self.log_apt_tdc_roetdec.info("Function - command_v_dc | response - {} ".format(response))
         return response
 
     def reader_queue_dld(self):
@@ -208,14 +208,14 @@ class APT_SIMPLE:
         counts_measured = variables.avg_n_count / (1 + variables.pulse_frequency * 1000)
 
         counts_error = counts_target - counts_measured  # deviation from setpoint
-        self.log.info("Function - main_ex_loop | count_temp | value - {}| type - {}".format(variables.count_temp,type(variables.count_temp)))
-        self.log.info("Function - main_ex_loop | count_last | value - {}| type - {}".format(variables.count_last,type(variables.count_last)))
-        self.log.info("Function - main_ex_loop | main_v_dc | value - {}| type - {}".format(variables.main_v_dc,type(variables.main_v_dc)))
-        self.log.info("Function - main_ex_loop | main_counter | value - {}| type - {}".format(variables.main_counter,type(variables.main_counter)))
-        self.log.info("Function - main_ex_loop | avg_n_count | value - {}| type - {}".format(variables.avg_n_count,type(variables.avg_n_count)))
-        self.log.info("Function - main_ex_loop | ex_freq | value - {}| type - {}".format(variables.ex_freq,type(variables.ex_freq)))
-        self.log.info("Function - main_ex_loop | counts_measured | value - {}| type - {}".format(counts_measured,type(counts_measured)))
-        self.log.info("Function - main_ex_loop | counts_error | value - {}| type - {}".format(counts_error,type(counts_error)))
+        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | count_temp | value - {}| type - {}".format(variables.count_temp,type(variables.count_temp)))
+        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | count_last | value - {}| type - {}".format(variables.count_last,type(variables.count_last)))
+        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | main_v_dc | value - {}| type - {}".format(variables.main_v_dc,type(variables.main_v_dc)))
+        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | main_counter | value - {}| type - {}".format(variables.main_counter,type(variables.main_counter)))
+        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | avg_n_count | value - {}| type - {}".format(variables.avg_n_count,type(variables.avg_n_count)))
+        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | ex_freq | value - {}| type - {}".format(variables.ex_freq,type(variables.ex_freq)))
+        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | counts_measured | value - {}| type - {}".format(counts_measured,type(counts_measured)))
+        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | counts_error | value - {}| type - {}".format(counts_error,type(counts_error)))
 
         # simple proportional control with averaging
         rate = ((variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000))
@@ -287,8 +287,8 @@ class APT_SIMPLE:
             variables.main_counter = np.zeros(0)
             variables.main_v_dc_dld = np.zeros(0)
             variables.main_v_dc_tdc = np.zeros(0)
-            self.log.info("Function - cleanup_variables | ch1 | value - {}| type - {}".format(variables.count_temp,type(variables.count_temp)))
-            self.log.info("Function - cleanup_variables | main_v_dc_tdc | value - {}| type - {}".format(variables.main_v_dc_tdc,type(variables.main_v_dc_tdc)))
+            self.log_apt_tdc_roetdec.info("Function - cleanup_variables | ch1 | value - {}| type - {}".format(variables.count_temp,type(variables.count_temp)))
+            self.log_apt_tdc_roetdec.info("Function - cleanup_variables | main_v_dc_tdc | value - {}| type - {}".format(variables.main_v_dc_tdc,type(variables.main_v_dc_tdc)))
 
         print('starting to clean up')
         # save the data to the HDF5

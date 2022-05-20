@@ -27,14 +27,14 @@ class EdwardsAGC(object):
         self.port = port
         self.serial = serial.Serial(self.port, baudrate=9600, timeout=0.5)
 
-        self.log = logging.getLogger('edwards_tic')
-        self.log.setLevel(logging.INFO)
+        self.log_edwards_tic = logging.getLogger('edwards_tic')
+        self.log_edwards_tic.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
                               '%m-%d-%Y %H:%M:%S')
-        file_handler = logging.FileHandler('edwards_tic.log')
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(formatter)
-        self.log.addHandler(file_handler)
+        file_handler_edwards_tic = logging.FileHandler('edwards_tic.log')
+        file_handler_edwards_tic.setLevel(logging.DEBUG)
+        file_handler_edwards_tic.setFormatter(formatter)
+        self.log_edwards_tic.addHandler(file_handler_edwards_tic)
 
     def comm(self, command):
         """ 
@@ -48,10 +48,10 @@ class EdwardsAGC(object):
 
         """
         comm = command + "\r\n"
-        self.log.info("Function - comm | Command - > {} | type -> {} ".format(command,type(command)))
-        self.log.info("Function - comm | Comm - > {}".format(comm))
+        self.log_edwards_tic.info("Function - comm | Command - > {} | type -> {} ".format(command,type(command)))
+        self.log_edwards_tic.info("Function - comm | Comm - > {}".format(comm))
         self.serial.write(comm.encode())
         complete_string = self.serial.readline().decode()
         complete_string = complete_string.strip()
-        self.log.info("Function - comm | Response - > {}".format(complete_string))
+        self.log_edwards_tic.info("Function - comm | Response - > {}".format(complete_string))
         return complete_string
