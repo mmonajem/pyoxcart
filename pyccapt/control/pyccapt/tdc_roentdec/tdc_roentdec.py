@@ -7,7 +7,8 @@ import os
 import ctypes
 from numpy.ctypeslib import ndpointer
 import numpy as np
-import logging
+
+from pyccapt.control_tools import loggi
 
 buf_size = 30000
 time_out = 300
@@ -38,14 +39,8 @@ class tdc_dec(object):
         tdc_lib.get_data_tdc_buf.argtypes =[ctypes.c_void_p]
         self.obj = tdc_lib.Warraper_tdc_new(buf_size, time_out)
         self.tdc_lib = tdc_lib
-        self.log_tdc_roentdc = logging.getLogger('tdc_roentdc')
-        self.log_tdc_roentdc .setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
-                              '%m-%d-%Y %H:%M:%S')
-        file_handler_tdc_roentdc = logging.FileHandler('tdc_roentdc.log')
-        file_handler_tdc_roentdc.setLevel(logging.DEBUG)
-        file_handler_tdc_roentdc.setFormatter(formatter)
-        self.log_tdc_roentdc .addHandler(file_handler_tdc_roentdc)
+        p = os.path.abspath(os.path.join(__file__, "../../../../."))
+        self.log_tdc_roentdc = loggi.logger_creator('tdc_roentdc', 'tdc_roentdc.log', path=p)
 
     def stop_tdc(self, ):
         """

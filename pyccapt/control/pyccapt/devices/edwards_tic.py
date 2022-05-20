@@ -2,9 +2,9 @@
 This is the main script for Reading the Edward gauges.
 """
 
-
 import serial
-import logging
+
+from pyccapt.control_tools import loggi
 
 
 
@@ -27,14 +27,8 @@ class EdwardsAGC(object):
         self.port = port
         self.serial = serial.Serial(self.port, baudrate=9600, timeout=0.5)
 
-        self.log_edwards_tic = logging.getLogger('edwards_tic')
-        self.log_edwards_tic.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
-                              '%m-%d-%Y %H:%M:%S')
-        file_handler_edwards_tic = logging.FileHandler('edwards_tic.log')
-        file_handler_edwards_tic.setLevel(logging.DEBUG)
-        file_handler_edwards_tic.setFormatter(formatter)
-        self.log_edwards_tic.addHandler(file_handler_edwards_tic)
+        self.log_edwards_tic = loggi.logger_creator('edwards_tic', 'edwards_tic.log')
+
 
     def comm(self, command):
         """ 

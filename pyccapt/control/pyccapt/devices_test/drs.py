@@ -39,7 +39,7 @@ if __name__ == '__main__':
     drs_ox = DRS(trigger=0, test=1, delay=0, sample_frequency=2)
 
     # code
-    for i in range(5):
+    for i in range(20):
         # Read the data from drs
         start = time.time()
         returnVale = np.array(drs_ox.reader())

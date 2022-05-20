@@ -14,7 +14,6 @@ import numpy as np
 import serial.tools.list_ports
 import pyvisa as visa
 import nidaqmx
-import logging
 
 # Local project scripts
 from pyccapt.devices import signal_generator, tweet_send
@@ -61,14 +60,8 @@ class APT_ADVANCE:
         self.queue_ch3_wave = queue_ch3_wave
         self.logger = logger
         self.conf = conf
-        self.log_apt_tdc_surface_consept = logging.getLogger('apt_tdc_surface_consept')
-        self.log_apt_tdc_surface_consept.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
-                              '%m-%d-%Y %H:%M:%S')
-        file_handler_apt_tdc_surface_consept = logging.FileHandler('apt_tdc_surface_consept.log')
-        file_handler_apt_tdc_surface_consept.setLevel(logging.DEBUG)
-        file_handler_apt_tdc_surface_consept.setFormatter(formatter)
-        self.log_apt_tdc_surface_consept.addHandler(file_handler_apt_tdc_surface_consept)
+        self.log_apt_tdc_surface_consept = loggi.logger_creator('apt_tdc_surface_consept', 'apt_tdc_surface_consept.log')
+
 
     def initialize_v_dc(self):
         """

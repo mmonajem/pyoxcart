@@ -52,14 +52,7 @@ class APT_SIMPLE:
         self.queue_stop_measurement = queue_stop_measurement
         self.lock1 = lock1
         self.conf = conf
-        self.log_apt_tdc_roetdec = logging.getLogger('apt_tdc_roetdec')
-        self.log_apt_tdc_roetdec.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
-                              '%m-%d-%Y %H:%M:%S')
-        file_handler_apt_tdc_roetdec = logging.FileHandler('apt_tdc_roetdec.log')
-        file_handler_apt_tdc_roetdec.setLevel(logging.DEBUG)
-        file_handler_apt_tdc_roetdec.setFormatter(formatter)
-        self.log_apt_tdc_roetdec.addHandler(file_handler_apt_tdc_roetdec)
+        self.log_apt_tdc_roetdec = loggi.logger_creator('apt_tdc_roetdec', 'apt_tdc_roetdec.log')
 
     def initialize_v_dc(self):
         """

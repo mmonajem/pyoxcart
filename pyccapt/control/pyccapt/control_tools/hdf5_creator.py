@@ -3,28 +3,22 @@ This is the script for saving the hdf5 file containing the experiment data.
 """
 
 import h5py
-import logging
 
+from pyccapt.control_tools import loggi
 from pyccapt.control_tools import variables
-
-log_hdf5_creator = logging.getLogger('hdf5_creator')
-log_hdf5_creator.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
-                              '%m-%d-%Y %H:%M:%S')
-file_handler_hdf5_creator = logging.FileHandler('hdf5_creator.log')
-file_handler_hdf5_creator.setLevel(logging.DEBUG)
-file_handler_hdf5_creator.setFormatter(formatter)
-log_hdf5_creator.addHandler(file_handler_hdf5_creator)
 
 
 def hdf_creator_oxcart(time_counter, time_ex_s, time_ex_m, time_ex_h):
     # save hdf5 file
-    log_hdf5_creator.info("Function - hdf_creator_oxcart | time_counter- > {} | type - {}".format(time_counter,type(time_counter)))
-    log_hdf5_creator.info("Function - hdf_creator_oxcart | time_ex_s- > {} | type - {}".format(time_ex_s,type(time_ex_s))) 
-    log_hdf5_creator.info("Function - hdf_creator_oxcart | time_ex_m- > {} | type - {}".format(time_ex_m,type(time_ex_m))) 
-    log_hdf5_creator.info("Function - hdf_creator_oxcart | time_ex_h- > {} | type - {}".format(time_ex_h,type(time_ex_h))) 
-
-
+    logger_creator = loggi.logger_creator('hdf5_creator', 'hdf5_creator.log')
+    logger_creator.info(
+        "Function - hdf_creator_oxcart | time_counter- > {} | type - {}".format(time_counter, type(time_counter)))
+    logger_creator.info(
+        "Function - hdf_creator_oxcart | time_ex_s- > {} | type - {}".format(time_ex_s, type(time_ex_s)))
+    logger_creator.info(
+        "Function - hdf_creator_oxcart | time_ex_m- > {} | type - {}".format(time_ex_m, type(time_ex_m)))
+    logger_creator.info(
+        "Function - hdf_creator_oxcart | time_ex_h- > {} | type - {}".format(time_ex_h, type(time_ex_h)))
 
     with h5py.File(variables.path + '\\data_%s.h5' % variables.exp_name, "w") as f:
         f.create_dataset("apt/high_voltage", data=variables.main_v_dc, dtype='f')
@@ -67,7 +61,6 @@ def hdf_creator_oxcart(time_counter, time_ex_s, time_ex_m, time_ex_h):
 
 
 def hdf_creator_physic(time_counter, time_ex_s, time_ex_m, time_ex_h):
-
     # save hdf5 file
     with h5py.File(variables.path + '\\data_%s.h5' % variables.exp_name, "w") as f:
         f.create_dataset("apt/high_voltage", data=variables.main_v_dc, dtype='f')

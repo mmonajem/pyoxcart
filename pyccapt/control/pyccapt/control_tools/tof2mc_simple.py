@@ -3,24 +3,16 @@ This is the script containing simple version of m/c calculation.
 """
 
 import numpy as np
-import logging
 
-log_tof = logging.getLogger('tof2mc_simple')
-log_tof.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
-                              '%m-%d-%Y %H:%M:%S')
-file_handler_tof = logging.FileHandler('tof2mc_simple.log')
-file_handler_tof.setLevel(logging.DEBUG)
-file_handler_tof.setFormatter(formatter)
-log_tof.addHandler(file_handler_tof)
-log_tof.propagate = False
+from pyccapt.control_tools import loggi
+
 
  
 def tof_bin2mc_sc(t, t0, V, xDet, yDet, flightPathLength):
     """
     Calculate the m/c for Surface Concept delay line.
     """
-
+    log_tof = loggi.logger_creator('tof2mc_simple', 'tof2mc_simple.log')
     log_tof.info("Function - tof_bin2mc_sc | t- > {} | type - {}".format(t,type(t)))
     log_tof.info("Function - tof_bin2mc_sc | t0- > {} | type - {}".format(t0,type(t0)))
     log_tof.info("Function - tof_bin2mc_sc | V- > {} | type - {}".format(V,type(V)))
@@ -65,6 +57,7 @@ def tof_bin2mc_ro(t, t0, V, xDet, yDet, flightPathLength):
     Calculate the m/c for Roentdec delay line.
     """
 
+    log_tof = loggi.logger_creator('tof2mc_simple', 'tof2mc_simple.log')
     log_tof.info("Function - tof_bin2mc_ro | t- > {} | type - {}".format(t,type(t)))
     log_tof.info("Function - tof_bin2mc_ro | t0- > {} | type - {}".format(t0,type(t0)))
     log_tof.info("Function - tof_bin2mc_ro | V- > {} | type - {}".format(V,type(V)))
