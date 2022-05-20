@@ -5,14 +5,14 @@ This is the script containing simple version of m/c calculation.
 import numpy as np
 import logging
 
-log = logging.getLogger()
-log.setLevel(logging.INFO)
+log_tof = logging.getLogger()
+log_tof.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s', 
                               '%m-%d-%Y %H:%M:%S')
 file_handler = logging.FileHandler('tof2mc_simple.log')
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
-log.addHandler(file_handler)
+log_tof.addHandler(file_handler)
 
  
 def tof_bin2mc_sc(t, t0, V, xDet, yDet, flightPathLength):
@@ -20,12 +20,12 @@ def tof_bin2mc_sc(t, t0, V, xDet, yDet, flightPathLength):
     Calculate the m/c for Surface Concept delay line.
     """
 
-    log.info("Function - tof_bin2mc_sc | t- > {} | type - {}".format(t,type(t)))
-    log.info("Function - tof_bin2mc_sc | t0- > {} | type - {}".format(t0,type(t0)))
-    log.info("Function - tof_bin2mc_sc | V- > {} | type - {}".format(V,type(V)))
-    log.info("Function - tof_bin2mc_sc | xDet- > {} | type - {}".format(xDet,type(xDet)))
-    log.info("Function - tof_bin2mc_sc | yDet- > {} | type - {}".format(yDet,type(yDet)))
-    log.info("Function - tof_bin2mc_sc | flightPathLength- > {} | type - {}".format(flightPathLength,type(flightPathLength)))
+    log_tof.info("Function - tof_bin2mc_sc | t- > {} | type - {}".format(t,type(t)))
+    log_tof.info("Function - tof_bin2mc_sc | t0- > {} | type - {}".format(t0,type(t0)))
+    log_tof.info("Function - tof_bin2mc_sc | V- > {} | type - {}".format(V,type(V)))
+    log_tof.info("Function - tof_bin2mc_sc | xDet- > {} | type - {}".format(xDet,type(xDet)))
+    log_tof.info("Function - tof_bin2mc_sc | yDet- > {} | type - {}".format(yDet,type(yDet)))
+    log_tof.info("Function - tof_bin2mc_sc | flightPathLength- > {} | type - {}".format(flightPathLength,type(flightPathLength)))
 
     # calculates m/c based on idealized geometry / electrostatics
     # m/c = 2 e V (t/L)^2
@@ -55,7 +55,7 @@ def tof_bin2mc_sc(t, t0, V, xDet, yDet, flightPathLength):
 
     mc = 2 * e * V * (t / flightPathLength) ** 2
     mc = mc / amu  # conversion from kg/C to Da 6.022E23 g/mol, 1.6E-19C/ec
-    log.info("Function - tof_bin2mc_sc | response- > {} | type - {}".format(mc,type(mc)))
+    log_tof.info("Function - tof_bin2mc_sc | response- > {} | type - {}".format(mc,type(mc)))
     return mc
 
 
@@ -64,12 +64,12 @@ def tof_bin2mc_ro(t, t0, V, xDet, yDet, flightPathLength):
     Calculate the m/c for Roentdec delay line.
     """
 
-    log.info("Function - tof_bin2mc_ro | t- > {} | type - {}".format(t,type(t)))
-    log.info("Function - tof_bin2mc_ro | t0- > {} | type - {}".format(t0,type(t0)))
-    log.info("Function - tof_bin2mc_ro | V- > {} | type - {}".format(V,type(V)))
-    log.info("Function - tof_bin2mc_ro | xDet- > {} | type - {}".format(xDet,type(xDet)))
-    log.info("Function - tof_bin2mc_ro | yDet- > {} | type - {}".format(yDet,type(yDet)))
-    log.info("Function - tof_bin2mc_ro | flightPathLength- > {} | type - {}".format(flightPathLength,type(flightPathLength)))
+    log_tof.info("Function - tof_bin2mc_ro | t- > {} | type - {}".format(t,type(t)))
+    log_tof.info("Function - tof_bin2mc_ro | t0- > {} | type - {}".format(t0,type(t0)))
+    log_tof.info("Function - tof_bin2mc_ro | V- > {} | type - {}".format(V,type(V)))
+    log_tof.info("Function - tof_bin2mc_ro | xDet- > {} | type - {}".format(xDet,type(xDet)))
+    log_tof.info("Function - tof_bin2mc_ro | yDet- > {} | type - {}".format(yDet,type(yDet)))
+    log_tof.info("Function - tof_bin2mc_ro | flightPathLength- > {} | type - {}".format(flightPathLength,type(flightPathLength)))
     # calculates m/c based on idealized geometry / electrostatics
     # m/c = 2 e V (t/L)^2
 
@@ -98,7 +98,7 @@ def tof_bin2mc_ro(t, t0, V, xDet, yDet, flightPathLength):
 
     mc = 2 * e * V * (t / flightPathLength) ** 2
     mc = mc / amu  # conversion from kg/C to Da 6.022E23 g/mol, 1.6E-19C/ec
-    log.info("Function - tof_bin2mc_sc | response- > {} | type - {}".format(mc,type(mc)))
+    log_tof.info("Function - tof_bin2mc_sc | response- > {} | type - {}".format(mc,type(mc)))
 
     return mc
 
