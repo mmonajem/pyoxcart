@@ -95,6 +95,7 @@ def init(conf):
     global vacuum_buffer_backing
     global vacuum_load_lock
     global vacuum_load_lock_backing
+    global log_path
 
     # DLD parameters
     global x
@@ -190,6 +191,7 @@ def init(conf):
     criteria_vdc = True
     point_size_detec_map = 1
     exp_name = ''
+    log_path = ''
 
     # Run statistics=
     elapsed_time = 0.0

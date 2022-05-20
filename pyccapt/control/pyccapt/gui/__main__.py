@@ -34,6 +34,7 @@ def main():
 
         # Initialize global experiment variables
         variables.init(conf)
+        variables.log_path = p
         # Config the port for cryo
         if conf['cryo'] == "off":
             print('The cryo temperature monitoring is off')
@@ -160,7 +161,7 @@ def main():
 
         # Initialize global experiment variables
         variables.init(conf)
-
+        variables.log_path = p
         app = QtWidgets.QApplication(sys.argv)
         APT_Physic = QtWidgets.QMainWindow()
         lock = threading.Lock()

@@ -4,11 +4,22 @@ This is the script containing simple version of m/c calculation.
 
 import numpy as np
 
+from pyccapt.control_tools import loggi
 
+
+ 
 def tof_bin2mc_sc(t, t0, V, xDet, yDet, flightPathLength):
     """
     Calculate the m/c for Surface Concept delay line.
     """
+    log_tof = loggi.logger_creator('tof2mc_simple', 'tof2mc_simple.log')
+    log_tof.info("Function - tof_bin2mc_sc | t- > {} | type - {}".format(t,type(t)))
+    log_tof.info("Function - tof_bin2mc_sc | t0- > {} | type - {}".format(t0,type(t0)))
+    log_tof.info("Function - tof_bin2mc_sc | V- > {} | type - {}".format(V,type(V)))
+    log_tof.info("Function - tof_bin2mc_sc | xDet- > {} | type - {}".format(xDet,type(xDet)))
+    log_tof.info("Function - tof_bin2mc_sc | yDet- > {} | type - {}".format(yDet,type(yDet)))
+    log_tof.info("Function - tof_bin2mc_sc | flightPathLength- > {} | type - {}".format(flightPathLength,type(flightPathLength)))
+
     # calculates m/c based on idealized geometry / electrostatics
     # m/c = 2 e V (t/L)^2
 
@@ -37,12 +48,22 @@ def tof_bin2mc_sc(t, t0, V, xDet, yDet, flightPathLength):
 
     mc = 2 * e * V * (t / flightPathLength) ** 2
     mc = mc / amu  # conversion from kg/C to Da 6.022E23 g/mol, 1.6E-19C/ec
+    log_tof.info("Function - tof_bin2mc_sc | response- > {} | type - {}".format(mc,type(mc)))
     return mc
+
 
 def tof_bin2mc_ro(t, t0, V, xDet, yDet, flightPathLength):
     """
     Calculate the m/c for Roentdec delay line.
     """
+
+    log_tof = loggi.logger_creator('tof2mc_simple', 'tof2mc_simple.log')
+    log_tof.info("Function - tof_bin2mc_ro | t- > {} | type - {}".format(t,type(t)))
+    log_tof.info("Function - tof_bin2mc_ro | t0- > {} | type - {}".format(t0,type(t0)))
+    log_tof.info("Function - tof_bin2mc_ro | V- > {} | type - {}".format(V,type(V)))
+    log_tof.info("Function - tof_bin2mc_ro | xDet- > {} | type - {}".format(xDet,type(xDet)))
+    log_tof.info("Function - tof_bin2mc_ro | yDet- > {} | type - {}".format(yDet,type(yDet)))
+    log_tof.info("Function - tof_bin2mc_ro | flightPathLength- > {} | type - {}".format(flightPathLength,type(flightPathLength)))
     # calculates m/c based on idealized geometry / electrostatics
     # m/c = 2 e V (t/L)^2
 
@@ -71,6 +92,8 @@ def tof_bin2mc_ro(t, t0, V, xDet, yDet, flightPathLength):
 
     mc = 2 * e * V * (t / flightPathLength) ** 2
     mc = mc / amu  # conversion from kg/C to Da 6.022E23 g/mol, 1.6E-19C/ec
+    log_tof.info("Function - tof_bin2mc_sc | response- > {} | type - {}".format(mc,type(mc)))
+
     return mc
 
 

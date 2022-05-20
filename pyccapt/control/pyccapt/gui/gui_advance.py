@@ -1579,7 +1579,6 @@ class UI_APT_A(Camera, object):
                     p = os.path.abspath(os.path.join(__file__, "../../../.."))
                     variables.path = os.path.join(p,
                                                   'data_voltage_pulse_mode\\%s' % variables.exp_name)
-                    print('ddddd', p)
                     # Create folder to save the data
                     if not os.path.isdir(variables.path):
                             os.makedirs(variables.path, mode=0o777, exist_ok=True)

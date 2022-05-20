@@ -9,6 +9,8 @@ from numpy.ctypeslib import ndpointer
 import numpy as np
 
 
+from pyccapt.control_tools import loggi
+
 
 buf_size = 30000
 time_out = 300
@@ -39,6 +41,8 @@ class tdc_dec(object):
         tdc_lib.get_data_tdc_buf.argtypes =[ctypes.c_void_p]
         self.obj = tdc_lib.Warraper_tdc_new(buf_size, time_out)
         self.tdc_lib = tdc_lib
+        p = os.path.abspath(os.path.join(__file__, "../../../../."))
+        self.log_tdc_roentdc = loggi.logger_creator('tdc_roentdc', 'tdc_roentdc.log', path=p)
 
     def stop_tdc(self, ):
         """
@@ -90,6 +94,8 @@ class tdc_dec(object):
             Does not return anything
         """
         data = self.tdc_lib.get_data_tdc_buf(self.obj)
+        self.log_tdc_roentdc .info("Function - get_data_tdc_buf | response - > {} | type -> {}".format(data,type(data)))
+
         return data
 
 
@@ -123,6 +129,7 @@ def experiment_measure(queue_x, queue_y, queue_t, queue_AbsoluteTimeStamp,
         p = p + '\\control\\pyccapt\\tdc_roentdec\\'
         os.chdir(p)
         tdc_lib = ctypes.CDLL("./wrapper_read_TDC8HP_x64.dll")
+
     except:
         print("TDC DLL was not found")
 

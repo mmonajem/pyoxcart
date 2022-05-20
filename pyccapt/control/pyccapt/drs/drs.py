@@ -9,6 +9,9 @@ from numpy.ctypeslib import ndpointer
 import numpy as np
 
 
+from pyccapt.control_tools import loggi
+
+
 
 class DRS(object):
     """
@@ -36,8 +39,9 @@ class DRS(object):
             p = os.path.abspath(os.path.join(__file__, "../."))
             os.chdir(p)
             self.drs_lib = ctypes.CDLL("./drs_lib.dll")
-        except:
+        except Exception as e:
             print("DRS DLL was not found")
+            print(e)
 
         self.drs_lib.Drs_new.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float]
         self.drs_lib.Drs_new.restype = ctypes.c_void_p
@@ -46,6 +50,8 @@ class DRS(object):
         self.drs_lib.Drs_delete_drs_ox.restype = ctypes.c_void_p
         self.drs_lib.Drs_delete_drs_ox.argtypes = [ctypes.c_void_p]
         self.obj = self.drs_lib.Drs_new(trigger, test, delay, sample_frequency)
+        p = os.path.abspath(os.path.join(__file__, "../../../../."))
+        self.log_drs = loggi.logger_creator('drs', 'dsr.log', path=p)
 
     def reader(self, ):
         """
@@ -59,7 +65,9 @@ class DRS(object):
         """
 
         data = self.drs_lib.Drs_reader(self.obj)
-        print(data)
+
+        self.log_drs.info("Function - reader | response - > {} | type -> {}".format(data, type(data)))
+
         return data
 
     def delete_drs_ox(self):
@@ -101,8 +109,10 @@ def experiment_measure(queue_ch0_time, queue_ch0_wave,
     Return :
         Does not return anything
     """
-
-    drs_ox = DRS(trigger=1, test=0, delay=0, sample_frequency=2)
+    # trigger = 1 means use external trigger
+    # delay is in ns
+    # test = 1 means run drs in test mode with sinusoidal signal
+    drs_ox = DRS(trigger=0, test=1, delay=0, sample_frequency=2)
 
     while True:
 
@@ -120,7 +130,7 @@ def experiment_measure(queue_ch0_time, queue_ch0_wave,
             queue_ch3_time.put(data[6, :])
             queue_ch3_wave.put(data[7, :])
         else:
-            print('TDC loop is break in child process')
+            print('DRS loop is break in child process')
             break
 
     drs_ox.delete_drs_ox()

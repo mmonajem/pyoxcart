@@ -60,6 +60,8 @@ class APT_ADVANCE:
         self.queue_ch3_wave = queue_ch3_wave
         self.logger = logger
         self.conf = conf
+        self.log_apt_tdc_surface_consept = loggi.logger_creator('apt_tdc_surface_consept', 'apt_tdc_surface_consept.log')
+
 
     def initialize_v_dc(self):
         """
@@ -76,6 +78,7 @@ class APT_ADVANCE:
         Returns:
             Does not return anything
         """
+        self.log_apt_tdc_surface_consept.info("Function - initialize_v_dc | Port selection -> {}".format(initialize_devices.com_ports[variables.COM_PORT_V_dc].device))
         # Setting the com port of V_dc
         self.com_port_v_dc = serial.Serial(
             port=initialize_devices.com_ports[variables.COM_PORT_V_dc].device,  # chosen COM port
@@ -84,6 +87,8 @@ class APT_ADVANCE:
             parity=serial.PARITY_NONE,  # N
             stopbits=serial.STOPBITS_ONE  # 1
         )
+        self.log_apt_tdc_surface_consept.info("Function - initialize_v_dc | Successful Port Open - O/p of serial variable - > {}".format(self.com_port_v_dc))
+
         # configure the COM port to talk to. Default values: 115200,8,N,1
         if self.com_port_v_dc.is_open:
             self.com_port_v_dc.flushInput()
@@ -94,6 +99,7 @@ class APT_ADVANCE:
             for cmd in range(len(cmd_list)):
                 self.command_v_dc(cmd_list[cmd])
         else:
+            self.log_apt_tdc_surface_consept.error("Function - initialize_v_dc | Port error - O/p of serial variable - > {} ".format(self.com_port_v_dc))
             print("Couldn't open Port!")
             exit()
 
@@ -143,6 +149,7 @@ class APT_ADVANCE:
         task_counter.ci_channels.add_ci_count_edges_chan(self.conf['COM_PORT_NI_counter'])
         # reference the terminal you want to use for the counter here
         task_counter.ci_channels[0].ci_count_edges_term = "PFI0"
+        self.log_apt_tdc_surface_consept.info("Function - initialize_counter | task counter - > {}".format(task_counter))
 
         return task_counter
 
@@ -165,9 +172,16 @@ class APT_ADVANCE:
         # Initialize the response to returned as string
         response = ''
         # Read the response code after execution(command write).
-        while self.com_port_v_dc.in_waiting > 0:
-            response = self.com_port_v_dc.readline()  # all characters received, read line till '\r\n'
-        return response.decode("utf-8")
+        try:
+
+            while self.com_port_v_dc.in_waiting > 0:
+                response = self.com_port_v_dc.readline()  # all characters received, read line till '\r\n'
+        except Exception as error:
+            self.log_apt_tdc_surface_consept.error("Function - command_v_dc | error reading lines - > {}".format(error))
+        response  =  response.decode("utf-8")
+        self.log_apt_tdc_surface_consept.info("Function - command_v_dc | response - > {}".format(response))
+
+        return response
 
     def reader_queue_dld(self):
         """
@@ -330,6 +344,14 @@ class APT_ADVANCE:
         # counts_measured = variables.avg_n_count / (1 + variables.pulse_frequency * 1000)
 
         counts_error = counts_target - counts_measured  # deviation from setpoint
+        self.log_apt_tdc_surface_consept.info("Function - main_ex_loop | count_temp | value - {}| type - {}".format(variables.count_temp,type(variables.count_temp)))
+        self.log_apt_tdc_surface_consept.info("Function - main_ex_loop | count_last | value - {}| type - {}".format(variables.count_last,type(variables.count_last)))
+        self.log_apt_tdc_surface_consept.info("Function - main_ex_loop | main_v_dc | value - {}| type - {}".format(variables.main_v_dc,type(variables.main_v_dc)))
+        self.log_apt_tdc_surface_consept.info("Function - main_ex_loop | main_counter | value - {}| type - {}".format(variables.main_counter,type(variables.main_counter)))
+        self.log_apt_tdc_surface_consept.info("Function - main_ex_loop | avg_n_count | value - {}| type - {}".format(variables.avg_n_count,type(variables.avg_n_count)))
+        self.log_apt_tdc_surface_consept.info("Function - main_ex_loop | ex_freq | value - {}| type - {}".format(variables.ex_freq,type(variables.ex_freq)))
+        self.log_apt_tdc_surface_consept.info("Function - main_ex_loop | counts_measured | value - {}| type - {}".format(counts_measured,type(counts_measured)))
+        self.log_apt_tdc_surface_consept.info("Function - main_ex_loop | counts_error | value - {}| type - {}".format(counts_error,type(counts_error)))
 
         # simple proportional control with averaging
         rate = ((variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000))
@@ -426,6 +448,8 @@ class APT_ADVANCE:
             variables.main_v_p_dld = np.zeros(0)
             variables.main_v_dc_tdc = np.zeros(0)
             variables.main_v_p_tdc = np.zeros(0)
+            self.log_apt_tdc_surface_consept.info("Function - cleanup_variables | ch1 | value - {}| type - {}".format(variables.count_temp,type(variables.count_temp)))
+            self.log_apt_tdc_surface_consept.info("Function - cleanup_variables | main_v_dc_tdc | value - {}| type - {}".format(variables.main_v_dc_tdc,type(variables.main_v_dc_tdc)))
 
         self.logger.info('starting to clean up')
 
