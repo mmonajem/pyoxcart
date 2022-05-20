@@ -1,6 +1,7 @@
 {
 	"mode": "advance",
 	"visualization": "tof",
+	"log": "on",
 	"tdc": "on",
 	"camera": "off",
 	"pump": "on",
