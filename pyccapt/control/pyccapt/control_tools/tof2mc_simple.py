@@ -13,6 +13,7 @@ file_handler = logging.FileHandler('tof2mc_simple.log')
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
 log_tof.addHandler(file_handler)
+log_tof.propagate = False
 
  
 def tof_bin2mc_sc(t, t0, V, xDet, yDet, flightPathLength):
