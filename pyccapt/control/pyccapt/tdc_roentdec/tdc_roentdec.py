@@ -8,7 +8,9 @@ import ctypes
 from numpy.ctypeslib import ndpointer
 import numpy as np
 
+
 from pyccapt.control_tools import loggi
+
 
 buf_size = 30000
 time_out = 300

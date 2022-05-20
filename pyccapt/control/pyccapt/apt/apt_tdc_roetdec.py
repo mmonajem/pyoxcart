@@ -10,7 +10,9 @@ from multiprocessing.queues import Queue
 import threading
 import numpy as np
 import logging
+
 import sys
+
 
 # Serial ports and NI
 import serial.tools.list_ports
@@ -52,7 +54,9 @@ class APT_SIMPLE:
         self.queue_stop_measurement = queue_stop_measurement
         self.lock1 = lock1
         self.conf = conf
+
         self.log_apt_tdc_roetdec = loggi.logger_creator('apt_tdc_roetdec', 'apt_tdc_roetdec.log')
+
 
     def initialize_v_dc(self):
         """
@@ -71,7 +75,9 @@ class APT_SIMPLE:
         """
         try:
             # Setting the com port of V_dc
+
             self.log_apt_tdc_roetdec.info("Function - initialize_v_dc | Port selection -> {}".format(initialize_devices.com_ports[variables.COM_PORT_V_dc].device))
+
             self.com_port_v_dc = serial.Serial(
                 port=initialize_devices.com_ports[variables.COM_PORT_V_dc].device,  # chosen COM port
                 baudrate=115200,  # 115200
@@ -79,7 +85,9 @@ class APT_SIMPLE:
                 parity=serial.PARITY_NONE,  # N
                 stopbits=serial.STOPBITS_ONE  # 1
             )
+
             self.log_apt_tdc_roetdec.info("Function - initialize_v_dc | Successful Port Open - O/p of serial variable - > {}".format(self.com_port_v_dc))
+
 
             # configure the COM port to talk to. Default values: 115200,8,N,1
             if self.com_port_v_dc.is_open:
@@ -91,10 +99,12 @@ class APT_SIMPLE:
                 for cmd in range(len(cmd_list)):
                     self.command_v_dc(cmd_list[cmd])
         except Exception as e:
+
             self.log_apt_tdc_roetdec.error("Function - initialize_v_dc | Port error - O/p of serial variable - > {} ".format(self.com_port_v_dc))
             print("Couldn't open Port!")
             print(e)
             self.log_apt_tdc_roetdec.error("Function - initialize_v_dc | Port error - Error stack - > {} ".format(e))
+
 
     # apply command to the V_dc
     def command_v_dc(self, cmd):
@@ -118,7 +128,9 @@ class APT_SIMPLE:
         while self.com_port_v_dc.in_waiting > 0:
             response = self.com_port_v_dc.readline()  # all characters received, read line till '\r\n'
         response = response.decode("utf-8")
+
         self.log_apt_tdc_roetdec.info("Function - command_v_dc | response - {} ".format(response))
+
         return response
 
     def reader_queue_dld(self):
@@ -201,6 +213,7 @@ class APT_SIMPLE:
         counts_measured = variables.avg_n_count / (1 + variables.pulse_frequency * 1000)
 
         counts_error = counts_target - counts_measured  # deviation from setpoint
+
         self.log_apt_tdc_roetdec.info("Function - main_ex_loop | count_temp | value - {}| type - {}".format(variables.count_temp,type(variables.count_temp)))
         self.log_apt_tdc_roetdec.info("Function - main_ex_loop | count_last | value - {}| type - {}".format(variables.count_last,type(variables.count_last)))
         self.log_apt_tdc_roetdec.info("Function - main_ex_loop | main_v_dc | value - {}| type - {}".format(variables.main_v_dc,type(variables.main_v_dc)))
@@ -209,6 +222,7 @@ class APT_SIMPLE:
         self.log_apt_tdc_roetdec.info("Function - main_ex_loop | ex_freq | value - {}| type - {}".format(variables.ex_freq,type(variables.ex_freq)))
         self.log_apt_tdc_roetdec.info("Function - main_ex_loop | counts_measured | value - {}| type - {}".format(counts_measured,type(counts_measured)))
         self.log_apt_tdc_roetdec.info("Function - main_ex_loop | counts_error | value - {}| type - {}".format(counts_error,type(counts_error)))
+
 
         # simple proportional control with averaging
         rate = ((variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000))
@@ -280,8 +294,10 @@ class APT_SIMPLE:
             variables.main_counter = np.zeros(0)
             variables.main_v_dc_dld = np.zeros(0)
             variables.main_v_dc_tdc = np.zeros(0)
+            
             self.log_apt_tdc_roetdec.info("Function - cleanup_variables | ch1 | value - {}| type - {}".format(variables.count_temp,type(variables.count_temp)))
             self.log_apt_tdc_roetdec.info("Function - cleanup_variables | main_v_dc_tdc | value - {}| type - {}".format(variables.main_v_dc_tdc,type(variables.main_v_dc_tdc)))
+
 
         print('starting to clean up')
         # save the data to the HDF5
@@ -308,9 +324,7 @@ def main(conf):
     7- Save the data
     8- Send email and tweet
     """
-    # Initialize logger
-    logger = loggi.get_logging()
-    logger.info('Experiment is starting')
+
 
     variables.start_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 

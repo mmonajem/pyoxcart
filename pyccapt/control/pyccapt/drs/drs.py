@@ -8,7 +8,9 @@ import os
 from numpy.ctypeslib import ndpointer
 import numpy as np
 
+
 from pyccapt.control_tools import loggi
+
 
 
 class DRS(object):
@@ -31,6 +33,7 @@ class DRS(object):
         """
 
         # load the library
+
         try:
             # load the library
             p = os.path.abspath(os.path.join(__file__, "../."))
@@ -62,8 +65,8 @@ class DRS(object):
         """
 
         data = self.drs_lib.Drs_reader(self.obj)
-        self.log_drs.info("Function - reader | response - > {} | type -> {}".format(data, type(data)))
 
+        self.log_drs.info("Function - reader | response - > {} | type -> {}".format(data, type(data)))
 
         return data
 
