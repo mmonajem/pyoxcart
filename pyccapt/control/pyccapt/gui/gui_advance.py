@@ -21,7 +21,6 @@ from pyccapt.apt import apt_tdc_surface_consept
 from pyccapt.control_tools import variables, tof2mc_simple
 from pyccapt.devices.camera import Camera
 from pyccapt.devices import initialize_devices
-import os.path as path
 
 
 class UI_APT_A(Camera, object):
@@ -1577,7 +1576,7 @@ class UI_APT_A(Camera, object):
                     now = datetime.datetime.now()
                     variables.exp_name = "%s_" % variables.counter + \
                                          now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
-                    p = path.abspath(path.join(__file__, "../../../.."))
+                    p = os.path.abspath(os.path.join(__file__, "../../../.."))
                     variables.path = os.path.join(p,
                                                   'data_voltage_pulse_mode\\%s' % variables.exp_name)
                     print('ddddd', p)

@@ -1,5 +1,5 @@
 {
-	"mode": "simple",
+	"mode": "advance",
 	"visualization": "tof",
 	"tdc": "on",
 	"camera": "off",

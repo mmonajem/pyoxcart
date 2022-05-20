@@ -4,12 +4,10 @@ This is the main script for reading TDC Roentec.
 
 # import the module
 import os
-import os.path as path
 import ctypes
 from numpy.ctypeslib import ndpointer
 import numpy as np
 import logging
-from pyccapt.control_tools import module_dir
 
 buf_size = 30000
 time_out = 300
@@ -130,7 +128,7 @@ def experiment_measure(queue_x, queue_y, queue_t, queue_AbsoluteTimeStamp,
 
     try:
         # load the library
-        p = path.abspath(path.join(__file__, "../../../.."))
+        p = os.path.abspath(os.path.join(__file__, "../../../.."))
         p = p + '\\control\\pyccapt\\tdc_roentdec\\'
         os.chdir(p)
         tdc_lib = ctypes.CDLL("./wrapper_read_TDC8HP_x64.dll")

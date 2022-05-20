@@ -6,7 +6,6 @@ import numpy as np
 import threading
 import datetime
 import os
-import os.path as path
 # PyQt and PyQtgraph libraries
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QThread, pyqtSignal
@@ -18,8 +17,7 @@ import pyqtgraph.exporters
 # Local module and scripts
 from pyccapt.apt import apt_tdc_roetdec
 from pyccapt.control_tools import variables, tof2mc_simple
-from pyccapt.control.pyccapt.devices import initialize_devices
-from pyccapt.control_tools import module_dir
+from pyccapt.devices import initialize_devices
 
 class UI_APT_S(object):
     """
@@ -810,7 +808,7 @@ class UI_APT_S(object):
             now = datetime.datetime.now()
             variables.exp_name = "%s_" % variables.counter + \
                                  now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
-            p = path.abspath(path.join(__file__, "../../../.."))
+            p = os.path.abspath(os.path.join(__file__, "../../../.."))
             variables.path = os.path.join(p,'data_laser_pulse_mode\\%s' % variables.exp_name)
             # Create folder to save the data
             if not os.path.isdir(variables.path):

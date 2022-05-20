@@ -9,11 +9,11 @@ from PyQt5 import QtWidgets
 # Serial ports and Camera libraries
 import serial.tools.list_ports
 from pypylon import pylon
-import os.path as path
 
 # Local module and scripts
 from pyccapt.control_tools import variables, read_files
 from pyccapt.devices import initialize_devices
+from pyccapt.devices.camera import Camera
 from pyccapt.gui import gui_simple
 from pyccapt.gui import gui_advance
 
@@ -23,7 +23,7 @@ def main():
     try:
         # load the Json file
         configFile = 'config.json'
-        p = path.abspath(path.join(__file__, "../../../.."))
+        p = os.path.abspath(os.path.join(__file__, "../../../.."))
         os.chdir(p)
         conf = read_files.read_json_file(configFile)
     except Exception as e:
@@ -142,8 +142,14 @@ def main():
         OXCART = QtWidgets.QMainWindow()
         lock = threading.Lock()
         if conf['camera'] != "off":
-            ui = gui_advance.UI_APT_A(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock, app,
+            try:
+                ui = gui_advance.UI_APT_A(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock, app,
                                       conf)
+            except Exception as e:
+                print('Can not initialize the cameras')
+                print(e)
+                conf['camera'] = "off"
+                ui = gui_advance.UI_APT_A(None, None, None, None, lock, app, conf)
         else:
             ui = gui_advance.UI_APT_A(None, None, None, None, lock, app, conf)
         ui.setupUi(OXCART)

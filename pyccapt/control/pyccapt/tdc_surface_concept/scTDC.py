@@ -78,14 +78,12 @@ import ctypes
 import os
 import time
 import traceback
-import os.path as path
 
 try:  # most stuff works without numpy
     import numpy as np
 except:
     pass
 
-from pyccapt.control_tools import module_dir
 
 # pipe types
 TDC_HISTO = 0
@@ -314,7 +312,7 @@ class scTDClib:
 
         if os.name == 'nt':
             # directory has to be changed to be changed to the directory of dlls
-            p = path.abspath(path.join(__file__, "../../../.."))
+            p = os.path.abspath(os.path.join(__file__, "../../../.."))
             p = p + '\\control\\pyccapt\\tdc_surface_concept\\'
             os.chdir(p)
             self.lib = ctypes.WinDLL('./scTDC1.dll')
@@ -498,7 +496,7 @@ class scTDC_hdf5lib:
         loads the shared library scTDC_hdf5
         """
         if os.name == 'nt':
-            p = path.abspath(path.join(__file__, "../../../.."))
+            p = os.path.abspath(os.path.join(__file__, "../../../.."))
             p = p + '\\control\\pyccapt\\tdc_surface_concept\\'
             os.chdir(p)
             self.lib = ctypes.WinDLL("scTDC_hdf50.dll")
