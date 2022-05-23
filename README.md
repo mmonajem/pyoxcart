@@ -86,7 +86,7 @@ UI (simple or advance) in the GUI module.
 
 For control part of the package you can follow the steps on [documentation](https://pyccapt.readthedocs.io/en/latest/configuration.html).
 
-For the calibration you should go through the tutorial first to understand how is it possible 
+For the calibration you should go through the [tutorial](https://pyccapt.readthedocs.io/en/latest/tutorials.html) first to understand how is it possible 
 to use the features of the package.
 
 ------------------
