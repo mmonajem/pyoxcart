@@ -97,4 +97,9 @@ Please report bugs, issues, ask for help or give feedback in the [github section
 -----------
 # Citing 
 
+-----------
+# Contributing 
+
+Contributions to PiSCAT are always welcome, and they are greatly appreciated! Our contribution 
+policy can be found [here](https://github.com/mmonajem/pyccapt/blob/main/CONTRIBUTING.md).
 
