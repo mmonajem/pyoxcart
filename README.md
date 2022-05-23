@@ -82,9 +82,12 @@ UI (simple or advance) in the GUI module.
 
     pyuic5 -x gui_simple_layout.ui -o gui_simple_layout.py. You should then merge the created file with the targeted 
 ---------------------
-# Running an experiment
+# Using PyCCAPT
 
-modify the congig.json file. Type pyccapt in your command line.
+For control part of the package you can follow the steps on [documentation](https://pyccapt.readthedocs.io/en/latest/configuration.html).
+
+For the calibration you should go through the tutorial first to understand how is it possible 
+to use the features of the package.
 
 ------------------
 # Bug reports
