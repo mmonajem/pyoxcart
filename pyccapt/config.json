@@ -3,7 +3,7 @@
 	"visualization": "tof",
 	"log": "on",
 	"tdc": "on",
-	"camera": "off",
+	"camera": "on",
 	"pump": "on",
 	"gates": "on",
 	"v_dc": "on",

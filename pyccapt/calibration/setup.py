@@ -28,7 +28,7 @@ setup(
     url='https://github.com/mmonajem/pyccapt',
     version=version,
     data_files=[('my_data', ['../../tests/data'])],
-    packages=[ 'pyccapt.mc', 'pyccapt.calibration_tools', 'pyccapt.tutorials'],
+    packages=['pyccapt.mc', 'pyccapt.calibration_tools', 'pyccapt.tutorials'],
     include_package_data=True,
     license="GPL v3",
     description=description,

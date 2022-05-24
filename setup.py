@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from os.path import exists, dirname, realpath
-from setuptools import find_namespace_packages, setup
+from setuptools import find_namespace_packages, setup, find_packages
 import sys
 
 
@@ -19,6 +19,19 @@ try:
 except BaseException:
     version = "0.0.32"
 
+all_packages = []
+package_dir = {}
+for source_dir_name in ['pyccapt/calibration', 'pyccapt/control']:
+    packages = find_namespace_packages(where=source_dir_name)
+    for package in packages:
+        package_dir[package] = '{}/{}'.format(
+            source_dir_name,
+            package.replace('.', '/'),
+        )
+    all_packages.extend(packages)
+
+print('Packages:', all_packages)
+print('Packages dir:', package_dir)
 setup(
     name=name,
     namespace_packages=['pyccapt'],
@@ -32,8 +45,8 @@ setup(
                 }
     },
     data_files=[('my_data', ['./tests/data'])],
-
-    packages=find_namespace_packages(include=['pyccapt.calibration.pyccapt.*', 'pyccapt.control.pyccapt.*']),
+    packages=all_packages,
+    package_dir=package_dir,
     include_package_data=True,
     license="GPL v3",
     description=description,

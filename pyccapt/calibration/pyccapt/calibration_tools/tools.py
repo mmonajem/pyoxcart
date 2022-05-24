@@ -15,28 +15,29 @@ from pyccapt.calibration_tools import intractive_point_identification
 
 
 def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False, prominence=500, distance=None,
-                 fig_name=None, text_loc='right'):
+                 fig_name=None, text_loc='right', label='mc'):
     """
     massSpecPlot plots the data from pos to get a mass spectrum as a figure
+
     handle = plotMassSpec(mc, bin, mode)
     handle = plotMassSpec(mc, bin)
 
     INPUT
-        mc:       is the mass-to-charge(mc)-ratio [Da] of the events in the
-                  APT measurement stored in pos, table
+    mc:       is the mass-to-charge(mc)-ratio [Da] of the events in the
+              APT measurement stored in pos, table
 
-        bin:      is the width of the steps in which the plot is performed
+    bin:      is the width of the steps in which the plot is performed
 
-        mode:     specifies the way the counts are applied
-                  'count' records the number of counts
-                  'normalised' records the number of counts if the bin was one Da
-                  wide over the overall number of counts
-                  default mode is 'count'
+    mode:     specifies the way the counts are applied
+              'count' records the number of counts
+              'normalised' records the number of counts if the bin was one Da
+              wide over the overall number of counts
+              default mode is 'count'
 
     OUTPUT
-        handle:   handle to the plot that contains counts or
-                  (counts/Dalton)/totalCounts over Dalton. Used in further
-                  analysis to find new ions
+    handle:   handle to the plot that contains counts or
+              (counts/Dalton)/totalCounts over Dalton. Used in further
+              analysis to find new ions
     """
 
     def find_nearest(x, y, index_peak, percent):
@@ -60,24 +61,21 @@ def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False,
 
         return [x[index_left_edge], x[index_right_edge], y[index_left_edge], y[index_right_edge]]
 
-    mcmax = np.max(mc)
-
-    x = np.linspace(0, mcmax, round(mcmax / bin))
+    bins = np.linspace(np.min(mc), np.max(mc), round(np.max(mc) / bin))
 
     if mode == 'count':
-        y, x = np.histogram(mc, bins=x)
+        y, x = np.histogram(mc, bins=bins)
     elif mode == 'normalised':
         # calculate as counts/(Da * totalCts) so that mass spectra with different
         # count numbers are comparable
-        y, x = np.histogram(mc, x)
+        y, x = np.histogram(mc, bins=bins)
         mc = mc / bin / len(mc)
         # med = median(y);
     else:
-        y, x = np.histogram(mc, x)
+        y, x = np.histogram(mc, bins=bins)
 
+    fig1, ax1 = plt.subplots(figsize=(8, 4))
 
-
-    # y, x, _ = plt.hist(mc, x,  log=True)
     if peaks_find:
         max_hist = x[np.where(y == y.max())]
         index_max = np.where(y == y.max())[0].tolist()[0]
@@ -104,16 +102,22 @@ def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False,
                     peakLocIs_tmp = np.append(peakLocIs_tmp, edges)
                     peakLocIs = np.expand_dims(peakLocIs_tmp, 0)
 
+        index_peak_max = np.argmax(peakLocIs[:, 1])
+        edges = peakLocIs[index_peak_max, 2:4]
+
     if plot:
-        fig1, ax1 = plt.subplots(figsize=(8, 4))
-        y, x, _ = plt.hist(mc, x, log=True)
-        ax1.set_xlabel("mass-to-charge-state ratio [Da]", color="red", fontsize=10)
+        y, x, _ = plt.hist(mc, bins=bins, log=True)
+        if label == 'mc':
+            plt.title("Mass Spectrum")
+            ax1.set_xlabel("mass-to-charge-state ratio [Da]", color="red", fontsize=10)
+        elif label == 'tof':
+            plt.title("Time of Flight")
+            ax1.set_xlabel("Time of Flight [ns]", color="red", fontsize=10)
         if mode == 'count':
             ax1.set_ylabel("frequency [counts]", color="red", fontsize=10)
         elif mode == 'normalised':
             ax1.set_ylabel("frequency [cts / Da / totCts]", color="red", fontsize=10)
 
-        plt.title("Mass spectrum")
         if peaks_find:
             # annotation with range stats
             upperLim = 4.5  # Da
@@ -126,9 +130,9 @@ def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False,
 
             props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
             if text_loc == 'left':
-                ax1.text(0.01, 0.8, txt, transform=ax1.transAxes, bbox=props, fontsize=10)
+                ax1.text(0.05, 0.82, txt, transform=ax1.transAxes, bbox=props, fontsize=8)
             elif text_loc == 'right':
-                ax1.text(0.6, 0.8, txt, transform=ax1.transAxes, bbox=props, fontsize=10)
+                ax1.text(0.7, 0.82, txt, transform=ax1.transAxes, bbox=props, fontsize=8)
             ax1.tick_params(axis='both', which='major', labelsize=12)
             ax1.tick_params(axis='both', which='minor', labelsize=10)
 
@@ -149,20 +153,28 @@ def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False,
                 annotes.append(str(i + 1))
             af = intractive_point_identification.AnnoteFinder(peakLocIs[:, 0], peakLocIs[:, 1], annotes, ax=ax1)
             fig1.canvas.mpl_connect('button_press_event', af)
-        if fig_name != None:
-            plt.savefig(variables.result_path + "//mc_%s.svg" % fig_name, format="svg", dpi=600)
-            plt.savefig(variables.result_path + "//mc_%s.png" % fig_name, format="png", dpi=600)
+        if fig_name is not None:
+            if label == 'mc':
+                plt.savefig(variables.result_path + "//mc_%s.svg" % fig_name, format="svg", dpi=600)
+                plt.savefig(variables.result_path + "//mc_%s.png" % fig_name, format="png", dpi=600)
+            elif label == 'tof':
+                plt.savefig(variables.result_path + "//tof_%s.svg" % fig_name, format="svg", dpi=600)
+                plt.savefig(variables.result_path + "//tof_%s.png" % fig_name, format="png", dpi=600)
         plt.show()
+    else:
+        plt.close(fig1)
 
     if 'peakLocIs' in locals():
-        max_paek_edges = [x[int(results_half[2][i])], x[int(results_half[3][i])]]
-        return max_hist, edges, peakLocIs, max_paek_edges
+        max_paek_edges = [x[int(results_half[2][index_peak_max])], x[int(results_half[3][index_peak_max])]]
+        return max_hist, edges, peakLocIs, max_paek_edges, index_max
     else:
         max_hist = 0
         edges = 0
         peakLocIs = 0
         max_paek_edges = 0
-        return max_hist, edges, peakLocIs, max_paek_edges
+        index_max = 0
+
+    return max_hist, edges, peakLocIs, max_paek_edges, index_max
 
 
 def history_ex(mc, dld_highVoltage, mean_t=1.5, plot=False, fig_name=None):
@@ -251,7 +263,7 @@ def voltage_corr(highVoltage, mc, fitPeak, ionsPerFitSegment, plot=False, fig_na
             pkLoc = np.append(pkLoc, np.median(mcBin))
             VDC = np.append(VDC, np.mean(highVoltage[np.array(mask)]))
 
-    corr = pkLoc/ pkLoc[0]
+    corr = pkLoc / pkLoc[0]
 
     # 'peak location vs DC voltage'
 
@@ -317,8 +329,10 @@ def bowl_corr(x, y, mc, mcIdeal, mc_min, mc_max, plot=False, fig_name=None):
         # ax.tick_params(axis='both', which='major', labelsize=12)
         # ax.tick_params(axis='both', which='minor', labelsize=10)
         if fig_name is not None:
-            plt.savefig(variables.result_path + "//bowl_cor_%s.svg" % fig_name, format="svg", dpi=600, bbox_index='tight')
-            plt.savefig(variables.result_path + "//bowl_cor_%s.png" % fig_name, format="png", dpi=600, bbox_index='tight')
+            plt.savefig(variables.result_path + "//bowl_cor_%s.svg" % fig_name, format="svg", dpi=600,
+                        bbox_index='tight')
+            plt.savefig(variables.result_path + "//bowl_cor_%s.png" % fig_name, format="png", dpi=600,
+                        bbox_index='tight')
         if plot:
             plt.show()
         else:
@@ -327,13 +341,13 @@ def bowl_corr(x, y, mc, mcIdeal, mc_min, mc_max, plot=False, fig_name=None):
     return corr / mcIdeal
 
 
-def linear_correction(mc, peaks, list_material):
+def linear_correction(mc, peaks, list_material, kind):
     peakLocIs = peaks
     peakLocIdeal = list_material
 
     corrRatio = peakLocIdeal / peakLocIs
 
     print(corrRatio)
-    f = interpolate.interp1d(peakLocIs.T, peakLocIdeal.T, kind='linear', fill_value="extrapolate")
+    f = interpolate.interp1d(peakLocIs.T, peakLocIdeal.T, kind=kind, fill_value="extrapolate")
 
     return f(mc)

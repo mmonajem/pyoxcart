@@ -320,7 +320,7 @@ class APT_ADVANCE:
         elif variables.counter_source == 'TDC_Raw':
             if len(variables.channel) > 0:
                 variables.total_ions = int(len(variables.channel) / 4)
-        elif variables.counter_source == 'pulse_counter':
+        elif variables.counter_source == 'Pulse Counter':
             # reading detector MCP pulse counter and calculating pulses since last loop iteration
             variables.total_ions = task_counter.read(number_of_samples_per_channel=1)[0]
         elif variables.counter_source == 'DRS':
@@ -467,7 +467,7 @@ class APT_ADVANCE:
             self.com_port_v_p.close()
 
         if self.conf['edge_counter'] != "off":
-            if variables.counter_source == 'pulse_counter':
+            if variables.counter_source == 'Pulse Counter':
                 # Close the task of counter
                 task_counter.stop()
                 task_counter.close()
@@ -497,7 +497,7 @@ def main(conf):
 
     variables.start_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
-    if conf['tdc'] != "off" and variables.counter_source != 'DRS' and variables.counter_source != 'pulse_counter':
+    if conf['tdc'] != "off" and variables.counter_source != 'DRS' and variables.counter_source != 'Pulse Counter':
         # Create and start the TDC process and related queues
         if variables.counter_source == 'TDC':
             queue_x = Queue(maxsize=-1, ctx=multiprocessing.get_context())
@@ -623,7 +623,7 @@ def main(conf):
         experiment.initialize_v_p()
         logger.info('Pulser is initialized')
 
-    if variables.counter_source == 'pulse_counter':
+    if variables.counter_source == 'Pulse Counter':
         task_counter = experiment.initialize_counter()
         logger.info('Edge counter is initialized')
     else:
@@ -679,7 +679,7 @@ def main(conf):
                 experiment.command_v_dc("F1")
                 time.sleep(0.5)
             if conf['edge_counter'] != "off":
-                if variables.counter_source == 'pulse_counter':
+                if variables.counter_source == 'Pulse Counter':
                     # start the Counter
                     task_counter.start()
 
