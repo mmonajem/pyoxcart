@@ -51,9 +51,6 @@ setup(
                         "wget",
                         "h5py",
                         "tables",
-                        "deepdiff",
-                        "defer",
-                        "pytest",
                       ],
     # not to be confused with definitions in pyproject.toml [build-system]
     setup_requires=["pytest-runner"],

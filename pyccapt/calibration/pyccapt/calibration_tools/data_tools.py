@@ -3,9 +3,6 @@ import h5py
 import pandas as pd
 import scipy.io
 
-from pyccapt.calibration_tools import logging_library
-
-logger = logging_library.logger_creator('data_tools')
 
 def read_hdf5(filename:"type: string - Path to hdf5(.h5) file")->"type: dataframe - Pandas dataframe converted from H5 file":
     """

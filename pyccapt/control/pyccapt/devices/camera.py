@@ -33,7 +33,7 @@ class Camera:
         self.cameras[0].ExposureTime.SetValue(1000000)
         self.cameras[1].Open()
         self.cameras[1].ExposureAuto.SetValue('Off')
-        self.cameras[1].ExposureTime.SetValue(350000)
+        self.cameras[1].ExposureTime.SetValue(50000)
 
     def update_cameras(self, lock):
         """
@@ -61,13 +61,14 @@ class Camera:
             img1 = image1.GetArray()
 
             # Original size is 2048 * 2448
-            # Resize the original to the required size. Utlize the openCV tool.
+            # Resize the original to the required size. Utilize the openCV tool.
             img0_orig = cv2.resize(img0, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            img0_zoom = cv2.resize(img0[800:1100, 1800:2300], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(
+            # img0[y, x] - the first range is for y-axis and second range is for x-axis
+            img0_zoom = cv2.resize(img0[500:2048, 1300:2400], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(
                 np.int32)
 
             img1_orig = cv2.resize(img1, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            img1_zoom = cv2.resize(img1[1120:1300, 1000:1520], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(
+            img1_zoom = cv2.resize(img1[500:1500, 1500:2448], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(
                 np.int32)
 
             # Store the captured processed image at a desired location.
@@ -120,16 +121,16 @@ class Camera:
         """
         if not variables.light:
             self.cameras[0].Open()
-            self.cameras[0].ExposureTime.SetValue(2000)
+            self.cameras[0].ExposureTime.SetValue(500)
             self.cameras[1].Open()
-            self.cameras[1].ExposureTime.SetValue(2000)
+            self.cameras[1].ExposureTime.SetValue(500)
             variables.light = True
             variables.sample_adjust = True
         elif variables.light:
             self.cameras[0].Open()
             self.cameras[0].ExposureTime.SetValue(1000000)
             self.cameras[1].Open()
-            self.cameras[1].ExposureTime.SetValue(350000)
+            self.cameras[1].ExposureTime.SetValue(50000)
             variables.light = False
             variables.sample_adjust = False
 
@@ -179,8 +180,9 @@ class Camera:
                     if len(img1) == 0:
                         img1 = img0
 
-                    img0_zoom = cv2.resize(img0[800:1100, 1800:2300], dsize=(2448, 1000), interpolation=cv2.INTER_CUBIC)
-                    img1_zoom = cv2.resize(img1[1100:1350, 1000:1550], dsize=(2448, 1000),
+                    img0_zoom = cv2.resize(img0[500:2048, 1300:2400], dsize=(2448, 1000),
+                                           interpolation=cv2.INTER_CUBIC)
+                    img1_zoom = cv2.resize(img1[500:1500, 1500:2448], dsize=(2448, 1000),
                                            interpolation=cv2.INTER_CUBIC)
                     img0_zoom = cv2.drawMarker(img0_zoom, (2150, 620), (0, 0, 255),
                                                markerType=cv2.MARKER_TRIANGLE_UP,

@@ -1,5 +1,5 @@
 # PyCCAPT-Calibration 
-# Python atom probe tomography software package calibrating data 
+# Python atom probe tomography software package for calibrating data 
 ![plot](../files/logo.png)
 [![Documentation Status](https://readthedocs.org/projects/pyccapt/badge/?version=latest)](https://pyccapt.readthedocs.io/en/latest/?badge=latest)
 [![PyPi version](https://badgen.net/pypi/v/pyccapt-calibration/)](https://pypi.org/project/pyccapt-calibration)
