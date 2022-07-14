@@ -68,7 +68,7 @@ def atom_probe_recons_geiser(detx, dety, hv, kf, icf, flight_path_length, ion_vo
     # magnification M at ion index
     M = flight_path_length / icf / radius_evolution
     # currently evaporating area of the specimen
-    specArea = det_eff / M ^ 2
+    specArea = det_eff / M ** 2
     # individual depth increment
     dz = omega / specArea
 
@@ -89,7 +89,7 @@ def atom_probe_recons_from_detector(detx, dety, hv, kf, icf, flight_path_length,
     ang, rad = cart2pol(detx, dety)
 
     # calcualting effective detector area:
-    Adet = (np.max(rad)) ^ 2 * math.pi()
+    Adet = ((np.max(rad)) ** 2) * math.pi()
 
     # radius evolution from voltage curve (in nm)
     Rspec = hv / (kf * Fevap)
@@ -112,10 +112,10 @@ def atom_probe_recons_from_detector(detx, dety, hv, kf, icf, flight_path_length,
     zP = Rspec - zP
 
     # accumulative part of z
-    omega = 1 / avgDens  # atmic volume in nm ^ 3
+    omega = 1 / avgDens  # atomic volume in nm ^ 3
 
     # nm ^ 3 * mm ^ 2 * V ^ 2 / nm ^ 2 / (mm ^ 2 * V ^ 2)
-    dz = omega * flight_path_length ** 2 * kf ** 2 * Fevap ** 2 / (det_eff * Adet * icf ** 2) * hv ** -2
+    dz = omega * (flight_path_length ** 2) * (kf ** 2) * (Fevap ** 2) / (det_eff * Adet * (icf ** 2)) * (hv ** -2)
 
     # wide angle correction
     cumZ = math.cumsum(np.double(dz))

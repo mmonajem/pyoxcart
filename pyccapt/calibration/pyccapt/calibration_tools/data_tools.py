@@ -4,7 +4,7 @@ import pandas as pd
 import scipy.io
 
 
-def read_hdf5(filename:"type: string - Path to hdf5(.h5) file")->"type: dataframe - Pandas dataframe converted from H5 file":
+def read_hdf5(filename:"type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc")->"type: dataframe - Pandas dataframe converted from H5 file":
     """
     This function differs from read_hdf5_through_pandas as it does not assume that 
     the contents of the HDF5 file as argument was created using pandas. It could 
@@ -30,12 +30,13 @@ def read_hdf5(filename:"type: string - Path to hdf5(.h5) file")->"type: datafram
             for key, value in groupDict.items():
                 for item in value:
                     dataset = pd.DataFrame(np.array(hdf['{}/{}'.format(key, item)]), columns=['values'])
-                    if key == 'dld' and item == 't':
-                        dataset = dataset * TOFFACTOR
-                    elif key == 'dld' and item == 'x':
-                        dataset = (dataset - XYBINSHIFT) * XYFACTOR
-                    elif key == 'dld' and item == 'y':
-                        dataset = (dataset - XYBINSHIFT) * XYFACTOR
+                    if tdc == 'surface_concept':
+                        if key == 'dld' and item == 't':
+                            dataset = dataset * TOFFACTOR
+                        elif key == 'dld' and item == 'x':
+                            dataset = (dataset - XYBINSHIFT) * XYFACTOR
+                        elif key == 'dld' and item == 'y':
+                            dataset = (dataset - XYBINSHIFT) * XYFACTOR
                     else:
                         dataset = dataset
                     dataframeStorage["{}/{}".format(key, item)] = dataset

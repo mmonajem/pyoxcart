@@ -12,16 +12,38 @@ from pyccapt.calibration_tools import selectors_data
 from pyccapt.calibration_tools import variables, data_tools
 
 
-def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file") -> "type:list - list of dataframes":
+def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc") -> "type:list - list of dataframes":
     try:
-        hdf5Data = data_tools.read_hdf5(filename)
-        dld_highVoltage = hdf5Data['dld/high_voltage']
-        dld_pulseVoltage = hdf5Data['dld/pulse_voltage']
-        dld_startCounter = hdf5Data['dld/start_counter']
-        dld_t = hdf5Data['dld/t']
-        dld_x = hdf5Data['dld/x']
-        dld_y = hdf5Data['dld/y']
-        dldGroupStorage = [dld_highVoltage, dld_pulseVoltage, dld_startCounter, dld_t, dld_x, dld_y]
+        hdf5Data = data_tools.read_hdf5(filename, tdc)
+        if tdc == 'surface_concept':
+            dld_highVoltage = hdf5Data['dld/high_voltage']
+            dld_pulseVoltage = hdf5Data['dld/pulse_voltage']
+            dld_startCounter = hdf5Data['dld/start_counter']
+            dld_t = hdf5Data['dld/t']
+            dld_x = hdf5Data['dld/x']
+            dld_y = hdf5Data['dld/y']
+            dldGroupStorage = [dld_highVoltage, dld_pulseVoltage, dld_startCounter, dld_t, dld_x, dld_y]
+        elif tdc == 'roentdec':
+            dld_highVoltage = hdf5Data['dld/high_voltage']
+            # dld_laserPower = hdf5Data['dld/laser_power']
+            dld_laserPower = hdf5Data['dld/high_voltage']
+            dld_AbsoluteTimeStamp = hdf5Data['dld/AbsoluteTimeStamp']
+            dld_t = hdf5Data['dld/t']
+            dld_x = hdf5Data['dld/x']
+            dld_y = hdf5Data['dld/y']
+            # remove data that is location are out of the detector
+            xx = dld_x.to_numpy()
+            yy = dld_y.to_numpy()
+            mask = np.logical_and((np.abs(xx) <= 50.0), (np.abs(yy) <= 50.0))
+            dld_highVoltage = dld_highVoltage[mask]
+            # dld_laserPower = dld_laserPower[mask]
+            dld_laserPower = dld_laserPower[mask]
+            dld_AbsoluteTimeStamp = dld_AbsoluteTimeStamp[mask]
+            dld_t = dld_t[mask]
+            dld_x = dld_x[mask]
+            dld_y = dld_y[mask]
+
+            dldGroupStorage = [dld_highVoltage, dld_laserPower, dld_AbsoluteTimeStamp, dld_t, dld_x, dld_y]
         return dldGroupStorage
     except KeyError as error:
         print("[*]Keys missing in the dataset -> ", error)
@@ -102,10 +124,10 @@ def elliptical_shape_selector(axisObject: "type:object", figureObject: "type:obj
     figureObject.canvas.mpl_connect('key_press_event', selectors_data.toggle_selector)
 
 
-def plot_crop_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", save_name=None):
+def plot_crop_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", bins=(256,556), save_name=None):
     # Plot and crop FDM
 
-    FDM, xedges, yedges = np.histogram2d(data_crop[:, 4], data_crop[:, 5], bins=(256, 256))
+    FDM, xedges, yedges = np.histogram2d(data_crop[:, 4], data_crop[:, 5], bins=bins)
 
     FDM[FDM == 0] = 1  # to have zero after apply log
     FDM = np.log(FDM)
@@ -124,9 +146,9 @@ def plot_crop_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", sav
     plt.show(block=True)
 
 
-def plot_FDM_after_selection(ax1, fig1, data_crop: "type:list  - cropped list content", save_name=None):
+def plot_FDM_after_selection(ax1, fig1, data_crop: "type:list  - cropped list content", bins=(256,256), save_name=None):
     # Plot FDM with selected part
-    FDM, xedges, yedges = np.histogram2d(data_crop[:, 4], data_crop[:, 5], bins=(256, 256))
+    FDM, xedges, yedges = np.histogram2d(data_crop[:, 4], data_crop[:, 5], bins=bins)
     FDM[FDM == 0] = 1  # to have zero after apply log
     FDM = np.log(FDM)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
@@ -154,9 +176,9 @@ def crop_data_after_selection(data_crop: "type:list  - cropped list content") ->
     return data_crop[np.array(mask_fdm)]
 
 
-def plot_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", save_name=None):
+def plot_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", bins=(256,256), save_name=None):
     # Plot FDM
-    FDM, xedges, yedges = np.histogram2d(data_crop[:, 4], data_crop[:, 5], bins=(256, 256))
+    FDM, xedges, yedges = np.histogram2d(data_crop[:, 4], data_crop[:, 5], bins=bins)
     FDM[FDM == 0] = 1  # to have zero after apply log
     FDM = np.log(FDM)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]

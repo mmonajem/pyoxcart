@@ -177,8 +177,8 @@ def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False,
     return max_hist, edges, peakLocIs, max_paek_edges, index_max
 
 
-def history_ex(mc, dld_highVoltage, mean_t=1.5, plot=False, fig_name=None):
-    MAXMC = 100  # maximum mc that makes sense
+def history_ex(mc, dld_highVoltage, mean_t=1.5, mc_max=100, plot=False, fig_name=None):
+    MAXMC = mc_max  # maximum mc that makes sense
     HISTORYPIX = 1024  # number of pixels in the hit sequence tof image
     TOFPIX = 512  # number of vertical pixels for tof image
 
@@ -196,8 +196,8 @@ def history_ex(mc, dld_highVoltage, mean_t=1.5, plot=False, fig_name=None):
     ##################
 
     maximum = np.amax(mean)
-    index = np.where(mean == np.amax(mean))
-
+    index = np.where(mean == maximum)
+    print(index)
     for i in range(100):
         if mean[index[0] + i] > mean_t:
             index_max = index[0] + i
@@ -211,7 +211,7 @@ def history_ex(mc, dld_highVoltage, mean_t=1.5, plot=False, fig_name=None):
             continue
         else:
             break
-
+    print()
     peak_mean = (index[0] / 512) * 100
     peak_begin = index_min * 100 / 512
     peak_end = index_max * 100 / 512
