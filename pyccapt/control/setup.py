@@ -32,7 +32,7 @@ setup(
     },
     packages=['pyccapt.apt', 'pyccapt.devices', 'pyccapt.devices_test', 'pyccapt.drs',
               'pyccapt.gui', 'pyccapt.tdc_roentdec', 'pyccapt.tdc_surface_concept',
-              'pyccapt.control_tools'],
+              'pyccapt.control_tools', 'pyccapt.thorlabs_apt'],
     include_package_data=True,
     license="GPL v3",
     description=description,
@@ -51,6 +51,8 @@ setup(
                         "wget",
                         "h5py",
                         "tables",
+                        "PyQt5",
+                        "pyqt5-tools",
                       ],
     # not to be confused with definitions in pyproject.toml [build-system]
     setup_requires=["pytest-runner"],

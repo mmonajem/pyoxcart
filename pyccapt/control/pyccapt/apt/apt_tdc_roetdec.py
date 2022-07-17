@@ -11,7 +11,7 @@ import threading
 import numpy as np
 import logging
 
-import sys
+from pyccapt.control_tools import loggi
 
 
 # Serial ports and NI
@@ -239,11 +239,10 @@ class APT_SIMPLE:
         if variables.specimen_voltage < variables.vdc_max:
             if variables.specimen_voltage >= variables.vdc_min:
                 specimen_voltage_temp = variables.specimen_voltage + voltage_step
-                if specimen_voltage_temp > variables.specimen_voltage:
-                    if self.conf['v_dc'] != "off":
-                        # sending VDC via serial
-                        self.command_v_dc(">S0 %s" % (specimen_voltage_temp))
-                    variables.specimen_voltage = specimen_voltage_temp
+                if self.conf['v_dc'] != "off":
+                    # sending VDC via serial
+                    self.command_v_dc(">S0 %s" % (specimen_voltage_temp))
+                variables.specimen_voltage = specimen_voltage_temp
 
     def clear_up(self, ):
         """
@@ -294,7 +293,7 @@ class APT_SIMPLE:
             variables.main_counter = np.zeros(0)
             variables.main_v_dc_dld = np.zeros(0)
             variables.main_v_dc_tdc = np.zeros(0)
-            
+
             self.log_apt_tdc_roetdec.info("Function - cleanup_variables | ch1 | value - {}| type - {}".format(variables.count_temp,type(variables.count_temp)))
             self.log_apt_tdc_roetdec.info("Function - cleanup_variables | main_v_dc_tdc | value - {}| type - {}".format(variables.main_v_dc_tdc,type(variables.main_v_dc_tdc)))
 
@@ -325,7 +324,9 @@ def main(conf):
     8- Send email and tweet
     """
 
-
+    # Initialize logger
+    logger = loggi.get_logging()
+    logger.info('Experiment is starting')
     variables.start_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
     if conf['tdc'] != "off":

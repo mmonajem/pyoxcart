@@ -73,6 +73,7 @@ setup(
                         "pyvisa-py",
                         "pyserial",
                         "tables",
+                        "pyqt5-tools",
                       ],
     # not to be confused with definitions in pyproject.toml [build-system]
     setup_requires=["pytest-runner"],

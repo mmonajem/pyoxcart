@@ -18,6 +18,7 @@ def init(conf):
     global COM_PORT_gauge_bc
     global COM_PORT_gauge_ll
     global COM_PORT_signal_generator
+    global COM_PORT_thorlab_motor
 
     # Setup parameters
     global raw_mode
@@ -58,6 +59,7 @@ def init(conf):
     global criteria_time
     global criteria_ions
     global criteria_vdc
+    global criteria_laser
     global point_size_detec_map
     global exp_name
 
@@ -148,6 +150,7 @@ def init(conf):
     COM_PORT_gauge_bc = conf['COM_PORT_gauge_bc']
     COM_PORT_gauge_ll = conf['COM_PORT_gauge_ll']
     COM_PORT_signal_generator = conf["COM_PORT_signal_generator"]
+    COM_PORT_thorlab_motor = conf["COM_PORT_thorlab_motor"]
 
     raw_mode = False
     counter = 0
@@ -189,6 +192,7 @@ def init(conf):
     criteria_time = True
     criteria_ions = True
     criteria_vdc = True
+    criteria_laser = True
     point_size_detec_map = 1
     exp_name = ''
     log_path = ''
