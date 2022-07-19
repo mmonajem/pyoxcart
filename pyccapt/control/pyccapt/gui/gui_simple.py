@@ -19,13 +19,14 @@ from pyccapt.apt import apt_tdc_roetdec
 from pyccapt.control_tools import variables, tof2mc_simple
 from pyccapt.devices import initialize_devices
 
+
 class UI_APT_S(object):
     """
     The GUI class of simple atom probe GUI
     """
 
     def __init__(self, lock, app, conf):
-        self.lock = lock # Lock for thread ...
+        self.lock = lock  # Lock for thread ...
         self.app = app
         self.conf = conf
 
@@ -53,8 +54,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.ex_user.sizePolicy().hasHeightForWidth())
         self.ex_user.setSizePolicy(sizePolicy)
         self.ex_user.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                   "background: rgb(223,223,233)\n"
+                                   "}")
         self.ex_user.setObjectName("ex_user")
         self.gridLayout.addWidget(self.ex_user, 0, 3, 1, 1)
         self.label_21 = QtWidgets.QLabel(self.centralwidget)
@@ -72,8 +73,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.ex_name.sizePolicy().hasHeightForWidth())
         self.ex_name.setSizePolicy(sizePolicy)
         self.ex_name.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                   "background: rgb(223,223,233)\n"
+                                   "}")
         self.ex_name.setObjectName("ex_name")
         self.gridLayout.addWidget(self.ex_name, 1, 3, 1, 1)
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
@@ -95,8 +96,8 @@ class UI_APT_S(object):
         self.criteria_time.setFont(font)
         self.criteria_time.setMouseTracking(True)
         self.criteria_time.setStyleSheet("QCheckBox{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                         "background: rgb(223,223,233)\n"
+                                         "}")
         self.criteria_time.setText("")
         self.criteria_time.setChecked(True)
         self.criteria_time.setObjectName("criteria_time")
@@ -108,8 +109,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.ex_time.sizePolicy().hasHeightForWidth())
         self.ex_time.setSizePolicy(sizePolicy)
         self.ex_time.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                   "background: rgb(223,223,233)\n"
+                                   "}")
         self.ex_time.setObjectName("ex_time")
         self.gridLayout.addWidget(self.ex_time, 2, 3, 1, 1)
         self.label_41 = QtWidgets.QLabel(self.centralwidget)
@@ -131,8 +132,8 @@ class UI_APT_S(object):
         self.criteria_ions.setFont(font)
         self.criteria_ions.setMouseTracking(True)
         self.criteria_ions.setStyleSheet("QCheckBox{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                         "background: rgb(223,223,233)\n"
+                                         "}")
         self.criteria_ions.setText("")
         self.criteria_ions.setChecked(True)
         self.criteria_ions.setObjectName("criteria_ions")
@@ -144,8 +145,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.max_ions.sizePolicy().hasHeightForWidth())
         self.max_ions.setSizePolicy(sizePolicy)
         self.max_ions.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                    "background: rgb(223,223,233)\n"
+                                    "}")
         self.max_ions.setObjectName("max_ions")
         self.gridLayout.addWidget(self.max_ions, 3, 3, 1, 1)
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
@@ -163,8 +164,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.ex_freq.sizePolicy().hasHeightForWidth())
         self.ex_freq.setSizePolicy(sizePolicy)
         self.ex_freq.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                   "background: rgb(223,223,233)\n"
+                                   "}")
         self.ex_freq.setObjectName("ex_freq")
         self.gridLayout.addWidget(self.ex_freq, 4, 3, 1, 1)
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
@@ -182,8 +183,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.vdc_min.sizePolicy().hasHeightForWidth())
         self.vdc_min.setSizePolicy(sizePolicy)
         self.vdc_min.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                   "background: rgb(223,223,233)\n"
+                                   "}")
         self.vdc_min.setObjectName("vdc_min")
         self.gridLayout.addWidget(self.vdc_min, 5, 3, 1, 1)
         self.label_5 = QtWidgets.QLabel(self.centralwidget)
@@ -205,8 +206,8 @@ class UI_APT_S(object):
         self.criteria_vdc.setFont(font)
         self.criteria_vdc.setMouseTracking(True)
         self.criteria_vdc.setStyleSheet("QCheckBox{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                        "background: rgb(223,223,233)\n"
+                                        "}")
         self.criteria_vdc.setText("")
         self.criteria_vdc.setChecked(True)
         self.criteria_vdc.setObjectName("criteria_vdc")
@@ -218,8 +219,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.vdc_max.sizePolicy().hasHeightForWidth())
         self.vdc_max.setSizePolicy(sizePolicy)
         self.vdc_max.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                   "background: rgb(223,223,233)\n"
+                                   "}")
         self.vdc_max.setObjectName("vdc_max")
         self.gridLayout.addWidget(self.vdc_max, 6, 3, 1, 1)
         self.label_6 = QtWidgets.QLabel(self.centralwidget)
@@ -232,8 +233,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.vdc_steps_up.sizePolicy().hasHeightForWidth())
         self.vdc_steps_up.setSizePolicy(sizePolicy)
         self.vdc_steps_up.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                        "background: rgb(223,223,233)\n"
+                                        "}")
         self.vdc_steps_up.setObjectName("vdc_steps_up")
         self.gridLayout.addWidget(self.vdc_steps_up, 7, 3, 1, 1)
         self.label_28 = QtWidgets.QLabel(self.centralwidget)
@@ -251,8 +252,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.vdc_steps_down.sizePolicy().hasHeightForWidth())
         self.vdc_steps_down.setSizePolicy(sizePolicy)
         self.vdc_steps_down.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                          "background: rgb(223,223,233)\n"
+                                          "}")
         self.vdc_steps_down.setObjectName("vdc_steps_down")
         self.gridLayout.addWidget(self.vdc_steps_down, 8, 3, 1, 1)
         self.label_20 = QtWidgets.QLabel(self.centralwidget)
@@ -270,8 +271,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.cycle_avg.sizePolicy().hasHeightForWidth())
         self.cycle_avg.setSizePolicy(sizePolicy)
         self.cycle_avg.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                     "background: rgb(223,223,233)\n"
+                                     "}")
         self.cycle_avg.setObjectName("cycle_avg")
         self.gridLayout.addWidget(self.cycle_avg, 9, 3, 1, 1)
         self.label_25 = QtWidgets.QLabel(self.centralwidget)
@@ -289,8 +290,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.pulse_fraction.sizePolicy().hasHeightForWidth())
         self.pulse_fraction.setSizePolicy(sizePolicy)
         self.pulse_fraction.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                          "background: rgb(223,223,233)\n"
+                                          "}")
         self.pulse_fraction.setObjectName("pulse_fraction")
         self.gridLayout.addWidget(self.pulse_fraction, 10, 3, 1, 1)
         self.label_23 = QtWidgets.QLabel(self.centralwidget)
@@ -308,8 +309,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.pulse_frequency.sizePolicy().hasHeightForWidth())
         self.pulse_frequency.setSizePolicy(sizePolicy)
         self.pulse_frequency.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                           "background: rgb(223,223,233)\n"
+                                           "}")
         self.pulse_frequency.setObjectName("pulse_frequency")
         self.gridLayout.addWidget(self.pulse_frequency, 11, 3, 1, 1)
         self.label_17 = QtWidgets.QLabel(self.centralwidget)
@@ -327,8 +328,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.detection_rate_init.sizePolicy().hasHeightForWidth())
         self.detection_rate_init.setSizePolicy(sizePolicy)
         self.detection_rate_init.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                               "background: rgb(223,223,233)\n"
+                                               "}")
         self.detection_rate_init.setObjectName("detection_rate_init")
         self.gridLayout.addWidget(self.detection_rate_init, 12, 3, 1, 1)
         self.label_22 = QtWidgets.QLabel(self.centralwidget)
@@ -346,8 +347,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.doubleSpinBox.sizePolicy().hasHeightForWidth())
         self.doubleSpinBox.setSizePolicy(sizePolicy)
         self.doubleSpinBox.setStyleSheet("QDoubleSpinBox{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                         "background: rgb(223,223,233)\n"
+                                         "}")
         self.doubleSpinBox.setProperty("value", 1.0)
         self.doubleSpinBox.setObjectName("doubleSpinBox")
         self.gridLayout.addWidget(self.doubleSpinBox, 13, 2, 1, 1)
@@ -358,8 +359,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.hit_displayed.sizePolicy().hasHeightForWidth())
         self.hit_displayed.setSizePolicy(sizePolicy)
         self.hit_displayed.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                         "background: rgb(223,223,233)\n"
+                                         "}")
         self.hit_displayed.setObjectName("hit_displayed")
         self.gridLayout.addWidget(self.hit_displayed, 13, 3, 1, 1)
         self.label_26 = QtWidgets.QLabel(self.centralwidget)
@@ -377,8 +378,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.email.sizePolicy().hasHeightForWidth())
         self.email.setSizePolicy(sizePolicy)
         self.email.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                 "background: rgb(223,223,233)\n"
+                                 "}")
         self.email.setText("")
         self.email.setObjectName("email")
         self.gridLayout.addWidget(self.email, 14, 3, 1, 1)
@@ -430,8 +431,8 @@ class UI_APT_S(object):
         self.criteria_laser.setFont(font)
         self.criteria_laser.setMouseTracking(True)
         self.criteria_laser.setStyleSheet("QCheckBox{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                          "background: rgb(223,223,233)\n"
+                                          "}")
         self.criteria_laser.setText("")
         self.criteria_laser.setChecked(True)
         self.criteria_laser.setObjectName("criteria_laser")
@@ -443,9 +444,9 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.fixed_laser.sizePolicy().hasHeightForWidth())
         self.fixed_laser.setSizePolicy(sizePolicy)
         self.fixed_laser.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
-        self.fixed_laser.setText("")
+                                       "background: rgb(223,223,233)\n"
+                                       "}")
+        self.fixed_laser.setText("0")
         self.fixed_laser.setObjectName("fixed_laser")
         self.gridLayout.addWidget(self.fixed_laser, 17, 3, 1, 1)
         self.label_18 = QtWidgets.QLabel(self.centralwidget)
@@ -463,8 +464,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.laser_num_ions_per_step.sizePolicy().hasHeightForWidth())
         self.laser_num_ions_per_step.setSizePolicy(sizePolicy)
         self.laser_num_ions_per_step.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                                   "background: rgb(223,223,233)\n"
+                                                   "}")
         self.laser_num_ions_per_step.setObjectName("laser_num_ions_per_step")
         self.gridLayout.addWidget(self.laser_num_ions_per_step, 18, 3, 1, 1)
         self.label_30 = QtWidgets.QLabel(self.centralwidget)
@@ -482,8 +483,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.laser_increase_per_step.sizePolicy().hasHeightForWidth())
         self.laser_increase_per_step.setSizePolicy(sizePolicy)
         self.laser_increase_per_step.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                                   "background: rgb(223,223,233)\n"
+                                                   "}")
         self.laser_increase_per_step.setObjectName("laser_increase_per_step")
         self.gridLayout.addWidget(self.laser_increase_per_step, 19, 3, 1, 1)
         self.label_16 = QtWidgets.QLabel(self.centralwidget)
@@ -501,8 +502,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.laser_start.sizePolicy().hasHeightForWidth())
         self.laser_start.setSizePolicy(sizePolicy)
         self.laser_start.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                       "background: rgb(223,223,233)\n"
+                                       "}")
         self.laser_start.setObjectName("laser_start")
         self.gridLayout.addWidget(self.laser_start, 20, 3, 1, 1)
         self.label_27 = QtWidgets.QLabel(self.centralwidget)
@@ -520,8 +521,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.laser_stop.sizePolicy().hasHeightForWidth())
         self.laser_stop.setSizePolicy(sizePolicy)
         self.laser_stop.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                      "background: rgb(223,223,233)\n"
+                                      "}")
         self.laser_stop.setObjectName("laser_stop")
         self.gridLayout.addWidget(self.laser_stop, 21, 3, 1, 1)
         self.label_11 = QtWidgets.QLabel(self.centralwidget)
@@ -551,8 +552,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.elapsed_time.sizePolicy().hasHeightForWidth())
         self.elapsed_time.setSizePolicy(sizePolicy)
         self.elapsed_time.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                        "background: rgb(223,223,233)\n"
+                                        "}")
         self.elapsed_time.setText("")
         self.elapsed_time.setObjectName("elapsed_time")
         self.gridLayout.addWidget(self.elapsed_time, 23, 1, 1, 3)
@@ -571,8 +572,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.total_ions.sizePolicy().hasHeightForWidth())
         self.total_ions.setSizePolicy(sizePolicy)
         self.total_ions.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                      "background: rgb(223,223,233)\n"
+                                      "}")
         self.total_ions.setText("")
         self.total_ions.setObjectName("total_ions")
         self.gridLayout.addWidget(self.total_ions, 24, 1, 1, 3)
@@ -591,8 +592,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.speciemen_voltage.sizePolicy().hasHeightForWidth())
         self.speciemen_voltage.setSizePolicy(sizePolicy)
         self.speciemen_voltage.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                             "background: rgb(223,223,233)\n"
+                                             "}")
         self.speciemen_voltage.setText("")
         self.speciemen_voltage.setObjectName("speciemen_voltage")
         self.gridLayout.addWidget(self.speciemen_voltage, 25, 1, 1, 3)
@@ -611,8 +612,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.detection_rate.sizePolicy().hasHeightForWidth())
         self.detection_rate.setSizePolicy(sizePolicy)
         self.detection_rate.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                          "background: rgb(223,223,233)\n"
+                                          "}")
         self.detection_rate.setText("")
         self.detection_rate.setObjectName("detection_rate")
         self.gridLayout.addWidget(self.detection_rate, 26, 1, 1, 3)
@@ -623,8 +624,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.start_button.sizePolicy().hasHeightForWidth())
         self.start_button.setSizePolicy(sizePolicy)
         self.start_button.setStyleSheet("QPushButton{\n"
-"background: rgb(193, 193, 193)\n"
-"}")
+                                        "background: rgb(193, 193, 193)\n"
+                                        "}")
         self.start_button.setObjectName("start_button")
         self.gridLayout.addWidget(self.start_button, 27, 1, 1, 2)
         self.stop_button = QtWidgets.QPushButton(self.centralwidget)
@@ -634,8 +635,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.stop_button.sizePolicy().hasHeightForWidth())
         self.stop_button.setSizePolicy(sizePolicy)
         self.stop_button.setStyleSheet("QPushButton{\n"
-"background: rgb(193, 193, 193)\n"
-"}")
+                                       "background: rgb(193, 193, 193)\n"
+                                       "}")
         self.stop_button.setObjectName("stop_button")
         self.gridLayout.addWidget(self.stop_button, 28, 1, 1, 2)
         self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
@@ -664,20 +665,20 @@ class UI_APT_S(object):
         self.vdc_time = pg.PlotWidget(self.centralwidget)
         self.vdc_time.setMinimumSize(QtCore.QSize(0, 0))
         self.vdc_time.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
+                                    "border: 2px solid gray;\n"
+                                    "border-radius: 10px;\n"
+                                    "padding: 4 4px;\n"
+                                    "}")
         self.vdc_time.setObjectName("vdc_time")
         self.horizontalLayout_2.addWidget(self.vdc_time)
         # self.detection_rate_viz = QtWidgets.QWidget(self.centralwidget)
         self.detection_rate_viz = pg.PlotWidget(self.centralwidget)
         self.detection_rate_viz.setMinimumSize(QtCore.QSize(0, 0))
         self.detection_rate_viz.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
+                                              "border: 2px solid gray;\n"
+                                              "border-radius: 10px;\n"
+                                              "padding: 4 4px;\n"
+                                              "}")
         self.detection_rate_viz.setObjectName("detection_rate_viz")
         self.horizontalLayout_2.addWidget(self.detection_rate_viz)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
@@ -711,10 +712,10 @@ class UI_APT_S(object):
         self.visualization.setMinimumSize(QtCore.QSize(0, 0))
         self.visualization.setAcceptDrops(True)
         self.visualization.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
+                                         "border: 2px solid gray;\n"
+                                         "border-radius: 10px;\n"
+                                         "padding: 4 4px;\n"
+                                         "}")
         self.visualization.setObjectName("visualization")
         self.horizontalLayout.addWidget(self.visualization)
         # self.histogram = QtWidgets.QGraphicsView(self.centralwidget)
@@ -726,10 +727,10 @@ class UI_APT_S(object):
         self.histogram.setSizePolicy(sizePolicy)
         self.histogram.setMinimumSize(QtCore.QSize(0, 0))
         self.histogram.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
+                                     "border: 2px solid gray;\n"
+                                     "border-radius: 10px;\n"
+                                     "padding: 4 4px;\n"
+                                     "}")
         self.histogram.setObjectName("histogram")
         self.horizontalLayout.addWidget(self.histogram)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -875,7 +876,7 @@ class UI_APT_S(object):
 
         # Visualization #####################
         self.scatter = pg.ScatterPlotItem(
-                size=self.doubleSpinBox.value(), brush=pg.mkBrush(255, 255, 255, 120))
+            size=self.doubleSpinBox.value(), brush=pg.mkBrush(255, 255, 255, 120))
         self.visualization.getPlotItem().hideAxis('bottom')
         self.visualization.getPlotItem().hideAxis('left')
 
@@ -890,18 +891,261 @@ class UI_APT_S(object):
         self.timer3.start()
 
     def thread_main(self):
-            """
+        """
             Main thread for running experiment
             """
-            self.start_button.setEnabled(False)  # Disable the start button in the GUI
-            variables.plot_clear_flag = True  # Change the flag to clear the plots in GUI
+        self.start_button.setEnabled(False)  # Disable the start button in the GUI
+        variables.plot_clear_flag = True  # Change the flag to clear the plots in GUI
 
-            # Update global variables to do the experiments
-            variables.user_name = self.ex_user.text()
+        # Update global variables to do the experiments
+        variables.user_name = self.ex_user.text()
+        variables.ex_time = int(float(self.ex_time.text()))
+        variables.ex_freq = int(float(self.ex_freq.text()))
+        variables.max_ions = int(float(self.max_ions.text()))
+        variables.vdc_min = int(float(self.vdc_min.text()))
+        variables.detection_rate = float(self.detection_rate_init.text())
+        variables.hit_display = int(float(self.hit_displayed.text()))
+        variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
+        variables.pulse_frequency = float(self.pulse_frequency.text())
+        variables.hdf5_path = self.ex_name.text()
+        variables.email = self.email.text()
+        variables.cycle_avg = int(float(self.cycle_avg.text()))
+        variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
+        variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
+        variables.counter_source = str(self.counter_source.currentText())
+        variables.fixed_laser = int(float(self.fixed_laser.text()))
+        variables.laser_num_ions_per_step = int(float(self.laser_num_ions_per_step.text()))
+        variables.laser_increase_per_step = int(float(self.laser_increase_per_step.text()))
+        variables.laser_start = int(float(self.laser_start.text()))
+        variables.laser_stop = int(float(self.laser_stop.text()))
+        if self.criteria_time.isChecked():
+            variables.criteria_time = True
+        elif not self.criteria_time.isChecked():
+            variables.criteria_time = False
+        if self.criteria_ions.isChecked():
+            variables.criteria_ions = True
+        elif not self.criteria_ions.isChecked():
+            variables.criteria_ions = False
+        if self.criteria_vdc.isChecked():
+            variables.criteria_vdc = True
+        elif not self.criteria_vdc.isChecked():
+            variables.criteria_vdc = False
+        if self.criteria_laser.isChecked():
+            variables.criteria_laser = True
+        elif not self.criteria_laser.isChecked():
+            variables.criteria_laser = False
+
+        # Read the experiment counter
+        with open('./files/counter_physic.txt') as f:
+            variables.counter = int(f.readlines()[0])
+        # Current time and date
+        now = datetime.datetime.now()
+        variables.exp_name = "%s_" % variables.counter + \
+                             now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
+        p = os.path.abspath(os.path.join(__file__, "../../../.."))
+        variables.path = os.path.join(p, 'data_laser_pulse_mode\\%s' % variables.exp_name)
+        # Create folder to save the data
+        if not os.path.isdir(variables.path):
+            os.makedirs(variables.path, mode=0o777, exist_ok=True)
+        # start the run methos of MainThread Class, which is main function of apt_voltage.py
+        self.thread.start()
+
+    def finished_thread_main(self):
+        """
+            The function that is run after end of experiment(MainThread)
+            """
+        self.start_button.setEnabled(True)
+        self.stop_button.setEnabled(True)
+        QScreen.grabWindow(self.app.primaryScreen(),
+                           QApplication.desktop().winId()).save(variables.path + '/screenshot.png')
+
+    def stop_ex(self):
+        """
+            The function that is run if STOP button is pressed
+            """
+        if variables.start_flag == True:
+            variables.stop_flag = True  # Set the STOP flag
+            self.stop_button.setEnabled(False)  # Disable the stop button
+
+    def thread_worker(self, target):
+        """
+            The function for creating workers
+            """
+        return threading.Thread(target=target)
+
+    def update_plot_data(self):
+        """
+            The function for updating plots
+            """
+        if variables.index_auto_scale_graph == 30:
+            self.vdc_time.enableAutoRange(axis='x')
+            self.detection_rate_viz.enableAutoRange(axis='x')
+            variables.index_auto_scale_graph = 0
+
+        self.vdc_time.disableAutoRange()
+        self.detection_rate_viz.disableAutoRange()
+
+        variables.index_auto_scale_graph += 1
+
+        if variables.plot_clear_flag:
+            self.x_vdc = np.arange(1000)  # 1000 time points
+            self.y_vdc = np.zeros(1000)  # 1000 data points
+            self.y_vdc[:] = np.nan
+
+            self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
+
+            self.x_dtec = np.arange(1000)
+            self.y_dtec = np.zeros(1000)
+            self.y_dtec[:] = np.nan
+
+            self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+
+            self.histogram.clear()
+
+            self.scatter.clear()
+            self.visualization.clear()
+            self.visualization.addItem(self.detector_circle)
+            variables.plot_clear_flag = False
+
+            variables.specimen_voltage = 0
+            variables.pulse_voltage = 0
+            variables.elapsed_time = 0
+            variables.total_ions = 0
+            variables.avg_n_count = 0
+
+        if variables.start_flag:
+            if variables.index_wait_on_plot_start <= 16:
+                variables.index_wait_on_plot_start += 1
+
+            if variables.index_wait_on_plot_start >= 8:
+                # V_dc
+                if variables.index_plot <= 999:
+                    self.y_vdc[variables.index_plot] = int(
+                        variables.specimen_voltage)  # Add a new value.
+                else:
+                    self.x_vdc = np.append(self.x_vdc,
+                                           self.x_vdc[
+                                               -1] + 1)  # Add a new value 1 higher than the last.
+                    self.y_vdc = np.append(self.y_vdc,
+                                           int(variables.specimen_voltage))  # Add a new value.
+
+                self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
+
+                # Detection Rate Visualization
+                if variables.index_plot <= 999:
+                    self.y_dtec[variables.index_plot] = int(variables.avg_n_count)  # Add a new value.
+                else:
+                    self.x_dtec = self.x_dtec[1:]  # Remove the first element.
+                    self.x_dtec = np.append(self.x_dtec,
+                                            self.x_dtec[
+                                                -1] + 1)  # Add a new value 1 higher than the last.
+                    self.y_dtec = self.y_dtec[1:]
+                    self.y_dtec = np.append(self.y_dtec, int(variables.avg_n_count))
+
+                self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+                # Increase the index
+                variables.index_plot += 1
+            # Time of Flight
+            if variables.counter_source == 'TDC' and variables.total_ions > 0 and variables.index_wait_on_plot_start > 16 \
+                    and variables.index_wait_on_plot_start > 16 and not variables.raw_mode:
+                if variables.index_wait_on_plot_start > 16:
+
+                    try:
+                        def replaceZeroes(data):
+                            min_nonzero = np.min(data[np.nonzero(data)])
+                            data[data == 0] = min_nonzero
+                            return data
+
+                        if self.conf["visualization"] == 'tof':
+                            tof = variables.t * 27.432 / (1000 * 4)  # Time in ns
+                            viz = tof[tof < 5000]
+                        elif self.conf["visualization"] == 'mc':
+                            max_lenght = max(len(variables.x), len(variables.y),
+                                             len(variables.t), len(variables.main_v_dc_dld))
+                            viz = tof2mc_simple.tof_bin2mc_sc(variables.t[:max_lenght], 0,
+                                                              variables.main_v_dc_dld[:max_lenght],
+                                                              variables.x[:max_lenght],
+                                                              variables.x[:max_lenght],
+                                                              flightPathLength=110)
+                            viz = viz[viz < 200]
+
+                        self.y_tof, self.x_tof = np.histogram(viz, bins=512)
+                        self.histogram.clear()
+                        self.y_tof = replaceZeroes(self.y_tof)
+                        self.histogram.addItem(
+                            pg.BarGraphItem(x=self.x_tof[:-1], height=np.log(self.y_tof),
+                                            width=0.1, brush='r'))
+
+                    except:
+                        print(
+                            f"{initialize_devices.bcolors.FAIL}Error: Cannot plot Histogram correctly{initialize_devices.bcolors.ENDC}")
+
+                    # Visualization
+                    try:
+                        # adding points to the scatter plot
+                        self.scatter.clear()
+                        self.scatter.setSize(self.doubleSpinBox.value())
+                        x = variables.x
+                        y = variables.y
+                        min_length = min(len(x), len(y))
+                        x = variables.x[-min_length:]
+                        y = variables.y[-min_length:]
+                        self.scatter.setData(x=x[-variables.hit_display:],
+                                             y=y[-variables.hit_display:])
+                        # add item to plot window
+                        # adding scatter plot item to the plot window
+                        self.visualization.clear()
+                        self.visualization.addItem(self.scatter)
+                        self.visualization.addItem(self.detector_circle)
+                    except:
+                        print(
+                            f"{initialize_devices.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
+
+            # save plots to the file
+            if variables.index_plot_save % 100 == 0:
+                exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
+                exporter.export(variables.path + '/v_dc_p_%s.png' % variables.index_plot_save)
+                exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
+                exporter.export(variables.path + '/detection_rate_%s.png' % variables.index_plot_save)
+                exporter = pg.exporters.ImageExporter(self.visualization.plotItem)
+                exporter.export(variables.path + '/visualization_%s.png' % variables.index_plot_save)
+                exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
+                exporter.export(variables.path + '/tof_%s.png' % variables.index_plot_save)
+
+            # Increase the index
+            variables.index_plot_save += 1
+
+        # Statistics Update
+        self.speciemen_voltage.setText(str(float("{:.3f}".format(variables.specimen_voltage))))
+        self.elapsed_time.setText(str(float("{:.3f}".format(variables.elapsed_time))))
+        self.total_ions.setText((str(variables.total_ions)))
+        self.detection_rate.setText(str
+            (float("{:.3f}".format(
+            (variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000)))))
+
+    def statistics(self):
+        """
+            The function for updating statistics in the GUI
+            """
+
+        # Clean up the error message
+        if variables.index_warning_message == 15:
+            _translate = QtCore.QCoreApplication.translate
+            self.Error.setText(_translate("APT_Physic",
+                                          "<html><head/><body><p><span style=\" "
+                                          "color:#ff0000;\"></span></p></body></html>"))
+            variables.index_warning_message = 0
+
+        variables.index_warning_message += 1
+
+        try:
+            # Update the setup parameters
             variables.ex_time = int(float(self.ex_time.text()))
+            variables.user_name = self.ex_user.text()
             variables.ex_freq = int(float(self.ex_freq.text()))
             variables.max_ions = int(float(self.max_ions.text()))
             variables.vdc_min = int(float(self.vdc_min.text()))
+
             variables.detection_rate = float(self.detection_rate_init.text())
             variables.hit_display = int(float(self.hit_displayed.text()))
             variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
@@ -912,268 +1156,45 @@ class UI_APT_S(object):
             variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
             variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
             variables.counter_source = str(self.counter_source.currentText())
+            variables.fixed_laser = int(float(self.fixed_laser.text()))
+            variables.laser_num_ions_per_step = int(float(self.laser_num_ions_per_step.text()))
+            variables.laser_increase_per_step = int(float(self.laser_increase_per_step.text()))
+            variables.laser_start = int(float(self.laser_start.text()))
+            variables.laser_stop = int(float(self.laser_stop.text()))
+
             if self.criteria_time.isChecked():
-                    variables.criteria_time = True
+                variables.criteria_time = True
             elif not self.criteria_time.isChecked():
-                    variables.criteria_time = False
+                variables.criteria_time = False
             if self.criteria_ions.isChecked():
-                    variables.criteria_ions = True
+                variables.criteria_ions = True
             elif not self.criteria_ions.isChecked():
-                    variables.criteria_ions = False
+                variables.criteria_ions = False
             if self.criteria_vdc.isChecked():
-                    variables.criteria_vdc = True
+                variables.criteria_vdc = True
             elif not self.criteria_vdc.isChecked():
-                    variables.criteria_vdc = False
+                variables.criteria_vdc = False
+            if self.criteria_laser.isChecked():
+                variables.criteria_laser = True
+            elif not self.criteria_laser.isChecked():
+                variables.criteria_laser = False
 
-            # Read the experiment counter
-            with open('./files/counter_physic.txt') as f:
-                    variables.counter = int(f.readlines()[0])
-            # Current time and date
-            now = datetime.datetime.now()
-            variables.exp_name = "%s_" % variables.counter + \
-                                 now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
-            p = os.path.abspath(os.path.join(__file__, "../../../.."))
-            variables.path = os.path.join(p,'data_laser_pulse_mode\\%s' % variables.exp_name)
-            # Create folder to save the data
-            if not os.path.isdir(variables.path):
-                    os.makedirs(variables.path, mode=0o777, exist_ok=True)
-            # start the run methos of MainThread Class, which is main function of apt_voltage.py
-            self.thread.start()
+            # Show error message for V_dc higher than 20Kv
+            if int(float(self.vdc_max.text())) > 20000:
+                _translate = QtCore.QCoreApplication.translate
+                self.Error.setText(_translate("OXCART",
+                                              "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible "
+                                              "number is 20KV</span></p></body></html>"))
+                self.vdc_max.setText(_translate("OXCART", str(variables.vdc_max)))
+            else:
+                variables.vdc_max = int(float(self.vdc_max.text()))
+            # Show error message for V_p higher than 3281
 
-    def finished_thread_main(self):
-            """
-            The function that is run after end of experiment(MainThread)
-            """
-            self.start_button.setEnabled(True)
-            self.stop_button.setEnabled(True)
-            QScreen.grabWindow(self.app.primaryScreen(),
-                               QApplication.desktop().winId()).save(variables.path + '/screenshot.png')
 
-    def stop_ex(self):
-            """
-            The function that is run if STOP button is pressed
-            """
-            if variables.start_flag == True:
-                    variables.stop_flag = True  # Set the STOP flag
-                    self.stop_button.setEnabled(False)  # Disable the stop button
-
-    def thread_worker(self, target):
-            """
-            The function for creating workers
-            """
-            return threading.Thread(target=target)
-
-    def update_plot_data(self):
-            """
-            The function for updating plots
-            """
-            if variables.index_auto_scale_graph == 30:
-                    self.vdc_time.enableAutoRange(axis='x')
-                    self.detection_rate_viz.enableAutoRange(axis='x')
-                    variables.index_auto_scale_graph = 0
-
-            self.vdc_time.disableAutoRange()
-            self.detection_rate_viz.disableAutoRange()
-
-            variables.index_auto_scale_graph += 1
-
-            if variables.plot_clear_flag:
-                    self.x_vdc = np.arange(1000)  # 1000 time points
-                    self.y_vdc = np.zeros(1000)  # 1000 data points
-                    self.y_vdc[:] = np.nan
-
-                    self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
-
-                    self.x_dtec = np.arange(1000)
-                    self.y_dtec = np.zeros(1000)
-                    self.y_dtec[:] = np.nan
-
-                    self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
-
-                    self.histogram.clear()
-
-                    self.scatter.clear()
-                    self.visualization.clear()
-                    self.visualization.addItem(self.detector_circle)
-                    variables.plot_clear_flag = False
-
-                    variables.specimen_voltage = 0
-                    variables.pulse_voltage = 0
-                    variables.elapsed_time = 0
-                    variables.total_ions = 0
-                    variables.avg_n_count = 0
-
-            if variables.start_flag:
-                    if variables.index_wait_on_plot_start <= 16:
-                            variables.index_wait_on_plot_start += 1
-
-                    if variables.index_wait_on_plot_start >= 8:
-                            # V_dc
-                            if variables.index_plot <= 999:
-                                    self.y_vdc[variables.index_plot] = int(
-                                            variables.specimen_voltage)  # Add a new value.
-                            else:
-                                    self.x_vdc = np.append(self.x_vdc,
-                                                           self.x_vdc[
-                                                                   -1] + 1)  # Add a new value 1 higher than the last.
-                                    self.y_vdc = np.append(self.y_vdc,
-                                                           int(variables.specimen_voltage))  # Add a new value.
-
-                            self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
-
-                            # Detection Rate Visualization
-                            if variables.index_plot <= 999:
-                                    self.y_dtec[variables.index_plot] = int(variables.avg_n_count)  # Add a new value.
-                            else:
-                                    self.x_dtec = self.x_dtec[1:]  # Remove the first element.
-                                    self.x_dtec = np.append(self.x_dtec,
-                                                            self.x_dtec[
-                                                                    -1] + 1)  # Add a new value 1 higher than the last.
-                                    self.y_dtec = self.y_dtec[1:]
-                                    self.y_dtec = np.append(self.y_dtec, int(variables.avg_n_count))
-
-                            self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
-                            # Increase the index
-                            variables.index_plot += 1
-                    # Time of Flight
-                    if variables.counter_source == 'TDC' and variables.total_ions > 0 and variables.index_wait_on_plot_start > 16 \
-                            and variables.index_wait_on_plot_start > 16 and not variables.raw_mode:
-                            if variables.index_wait_on_plot_start > 16:
-
-                                    try:
-                                            def replaceZeroes(data):
-                                                    min_nonzero = np.min(data[np.nonzero(data)])
-                                                    data[data == 0] = min_nonzero
-                                                    return data
-
-                                            if self.conf["visualization"] == 'tof':
-                                                    tof = variables.t * 27.432 / (1000 * 4)  # Time in ns
-                                                    viz = tof[tof < 5000]
-                                            elif self.conf["visualization"] == 'mc':
-                                                    max_lenght = max(len(variables.x), len(variables.y),
-                                                                     len(variables.t), len(variables.main_v_dc_dld))
-                                                    viz = tof2mc_simple.tof_bin2mc_sc(variables.t[:max_lenght], 0,
-                                                                                      variables.main_v_dc_dld[:max_lenght],
-                                                                                      variables.x[:max_lenght],
-                                                                                      variables.x[:max_lenght],
-                                                                                      flightPathLength=110)
-                                                    viz = viz[viz < 200]
-
-                                            self.y_tof, self.x_tof = np.histogram(viz, bins=512)
-                                            self.histogram.clear()
-                                            self.y_tof = replaceZeroes(self.y_tof)
-                                            self.histogram.addItem(
-                                                    pg.BarGraphItem(x=self.x_tof[:-1], height=np.log(self.y_tof),
-                                                                    width=0.1, brush='r'))
-
-                                    except:
-                                            print(
-                                                    f"{initialize_devices.bcolors.FAIL}Error: Cannot plot Histogram correctly{initialize_devices.bcolors.ENDC}")
-
-                                    # Visualization
-                                    try:
-                                            # adding points to the scatter plot
-                                            self.scatter.clear()
-                                            self.scatter.setSize(self.doubleSpinBox.value())
-                                            x = variables.x
-                                            y = variables.y
-                                            min_length = min(len(x), len(y))
-                                            x = variables.x[-min_length:]
-                                            y = variables.y[-min_length:]
-                                            self.scatter.setData(x=x[-variables.hit_display:],
-                                                                 y=y[-variables.hit_display:])
-                                            # add item to plot window
-                                            # adding scatter plot item to the plot window
-                                            self.visualization.clear()
-                                            self.visualization.addItem(self.scatter)
-                                            self.visualization.addItem(self.detector_circle)
-                                    except:
-                                            print(
-                                                    f"{initialize_devices.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
-
-                    # save plots to the file
-                    if variables.index_plot_save % 100 == 0:
-                            exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
-                            exporter.export(variables.path + '/v_dc_p_%s.png' % variables.index_plot_save)
-                            exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
-                            exporter.export(variables.path + '/detection_rate_%s.png' % variables.index_plot_save)
-                            exporter = pg.exporters.ImageExporter(self.visualization.plotItem)
-                            exporter.export(variables.path + '/visualization_%s.png' % variables.index_plot_save)
-                            exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
-                            exporter.export(variables.path + '/tof_%s.png' % variables.index_plot_save)
-
-                    # Increase the index
-                    variables.index_plot_save += 1
-
-            # Statistics Update
-            self.speciemen_voltage.setText(str(float("{:.3f}".format(variables.specimen_voltage))))
-            self.elapsed_time.setText(str(float("{:.3f}".format(variables.elapsed_time))))
-            self.total_ions.setText((str(variables.total_ions)))
-            self.detection_rate.setText(str
-                    (float("{:.3f}".format(
-                (variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000)))))
-
-    def statistics(self):
-            """
-            The function for updating statistics in the GUI
-            """
-
-            # Clean up the error message
-            if variables.index_warning_message == 15:
-                    _translate = QtCore.QCoreApplication.translate
-                    self.Error.setText(_translate("APT_Physic",
-                                                  "<html><head/><body><p><span style=\" "
-                                                  "color:#ff0000;\"></span></p></body></html>"))
-                    variables.index_warning_message = 0
-
-            variables.index_warning_message += 1
-
-            try:
-                    # Update the setup parameters
-                    variables.ex_time = int(float(self.ex_time.text()))
-                    variables.user_name = self.ex_user.text()
-                    variables.ex_freq = int(float(self.ex_freq.text()))
-                    variables.max_ions = int(float(self.max_ions.text()))
-                    variables.vdc_min = int(float(self.vdc_min.text()))
-
-                    variables.detection_rate = float(self.detection_rate_init.text())
-                    variables.hit_display = int(float(self.hit_displayed.text()))
-                    variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
-                    variables.pulse_frequency = float(self.pulse_frequency.text())
-                    variables.hdf5_path = self.ex_name.text()
-                    variables.email = self.email.text()
-                    variables.cycle_avg = int(float(self.cycle_avg.text()))
-                    variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
-                    variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
-                    variables.counter_source = str(self.counter_source.currentText())
-
-                    if self.criteria_time.isChecked():
-                            variables.criteria_time = True
-                    elif not self.criteria_time.isChecked():
-                            variables.criteria_time = False
-                    if self.criteria_ions.isChecked():
-                            variables.criteria_ions = True
-                    elif not self.criteria_ions.isChecked():
-                            variables.criteria_ions = False
-                    if self.criteria_vdc.isChecked():
-                            variables.criteria_vdc = True
-                    elif not self.criteria_vdc.isChecked():
-                            variables.criteria_vdc = False
-
-                    # Show error message for V_dc higher than 20Kv
-                    if int(float(self.vdc_max.text())) > 20000:
-                            _translate = QtCore.QCoreApplication.translate
-                            self.Error.setText(_translate("OXCART",
-                                                          "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible "
-                                                          "number is 20KV</span></p></body></html>"))
-                            self.vdc_max.setText(_translate("OXCART", str(variables.vdc_max)))
-                    else:
-                            variables.vdc_max = int(float(self.vdc_max.text()))
-                    # Show error message for V_p higher than 3281
-
-            except:
-                    print(
-                            f"{initialize_devices.bcolors.FAIL}Error: Cannot update setup parameters{initialize_devices.bcolors.ENDC}")
+        except Exception as e:
+            print(e)
+            print(
+                f"{initialize_devices.bcolors.FAIL}Error: Cannot update setup parameters{initialize_devices.bcolors.ENDC}")
 
 
 class MainThread(QThread):
@@ -1185,18 +1206,9 @@ class MainThread(QThread):
     signal = pyqtSignal('PyQt_PyObject')
 
     def __init__(self, conf):
-            QThread.__init__(self, )
-            self.conf = conf
+        QThread.__init__(self, )
+        self.conf = conf
 
     def run(self):
-            main_thread = apt_tdc_roetdec.main(self.conf)
-            self.signal.emit(main_thread)
-
-
-
-
-
-
-
-
-
+        main_thread = apt_tdc_roetdec.main(self.conf)
+        self.signal.emit(main_thread)

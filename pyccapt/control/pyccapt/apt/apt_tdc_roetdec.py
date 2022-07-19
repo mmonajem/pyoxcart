@@ -9,10 +9,10 @@ import multiprocessing
 from multiprocessing.queues import Queue
 import threading
 import numpy as np
+import copy
 import logging
 
 from pyccapt.control_tools import loggi
-
 
 # Serial ports and NI
 import serial.tools.list_ports
@@ -22,15 +22,29 @@ from pyccapt.devices import email_send, initialize_devices
 from pyccapt.control_tools import experiment_statistics, variables, hdf5_creator, loggi
 
 
+def thorlab(conf, degree, initialize=False):
+    """
+    Initialize the Thorlab controller and set it to zero degree
+    """
+    import pyccapt.thorlabs_apt.core as apt
+    motor = apt.Motor(int(conf['COM_PORT_thorlab_motor']))
+    if initialize:
+        motor.move_home(True)
+        if degree != 0:
+            motor.move_by(degree)
+    else:
+        motor.move_by(degree)
+
+
 class APT_SIMPLE:
     """
     APT_VOLTAGE class is a main class for controlling laser atom probe with Roentdec TDC.
     """
 
     def __init__(self, queue_x, queue_y, queue_tof, queue_AbsoluteTimeStamp,
-                           queue_ch0, queue_ch1, queue_ch2, queue_ch3,
-                           queue_ch4, queue_ch5, queue_ch6, queue_ch7,
-                            queue_stop_measurement, lock1, conf):
+                 queue_ch0, queue_ch1, queue_ch2, queue_ch3,
+                 queue_ch4, queue_ch5, queue_ch6, queue_ch7,
+                 queue_stop_measurement, lock1, conf):
         """
         This is the constructor class that accepts several initialized queues objects corresponding
         to various parameters of the groups like dld,TDC. This constructor also objects used for
@@ -54,9 +68,9 @@ class APT_SIMPLE:
         self.queue_stop_measurement = queue_stop_measurement
         self.lock1 = lock1
         self.conf = conf
+        self.motor = None
 
         self.log_apt_tdc_roetdec = loggi.logger_creator('apt_tdc_roetdec', 'apt_tdc_roetdec.log')
-
 
     def initialize_v_dc(self):
         """
@@ -76,7 +90,8 @@ class APT_SIMPLE:
         try:
             # Setting the com port of V_dc
 
-            self.log_apt_tdc_roetdec.info("Function - initialize_v_dc | Port selection -> {}".format(initialize_devices.com_ports[variables.COM_PORT_V_dc].device))
+            self.log_apt_tdc_roetdec.info("Function - initialize_v_dc | Port selection -> {}".format(
+                initialize_devices.com_ports[variables.COM_PORT_V_dc].device))
 
             self.com_port_v_dc = serial.Serial(
                 port=initialize_devices.com_ports[variables.COM_PORT_V_dc].device,  # chosen COM port
@@ -86,8 +101,9 @@ class APT_SIMPLE:
                 stopbits=serial.STOPBITS_ONE  # 1
             )
 
-            self.log_apt_tdc_roetdec.info("Function - initialize_v_dc | Successful Port Open - O/p of serial variable - > {}".format(self.com_port_v_dc))
-
+            self.log_apt_tdc_roetdec.info(
+                "Function - initialize_v_dc | Successful Port Open - O/p of serial variable - > {}".format(
+                    self.com_port_v_dc))
 
             # configure the COM port to talk to. Default values: 115200,8,N,1
             if self.com_port_v_dc.is_open:
@@ -100,11 +116,11 @@ class APT_SIMPLE:
                     self.command_v_dc(cmd_list[cmd])
         except Exception as e:
 
-            self.log_apt_tdc_roetdec.error("Function - initialize_v_dc | Port error - O/p of serial variable - > {} ".format(self.com_port_v_dc))
+            self.log_apt_tdc_roetdec.error(
+                "Function - initialize_v_dc | Port error - O/p of serial variable - > {} ".format(self.com_port_v_dc))
             print("Couldn't open Port!")
             print(e)
             self.log_apt_tdc_roetdec.error("Function - initialize_v_dc | Port error - Error stack - > {} ".format(e))
-
 
     # apply command to the V_dc
     def command_v_dc(self, cmd):
@@ -214,15 +230,29 @@ class APT_SIMPLE:
 
         counts_error = counts_target - counts_measured  # deviation from setpoint
 
-        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | count_temp | value - {}| type - {}".format(variables.count_temp,type(variables.count_temp)))
-        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | count_last | value - {}| type - {}".format(variables.count_last,type(variables.count_last)))
-        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | main_v_dc | value - {}| type - {}".format(variables.main_v_dc,type(variables.main_v_dc)))
-        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | main_counter | value - {}| type - {}".format(variables.main_counter,type(variables.main_counter)))
-        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | avg_n_count | value - {}| type - {}".format(variables.avg_n_count,type(variables.avg_n_count)))
-        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | ex_freq | value - {}| type - {}".format(variables.ex_freq,type(variables.ex_freq)))
-        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | counts_measured | value - {}| type - {}".format(counts_measured,type(counts_measured)))
-        self.log_apt_tdc_roetdec.info("Function - main_ex_loop | counts_error | value - {}| type - {}".format(counts_error,type(counts_error)))
-
+        self.log_apt_tdc_roetdec.info(
+            "Function - main_ex_loop | count_temp | value - {}| type - {}".format(variables.count_temp,
+                                                                                  type(variables.count_temp)))
+        self.log_apt_tdc_roetdec.info(
+            "Function - main_ex_loop | count_last | value - {}| type - {}".format(variables.count_last,
+                                                                                  type(variables.count_last)))
+        self.log_apt_tdc_roetdec.info(
+            "Function - main_ex_loop | main_v_dc | value - {}| type - {}".format(variables.main_v_dc,
+                                                                                 type(variables.main_v_dc)))
+        self.log_apt_tdc_roetdec.info(
+            "Function - main_ex_loop | main_counter | value - {}| type - {}".format(variables.main_counter,
+                                                                                    type(variables.main_counter)))
+        self.log_apt_tdc_roetdec.info(
+            "Function - main_ex_loop | avg_n_count | value - {}| type - {}".format(variables.avg_n_count,
+                                                                                   type(variables.avg_n_count)))
+        self.log_apt_tdc_roetdec.info(
+            "Function - main_ex_loop | ex_freq | value - {}| type - {}".format(variables.ex_freq,
+                                                                               type(variables.ex_freq)))
+        self.log_apt_tdc_roetdec.info(
+            "Function - main_ex_loop | counts_measured | value - {}| type - {}".format(counts_measured,
+                                                                                       type(counts_measured)))
+        self.log_apt_tdc_roetdec.info(
+            "Function - main_ex_loop | counts_error | value - {}| type - {}".format(counts_error, type(counts_error)))
 
         # simple proportional control with averaging
         rate = ((variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000))
@@ -287,16 +317,19 @@ class APT_SIMPLE:
             variables.ch6 = np.zeros(0)
             variables.ch7 = np.zeros(0)
 
-
             #
             variables.main_v_dc = np.zeros(0)
             variables.main_counter = np.zeros(0)
             variables.main_v_dc_dld = np.zeros(0)
             variables.main_v_dc_tdc = np.zeros(0)
 
-            self.log_apt_tdc_roetdec.info("Function - cleanup_variables | ch1 | value - {}| type - {}".format(variables.count_temp,type(variables.count_temp)))
-            self.log_apt_tdc_roetdec.info("Function - cleanup_variables | main_v_dc_tdc | value - {}| type - {}".format(variables.main_v_dc_tdc,type(variables.main_v_dc_tdc)))
-
+            self.log_apt_tdc_roetdec.info(
+                "Function - cleanup_variables | ch1 | value - {}| type - {}".format(variables.count_temp,
+                                                                                    type(variables.count_temp)))
+            self.log_apt_tdc_roetdec.info(
+                "Function - cleanup_variables | main_v_dc_tdc | value - {}| type - {}".format(variables.main_v_dc_tdc,
+                                                                                              type(
+                                                                                                  variables.main_v_dc_tdc)))
 
         print('starting to clean up')
         # save the data to the HDF5
@@ -346,11 +379,11 @@ def main(conf):
             queue_ch7 = Queue(maxsize=1, ctx=multiprocessing.get_context())
             queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
 
-            tdc_process = multiprocessing.Process(target=tdc_roentdec.experiment_measure, args=(queue_x, queue_y, queue_tof, queue_AbsoluteTimeStamp,
-                                                                                                queue_ch0, queue_ch1, queue_ch2, queue_ch3,
-                                                                                                queue_ch4, queue_ch5, queue_ch6, queue_ch7,
-                                                                                                queue_stop_measurement))
-
+            tdc_process = multiprocessing.Process(target=tdc_roentdec.experiment_measure,
+                                                  args=(queue_x, queue_y, queue_tof, queue_AbsoluteTimeStamp,
+                                                        queue_ch0, queue_ch1, queue_ch2, queue_ch3,
+                                                        queue_ch4, queue_ch5, queue_ch6, queue_ch7,
+                                                        queue_stop_measurement))
 
             tdc_process.daemon = True
             tdc_process.start()
@@ -375,9 +408,9 @@ def main(conf):
 
     # Create the experiment object
     experiment = APT_SIMPLE(queue_x, queue_y, queue_tof, queue_AbsoluteTimeStamp,
-                           queue_ch0, queue_ch1, queue_ch2, queue_ch3,
-                           queue_ch4, queue_ch5, queue_ch6, queue_ch7,
-                           queue_stop_measurement, lock1, conf)
+                            queue_ch0, queue_ch1, queue_ch2, queue_ch3,
+                            queue_ch4, queue_ch5, queue_ch6, queue_ch7,
+                            queue_stop_measurement, lock1, conf)
 
     if conf['v_dc'] != "off":
         # Initialize high voltage
@@ -393,6 +426,15 @@ def main(conf):
     counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
     logger.info('Starting the main loop')
 
+    if conf['thorlab_motor'] != 'off':
+        if variables.criteria_laser == True:
+            thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, variables.fixed_laser, True))
+        else:
+            thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, variables.laser_start, True))
+        thorlab_process.start()
+        # Sleep for 5 seconds to get zero degree on motor
+        thorlab_process.join()
+
     if conf['tdc'] != "off":
         # Initialze threads that will read from the queue for the group: dld
         if variables.counter_source == 'TDC':
@@ -406,6 +448,9 @@ def main(conf):
     index_time = 0
     ex_time_temp = variables.ex_time
 
+    # save laser fixed variable
+    fixed_laser_tmp = copy.copy(variables.fixed_laser)
+    current_laser_degree = copy.copy(variables.laser_start)
     # Main loop of experiment
     while steps < total_steps:
         # Only for initializing every thing at firs iteration
@@ -445,6 +490,21 @@ def main(conf):
         end_main_ex_loop = time.time()
         variables.elapsed_time = end_main_ex_loop - start_main_ex
 
+        # Laser intensity adjustment
+        if conf['thorlab_motor'] != 'off':
+            if variables.criteria_laser and variables.fixed_laser != fixed_laser_tmp:
+                if not thorlab_process.is_alive():
+                    thorlab_process = multiprocessing.Process(target=thorlab,
+                                                              args=(conf, variables.fixed_laser - fixed_laser_tmp, False))
+                    thorlab_process.start()
+                    # save laser fixed variable
+                    fixed_laser_tmp = copy.copy(variables.fixed_laser)
+            else:
+                if variables.total_ions % variables.laser_num_ions_per_step == 0 and variables.total_ions != 0:
+                    increase_value = variables.laser_increase_per_step + current_laser_degree
+                    thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, increase_value, False))
+                    thorlab_process.start()
+                    current_laser_degree = copy.copy(increase_value)
         # Counter of iteration
         time_counter = np.append(time_counter, steps)
         steps += 1
@@ -459,13 +519,17 @@ def main(conf):
         if variables.criteria_ions:
             if variables.max_ions <= variables.total_ions:
                 logger.info('Total number of Ions is achieved')
-                if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
-                    queue_stop_measurement.put(True)
+                if conf['tdc'] != "off":
+                    if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+                        queue_stop_measurement.put(True)
                 time.sleep(1)
                 break
         if variables.criteria_vdc:
             if variables.vdc_max <= variables.specimen_voltage:
                 if flag_achieved_high_voltage > variables.ex_freq * 10:
+                    if conf['tdc'] != "off":
+                        if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+                            queue_stop_measurement.put(True)
                     logger.info('High Voltage Max. is achieved')
                     time.sleep(1)
                     break
@@ -473,6 +537,9 @@ def main(conf):
         if variables.ex_time != ex_time_temp:
             total_steps = variables.ex_time * variables.ex_freq - steps
             ex_time_temp = variables.ex_time
+            if conf['tdc'] != "off":
+                if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+                    queue_stop_measurement.put(True)
         # Because experiment time is not a stop criteria, increase total_steps
         if not variables.criteria_time and steps + 1 == total_steps:
             total_steps += 1
@@ -495,6 +562,9 @@ def main(conf):
     variables.end_experiment = True
     time.sleep(1)
 
+    if conf['thorlab_motor'] != 'off':
+        # Stop the thorlab
+        thorlab_process.join()
     if conf['tdc'] != "off":
         # Stop the TDC and DLD thread
         if variables.counter_source == 'TDC':

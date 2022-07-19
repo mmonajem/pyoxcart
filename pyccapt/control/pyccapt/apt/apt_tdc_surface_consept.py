@@ -744,6 +744,9 @@ def main(conf):
         if variables.ex_time != ex_time_temp:
             total_steps = variables.ex_time * variables.ex_freq - steps
             ex_time_temp = variables.ex_time
+            if conf['tdc'] != "off":
+                if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+                    queue_stop_measurement.put(True)
         # Because experiment time is not a stop criteria, increase total_steps
         if not variables.criteria_time and steps + 1 == total_steps:
             total_steps += 1

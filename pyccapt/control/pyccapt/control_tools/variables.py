@@ -62,6 +62,11 @@ def init(conf):
     global criteria_laser
     global point_size_detec_map
     global exp_name
+    global fixed_laser
+    global laser_num_ions_per_step
+    global laser_increase_per_step
+    global laser_start
+    global laser_stop
 
     # Statistics parameters
     global elapsed_time
@@ -196,6 +201,11 @@ def init(conf):
     point_size_detec_map = 1
     exp_name = ''
     log_path = ''
+    fixed_laser = 0
+    laser_num_ions_per_step = 0
+    laser_increase_per_step = 0
+    laser_start = 0
+    laser_stop = 0
 
     # Run statistics=
     elapsed_time = 0.0
