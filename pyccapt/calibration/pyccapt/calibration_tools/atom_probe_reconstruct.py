@@ -96,7 +96,7 @@ def atom_probe_recons_from_detector(detx, dety, hv, kf, icf, flight_path_length,
 
     ## calcualte x and y coordinates
 
-    # launch angle relaive to specimen axis
+    # launch angle relative to specimen axis
     thetaP = math.atan(rad / flight_path_length)  # mm / mm
     theta = thetaP + math.asin((icf - 1) * math.sin(thetaP))
 
