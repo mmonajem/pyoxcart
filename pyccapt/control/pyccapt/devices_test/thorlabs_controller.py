@@ -9,7 +9,7 @@ def thorlab(degree, initialize=False):
     """
     import pyccapt.thorlabs_apt.core as apt
     motor = apt.Motor(27261754)
-    if initialize == True:
+    if initialize:
         motor.move_home(True)
     else:
         motor.move_by(degree)

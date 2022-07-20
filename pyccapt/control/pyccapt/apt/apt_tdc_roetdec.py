@@ -4,6 +4,7 @@ It contains the main control loop of experiment.
 """
 
 import time
+import os
 import datetime
 import multiprocessing
 from multiprocessing.queues import Queue
@@ -11,6 +12,7 @@ import threading
 import numpy as np
 import copy
 import logging
+import shutil
 
 from pyccapt.control_tools import loggi
 
@@ -189,6 +191,10 @@ class APT_SIMPLE:
 
                     variables.main_v_dc_dld = np.append(variables.main_v_dc_dld,
                                                         np.tile(variables.specimen_voltage, len(length)))
+
+                    variables.laser_intensity = np.append(variables.laser_intensity,
+                                                        np.tile(variables.laser_degree, len(length)))
+
             # If end of experiment flag is set break the while loop
             if variables.end_experiment:
                 break
@@ -267,12 +273,13 @@ class APT_SIMPLE:
 
         # update v_dc
         if variables.specimen_voltage < variables.vdc_max:
-            if variables.specimen_voltage >= variables.vdc_min:
+            if variables.specimen_voltage >= variables.vdc_min - 50:
                 specimen_voltage_temp = variables.specimen_voltage + voltage_step
-                if self.conf['v_dc'] != "off":
-                    # sending VDC via serial
-                    self.command_v_dc(">S0 %s" % (specimen_voltage_temp))
-                variables.specimen_voltage = specimen_voltage_temp
+                if specimen_voltage_temp != variables.specimen_voltage:
+                    if self.conf['v_dc'] != "off":
+                        # sending VDC via serial
+                        self.command_v_dc(">S0 %s" % (specimen_voltage_temp))
+                    variables.specimen_voltage = specimen_voltage_temp
 
     def clear_up(self, ):
         """
@@ -322,6 +329,8 @@ class APT_SIMPLE:
             variables.main_counter = np.zeros(0)
             variables.main_v_dc_dld = np.zeros(0)
             variables.main_v_dc_tdc = np.zeros(0)
+
+            variables.laser_intensity = np.zeros(0)
 
             self.log_apt_tdc_roetdec.info(
                 "Function - cleanup_variables | ch1 | value - {}| type - {}".format(variables.count_temp,
@@ -423,14 +432,17 @@ def main(conf):
     time_ex_h = np.zeros(0)
     time_counter = np.zeros(0)
 
+
     counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
     logger.info('Starting the main loop')
 
     if conf['thorlab_motor'] != 'off':
         if variables.criteria_laser == True:
             thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, variables.fixed_laser, True))
+            variables.laser_degree = variables.fixed_laser
         else:
             thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, variables.laser_start, True))
+            variables.laser_degree = variables.laser_start
         thorlab_process.start()
         # Sleep for 5 seconds to get zero degree on motor
         thorlab_process.join()
@@ -450,7 +462,10 @@ def main(conf):
 
     # save laser fixed variable
     fixed_laser_tmp = copy.copy(variables.fixed_laser)
-    current_laser_degree = copy.copy(variables.laser_start)
+    variables.laser_degree = copy.copy(variables.laser_start)
+    index_step_laser = 1
+    # Save the detection variable
+    init_detection_rate = variables.detection_rate
     # Main loop of experiment
     while steps < total_steps:
         # Only for initializing every thing at firs iteration
@@ -470,7 +485,11 @@ def main(conf):
             variables.specimen_voltage = variables.vdc_min
         # Measure time
         start = datetime.datetime.now()
+        if variables.detection_rate != init_detection_rate:
+            counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
+            init_detection_rate = variables.detection_rate
         # main loop function
+        counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
         experiment.main_ex_loop(counts_target)
         end = datetime.datetime.now()
         # If the main experiment function takes less than experiment frequency we have to waite
@@ -499,12 +518,15 @@ def main(conf):
                     thorlab_process.start()
                     # save laser fixed variable
                     fixed_laser_tmp = copy.copy(variables.fixed_laser)
+                    variables.laser_degree = variables.laser_start
             else:
-                if variables.total_ions % variables.laser_num_ions_per_step == 0 and variables.total_ions != 0:
-                    increase_value = variables.laser_increase_per_step + current_laser_degree
-                    thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, increase_value, False))
-                    thorlab_process.start()
-                    current_laser_degree = copy.copy(increase_value)
+                if variables.total_ions > variables.laser_num_ions_per_step * index_step_laser and variables.total_ions != 0:
+                    if not thorlab_process.is_alive():
+                        thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, variables.laser_increase_per_step, False))
+                        thorlab_process.start()
+                        variables.laser_degree = variables.laser_degree + variables.laser_increase_per_step
+                        index_step_laser = index_step_laser + 1
+
         # Counter of iteration
         time_counter = np.append(time_counter, steps)
         steps += 1
@@ -579,7 +601,7 @@ def main(conf):
     # Check the length of arrays to be equal
     if variables.counter_source == 'TDC':
         if all(len(lst) == len(variables.x) for lst in [variables.x, variables.y,
-                                                        variables.t, variables.time_stamp,
+                                                        variables.t, variables.time_stamp, variables.laser_intensity,
                                                         variables.main_v_dc_dld, variables.ch0,
                                                         variables.ch0, variables.ch1, variables.ch2,
                                                         variables.ch3, variables.ch4, variables.ch5,
@@ -619,3 +641,12 @@ def main(conf):
     # Clear up all the variables and deinitialize devices
     experiment.clear_up()
     logger.info('Variables and devices is cleared')
+
+    try:
+        p = os.path.abspath(os.path.join(__file__, "../../."))
+        original = p + '\\tdc_roentdec\\output.lmf'
+        target = variables.path + '\\output.lmf'
+
+        shutil.copyfile(original, target)
+    except Exception as e:
+        print(e)

@@ -13,7 +13,10 @@ import numpy as np
 # Serial ports and NI
 import serial.tools.list_ports
 import pyvisa as visa
-import nidaqmx
+try:
+        import nidaqmx
+except:
+       pass
 
 # Local project scripts
 from pyccapt.devices import signal_generator, tweet_send
@@ -112,7 +115,7 @@ class APT_ADVANCE:
 
         Attributes:
             Accepts only the self (class object)
-        
+
         Returns:
             Does not return anything
 
@@ -135,15 +138,15 @@ class APT_ADVANCE:
         The function utilizes the nidaqmx library to communicate
         through NI Instruments to count the edges.
 
-        NI-DAQmx can help you use National Instruments (NI) data acquisition and 
+        NI-DAQmx can help you use National Instruments (NI) data acquisition and
         signal conditioning hardware
 
         Attributes:
             Accepts only the self (class object)
-        
+
         Returns:
             Returns the counted edges
-            
+
         """
         task_counter = nidaqmx.Task()
         task_counter.ci_channels.add_ci_count_edges_chan(self.conf['COM_PORT_NI_counter'])
@@ -162,7 +165,7 @@ class APT_ADVANCE:
 
         Attributes:
             Accepts only the self (class object)
-        
+
         Returns:
             Returns the response code after executing the command.
         """
@@ -194,7 +197,7 @@ class APT_ADVANCE:
 
         Attributes:
             Accepts only the self (class object)
-        
+
         Returns:
             Does not return anything
         """
@@ -228,7 +231,7 @@ class APT_ADVANCE:
         The values read from the queues are updates in imported "variables" file.
         Attributes:
             Accepts only the self (class object)
-        
+
         Returns:
             Does not return anything
         """
@@ -271,7 +274,7 @@ class APT_ADVANCE:
 
         Attributes:
             Accepts only the self (class object)
-        
+
         Returns:
             Does not return anything
         """
@@ -309,7 +312,7 @@ class APT_ADVANCE:
         Attributes:
             task_counter: Counter edges
             counts_target:
-        
+
         Returns:
             Does not return anything
 
@@ -394,7 +397,7 @@ class APT_ADVANCE:
             Does not accept any arguments
         Returns:
             Does not return anything
-        
+
         """
 
         def cleanup_variables():
@@ -598,7 +601,7 @@ def main(conf):
         queue_ch3_wave = None
 
     # Initialize lock that is used by TDC and DLD threads
-    # Module used: threading 
+    # Module used: threading
     lock1 = threading.Lock()
     lock2 = threading.Lock()
 
@@ -692,6 +695,9 @@ def main(conf):
             logger.info('Experiment is started')
         # Measure time
         start = datetime.datetime.now()
+        if variables.detection_rate != init_detection_rate:
+            counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
+            init_detection_rate = variables.detection_rate
         # main loop function
         experiment.main_ex_loop(task_counter, counts_target)
         end = datetime.datetime.now()

@@ -32,7 +32,7 @@ class UI_APT_S(object):
 
     def setupUi(self, UI_APT_S):
         UI_APT_S.setObjectName("UI_APT_S")
-        UI_APT_S.resize(1400, 838)
+        UI_APT_S.resize(1100, 838)
         self.centralwidget = QtWidgets.QWidget(UI_APT_S)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.centralwidget)
@@ -1090,6 +1090,11 @@ class UI_APT_S(object):
                         min_length = min(len(x), len(y))
                         x = variables.x[-min_length:]
                         y = variables.y[-min_length:]
+                        x = x[np.abs(x) < 85]
+                        y = y[np.abs(y) < 85]
+                        lenth_min = min(len(x), len(y))
+                        x = x[-lenth_min:]
+                        y = y[-lenth_min:]
                         self.scatter.setData(x=x[-variables.hit_display:],
                                              y=y[-variables.hit_display:])
                         # add item to plot window
@@ -1097,9 +1102,10 @@ class UI_APT_S(object):
                         self.visualization.clear()
                         self.visualization.addItem(self.scatter)
                         self.visualization.addItem(self.detector_circle)
-                    except:
+                    except Exception as e:
                         print(
-                            f"{initialize_devices.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
+                            f"{initialize_devices.bcolors.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
+                        print(e)
 
             # save plots to the file
             if variables.index_plot_save % 100 == 0:

@@ -77,6 +77,7 @@ def hdf_creator_physic(time_counter, time_ex_s, time_ex_m, time_ex_h):
             f.create_dataset("dld/t", data=variables.t, dtype='i')
             f.create_dataset("dld/AbsoluteTimeStamp", data=variables.dld_start_counter, dtype='i')
             f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld, dtype='f')
+            f.create_dataset("dld/laser_intensity", data=variables.laser_intensity, dtype='f')
 
             f.create_dataset("tdc/ch0", data=variables.ch0, dtype='i')
             f.create_dataset("tdc/ch1", data=variables.ch1, dtype='i')
