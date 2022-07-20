@@ -1,6 +1,7 @@
 
 import threading
 import multiprocessing
+import  time
 
 
 def thorlab(degree, initialize=False):
@@ -12,7 +13,10 @@ def thorlab(degree, initialize=False):
     if initialize:
         motor.move_home(True)
     else:
-        motor.move_by(degree)
+        motor.move_by(degree*2, blocking=True)
+        time.sleep(3)
+        motor.move_to(degree, blocking=True)
+
 
 
 

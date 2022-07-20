@@ -104,6 +104,8 @@ def init(conf):
     global vacuum_load_lock_backing
     global log_path
 
+    # Laser intensity
+    global laser_intensity
     # DLD parameters
     global x
     global y
@@ -146,6 +148,7 @@ def init(conf):
     global main_v_p_tdc
     global main_v_dc_drs
     global main_v_p_drs
+    global laser_degree
 
     # Device ports
     COM_PORT_cryo = conf['COM_PORT_cryo']
@@ -207,6 +210,7 @@ def init(conf):
     laser_start = 0
     laser_stop = 0
 
+
     # Run statistics=
     elapsed_time = 0.0
     start_time = ''
@@ -239,11 +243,15 @@ def init(conf):
     vacuum_load_lock = 0
     vacuum_load_lock_backing = 0
 
+    laser_degree = 0
+
     x = np.zeros(0)
     y = np.zeros(0)
     t = np.zeros(0)
     dld_start_counter = np.zeros(0)
     time_stamp = np.zeros(0)
+
+    laser_intensity = np.zeros(0)
 
     channel = np.zeros(0)
     time_data = np.zeros(0)

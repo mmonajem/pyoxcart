@@ -24,18 +24,29 @@ from pyccapt.devices import email_send, initialize_devices
 from pyccapt.control_tools import experiment_statistics, variables, hdf5_creator, loggi
 
 
-def thorlab(conf, degree, initialize=False):
+def thorlab(conf, degree, step_increase=False, initialize=False):
     """
     Initialize the Thorlab controller and set it to zero degree
     """
     import pyccapt.thorlabs_apt.core as apt
     motor = apt.Motor(int(conf['COM_PORT_thorlab_motor']))
     if initialize:
+        motor.set_move_home_parameters(2, 1, 10, 4)
         motor.move_home(True)
         if degree != 0:
             motor.move_by(degree)
+    elif step_increase:
+        if degree > 180:
+            motor.move_by(int(degree/2), blocking=True)
+            motor.move_by(degree - int(degree/2), blocking=True)
+        else:
+            motor.move_by(degree)
     else:
-        motor.move_by(degree)
+        if degree > 180:
+            motor.move_to(int(degree/2), blocking=True)
+            motor.move_to(degree, blocking=True)
+        else:
+            motor.move_to(degree)
 
 
 class APT_SIMPLE:
@@ -433,19 +444,35 @@ def main(conf):
     time_counter = np.zeros(0)
 
 
-    counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
+
     logger.info('Starting the main loop')
 
     if conf['thorlab_motor'] != 'off':
-        if variables.criteria_laser == True:
-            thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, variables.fixed_laser, True))
-            variables.laser_degree = variables.fixed_laser
-        else:
-            thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, variables.laser_start, True))
-            variables.laser_degree = variables.laser_start
-        thorlab_process.start()
-        # Sleep for 5 seconds to get zero degree on motor
-        thorlab_process.join()
+        thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, 0, False, False))
+        if variables.criteria_laser and variables.fixed_laser != 0:
+            if 270 >= variables.fixed_laser > -10:
+                thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, variables.fixed_laser, False, False))
+                variables.laser_degree = variables.fixed_laser
+                thorlab_process.daemon = True
+                thorlab_process.start()
+                # Sleep for 5 seconds to get zero degree on motor
+                thorlab_process.join()
+            else:
+                print(
+                    f"{initialize_devices.bcolors.FAIL}Error: The motor degree is not between -10 to 270{initialize_devices.bcolors.ENDC}")
+
+        elif not variables.criteria_laser and variables.laser_start != 0:
+            if 270 >= variables.laser_start > -10:
+                thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, variables.laser_start, False, False))
+                variables.laser_degree = variables.laser_start
+                thorlab_process.daemon = True
+                thorlab_process.start()
+                # Sleep for 5 seconds to get zero degree on motor
+                thorlab_process.join()
+            else:
+                print(
+                    f"{initialize_devices.bcolors.FAIL}Error: The motor degree is not between -10 to 270{initialize_devices.bcolors.ENDC}")
+
 
     if conf['tdc'] != "off":
         # Initialze threads that will read from the queue for the group: dld
@@ -513,19 +540,30 @@ def main(conf):
         if conf['thorlab_motor'] != 'off':
             if variables.criteria_laser and variables.fixed_laser != fixed_laser_tmp:
                 if not thorlab_process.is_alive():
-                    thorlab_process = multiprocessing.Process(target=thorlab,
-                                                              args=(conf, variables.fixed_laser - fixed_laser_tmp, False))
-                    thorlab_process.start()
-                    # save laser fixed variable
-                    fixed_laser_tmp = copy.copy(variables.fixed_laser)
-                    variables.laser_degree = variables.laser_start
+                    if 270 >= variables.fixed_laser > -10:
+                        thorlab_process = multiprocessing.Process(target=thorlab,
+                                                                  args=(conf, variables.fixed_laser, False, False))
+                        thorlab_process.daemon = True
+                        thorlab_process.start()
+                        # save laser fixed variable
+                        fixed_laser_tmp = copy.copy(variables.fixed_laser)
+                        variables.laser_degree = variables.laser_start
+                    else:
+                        print(
+                            f"{initialize_devices.bcolors.FAIL}Error: The motor degree is not between -10 to 270{initialize_devices.bcolors.ENDC}")
+
             else:
                 if variables.total_ions > variables.laser_num_ions_per_step * index_step_laser and variables.total_ions != 0:
                     if not thorlab_process.is_alive():
-                        thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, variables.laser_increase_per_step, False))
-                        thorlab_process.start()
-                        variables.laser_degree = variables.laser_degree + variables.laser_increase_per_step
-                        index_step_laser = index_step_laser + 1
+                        if 270 >= variables.laser_degree + variables.laser_increase_per_step > -10:
+                            thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, variables.laser_increase_per_step, True, False))
+                            thorlab_process.daemon = True
+                            thorlab_process.start()
+                            variables.laser_degree = variables.laser_degree + variables.laser_increase_per_step
+                            index_step_laser = index_step_laser + 1
+                        else:
+                            print(
+                                f"{initialize_devices.bcolors.FAIL}Error: The motor degree is not between -10 to 270{initialize_devices.bcolors.ENDC}")
 
         # Counter of iteration
         time_counter = np.append(time_counter, steps)
@@ -586,7 +624,10 @@ def main(conf):
 
     if conf['thorlab_motor'] != 'off':
         # Stop the thorlab
-        thorlab_process.join()
+        try:
+            thorlab_process.join()
+        except:
+            pass
     if conf['tdc'] != "off":
         # Stop the TDC and DLD thread
         if variables.counter_source == 'TDC':

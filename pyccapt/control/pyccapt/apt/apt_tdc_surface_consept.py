@@ -643,8 +643,7 @@ def main(conf):
     time_ex_h = np.zeros(0)
     time_counter = np.zeros(0)
 
-    counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
-    # counts_target = variables.detection_rate / 100
+
     logger.info('Starting the main loop')
 
     if conf['tdc'] != "off":
@@ -698,6 +697,7 @@ def main(conf):
         if variables.detection_rate != init_detection_rate:
             counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
             init_detection_rate = variables.detection_rate
+        counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
         # main loop function
         experiment.main_ex_loop(task_counter, counts_target)
         end = datetime.datetime.now()

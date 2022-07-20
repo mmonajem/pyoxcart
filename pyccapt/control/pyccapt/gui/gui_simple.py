@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QScreen
 import pyqtgraph as pg
 import pyqtgraph.exporters
+import multiprocessing
 
 # Local module and scripts
 from pyccapt.apt import apt_tdc_roetdec
@@ -54,8 +55,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.ex_user.sizePolicy().hasHeightForWidth())
         self.ex_user.setSizePolicy(sizePolicy)
         self.ex_user.setStyleSheet("QLineEdit{\n"
-                                   "background: rgb(223,223,233)\n"
-                                   "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.ex_user.setObjectName("ex_user")
         self.gridLayout.addWidget(self.ex_user, 0, 3, 1, 1)
         self.label_21 = QtWidgets.QLabel(self.centralwidget)
@@ -73,8 +74,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.ex_name.sizePolicy().hasHeightForWidth())
         self.ex_name.setSizePolicy(sizePolicy)
         self.ex_name.setStyleSheet("QLineEdit{\n"
-                                   "background: rgb(223,223,233)\n"
-                                   "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.ex_name.setObjectName("ex_name")
         self.gridLayout.addWidget(self.ex_name, 1, 3, 1, 1)
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
@@ -96,8 +97,8 @@ class UI_APT_S(object):
         self.criteria_time.setFont(font)
         self.criteria_time.setMouseTracking(True)
         self.criteria_time.setStyleSheet("QCheckBox{\n"
-                                         "background: rgb(223,223,233)\n"
-                                         "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.criteria_time.setText("")
         self.criteria_time.setChecked(True)
         self.criteria_time.setObjectName("criteria_time")
@@ -109,8 +110,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.ex_time.sizePolicy().hasHeightForWidth())
         self.ex_time.setSizePolicy(sizePolicy)
         self.ex_time.setStyleSheet("QLineEdit{\n"
-                                   "background: rgb(223,223,233)\n"
-                                   "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.ex_time.setObjectName("ex_time")
         self.gridLayout.addWidget(self.ex_time, 2, 3, 1, 1)
         self.label_41 = QtWidgets.QLabel(self.centralwidget)
@@ -132,8 +133,8 @@ class UI_APT_S(object):
         self.criteria_ions.setFont(font)
         self.criteria_ions.setMouseTracking(True)
         self.criteria_ions.setStyleSheet("QCheckBox{\n"
-                                         "background: rgb(223,223,233)\n"
-                                         "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.criteria_ions.setText("")
         self.criteria_ions.setChecked(True)
         self.criteria_ions.setObjectName("criteria_ions")
@@ -145,8 +146,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.max_ions.sizePolicy().hasHeightForWidth())
         self.max_ions.setSizePolicy(sizePolicy)
         self.max_ions.setStyleSheet("QLineEdit{\n"
-                                    "background: rgb(223,223,233)\n"
-                                    "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.max_ions.setObjectName("max_ions")
         self.gridLayout.addWidget(self.max_ions, 3, 3, 1, 1)
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
@@ -164,8 +165,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.ex_freq.sizePolicy().hasHeightForWidth())
         self.ex_freq.setSizePolicy(sizePolicy)
         self.ex_freq.setStyleSheet("QLineEdit{\n"
-                                   "background: rgb(223,223,233)\n"
-                                   "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.ex_freq.setObjectName("ex_freq")
         self.gridLayout.addWidget(self.ex_freq, 4, 3, 1, 1)
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
@@ -183,8 +184,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.vdc_min.sizePolicy().hasHeightForWidth())
         self.vdc_min.setSizePolicy(sizePolicy)
         self.vdc_min.setStyleSheet("QLineEdit{\n"
-                                   "background: rgb(223,223,233)\n"
-                                   "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.vdc_min.setObjectName("vdc_min")
         self.gridLayout.addWidget(self.vdc_min, 5, 3, 1, 1)
         self.label_5 = QtWidgets.QLabel(self.centralwidget)
@@ -206,8 +207,8 @@ class UI_APT_S(object):
         self.criteria_vdc.setFont(font)
         self.criteria_vdc.setMouseTracking(True)
         self.criteria_vdc.setStyleSheet("QCheckBox{\n"
-                                        "background: rgb(223,223,233)\n"
-                                        "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.criteria_vdc.setText("")
         self.criteria_vdc.setChecked(True)
         self.criteria_vdc.setObjectName("criteria_vdc")
@@ -219,8 +220,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.vdc_max.sizePolicy().hasHeightForWidth())
         self.vdc_max.setSizePolicy(sizePolicy)
         self.vdc_max.setStyleSheet("QLineEdit{\n"
-                                   "background: rgb(223,223,233)\n"
-                                   "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.vdc_max.setObjectName("vdc_max")
         self.gridLayout.addWidget(self.vdc_max, 6, 3, 1, 1)
         self.label_6 = QtWidgets.QLabel(self.centralwidget)
@@ -233,8 +234,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.vdc_steps_up.sizePolicy().hasHeightForWidth())
         self.vdc_steps_up.setSizePolicy(sizePolicy)
         self.vdc_steps_up.setStyleSheet("QLineEdit{\n"
-                                        "background: rgb(223,223,233)\n"
-                                        "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.vdc_steps_up.setObjectName("vdc_steps_up")
         self.gridLayout.addWidget(self.vdc_steps_up, 7, 3, 1, 1)
         self.label_28 = QtWidgets.QLabel(self.centralwidget)
@@ -252,8 +253,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.vdc_steps_down.sizePolicy().hasHeightForWidth())
         self.vdc_steps_down.setSizePolicy(sizePolicy)
         self.vdc_steps_down.setStyleSheet("QLineEdit{\n"
-                                          "background: rgb(223,223,233)\n"
-                                          "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.vdc_steps_down.setObjectName("vdc_steps_down")
         self.gridLayout.addWidget(self.vdc_steps_down, 8, 3, 1, 1)
         self.label_20 = QtWidgets.QLabel(self.centralwidget)
@@ -271,8 +272,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.cycle_avg.sizePolicy().hasHeightForWidth())
         self.cycle_avg.setSizePolicy(sizePolicy)
         self.cycle_avg.setStyleSheet("QLineEdit{\n"
-                                     "background: rgb(223,223,233)\n"
-                                     "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.cycle_avg.setObjectName("cycle_avg")
         self.gridLayout.addWidget(self.cycle_avg, 9, 3, 1, 1)
         self.label_25 = QtWidgets.QLabel(self.centralwidget)
@@ -290,8 +291,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.pulse_fraction.sizePolicy().hasHeightForWidth())
         self.pulse_fraction.setSizePolicy(sizePolicy)
         self.pulse_fraction.setStyleSheet("QLineEdit{\n"
-                                          "background: rgb(223,223,233)\n"
-                                          "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.pulse_fraction.setObjectName("pulse_fraction")
         self.gridLayout.addWidget(self.pulse_fraction, 10, 3, 1, 1)
         self.label_23 = QtWidgets.QLabel(self.centralwidget)
@@ -309,8 +310,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.pulse_frequency.sizePolicy().hasHeightForWidth())
         self.pulse_frequency.setSizePolicy(sizePolicy)
         self.pulse_frequency.setStyleSheet("QLineEdit{\n"
-                                           "background: rgb(223,223,233)\n"
-                                           "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.pulse_frequency.setObjectName("pulse_frequency")
         self.gridLayout.addWidget(self.pulse_frequency, 11, 3, 1, 1)
         self.label_17 = QtWidgets.QLabel(self.centralwidget)
@@ -328,8 +329,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.detection_rate_init.sizePolicy().hasHeightForWidth())
         self.detection_rate_init.setSizePolicy(sizePolicy)
         self.detection_rate_init.setStyleSheet("QLineEdit{\n"
-                                               "background: rgb(223,223,233)\n"
-                                               "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.detection_rate_init.setObjectName("detection_rate_init")
         self.gridLayout.addWidget(self.detection_rate_init, 12, 3, 1, 1)
         self.label_22 = QtWidgets.QLabel(self.centralwidget)
@@ -347,8 +348,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.doubleSpinBox.sizePolicy().hasHeightForWidth())
         self.doubleSpinBox.setSizePolicy(sizePolicy)
         self.doubleSpinBox.setStyleSheet("QDoubleSpinBox{\n"
-                                         "background: rgb(223,223,233)\n"
-                                         "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.doubleSpinBox.setProperty("value", 1.0)
         self.doubleSpinBox.setObjectName("doubleSpinBox")
         self.gridLayout.addWidget(self.doubleSpinBox, 13, 2, 1, 1)
@@ -359,8 +360,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.hit_displayed.sizePolicy().hasHeightForWidth())
         self.hit_displayed.setSizePolicy(sizePolicy)
         self.hit_displayed.setStyleSheet("QLineEdit{\n"
-                                         "background: rgb(223,223,233)\n"
-                                         "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.hit_displayed.setObjectName("hit_displayed")
         self.gridLayout.addWidget(self.hit_displayed, 13, 3, 1, 1)
         self.label_26 = QtWidgets.QLabel(self.centralwidget)
@@ -378,8 +379,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.email.sizePolicy().hasHeightForWidth())
         self.email.setSizePolicy(sizePolicy)
         self.email.setStyleSheet("QLineEdit{\n"
-                                 "background: rgb(223,223,233)\n"
-                                 "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.email.setText("")
         self.email.setObjectName("email")
         self.gridLayout.addWidget(self.email, 14, 3, 1, 1)
@@ -431,8 +432,8 @@ class UI_APT_S(object):
         self.criteria_laser.setFont(font)
         self.criteria_laser.setMouseTracking(True)
         self.criteria_laser.setStyleSheet("QCheckBox{\n"
-                                          "background: rgb(223,223,233)\n"
-                                          "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.criteria_laser.setText("")
         self.criteria_laser.setChecked(True)
         self.criteria_laser.setObjectName("criteria_laser")
@@ -444,8 +445,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.fixed_laser.sizePolicy().hasHeightForWidth())
         self.fixed_laser.setSizePolicy(sizePolicy)
         self.fixed_laser.setStyleSheet("QLineEdit{\n"
-                                       "background: rgb(223,223,233)\n"
-                                       "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.fixed_laser.setText("0")
         self.fixed_laser.setObjectName("fixed_laser")
         self.gridLayout.addWidget(self.fixed_laser, 17, 3, 1, 1)
@@ -464,8 +465,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.laser_num_ions_per_step.sizePolicy().hasHeightForWidth())
         self.laser_num_ions_per_step.setSizePolicy(sizePolicy)
         self.laser_num_ions_per_step.setStyleSheet("QLineEdit{\n"
-                                                   "background: rgb(223,223,233)\n"
-                                                   "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.laser_num_ions_per_step.setObjectName("laser_num_ions_per_step")
         self.gridLayout.addWidget(self.laser_num_ions_per_step, 18, 3, 1, 1)
         self.label_30 = QtWidgets.QLabel(self.centralwidget)
@@ -483,8 +484,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.laser_increase_per_step.sizePolicy().hasHeightForWidth())
         self.laser_increase_per_step.setSizePolicy(sizePolicy)
         self.laser_increase_per_step.setStyleSheet("QLineEdit{\n"
-                                                   "background: rgb(223,223,233)\n"
-                                                   "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.laser_increase_per_step.setObjectName("laser_increase_per_step")
         self.gridLayout.addWidget(self.laser_increase_per_step, 19, 3, 1, 1)
         self.label_16 = QtWidgets.QLabel(self.centralwidget)
@@ -502,8 +503,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.laser_start.sizePolicy().hasHeightForWidth())
         self.laser_start.setSizePolicy(sizePolicy)
         self.laser_start.setStyleSheet("QLineEdit{\n"
-                                       "background: rgb(223,223,233)\n"
-                                       "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.laser_start.setObjectName("laser_start")
         self.gridLayout.addWidget(self.laser_start, 20, 3, 1, 1)
         self.label_27 = QtWidgets.QLabel(self.centralwidget)
@@ -521,8 +522,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.laser_stop.sizePolicy().hasHeightForWidth())
         self.laser_stop.setSizePolicy(sizePolicy)
         self.laser_stop.setStyleSheet("QLineEdit{\n"
-                                      "background: rgb(223,223,233)\n"
-                                      "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.laser_stop.setObjectName("laser_stop")
         self.gridLayout.addWidget(self.laser_stop, 21, 3, 1, 1)
         self.label_11 = QtWidgets.QLabel(self.centralwidget)
@@ -552,8 +553,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.elapsed_time.sizePolicy().hasHeightForWidth())
         self.elapsed_time.setSizePolicy(sizePolicy)
         self.elapsed_time.setStyleSheet("QLineEdit{\n"
-                                        "background: rgb(223,223,233)\n"
-                                        "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.elapsed_time.setText("")
         self.elapsed_time.setObjectName("elapsed_time")
         self.gridLayout.addWidget(self.elapsed_time, 23, 1, 1, 3)
@@ -572,8 +573,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.total_ions.sizePolicy().hasHeightForWidth())
         self.total_ions.setSizePolicy(sizePolicy)
         self.total_ions.setStyleSheet("QLineEdit{\n"
-                                      "background: rgb(223,223,233)\n"
-                                      "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.total_ions.setText("")
         self.total_ions.setObjectName("total_ions")
         self.gridLayout.addWidget(self.total_ions, 24, 1, 1, 3)
@@ -592,8 +593,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.speciemen_voltage.sizePolicy().hasHeightForWidth())
         self.speciemen_voltage.setSizePolicy(sizePolicy)
         self.speciemen_voltage.setStyleSheet("QLineEdit{\n"
-                                             "background: rgb(223,223,233)\n"
-                                             "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.speciemen_voltage.setText("")
         self.speciemen_voltage.setObjectName("speciemen_voltage")
         self.gridLayout.addWidget(self.speciemen_voltage, 25, 1, 1, 3)
@@ -612,8 +613,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.detection_rate.sizePolicy().hasHeightForWidth())
         self.detection_rate.setSizePolicy(sizePolicy)
         self.detection_rate.setStyleSheet("QLineEdit{\n"
-                                          "background: rgb(223,223,233)\n"
-                                          "}")
+"background: rgb(223,223,233)\n"
+"}")
         self.detection_rate.setText("")
         self.detection_rate.setObjectName("detection_rate")
         self.gridLayout.addWidget(self.detection_rate, 26, 1, 1, 3)
@@ -624,8 +625,8 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.start_button.sizePolicy().hasHeightForWidth())
         self.start_button.setSizePolicy(sizePolicy)
         self.start_button.setStyleSheet("QPushButton{\n"
-                                        "background: rgb(193, 193, 193)\n"
-                                        "}")
+"background: rgb(193, 193, 193)\n"
+"}")
         self.start_button.setObjectName("start_button")
         self.gridLayout.addWidget(self.start_button, 27, 1, 1, 2)
         self.stop_button = QtWidgets.QPushButton(self.centralwidget)
@@ -635,10 +636,21 @@ class UI_APT_S(object):
         sizePolicy.setHeightForWidth(self.stop_button.sizePolicy().hasHeightForWidth())
         self.stop_button.setSizePolicy(sizePolicy)
         self.stop_button.setStyleSheet("QPushButton{\n"
-                                       "background: rgb(193, 193, 193)\n"
-                                       "}")
+"background: rgb(193, 193, 193)\n"
+"}")
         self.stop_button.setObjectName("stop_button")
         self.gridLayout.addWidget(self.stop_button, 28, 1, 1, 2)
+        self.home_motor = QtWidgets.QPushButton(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.home_motor.sizePolicy().hasHeightForWidth())
+        self.home_motor.setSizePolicy(sizePolicy)
+        self.home_motor.setStyleSheet("QPushButton{\n"
+"background: rgb(193, 193, 193)\n"
+"}")
+        self.home_motor.setObjectName("home_motor")
+        self.gridLayout.addWidget(self.home_motor, 16, 2, 1, 1)
         self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
@@ -665,20 +677,20 @@ class UI_APT_S(object):
         self.vdc_time = pg.PlotWidget(self.centralwidget)
         self.vdc_time.setMinimumSize(QtCore.QSize(0, 0))
         self.vdc_time.setStyleSheet("QWidget{\n"
-                                    "border: 2px solid gray;\n"
-                                    "border-radius: 10px;\n"
-                                    "padding: 4 4px;\n"
-                                    "}")
+"border: 2px solid gray;\n"
+"border-radius: 10px;\n"
+"padding: 4 4px;\n"
+"}")
         self.vdc_time.setObjectName("vdc_time")
         self.horizontalLayout_2.addWidget(self.vdc_time)
         # self.detection_rate_viz = QtWidgets.QWidget(self.centralwidget)
         self.detection_rate_viz = pg.PlotWidget(self.centralwidget)
         self.detection_rate_viz.setMinimumSize(QtCore.QSize(0, 0))
         self.detection_rate_viz.setStyleSheet("QWidget{\n"
-                                              "border: 2px solid gray;\n"
-                                              "border-radius: 10px;\n"
-                                              "padding: 4 4px;\n"
-                                              "}")
+"border: 2px solid gray;\n"
+"border-radius: 10px;\n"
+"padding: 4 4px;\n"
+"}")
         self.detection_rate_viz.setObjectName("detection_rate_viz")
         self.horizontalLayout_2.addWidget(self.detection_rate_viz)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
@@ -712,10 +724,10 @@ class UI_APT_S(object):
         self.visualization.setMinimumSize(QtCore.QSize(0, 0))
         self.visualization.setAcceptDrops(True)
         self.visualization.setStyleSheet("QWidget{\n"
-                                         "border: 2px solid gray;\n"
-                                         "border-radius: 10px;\n"
-                                         "padding: 4 4px;\n"
-                                         "}")
+"border: 2px solid gray;\n"
+"border-radius: 10px;\n"
+"padding: 4 4px;\n"
+"}")
         self.visualization.setObjectName("visualization")
         self.horizontalLayout.addWidget(self.visualization)
         # self.histogram = QtWidgets.QGraphicsView(self.centralwidget)
@@ -727,10 +739,10 @@ class UI_APT_S(object):
         self.histogram.setSizePolicy(sizePolicy)
         self.histogram.setMinimumSize(QtCore.QSize(0, 0))
         self.histogram.setStyleSheet("QWidget{\n"
-                                     "border: 2px solid gray;\n"
-                                     "border-radius: 10px;\n"
-                                     "padding: 4 4px;\n"
-                                     "}")
+"border: 2px solid gray;\n"
+"border-radius: 10px;\n"
+"padding: 4 4px;\n"
+"}")
         self.histogram.setObjectName("histogram")
         self.horizontalLayout.addWidget(self.histogram)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -822,7 +834,10 @@ class UI_APT_S(object):
         self.thread.signal.connect(self.finished_thread_main)
         self.stop_button.setText(_translate("APT_Physic", "Stop"))
         self.stop_button.clicked.connect(self.stop_ex)
+        self.home_motor.clicked.connect(self.make_motor_home)
         ###
+        self.home_motor.setText(_translate("UI_APT_S", "Home"))
+        self.stop_button.clicked.connect(self.stop_ex)
         self.label_7.setText(_translate("UI_APT_S", "Voltage"))
         self.label_10.setText(_translate("UI_APT_S", "Detection Rate"))
         self.label_19.setText(_translate("UI_APT_S", "Visualization"))
@@ -966,6 +981,19 @@ class UI_APT_S(object):
         if variables.start_flag == True:
             variables.stop_flag = True  # Set the STOP flag
             self.stop_button.setEnabled(False)  # Disable the stop button
+
+    def make_motor_home(self):
+        """
+            The function that is run if home button for laser is pressed
+            """
+        self.home_motor.setEnabled(False)  # Disable the home button
+
+        thorlab_process = multiprocessing.Process(target=apt_tdc_roetdec.thorlab,
+                                                  args=(self.conf, 0, False, True))
+        thorlab_process.daemon = True
+        thorlab_process.start()
+
+
 
     def thread_worker(self, target):
         """
@@ -1129,6 +1157,7 @@ class UI_APT_S(object):
             (float("{:.3f}".format(
             (variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000)))))
 
+
     def statistics(self):
         """
             The function for updating statistics in the GUI
@@ -1141,6 +1170,8 @@ class UI_APT_S(object):
                                           "<html><head/><body><p><span style=\" "
                                           "color:#ff0000;\"></span></p></body></html>"))
             variables.index_warning_message = 0
+
+            self.home_motor.setEnabled(True)  # Disable the home button
 
         variables.index_warning_message += 1
 
@@ -1218,3 +1249,4 @@ class MainThread(QThread):
     def run(self):
         main_thread = apt_tdc_roetdec.main(self.conf)
         self.signal.emit(main_thread)
+
