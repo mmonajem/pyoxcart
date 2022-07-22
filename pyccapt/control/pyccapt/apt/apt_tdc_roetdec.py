@@ -450,7 +450,7 @@ def main(conf):
     if conf['thorlab_motor'] != 'off':
         thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, 0, False, False))
         if variables.criteria_laser and variables.fixed_laser != 0:
-            if 270 >= variables.fixed_laser > -10:
+            if 290 >= variables.fixed_laser > 10:
                 thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, variables.fixed_laser, False, False))
                 variables.laser_degree = variables.fixed_laser
                 thorlab_process.daemon = True
@@ -459,10 +459,10 @@ def main(conf):
                 thorlab_process.join()
             else:
                 print(
-                    f"{initialize_devices.bcolors.FAIL}Error: The motor degree is not between -10 to 270{initialize_devices.bcolors.ENDC}")
+                    f"{initialize_devices.bcolors.FAIL}Error: The motor degree is not between 10 to 290{initialize_devices.bcolors.ENDC}")
 
         elif not variables.criteria_laser and variables.laser_start != 0:
-            if 270 >= variables.laser_start > -10:
+            if 290 >= variables.fixed_laser > 10:
                 thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, variables.laser_start, False, False))
                 variables.laser_degree = variables.laser_start
                 thorlab_process.daemon = True
@@ -471,7 +471,7 @@ def main(conf):
                 thorlab_process.join()
             else:
                 print(
-                    f"{initialize_devices.bcolors.FAIL}Error: The motor degree is not between -10 to 270{initialize_devices.bcolors.ENDC}")
+                    f"{initialize_devices.bcolors.FAIL}Error: The motor degree is not between 10 to 290{initialize_devices.bcolors.ENDC}")
 
 
     if conf['tdc'] != "off":
@@ -540,7 +540,7 @@ def main(conf):
         if conf['thorlab_motor'] != 'off':
             if variables.criteria_laser and variables.fixed_laser != fixed_laser_tmp:
                 if not thorlab_process.is_alive():
-                    if 270 >= variables.fixed_laser > -10:
+                    if 290 >= variables.fixed_laser > 10:
                         thorlab_process = multiprocessing.Process(target=thorlab,
                                                                   args=(conf, variables.fixed_laser, False, False))
                         thorlab_process.daemon = True
@@ -550,12 +550,12 @@ def main(conf):
                         variables.laser_degree = variables.laser_start
                     else:
                         print(
-                            f"{initialize_devices.bcolors.FAIL}Error: The motor degree is not between -10 to 270{initialize_devices.bcolors.ENDC}")
+                            f"{initialize_devices.bcolors.FAIL}Error: The motor degree is not between 10 to 290{initialize_devices.bcolors.ENDC}")
 
             else:
                 if variables.total_ions > variables.laser_num_ions_per_step * index_step_laser and variables.total_ions != 0:
                     if not thorlab_process.is_alive():
-                        if 270 >= variables.laser_degree + variables.laser_increase_per_step > -10:
+                        if 290 >= variables.laser_degree + variables.laser_increase_per_step > 10:
                             thorlab_process = multiprocessing.Process(target=thorlab, args=(conf, variables.laser_increase_per_step, True, False))
                             thorlab_process.daemon = True
                             thorlab_process.start()
@@ -563,7 +563,7 @@ def main(conf):
                             index_step_laser = index_step_laser + 1
                         else:
                             print(
-                                f"{initialize_devices.bcolors.FAIL}Error: The motor degree is not between -10 to 270{initialize_devices.bcolors.ENDC}")
+                                f"{initialize_devices.bcolors.FAIL}Error: The motor degree is not between 10 to 290{initialize_devices.bcolors.ENDC}")
 
         # Counter of iteration
         time_counter = np.append(time_counter, steps)

@@ -27,18 +27,17 @@ def pol2cart(rho, phi):
 
 def atom_probe_recons_geiser(detx, dety, hv, kf, icf, flight_path_length, ion_volume, det_eff, radius_evolution):
     """
-    # atom probe reconstruction after: Gault et al., Ultramicroscopy 111(2011) 448 - 457
-    x, y are the detector hit coordinates in mm
-    kf is the field factor and ICF is the image compression factor
-    :param x:
-    :param y:
+
+    :param detx:
+    :param dety:
     :param hv:
     :param kf:
     :param icf:
-    :param flight_path_length: flight path length in mm
+    :param flight_path_length:
     :param ion_volume:
-    :param det_eff: detector efficiency
-    :return z:
+    :param det_eff:
+    :param radius_evolution:
+    :return:
     """
     ### fundamental bdata reconstruction
     # detector coordinates in polar form
@@ -80,6 +79,21 @@ def atom_probe_recons_geiser(detx, dety, hv, kf, icf, flight_path_length, ion_vo
 
 
 def atom_probe_recons_from_detector(detx, dety, hv, kf, icf, flight_path_length, ion_volume, det_eff, radius_evolution):
+    """
+    # atom probe reconstruction after: Gault et al., Ultramicroscopy 111(2011) 448 - 457
+    x, y are the detector hit coordinates in mm
+    kf is the field factor and ICF is the image compression factor
+    :param detx:
+    :param dety:
+    :param hv:
+    :param kf:
+    :param icf:
+    :param flight_path_length:
+    :param ion_volume:
+    :param det_eff:
+    :param radius_evolution:
+    :return:
+    """
     ## constants and variable setup
     # specimen parameters
     avgDens = 60.2  # atomic density in atoms / nm3

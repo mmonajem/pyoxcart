@@ -16,7 +16,7 @@ import pyvisa as visa
 try:
         import nidaqmx
 except:
-       pass
+       print('Please install nidaqmx')
 
 # Local project scripts
 from pyccapt.devices import signal_generator, tweet_send
