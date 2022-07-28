@@ -7,7 +7,7 @@ import sys
 
 author = u"Mehrpad Monajem"
 # authors in alphabetical order
-description = 'A package for controlling APT experiment'
+description = 'A package for controlling APT experiment and calibrating APT data'
 name = 'PyCCAPT_Control'
 year = "2022"
 

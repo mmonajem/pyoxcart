@@ -25,20 +25,24 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
             dldGroupStorage = [dld_highVoltage, dld_pulseVoltage, dld_startCounter, dld_t, dld_x, dld_y]
         elif tdc == 'roentdec':
             dld_highVoltage = hdf5Data['dld/high_voltage']
-            # dld_laserPower = hdf5Data['dld/laser_power']
-            dld_laserPower = hdf5Data['dld/high_voltage']
+            dld_laserPower = hdf5Data['dld/laser_intensity']
             dld_AbsoluteTimeStamp = hdf5Data['dld/AbsoluteTimeStamp']
             dld_t = hdf5Data['dld/t']
             dld_x = hdf5Data['dld/x']
             dld_y = hdf5Data['dld/y']
             # remove data that is location are out of the detector
+            tt = dld_t.to_numpy()
             xx = dld_x.to_numpy()
             yy = dld_y.to_numpy()
-            mask = np.logical_and((np.abs(xx) <= 50.0), (np.abs(yy) <= 50.0))
+            mask_local = np.logical_and((np.abs(xx) <= 50.0), (np.abs(yy) <= 50.0))
+            mask_temporal = (tt > 0)
+            mask = np.logical_and(mask_temporal, mask_local)
+            print((mask_local[mask_local==True]).shape)
+            print((mask_temporal[mask_temporal==True]).shape)
+            print((mask[mask==True]).shape)
             dld_highVoltage = dld_highVoltage[mask]
-            # dld_laserPower = dld_laserPower[mask]
             dld_laserPower = dld_laserPower[mask]
-            dld_AbsoluteTimeStamp = dld_AbsoluteTimeStamp[mask]
+            dld_AbsoluteTimeStamp = dld_t[mask]
             dld_t = dld_t[mask]
             dld_x = dld_x[mask]
             dld_y = dld_y[mask]

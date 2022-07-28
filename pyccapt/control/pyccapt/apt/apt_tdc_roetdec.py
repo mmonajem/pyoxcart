@@ -156,7 +156,10 @@ class APT_SIMPLE:
         # Read the response code after execution(command write).
         while self.com_port_v_dc.in_waiting > 0:
             response = self.com_port_v_dc.readline()  # all characters received, read line till '\r\n'
-        response = response.decode("utf-8")
+        try:
+            response = response.decode("utf-8")
+        except:
+            pass
 
         self.log_apt_tdc_roetdec.info("Function - command_v_dc | response - {} ".format(response))
 
@@ -389,14 +392,14 @@ def main(conf):
             queue_y = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_tof = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_AbsoluteTimeStamp = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            queue_ch0 = Queue(maxsize=1, ctx=multiprocessing.get_context())
-            queue_ch1 = Queue(maxsize=1, ctx=multiprocessing.get_context())
-            queue_ch2 = Queue(maxsize=1, ctx=multiprocessing.get_context())
-            queue_ch3 = Queue(maxsize=1, ctx=multiprocessing.get_context())
-            queue_ch4 = Queue(maxsize=1, ctx=multiprocessing.get_context())
-            queue_ch5 = Queue(maxsize=1, ctx=multiprocessing.get_context())
-            queue_ch6 = Queue(maxsize=1, ctx=multiprocessing.get_context())
-            queue_ch7 = Queue(maxsize=1, ctx=multiprocessing.get_context())
+            queue_ch0 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+            queue_ch1 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+            queue_ch2 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+            queue_ch3 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+            queue_ch4 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+            queue_ch5 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+            queue_ch6 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
+            queue_ch7 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
 
             tdc_process = multiprocessing.Process(target=tdc_roentdec.experiment_measure,
