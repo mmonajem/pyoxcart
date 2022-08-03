@@ -7,7 +7,12 @@ import os
 from pyccapt.calibration_tools import data_loadcrop, data_tools
 
 
+<<<<<<< HEAD
 p = os.path.abspath(os.path.join("", "."))
+=======
+p = os.path.abspath(os.path.join("",
+                                 "../../../Downloads/Compressed/pyccapt-/pyccapt-fa5750ba9a4d60be3b1d4216313cb4907cefc50f/tests"))
+>>>>>>> 82136ce (add unit tests)
 path = p + '//data//data_tests//'
 test_file_name = 'OLO_Al_6_data.h5'
 

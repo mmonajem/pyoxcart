@@ -1,5 +1,5 @@
 """
-This is the main script of loading and croping the dataset.
+This is the main script of loading and cropping the dataset.
 """
 
 import numpy as np
@@ -7,9 +7,13 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import RectangleSelector, EllipseSelector
 from matplotlib.patches import Circle, Rectangle
 import pandas as pd
+import h5py
 
 from pyccapt.calibration_tools import selectors_data
 from pyccapt.calibration_tools import variables, data_tools
+from pyccapt.calibration_tools import logging_library
+
+logger = logging_library.logger_creator('data_loadcrop')
 
 from pyccapt.calibration_tools import logging_library
 
@@ -211,3 +215,26 @@ def save_croppped_data_to_hdf5(data_crop: "type:list  - cropped list content",
                                  columns=['dld/high_voltage', 'dld/pulse_voltage', 'dld/start_counter', 'dld/t',
                                           'dld/x', 'dld/y'])
     data_tools.store_df_to_hdf(name, hdf5Dataframe, hierarchyName)
+
+
+def add_croppped_data_to_hdf5(filename: "type: string - Path to hdf5(.h5) file", data_crop: "type:list  - cropped list content",
+                dld_masterDataframe: "type:list - list of dataframes") -> "type:list - list of dataframes":
+    # add the cropped data
+    with h5py.File(filename, 'a') as hdf:
+        hdf.create_dataset("cropped_dld/x", data=data_crop[:, 5], dtype='f')
+        hdf.create_dataset("cropped_dld/y", data=data_crop[:, 4], dtype='f')
+        hdf.create_dataset("cropped_dld/t", data=data_crop[:, 3], dtype='f')
+        hdf.create_dataset("cropped_dld/start_counter", data=data_crop[:, 2], dtype='f')
+        hdf.create_dataset("cropped_dld/pulse_voltage", data=data_crop[:, 1], dtype='f')
+        hdf.create_dataset("cropped_dld/high_voltage", data=data_crop[:, 0], dtype='f')
+
+    print('tofCropLossPct', (1 - len(data_crop) / len(dld_masterDataframe)) * 100)
+
+
+def add_tof_mc_data_to_hdf5(filename: "type: string - Path to hdf5(.h5) file", tof: "type:numpy array  - TOF",
+                mc: "type:numpy array - mass-to-charge") -> "type:list - list of dataframes":
+    # add the cropped data
+    with h5py.File(filename, 'a') as hdf:
+        hdf.create_dataset("cropped_dld/mc", data=mc, dtype='f')
+        hdf.create_dataset("cropped_dld/t_c", data=tof, dtype='f')
+

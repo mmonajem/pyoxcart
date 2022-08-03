@@ -11,10 +11,11 @@ from multiprocessing.queues import Queue
 import threading
 import numpy as np
 import copy
-import logging
 import shutil
 
-from pyccapt.control_tools import loggi
+from pyccapt.calibration_tools import logging_library
+
+logger = logging_library.logger_creator('data_loadcrop')
 
 # Serial ports and NI
 import serial.tools.list_ports
