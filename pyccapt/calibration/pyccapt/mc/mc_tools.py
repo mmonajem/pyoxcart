@@ -4,6 +4,10 @@ This is file contains tools for mass calibration process.
 
 import numpy as np
 
+from pyccapt.calibration_tools import logging_library
+
+logger = logging_library.logger_creator('data_loadcrop')
+
 def tof2mcSimple(t:"Unit: ns", t0:"Unit:ns", V:"Unit:volts", xDet:"Unit:mm", yDet:"Unit:mm", flightPathLength:"Unit:mm")->"Unit: Dalton":
     # calculates m/c based on idealized geometry / electrostatics
     # m/c = 2 e V (t/L)^2
