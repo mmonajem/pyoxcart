@@ -14,7 +14,7 @@ from pyccapt.calibration_tools import variables
 from pyccapt.calibration_tools import intractive_point_identification
 
 
-def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False, prominence=500, distance=None,
+def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_find=True, plot=False, prominence=500, distance=None,
                  fig_name=None, text_loc='right', label='mc'):
     """
     massSpecPlot plots the data from pos to get a mass spectrum as a figure
@@ -160,13 +160,15 @@ def massSpecPlot(mc, bin, mode='count', percent=50, peaks_find=True, plot=False,
             elif label == 'tof':
                 plt.savefig(variables.result_path + "//tof_%s.svg" % fig_name, format="svg", dpi=600)
                 plt.savefig(variables.result_path + "//tof_%s.png" % fig_name, format="png", dpi=600)
+        if mc_ideal.any() != 0:
+            for i in range(len(mc_ideal)):
+                plt.axvline(mc_ideal[i], color='k', linewidth=1)
         plt.show()
     else:
         plt.close(fig1)
 
     if 'peakLocIs' in locals():
         max_paek_edges = [x[int(results_half[2][index_peak_max])], x[int(results_half[3][index_peak_max])]]
-        return max_hist, edges, peakLocIs, max_paek_edges, index_max
     else:
         max_hist = 0
         edges = 0
