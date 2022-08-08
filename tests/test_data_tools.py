@@ -8,7 +8,7 @@ from pyccapt.calibration_tools import data_loadcrop, data_tools
 
 p = os.path.abspath(os.path.join("", "."))
 path = p + '//data//data_tests//'
-test_file_name = 'OLO_Al_6_data.h5'
+test_file_name = 'OLO_AL_6_data.h5'
 
 
 @patch.object(data_tools.logger, "critical")
@@ -25,7 +25,8 @@ def test_read_hdf5_no_grp_keys():
 
 
 def test_read_hdf5_through_pandas_check_returnType():
-    file_name = path + '/isotopeTable.h5'
+
+    file_name = path + 'isotopeTable.h5'
     response = data_tools.read_hdf5_through_pandas(file_name)
     assert isinstance(response, pd.core.frame.DataFrame)
 
@@ -68,7 +69,7 @@ def test_read_mat_files_check_returnType():
 def test_convert_mat_to_df_check_returnType():
     filename = path + 'not_existing_file.mat'
     data = data_tools.read_mat_files(filename)
-    print(data['None'])
+    # print(data['None'])
     data_tools.store_df_to_hdf = MagicMock()
     response = data_tools.convert_mat_to_df(data)
     assert isinstance(response, pd.core.frame.DataFrame)

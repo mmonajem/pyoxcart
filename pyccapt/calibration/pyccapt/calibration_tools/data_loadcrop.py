@@ -19,6 +19,7 @@ from pyccapt.calibration_tools import logging_library
 
 logger = logging_library.logger_creator('data_loadcrop')
 
+
 def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc") -> "type:list - list of dataframes":
     try:
         hdf5Data = data_tools.read_hdf5(filename, tdc)
@@ -207,18 +208,24 @@ def plot_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", bins=(25
 
 def save_croppped_data_to_hdf5(data_crop: "type:list  - cropped list content",
                                dld_masterDataframe: "type:list - list of dataframes",
-                               name: "type:string - name of h5 file"):
+                               name: "type:string - name of h5 file", tdc: "type: string - model of tdc",):
     # save the cropped data
     hierarchyName = 'df'
     print('tofCropLossPct', (1 - len(data_crop) / len(dld_masterDataframe)) * 100)
-    hdf5Dataframe = pd.DataFrame(data=data_crop,
-                                 columns=['dld/high_voltage', 'dld/pulse_voltage', 'dld/start_counter', 'dld/t',
-                                          'dld/x', 'dld/y'])
+    if tdc == 'surface_concept':
+        hdf5Dataframe = pd.DataFrame(data=data_crop,
+                                     columns=['dld/high_voltage', 'dld/pulse_voltage', 'dld/start_counter', 'dld/t',
+                                              'dld/x', 'dld/y'])
+    elif tdc == 'roentdec':
+        hdf5Dataframe = pd.DataFrame(data=data_crop,
+                                     columns=['dld/high_voltage', 'dld/laser_intensity', 'dld/start_counter', 'dld/t',
+                                              'dld/x', 'dld/y'])
     data_tools.store_df_to_hdf(name, hdf5Dataframe, hierarchyName)
 
 
 def add_croppped_data_to_hdf5(filename: "type: string - Path to hdf5(.h5) file", data_crop: "type:list  - cropped list content",
-                dld_masterDataframe: "type:list - list of dataframes") -> "type:list - list of dataframes":
+                dld_masterDataframe: "type:list - list of dataframes",
+                tdc: "type: string - model of tdc") -> "type:list - list of dataframes":
     try:
         # add the cropped data
         hdf = h5py.File(filename, 'a')
@@ -226,7 +233,10 @@ def add_croppped_data_to_hdf5(filename: "type: string - Path to hdf5(.h5) file",
         hdf.create_dataset("cropped_dld/y", data=data_crop[:, 4], dtype='f')
         hdf.create_dataset("cropped_dld/t", data=data_crop[:, 3], dtype='f')
         hdf.create_dataset("cropped_dld/start_counter", data=data_crop[:, 2], dtype='f')
-        hdf.create_dataset("cropped_dld/pulse_voltage", data=data_crop[:, 1], dtype='f')
+        if tdc == 'surface_concept':
+            hdf.create_dataset("cropped_dld/pulse_voltage", data=data_crop[:, 1], dtype='f')
+        elif tdc == 'roentdec':
+            hdf.create_dataset("cropped_dld/laser_intensity", data=data_crop[:, 1], dtype='f')
         hdf.create_dataset("cropped_dld/high_voltage", data=data_crop[:, 0], dtype='f')
 
     except:
@@ -237,14 +247,21 @@ def add_croppped_data_to_hdf5(filename: "type: string - Path to hdf5(.h5) file",
         del hdf["cropped_dld/y"]
         del hdf["cropped_dld/t"]
         del hdf["cropped_dld/start_counter"]
-        del hdf["cropped_dld/pulse_voltage"]
+        if tdc == 'surface_concept':
+            del hdf["cropped_dld/pulse_voltage"]
+        elif tdc == 'roentdec':
+            del hdf["cropped_dld/laser_intensity"]
+
         del hdf["cropped_dld/high_voltage"]
 
         hdf["cropped_dld/x"] = data_crop[:, 5]
         hdf["cropped_dld/y"] = data_crop[:, 4]
         hdf["cropped_dld/t"] = data_crop[:, 3]
         hdf["cropped_dld/start_counter"] = data_crop[:, 2]
-        hdf["cropped_dld/pulse_voltage"] = data_crop[:, 1]
+        if tdc == 'surface_concept':
+            hdf.create_dataset("cropped_dld/pulse_voltage", data=data_crop[:, 1], dtype='f')
+        elif tdc == 'roentdec':
+            hdf.create_dataset("cropped_dld/laser_intensity", data=data_crop[:, 1], dtype='f')
         hdf["cropped_dld/high_voltage"] = data_crop[:, 0]
 
 

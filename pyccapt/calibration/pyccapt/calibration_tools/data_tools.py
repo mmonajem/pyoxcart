@@ -3,6 +3,10 @@ import h5py
 import pandas as pd
 import scipy.io
 
+from pyccapt.calibration_tools import logging_library
+
+logger = logging_library.logger_creator('data_loadcrop')
+
 
 def read_hdf5(filename:"type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc")->"type: dataframe - Pandas dataframe converted from H5 file":
     """
@@ -51,7 +55,7 @@ def read_hdf5(filename:"type: string - Path to hdf5(.h5) file", tdc: "type: stri
 def read_hdf5_through_pandas(filename:"type:string - Path to hdf5(.h5) file")->"type: dataframe - Pandas Dataframe":
     """
     This function is different from read_hdf5 function. As it assumes, the content 
-    of the HDF5 file passed as argument was created using the pandas library.
+    of the HDF5 file passed as argument was created using the Pandas library.
     """
     try:
         hdf5FileResponse = pd.read_hdf(filename, mode='r')

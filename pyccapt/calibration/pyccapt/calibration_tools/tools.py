@@ -12,6 +12,9 @@ from scipy import interpolate
 
 from pyccapt.calibration_tools import variables
 from pyccapt.calibration_tools import intractive_point_identification
+from pyccapt.calibration_tools import logging_library
+
+logger = logging_library.logger_creator('data_loadcrop')
 
 
 def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_find=True, plot=False, prominence=500, distance=None,
