@@ -300,7 +300,7 @@ class APT_ADVANCE:
     def main_ex_loop(self, task_counter, counts_target):
 
         """
-        This function is contaion all methods that itretively has to run to control the exprement.
+        This function is contain all methods that iteratively has to run to control the experiment.
         This class method:
 
         1. Read the number of detected Ions(in TDC or Counter mode)
@@ -369,24 +369,28 @@ class APT_ADVANCE:
 
         # update v_dc
         if variables.specimen_voltage < variables.vdc_max:
-            if variables.specimen_voltage >= variables.vdc_min:
+            if variables.specimen_voltage >= variables.vdc_min - 50:
                 specimen_voltage_temp = variables.specimen_voltage + voltage_step
-                if specimen_voltage_temp > variables.specimen_voltage:
+                if specimen_voltage_temp != variables.specimen_voltage:
                     # sending VDC via serial
                     if self.conf['v_dc'] != "off":
                         self.command_v_dc(">S0 %s" % specimen_voltage_temp)
-                    variables.specimen_voltage = specimen_voltage_temp
 
-        # update pulse voltage v_p
-        new_vp = variables.specimen_voltage * variables.pulse_fraction * \
-                 (1 / variables.pulse_amp_per_supply_voltage)
-        if variables.pulse_voltage_max > new_vp > variables.pulse_voltage_min:
-            if self.conf['v_p'] != "off":
-                self.com_port_v_p.write('VOLT %s' % new_vp)
-            variables.pulse_voltage = new_vp * variables.pulse_amp_per_supply_voltage
+                    # update pulse voltage v_p
+                    new_vp = variables.specimen_voltage * variables.pulse_fraction * \
+                                 (1 / variables.pulse_amp_per_supply_voltage)
+                    if variables.pulse_voltage_max > new_vp > variables.pulse_voltage_min:
+                        if self.conf['v_p'] != "off":
+                            self.com_port_v_p.write('VOLT %s' % new_vp)
+                        variables.pulse_voltage = new_vp * variables.pulse_amp_per_supply_voltage
+
+                variables.specimen_voltage = specimen_voltage_temp
 
         variables.main_temperature = np.append(variables.main_temperature, variables.temperature)
-        variables.main_chamber_vacuum = np.append(variables.main_chamber_vacuum, float(variables.vacuum_main))
+        variables.main_chamber_vacuum = np.append(variables.main_chamber_vacuum,
+                                                  float(variables.vacuum_main))
+
+
 
     def clear_up(self, task_counter):
         """
@@ -668,6 +672,7 @@ def main(conf):
     flag_achieved_high_voltage = 0
     index_time = 0
     ex_time_temp = variables.ex_time
+    init_detection_rate = 0
 
     # Main loop of experiment
     while steps < total_steps:
@@ -697,7 +702,7 @@ def main(conf):
         if variables.detection_rate != init_detection_rate:
             counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
             init_detection_rate = variables.detection_rate
-        counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
+
         # main loop function
         experiment.main_ex_loop(task_counter, counts_target)
         end = datetime.datetime.now()
@@ -747,12 +752,18 @@ def main(conf):
                     time.sleep(1)
                     break
                 flag_achieved_high_voltage += 1
+        if variables.criteria_time:
+            if steps + 1 == total_steps:
+                logger.info('Experiment time Max. is achieved')
+                if conf['tdc'] != "off":
+                    if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+                        queue_stop_measurement.put(True)
+                time.sleep(1)
+                break
         if variables.ex_time != ex_time_temp:
             total_steps = variables.ex_time * variables.ex_freq - steps
             ex_time_temp = variables.ex_time
-            if conf['tdc'] != "off":
-                if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
-                    queue_stop_measurement.put(True)
+
         # Because experiment time is not a stop criteria, increase total_steps
         if not variables.criteria_time and steps + 1 == total_steps:
             total_steps += 1

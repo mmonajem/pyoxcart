@@ -217,7 +217,7 @@ class APT_SIMPLE:
     def main_ex_loop(self, counts_target):
 
         """
-        This function is contaion all methods that itretively has to run to control the exprement.
+        This function is contain all methods that iteratively has to run to control the experiment.
         This class method:
 
         1. Read the number of detected Ions(in TDC or Counter mode)
@@ -477,7 +477,6 @@ def main(conf):
                 print(
                     f"{initialize_devices.bcolors.FAIL}Error: The motor degree is not between 10 to 290{initialize_devices.bcolors.ENDC}")
 
-
     if conf['tdc'] != "off":
         # Initialze threads that will read from the queue for the group: dld
         if variables.counter_source == 'TDC':
@@ -496,7 +495,7 @@ def main(conf):
     variables.laser_degree = copy.copy(variables.laser_start)
     index_step_laser = 1
     # Save the detection variable
-    init_detection_rate = variables.detection_rate
+    init_detection_rate = 0
     # Main loop of experiment
     while steps < total_steps:
         # Only for initializing every thing at firs iteration
@@ -520,7 +519,6 @@ def main(conf):
             counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
             init_detection_rate = variables.detection_rate
         # main loop function
-        counts_target = ((variables.detection_rate / 100) * variables.pulse_frequency) / variables.pulse_frequency
         experiment.main_ex_loop(counts_target)
         end = datetime.datetime.now()
         # If the main experiment function takes less than experiment frequency we have to waite
@@ -598,12 +596,18 @@ def main(conf):
                     time.sleep(1)
                     break
                 flag_achieved_high_voltage += 1
+        if variables.criteria_time:
+            if steps + 1 == total_steps:
+                logger.info('Experiment time Max. is achieved')
+                if conf['tdc'] != "off":
+                    if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+                        queue_stop_measurement.put(True)
+                time.sleep(1)
+                break
         if variables.ex_time != ex_time_temp:
             total_steps = variables.ex_time * variables.ex_freq - steps
             ex_time_temp = variables.ex_time
-            if conf['tdc'] != "off":
-                if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
-                    queue_stop_measurement.put(True)
+
         # Because experiment time is not a stop criteria, increase total_steps
         if not variables.criteria_time and steps + 1 == total_steps:
             total_steps += 1

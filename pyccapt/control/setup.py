@@ -41,6 +41,7 @@ setup(
     install_requires=[
                         "numpy",
                         "matplotlib",
+                        "pyserial",
                         "opencv-python",
                         "pandas",
                         "scikit_learn",
@@ -51,8 +52,13 @@ setup(
                         "wget",
                         "h5py",
                         "tables",
-                        "PyQt5",
-                        "pyqt5-tools",
+                        "PyQt5==5.12.3",
+                        "pyqtgraph",
+                        "pypylon",
+                        "nidaqmx",
+                        "pyvisa",
+                        "tweepy",
+                        "pyvisa-py"
                       ],
     # not to be confused with definitions in pyproject.toml [build-system]
     setup_requires=["pytest-runner"],

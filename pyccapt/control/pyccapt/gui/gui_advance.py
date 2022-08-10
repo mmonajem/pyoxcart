@@ -105,10 +105,10 @@ class UI_APT_A(Camera, object):
         font.setPointSize(8)
         self.vacuum_buffer_back.setFont(font)
         self.vacuum_buffer_back.setStyleSheet("QLCDNumber{\n"
-"border: 2px solid blue;\n"
-"border-radius: 10px;\n"
-"padding: 0 8px;\n"
-"}")
+                                              "border: 2px solid blue;\n"
+                                              "border-radius: 10px;\n"
+                                              "padding: 0 8px;\n"
+                                              "}")
         self.vacuum_buffer_back.setObjectName("vacuum_buffer_back")
         self.gridLayout_16.addWidget(self.vacuum_buffer_back, 1, 3, 1, 1)
         self.label_38 = QtWidgets.QLabel(self.centralwidget)
@@ -129,10 +129,10 @@ class UI_APT_A(Camera, object):
         font.setPointSize(8)
         self.vacuum_buffer.setFont(font)
         self.vacuum_buffer.setStyleSheet("QLCDNumber{\n"
-"border: 2px solid blue;\n"
-"border-radius: 10px;\n"
-"padding: 0 8px;\n"
-"}")
+                                         "border: 2px solid blue;\n"
+                                         "border-radius: 10px;\n"
+                                         "padding: 0 8px;\n"
+                                         "}")
         self.vacuum_buffer.setObjectName("vacuum_buffer")
         self.gridLayout_16.addWidget(self.vacuum_buffer, 0, 3, 1, 1)
         self.vacuum_main = QtWidgets.QLCDNumber(self.centralwidget)
@@ -147,10 +147,10 @@ class UI_APT_A(Camera, object):
         font.setWeight(50)
         self.vacuum_main.setFont(font)
         self.vacuum_main.setStyleSheet("QLCDNumber{\n"
-"border: 2px solid green;\n"
-"border-radius: 10px;\n"
-"padding: 0 8px;\n"
-"}")
+                                       "border: 2px solid green;\n"
+                                       "border-radius: 10px;\n"
+                                       "padding: 0 8px;\n"
+                                       "}")
         self.vacuum_main.setObjectName("vacuum_main")
         self.gridLayout_16.addWidget(self.vacuum_main, 0, 5, 1, 1)
         self.vacuum_load_lock = QtWidgets.QLCDNumber(self.centralwidget)
@@ -161,10 +161,10 @@ class UI_APT_A(Camera, object):
         self.vacuum_load_lock.setSizePolicy(sizePolicy)
         self.vacuum_load_lock.setMinimumSize(QtCore.QSize(230, 100))
         self.vacuum_load_lock.setStyleSheet("QLCDNumber{\n"
-"border: 2px solid yellow;\n"
-"border-radius: 10px;\n"
-"padding: 0 8px;\n"
-"}")
+                                            "border: 2px solid yellow;\n"
+                                            "border-radius: 10px;\n"
+                                            "padding: 0 8px;\n"
+                                            "}")
         self.vacuum_load_lock.setObjectName("vacuum_load_lock")
         self.gridLayout_16.addWidget(self.vacuum_load_lock, 0, 1, 1, 1)
         self.vacuum_load_lock_back = QtWidgets.QLCDNumber(self.centralwidget)
@@ -174,10 +174,10 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.vacuum_load_lock_back.sizePolicy().hasHeightForWidth())
         self.vacuum_load_lock_back.setSizePolicy(sizePolicy)
         self.vacuum_load_lock_back.setStyleSheet("QLCDNumber{\n"
-"border: 2px solid yellow;\n"
-"border-radius: 10px;\n"
-"padding: 0 8px;\n"
-"}")
+                                                 "border: 2px solid yellow;\n"
+                                                 "border-radius: 10px;\n"
+                                                 "padding: 0 8px;\n"
+                                                 "}")
         self.vacuum_load_lock_back.setObjectName("vacuum_load_lock_back")
         self.gridLayout_16.addWidget(self.vacuum_load_lock_back, 1, 1, 1, 1)
         self.label_36 = QtWidgets.QLabel(self.centralwidget)
@@ -202,10 +202,10 @@ class UI_APT_A(Camera, object):
         self.temp.setSizePolicy(sizePolicy)
         self.temp.setMinimumSize(QtCore.QSize(230, 100))
         self.temp.setStyleSheet("QLCDNumber{\n"
-"border: 2px solid brown;\n"
-"border-radius: 10px;\n"
-"padding: 0 8px;\n"
-"}")
+                                "border: 2px solid brown;\n"
+                                "border-radius: 10px;\n"
+                                "padding: 0 8px;\n"
+                                "}")
         self.temp.setObjectName("temp")
         self.gridLayout_16.addWidget(self.temp, 1, 5, 1, 1)
         self.horizontalLayout_8.addLayout(self.gridLayout_16)
@@ -218,10 +218,10 @@ class UI_APT_A(Camera, object):
         self.temperature.setSizePolicy(sizePolicy)
         self.temperature.setMinimumSize(QtCore.QSize(400, 400))
         self.temperature.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
+                                       "border: 2px solid gray;\n"
+                                       "border-radius: 10px;\n"
+                                       "padding: 4 4px;\n"
+                                       "}")
         self.temperature.setObjectName("temperature")
         self.horizontalLayout_8.addWidget(self.temperature)
         self.horizontalLayout_7 = QtWidgets.QHBoxLayout()
@@ -235,8 +235,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.start_button.sizePolicy().hasHeightForWidth())
         self.start_button.setSizePolicy(sizePolicy)
         self.start_button.setStyleSheet("QPushButton{\n"
-"background: rgb(193, 193, 193)\n"
-"}")
+                                        "background: rgb(193, 193, 193)\n"
+                                        "}")
         self.start_button.setObjectName("start_button")
         self.gridLayout_2.addWidget(self.start_button, 0, 0, 1, 1)
         self.stop_button = QtWidgets.QPushButton(self.centralwidget)
@@ -246,8 +246,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.stop_button.sizePolicy().hasHeightForWidth())
         self.stop_button.setSizePolicy(sizePolicy)
         self.stop_button.setStyleSheet("QPushButton{\n"
-"background: rgb(193, 193, 193)\n"
-"}")
+                                       "background: rgb(193, 193, 193)\n"
+                                       "}")
         self.stop_button.setObjectName("stop_button")
         self.gridLayout_2.addWidget(self.stop_button, 1, 0, 1, 1)
         self.horizontalLayout_7.addLayout(self.gridLayout_2)
@@ -272,20 +272,20 @@ class UI_APT_A(Camera, object):
         self.gridLayout.addWidget(self.led_cryo, 0, 2, 1, 1)
         self.main_chamber_switch = QtWidgets.QPushButton(self.centralwidget)
         self.main_chamber_switch.setStyleSheet("QPushButton{\n"
-"background: rgb(193, 193, 193)\n"
-"}")
+                                               "background: rgb(193, 193, 193)\n"
+                                               "}")
         self.main_chamber_switch.setObjectName("main_chamber_switch")
         self.gridLayout.addWidget(self.main_chamber_switch, 1, 0, 1, 1)
         self.load_lock_switch = QtWidgets.QPushButton(self.centralwidget)
         self.load_lock_switch.setStyleSheet("QPushButton{\n"
-"background: rgb(193, 193, 193)\n"
-"}")
+                                            "background: rgb(193, 193, 193)\n"
+                                            "}")
         self.load_lock_switch.setObjectName("load_lock_switch")
         self.gridLayout.addWidget(self.load_lock_switch, 1, 1, 1, 1)
         self.cryo_switch = QtWidgets.QPushButton(self.centralwidget)
         self.cryo_switch.setStyleSheet("QPushButton{\n"
-"background: rgb(193, 193, 193)\n"
-"}")
+                                       "background: rgb(193, 193, 193)\n"
+                                       "}")
         self.cryo_switch.setObjectName("cryo_switch")
         self.gridLayout.addWidget(self.cryo_switch, 1, 2, 1, 1)
         self.gridLayout_13.addLayout(self.gridLayout, 2, 0, 1, 1)
@@ -308,8 +308,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.speciemen_voltage.sizePolicy().hasHeightForWidth())
         self.speciemen_voltage.setSizePolicy(sizePolicy)
         self.speciemen_voltage.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                             "background: rgb(223,223,233)\n"
+                                             "}")
         self.speciemen_voltage.setText("")
         self.speciemen_voltage.setObjectName("speciemen_voltage")
         self.gridLayout_4.addWidget(self.speciemen_voltage, 3, 1, 1, 1)
@@ -328,8 +328,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.pulse_voltage.sizePolicy().hasHeightForWidth())
         self.pulse_voltage.setSizePolicy(sizePolicy)
         self.pulse_voltage.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                         "background: rgb(223,223,233)\n"
+                                         "}")
         self.pulse_voltage.setText("")
         self.pulse_voltage.setObjectName("pulse_voltage")
         self.gridLayout_4.addWidget(self.pulse_voltage, 4, 1, 1, 1)
@@ -340,8 +340,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.total_ions.sizePolicy().hasHeightForWidth())
         self.total_ions.setSizePolicy(sizePolicy)
         self.total_ions.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                      "background: rgb(223,223,233)\n"
+                                      "}")
         self.total_ions.setText("")
         self.total_ions.setObjectName("total_ions")
         self.gridLayout_4.addWidget(self.total_ions, 2, 1, 1, 1)
@@ -372,8 +372,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.detection_rate.sizePolicy().hasHeightForWidth())
         self.detection_rate.setSizePolicy(sizePolicy)
         self.detection_rate.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                          "background: rgb(223,223,233)\n"
+                                          "}")
         self.detection_rate.setText("")
         self.detection_rate.setObjectName("detection_rate")
         self.gridLayout_4.addWidget(self.detection_rate, 5, 1, 1, 1)
@@ -400,8 +400,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.elapsed_time.sizePolicy().hasHeightForWidth())
         self.elapsed_time.setSizePolicy(sizePolicy)
         self.elapsed_time.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                        "background: rgb(223,223,233)\n"
+                                        "}")
         self.elapsed_time.setText("")
         self.elapsed_time.setObjectName("elapsed_time")
         self.gridLayout_4.addWidget(self.elapsed_time, 1, 1, 1, 1)
@@ -425,8 +425,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.vdc_steps_down.sizePolicy().hasHeightForWidth())
         self.vdc_steps_down.setSizePolicy(sizePolicy)
         self.vdc_steps_down.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                          "background: rgb(223,223,233)\n"
+                                          "}")
         self.vdc_steps_down.setObjectName("vdc_steps_down")
         self.gridLayout_3.addWidget(self.vdc_steps_down, 9, 2, 1, 1)
         self.pulse_frequency = QtWidgets.QLineEdit(self.centralwidget)
@@ -436,8 +436,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.pulse_frequency.sizePolicy().hasHeightForWidth())
         self.pulse_frequency.setSizePolicy(sizePolicy)
         self.pulse_frequency.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                           "background: rgb(223,223,233)\n"
+                                           "}")
         self.pulse_frequency.setObjectName("pulse_frequency")
         self.gridLayout_3.addWidget(self.pulse_frequency, 14, 2, 1, 1)
         self.label_17 = QtWidgets.QLabel(self.centralwidget)
@@ -463,8 +463,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.pulse_fraction.sizePolicy().hasHeightForWidth())
         self.pulse_fraction.setSizePolicy(sizePolicy)
         self.pulse_fraction.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                          "background: rgb(223,223,233)\n"
+                                          "}")
         self.pulse_fraction.setObjectName("pulse_fraction")
         self.gridLayout_3.addWidget(self.pulse_fraction, 13, 2, 1, 1)
         self.detection_rate_init = QtWidgets.QLineEdit(self.centralwidget)
@@ -474,8 +474,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.detection_rate_init.sizePolicy().hasHeightForWidth())
         self.detection_rate_init.setSizePolicy(sizePolicy)
         self.detection_rate_init.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                               "background: rgb(223,223,233)\n"
+                                               "}")
         self.detection_rate_init.setObjectName("detection_rate_init")
         self.gridLayout_3.addWidget(self.detection_rate_init, 15, 2, 1, 1)
         self.cycle_avg = QtWidgets.QLineEdit(self.centralwidget)
@@ -485,8 +485,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.cycle_avg.sizePolicy().hasHeightForWidth())
         self.cycle_avg.setSizePolicy(sizePolicy)
         self.cycle_avg.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                     "background: rgb(223,223,233)\n"
+                                     "}")
         self.cycle_avg.setObjectName("cycle_avg")
         self.gridLayout_3.addWidget(self.cycle_avg, 10, 2, 1, 1)
         self.vp_max = QtWidgets.QLineEdit(self.centralwidget)
@@ -496,8 +496,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.vp_max.sizePolicy().hasHeightForWidth())
         self.vp_max.setSizePolicy(sizePolicy)
         self.vp_max.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                  "background: rgb(223,223,233)\n"
+                                  "}")
         self.vp_max.setObjectName("vp_max")
         self.gridLayout_3.addWidget(self.vp_max, 12, 2, 1, 1)
         self.vdc_steps_up = QtWidgets.QLineEdit(self.centralwidget)
@@ -507,8 +507,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.vdc_steps_up.sizePolicy().hasHeightForWidth())
         self.vdc_steps_up.setSizePolicy(sizePolicy)
         self.vdc_steps_up.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                        "background: rgb(223,223,233)\n"
+                                        "}")
         self.vdc_steps_up.setObjectName("vdc_steps_up")
         self.gridLayout_3.addWidget(self.vdc_steps_up, 8, 2, 1, 1)
         self.label_8 = QtWidgets.QLabel(self.centralwidget)
@@ -545,8 +545,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.vp_min.sizePolicy().hasHeightForWidth())
         self.vp_min.setSizePolicy(sizePolicy)
         self.vp_min.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                  "background: rgb(223,223,233)\n"
+                                  "}")
         self.vp_min.setObjectName("vp_min")
         self.gridLayout_3.addWidget(self.vp_min, 11, 2, 1, 1)
         self.label_42 = QtWidgets.QLabel(self.centralwidget)
@@ -572,8 +572,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.doubleSpinBox.sizePolicy().hasHeightForWidth())
         self.doubleSpinBox.setSizePolicy(sizePolicy)
         self.doubleSpinBox.setStyleSheet("QDoubleSpinBox{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                         "background: rgb(223,223,233)\n"
+                                         "}")
         self.doubleSpinBox.setObjectName("doubleSpinBox")
         self.gridLayout_3.addWidget(self.doubleSpinBox, 16, 1, 1, 1)
         self.email = QtWidgets.QLineEdit(self.centralwidget)
@@ -583,8 +583,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.email.sizePolicy().hasHeightForWidth())
         self.email.setSizePolicy(sizePolicy)
         self.email.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                 "background: rgb(223,223,233)\n"
+                                 "}")
         self.email.setText("")
         self.email.setObjectName("email")
         self.gridLayout_3.addWidget(self.email, 17, 2, 1, 1)
@@ -603,8 +603,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.hit_displayed.sizePolicy().hasHeightForWidth())
         self.hit_displayed.setSizePolicy(sizePolicy)
         self.hit_displayed.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                         "background: rgb(223,223,233)\n"
+                                         "}")
         self.hit_displayed.setObjectName("hit_displayed")
         self.gridLayout_3.addWidget(self.hit_displayed, 16, 2, 1, 1)
         self.label_26 = QtWidgets.QLabel(self.centralwidget)
@@ -622,8 +622,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.tweet.sizePolicy().hasHeightForWidth())
         self.tweet.setSizePolicy(sizePolicy)
         self.tweet.setStyleSheet("QComboBox{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                 "background: rgb(223,223,233)\n"
+                                 "}")
         self.tweet.setObjectName("tweet")
         self.tweet.addItem("")
         self.tweet.addItem("")
@@ -635,8 +635,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.counter_source.sizePolicy().hasHeightForWidth())
         self.counter_source.setSizePolicy(sizePolicy)
         self.counter_source.setStyleSheet("QComboBox{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                          "background: rgb(223,223,233)\n"
+                                          "}")
         self.counter_source.setObjectName("counter_source")
         self.counter_source.addItem("")
         self.counter_source.addItem("")
@@ -650,8 +650,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.parameters_source.sizePolicy().hasHeightForWidth())
         self.parameters_source.setSizePolicy(sizePolicy)
         self.parameters_source.setStyleSheet("QComboBox{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                             "background: rgb(223,223,233)\n"
+                                             "}")
         self.parameters_source.setObjectName("parameters_source")
         self.parameters_source.addItem("")
         self.parameters_source.addItem("")
@@ -671,8 +671,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.ex_user.sizePolicy().hasHeightForWidth())
         self.ex_user.setSizePolicy(sizePolicy)
         self.ex_user.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                   "background: rgb(223,223,233)\n"
+                                   "}")
         self.ex_user.setObjectName("ex_user")
         self.gridLayout_3.addWidget(self.ex_user, 1, 2, 1, 1)
         self.label_43 = QtWidgets.QLabel(self.centralwidget)
@@ -702,8 +702,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.ex_name.sizePolicy().hasHeightForWidth())
         self.ex_name.setSizePolicy(sizePolicy)
         self.ex_name.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                   "background: rgb(223,223,233)\n"
+                                   "}")
         self.ex_name.setObjectName("ex_name")
         self.gridLayout_3.addWidget(self.ex_name, 2, 2, 1, 1)
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
@@ -721,8 +721,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.ex_freq.sizePolicy().hasHeightForWidth())
         self.ex_freq.setSizePolicy(sizePolicy)
         self.ex_freq.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                   "background: rgb(223,223,233)\n"
+                                   "}")
         self.ex_freq.setObjectName("ex_freq")
         self.gridLayout_3.addWidget(self.ex_freq, 5, 2, 1, 1)
         self.max_ions = QtWidgets.QLineEdit(self.centralwidget)
@@ -732,8 +732,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.max_ions.sizePolicy().hasHeightForWidth())
         self.max_ions.setSizePolicy(sizePolicy)
         self.max_ions.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                    "background: rgb(223,223,233)\n"
+                                    "}")
         self.max_ions.setObjectName("max_ions")
         self.gridLayout_3.addWidget(self.max_ions, 4, 2, 1, 1)
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
@@ -751,8 +751,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.ex_time.sizePolicy().hasHeightForWidth())
         self.ex_time.setSizePolicy(sizePolicy)
         self.ex_time.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                   "background: rgb(223,223,233)\n"
+                                   "}")
         self.ex_time.setObjectName("ex_time")
         self.gridLayout_3.addWidget(self.ex_time, 3, 2, 1, 1)
         self.vdc_min = QtWidgets.QLineEdit(self.centralwidget)
@@ -762,8 +762,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.vdc_min.sizePolicy().hasHeightForWidth())
         self.vdc_min.setSizePolicy(sizePolicy)
         self.vdc_min.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                   "background: rgb(223,223,233)\n"
+                                   "}")
         self.vdc_min.setObjectName("vdc_min")
         self.gridLayout_3.addWidget(self.vdc_min, 6, 2, 1, 1)
         self.vdc_max = QtWidgets.QLineEdit(self.centralwidget)
@@ -773,8 +773,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.vdc_max.sizePolicy().hasHeightForWidth())
         self.vdc_max.setSizePolicy(sizePolicy)
         self.vdc_max.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                   "background: rgb(223,223,233)\n"
+                                   "}")
         self.vdc_max.setObjectName("vdc_max")
         self.gridLayout_3.addWidget(self.vdc_max, 7, 2, 1, 1)
         self.label_6 = QtWidgets.QLabel(self.centralwidget)
@@ -799,8 +799,8 @@ class UI_APT_A(Camera, object):
         self.criteria_ions.setFont(font)
         self.criteria_ions.setMouseTracking(True)
         self.criteria_ions.setStyleSheet("QCheckBox{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                         "background: rgb(223,223,233)\n"
+                                         "}")
         self.criteria_ions.setText("")
         self.criteria_ions.setChecked(True)
         self.criteria_ions.setObjectName("criteria_ions")
@@ -824,8 +824,8 @@ class UI_APT_A(Camera, object):
         self.criteria_time.setFont(font)
         self.criteria_time.setMouseTracking(True)
         self.criteria_time.setStyleSheet("QCheckBox{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                         "background: rgb(223,223,233)\n"
+                                         "}")
         self.criteria_time.setText("")
         self.criteria_time.setChecked(True)
         self.criteria_time.setObjectName("criteria_time")
@@ -849,8 +849,8 @@ class UI_APT_A(Camera, object):
         self.criteria_vdc.setFont(font)
         self.criteria_vdc.setMouseTracking(True)
         self.criteria_vdc.setStyleSheet("QCheckBox{\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                        "background: rgb(223,223,233)\n"
+                                        "}")
         self.criteria_vdc.setText("")
         self.criteria_vdc.setChecked(True)
         self.criteria_vdc.setObjectName("criteria_vdc")
@@ -882,11 +882,11 @@ class UI_APT_A(Camera, object):
         ####
         self.diagram.setMinimumSize(QtCore.QSize(350, 350))
         self.diagram.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"background: rgb(255, 255, 255)\n"
-"}")
+                                   "border: 2px solid gray;\n"
+                                   "border-radius: 10px;\n"
+                                   "padding: 4 4px;\n"
+                                   "background: rgb(255, 255, 255)\n"
+                                   "}")
         self.diagram.setText("")
         self.diagram.setObjectName("diagram")
         self.verticalLayout_2.addWidget(self.diagram)
@@ -936,10 +936,10 @@ class UI_APT_A(Camera, object):
         self.cam_b_o.setMinimumSize(QtCore.QSize(500, 500))
         self.cam_b_o.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.cam_b_o.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
+                                   "border: 2px solid gray;\n"
+                                   "border-radius: 10px;\n"
+                                   "padding: 4 4px;\n"
+                                   "}")
         # self.cam_b_o.setText("")
         self.cam_b_o.setObjectName("cam_b_o")
         self.horizontalLayout_6.addWidget(self.cam_b_o)
@@ -952,10 +952,10 @@ class UI_APT_A(Camera, object):
         self.cam_b_d.setMinimumSize(QtCore.QSize(1200, 500))
         self.cam_b_d.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.cam_b_d.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
+                                   "border: 2px solid gray;\n"
+                                   "border-radius: 10px;\n"
+                                   "padding: 4 4px;\n"
+                                   "}")
         self.cam_b_d.setText("")
         self.cam_b_d.setObjectName("cam_b_d")
         self.horizontalLayout_6.addWidget(self.cam_b_d)
@@ -978,10 +978,10 @@ class UI_APT_A(Camera, object):
         self.cam_s_o.setSizePolicy(sizePolicy)
         self.cam_s_o.setMinimumSize(QtCore.QSize(500, 500))
         self.cam_s_o.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
+                                   "border: 2px solid gray;\n"
+                                   "border-radius: 10px;\n"
+                                   "padding: 4 4px;\n"
+                                   "}")
         # self.cam_s_o.setText("")
         self.cam_s_o.setObjectName("cam_s_o")
         self.horizontalLayout_5.addWidget(self.cam_s_o)
@@ -994,10 +994,10 @@ class UI_APT_A(Camera, object):
         self.cam_s_d.setMinimumSize(QtCore.QSize(1200, 500))
         self.cam_s_d.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.cam_s_d.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
+                                   "border: 2px solid gray;\n"
+                                   "border-radius: 10px;\n"
+                                   "padding: 4 4px;\n"
+                                   "}")
         self.cam_s_d.setText("")
         self.cam_s_d.setObjectName("cam_s_d")
         self.horizontalLayout_5.addWidget(self.cam_s_d)
@@ -1072,10 +1072,10 @@ class UI_APT_A(Camera, object):
         self.vdc_time.setSizePolicy(sizePolicy)
         self.vdc_time.setMinimumSize(QtCore.QSize(500, 500))
         self.vdc_time.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
+                                    "border: 2px solid gray;\n"
+                                    "border-radius: 10px;\n"
+                                    "padding: 4 4px;\n"
+                                    "}")
         self.vdc_time.setObjectName("vdc_time")
         self.horizontalLayout.addWidget(self.vdc_time)
         # self.detection_rate_viz = QtWidgets.QWidget(self.centralwidget)
@@ -1087,10 +1087,10 @@ class UI_APT_A(Camera, object):
         self.detection_rate_viz.setSizePolicy(sizePolicy)
         self.detection_rate_viz.setMinimumSize(QtCore.QSize(500, 500))
         self.detection_rate_viz.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
+                                              "border: 2px solid gray;\n"
+                                              "border-radius: 10px;\n"
+                                              "padding: 4 4px;\n"
+                                              "}")
         self.detection_rate_viz.setObjectName("detection_rate_viz")
         self.horizontalLayout.addWidget(self.detection_rate_viz)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
@@ -1128,10 +1128,10 @@ class UI_APT_A(Camera, object):
         self.visualization.setSizePolicy(sizePolicy)
         self.visualization.setMinimumSize(QtCore.QSize(500, 500))
         self.visualization.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
+                                         "border: 2px solid gray;\n"
+                                         "border-radius: 10px;\n"
+                                         "padding: 4 4px;\n"
+                                         "}")
         self.visualization.setObjectName("visualization")
         self.horizontalLayout_4.addWidget(self.visualization)
         # self.histogram = QtWidgets.QWidget(self.centralwidget)
@@ -1143,10 +1143,10 @@ class UI_APT_A(Camera, object):
         self.histogram.setSizePolicy(sizePolicy)
         self.histogram.setMinimumSize(QtCore.QSize(500, 500))
         self.histogram.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
+                                     "border: 2px solid gray;\n"
+                                     "border-radius: 10px;\n"
+                                     "padding: 4 4px;\n"
+                                     "}")
         self.histogram.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.histogram.setObjectName("histogram")
         self.horizontalLayout_4.addWidget(self.histogram)
@@ -1162,11 +1162,11 @@ class UI_APT_A(Camera, object):
         self.textEdit.setSizePolicy(sizePolicy)
         self.textEdit.setMinimumSize(QtCore.QSize(2508, 80))
         self.textEdit.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 0 8px;\n"
-"background: rgb(223,223,233)\n"
-"}")
+                                    "border: 2px solid gray;\n"
+                                    "border-radius: 10px;\n"
+                                    "padding: 0 8px;\n"
+                                    "background: rgb(223,223,233)\n"
+                                    "}")
         self.textEdit.setObjectName("textEdit")
         self.gridLayout_18.addWidget(self.textEdit, 0, 0, 1, 1)
         self.light = QtWidgets.QPushButton(self.centralwidget)
@@ -1176,8 +1176,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.light.sizePolicy().hasHeightForWidth())
         self.light.setSizePolicy(sizePolicy)
         self.light.setStyleSheet("QPushButton{\n"
-"background: rgb(193, 193, 193)\n"
-"}")
+                                 "background: rgb(193, 193, 193)\n"
+                                 "}")
         self.light.setObjectName("light")
         self.gridLayout_18.addWidget(self.light, 0, 1, 1, 1)
         self.led_light = QtWidgets.QLabel(self.centralwidget)
@@ -1320,12 +1320,13 @@ class UI_APT_A(Camera, object):
         self.label_10.setText(_translate("UI_APT_A", "Detection Rate"))
         self.label_19.setText(_translate("UI_APT_A", "Visualization"))
         self.label_24.setText(_translate("UI_APT_A", "TOF"))
-        self.textEdit.setHtml(_translate("UI_APT_A", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">ex_user=user1;</span>ex_name=test1;ex_time=90;max_ions=2000;ex_freq=10;vdc_min=500;vdc_max=4000;vdc_steps_up=100;vdc_steps_down=100;vp_min=328;vp_max=3281;pulse_fraction=20;pulse_frequency=200;detection_rate_init=1;hit_displayed=20000;email=;tweet=No;counter_source=TDC<span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">;criteria_time=True;criteria_ions=False;criteria_vdc=False</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">ex_user=user2;ex_name=test2;ex_time=100;max_ions=3000;ex_freq=5;vdc_min=1000;vdc_max=3000;vdc_steps_up=50;vdc_steps_down=50;vp_min=400;vp_max=2000;pulse_fraction=15;pulse_frequency=200;detection_rate_init=2;hit_displayed=40000;email=;tweet=No;counter_source=Pulse Counter;criteria_time=False;criteria_ions=False;criteria_vdc=True</span></p></body></html>"))
+        self.textEdit.setHtml(_translate("UI_APT_A",
+                                         "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                         "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                         "p, li { white-space: pre-wrap; }\n"
+                                         "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt; font-weight:400; font-style:normal;\">\n"
+                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">ex_user=user1;</span>ex_name=test1;ex_time=90;max_ions=2000;ex_freq=10;vdc_min=500;vdc_max=4000;vdc_steps_up=100;vdc_steps_down=100;vp_min=328;vp_max=3281;pulse_fraction=20;pulse_frequency=200;detection_rate_init=1;hit_displayed=20000;email=;tweet=No;counter_source=TDC<span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">;criteria_time=True;criteria_ions=False;criteria_vdc=False</span></p>\n"
+                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">ex_user=user2;ex_name=test2;ex_time=100;max_ions=3000;ex_freq=5;vdc_min=1000;vdc_max=3000;vdc_steps_up=50;vdc_steps_down=50;vp_min=400;vp_max=2000;pulse_fraction=15;pulse_frequency=200;detection_rate_init=2;hit_displayed=40000;email=;tweet=No;counter_source=Pulse Counter;criteria_time=False;criteria_ions=False;criteria_vdc=True</span></p></body></html>"))
         self.light.setText(_translate("UI_APT_A", "Light"))
         self.led_light.setText(_translate("UI_APT_A", "light"))
         self.menuFile.setTitle(_translate("UI_APT_A", "File"))
@@ -1402,7 +1403,7 @@ class UI_APT_A(Camera, object):
 
         # Visualization #####################
         self.scatter = pg.ScatterPlotItem(
-                size=self.doubleSpinBox.value(), brush=pg.mkBrush(255, 255, 255, 120))
+            size=self.doubleSpinBox.value(), brush=pg.mkBrush(255, 255, 255, 120))
         self.visualization.getPlotItem().hideAxis('bottom')
         self.visualization.getPlotItem().hideAxis('left')
 
@@ -1436,575 +1437,576 @@ class UI_APT_A(Camera, object):
         self.led_pump_load_lock.setPixmap(self.led_green)
 
     def thread_main(self):
-            """
+        """
                 Main thread for running experiment
                 """
 
-            def read_update(text_line, index_line):
-                    """
+        def read_update(text_line, index_line):
+            """
                             Function for reading the Textline box
                             This function is only run if Textline is selected in the GUI
                             The function read the the text line and put it in the Qboxes
                             """
-                    _translate = QtCore.QCoreApplication.translate
-                    text_line = text_line[index_line].split(';')
-                    text_line_b = []
-                    for i in range(len(text_line)):
-                            text_line_b.append(text_line[i].split('='))
-                    for i in range(len(text_line_b)):
-                            if text_line_b[i][0] == 'ex_user':
-                                    self.ex_user.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'ex_name':
-                                    self.ex_name.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'ex_time':
-                                    self.ex_time.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'ex_freq':
-                                    self.ex_freq.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'max_ions':
-                                    self.max_ions.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'vdc_min':
-                                    self.vdc_min.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'vdc_max':
-                                    self.vdc_max.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'detection_rate_init':
-                                    self.detection_rate_init.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'pulse_fraction':
-                                    self.pulse_fraction.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'pulse_frequency':
-                                    self.pulse_frequency.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'hit_displayed':
-                                    self.hit_displayed.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'hdf5_path':
-                                    self.ex_name.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'email':
-                                    self.email.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'cycle_avg':
-                                    self.cycle_avg.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'vdc_steps_up':
-                                    self.vdc_steps_up.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'vdc_steps_down':
-                                    self.vdc_steps_down.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'vp_min':
-                                    self.vp_min.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'vp_max':
-                                    self.vp_max.setText(_translate("OXCART", text_line_b[i][1]))
-                            if text_line_b[i][0] == 'counter_source':
-                                    if text_line_b[i][1] == 'TDC':
-                                            self.counter_source.setCurrentIndex(0)
-                                    if text_line_b[i][1] == 'TDC_Raw':
-                                            self.counter_source.setCurrentIndex(1)
-                                    if text_line_b[i][1] == 'Pulse Counter':
-                                            self.counter_source.setCurrentIndex(2)
-                                    if text_line_b[i][1] == 'DRS':
-                                            self.counter_source.setCurrentIndex(3)
-                            if text_line_b[i][0] == 'tweet':
-                                    if text_line_b[i][1] == 'NO':
-                                            self.tweet.setCurrentIndex(0)
-                                    if text_line_b[i][1] == 'Yes':
-                                            self.tweet.setCurrentIndex(1)
-                            if text_line_b[i][0] == 'criteria_time':
-                                    if text_line_b[i][1] == 'True':
-                                            self.criteria_time.setChecked(True)
-                                    elif text_line_b[i][1] == 'False':
-                                            self.criteria_time.setChecked(False)
-                            if text_line_b[i][0] == 'criteria_ions':
-                                    if text_line_b[i][1] == 'True':
-                                            self.criteria_ions.setChecked(True)
-                                    elif text_line_b[i][1] == 'False':
-                                            self.criteria_ions.setChecked(False)
-                            if text_line_b[i][0] == 'criteria_vdc':
-                                    if text_line_b[i][1] == 'True':
-                                            self.criteria_vdc.setChecked(True)
-                                    elif text_line_b[i][1] == 'False':
-                                            self.criteria_vdc.setChecked(False)
+            _translate = QtCore.QCoreApplication.translate
+            text_line = text_line[index_line].split(';')
+            text_line_b = []
+            for i in range(len(text_line)):
+                text_line_b.append(text_line[i].split('='))
+            for i in range(len(text_line_b)):
+                if text_line_b[i][0] == 'ex_user':
+                    self.ex_user.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'ex_name':
+                    self.ex_name.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'ex_time':
+                    self.ex_time.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'ex_freq':
+                    self.ex_freq.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'max_ions':
+                    self.max_ions.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'vdc_min':
+                    self.vdc_min.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'vdc_max':
+                    self.vdc_max.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'detection_rate_init':
+                    self.detection_rate_init.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'pulse_fraction':
+                    self.pulse_fraction.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'pulse_frequency':
+                    self.pulse_frequency.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'hit_displayed':
+                    self.hit_displayed.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'hdf5_path':
+                    self.ex_name.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'email':
+                    self.email.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'cycle_avg':
+                    self.cycle_avg.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'vdc_steps_up':
+                    self.vdc_steps_up.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'vdc_steps_down':
+                    self.vdc_steps_down.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'vp_min':
+                    self.vp_min.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'vp_max':
+                    self.vp_max.setText(_translate("OXCART", text_line_b[i][1]))
+                if text_line_b[i][0] == 'counter_source':
+                    if text_line_b[i][1] == 'TDC':
+                        self.counter_source.setCurrentIndex(0)
+                    if text_line_b[i][1] == 'TDC_Raw':
+                        self.counter_source.setCurrentIndex(1)
+                    if text_line_b[i][1] == 'Pulse Counter':
+                        self.counter_source.setCurrentIndex(2)
+                    if text_line_b[i][1] == 'DRS':
+                        self.counter_source.setCurrentIndex(3)
+                if text_line_b[i][0] == 'tweet':
+                    if text_line_b[i][1] == 'NO':
+                        self.tweet.setCurrentIndex(0)
+                    if text_line_b[i][1] == 'Yes':
+                        self.tweet.setCurrentIndex(1)
+                if text_line_b[i][0] == 'criteria_time':
+                    if text_line_b[i][1] == 'True':
+                        self.criteria_time.setChecked(True)
+                    elif text_line_b[i][1] == 'False':
+                        self.criteria_time.setChecked(False)
+                if text_line_b[i][0] == 'criteria_ions':
+                    if text_line_b[i][1] == 'True':
+                        self.criteria_ions.setChecked(True)
+                    elif text_line_b[i][1] == 'False':
+                        self.criteria_ions.setChecked(False)
+                if text_line_b[i][0] == 'criteria_vdc':
+                    if text_line_b[i][1] == 'True':
+                        self.criteria_vdc.setChecked(True)
+                    elif text_line_b[i][1] == 'False':
+                        self.criteria_vdc.setChecked(False)
 
-            # check if the gates are closed
-            if not variables.flag_main_gate and not variables.flag_load_gate and not variables.flag_cryo_gate:
-                    if self.parameters_source.currentText() == 'TextLine' and variables.index_line == 0:
-                            lines = self.textEdit.toPlainText()  # Copy all the lines in TextLine
-                            self.text_line = lines.splitlines()  # Seperate the lines in TextLine
-                            self.num_line = len(
-                                    self.text_line)  # count number of line in TextLine (Number of experiments that have to be done)
-                    elif self.parameters_source.currentText() != 'TextLine' and variables.index_line == 0:
-                            self.num_line = 0
-                    self.start_button.setEnabled(False)  # Disable the start button in the GUI
-                    variables.plot_clear_flag = True  # Change the flag to clear the plots in GUI
+        # check if the gates are closed
+        if not variables.flag_main_gate and not variables.flag_load_gate and not variables.flag_cryo_gate:
+            if self.parameters_source.currentText() == 'TextLine' and variables.index_line == 0:
+                lines = self.textEdit.toPlainText()  # Copy all the lines in TextLine
+                self.text_line = lines.splitlines()  # Seperate the lines in TextLine
+                self.num_line = len(
+                    self.text_line)  # count number of line in TextLine (Number of experiments that have to be done)
+            elif self.parameters_source.currentText() != 'TextLine' and variables.index_line == 0:
+                self.num_line = 0
+            self.start_button.setEnabled(False)  # Disable the start button in the GUI
+            variables.plot_clear_flag = True  # Change the flag to clear the plots in GUI
 
-                    # If the TextLine is selected the read_update function is run
-                    if self.parameters_source.currentText() == 'TextLine':
-                            read_update(self.text_line, variables.index_line)
-                    # Update global variables to do the experiments
-                    variables.user_name = self.ex_user.text()
-                    variables.ex_time = int(float(self.ex_time.text()))
-                    variables.ex_freq = int(float(self.ex_freq.text()))
-                    variables.max_ions = int(float(self.max_ions.text()))
-                    variables.vdc_min = int(float(self.vdc_min.text()))
-                    variables.detection_rate = float(self.detection_rate_init.text())
-                    variables.hit_display = int(float(self.hit_displayed.text()))
-                    variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
-                    variables.pulse_frequency = float(self.pulse_frequency.text())
-                    variables.hdf5_path = self.ex_name.text()
-                    variables.email = self.email.text()
-                    variables.cycle_avg = int(float(self.cycle_avg.text()))
-                    variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
-                    variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
-                    variables.v_p_min = int(float(self.vp_min.text()))
-                    variables.v_p_max = int(float(self.vp_max.text()))
-                    variables.counter_source = str(self.counter_source.currentText())
-                    if self.criteria_time.isChecked():
-                            variables.criteria_time = True
-                    elif not self.criteria_time.isChecked():
-                            variables.criteria_time = False
-                    if self.criteria_ions.isChecked():
-                            variables.criteria_ions = True
-                    elif not self.criteria_ions.isChecked():
-                            variables.criteria_ions = False
-                    if self.criteria_vdc.isChecked():
-                            variables.criteria_vdc = True
-                    elif not self.criteria_vdc.isChecked():
-                            variables.criteria_vdc = False
-                    if variables.counter_source == 'TDC_Raw':
-                            variables.raw_mode = True
+            # If the TextLine is selected the read_update function is run
+            if self.parameters_source.currentText() == 'TextLine':
+                read_update(self.text_line, variables.index_line)
+            # Update global variables to do the experiments
+            variables.user_name = self.ex_user.text()
+            variables.ex_time = int(float(self.ex_time.text()))
+            variables.ex_freq = int(float(self.ex_freq.text()))
+            variables.max_ions = int(float(self.max_ions.text()))
+            variables.vdc_min = int(float(self.vdc_min.text()))
+            variables.detection_rate = float(self.detection_rate_init.text())
+            variables.hit_display = int(float(self.hit_displayed.text()))
+            variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
+            variables.pulse_frequency = float(self.pulse_frequency.text())
+            variables.hdf5_path = self.ex_name.text()
+            variables.email = self.email.text()
+            variables.cycle_avg = int(float(self.cycle_avg.text()))
+            variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
+            variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
+            variables.v_p_min = int(float(self.vp_min.text()))
+            variables.v_p_max = int(float(self.vp_max.text()))
+            variables.counter_source = str(self.counter_source.currentText())
+            if self.criteria_time.isChecked():
+                variables.criteria_time = True
+            elif not self.criteria_time.isChecked():
+                variables.criteria_time = False
+            if self.criteria_ions.isChecked():
+                variables.criteria_ions = True
+            elif not self.criteria_ions.isChecked():
+                variables.criteria_ions = False
+            if self.criteria_vdc.isChecked():
+                variables.criteria_vdc = True
+            elif not self.criteria_vdc.isChecked():
+                variables.criteria_vdc = False
+            if variables.counter_source == 'TDC_Raw':
+                variables.raw_mode = True
 
-                    if self.tweet.currentText() == 'Yes':
-                            variables.tweet = True
+            if self.tweet.currentText() == 'Yes':
+                variables.tweet = True
 
-                    # Read the experiment counter
-                    with open('./files/counter_oxcart.txt') as f:
-                            variables.counter = int(f.readlines()[0])
-                    # Current time and date
-                    now = datetime.datetime.now()
-                    variables.exp_name = "%s_" % variables.counter + \
-                                         now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
-                    p = os.path.abspath(os.path.join(__file__, "../../../.."))
-                    variables.path = os.path.join(p,
-                                                  'data_voltage_pulse_mode\\%s' % variables.exp_name)
-                    # Create folder to save the data
-                    if not os.path.isdir(variables.path):
-                            os.makedirs(variables.path, mode=0o777, exist_ok=True)
-                    # start the run methos of MainThread Class, which is main function of apt_voltage.py
-                    self.thread.start()
-                    if self.parameters_source.currentText() == 'TextLine':
-                            variables.index_line += 1  # increase the index line of TextLine to read the second line in next step
-            else:
-                    _translate = QtCore.QCoreApplication.translate
-                    self.Error.setText(_translate("OXCART",
-                                                  "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all "
-                                                  "Gates !!!</span></p></body></html>"))
+            # Read the experiment counter
+            with open('./files/counter_oxcart.txt') as f:
+                variables.counter = int(f.readlines()[0])
+            # Current time and date
+            now = datetime.datetime.now()
+            variables.exp_name = "%s_" % variables.counter + \
+                                 now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
+            p = os.path.abspath(os.path.join(__file__, "../../../.."))
+            variables.path = os.path.join(p,
+                                          'data_voltage_pulse_mode\\%s' % variables.exp_name)
+            # Create folder to save the data
+            if not os.path.isdir(variables.path):
+                os.makedirs(variables.path, mode=0o777, exist_ok=True)
+            # start the run methos of MainThread Class, which is main function of apt_voltage.py
+            self.thread.start()
+            if self.parameters_source.currentText() == 'TextLine':
+                variables.index_line += 1  # increase the index line of TextLine to read the second line in next step
+        else:
+            _translate = QtCore.QCoreApplication.translate
+            self.Error.setText(_translate("OXCART",
+                                          "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all "
+                                          "Gates !!!</span></p></body></html>"))
 
     def finished_thread_main(self, ):
-            """
+        """
                 The function that is run after end of experiment(MainThread)
                 """
-            self.start_button.setEnabled(True)
-            self.stop_button.setEnabled(True)
-            QScreen.grabWindow(self.app.primaryScreen(),
-                               QApplication.desktop().winId()).save(variables.path + '\screenshot.png')
-            if variables.index_line < self.num_line:  # Do next experiment in case of TextLine
-                    self.thread_main()
-            else:
-                    variables.index_line = 0
+        self.start_button.setEnabled(True)
+        self.stop_button.setEnabled(True)
+        QScreen.grabWindow(self.app.primaryScreen(),
+                           QApplication.desktop().winId()).save(variables.path + '\screenshot.png')
+        if variables.index_line < self.num_line:  # Do next experiment in case of TextLine
+            self.thread_main()
+        else:
+            variables.index_line = 0
 
     def stop_ex(self):
-            """
+        """
                 The function that is run if STOP button is pressed
                 """
-            if variables.start_flag == True:
-                    variables.stop_flag = True  # Set the STOP flag
-                    self.stop_button.setEnabled(False)  # Disable the stop button
+        if variables.start_flag == True:
+            variables.stop_flag = True  # Set the STOP flag
+            self.stop_button.setEnabled(False)  # Disable the stop button
 
     def gates(self, gate_num):
-            """
+        """
                 The function for closing or opening gates
                 """
 
-            def switch_gate(num):
-                    """
+        def switch_gate(num):
+            """
                             The function for applying the command of closing or opening gate
                             """
-                    with nidaqmx.Task() as task:
-                            if self.conf['gates'] != "off":
-                                    task.do_channels.add_do_chan(self.conf['COM_PORT_gates'] + 'line%s' % num)
-                                    task.start()
-                                    task.write([True])
-                                    time.sleep(.5)
-                                    task.write([False])
-                            else:
-                                    print('The gates control is off')
+            with nidaqmx.Task() as task:
+                if self.conf['gates'] != "off":
+                    task.do_channels.add_do_chan(self.conf['COM_PORT_gates'] + 'line%s' % num)
+                    task.start()
+                    task.write([True])
+                    time.sleep(.5)
+                    task.write([False])
+                else:
+                    print('The gates control is off')
 
-            # Main gate
-            if not variables.start_flag and gate_num == 1 and not variables.flag_load_gate and not variables.flag_cryo_gate and variables.flag_pump_load_lock:
-                    if not variables.flag_main_gate:  # Open the main gate
-                            switch_gate(0)
-                            self.led_main_chamber.setPixmap(self.led_green)
-                            self.diagram.setPixmap(self.diagram_main_open)
-                            variables.flag_main_gate = True
-                    elif variables.flag_main_gate:  # Close the main gate
-                            switch_gate(1)
-                            self.led_main_chamber.setPixmap(self.led_red)
-                            self.diagram.setPixmap(self.diagram_close_all)
-                            variables.flag_main_gate = False
-            # Buffer gate
-            elif not variables.start_flag and gate_num == 2 and not variables.flag_main_gate and not variables.flag_cryo_gate and variables.flag_pump_load_lock:
-                    if not variables.flag_load_gate:  # Open the main gate
-                            switch_gate(2)
-                            self.led_load_lock.setPixmap(self.led_green)
-                            self.diagram.setPixmap(self.diagram_load_open)
-                            variables.flag_load_gate = True
-                    elif variables.flag_load_gate:  # Close the main gate
-                            switch_gate(3)
-                            self.led_load_lock.setPixmap(self.led_red)
-                            self.diagram.setPixmap(self.diagram_close_all)
-                            variables.flag_load_gate = False
-            # Cryo gate
-            elif not variables.start_flag and gate_num == 3 and not variables.flag_main_gate and not variables.flag_load_gate and variables.flag_pump_load_lock:
-                    if not variables.flag_cryo_gate:  # Open the main gate
-                            switch_gate(4)
-                            self.led_cryo.setPixmap(self.led_green)
-                            self.diagram.setPixmap(self.diagram_cryo_open)
-                            variables.flag_cryo_gate = True
-                    elif variables.flag_cryo_gate:  # Close the main gate
-                            switch_gate(5)
-                            self.led_cryo.setPixmap(self.led_red)
-                            self.diagram.setPixmap(self.diagram_close_all)
-                            variables.flag_cryo_gate = False
-            # Show the error message in the GUI
-            else:
-                    _translate = QtCore.QCoreApplication.translate
-                    self.Error.setText(_translate("OXCART",
-                                                  "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all "
-                                                  "the Gates and switch on the pump !!!</span></p></body></html>"))
+        # Main gate
+        if not variables.start_flag and gate_num == 1 and not variables.flag_load_gate and not variables.flag_cryo_gate and variables.flag_pump_load_lock:
+            if not variables.flag_main_gate:  # Open the main gate
+                switch_gate(0)
+                self.led_main_chamber.setPixmap(self.led_green)
+                self.diagram.setPixmap(self.diagram_main_open)
+                variables.flag_main_gate = True
+            elif variables.flag_main_gate:  # Close the main gate
+                switch_gate(1)
+                self.led_main_chamber.setPixmap(self.led_red)
+                self.diagram.setPixmap(self.diagram_close_all)
+                variables.flag_main_gate = False
+        # Buffer gate
+        elif not variables.start_flag and gate_num == 2 and not variables.flag_main_gate and not variables.flag_cryo_gate and variables.flag_pump_load_lock:
+            if not variables.flag_load_gate:  # Open the main gate
+                switch_gate(2)
+                self.led_load_lock.setPixmap(self.led_green)
+                self.diagram.setPixmap(self.diagram_load_open)
+                variables.flag_load_gate = True
+            elif variables.flag_load_gate:  # Close the main gate
+                switch_gate(3)
+                self.led_load_lock.setPixmap(self.led_red)
+                self.diagram.setPixmap(self.diagram_close_all)
+                variables.flag_load_gate = False
+        # Cryo gate
+        elif not variables.start_flag and gate_num == 3 and not variables.flag_main_gate and not variables.flag_load_gate and variables.flag_pump_load_lock:
+            if not variables.flag_cryo_gate:  # Open the main gate
+                switch_gate(4)
+                self.led_cryo.setPixmap(self.led_green)
+                self.diagram.setPixmap(self.diagram_cryo_open)
+                variables.flag_cryo_gate = True
+            elif variables.flag_cryo_gate:  # Close the main gate
+                switch_gate(5)
+                self.led_cryo.setPixmap(self.led_red)
+                self.diagram.setPixmap(self.diagram_close_all)
+                variables.flag_cryo_gate = False
+        # Show the error message in the GUI
+        else:
+            _translate = QtCore.QCoreApplication.translate
+            self.Error.setText(_translate("OXCART",
+                                          "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all "
+                                          "the Gates and switch on the pump !!!</span></p></body></html>"))
 
     def pump_switch(self):
-            """
+        """
                 The function for Switching the Load Lock pump
                 """
-            if not variables.start_flag and not variables.flag_main_gate and not variables.flag_cryo_gate \
-                    and not variables.flag_load_gate:
-                    if variables.flag_pump_load_lock:
-                            variables.flag_pump_load_lock_click = True
-                            self.pump_load_lock_switch.setEnabled(False)
-                    elif not variables.flag_pump_load_lock:
-                            variables.flag_pump_load_lock_click = True
-                            self.pump_load_lock_switch.setEnabled(False)
-            else:  # SHow error message in the GUI
-                    _translate = QtCore.QCoreApplication.translate
-                    self.Error.setText(_translate("OXCART",
-                                                  "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all "
-                                                  "the Gates !!!</span></p></body></html>"))
+        if not variables.start_flag and not variables.flag_main_gate and not variables.flag_cryo_gate \
+                and not variables.flag_load_gate:
+            if variables.flag_pump_load_lock:
+                variables.flag_pump_load_lock_click = True
+                self.pump_load_lock_switch.setEnabled(False)
+            elif not variables.flag_pump_load_lock:
+                variables.flag_pump_load_lock_click = True
+                self.pump_load_lock_switch.setEnabled(False)
+        else:  # SHow error message in the GUI
+            _translate = QtCore.QCoreApplication.translate
+            self.Error.setText(_translate("OXCART",
+                                          "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all "
+                                          "the Gates !!!</span></p></body></html>"))
 
     def light_switch(self):
-            """
+        """
                 The function for switching the exposure time of cameras in case of swithching the light
                 """
-            if not variables.light:
-                    self.led_light.setPixmap(self.led_green)
-                    Camera.light_switch(self)
-                    self.timer1.setInterval(500)
-                    variables.light = True
-                    variables.sample_adjust = True
-                    variables.light_swich = True
-            elif variables.light:
-                    self.led_light.setPixmap(self.led_red)
-                    Camera.light_switch(self)
-                    self.timer1.setInterval(500)
-                    variables.light = False
-                    variables.sample_adjust = False
-                    variables.light_swich = False
+        if not variables.light:
+            self.led_light.setPixmap(self.led_green)
+            Camera.light_switch(self)
+            self.timer1.setInterval(500)
+            variables.light = True
+            variables.sample_adjust = True
+            variables.light_swich = True
+        elif variables.light:
+            self.led_light.setPixmap(self.led_red)
+            Camera.light_switch(self)
+            self.timer1.setInterval(500)
+            variables.light = False
+            variables.sample_adjust = False
+            variables.light_swich = False
 
     def thread_worker(self, target):
-            """
+        """
                 The function for creating workers
                 """
-            return threading.Thread(target=target)
+        return threading.Thread(target=target)
 
     def update_plot_data(self):
-            """
+        """
                 The function for updating plots
             """
-            if self.conf['pump'] == "off":
-                    self.pump_load_lock_switch.setEnabled(False)
-            if self.conf['gates'] == "off":
-                    self.main_chamber_switch.setEnabled(False)
-                    self.load_lock_switch.setEnabled(False)
-                    self.cryo_switch.setEnabled(False)
-            # Temperature
-            self.x_tem = self.x_tem[1:]  # Remove the first element.
-            self.x_tem = np.append(self.x_tem, self.x_tem[-1] + 1)  # Add a new value 1 higher than the last.
-            self.y_tem = self.y_tem[1:]  # Remove the first element.
-            try:
-                    self.y_tem = np.append(self.y_tem, int(variables.temperature))
-                    self.data_line_tem.setData(self.x_tem, self.y_tem)
-            except Exception as e:
-                    print(
-                            f"{initialize_devices.bcolors.FAIL}Error: Cannot read the temperature{initialize_devices.bcolors.ENDC}")
-                    print(e)
-            if variables.index_auto_scale_graph == 30:
-                    self.temperature.enableAutoRange(axis='x')
-                    self.vdc_time.enableAutoRange(axis='x')
-                    self.detection_rate_viz.enableAutoRange(axis='x')
-                    variables.index_auto_scale_graph = 0
+        if self.conf['pump'] == "off":
+            self.pump_load_lock_switch.setEnabled(False)
+        if self.conf['gates'] == "off":
+            self.main_chamber_switch.setEnabled(False)
+            self.load_lock_switch.setEnabled(False)
+            self.cryo_switch.setEnabled(False)
+        # Temperature
+        self.x_tem = self.x_tem[1:]  # Remove the first element.
+        self.x_tem = np.append(self.x_tem, self.x_tem[-1] + 1)  # Add a new value 1 higher than the last.
+        self.y_tem = self.y_tem[1:]  # Remove the first element.
+        try:
+            self.y_tem = np.append(self.y_tem, int(variables.temperature))
+            self.data_line_tem.setData(self.x_tem, self.y_tem)
+        except Exception as e:
+            print(
+                f"{initialize_devices.bcolors.FAIL}Error: Cannot read the temperature{initialize_devices.bcolors.ENDC}")
+            print(e)
+        if variables.index_auto_scale_graph == 30:
+            self.temperature.enableAutoRange(axis='x')
+            self.vdc_time.enableAutoRange(axis='x')
+            self.detection_rate_viz.enableAutoRange(axis='x')
+            variables.index_auto_scale_graph = 0
 
-            self.temperature.disableAutoRange()
-            self.vdc_time.disableAutoRange()
-            self.detection_rate_viz.disableAutoRange()
+        self.temperature.disableAutoRange()
+        self.vdc_time.disableAutoRange()
+        self.detection_rate_viz.disableAutoRange()
 
-            variables.index_auto_scale_graph += 1
+        variables.index_auto_scale_graph += 1
 
-            if variables.plot_clear_flag:
-                    self.x_vdc = np.arange(1000)  # 1000 time points
-                    self.y_vdc = np.zeros(1000)  # 1000 data points
-                    self.y_vdc[:] = np.nan
-                    self.y_vps = np.zeros(1000)  # 1000 data points
-                    self.y_vps[:] = np.nan
+        if variables.plot_clear_flag:
+            self.x_vdc = np.arange(1000)  # 1000 time points
+            self.y_vdc = np.zeros(1000)  # 1000 data points
+            self.y_vdc[:] = np.nan
+            self.y_vps = np.zeros(1000)  # 1000 data points
+            self.y_vps[:] = np.nan
 
-                    self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
-                    self.data_line_vps.setData(self.x_vdc, self.y_vps)
+            self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
+            self.data_line_vps.setData(self.x_vdc, self.y_vps)
 
-                    self.x_dtec = np.arange(1000)
-                    self.y_dtec = np.zeros(1000)
-                    self.y_dtec[:] = np.nan
+            self.x_dtec = np.arange(1000)
+            self.y_dtec = np.zeros(1000)
+            self.y_dtec[:] = np.nan
 
-                    self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+            self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 
-                    self.histogram.clear()
+            self.histogram.clear()
 
-                    self.scatter.clear()
-                    self.visualization.clear()
-                    self.visualization.addItem(self.detector_circle)
-                    variables.plot_clear_flag = False
+            self.scatter.clear()
+            self.visualization.clear()
+            self.visualization.addItem(self.detector_circle)
+            variables.plot_clear_flag = False
 
-                    variables.specimen_voltage = 0
-                    variables.pulse_voltage = 0
-                    variables.elapsed_time = 0
-                    variables.total_ions = 0
-                    variables.avg_n_count = 0
+            variables.specimen_voltage = 0
+            variables.pulse_voltage = 0
+            variables.elapsed_time = 0
+            variables.total_ions = 0
+            variables.avg_n_count = 0
 
-            if variables.start_flag:
-                    if variables.index_wait_on_plot_start <= 16:
-                            variables.index_wait_on_plot_start += 1
+        if variables.start_flag:
+            if variables.index_wait_on_plot_start <= 16:
+                variables.index_wait_on_plot_start += 1
 
-                    if variables.index_wait_on_plot_start >= 8:
-                            # V_dc and V_p
-                            if variables.index_plot <= 999:
-                                    self.y_vdc[variables.index_plot] = int(
-                                            variables.specimen_voltage)  # Add a new value.
-                                    self.y_vps[variables.index_plot] = int(variables.pulse_voltage)  # Add a new value.
-                            else:
-                                    self.x_vdc = np.append(self.x_vdc,
-                                                           self.x_vdc[
-                                                                   -1] + 1)  # Add a new value 1 higher than the last.
-                                    self.y_vdc = np.append(self.y_vdc,
-                                                           int(variables.specimen_voltage))  # Add a new value.
-                                    self.y_vps = np.append(self.y_vps, int(variables.pulse_voltage))  # Add a new value.
+            if variables.index_wait_on_plot_start >= 8:
+                # V_dc and V_p
+                if variables.index_plot <= 999:
+                    self.y_vdc[variables.index_plot] = int(
+                        variables.specimen_voltage)  # Add a new value.
+                    self.y_vps[variables.index_plot] = int(variables.pulse_voltage)  # Add a new value.
+                else:
+                    self.x_vdc = np.append(self.x_vdc,
+                                           self.x_vdc[
+                                               -1] + 1)  # Add a new value 1 higher than the last.
+                    self.y_vdc = np.append(self.y_vdc,
+                                           int(variables.specimen_voltage))  # Add a new value.
+                    self.y_vps = np.append(self.y_vps, int(variables.pulse_voltage))  # Add a new value.
 
-                            self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
-                            self.data_line_vps.setData(self.x_vdc, self.y_vps)
+                self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
+                self.data_line_vps.setData(self.x_vdc, self.y_vps)
 
-                            # Detection Rate Visualization
-                            if variables.index_plot <= 999:
-                                    self.y_dtec[variables.index_plot] = int(variables.avg_n_count)  # Add a new value.
-                            else:
-                                    self.x_dtec = self.x_dtec[1:]  # Remove the first element.
-                                    self.x_dtec = np.append(self.x_dtec,
-                                                            self.x_dtec[
-                                                                    -1] + 1)  # Add a new value 1 higher than the last.
-                                    self.y_dtec = self.y_dtec[1:]
-                                    self.y_dtec = np.append(self.y_dtec, int(variables.avg_n_count))
+                # Detection Rate Visualization
+                if variables.index_plot <= 999:
+                    self.y_dtec[variables.index_plot] = int(variables.avg_n_count)  # Add a new value.
+                else:
+                    self.x_dtec = self.x_dtec[1:]  # Remove the first element.
+                    self.x_dtec = np.append(self.x_dtec,
+                                            self.x_dtec[
+                                                -1] + 1)  # Add a new value 1 higher than the last.
+                    self.y_dtec = self.y_dtec[1:]
+                    self.y_dtec = np.append(self.y_dtec, int(variables.avg_n_count))
 
-                            self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
-                            # Increase the index
-                            variables.index_plot += 1
-                    # Time of Flight
-                    if variables.counter_source == 'TDC' and variables.total_ions > 0 and variables.index_wait_on_plot_start > 16 \
-                            and variables.index_wait_on_plot_start > 16 and not variables.raw_mode:
-                            if variables.index_wait_on_plot_start > 16:
+                self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+                # Increase the index
+                variables.index_plot += 1
+            # Time of Flight
+            if variables.counter_source == 'TDC' and variables.total_ions > 0 and variables.index_wait_on_plot_start > 16 \
+                    and variables.index_wait_on_plot_start > 16 and not variables.raw_mode:
+                if variables.index_wait_on_plot_start > 16:
 
-                                    try:
-                                            def replaceZeroes(data):
-                                                    min_nonzero = np.min(data[np.nonzero(data)])
-                                                    data[data == 0] = min_nonzero
-                                                    return data
+                    try:
+                        def replaceZeroes(data):
+                            min_nonzero = np.min(data[np.nonzero(data)])
+                            data[data == 0] = min_nonzero
+                            return data
 
-                                            if self.conf["visualization"] == 'tof':
-                                                    tof = variables.t * 27.432 / (1000 * 4)  # Time in ns
-                                                    viz = tof[tof < 5000]
-                                            elif self.conf["visualization"] == 'mc':
-                                                    max_lenght = max(len(variables.x), len(variables.y),
-                                                                     len(variables.t), len(variables.main_v_dc_dld))
-                                                    viz = tof2mc_simple.tof_bin2mc_sc(variables.t[:max_lenght], 0,
-                                                                                      variables.main_v_dc_dld[
-                                                                                   :max_lenght],
-                                                                                      variables.x[:max_lenght],
-                                                                                      variables.x[:max_lenght],
-                                                                                      flightPathLength=110)
-                                                    viz = viz[viz < 200]
+                        if self.conf["visualization"] == 'tof':
+                            tof = variables.t * 27.432 / (1000 * 4)  # Time in ns
+                            viz = tof[tof < 5000]
+                        elif self.conf["visualization"] == 'mc':
+                            max_lenght = max(len(variables.x), len(variables.y),
+                                             len(variables.t), len(variables.main_v_dc_dld))
+                            viz = tof2mc_simple.tof_bin2mc_sc(variables.t[:max_lenght], 0,
+                                                              variables.main_v_dc_dld[
+                                                              :max_lenght],
+                                                              variables.x[:max_lenght],
+                                                              variables.x[:max_lenght],
+                                                              flightPathLength=110)
+                            viz = viz[viz < 200]
 
-                                            self.y_tof, self.x_tof = np.histogram(viz, bins=512)
-                                            self.histogram.clear()
-                                            self.y_tof = replaceZeroes(self.y_tof)
-                                            self.histogram.addItem(
-                                                    pg.BarGraphItem(x=self.x_tof[:-1], height=np.log(self.y_tof),
-                                                                    width=0.1, brush='r'))
+                        self.y_tof, self.x_tof = np.histogram(viz, bins=512)
+                        self.histogram.clear()
+                        self.y_tof = replaceZeroes(self.y_tof)
+                        self.histogram.addItem(
+                            pg.BarGraphItem(x=self.x_tof[:-1], height=np.log(self.y_tof),
+                                            width=0.1, brush='r'))
 
-                                    except Exception as e:
-                                            print(
-                                                    f"{initialize_devices.bcolors.FAIL}Error: Cannot plot Histogram correctly{initialize_devices.bcolors.ENDC}")
-                                            print(e)
-                                    # Visualization
-                                    try:
-                                            # adding points to the scatter plot
-                                            self.scatter.clear()
-                                            self.scatter.setSize(self.doubleSpinBox.value())
-                                            x = variables.x
-                                            y = variables.y
-                                            min_length = min(len(x), len(y))
-                                            x = variables.x[-min_length:]
-                                            y = variables.y[-min_length:]
-                                            self.scatter.setData(x=x[-variables.hit_display:],
-                                                                 y=y[-variables.hit_display:])
-                                            # add item to plot window
-                                            # adding scatter plot item to the plot window
-                                            self.visualization.clear()
-                                            self.visualization.addItem(self.scatter)
-                                            self.visualization.addItem(self.detector_circle)
-                                    except Exception as e:
-                                            print(
-                                                    f"{initialize_devices.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
-                                            print(e)
-                    # save plots to the file
-                    if variables.index_plot_save % 100 == 0:
-                            exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
-                            exporter.export(variables.path + '/v_dc_p_%s.png' % variables.index_plot_save)
-                            exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
-                            exporter.export(variables.path + '/detection_rate_%s.png' % variables.index_plot_save)
-                            exporter = pg.exporters.ImageExporter(self.visualization.plotItem)
-                            exporter.export(variables.path + '/visualization_%s.png' % variables.index_plot_save)
-                            exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
-                            exporter.export(variables.path + '/tof_%s.png' % variables.index_plot_save)
+                    except Exception as e:
+                        print(
+                            f"{initialize_devices.bcolors.FAIL}Error: Cannot plot Histogram correctly{initialize_devices.bcolors.ENDC}")
+                        print(e)
+                    # Visualization
+                    try:
+                        # adding points to the scatter plot
+                        self.scatter.clear()
+                        self.scatter.setSize(self.doubleSpinBox.value())
+                        x = variables.x
+                        y = variables.y
+                        min_length = min(len(x), len(y))
+                        x = variables.x[-min_length:]
+                        y = variables.y[-min_length:]
+                        self.scatter.setData(x=x[-variables.hit_display:],
+                                             y=y[-variables.hit_display:])
+                        # add item to plot window
+                        # adding scatter plot item to the plot window
+                        self.visualization.clear()
+                        self.visualization.addItem(self.scatter)
+                        self.visualization.addItem(self.detector_circle)
+                    except Exception as e:
+                        print(
+                            f"{initialize_devices.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
+                        print(e)
+            # save plots to the file
+            if variables.index_plot_save % 100 == 0:
+                exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
+                exporter.export(variables.path + '/v_dc_p_%s.png' % variables.index_plot_save)
+                exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
+                exporter.export(variables.path + '/detection_rate_%s.png' % variables.index_plot_save)
+                exporter = pg.exporters.ImageExporter(self.visualization.plotItem)
+                exporter.export(variables.path + '/visualization_%s.png' % variables.index_plot_save)
+                exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
+                exporter.export(variables.path + '/tof_%s.png' % variables.index_plot_save)
 
-                    # Increase the index
-                    variables.index_plot_save += 1
+            # Increase the index
+            variables.index_plot_save += 1
 
-            # Statistics Update
-            self.speciemen_voltage.setText(str(float("{:.3f}".format(variables.specimen_voltage))))
-            self.pulse_voltage.setText(str(float("{:.3f}".format(variables.pulse_voltage))))
-            self.elapsed_time.setText(str(float("{:.3f}".format(variables.elapsed_time))))
-            self.total_ions.setText((str(variables.total_ions)))
-            self.detection_rate.setText(str
-                    (float("{:.3f}".format(
-                (variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000)))))
+        # Statistics Update
+        self.speciemen_voltage.setText(str(float("{:.3f}".format(variables.specimen_voltage))))
+        self.pulse_voltage.setText(str(float("{:.3f}".format(variables.pulse_voltage))))
+        self.elapsed_time.setText(str(float("{:.3f}".format(variables.elapsed_time))))
+        self.total_ions.setText((str(variables.total_ions)))
+        self.detection_rate.setText(str
+            (float("{:.3f}".format(
+            (variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000)))))
 
     def statistics(self):
-            """
+        """
                 The function for updating statistics in the GUI
                 """
-            # update temperature and vacuum gages
-            self.temp.display(variables.temperature)
-            self.vacuum_main.display(variables.vacuum_main)
-            self.vacuum_buffer.display('{:.2e}'.format(float(variables.vacuum_buffer)))
-            self.vacuum_buffer_back.display('{:.2e}'.format(variables.vacuum_buffer_backing))
-            self.vacuum_load_lock.display('{:.2e}'.format(variables.vacuum_load_lock))
-            self.vacuum_load_lock_back.display('{:.2e}'.format(variables.vacuum_load_lock_backing))
-            if variables.flag_pump_load_lock_led == False:
-                    self.led_pump_load_lock.setPixmap(self.led_red)
-                    self.pump_load_lock_switch.setEnabled(True)
-                    variables.flag_pump_load_lock_led = None
-            elif variables.flag_pump_load_lock_led == True:
-                    self.led_pump_load_lock.setPixmap(self.led_green)
-                    self.pump_load_lock_switch.setEnabled(True)
-                    variables.flag_pump_load_lock_led = None
+        # update temperature and vacuum gages
+        self.temp.display(variables.temperature)
+        self.vacuum_main.display(variables.vacuum_main)
+        self.vacuum_buffer.display('{:.2e}'.format(float(variables.vacuum_buffer)))
+        self.vacuum_buffer_back.display('{:.2e}'.format(variables.vacuum_buffer_backing))
+        self.vacuum_load_lock.display('{:.2e}'.format(variables.vacuum_load_lock))
+        self.vacuum_load_lock_back.display('{:.2e}'.format(variables.vacuum_load_lock_backing))
+        if variables.flag_pump_load_lock_led == False:
+            self.led_pump_load_lock.setPixmap(self.led_red)
+            self.pump_load_lock_switch.setEnabled(True)
+            variables.flag_pump_load_lock_led = None
+        elif variables.flag_pump_load_lock_led == True:
+            self.led_pump_load_lock.setPixmap(self.led_green)
+            self.pump_load_lock_switch.setEnabled(True)
+            variables.flag_pump_load_lock_led = None
 
-            # Clean up the error message
-            if variables.index_warning_message == 15:
-                    _translate = QtCore.QCoreApplication.translate
-                    self.Error.setText(_translate("OXCART",
-                                                  "<html><head/><body><p><span style=\" "
-                                                  "color:#ff0000;\"></span></p></body></html>"))
-                    variables.index_warning_message = 0
+        # Clean up the error message
+        if variables.index_warning_message == 15:
+            _translate = QtCore.QCoreApplication.translate
+            self.Error.setText(_translate("OXCART",
+                                          "<html><head/><body><p><span style=\" "
+                                          "color:#ff0000;\"></span></p></body></html>"))
+            variables.index_warning_message = 0
 
-            variables.index_warning_message += 1
+        variables.index_warning_message += 1
 
-            try:
-                    # Update the setup parameters
-                    variables.ex_time = int(float(self.ex_time.text()))
-                    variables.user_name = self.ex_user.text()
-                    variables.ex_freq = int(float(self.ex_freq.text()))
-                    variables.max_ions = int(float(self.max_ions.text()))
-                    variables.vdc_min = int(float(self.vdc_min.text()))
-                    variables.detection_rate = float(self.detection_rate_init.text())
-                    variables.hit_display = int(float(self.hit_displayed.text()))
-                    variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
-                    variables.pulse_frequency = float(self.pulse_frequency.text())
-                    variables.hdf5_path = self.ex_name.text()
-                    variables.email = self.email.text()
-                    variables.cycle_avg = int(float(self.cycle_avg.text()))
-                    variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
-                    variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
-                    variables.v_p_min = int(float(self.vp_min.text()))
-                    variables.v_p_max = int(float(self.vp_max.text()))
-                    variables.counter_source = str(self.counter_source.currentText())
+        try:
+            # Update the setup parameters
+            variables.ex_time = int(float(self.ex_time.text()))
+            variables.user_name = self.ex_user.text()
+            variables.ex_freq = int(float(self.ex_freq.text()))
+            variables.max_ions = int(float(self.max_ions.text()))
+            variables.vdc_min = int(float(self.vdc_min.text()))
+            variables.detection_rate = float(self.detection_rate_init.text())
+            variables.hit_display = int(float(self.hit_displayed.text()))
+            variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
+            variables.pulse_frequency = float(self.pulse_frequency.text())
+            variables.hdf5_path = self.ex_name.text()
+            variables.email = self.email.text()
+            variables.cycle_avg = int(float(self.cycle_avg.text()))
+            variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
+            variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
+            variables.v_p_min = int(float(self.vp_min.text()))
+            variables.v_p_max = int(float(self.vp_max.text()))
+            variables.counter_source = str(self.counter_source.currentText())
 
-                    if variables.counter_source == 'Pulse Counter':
-                            variables.counter_source = 'pulse_counter'
+            if variables.counter_source == 'Pulse Counter':
+                variables.counter_source = 'pulse_counter'
 
-                    if self.tweet.currentText() == 'Yes':
-                            variables.tweet = True
-                    elif self.tweet.currentText() == 'No':
-                            variables.tweet = False
+            if self.tweet.currentText() == 'Yes':
+                variables.tweet = True
+            elif self.tweet.currentText() == 'No':
+                variables.tweet = False
 
-                    if self.criteria_time.isChecked():
-                            variables.criteria_time = True
-                    elif not self.criteria_time.isChecked():
-                            variables.criteria_time = False
-                    if self.criteria_ions.isChecked():
-                            variables.criteria_ions = True
-                    elif not self.criteria_ions.isChecked():
-                            variables.criteria_ions = False
-                    if self.criteria_vdc.isChecked():
-                            variables.criteria_vdc = True
-                    elif not self.criteria_vdc.isChecked():
-                            variables.criteria_vdc = False
+            if self.criteria_time.isChecked():
+                variables.criteria_time = True
+            elif not self.criteria_time.isChecked():
+                variables.criteria_time = False
+            if self.criteria_ions.isChecked():
+                variables.criteria_ions = True
+            elif not self.criteria_ions.isChecked():
+                variables.criteria_ions = False
+            if self.criteria_vdc.isChecked():
+                variables.criteria_vdc = True
+            elif not self.criteria_vdc.isChecked():
+                variables.criteria_vdc = False
 
-                    # Show error message for V_dc higher than 20Kv
-                    if int(float(self.vdc_max.text())) > 20000:
-                            _translate = QtCore.QCoreApplication.translate
-                            self.Error.setText(_translate("OXCART",
-                                                          "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible "
-                                                          "number is 20KV</span></p></body></html>"))
-                            self.vdc_max.setText(_translate("OXCART", str(variables.vdc_max)))
-                    else:
-                            variables.vdc_max = int(float(self.vdc_max.text()))
-                    # Show error message for V_p higher than 3281
-                    if float(self.vp_max.text()) > 3281:
-                            _translate = QtCore.QCoreApplication.translate
-                            self.Error.setText(_translate("OXCART",
-                                                          "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible "
-                                                          "number is 3281 V</span></p></body></html>"))
-                            self.vp_max.setText(_translate("OXCART", str(variables.v_p_max)))
-                    else:
-                            variables.v_p_max = int(float(self.vp_max.text()))
+            # Show error message for V_dc higher than 20Kv
+            if int(float(self.vdc_max.text())) > 20000:
+                _translate = QtCore.QCoreApplication.translate
+                self.Error.setText(_translate("OXCART",
+                                              "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible "
+                                              "number is 20KV</span></p></body></html>"))
+                self.vdc_max.setText(_translate("OXCART", str(variables.vdc_max)))
+            else:
+                variables.vdc_max = int(float(self.vdc_max.text()))
+            # Show error message for V_p higher than 3281
+            if float(self.vp_max.text()) > 3281:
+                _translate = QtCore.QCoreApplication.translate
+                self.Error.setText(_translate("OXCART",
+                                              "<html><head/><body><p><span style=\" color:#ff0000;\">Maximum possible "
+                                              "number is 3281 V</span></p></body></html>"))
+                self.vp_max.setText(_translate("OXCART", str(variables.v_p_max)))
+            else:
+                variables.v_p_max = int(float(self.vp_max.text()))
 
-            except Exception as e:
-                    print(
-                            f"{initialize_devices.bcolors.FAIL}Error: Cannot update setup parameters{initialize_devices.bcolors.ENDC}")
-                    print(e)
+        except Exception as e:
+            print(
+                f"{initialize_devices.bcolors.FAIL}Error: Cannot update setup parameters{initialize_devices.bcolors.ENDC}")
+            print(e)
 
     def update_cameras(self, ):
-            """
+        """
                 The function for updating cameras in the GUI
                 """
-            self.cam_s_o.setImage(variables.img0_orig, autoRange=False)
-            self.cam_b_o.setImage(variables.img1_orig, autoRange=False)
+        self.cam_s_o.setImage(variables.img0_orig, autoRange=False)
+        self.cam_b_o.setImage(variables.img1_orig, autoRange=False)
 
-            self.camera0_zoom = QImage(variables.img0_zoom, 1200, 500, QImage.Format_RGB888)
-            self.camera1_zoom = QImage(variables.img1_zoom, 1200, 500, QImage.Format_RGB888)
+        self.camera0_zoom = QImage(variables.img0_zoom, 1200, 500, QImage.Format_RGB888)
+        self.camera1_zoom = QImage(variables.img1_zoom, 1200, 500, QImage.Format_RGB888)
 
-            self.camera0_zoom = QtGui.QPixmap(self.camera0_zoom)
-            self.camera1_zoom = QtGui.QPixmap(self.camera1_zoom)
+        self.camera0_zoom = QtGui.QPixmap(self.camera0_zoom)
+        self.camera1_zoom = QtGui.QPixmap(self.camera1_zoom)
 
-            self.cam_s_d.setPixmap(self.camera0_zoom)
-            self.cam_b_d.setPixmap(self.camera1_zoom)
+        self.cam_s_d.setPixmap(self.camera0_zoom)
+        self.cam_b_d.setPixmap(self.camera1_zoom)
+
 
 class MainThread(QThread):
     """
@@ -2014,11 +2016,9 @@ class MainThread(QThread):
     signal = pyqtSignal('PyQt_PyObject')
 
     def __init__(self, conf):
-            QThread.__init__(self, )
-            self.conf = conf
+        QThread.__init__(self, )
+        self.conf = conf
 
     def run(self):
-            main_thread = apt_tdc_surface_consept.main(self.conf)
-            self.signal.emit(main_thread)
-
-
+        main_thread = apt_tdc_surface_consept.main(self.conf)
+        self.signal.emit(main_thread)

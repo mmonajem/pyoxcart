@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="simple_read_TDC8HP.cpp">
+    <ClCompile Include="wrapper_read_TDC8HP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LMF_IO.cpp">

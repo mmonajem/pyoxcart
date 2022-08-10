@@ -9,13 +9,11 @@ import numpy as np
 import time
 import os
 
-from pyccapt.control_tools.module_dir import MODULE_DIR
-
 # load the library
-
-os.chdir(os.path.split(MODULE_DIR)[
-             0] + '\\control\\tdc_roentdec\\')  # directory has to be changed to be changed to the directory of dlls
-tdc_lib = ctypes.CDLL("../tdc_roentdec/wrapper_read_TDC8HP_x64.dll")
+p = os.path.abspath(os.path.join(__file__, "../../../.."))
+p = p + '\\control\\pyccapt\\tdc_roentdec\\'
+os.chdir(p)
+tdc_lib = ctypes.CDLL("./wrapper_read_TDC8HP_x64.dll")
 
 
 class tdc_roentec(object):
