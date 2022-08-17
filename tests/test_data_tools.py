@@ -13,7 +13,7 @@ test_file_name = 'OLO_AL_6_data.h5'
 
 @patch.object(data_tools.logger, "critical")
 def test_read_hdf5_file_not_found(mock):
-    file_name = path + test_file_name
+    file_name = path + 'not_existing_file.h5'
     response = data_tools.read_hdf5(file_name, 'surface_concept')
     mock.assert_called_with("[*] HDF5 File could not be found")
 
@@ -53,7 +53,7 @@ def test_read_mat_files_file_not_found(mock):
 
 
 def test_read_mat_files_check_response():
-    filename = path + 'not_existing_file.mat'
+    filename = path + 'isotopeTable.mat'
     test_response = scipy.io.loadmat(filename)
     response = data_tools.read_mat_files(filename)
     diff = DeepDiff(test_response, response)
@@ -61,22 +61,21 @@ def test_read_mat_files_check_response():
 
 
 def test_read_mat_files_check_returnType():
-    filename = path + 'not_existing_file.mat'
+    filename = path + 'isotopeTable.mat'
     response = data_tools.read_mat_files(filename)
     assert isinstance(response, dict)
 
 
 def test_convert_mat_to_df_check_returnType():
-    filename = path + 'not_existing_file.mat'
+    filename = path + 'isotopeTable.mat'
     data = data_tools.read_mat_files(filename)
-    # print(data['None'])
     data_tools.store_df_to_hdf = MagicMock()
     response = data_tools.convert_mat_to_df(data)
     assert isinstance(response, pd.core.frame.DataFrame)
 
 
 def test_store_df_to_hdf_check_response():
-    filename = path + 'not_existing_file.mat'
+    filename = path + 'isotopeTable.mat'
     matFileResponse = data_tools.read_mat_files(filename)
     pdDataframe = pd.DataFrame(matFileResponse['None'])
     filename = path + 'unittests_dummy.h5'

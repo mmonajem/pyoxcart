@@ -15,15 +15,18 @@ from pyccapt.calibration_tools import logging_library
 
 logger = logging_library.logger_creator('data_loadcrop')
 
-from pyccapt.calibration_tools import logging_library
-
-logger = logging_library.logger_creator('data_loadcrop')
-
 
 def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc") -> "type:list - list of dataframes":
     try:
+        print("Filename>>",filename)
         hdf5Data = data_tools.read_hdf5(filename, tdc)
+        print("here",hdf5Data)
+        if hdf5Data is None:
+            print("Helloo")
+            raise FileNotFoundError
         if tdc == 'surface_concept':
+            #if 'dld/high_voltage' or 'dld/pulse_voltage' or 'dld/start_counter' or 'dld/t' or 'dld/x' or 'dld/y' not in hdf5Data:
+            #    raise KeyError 
             dld_highVoltage = hdf5Data['dld/high_voltage']
             dld_pulseVoltage = hdf5Data['dld/pulse_voltage']
             dld_startCounter = hdf5Data['dld/start_counter']
@@ -32,6 +35,8 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
             dld_y = hdf5Data['dld/y']
             dldGroupStorage = [dld_highVoltage, dld_pulseVoltage, dld_startCounter, dld_t, dld_x, dld_y]
         elif tdc == 'roentdec':
+            #if 'dld/high_voltage' or 'dld/laser_intensity' or 'dld/AbsoluteTimeStamp' or 'dld/t' or 'dld/x' or 'dld/y' not in hdf5Data:
+            #    raise KeyError 
             dld_highVoltage = hdf5Data['dld/high_voltage']
             dld_laserPower = hdf5Data['dld/laser_intensity']
             dld_AbsoluteTimeStamp = hdf5Data['dld/AbsoluteTimeStamp']
@@ -58,7 +63,11 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
             dldGroupStorage = [dld_highVoltage, dld_laserPower, dld_AbsoluteTimeStamp, dld_t, dld_x, dld_y]
         return dldGroupStorage
     except KeyError as error:
-        print("[*]Keys missing in the dataset -> ", error)
+        logger.info(error)
+        logger.critical("[*]Keys missing in the dataset")
+    except FileNotFoundError as error:
+        logger.info(error)
+        logger.critical("[*] HDF5 file not found")
 
 
 def concatenate_dataframes_of_dld_grp(
@@ -153,6 +162,7 @@ def plot_crop_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", bin
     plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
     elliptical_shape_selector(ax1, fig1)
     if save_name != None:
+        logger.info("Plot saved by the name {}".format(save_name))
         plt.savefig("%s.png" % save_name, format="png", dpi=600)
         plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
     plt.show(block=True)
@@ -170,11 +180,13 @@ def plot_FDM_after_selection(ax1, fig1, data_crop: "type:list  - cropped list co
     ax1.set_ylabel("y [mm]", color="red", fontsize=14)
     plt.title("FDM")
     plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
+    logger.info("Circle selector Called")
     print('x:', variables.selected_x_fdm, 'y:', variables.selected_y_fdm, 'roi:', variables.roi_fdm)
     circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
                   alpha=0.2, color='r', linewidth=1)
     ax1.add_patch(circ)
     if save_name != None:
+        logger.info("Plot saved by the name {}".format(save_name))
         plt.savefig("%s.png" % save_name, format="png", dpi=600)
         plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
     plt.show(block=True)
@@ -201,6 +213,7 @@ def plot_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", bins=(25
     plt.title("FDM")
     plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
     if save_name != None:
+        logger.info("Plot saved by the name {}".format(save_name))
         plt.savefig("%s.png" % save_name, format="png", dpi=600)
         plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
     plt.show(block=True)
@@ -211,7 +224,7 @@ def save_croppped_data_to_hdf5(data_crop: "type:list  - cropped list content",
                                name: "type:string - name of h5 file", tdc: "type: string - model of tdc",):
     # save the cropped data
     hierarchyName = 'df'
-    print('tofCropLossPct', (1 - len(data_crop) / len(dld_masterDataframe)) * 100)
+    logger.info('tofCropLossPct {}'.format(str(int((1 - len(data_crop) / len(dld_masterDataframe)) * 100))))
     if tdc == 'surface_concept':
         hdf5Dataframe = pd.DataFrame(data=data_crop,
                                      columns=['dld/high_voltage', 'dld/pulse_voltage', 'dld/start_counter', 'dld/t',

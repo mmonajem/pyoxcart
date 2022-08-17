@@ -8,7 +8,7 @@ from pyccapt.calibration_tools import variables
 
 p = os.path.abspath(os.path.join("", "."))
 path = p + '//data//data_tests//'
-
+test_dataset_2 = 'AL_data_b.h5'
 
 @pytest.fixture()
 def mc():
@@ -19,7 +19,7 @@ def mc():
 
 @pytest.fixture()
 def mc_voltage_corr():
-    file_name = path + 'mc_seb_array.h5'
+    file_name = path + 'mc_seb_latest.h5'
     mc_voltage_corr = data_tools.read_hdf5_through_pandas(file_name).to_numpy()[0][0]
     return mc_voltage_corr
 
@@ -33,7 +33,7 @@ def fitpeak():
 
 @pytest.fixture()
 def dld_data():
-    file_name = path + 'mc_seb_array.h5'
+    file_name = path + 'AL_data_b_cropped.h5'
     data = data_tools.read_hdf5_through_pandas(file_name)
     return data
 

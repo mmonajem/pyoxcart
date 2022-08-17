@@ -68,14 +68,17 @@ def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_
 
     if mode == 'count':
         y, x = np.histogram(mc, bins=bins)
+        logger.info("Selected Mode = count")
     elif mode == 'normalised':
         # calculate as counts/(Da * totalCts) so that mass spectra with different
         # count numbers are comparable
         y, x = np.histogram(mc, bins=bins)
         mc = mc / bin / len(mc)
         # med = median(y);
+        logger.info("Selected Mode = normalised")
     else:
         y, x = np.histogram(mc, bins=bins)
+        logger.info("Mode not selected")
 
     fig1, ax1 = plt.subplots(figsize=(8, 4))
 
@@ -246,7 +249,9 @@ def voltage_corr(highVoltage, mc, fitPeak, ionsPerFitSegment, plot=False, fig_na
     def voltage_corr_f(x, a, b, c):
         # return (np.sqrt(b + x + c*(x**2))) * a
         return a * (x ** 2) + b * x + c
-
+    variables.init()
+    if not isinstance(highVoltage,np.ndarray) or not isinstance(mc,np.ndarray) or not isinstance(fitPeak,np.ndarray):
+        logger.error("Incorrect data type of passed arguments")
     numAtom = len(mc)
     numMcBins = math.floor(numAtom / ionsPerFitSegment)
     binLimitsIdx = np.round(np.linspace(0, numAtom - 1, numMcBins + 1))
