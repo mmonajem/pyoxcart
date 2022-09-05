@@ -1,18 +1,15 @@
-
-from asyncore import file_dispatcher
 from unittest.mock import patch, Mock, MagicMock
 import matplotlib.pyplot as plt
 import os
-p = os.path.abspath(os.path.join("", "."))
-print(p)
-import copy
+
+
 
 from pyccapt.calibration_tools import data_loadcrop, data_tools,variables
 
 
 
-
-path = p + '//data//data_tests//'
+p = os.path.abspath(os.path.join("", "."))
+path = p + './/data//data_tests//'
 test_file_name = 'OLO_AL_6_data.h5'
 test_dataset_2 = 'AL_data_b.h5'
 

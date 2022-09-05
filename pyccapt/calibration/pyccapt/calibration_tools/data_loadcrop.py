@@ -50,9 +50,6 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
             mask_local = np.logical_and((np.abs(xx) <= 50.0), (np.abs(yy) <= 50.0))
             mask_temporal = (tt > 0)
             mask = np.logical_and(mask_temporal, mask_local)
-            print((mask_local[mask_local==True]).shape)
-            print((mask_temporal[mask_temporal==True]).shape)
-            print((mask[mask==True]).shape)
             dld_highVoltage = dld_highVoltage[mask]
             dld_laserPower = dld_laserPower[mask]
             dld_AbsoluteTimeStamp = dld_t[mask]
