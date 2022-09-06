@@ -43,7 +43,7 @@ setup(
                         "matplotlib",
                         "opencv-python",
                         "pandas",
-                        "PyQt5",
+                        "PyQt6",
                         "pyqtgraph",
                         "scikit_learn",
                         "ipywidgets",
@@ -59,7 +59,7 @@ setup(
                         "pyvisa-py",
                         "pyserial",
                         "tables",
-                        "pyqt5-tools",
+                        "pyqt6-tools",
                       ],
     # not to be confused with definitions in pyproject.toml [build-system]
     setup_requires=["pytest-runner"],

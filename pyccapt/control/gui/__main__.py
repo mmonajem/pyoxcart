@@ -5,7 +5,7 @@ This is the main script is load the GUI base on the configuration file.
 import sys
 import os
 import threading
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 # Serial ports and Camera libraries
 import serial.tools.list_ports
 from pypylon import pylon
@@ -138,7 +138,7 @@ def main():
 
         app = QtWidgets.QApplication(sys.argv)
         # get display resolution
-        screen_resolution = app.desktop().screenGeometry()
+        # screen_resolution = app.desktop().screenGeometry()
         # width, height = screen_resolution.width(), screen_resolution.height()
         # print('Screen size is:(%s,%s)' % (width, height))
         APT = QtWidgets.QMainWindow()
@@ -168,7 +168,8 @@ def main():
 
     ui.setupUi(APT)
     APT.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()

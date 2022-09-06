@@ -351,13 +351,14 @@ class APT_SIMPLE:
 
             variables.laser_intensity = np.zeros(0)
 
-            self.log_apt_tdc_roetdec.info(
-                "Function - cleanup_variables | ch1 | value - {}| type - {}".format(variables.count_temp,
-                                                                                    type(variables.count_temp)))
-            self.log_apt_tdc_roetdec.info(
-                "Function - cleanup_variables | main_v_dc_tdc | value - {}| type - {}".format(variables.main_v_dc_tdc,
-                                                                                              type(
-                                                                                                  variables.main_v_dc_tdc)))
+            if variables.log:
+                self.log_apt_tdc_roetdec.info(
+                    "Function - cleanup_variables | ch1 | value - {}| type - {}".format(variables.count_temp,
+                                                                                        type(variables.count_temp)))
+                self.log_apt_tdc_roetdec.info(
+                    "Function - cleanup_variables | main_v_dc_tdc | value - {}| type - {}".format(variables.main_v_dc_tdc,
+                                                                                                  type(
+                                                                                                      variables.main_v_dc_tdc)))
 
         print('starting to clean up')
         # save the data to the HDF5
