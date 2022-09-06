@@ -2,9 +2,7 @@ import pytest
 from unittest.mock import patch
 import os
 
-from pyccapt.calibration_tools import tools
-from pyccapt.calibration_tools import data_tools
-from pyccapt.calibration_tools import variables
+from calibration_tools import tools, data_tools, variables
 
 p = os.path.abspath(os.path.join("", "."))
 path = p + '//data//data_tests//'
@@ -123,7 +121,6 @@ def test_voltage_corr_check_return_type(dld_data, mc_voltage_corr, fitpeak):
 
 @patch.object(tools.plt, "savefig")
 def test_voltage_corr_fig_name_passed(mock, dld_data, mc_voltage_corr, fitpeak):
-    import numpy
     variables.init()
     dld_highVoltage = dld_data['dld/high_voltage'].to_numpy()
     dld_t = dld_data['dld/t'].to_numpy()
@@ -154,7 +151,6 @@ def test_voltage_corr_plot_equal_true(mock, dld_data, mc_voltage_corr, fitpeak):
 
 @patch.object(tools.logger, "error")
 def test_voltage_corr_incorrect_args_passed(mock, dld_data, mc_voltage_corr, fitpeak):
-    import numpy
     dld_highVoltage = dld_data['dld/high_voltage']
     dld_t = dld_data['dld/t'].to_numpy()
     threshold = 60
@@ -183,7 +179,6 @@ def test_bowl_corr_check_return_type(dld_data, mc_voltage_corr):
 
 @patch.object(tools.plt, "show")
 def test_bowl_corr_plot_equal_true(mock, dld_data, mc_voltage_corr):
-    import numpy
     dld_x = dld_data['dld/x'].to_numpy()
     dld_y = dld_data['dld/y'].to_numpy()
     mc_min = 21.42

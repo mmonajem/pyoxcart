@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from os.path import exists, dirname, realpath
-from setuptools import find_namespace_packages, setup, find_packages
-import sys
+from os.path import exists
+from setuptools import  setup, find_packages
 
 
 author = u"Mehrpad Monajem"
@@ -19,22 +18,9 @@ try:
 except BaseException:
     version = "0.0.32"
 
-all_packages = []
-package_dir = {}
-for source_dir_name in ['pyccapt/calibration', 'pyccapt/control']:
-    packages = find_namespace_packages(where=source_dir_name)
-    for package in packages:
-        package_dir[package] = '{}/{}'.format(
-            source_dir_name,
-            package.replace('.', '/'),
-        )
-    all_packages.extend(packages)
 
-print('Packages:', all_packages)
-print('Packages dir:', package_dir)
 setup(
     name=name,
-    namespace_packages=['pyccapt'],
     author=author,
     author_email='mehrpad.monajem@fau.de',
     url='https://github.com/mmonajem/pyccapt',
@@ -45,8 +31,8 @@ setup(
                 }
     },
     data_files=[('my_data', ['./tests/data'])],
-    packages=all_packages,
-    package_dir=package_dir,
+    packages=find_packages(),
+    package_dir={name: name},
     include_package_data=True,
     license="GPL v3",
     description=description,

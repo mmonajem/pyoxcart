@@ -4,9 +4,7 @@ import os
 
 
 
-from pyccapt.calibration_tools import data_loadcrop, data_tools,variables
-
-
+from calibration_tools import data_loadcrop, data_tools
 
 p = os.path.abspath(os.path.join("", "."))
 path = p + './/data//data_tests//'
@@ -22,7 +20,7 @@ def return_master_df_list():
 
 def return_hdf5_response():
     filename = path + test_dataset_2
-    data_response = data_tools.read_hdf5(filename,"surface_concept")
+    data_response = data_tools.read_hdf5(filename, "surface_concept")
     return data_response
 
 
@@ -57,8 +55,8 @@ def test_fetch_dataset_from_dld_grp_file_not_found(mock):
 
 def test_concatenate_dataframes_of_dld_grp_functionality():
     filename = path + test_file_name
-    data_response = data_tools.read_hdf5(filename,"surface_concept")
-    data_loadcrop.data_tools.read_hdf5 = Mock(return_value = data_response)
+    data_response = data_tools.read_hdf5(filename, "surface_concept")
+    calibration_tools.data_tools.read_hdf5 = Mock(return_value = data_response)
     list_of_dataframes = data_loadcrop.fetch_dataset_from_dld_grp(filename, 'surface_concept')
     df1_column_len = int(len(list_of_dataframes[0].columns))
     df2_column_len = int(len(list_of_dataframes[1].columns))
@@ -103,7 +101,7 @@ def test_plot_crop_FDM_functionality(mock):
     master_df = master_df.to_numpy()
     cropped_df = master_df[0:20:]
     plt.imshow = MagicMock()
-    data_loadcrop.plot_crop_FDM(ax1,fig1,cropped_df)
+    data_loadcrop.plot_crop_FDM(ax1, fig1, cropped_df)
     mock.assert_called()
 
 
@@ -115,7 +113,7 @@ def test_plot_crop_FDM_save_fig_func(mock):
     cropped_df = master_df[0:20:]
     plt.imshow = MagicMock()
     plt.savefig = MagicMock()
-    data_loadcrop.plot_crop_FDM(ax1, fig1, cropped_df, bins = (256,256),save_name = "test_plot")
+    data_loadcrop.plot_crop_FDM(ax1, fig1, cropped_df, bins = (256, 256), save_name ="test_plot")
     mock.assert_called_with("Plot saved by the name test_plot")
 
 
@@ -126,7 +124,7 @@ def test_plot_FDM_functionality(mock):
     master_df = return_master_df_list()
     master_df = master_df.to_numpy()
     cropped_df = master_df[0:20:]
-    data_loadcrop.plot_FDM(ax1,fig1,cropped_df)
+    data_loadcrop.plot_FDM(ax1, fig1, cropped_df)
     mock.assert_called()
 
 @patch.object(data_loadcrop.logger, "info")
@@ -137,7 +135,7 @@ def test_plot_FDM_save_fig_func(mock):
     cropped_df = master_df[0:20:]
     plt.imshow = MagicMock()
     plt.savefig = MagicMock()
-    data_loadcrop.plot_FDM(ax1,fig1,cropped_df,bins = (256,256),save_name = "test_plot")
+    data_loadcrop.plot_FDM(ax1, fig1, cropped_df, bins = (256, 256), save_name ="test_plot")
     mock.assert_called_with("Plot saved by the name test_plot")
 
 '''

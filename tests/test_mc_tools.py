@@ -1,10 +1,9 @@
 
 from unittest.mock import patch
 import numpy as np
-import sys
-import os
 
-from pyccapt.mc import mc_tools
+from mc import mc_tools
+
 
 def test_tof2mcSimple_check_return_type():
 
@@ -14,7 +13,7 @@ def test_tof2mcSimple_check_return_type():
     xDet = 100
     yDet = 50
     flightPathLength = 20
-    response = mc_tools.tof2mcSimple(t,t0,V,xDet,yDet,flightPathLength)
+    response = mc_tools.tof2mcSimple(t, t0, V, xDet, yDet, flightPathLength)
     assert isinstance(response,np.float64)
 
 
@@ -27,7 +26,7 @@ def test_tof2mcSimple_check_data_type_of_args(mock):
     xDet = 100
     yDet = 50
     flightPathLength = 20
-    response = mc_tools.tof2mcSimple(t,t0,V,xDet,yDet,flightPathLength)
+    response = mc_tools.tof2mcSimple(t, t0, V, xDet, yDet, flightPathLength)
     mock.assert_called_with("Data type of the passed argument is incorrect")
 
 
@@ -39,7 +38,7 @@ def test_tof2mc_check_return_type():
     xDet = 100
     yDet = 50
     flightPathLength = 20
-    response = mc_tools.tof2mc(t,t0,V,V_pulse,xDet,yDet,flightPathLength)
+    response = mc_tools.tof2mc(t, t0, V, V_pulse, xDet, yDet, flightPathLength)
     assert isinstance(response,np.float64)
 
 
@@ -53,7 +52,7 @@ def test_tof2mc_check_data_type_of_args(mock):
     xDet = 100
     yDet = 50
     flightPathLength = 20
-    response = mc_tools.tof2mc(t,t0,V,V_pulse,xDet,yDet,flightPathLength)
+    response = mc_tools.tof2mc(t, t0, V, V_pulse, xDet, yDet, flightPathLength)
     mock.assert_called_with("Data type of the passed argument is incorrect")
 
 
@@ -68,5 +67,5 @@ def test_tof2mc_check_mode(mock):
     yDet = 50
     flightPathLength = 20
     mode = "wrong_mode"
-    response = mc_tools.tof2mc(t,t0,V,V_pulse,xDet,yDet,flightPathLength,mode)
+    response = mc_tools.tof2mc(t, t0, V, V_pulse, xDet, yDet, flightPathLength, mode)
     mock.assert_called_with("Enter correct mode type")

@@ -1,10 +1,10 @@
-from unittest.mock import patch, Mock, MagicMock
+from unittest.mock import patch, MagicMock
 import os
 import pandas as pd
 import scipy
 from deepdiff import DeepDiff
 
-from pyccapt.calibration_tools import data_loadcrop, data_tools
+from calibration_tools import data_tools
 
 p = os.path.abspath(os.path.join("", "."))
 path = p + '//data//data_tests//'

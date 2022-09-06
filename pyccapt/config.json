@@ -1,5 +1,5 @@
 {
-	"mode": "advance",
+	"mode": "simple",
 	"visualization": "tof",
 	"log": "off",
 	"tdc": "on",
