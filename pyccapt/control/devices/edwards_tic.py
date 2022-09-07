@@ -4,6 +4,7 @@ This is the main script for Reading the Edward gauges.
 
 import serial
 
+# Local module and scripts
 from pyccapt.control.control_tools import loggi, variables
 
 

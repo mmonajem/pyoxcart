@@ -4,7 +4,7 @@ This is the script for testing pulser.
 
 import pyvisa
 import time
-from pyvisa import constants
+
 
 resources = pyvisa.ResourceManager('@py')
 print(resources.list_resources())

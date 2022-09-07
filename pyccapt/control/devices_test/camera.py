@@ -16,8 +16,6 @@ This is the script for testing BASLER cameras.
 # image event handlers. Please note that this is not shown in this example.
 # ============================================================================
 
-import os
-
 
 from pypylon import genicam
 from pypylon import pylon

@@ -10,9 +10,10 @@ from scipy.optimize import curve_fit
 from mpl_toolkits.mplot3d import Axes3D
 from scipy import interpolate
 
-from calibration_tools import variables
-from calibration_tools import intractive_point_identification
-from calibration_tools import logging_library
+# Local module and scripts
+from pyccapt.calibration.calibration_tools import variables
+from pyccapt.calibration.calibration_tools import intractive_point_identification
+from pyccapt.calibration.calibration_tools import logging_library
 
 logger = logging_library.logger_creator('data_loadcrop')
 

@@ -2,7 +2,8 @@ import pandas as pd
 import os.path as path
 import h5py
 
-from calibration_tools import data_loadcrop
+# Local module and scripts
+from pyccapt.calibration.calibration_tools import data_loadcrop
 
 p = path.abspath(path.join("", '../../../tests/data/'))
 name = ['data_97_Jul-22-2022_15-25_With_laser_2']

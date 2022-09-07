@@ -9,9 +9,10 @@ from matplotlib.patches import Circle, Rectangle
 import pandas as pd
 import h5py
 
-from calibration_tools import selectors_data
-from calibration_tools import variables, data_tools
-from calibration_tools import logging_library
+# Local module and scripts
+from pyccapt.calibration.calibration_tools import selectors_data
+from pyccapt.calibration.calibration_tools import variables, data_tools
+from pyccapt.calibration.calibration_tools import logging_library
 
 logger = logging_library.logger_creator('data_loadcrop')
 

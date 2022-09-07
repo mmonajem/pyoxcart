@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 from pypylon import pylon
 
-
+# Local module and scripts
 from pyccapt.control.control_tools import variables
 
 

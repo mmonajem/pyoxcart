@@ -3,7 +3,8 @@ This is the main script for sending email.
 """
 
 
-import smtplib, ssl
+import smtplib
+import ssl
 import datetime
 
 port = 465  # For SSL

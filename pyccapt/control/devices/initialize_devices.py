@@ -5,6 +5,7 @@ This is the main script for initializing Edward and Pfeifer gauges.
 import time
 import serial.tools.list_ports
 
+# Local module and scripts
 from pyccapt.control.devices.pfeiffer_gauges import TPG362
 from pyccapt.control.devices.edwards_tic import EdwardsAGC
 from pyccapt.control.control_tools import variables

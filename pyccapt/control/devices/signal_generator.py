@@ -5,6 +5,7 @@ This is the main script for initializing and controlling signal generator.
 import pyvisa
 import time
 
+# Local module and scripts
 from pyccapt.control.control_tools import variables
 
 

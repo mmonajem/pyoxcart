@@ -1,6 +1,6 @@
 """
 This is the script that print all the com port of the system.
-It is usful to find the com port of the device.
+It is useful to find the com port of the device.
 """
 
 import serial.tools.list_ports

@@ -2,7 +2,7 @@
 This is file contains tools for mass calibration process.
 """
 
-from calibration_tools import variables
+from pyccapt.calibration.calibration_tools import variables
 
 
 def onselect(eclick, erelease):

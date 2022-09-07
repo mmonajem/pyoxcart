@@ -5,9 +5,10 @@ This is the python version of data load and crop tutorial.
 import os
 import matplotlib.pyplot as plt
 
-from calibration_tools import data_loadcrop
-from calibration_tools import variables
-from calibration_tools import MODULE_DIR
+# Local module and scripts
+from pyccapt.calibration.calibration_tools import data_loadcrop
+from pyccapt.calibration.calibration_tools import variables
+
 
 
 def data_crop(filename, savename, dataset_name):
@@ -28,12 +29,19 @@ def data_crop(filename, savename, dataset_name):
 
 if __name__ == "__main__":
 
-    variables.path = os.path.join(os.path.split(os.path.split(MODULE_DIR)[0])[0], 'tests//data')
-    variables.result_path = os.path.join(os.path.split(os.path.split(MODULE_DIR)[0])[0], 'results')
+    dataset_name = 'OLO_AL_6_data'
+
+    p = os.path.abspath(os.path.join("", "../../../.."))
+
+    variables.init()
+    variables.path = os.path.join(p, 'tests//data')
+    variables.result_path = os.path.join(p, 'tests/results/load_crop/' + dataset_name)
+
+
     if not os.path.isdir(variables.result_path):
         os.makedirs(variables.result_path, mode=0o777, exist_ok=True)
     # dataset name
-    dataset_name = 'OLO_AL_6_data'
+
     filename = variables.path + '//' + dataset_name + '.h5'
     savename = variables.result_path + '//' + dataset_name + '.h5'
 

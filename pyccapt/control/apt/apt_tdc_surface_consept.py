@@ -9,16 +9,15 @@ import multiprocessing
 from multiprocessing.queues import Queue
 import threading
 import numpy as np
-
-# Serial ports and NI
 import serial.tools.list_ports
 import pyvisa as visa
-try:
-        import nidaqmx
-except:
-       print('Please install nidaqmx')
 
-# Local project scripts
+try:
+    import nidaqmx
+except:
+    print('Please install nidaqmx')
+
+# Local module and scripts
 from pyccapt.control.devices import tweet_send, initialize_devices, signal_generator
 from pyccapt.control.devices import email_send
 from pyccapt.control.tdc_surface_concept import tdc_surface_consept

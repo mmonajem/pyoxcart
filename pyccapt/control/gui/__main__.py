@@ -6,7 +6,6 @@ import sys
 import os
 import threading
 from PyQt6 import QtWidgets
-# Serial ports and Camera libraries
 import serial.tools.list_ports
 from pypylon import pylon
 
@@ -51,6 +50,7 @@ def main():
                 )
                 initialize_devices.initialize_cryovac(com_port_idx_cryovac)
             except Exception as e:
+                com_port_idx_cryovac = None
                 print('Can not initialize the Cryovac')
                 print(e)
 

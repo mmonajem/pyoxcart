@@ -4,7 +4,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-from calibration_tools import variables
+# Local module and scripts
+from pyccapt.calibration.calibration_tools import variables
 
 
 def voltage_corr(x, a, b, c, d):

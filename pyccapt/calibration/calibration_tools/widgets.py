@@ -4,7 +4,8 @@ This is the script containing widgets for ions selection from isotopic table.
 
 import ipywidgets as widgets
 
-from calibration_tools import variables
+# Local module and scripts
+from pyccapt.calibration.calibration_tools import variables
 
 # Stores values currently selected element in dropdown.
 elementDict = {}

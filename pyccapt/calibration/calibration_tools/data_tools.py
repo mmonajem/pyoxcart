@@ -3,7 +3,8 @@ import h5py
 import pandas as pd
 import scipy.io
 
-from calibration_tools import logging_library
+# Local module and scripts
+from pyccapt.calibration.calibration_tools import logging_library
 
 logger = logging_library.logger_creator('data_loadcrop')
 

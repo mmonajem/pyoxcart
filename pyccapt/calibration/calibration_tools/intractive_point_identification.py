@@ -5,7 +5,8 @@ This is the script containing interactive peak selection on m/c plot.
 import math
 import matplotlib.pyplot as plt
 
-from calibration_tools import variables
+# Local module and scripts
+from pyccapt.calibration.calibration_tools import variables
 
 
 class AnnoteFinder(object):

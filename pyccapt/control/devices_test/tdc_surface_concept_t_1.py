@@ -32,7 +32,10 @@ Created on Thu Sep 19 16:07:32 2019
 
 Test of the user callbacks interface.
 """
+
 import timeit
+
+# Local module and scripts
 from tdc_surface_concept import scTDC
 
 
