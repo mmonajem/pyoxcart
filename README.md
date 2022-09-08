@@ -1,5 +1,5 @@
 # PyCCAPT (APT_PyControl)
-# A modular, FAIR open-source python atom probe tomography software package for controlling experiment and calibrating data 
+# A modular, FAIR open-source python atom probe tomography software package for experiment control and data calibration 
 ![plot](pyccapt/files/logo.png)
 [![Documentation Status](https://readthedocs.org/projects/pyccapt/badge/?version=latest)](https://pyccapt.readthedocs.io/en/latest/?badge=latest)
 [![PyPi version](https://badgen.net/pypi/v/pyccapt/)](https://pypi.org/project/pyccapt)
@@ -33,7 +33,7 @@ The images below are an overview of the two version of user interface:
 #  Installation
 1- create the virtual environment via Anaconda:
     
-    conda create -n apt_env python=3.8 
+    conda create -n apt_env python=3.9
 
 2- Activate the virtual environment:
 
@@ -42,28 +42,6 @@ The images below are an overview of the two version of user interface:
 3- Install the package:
 
     pip install pyccapt
-
-if you want to only install control package then:
-
-    pip install pyccapt-control
-
-or for calibration package:
-
-    pip install pyccapt-calibration
-
-4- Install package locally:
-    
-    pip install -e .
-
-if you want to only install control package then:
-    
-    cd pyccapt/control
-    pip install -e .
-
-or for calibration package:
-
-    cd pyccapt/calibration
-    pip install -e .
 
 
 --------------
@@ -80,7 +58,7 @@ Crappy's features, tutorials, and other useful information.
 Edite the GUI with Qt-Designer and run command below to create your own GUI
 UI (simple or advance) in the GUI module. 
 
-    pyuic5 -x gui_simple_layout.ui -o gui_simple_layout.py. You should then merge the created file with the targeted 
+    pyuic6 -x gui_simple_layout.ui -o gui_simple_layout.py. You should then merge the created file with the targeted 
 ---------------------
 # Using PyCCAPT
 
