@@ -158,4 +158,20 @@ def compute_element_isotope_values_according_to_selected_charge():
     charge = chargeDict['charge']
     elementWithCharge = round(float(selectedElement) / int(charge), 2)
     elementWithChargeDict['element'] = elementWithCharge
+
+
+def dataset_tdc_selection():
+    dataset = widgets.Text(
+        value='OLO_AL_6_data',
+        placeholder='Paste ticket description here!',
+        description='Dataset:',
+        disabled=False
+    )
+
+    tdc = widgets.Dropdown(
+        options=['surface_concept', 'roentdec'],
+        value='surface_concept',
+        description='TDC model:',
+    )
+    return tdc, dataset
     
