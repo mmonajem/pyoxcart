@@ -60,6 +60,7 @@ setup(
                         "pyserial",
                         "tables",
                         "pyqt6-tools",
+                        "deepdiff",
                       ],
     # not to be confused with definitions in pyproject.toml [build-system]
     setup_requires=["pytest-runner"],

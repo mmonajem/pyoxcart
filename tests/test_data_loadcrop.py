@@ -3,13 +3,12 @@ import matplotlib.pyplot as plt
 import os
 
 
-
-from calibration_tools import data_loadcrop, data_tools
+# Local module and scripts
+from pyccapt.calibration.calibration_tools import data_loadcrop, data_tools
 
 p = os.path.abspath(os.path.join("", "."))
-path = p + './/data//data_tests//'
-test_file_name = 'OLO_AL_6_data.h5'
-test_dataset_2 = 'AL_data_b.h5'
+path = p + '\\data\\data_tests\\'
+test_file_name = 'AL_data_b.h5'
 
 def return_master_df_list():
 
@@ -19,7 +18,7 @@ def return_master_df_list():
     return response
 
 def return_hdf5_response():
-    filename = path + test_dataset_2
+    filename = path + test_file_name
     data_response = data_tools.read_hdf5(filename, "surface_concept")
     return data_response
 
@@ -56,7 +55,7 @@ def test_fetch_dataset_from_dld_grp_file_not_found(mock):
 def test_concatenate_dataframes_of_dld_grp_functionality():
     filename = path + test_file_name
     data_response = data_tools.read_hdf5(filename, "surface_concept")
-    calibration_tools.data_tools.read_hdf5 = Mock(return_value = data_response)
+    data_tools.read_hdf5 = Mock(return_value = data_response)
     list_of_dataframes = data_loadcrop.fetch_dataset_from_dld_grp(filename, 'surface_concept')
     df1_column_len = int(len(list_of_dataframes[0].columns))
     df2_column_len = int(len(list_of_dataframes[1].columns))

@@ -2,7 +2,8 @@
 from unittest.mock import patch
 import numpy as np
 
-from mc import mc_tools
+# Local module and scripts
+from pyccapt.calibration.mc import mc_tools
 
 
 def test_tof2mcSimple_check_return_type():

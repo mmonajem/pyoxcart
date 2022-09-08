@@ -4,11 +4,12 @@ import pandas as pd
 import scipy
 from deepdiff import DeepDiff
 
+# Local module and scripts
 from calibration_tools import data_tools
 
 p = os.path.abspath(os.path.join("", "."))
 path = p + '//data//data_tests//'
-test_file_name = 'OLO_AL_6_data.h5'
+test_file_name = 'AL_data_b.h5'
 
 
 @patch.object(data_tools.logger, "critical")

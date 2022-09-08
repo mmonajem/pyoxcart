@@ -2,7 +2,8 @@ import pytest
 from unittest.mock import patch
 import os
 
-from calibration_tools import tools, data_tools, variables
+# Local module and scripts
+from pyccapt.calibration.calibration_tools import tools, data_tools, variables
 
 p = os.path.abspath(os.path.join("", "."))
 path = p + '//data//data_tests//'

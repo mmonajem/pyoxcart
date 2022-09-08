@@ -18,8 +18,8 @@ from pyccapt.calibration.calibration_tools import logging_library
 logger = logging_library.logger_creator('data_loadcrop')
 
 
-def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_find=True, plot=False, prominence=500, distance=None,
-                 fig_name=None, text_loc='right', label='mc'):
+def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_find=True, plot=False,
+                 prominence=500, distance=None, fig_name=None, text_loc='right', label='mc'):
     """
     massSpecPlot plots the data from pos to get a mass spectrum as a figure
 
