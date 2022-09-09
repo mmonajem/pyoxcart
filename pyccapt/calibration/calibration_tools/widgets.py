@@ -168,10 +168,24 @@ def dataset_tdc_selection():
         disabled=False
     )
 
+    flightPathLength = widgets.Text(
+        value='110',
+        placeholder='Flight path length',
+        description='Flight path length:',
+        disabled=False
+    )
+    t0 = widgets.Text(
+        value='51.74',
+        placeholder='T_0 of the instrument',
+        description='t0:',
+        disabled=False
+    )
+
+
     tdc = widgets.Dropdown(
         options=['surface_concept', 'roentdec'],
         value='surface_concept',
         description='TDC model:',
     )
-    return tdc, dataset
+    return tdc, dataset, flightPathLength, t0
     
