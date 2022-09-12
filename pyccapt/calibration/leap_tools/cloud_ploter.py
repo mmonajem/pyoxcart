@@ -27,7 +27,7 @@ def decompose(data, element):
     # a bug existed, when only one line contained in pos.
     color = initial['colour'].values[0]
     px, py, pz = (pos[:,0], pos[:,1], pos[:,2])
-    return (px,py,pz,color)
+    return px, py, pz, color
 
 
 def cloud_ploter(data, phases, result_path, filename, plot_type='cloud'):
@@ -51,10 +51,10 @@ def cloud_ploter(data, phases, result_path, filename, plot_type='cloud'):
         for element in phases:
             px, py, pz, color = decompose(data, element)
             scatter = dict(
-                mode = "markers",
-                name = element,
-                type = "scatter3d",
-                x = px, y = py, z = pz,
+                mode="markers",
+                name=element,
+                type="scatter3d",
+                x=px, y=py, z=pz,
                 opacity = 0.2,
                 marker = dict(size=2, color=color)
             )

@@ -12,8 +12,8 @@ logger = logging_library.logger_creator('data_loadcrop')
 def read_hdf5(filename:"type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc")->"type: dataframe - Pandas dataframe converted from H5 file":
     """
     This function differs from read_hdf5_through_pandas as it does not assume that 
-    the contents of the HDF5 file as argument was created using pandas. It could 
-    be have been created using other tools like h5py/MATLAB.
+    the contents of the HDF5 file as argument was created using pandas. It could have been
+    created using other tools like h5py/MATLAB.
     """
     try:
         TOFFACTOR = 27.432 / (1000 * 4)  # 27.432 ps/bin, tof in ns, data is TDC time sum

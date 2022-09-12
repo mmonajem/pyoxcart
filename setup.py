@@ -63,6 +63,7 @@ setup(
                         "deepdiff",
                         "vispy",
                         "plotly",
+                        "faker",
                       ],
     # not to be confused with definitions in pyproject.toml [build-system]
     setup_requires=["pytest-runner"],

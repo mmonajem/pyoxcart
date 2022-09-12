@@ -24,43 +24,54 @@ def pol2cart(rho, phi):
     y = rho * np.sin(phi)
     return x, y
 
-def atom_probe_recons_pad(detx, dety, dld_v, flight_path_length, ion_volume, radius=55*1E-9, Fevap=65, det_eff=50, kf=3.0, icf=1.4):
+def atom_probe_recons_pad(detx, dety, hv, flight_path_length, ion_volume, radius=55*1E-9, Fevap=65, det_eff=50, kf=3.0, icf=1.4):
     """
-    :param detx:
-    :param dety:
-    :param hv:
-    :param kf:
-    :param icf:
-    :param flight_path_length:
+    :param detx: Hit position on the detector
+    :param dety: Hit position on the detector
+    :param hv: High voltage
+    :param kf: Field reduction factor
+    :param icf: Image compression factor (1.4) Because sample is not a perfect sphere
+    :param flight_path_length: distance between detector and sample
     :param ion_volume:
-    :param det_eff:
-    :param radius_evolution:
+    :param det_eff: Efficiency of the detector
     :return:
     """
 
-    r = dld_v / kf * Fevap
+    r = hv / (icf * (Fevap/1E-9))
 
-    m = flight_path_length / (icf * r)
+    m = flight_path_length / (kf * r)
 
     x = detx / m
     y = dety / m
 
-    det_area = (78/2)**2 * math.pi
+    det_area = ((78*10e-3)/2)**2 * math.pi
+
+    # detector coordinates in polar form
+    ang, rad = cart2pol(detx, dety)
+
+    # launch angle relative to specimen axis
+    thetaP = math.atan(rad / flight_path_length)  # mm / mm
+
+    # image compression correction
+    theta = thetaP + math.asin((icf - 1) * math.sin(thetaP))
+
+    # distance from axis and z shift of each hit
+    zp, d = pol2cart(theta, r)  # nm
 
     # dz = omega / det_eff = s_a  # s_a = s_d / m**2
     dz = ion_volume * m**2 / det_area * det_eff
 
-
+    zP, d = pol2cart(theta, r)  # nm
     ### calculate z coordinate
     # the z shift with respect to the top of the cap is Rspec - zP
-    zp = radius_evolution - zp
+    zp = r - zp
 
     # accumulative part of z
     omega = 1. / ion_volume / det_eff  # atomic volume in nm ^ 3
     omega[math.isnan(omega)] = 0
 
     # magnification M at ion index
-    M = flight_path_length / icf / radius_evolution
+    M = flight_path_length / icf / r
     # currently evaporating area of the specimen
     specArea = det_eff / M**2
     # individual depth increment

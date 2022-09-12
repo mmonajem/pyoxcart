@@ -6,6 +6,7 @@ import sys
 import matplotlib.colors as cols
 import re
 
+
 def read_pos(f):
     """
     Loads an APT .pos file as a pandas dataframe.
@@ -24,9 +25,9 @@ def read_pos(f):
         d = struct.unpack('>'+'f'*n, data)
                         # '>' denotes 'big-endian' byte order
     # unpack data
-    pos = pd.DataFrame({'x': d[0::4],
-                        'y': d[1::4],
-                        'z': d[2::4],
+    pos = pd.DataFrame({'x (nm)': d[0::4],
+                        'y (nm)': d[1::4],
+                        'z (nm)': d[2::4],
                         'm/n (Da)': d[3::4]})
     return pos
 
@@ -81,8 +82,8 @@ def read_epos(f):
                         'TOF (ns)': d[4::11],
                         'HV_DC (kV)': d[5::11],
                         'pulse (kV)': d[6::11],
-                        'det_x (nm)': d[7::11],
-                        'det_y (nm)': d[8::11],
+                        'det_x (cm)': d[7::11],
+                        'det_y (cm)': d[8::11],
                         'pslep': d[9::11], # pulses since last event pulse
                         'ipp': d[10::11]}) # ions per pulse
     return epos
