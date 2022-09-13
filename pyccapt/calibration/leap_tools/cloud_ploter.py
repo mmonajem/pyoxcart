@@ -23,16 +23,16 @@ def pre_data(pos_file, rrng_file, input_type):
 
 def decompose(data, element):
     initial = data.loc[element]
-    pos = initial[['x','y','z']].values
+    pos = initial[['x (nm)', 'y (nm)', 'z (nm)']].values
     # a bug existed, when only one line contained in pos.
     color = initial['colour'].values[0]
     px, py, pz = (pos[:,0], pos[:,1], pos[:,2])
     return px, py, pz, color
 
 
-def cloud_ploter(data, phases, result_path, filename, plot_type='cloud'):
+def cloud_plotter(data, phases, result_path, filename, plot_type='cloud'):
     if plot_type == 'projection':
-        ## plot static images with matplotlib.
+        # plot static images with matplotlib.
         ax = plt.figure().add_subplot(111)
         for element in phases:
             px, py, pz, color = decompose(data, element)
@@ -61,10 +61,10 @@ def cloud_ploter(data, phases, result_path, filename, plot_type='cloud'):
             plotly_data.append(scatter)
 
         layout = dict(
-            title = 'APT 3D Point Cloud',
-            scene = dict(xaxis = dict(zeroline=False),
-                        yaxis = dict(zeroline=False),
-                        zaxis = dict(zeroline=False, autorange='reversed'))
+            title='APT 3D Point Cloud',
+            scene=dict(xaxis=dict(zeroline=False, title='x (nm)'),
+                       yaxis=dict(zeroline=False, title='y (nm)'),
+                       zaxis=dict(zeroline=False, title='z (nm)', autorange='reversed'))
         )
         fig = dict(data=plotly_data, layout=layout)
         plotly.offline.plot(fig, filename=result_path + '{fn}.html'.format(fn=filename), show_link=False)
@@ -86,9 +86,9 @@ if __name__ == "__main__":
 
     ions, rrngs = apt_importers.read_rrng(path + 'rangefile.rrng')
 
-    pos_elements_l = pos_elements[['x', 'y', 'z', 'element', 'colour']].set_index("element")
+    pos_elements_l = pos_elements[['x (nm)', 'y (nm)', 'z (nm)', 'element', 'colour']].set_index("element")
 
     print(ions)
     phases = ['H', 'C', 'O', 'Ca', 'Ga', 'Na', 'N']
     filename = '_'.join(phases)
-    cloud_ploter(pos_elements_l, phases, result_path, filename, plot_type='projection')
+    cloud_plotter(pos_elements_l, phases, result_path, filename, plot_type='cloud')
