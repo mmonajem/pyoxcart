@@ -24,35 +24,7 @@ def pol2cart(rho, phi):
     return x, y
 
 
-def atom_probe_recons_pad(detx, dety, hv, flight_path_length, ion_volume, f_evap=65, det_eff=0.5, kf=3.0, icf=1.4):
-    """
-    :param detx: Hit position on the detector
-    :param dety: Hit position on the detector
-    :param hv: High voltage
-    :param kf: Field reduction factor
-    :param icf: Image compression factor (1.4) Because sample is not a perfect sphere
-    :param flight_path_length: distance between detector and sample
-    :param ion_volume: atomic volume in atoms/nm ^ 3
-    :param det_eff: Efficiency of the detector
-    :return:
-    """
-    # f_evap   evaporation field in V / nm
-    radius_evolution = hv / (icf * (f_evap / 1E-9))
-
-    m = (flight_path_length * 1E-3) / (kf * radius_evolution)
-
-    x = (detx * 1E-3) / m
-    y = (dety * 1E-3) / m
-
-    det_area = ((78 * 1E-3)/2)**2 * np.pi
-
-    dz = (((1/ion_volume) * 1E-9 ** 3) * (110 * 1E-3) ** 2) / (det_area * det_eff * (1.4 ** 2) * (radius_evolution ** 2))
-    z = np.cumsum(dz)
-
-    return x*1E9, y*1E9, z*1E9
-
-
-def atom_probe_recons_from_detector(detx, dety, hv, flight_path_length, kf=3.0, det_eff=50, icf=1.4, Fevap=65, avgDens=60.2):
+def atom_probe_recons_from_detector(detx, dety, hv, flight_path_length, kf, det_eff, icf, field_evap, avg_dens):
     """
     # atom probe reconstruction after: Gault et al., Ultramicroscopy 111(2011) 448 - 457
     x, y are the detector hit coordinates in mm
@@ -75,99 +47,67 @@ def atom_probe_recons_from_detector(detx, dety, hv, flight_path_length, kf=3.0, 
     # Fevap  # evaporation field in V / nm
 
     # detector coordinates in polar form
-    ang, rad = cart2pol(detx, dety)
-
+    rad, ang = cart2pol(detx * 1E-3, dety * 1E-3)
     # calculating effective detector area:
-    Adet = ((np.max(rad)) ** 2) * np.pi
+    det_area = (np.max(rad) ** 2) * np.pi
+    # f_evap   evaporation field in V / nm
+    radius_evolution = hv / (1.4 * (field_evap / 1E-9))
 
-    # radius evolution from voltage curve (in nm)
-    Rspec = hv / (kf * Fevap)
-
-    ## calcualte x and y coordinates
+    m = (flight_path_length * 1E-3) / (kf * radius_evolution)
 
     # launch angle relative to specimen axis
-    thetaP = np.arctan(rad / flight_path_length)  # mm / mm
-    theta = thetaP + np.arcsin((icf - 1) * np.sin(thetaP))
+    theta_p = np.arctan(rad / (110 * 1E-3))  # mm / mm
+    thet_a = theta_p + np.arcsin((1.4 - 1) * np.sin(theta_p))
 
     # distance from axis and z shift of each hit
-    zP, d = pol2cart(theta, Rspec)  # nm
+    z_p, d = pol2cart(radius_evolution, thet_a)  # nm
 
     # x and y coordinates from the angle on the detector and the distance to
     # the specimen axis.
-    x, y = pol2cart(ang, d)  # nm
+    x, y = pol2cart(d, ang)  # nm
 
     ## calculate z coordinate
     # the z shift with respect to the top of the cap is Rspec - zP
-    zP = Rspec - zP
+    z_p = radius_evolution - z_p
 
     # accumulative part of z
-    omega = 1 / avgDens  # atomic volume in nm ^ 3
+    omega = 1E-9 ** 3 / avg_dens  # atomic volume in nm ^ 3
 
     # nm ^ 3 * mm ^ 2 * V ^ 2 / nm ^ 2 / (mm ^ 2 * V ^ 2)
-    dz = omega * (flight_path_length**2) * (kf**2) * (Fevap**2) / (det_eff * Adet * (icf**2)) * (hv**2)
-
+    dz = omega * ((flight_path_length * 1E-3) ** 2) * (kf ** 2) / (det_eff * det_area * (icf ** 2)) * (
+                hv ** 2)
     # wide angle correction
-    cumZ = np.cumsum(np.double(dz))
-    z = cumZ + zP
+    cum_z = np.cumsum(dz)
+    z = cum_z + z_p
 
-    return x, y, z
+    return x * 1E9, y * 1E9, z * 1E9
 
 
-def atom_probe_recons_geiser(detx, dety, hv, flight_path_length, ion_volume, f_evap=65, det_eff=0.5, icf=1.4):
+
+
+def atom_probe_recons_pad(detx, dety, hv, flight_path_length, ion_volume, f_evap, det_eff, kf, icf):
     """
-    :param detx:
-    :param dety:
-    :param hv:
-    :param kf:
-    :param icf:
-    :param flight_path_length:
-    :param ion_volume:
-    :param det_eff:
-    :param radius_evolution:
+    :param detx: Hit position on the detector
+    :param dety: Hit position on the detector
+    :param hv: High voltage
+    :param kf: Field reduction factor
+    :param icf: Image compression factor (1.4) Because sample is not a perfect sphere
+    :param flight_path_length: distance between detector and sample
+    :param ion_volume: atomic volume in atoms/nm ^ 3
+    :param det_eff: Efficiency of the detector
     :return:
     """
-    ### fundamental bdata reconstruction
-
     # f_evap   evaporation field in V / nm
-    radius_evolution = hv / (icf * (f_evap))
+    radius_evolution = hv / (icf * (f_evap / 1E-9))
 
+    m = (flight_path_length * 1E-3) / (kf * radius_evolution)
 
-    # detector coordinates in polar form
-    ang, rad = cart2pol(detx, dety)
+    x = (detx * 1E-3) / m
+    y = (dety * 1E-3) / m
 
-    # launch angle relative to specimen axis
-    thetaP = np.arctan(rad / flight_path_length)  # mm / mm
+    det_area = ((78 * 1E-3)/2)**2 * np.pi
 
-    # image compression correction
-    theta = thetaP + np.arcsin((icf - 1) * np.sin(thetaP))
+    dz = (((1/ion_volume) * 1E-9 ** 3) * (110 * 1E-3) ** 2) / (det_area * det_eff * (icf ** 2) * (radius_evolution ** 2))
+    z = np.cumsum(dz)
 
-    # distance from axis and z shift of each hit
-    zp, d = pol2cart(theta, radius_evolution)  # nm
-
-    # x and y coordinates from the angle on the detector and the distance to
-    # the specimen axis.
-    x, y = pol2cart(ang, d)  # nm
-
-    ### calculate z coordinate
-    # the z shift with respect to the top of the cap is Rspec - zP
-    zp = radius_evolution - zp
-
-    # accumulative part of z
-    omega = (1.0 / ion_volume) / det_eff  # atomic volume in nm ^ 3
-    # omega[math.isnan(omega)] = 0
-
-    # magnification M at ion index
-    M = (flight_path_length / icf) / radius_evolution
-    # currently evaporating area of the specimen
-    specArea = det_eff / (M**2)
-    # individual depth increment
-    dz = omega / specArea
-
-    # wide angle correction
-    cum_z = np.cumsum(np.double(dz))
-    z = cum_z + zp
-
-    return x, y, z
-
-
-
+    return x*1E9, y*1E9, z*1E9

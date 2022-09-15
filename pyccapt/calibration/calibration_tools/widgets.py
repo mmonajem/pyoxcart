@@ -5,7 +5,7 @@ This is the script containing widgets for ions selection from isotopic table.
 import ipywidgets as widgets
 
 # Local module and scripts
-from pyccapt.calibration.calibration_tools import variables
+from pyccapt.calibration.calibration_tools import variables, data_tools
 
 # Stores values currently selected element in dropdown.
 elementDict = {}
@@ -188,4 +188,25 @@ def dataset_tdc_selection():
         description='TDC model:',
     )
     return tdc, dataset, flightPathLength, t0
-    
+
+def density_field_selection():
+    TableFile = '../../../files/field_density_table.h5'
+    dataframe = data_tools.read_hdf5_through_pandas(TableFile)
+    elementsAtomicNumber = dataframe['atomic_number']
+    elementsList = dataframe['element']
+    elementDensityList = dataframe['atom_density']
+    elementFieldList = dataframe['field_evaporation']
+
+    elementsAtomicNumber.to_numpy()
+    elements = list(zip(elementsAtomicNumber, elementsList, elementDensityList, elementFieldList))
+    dropdownList = []
+    for index, element in enumerate(elements):
+        tupleElement = (
+        "{} - {} - Density({}) - FieldEva({})".format(element[0], element[1], element[2], element[3]), )
+        dropdownList.append(tupleElement)
+
+    element = widgets.Dropdown(
+        options=elements,
+        description='Element'
+    )
+    return element

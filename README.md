@@ -72,6 +72,10 @@ to use the features of the package.
 
 Please report bugs, issues, ask for help or give feedback in the [github section](https://github.com/mmonajem/pyccapt/issues).
 
+Qestions/comments:
+  - Mehrpad Monajem, mehrpad.monajem@fau.de
+
+
 -----------
 # Citing 
 
