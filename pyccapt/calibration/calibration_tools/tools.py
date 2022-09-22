@@ -121,7 +121,7 @@ def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_
             plt.title("Time of Flight")
             ax1.set_xlabel("Time of Flight [ns]", color="red", fontsize=10)
         if mode == 'count':
-            ax1.set_ylabel("frequency [counts]", color="red", fontsize=10)
+            ax1.set_ylabel("frequency [cts / Da / totCts]", color="red", fontsize=10)
         elif mode == 'normalised':
             ax1.set_ylabel("frequency [cts / Da / totCts]", color="red", fontsize=10)
 
@@ -147,10 +147,10 @@ def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_
             plt.scatter(peakLocIs[:, 0], peakLocIs[:, 1], marker="x", color='red')
             for i in range(len(peaks)):
                 peakLocIs_tmp = [x[peaks[i]], y[peaks[i]]]
-                if peakLocIs_tmp[0] > 0.8:
-                    plt.hlines(results_half[1][i], x[int(results_half[2][i])], x[int(results_half[3][i])], color="red")
+                # Draw a horizontal line for width of each peak
+                # if peakLocIs_tmp[0] > 0.8:
+                #     plt.hlines(results_half[1][i], x[int(results_half[2][i])], x[int(results_half[3][i])], color="red")
 
-            # plt.hlines(*results_full[1:], color="C3")
             annotes = []
             variables.peaks_idx = []
             for i in range(len(peakLocIs)):
@@ -220,7 +220,7 @@ def history_ex(mc, dld_highVoltage, mean_t=1.5, mc_max=100, plot=False, fig_name
             continue
         else:
             break
-    print()
+
     peak_mean = (index[0] / 512) * 100
     peak_begin = index_min * 100 / 512
     peak_end = index_max * 100 / 512
@@ -232,9 +232,9 @@ def history_ex(mc, dld_highVoltage, mean_t=1.5, mc_max=100, plot=False, fig_name
         # set x-axis label
         ax1.set_xlabel("DC voltage", color="red", fontsize=20)
         # set y-axis label
-        ax1.set_ylabel("mass to charge [Da]", color="red", fontsize=20)
+        ax1.set_ylabel("mass to charge [Da]", color="red", fontsize=12)
         ax1.tick_params(axis='both', which='major', labelsize=12)
-        ax1.tick_params(axis='both', which='minor', labelsize=10)
+        ax1.tick_params(axis='both', which='minor', labelsize=12)
         plt.title("Experiment history")
         plt.imshow(mcImage.T, extent=extent, origin='lower', aspect="auto")
         # ax1.grid(axis='y', color='0.95')
@@ -250,8 +250,8 @@ def voltage_corr(highVoltage, mc, fitPeak, ionsPerFitSegment, plot=False, fig_na
     def voltage_corr_f(x, a, b, c):
         # return (np.sqrt(b + x + c*(x**2))) * a
         return a * (x ** 2) + b * x + c
-    variables.init()
-    if not isinstance(highVoltage,np.ndarray) or not isinstance(mc,np.ndarray) or not isinstance(fitPeak,np.ndarray):
+
+    if not isinstance(highVoltage, np.ndarray) or not isinstance(mc, np.ndarray) or not isinstance(fitPeak, np.ndarray):
         logger.error("Incorrect data type of passed arguments")
     numAtom = len(mc)
     numMcBins = math.floor(numAtom / ionsPerFitSegment)
@@ -276,8 +276,7 @@ def voltage_corr(highVoltage, mc, fitPeak, ionsPerFitSegment, plot=False, fig_na
 
     corr = pkLoc / pkLoc[0]
 
-    # 'peak location vs DC voltage'
-
+    # peak location vs DC voltage
     # Do the fit, defining the fitting function in-line
     fitresult, _ = curve_fit(voltage_corr_f, VDC, corr)
 

@@ -153,7 +153,7 @@ class UI_APT_A(Camera, object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.vacuum_load_lock.sizePolicy().hasHeightForWidth())
         self.vacuum_load_lock.setSizePolicy(sizePolicy)
-        self.vacuum_load_lock.setMinimumSize(QtCore.QSize(100, 50))
+        self.vacuum_load_lock.setMinimumSize(QtCore.QSize(130, 50))
         self.vacuum_load_lock.setStyleSheet("QLCDNumber{\n"
 "border: 2px solid yellow;\n"
 "border-radius: 10px;\n"
@@ -209,12 +209,8 @@ class UI_APT_A(Camera, object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.temperature.sizePolicy().hasHeightForWidth())
         self.temperature.setSizePolicy(sizePolicy)
-        self.temperature.setMinimumSize(QtCore.QSize(100, 100))
-        self.temperature.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
+        self.temperature.setMinimumSize(QtCore.QSize(200, 200))
+        self.temperature.setMaximumSize(QtCore.QSize(400, 200))
         self.temperature.setObjectName("temperature")
         self.horizontalLayout_8.addWidget(self.temperature)
         self.horizontalLayout_7 = QtWidgets.QHBoxLayout()
@@ -1051,11 +1047,6 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.vdc_time.sizePolicy().hasHeightForWidth())
         self.vdc_time.setSizePolicy(sizePolicy)
         self.vdc_time.setMinimumSize(QtCore.QSize(300, 300))
-        self.vdc_time.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
         self.vdc_time.setObjectName("vdc_time")
         self.horizontalLayout.addWidget(self.vdc_time)
         # self.detection_rate_viz = QtWidgets.QWidget(self.centralwidget)
@@ -1066,11 +1057,6 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.detection_rate_viz.sizePolicy().hasHeightForWidth())
         self.detection_rate_viz.setSizePolicy(sizePolicy)
         self.detection_rate_viz.setMinimumSize(QtCore.QSize(300, 300))
-        self.detection_rate_viz.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
         self.detection_rate_viz.setObjectName("detection_rate_viz")
         self.horizontalLayout.addWidget(self.detection_rate_viz)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
@@ -1105,11 +1091,6 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.visualization.sizePolicy().hasHeightForWidth())
         self.visualization.setSizePolicy(sizePolicy)
         self.visualization.setMinimumSize(QtCore.QSize(300, 300))
-        self.visualization.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
         self.visualization.setObjectName("visualization")
         self.horizontalLayout_4.addWidget(self.visualization)
         # self.histogram = QtWidgets.QWidget(self.centralwidget)
@@ -1120,11 +1101,6 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.histogram.sizePolicy().hasHeightForWidth())
         self.histogram.setSizePolicy(sizePolicy)
         self.histogram.setMinimumSize(QtCore.QSize(300, 300))
-        self.histogram.setStyleSheet("QWidget{\n"
-"border: 2px solid gray;\n"
-"border-radius: 10px;\n"
-"padding: 4 4px;\n"
-"}")
         self.histogram.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
         self.histogram.setObjectName("histogram")
         self.horizontalLayout_4.addWidget(self.histogram)
@@ -1329,7 +1305,7 @@ class UI_APT_A(Camera, object):
         self.data_line_vps = self.vdc_time.plot(self.x_vdc, self.y_vps, name="Pulse Vol.", pen=pen_vps)
         self.vdc_time.setBackground('w')
         # Add Axis Labels
-        styles = {"color": "#f00", "font-size": "20px"}
+        styles = {"color": "#f00", "font-size": "12px"}
         self.vdc_time.setLabel("left", "High Voltage (v)", **styles)
         self.vdc_time.setLabel("bottom", "Time (s)", **styles)
         # Add grid
@@ -1346,7 +1322,7 @@ class UI_APT_A(Camera, object):
         self.data_line_dtec = self.detection_rate_viz.plot(self.x_dtec, self.y_dtec, pen=pen_dtec)
         self.detection_rate_viz.setBackground('w')
         # Add Axis Labels
-        styles = {"color": "#f00", "font-size": "20px"}
+        styles = {"color": "#f00", "font-size": "12px"}
         self.detection_rate_viz.setLabel("left", "Counts", **styles)
         self.detection_rate_viz.setLabel("bottom", "Time (s)", **styles)
         # Add grid
@@ -1357,9 +1333,12 @@ class UI_APT_A(Camera, object):
 
         # Histogram #########################
         # Add Axis Labels
-        styles = {"color": "#f00", "font-size": "20px"}
+        styles = {"color": "#f00", "font-size": "12px"}
         self.histogram.setLabel("left", "Frequency (counts)", **styles)
-        self.histogram.setLabel("bottom", "Time (ns)", **styles)
+        if self.conf["visualization"] == 'tof':
+                self.histogram.setLabel("bottom", "Time (ns)", **styles)
+        elif self.conf["visualization"] == 'mc':
+                self.histogram.setLabel("bottom", "mc (Da)", **styles)
 
         # Temperature #########################
         self.x_tem = np.arange(100)  # 1000 time points
@@ -1369,7 +1348,7 @@ class UI_APT_A(Camera, object):
         self.data_line_tem = self.temperature.plot(self.x_tem, self.y_tem, pen=pen_dtec)
         self.temperature.setBackground('b')
         # Add Axis Labels
-        styles = {"color": "#f00", "font-size": "20px"}
+        styles = {"color": "#f00", "font-size": "12px"}
         self.temperature.setLabel("left", "Temperature (K)", **styles)
         self.temperature.setLabel("bottom", "Time (s)", **styles)
         # Add grid

@@ -27,7 +27,7 @@ setup(
     version=version,
     entry_points={
             'console_scripts': {
-                'pyccapt=pyccapt.control.gui.__main__:main',
+                'pyccapt=pyccapt.control.__main__:main',
                 }
     },
     data_files=[('my_data', ['./tests/data'])],

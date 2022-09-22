@@ -19,11 +19,9 @@ logger = logging_library.logger_creator('data_loadcrop')
 
 def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc") -> "type:list - list of dataframes":
     try:
-        print("Filename>>",filename)
+        print("Filename>>", filename)
         hdf5Data = data_tools.read_hdf5(filename, tdc)
-        print("here",hdf5Data)
         if hdf5Data is None:
-            print("Helloo")
             raise FileNotFoundError
         if tdc == 'surface_concept':
             #if 'dld/high_voltage' or 'dld/pulse_voltage' or 'dld/start_counter' or 'dld/t' or 'dld/x' or 'dld/y' not in hdf5Data:
@@ -90,9 +88,9 @@ def plot_graph_for_dld_high_voltage(ax1: "type:object", dldGroupStorage: "type:l
     heatmap = np.log(heatmap)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     # set x-axis label
-    ax1.set_xlabel("hit sequence number", color="red", fontsize=14)
+    ax1.set_xlabel("hit sequence number", color="red", fontsize=10)
     # set y-axis label
-    ax1.set_ylabel("time of flight [ns]", color="red", fontsize=14)
+    ax1.set_ylabel("time of flight [ns]", color="red", fontsize=10)
     plt.title("Experiment history")
     plt.imshow(heatmap.T, extent=extent, origin='lower', aspect="auto")
 
@@ -100,8 +98,8 @@ def plot_graph_for_dld_high_voltage(ax1: "type:object", dldGroupStorage: "type:l
     ax2 = ax1.twinx()
 
     xaxis2 = np.arange(len(high_voltage))
-    ax2.plot(xaxis2, high_voltage, color='r', linewidth=2)
-    ax2.set_ylabel("DC voltage [V]", color="blue", fontsize=14)
+    ax2.plot(xaxis2, high_voltage, color='b', linewidth=2)
+    ax2.set_ylabel("DC voltage [V]", color="blue", fontsize=10)
     if rect is None:
         rectangle_box_selector(ax2)
         plt.connect('key_press_event', selectors_data.toggle_selector)
@@ -153,9 +151,9 @@ def plot_crop_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", bin
 
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     # set x-axis label
-    ax1.set_xlabel("x [mm]", color="red", fontsize=14)
+    ax1.set_xlabel("x [mm]", color="red", fontsize=10)
     # set y-axis label
-    ax1.set_ylabel("y [mm]", color="red", fontsize=14)
+    ax1.set_ylabel("y [mm]", color="red", fontsize=10)
     plt.title("FDM")
     plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
     elliptical_shape_selector(ax1, fig1)
@@ -173,9 +171,9 @@ def plot_FDM_after_selection(ax1, fig1, data_crop: "type:list  - cropped list co
     FDM = np.log(FDM)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     # set x-axis label
-    ax1.set_xlabel("x [mm]", color="red", fontsize=14)
+    ax1.set_xlabel("x [mm]", color="red", fontsize=10)
     # set y-axis label
-    ax1.set_ylabel("y [mm]", color="red", fontsize=14)
+    ax1.set_ylabel("y [mm]", color="red", fontsize=10)
     plt.title("FDM")
     plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
     logger.info("Circle selector Called")
@@ -205,9 +203,9 @@ def plot_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", bins=(25
     FDM = np.log(FDM)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     # set x-axis label
-    ax1.set_xlabel("x [mm]", color="red", fontsize=14)
+    ax1.set_xlabel("x [mm]", color="red", fontsize=10)
     # set y-axis label
-    ax1.set_ylabel("y [mm]", color="red", fontsize=14)
+    ax1.set_ylabel("y [mm]", color="red", fontsize=10)
     plt.title("FDM")
     plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
     if save_name != None:

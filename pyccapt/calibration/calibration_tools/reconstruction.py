@@ -83,8 +83,6 @@ def atom_probe_recons_from_detector(detx, dety, hv, flight_path_length, kf, det_
     return x * 1E9, y * 1E9, z * 1E9
 
 
-
-
 def atom_probe_recons_pad(detx, dety, hv, flight_path_length, ion_volume, f_evap, det_eff, kf, icf):
     """
     :param detx: Hit position on the detector

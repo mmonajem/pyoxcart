@@ -25,8 +25,8 @@ PyCCAPT package provides the basis of a fully FAIR atom probe data collection an
 This repository contains the GUI and control program, which control, visualize, and do the atom probe experiment.
 The images below are an overview of the two version of user interface:
 
-![plot](pyccapt/files/oxcart_gui.png)
-![plot](pyccapt/files/physic_gui.png)
+![plot](pyccapt/files/advance_gui.png)
+![plot](pyccapt/files/basic_gui.png)
 
  ---------------------
 
