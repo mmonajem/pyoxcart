@@ -51,13 +51,13 @@ def atom_probe_recons_from_detector(detx, dety, hv, flight_path_length, kf, det_
     # calculating effective detector area:
     det_area = (np.max(rad) ** 2) * np.pi
     # f_evap   evaporation field in V / nm
-    radius_evolution = hv / (1.4 * (field_evap / 1E-9))
+    radius_evolution = hv / (kf * (field_evap / 1E-9))
 
-    m = (flight_path_length * 1E-3) / (kf * radius_evolution)
+    # m = (flight_path_length * 1E-3) / (kf * radius_evolution)
 
     # launch angle relative to specimen axis
-    theta_p = np.arctan(rad / (110 * 1E-3))  # mm / mm
-    thet_a = theta_p + np.arcsin((1.4 - 1) * np.sin(theta_p))
+    theta_p = np.arctan(rad / (flight_path_length * 1E-3))  # mm / mm
+    thet_a = theta_p + np.arcsin((kf - 1) * np.sin(theta_p))
 
     # distance from axis and z shift of each hit
     z_p, d = pol2cart(radius_evolution, thet_a)  # nm
