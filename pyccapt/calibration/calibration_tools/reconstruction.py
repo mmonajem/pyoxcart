@@ -55,15 +55,18 @@ def atom_probe_recons_from_detector_Gault_et_al(detx, dety, hv, flight_path_leng
 
     # m = (flight_path_length * 1E-3) / (kf * radius_evolution)
 
-    # launch angle relative to specimen axis
+    # launch angle relative to specimen axis - a/flight_path_length - a is based on detector hit position
+    # theta detector
     theta_p = np.arctan(rad / (flight_path_length * 1E-3))  # mm / mm
 
-    thet_a = theta_p + np.arcsin((kf - 1) * np.sin(theta_p))
+    # theta normal
+    # m = icf - 1
+    theta_a = theta_p + np.arcsin((icf - 1) * np.sin(theta_p))
 
-    icf_2 = thet_a / theta_p
+    icf_2 = theta_a / theta_p
 
     # distance from axis and z shift of each hit
-    z_p, d = pol2cart(radius_evolution, thet_a)  # nm
+    z_p, d = pol2cart(radius_evolution, theta_a)  # nm
 
     # x and y coordinates from the angle on the detector and the distance to
     # the specimen axis.
@@ -71,8 +74,8 @@ def atom_probe_recons_from_detector_Gault_et_al(detx, dety, hv, flight_path_leng
 
     ## calculate z coordinate
     # the z shift with respect to the top of the cap is Rspec - zP
-    z_p = radius_evolution - z_p
-
+    #     z_p = radius_evolution - z_p
+    dz_p = radius_evolution * (1 - np.cos(theta_a))
     # accumulative part of z
     omega = 1E-9 ** 3 / avg_dens  # atomic volume in nm ^ 3
 
@@ -83,12 +86,12 @@ def atom_probe_recons_from_detector_Gault_et_al(detx, dety, hv, flight_path_leng
                 det_area * det_eff * (icf_2 ** 2) * (hv ** 2))
     # wide angle correction
     cum_z = np.cumsum(dz)
-    z = cum_z + z_p
+    z = cum_z + dz_p
 
     return x * 1E9, y * 1E9, z * 1E9
 
 
-def atom_probe_recons_bas_et_al(detx, dety, hv, flight_path_length, kf, det_eff, icf, field_evap, avg_dens):
+def atom_probe_recons_Bas_et_al(detx, dety, hv, flight_path_length, kf, det_eff, icf, field_evap, avg_dens):
     """
     :param detx: Hit position on the detector
     :param dety: Hit position on the detector
@@ -123,7 +126,6 @@ def atom_probe_recons_bas_et_al(detx, dety, hv, flight_path_length, kf, det_eff,
 
     #     dz_p = radius_evolution * (1 - np.sqrt((x**2 + y**2) / (radius_evolution**2)))
     dz_p = radius_evolution * (1 - np.sqrt(1 - ((x ** 2 + y ** 2) / (radius_evolution ** 2))))
-    #     dz_p = radius_evolution - np.sqrt((x**2) + (y**2))
 
     z = np.cumsum(dz) + dz_p
 
