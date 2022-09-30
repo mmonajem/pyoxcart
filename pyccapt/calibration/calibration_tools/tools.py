@@ -18,7 +18,7 @@ from pyccapt.calibration.calibration_tools import logging_library
 logger = logging_library.logger_creator('data_loadcrop')
 
 
-def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_find=True, plot=False,
+def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_find=True, peaks_find_plot=True, plot=False,
                  prominence=500, distance=None, fig_name=None, text_loc='right', label='mc'):
     """
     massSpecPlot plots the data from pos to get a mass spectrum as a figure
@@ -125,41 +125,43 @@ def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_
         elif mode == 'normalised':
             ax1.set_ylabel("frequency [cts / Da / totCts]", color="red", fontsize=10)
 
-        if peaks_find:
-            # annotation with range stats
-            upperLim = 4.5  # Da
-            lowerLim = 3.5  # Da
-            mask = np.logical_and((x >= lowerLim), (x <= upperLim))
-            BG4 = np.sum(y[np.array(mask[:-1])]) / (upperLim - lowerLim)
-            BG4 = BG4 / len(mc) * 1E6
-            mrp = '{:.2f}'.format((max_hist / (edges[1] - edges[0]))[0])
-            txt = 'bin width: %s Da\nnum atoms: %s\nbackG @ 4 Da: %s ppm/Da\nMRP: %s' % (bin, len(mc), int(BG4), mrp)
+        # annotation with range stats
+        upperLim = 4.5  # Da
+        lowerLim = 3.5  # Da
+        mask = np.logical_and((x >= lowerLim), (x <= upperLim))
+        BG4 = np.sum(y[np.array(mask[:-1])]) / (upperLim - lowerLim)
+        BG4 = BG4 / len(mc) * 1E6
+        mrp = '{:.2f}'.format((max_hist / (edges[1] - edges[0]))[0])
+        txt = 'bin width: %s Da\nnum atoms: %s\nbackG @ 4 Da: %s ppm/Da\nMRP: %s' % (bin, len(mc), int(BG4), mrp)
 
-            props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-            if text_loc == 'left':
-                ax1.text(0.05, 0.82, txt, transform=ax1.transAxes, bbox=props, fontsize=8)
-            elif text_loc == 'right':
-                ax1.text(0.7, 0.82, txt, transform=ax1.transAxes, bbox=props, fontsize=8)
-            ax1.tick_params(axis='both', which='major', labelsize=12)
-            ax1.tick_params(axis='both', which='minor', labelsize=10)
+        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+        if text_loc == 'left':
+            ax1.text(0.05, 0.82, txt, transform=ax1.transAxes, bbox=props, fontsize=8)
+        elif text_loc == 'right':
+            ax1.text(0.7, 0.82, txt, transform=ax1.transAxes, bbox=props, fontsize=8)
+        ax1.tick_params(axis='both', which='major', labelsize=12)
+        ax1.tick_params(axis='both', which='minor', labelsize=10)
 
-        if 'peakLocIs' in locals():
-            plt.scatter(peakLocIs[:, 0], peakLocIs[:, 1], marker="x", color='red')
-            for i in range(len(peaks)):
-                peakLocIs_tmp = [x[peaks[i]], y[peaks[i]]]
+        if peaks_find_plot:
+
+            if 'peakLocIs' in locals():
+
+                plt.scatter(peakLocIs[:, 0], peakLocIs[:, 1], marker="x", color='red')
+                # plot a red line for width of each peak
+                # for i in range(len(peaks)):
+                #     peakLocIs_tmp = [x[peaks[i]], y[peaks[i]]]
                 # Draw a horizontal line for width of each peak
                 # if peakLocIs_tmp[0] > 0.8:
                 #     plt.hlines(results_half[1][i], x[int(results_half[2][i])], x[int(results_half[3][i])], color="red")
+                annotes = []
+                for i in range(len(peakLocIs)):
+                    ax1.annotate('%s' % '{:.2f}'.format(peakLocIs[i, 0]),
+                                 xy=(peakLocIs[i, 0], peakLocIs[i, 1]),
+                                 xytext=(peakLocIs[i, 0] + 2.5, peakLocIs[i, 1]))
+                    annotes.append(str(i + 1))
+                af = intractive_point_identification.AnnoteFinder(peakLocIs[:, 0], peakLocIs[:, 1], annotes, ax=ax1)
+                fig1.canvas.mpl_connect('button_press_event', af)
 
-            annotes = []
-            variables.peaks_idx = []
-            for i in range(len(peakLocIs)):
-                ax1.annotate('%s' % '{:.2f}'.format(peakLocIs[i, 0]),
-                             xy=(peakLocIs[i, 0], peakLocIs[i, 1]),
-                             xytext=(peakLocIs[i, 0] + 2.5, peakLocIs[i, 1]))
-                annotes.append(str(i + 1))
-            af = intractive_point_identification.AnnoteFinder(peakLocIs[:, 0], peakLocIs[:, 1], annotes, ax=ax1)
-            fig1.canvas.mpl_connect('button_press_event', af)
         if fig_name is not None:
             if label == 'mc':
                 plt.savefig(variables.result_path + "//mc_%s.svg" % fig_name, format="svg", dpi=600)
