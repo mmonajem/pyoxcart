@@ -30,7 +30,7 @@ def decompose(data, element):
     return px, py, pz, color
 
 
-def cloud_plotter(data, phases, result_path, filename, plot_type='cloud'):
+def cloud_plotter(data, phases, result_path, filename, plot_type='cloud', open_new_window=False):
     if plot_type == 'projection':
         # plot static images with matplotlib.
         ax = plt.figure().add_subplot(111)
@@ -67,7 +67,8 @@ def cloud_plotter(data, phases, result_path, filename, plot_type='cloud'):
                        zaxis=dict(zeroline=False, title='z (nm)', autorange='reversed'))
         )
         fig = dict(data=plotly_data, layout=layout)
-        plotly.offline.plot(fig, filename=result_path + '{fn}.html'.format(fn=filename), show_link=False)
+        if open_new_window:
+            plotly.offline.plot(fig, filename=result_path + '{fn}.html'.format(fn=filename), show_link=False)
         return fig
     else:
         print("Plot type error!")

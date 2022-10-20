@@ -181,13 +181,18 @@ def dataset_tdc_selection():
         disabled=False
     )
 
-
     tdc = widgets.Dropdown(
         options=['surface_concept', 'roentdec'],
         value='surface_concept',
         description='TDC model:',
     )
-    return tdc, dataset, flightPathLength, t0
+
+    pulse_mode = widgets.Dropdown(
+        options=['voltage', 'laser'],
+        value='voltage',
+        description='Pulse mode:',
+    )
+    return tdc, pulse_mode, dataset, flightPathLength, t0
 
 def density_field_selection():
     TableFile = '../../../files/field_density_table.h5'
