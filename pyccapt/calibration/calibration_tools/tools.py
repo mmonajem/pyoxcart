@@ -17,7 +17,6 @@ from pyccapt.calibration.calibration_tools import logging_library
 
 logger = logging_library.logger_creator('data_loadcrop')
 
-
 def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_find=True, peaks_find_plot=True, plot=False,
                  prominence=500, distance=None, fig_name=None, text_loc='right', label='mc'):
     """
