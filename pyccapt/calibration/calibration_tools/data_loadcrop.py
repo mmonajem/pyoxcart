@@ -17,28 +17,31 @@ from pyccapt.calibration.calibration_tools import logging_library
 logger = logging_library.logger_creator('data_loadcrop')
 
 
-def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc") -> "type:list - list of dataframes":
+def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc",
+                               pulse_mode: "type: string - mode of pulse") -> "type:list - list of dataframes":
     try:
         print("Filename>>", filename)
         hdf5Data = data_tools.read_hdf5(filename, tdc)
         if hdf5Data is None:
             raise FileNotFoundError
         if tdc == 'surface_concept':
-            #if 'dld/high_voltage' or 'dld/pulse_voltage' or 'dld/start_counter' or 'dld/t' or 'dld/x' or 'dld/y' not in hdf5Data:
-            #    raise KeyError 
             dld_highVoltage = hdf5Data['dld/high_voltage']
-            dld_pulseVoltage = hdf5Data['dld/pulse_voltage']
+            if pulse_mode == 'laser':
+                dld_pulse = hdf5Data['dld/laser_intensity']
+            elif pulse_mode == 'voltage':
+                dld_pulse = hdf5Data['dld/pulse_voltage']
             dld_startCounter = hdf5Data['dld/start_counter']
             dld_t = hdf5Data['dld/t']
             dld_x = hdf5Data['dld/x']
             dld_y = hdf5Data['dld/y']
-            dldGroupStorage = [dld_highVoltage, dld_pulseVoltage, dld_startCounter, dld_t, dld_x, dld_y]
+            dldGroupStorage = [dld_highVoltage, dld_pulse, dld_startCounter, dld_t, dld_x, dld_y]
         elif tdc == 'roentdec':
-            #if 'dld/high_voltage' or 'dld/laser_intensity' or 'dld/AbsoluteTimeStamp' or 'dld/t' or 'dld/x' or 'dld/y' not in hdf5Data:
-            #    raise KeyError 
             dld_highVoltage = hdf5Data['dld/high_voltage']
-            dld_laserPower = hdf5Data['dld/laser_intensity']
-            dld_AbsoluteTimeStamp = hdf5Data['dld/AbsoluteTimeStamp']
+            if pulse_mode == 'laser':
+                dld_pulse = hdf5Data['dld/laser_intensity']
+            elif pulse_mode == 'voltage':
+                dld_pulse = hdf5Data['dld/pulse_voltage']
+            # dld_AbsoluteTimeStamp = hdf5Data['dld/AbsoluteTimeStamp']
             dld_t = hdf5Data['dld/t']
             dld_x = hdf5Data['dld/x']
             dld_y = hdf5Data['dld/y']
@@ -46,17 +49,17 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
             tt = dld_t.to_numpy()
             xx = dld_x.to_numpy()
             yy = dld_y.to_numpy()
-            mask_local = np.logical_and((np.abs(xx) <= 50.0), (np.abs(yy) <= 50.0))
+            mask_local = np.logical_and((np.abs(xx) <= 60.0), (np.abs(yy) <= 60.0))
             mask_temporal = (tt > 0)
-            mask = np.logical_and(mask_temporal, mask_local)
+            mask = np.logical_or(mask_temporal, mask_local)
             dld_highVoltage = dld_highVoltage[mask]
-            dld_laserPower = dld_laserPower[mask]
+            dld_pulse = dld_pulse[mask]
             dld_AbsoluteTimeStamp = dld_t[mask]
             dld_t = dld_t[mask]
             dld_x = dld_x[mask]
             dld_y = dld_y[mask]
 
-            dldGroupStorage = [dld_highVoltage, dld_laserPower, dld_AbsoluteTimeStamp, dld_t, dld_x, dld_y]
+            dldGroupStorage = [dld_highVoltage, dld_pulse, dld_AbsoluteTimeStamp, dld_t, dld_x, dld_y]
         return dldGroupStorage
     except KeyError as error:
         logger.info(error)
@@ -217,18 +220,31 @@ def plot_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", bins=(25
 
 def save_croppped_data_to_hdf5(data_crop: "type:list  - cropped list content",
                                dld_masterDataframe: "type:list - list of dataframes",
-                               name: "type:string - name of h5 file", tdc: "type: string - model of tdc",):
+                               name: "type:string - name of h5 file", tdc: "type: string - model of tdc",
+                               pulser_mode: "type: string - mode of pulser"):
     # save the cropped data
     hierarchyName = 'df'
     logger.info('tofCropLossPct {}'.format(str(int((1 - len(data_crop) / len(dld_masterDataframe)) * 100))))
+    print('tofCropLossPct {}'.format(str(int((1 - len(data_crop) / len(dld_masterDataframe)) * 100))))
     if tdc == 'surface_concept':
-        hdf5Dataframe = pd.DataFrame(data=data_crop,
-                                     columns=['dld/high_voltage', 'dld/pulse_voltage', 'dld/start_counter', 'dld/t',
-                                              'dld/x', 'dld/y'])
+        if pulser_mode == 'voltage':
+            hdf5Dataframe = pd.DataFrame(data=data_crop,
+                                         columns=['high_voltage (V)', 'pulse (V)', 'start_counter', 't (ns)',
+                                                  'x (mm)', 'y (mm)'])
+        elif pulser_mode == 'laser':
+            hdf5Dataframe = pd.DataFrame(data=data_crop,
+                                         columns=['high_voltage (V)', 'pulse (deg)', 'start_counter', 't (ns)',
+                                                  'x (mm)', 'y (mm)'])
     elif tdc == 'roentdec':
-        hdf5Dataframe = pd.DataFrame(data=data_crop,
-                                     columns=['dld/high_voltage', 'dld/laser_intensity', 'dld/start_counter', 'dld/t',
-                                              'dld/x', 'dld/y'])
+        if pulser_mode == 'voltage':
+            hdf5Dataframe = pd.DataFrame(data=data_crop,
+                                         columns=['high_voltage (V)', 'pulse (V)', 'time_stamp', 't (ns)',
+                                                  'x (mm)', 'y (mm)'])
+        elif pulser_mode == 'laser':
+            hdf5Dataframe = pd.DataFrame(data=data_crop,
+                                         columns=['high_voltage (V)', 'pulse (deg)', 'time_stamp', 't (ns)',
+                                                  'x (mm)', 'y (mm)'])
+
     data_tools.store_df_to_hdf(name, hdf5Dataframe, hierarchyName)
 
 
