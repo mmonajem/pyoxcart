@@ -33,6 +33,7 @@ def dropdownWidget(elementsList, dropdownLabel):
         chargeDict['charge'] = elementsList[0][1]
     elif dropdownLabel == "Elements":
         elementDict['element'] = elementsList[0][1]
+
     return dropdown
 
 
@@ -131,8 +132,26 @@ def on_change(change):
         print("Now please select the appropriate charge", ''.ljust(40), end='\r')
         elementDict['element'] = change['new']
         compute_element_isotope_values_according_to_selected_charge()
-        
 
+
+def on_change_ions_selection(change):
+    """
+    This is a callback function which observes change in the dropdown widget.
+    It updates the element and its corresponding weight/mass based on the selection from the dropdown.
+    Updates the selected value in a global dict. [This dict could be replaced by a single variable]
+
+    Attributes:
+        Accepts only a internal object as an argument
+
+    Returns:
+        Does not return anything
+    """
+    if change['type'] == 'change' and change['name'] == 'value':
+        print("Mass of selected element: to %s" % change['new'], ''.ljust(40), end='\r')
+        elementWithChargeDict.clear()
+        print("Now please select the appropriate charge", ''.ljust(40), end='\r')
+        elementDict['element'] = change['new']
+        compute_element_isotope_values_according_to_selected_charge(mode='ions_selection')
 def on_change_charge(change):
     """
     This is a callback function which observes change in the dropdown widget.
@@ -147,18 +166,39 @@ def on_change_charge(change):
     """
     if change['type'] == 'change' and change['name'] == 'value':
         print("Selected charge : to %s" % change['new'], ''.ljust(40), end='\r')
-        selectedElement = elementDict['element']
         updatedCharge = change['new']
         chargeDict['charge'] = updatedCharge
         compute_element_isotope_values_according_to_selected_charge()
-        
 
-def compute_element_isotope_values_according_to_selected_charge():
+def on_change_charge_ions_selection(change):
+    """
+    This is a callback function which observes change in the dropdown widget.
+    It updates the element and its corresponding weight/mass based on the selection from the dropdown.
+    Updates the selected value in a global dict. [This dict could be replaced by a single variable]
+
+    Attributes:
+        Accepts only a internal object as an argument
+
+    Returns:
+        Does not return anything
+    """
+    if change['type'] == 'change' and change['name'] == 'value':
+        print("Selected charge : to %s" % change['new'], ''.ljust(40), end='\r')
+        updatedCharge = change['new']
+        chargeDict['charge'] = updatedCharge
+        compute_element_isotope_values_according_to_selected_charge(mode='ions_selection')
+
+
+def compute_element_isotope_values_according_to_selected_charge(mode='calibration'):
     selectedElement = elementDict['element']
     charge = chargeDict['charge']
-    elementWithCharge = round(float(selectedElement) / int(charge), 2)
-    elementWithChargeDict['element'] = elementWithCharge
 
+    if mode == 'calibration':
+        elementWithCharge = round(float(selectedElement) / int(charge), 2)
+        elementWithChargeDict['element'] = elementWithCharge
+    elif mode == 'ions_selection':
+        elementWithCharge = selectedElement + '(' + str(charge) + '+)'
+        elementWithChargeDict['element'] = elementWithCharge
 
 def dataset_tdc_selection():
     dataset = widgets.Text(

@@ -5,7 +5,7 @@ This is file contains tools for mass calibration process.
 import numpy as np
 
 # Local module and scripts
-from calibration_tools import logging_library
+from pyccapt.calibration.calibration_tools import logging_library
 
 logger = logging_library.logger_creator('data_loadcrop')
 
