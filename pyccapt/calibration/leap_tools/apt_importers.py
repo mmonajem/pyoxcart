@@ -109,12 +109,12 @@ def read_rrng(f):
                 rrngs.append(m.groups()[2:])
 
     ions = pd.DataFrame(ions, columns=['number','name'])
-    ions.set_index('number',inplace=True)
+    ions.set_index('number', inplace=True)
     rrngs = pd.DataFrame(rrngs, columns=['number','lower','upper','vol','comp','colour'])
     rrngs.set_index('number',inplace=True)
 
-    rrngs[['lower','upper','vol']] = rrngs[['lower','upper','vol']].astype(float)
-    rrngs[['comp','colour']] = rrngs[['comp','colour']].astype(str)
+    rrngs[['lower', 'upper', 'vol']] = rrngs[['lower', 'upper', 'vol']].astype(float)
+    rrngs[['comp','colour']] = rrngs[['comp', 'colour']].astype(str)
 
     return ions,rrngs
 
@@ -128,7 +128,7 @@ def label_ions(pos, rrngs):
 
     for n,r in rrngs.iterrows():
         pos.loc[(pos.loc[:, 'm/n (Da)'] >= r.lower) & (pos.loc[:, 'm/n (Da)'] <= r.upper),
-                ['comp','colour']] = [r['comp'], '#' + r['colour']]
+                ['comp', 'colour']] = [r['comp'], '#' + r['colour']]
 
     return pos
 
@@ -169,7 +169,7 @@ def volvis(pos, size=2, alpha=1):
     if 'colour' in pos.columns:
         colours = np.asarray(list(pos.colour.apply(cols.hex2color)))
     else:
-        Dapc = lpos.Da.values / lpos.Da.max()
+        Dapc = pos.Da.values / pos.Da.max()
         colours = np.array(zip(Dapc, Dapc, Dapc))
     if alpha != 1:
         np.hstack([colours, np.array([0.5] * len(colours))[..., None]])
