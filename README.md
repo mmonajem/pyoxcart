@@ -43,6 +43,17 @@ The images below are an overview of the two version of user interface:
 
     pip install pyccapt
 
+---------------------
+
+# Local installation of PyCCAPT
+
+Clone/download this repository and unzip it. In the project directory enter the following command
+
+
+    pip install -e .
+
+
+
 
 --------------
 # Documentation
@@ -50,6 +61,16 @@ The images below are an overview of the two version of user interface:
 The latest versions of the documentation can be accessed on our
 [ReadTheDocs](https://pyccapt.readthedocs.io/en/latest/?#) page. It contains descriptions of
 Crappy's features, tutorials, and other useful information.
+
+--------------------
+## Running PyCCAPT control GUI
+
+After installing the project locally or via pip command enter the following command in the console:
+
+
+    python pyccapt
+
+
 
 --------------------
 

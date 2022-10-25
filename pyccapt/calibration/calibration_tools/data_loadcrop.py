@@ -248,67 +248,6 @@ def save_croppped_data_to_hdf5(data_crop: "type:list  - cropped list content",
     data_tools.store_df_to_hdf(name, hdf5Dataframe, hierarchyName)
 
 
-# def add_croppped_data_to_hdf5(filename: "type: string - Path to hdf5(.h5) file", data_crop: "type:list  - cropped list content",
-#                 dld_masterDataframe: "type:list - list of dataframes",
-#                 tdc: "type: string - model of tdc") -> "type:list - list of dataframes":
-#     try:
-#         # add the cropped data
-#         hdf = h5py.File(filename, 'a')
-#         hdf.create_dataset("cropped_dld/x", data=data_crop[:, 5], dtype='f')
-#         hdf.create_dataset("cropped_dld/y", data=data_crop[:, 4], dtype='f')
-#         hdf.create_dataset("cropped_dld/t", data=data_crop[:, 3], dtype='f')
-#         hdf.create_dataset("cropped_dld/start_counter", data=data_crop[:, 2], dtype='f')
-#         if tdc == 'surface_concept':
-#             hdf.create_dataset("cropped_dld/pulse_voltage", data=data_crop[:, 1], dtype='f')
-#         elif tdc == 'roentdec':
-#             hdf.create_dataset("cropped_dld/laser_intensity", data=data_crop[:, 1], dtype='f')
-#         hdf.create_dataset("cropped_dld/high_voltage", data=data_crop[:, 0], dtype='f')
-#
-#     except:
-#         hdf.close()
-#
-#     with h5py.File(filename, 'r+') as hdf:
-#         del hdf["cropped_dld/x"]
-#         del hdf["cropped_dld/y"]
-#         del hdf["cropped_dld/t"]
-#         del hdf["cropped_dld/start_counter"]
-#         if tdc == 'surface_concept':
-#             del hdf["cropped_dld/pulse_voltage"]
-#         elif tdc == 'roentdec':
-#             del hdf["cropped_dld/laser_intensity"]
-#
-#         del hdf["cropped_dld/high_voltage"]
-#
-#         hdf["cropped_dld/x"] = data_crop[:, 5]
-#         hdf["cropped_dld/y"] = data_crop[:, 4]
-#         hdf["cropped_dld/t"] = data_crop[:, 3]
-#         hdf["cropped_dld/start_counter"] = data_crop[:, 2]
-#         if tdc == 'surface_concept':
-#             hdf.create_dataset("cropped_dld/pulse_voltage", data=data_crop[:, 1], dtype='f')
-#         elif tdc == 'roentdec':
-#             hdf.create_dataset("cropped_dld/laser_intensity", data=data_crop[:, 1], dtype='f')
-#         hdf["cropped_dld/high_voltage"] = data_crop[:, 0]
-#
-#
-#     print('tofCropLossPct', (1 - len(data_crop) / len(dld_masterDataframe)) * 100)
 
-
-def add_tof_mc_data_to_hdf5(filename: "type: string - Path to hdf5(.h5) file", tof: "type:numpy array  - TOF",
-                mc: "type:numpy array - mass-to-charge") -> "type:list - list of dataframes":
-    try:
-        # add the cropped data
-        hdf = h5py.File(filename, 'a')
-        hdf.create_dataset("cropped_dld/mc", data=mc, dtype='f')
-        hdf.create_dataset("cropped_dld/t_c", data=tof, dtype='f')
-
-    except:
-        hdf.close()
-
-    with h5py.File(filename, 'r+') as hdf:
-        del hdf["cropped_dld/mc"]
-        del hdf["cropped_dld/t_c"]
-
-        hdf["cropped_dld/mc"] = mc
-        hdf["cropped_dld/t_c"] = tof
 
 
