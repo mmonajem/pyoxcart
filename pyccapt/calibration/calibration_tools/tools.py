@@ -11,13 +11,13 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy import interpolate
 
 # Local module and scripts
-from pyccapt.calibration.calibration_tools import variables
+from pyccapt.calibration.calibration_tools import variables, data_tools
 from pyccapt.calibration.calibration_tools import intractive_point_identification
 from pyccapt.calibration.calibration_tools import logging_library
 
 logger = logging_library.logger_creator('data_loadcrop')
 
-def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_find=True, peaks_find_plot=True, plot=False,
+def massSpecPlot(mc, bin, mc_ideal=[], mode='count', percent=50, peaks_find=True, peaks_find_plot=True, plot=False,
                  prominence=500, distance=None, fig_name=None, text_loc='right', label='mc'):
     """
     massSpecPlot plots the data from pos to get a mass spectrum as a figure
@@ -154,10 +154,16 @@ def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_
                 #     plt.hlines(results_half[1][i], x[int(results_half[2][i])], x[int(results_half[3][i])], color="red")
                 annotes = []
                 for i in range(len(peakLocIs)):
-                    ax1.annotate('%s' % '{:.2f}'.format(peakLocIs[i, 0]),
-                                 xy=(peakLocIs[i, 0], peakLocIs[i, 1]),
-                                 xytext=(peakLocIs[i, 0] + 2.5, peakLocIs[i, 1]))
-                    annotes.append(str(i + 1))
+                    if len(mc_ideal) != 0:
+                        ax1.annotate(mc_ideal[i],
+                                     xy=(peakLocIs[i, 0], peakLocIs[i, 1]),
+                                     xytext=(peakLocIs[i, 0] + 1.5, peakLocIs[i, 1]), size=6, color='gray')
+                         # plt.axvline(mc_ideal[i], color='k', linewidth=1)
+                    else:
+                        ax1.annotate('%s' % '{:.2f}'.format(peakLocIs[i, 0]),
+                                     xy=(peakLocIs[i, 0], peakLocIs[i, 1]),
+                                     xytext=(peakLocIs[i, 0] + 1.5, peakLocIs[i, 1]), size=6, color='gray')
+                        annotes.append(str(i + 1))
                 af = intractive_point_identification.AnnoteFinder(peakLocIs[:, 0], peakLocIs[:, 1], annotes, ax=ax1)
                 fig1.canvas.mpl_connect('button_press_event', af)
 
@@ -168,9 +174,7 @@ def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_
             elif label == 'tof':
                 plt.savefig(variables.result_path + "//tof_%s.svg" % fig_name, format="svg", dpi=600)
                 plt.savefig(variables.result_path + "//tof_%s.png" % fig_name, format="png", dpi=600)
-        if mc_ideal.any() != 0:
-            for i in range(len(mc_ideal)):
-                plt.axvline(mc_ideal[i], color='k', linewidth=1)
+
         plt.show()
     else:
         plt.close(fig1)
@@ -186,6 +190,26 @@ def massSpecPlot(mc, bin, mc_ideal=np.zeros(0), mode='count', percent=50, peaks_
 
     return max_hist, edges, peakLocIs, max_paek_edges, index_max
 
+
+def find_closest_element(input_value):
+    def closest_value(mass_list, element_list, input_value):
+        element = np.array(element_list)
+        closest_mass = []
+        closest_element = []
+        for i in range(4):
+            arr = np.asarray(mass_list / (i + 1))
+            i = (np.abs(arr - input_value)).argmin()
+            closest_mass.append(arr[i])
+            closest_element.append(element[i] + '%s+' % (i + 1))
+        return closest_mass, closest_element
+
+    isotopeTableFile = '../../../files/isotopeTable.h5'
+    dataframe = data_tools.read_hdf5_through_pandas(isotopeTableFile)
+    mass_list = dataframe['weight']
+    element_list = dataframe['element']
+    closest_mass, closest_element = closest_value(mass_list, element_list, input_value)
+
+    return closest_mass, closest_element
 
 def history_ex(mc, dld_highVoltage, mean_t=1.5, mc_max=100, plot=False, fig_name=None):
     MAXMC = mc_max  # maximum mc that makes sense
