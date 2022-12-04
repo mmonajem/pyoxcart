@@ -201,12 +201,6 @@ def compute_element_isotope_values_according_to_selected_charge(mode='calibratio
         elementWithChargeDict['element'] = elementWithCharge
 
 def dataset_tdc_selection():
-    dataset = widgets.Text(
-        value='OLO_AL_6_data',
-        placeholder='Paste ticket description here!',
-        description='Dataset:',
-        disabled=False
-    )
 
     flightPathLength = widgets.Text(
         value='110',
@@ -221,6 +215,13 @@ def dataset_tdc_selection():
         disabled=False
     )
 
+    max_tof = widgets.Text(
+        value='5000',
+        placeholder='Maximum possible tof',
+        description='Max tof:',
+        disabled = False
+    )
+
     tdc = widgets.Dropdown(
         options=['surface_concept', 'roentdec'],
         value='surface_concept',
@@ -232,7 +233,8 @@ def dataset_tdc_selection():
         value='voltage',
         description='Pulse mode:',
     )
-    return tdc, pulse_mode, dataset, flightPathLength, t0
+
+    return tdc, pulse_mode, flightPathLength, t0, max_tof
 
 def density_field_selection():
     TableFile = '../../../files/field_density_table.h5'
@@ -255,3 +257,4 @@ def density_field_selection():
         description='Element'
     )
     return element
+

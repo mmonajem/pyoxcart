@@ -9,7 +9,8 @@ from pyccapt.calibration.calibration_tools import logging_library
 logger = logging_library.logger_creator('data_loadcrop')
 
 
-def read_hdf5(filename:"type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc")->"type: dataframe - Pandas dataframe converted from H5 file":
+def read_hdf5(filename: "type: string - Path to hdf5(.h5) file",
+              tdc: "type: string - model of tdc") -> "type: dataframe":
     """
     This function differs from read_hdf5_through_pandas as it does not assume that 
     the contents of the HDF5 file as argument was created using pandas. It could have been
@@ -23,12 +24,10 @@ def read_hdf5(filename:"type: string - Path to hdf5(.h5) file", tdc: "type: stri
         XYBINSHIFT = DETBINS / BINNINGFAC / 2  # to center detector
         dataframeStorage = {}
         groupDict = {}
-        dataframeStorageSubgroup = {}
 
         with h5py.File(filename, 'r') as hdf:
             groups = list(hdf.keys())
 
-            subGroupList = []
             for item in groups:
                 groupDict[item] = list(hdf[item].keys())
             print(groupDict)
@@ -50,44 +49,47 @@ def read_hdf5(filename:"type: string - Path to hdf5(.h5) file", tdc: "type: stri
     except FileNotFoundError as error:
         logger.critical(error)
         logger.critical("[*] HDF5 File could not be found")
-        
+
     except IndexError as error:
         logger.critical(error)
         logger.critical("[*] No Group keys could be found in HDF5 File")
 
 
-def read_hdf5_through_pandas(filename:"type:string - Path to hdf5(.h5) file")->"type: dataframe - Pandas Dataframe":
+def read_hdf5_through_pandas(filename: "type:string - Path to hdf5(.h5) file") -> "type: dataframe - Pandas Dataframe":
     """
     This function is different from read_hdf5 function. As it assumes, the content 
     of the HDF5 file passed as argument was created using the Pandas library.
     """
     try:
-        hdf5FileResponse = pd.read_hdf(filename, mode='r')
-        return hdf5FileResponse
+        hdf5_file_response = pd.read_hdf(filename, mode='r')
+        return hdf5_file_response
     except FileNotFoundError as error:
         logger.info(error)
         logger.critical("[*] HDF5 File could not be found")
 
 
-def read_mat_files(filename:"type:string - Path to .mat file") -> " type: dict - Returns the content .mat file":
+def read_mat_files(filename: "type:string - Path to .mat file") -> " type: dict - Returns the content .mat file":
     try:
-        matFileResponse = scipy.io.loadmat(filename)
-        return matFileResponse
+        hdf5_file_response = scipy.io.loadmat(filename)
+        return hdf5_file_response
     except FileNotFoundError as error:
         logger.critical(error)
         logger.critical("[*] Mat File could not be found")
 
 
-def convert_mat_to_df(matFileResponse:"type: dict - content of .mat file"):
-    pdDataframe = pd.DataFrame(matFileResponse['None'])
+def convert_mat_to_df(hdf5_file_response: "type: dict - content of .mat file"):
+    pd_dataframe = pd.DataFrame(hdf5_file_response['None'])
     key = 'dataframe/isotope'
     filename = 'isotopeTable.h5'
-    store_df_to_hdf(filename, pdDataframe, key)
-    return pdDataframe
+    store_df_to_hdf(filename, pd_dataframe, key)
+    return pd_dataframe
 
-def store_df_to_hdf(filename:"type: string - name of hdf5 file", 
-                    dataframe:"dataframe which is to be stored in h5 file", 
-                    key:"DirectoryStructure/columnName of content"):
+
+def store_df_to_hdf(filename: "type: string - name of hdf5 file",
+                    dataframe: "dataframe which is to be stored in h5 file",
+                    key: "DirectoryStructure/columnName of content"):
     dataframe.to_hdf(filename, key, mode='w')
 
 
+def store_df_to_csv(data, path):
+    data.to_csv(path, encoding='utf-8', index=False)

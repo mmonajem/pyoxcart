@@ -11,7 +11,8 @@
 	"signal_generator": "on",
 	"cryo": "on",
 	"gauges": "on",
-	"edge_counter": "off",
+	"t_0": "51",
+	"flight_path": "110",
 	"thorlab_motor": "off",
 	"COM_PORT_gates": "Dev2/port0/",
 	"COM_PORT_cryo": 3,
@@ -21,7 +22,6 @@
 	"COM_PORT_gauge_bc": "COM2",
 	"COM_PORT_gauge_ll": "COM1",
 	"COM_PORT_signal_generator": "USB0::0xF4EC::0x1101::SDG6XBAD2R0601::INSTR",
-	"COM_PORT_NI_counter": "Dev1/ctr0",
 	"COM_PORT_thorlab_motor": "27261754"
 }
 

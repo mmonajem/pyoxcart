@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import RectangleSelector, EllipseSelector
 from matplotlib.patches import Circle, Rectangle
 import pandas as pd
-import h5py
 
 # Local module and scripts
 from pyccapt.calibration.calibration_tools import selectors_data
@@ -18,49 +17,80 @@ logger = logging_library.logger_creator('data_loadcrop')
 
 
 def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc",
-                               pulse_mode: "type: string - mode of pulse") -> "type:list - list of dataframes":
+                               pulse_mode: "type: string - mode of pulse",
+                               max_tof: "type: float - maximum possible tof") -> "type: dataframes":
     try:
         print("Filename>>", filename)
         hdf5Data = data_tools.read_hdf5(filename, tdc)
         if hdf5Data is None:
             raise FileNotFoundError
         if tdc == 'surface_concept':
-            dld_highVoltage = hdf5Data['dld/high_voltage']
+            dld_highVoltage = hdf5Data['dld/high_voltage'].to_numpy()
             if pulse_mode == 'laser':
-                dld_pulse = hdf5Data['dld/laser_intensity']
+                dld_pulse = hdf5Data['dld/laser_intensity'].to_numpy()
             elif pulse_mode == 'voltage':
-                dld_pulse = hdf5Data['dld/pulse_voltage']
-            dld_startCounter = hdf5Data['dld/start_counter']
-            dld_t = hdf5Data['dld/t']
-            dld_x = hdf5Data['dld/x']
-            dld_y = hdf5Data['dld/y']
-            dldGroupStorage = [dld_highVoltage, dld_pulse, dld_startCounter, dld_t, dld_x, dld_y]
-        elif tdc == 'roentdec':
-            dld_highVoltage = hdf5Data['dld/high_voltage']
-            if pulse_mode == 'laser':
-                dld_pulse = hdf5Data['dld/laser_intensity']
-            elif pulse_mode == 'voltage':
-                dld_pulse = hdf5Data['dld/pulse_voltage']
-            # dld_AbsoluteTimeStamp = hdf5Data['dld/AbsoluteTimeStamp']
-            dld_t = hdf5Data['dld/t']
-            dld_x = hdf5Data['dld/x']
-            dld_y = hdf5Data['dld/y']
+                dld_pulse = hdf5Data['dld/pulse_voltage'].to_numpy()
+            dld_startCounter = hdf5Data['dld/start_counter'].to_numpy()
+            dld_t = hdf5Data['dld/t'].to_numpy()
+            dld_x = hdf5Data['dld/x'].to_numpy()
+            dld_y = hdf5Data['dld/y'].to_numpy()
             # remove data that is location are out of the detector
-            tt = dld_t.to_numpy()
-            xx = dld_x.to_numpy()
-            yy = dld_y.to_numpy()
-            mask_local = np.logical_and((np.abs(xx) <= 60.0), (np.abs(yy) <= 60.0))
-            mask_temporal = (tt > 0)
-            mask = np.logical_or(mask_temporal, mask_local)
+
+            mask_local = np.logical_and((np.abs(dld_x) <= 40.0), (np.abs(dld_y) <= 40.0))
+            mask_temporal = np.logical_and((dld_t > 0), (dld_t < max_tof))
+            mask = np.logical_and(mask_temporal, mask_local)
             dld_highVoltage = dld_highVoltage[mask]
             dld_pulse = dld_pulse[mask]
+            dld_startCounter = dld_startCounter[mask]
+            dld_t = dld_t[mask]
+            dld_x = dld_x[mask]
+            dld_y = dld_y[mask]
+
+            dld_highVoltage = np.expand_dims(dld_highVoltage, axis=1)
+            dld_pulse = np.expand_dims(dld_pulse, axis=1)
+            dld_startCounter = np.expand_dims(dld_startCounter, axis=1)
+            dld_t = np.expand_dims(dld_t, axis=1)
+            dld_x = np.expand_dims(dld_x, axis=1)
+            dld_y = np.expand_dims(dld_y, axis=1)
+
+            dldGroupStorage = np.concatenate((dld_highVoltage, dld_pulse, dld_startCounter, dld_t, dld_x, dld_y),
+                                             axis=1)
+
+        elif tdc == 'roentdec':
+            dld_highVoltage = hdf5Data['dld/high_voltage'].to_numpy()
+            if pulse_mode == 'laser':
+                dld_pulse = hdf5Data['dld/laser_intensity'].to_numpy()
+            elif pulse_mode == 'voltage':
+                dld_pulse = hdf5Data['dld/pulse_voltage'].to_numpy()
+            dld_AbsoluteTimeStamp = hdf5Data['dld/AbsoluteTimeStamp'].to_numpy()
+            dld_t = hdf5Data['dld/t'].to_numpy()
+            dld_x = hdf5Data['dld/x'].to_numpy()
+            dld_y = hdf5Data['dld/y'].to_numpy()
+            # remove data that is location are out of the detector
+
+            mask_local = np.logical_and((np.abs(dld_x) <= 60.0), (np.abs(dld_y) <= 60.0))
+            mask_temporal = np.logical_and((dld_t > 0), (dld_t < max_tof))
+            mask = np.logical_and(mask_temporal, mask_local)
+            dld_highVoltage = dld_highVoltage[mask]
+            dld_pulse = dld_pulse[mask]
+            # TODO
+            # dld_AbsoluteTimeStamp = dld_AbsoluteTimeStamp[mask]
             dld_AbsoluteTimeStamp = dld_t[mask]
             dld_t = dld_t[mask]
             dld_x = dld_x[mask]
             dld_y = dld_y[mask]
 
-            dldGroupStorage = [dld_highVoltage, dld_pulse, dld_AbsoluteTimeStamp, dld_t, dld_x, dld_y]
-        return dldGroupStorage
+            dld_highVoltage = np.expand_dims(dld_highVoltage, axis=1)
+            dld_pulse = np.expand_dims(dld_pulse, axis=1)
+            dld_AbsoluteTimeStamp = np.expand_dims(dld_AbsoluteTimeStamp, axis=1)
+            dld_t = np.expand_dims(dld_t, axis=1)
+            dld_x = np.expand_dims(dld_x, axis=1)
+            dld_y = np.expand_dims(dld_y, axis=1)
+
+            dldGroupStorage = np.concatenate((dld_highVoltage, dld_pulse, dld_AbsoluteTimeStamp, dld_t, dld_x, dld_y),
+                                             axis=1)
+        dld_group_storage = create_pandas_dataframe(dldGroupStorage, tdc, pulse_mode)
+        return dld_group_storage
     except KeyError as error:
         logger.info(error)
         logger.critical("[*]Keys missing in the dataset")
@@ -75,16 +105,16 @@ def concatenate_dataframes_of_dld_grp(
     dld_masterDataframe = pd.concat(dld_masterDataframeList, axis=1)
     return dld_masterDataframe
 
+def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes",
+                                 rect=False, only_plot=False, save_name=False):
+    fig1, ax1 = plt.subplots(figsize=(8, 4), constrained_layout=True)
 
-def plot_graph_for_dld_high_voltage(ax1: "type:object", dldGroupStorage: "type:list - list of dataframes",
-                                    rect=None, save_name=None):
     # Plot tof and high voltage
-    y = dldGroupStorage[3]  # dld_t
-    y.loc[y['values'] > 5000, 'values'] = 0
-    yaxis = y['values'].to_numpy()
+    yaxis = dldGroupStorage['t (ns)'].to_numpy()
+
     xaxis = np.arange(len(yaxis))
 
-    high_voltage = dldGroupStorage[0]['values'].to_numpy()
+    high_voltage = dldGroupStorage['high_voltage (V)'].to_numpy()
 
     heatmap, xedges, yedges = np.histogram2d(xaxis, yaxis, bins=(1200, 800))
     heatmap[heatmap == 0] = 1  # to have zero after apply log
@@ -95,7 +125,10 @@ def plot_graph_for_dld_high_voltage(ax1: "type:object", dldGroupStorage: "type:l
     # set y-axis label
     ax1.set_ylabel("time of flight [ns]", color="red", fontsize=10)
     plt.title("Experiment history")
-    plt.imshow(heatmap.T, extent=extent, origin='lower', aspect="auto")
+    img = plt.imshow(heatmap.T, extent=extent, origin='lower', aspect="auto")
+
+    cax = ax1.inset_axes([1.14, 0.0, 0.05, 1])
+    fig1.colorbar(img, ax=ax1, cax=cax)
 
     # plot high voltage curve
     ax2 = ax1.twinx()
@@ -103,19 +136,55 @@ def plot_graph_for_dld_high_voltage(ax1: "type:object", dldGroupStorage: "type:l
     xaxis2 = np.arange(len(high_voltage))
     ax2.plot(xaxis2, high_voltage, color='b', linewidth=2)
     ax2.set_ylabel("DC voltage [V]", color="blue", fontsize=10)
-    if rect is None:
-        rectangle_box_selector(ax2)
-        plt.connect('key_press_event', selectors_data.toggle_selector)
-    else:
-        left, bottom, width, height = (
-            variables.selected_x1, 0, variables.selected_x2 - variables.selected_x1, np.max(yaxis))
-        rect = Rectangle((left, bottom), width, height, fill=True, alpha=0.2, color="r", linewidth=2)
-        ax1.add_patch(rect)
+    if not only_plot:
+        if not rect:
+            rectangle_box_selector(ax2)
+            plt.connect('key_press_event', selectors_data.toggle_selector)
+        else:
+            left, bottom, width, height = (
+                variables.selected_x1, 0, variables.selected_x2 - variables.selected_x1, np.max(yaxis))
+            rect = Rectangle((left, bottom), width, height, fill=True, alpha=0.2, color="r", linewidth=2)
+            ax1.add_patch(rect)
 
-    if save_name is not None:
+    if save_name:
         plt.savefig("%s.png" % save_name, format="png", dpi=600)
         plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
 
+    plt.show(block=True)
+
+
+def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256), circle=False,
+                  save_name=False, only_plot=False):
+    fig1, ax1 = plt.subplots(figsize=(6, 6), constrained_layout=True)
+    # Plot and crop FDM
+    x = data_crop['x (mm)'].to_numpy()
+    y = data_crop['y (mm)'].to_numpy()
+    FDM, xedges, yedges = np.histogram2d(x, y, bins=bins)
+
+    FDM[FDM == 0] = 1  # to have zero after apply log
+    FDM = np.log(FDM)
+
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    # set x-axis label
+    ax1.set_xlabel("x [mm]", color="red", fontsize=10)
+    # set y-axis label
+    ax1.set_ylabel("y [mm]", color="red", fontsize=10)
+    plt.title("FDM")
+    img = plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
+    fig1.colorbar(img)
+
+    if not only_plot:
+        if not circle:
+            elliptical_shape_selector(ax1, fig1)
+        else:
+            print('x:', variables.selected_x_fdm, 'y:', variables.selected_y_fdm, 'roi:', variables.roi_fdm)
+            circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
+                          alpha=0.2, color='r', linewidth=1)
+            ax1.add_patch(circ)
+    if save_name:
+        logger.info("Plot saved by the name {}".format(save_name))
+        plt.savefig("%s.png" % save_name, format="png", dpi=600)
+        plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
     plt.show(block=True)
 
 
@@ -129,9 +198,9 @@ def rectangle_box_selector(axisObject: "type:object"):
                                                           interactive=True)
 
 
-def crop_dataset(dld_masterDataframe: "type:list - list of dataframes") -> "type:list  - cropped list content":
-    dld_masterDataframe = dld_masterDataframe.to_numpy()
-    data_crop = dld_masterDataframe[int(variables.selected_x1):int(variables.selected_x2), :]
+def crop_dataset(dld_master_dataframe: "type: dataframes") -> "type: dataframe":
+    data_crop = dld_master_dataframe.loc[int(variables.selected_x1):int(variables.selected_x2), :]
+    data_crop.reset_index(inplace=True, drop=True)
     return data_crop
 
 
@@ -144,110 +213,35 @@ def elliptical_shape_selector(axisObject: "type:object", figureObject: "type:obj
     figureObject.canvas.mpl_connect('key_press_event', selectors_data.toggle_selector)
 
 
-def plot_crop_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", bins=(256,556), save_name=None):
-    # Plot and crop FDM
-
-    FDM, xedges, yedges = np.histogram2d(data_crop[:, 4], data_crop[:, 5], bins=bins)
-
-    FDM[FDM == 0] = 1  # to have zero after apply log
-    FDM = np.log(FDM)
-
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    # set x-axis label
-    ax1.set_xlabel("x [mm]", color="red", fontsize=10)
-    # set y-axis label
-    ax1.set_ylabel("y [mm]", color="red", fontsize=10)
-    plt.title("FDM")
-    plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
-    elliptical_shape_selector(ax1, fig1)
-    if save_name != None:
-        logger.info("Plot saved by the name {}".format(save_name))
-        plt.savefig("%s.png" % save_name, format="png", dpi=600)
-        plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
-    plt.show(block=True)
-
-
-def plot_FDM_after_selection(ax1, fig1, data_crop: "type:list  - cropped list content", bins=(256,256), save_name=None):
-    # Plot FDM with selected part
-    FDM, xedges, yedges = np.histogram2d(data_crop[:, 4], data_crop[:, 5], bins=bins)
-    FDM[FDM == 0] = 1  # to have zero after apply log
-    FDM = np.log(FDM)
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    # set x-axis label
-    ax1.set_xlabel("x [mm]", color="red", fontsize=10)
-    # set y-axis label
-    ax1.set_ylabel("y [mm]", color="red", fontsize=10)
-    plt.title("FDM")
-    plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
-    logger.info("Circle selector Called")
-    print('x:', variables.selected_x_fdm, 'y:', variables.selected_y_fdm, 'roi:', variables.roi_fdm)
-    circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
-                  alpha=0.2, color='r', linewidth=1)
-    ax1.add_patch(circ)
-    if save_name != None:
-        logger.info("Plot saved by the name {}".format(save_name))
-        plt.savefig("%s.png" % save_name, format="png", dpi=600)
-        plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
-    plt.show(block=True)
-
-
-def crop_data_after_selection(data_crop: "type:list  - cropped list content") -> list:
+def crop_data_after_selection(data_crop: "dataframe") -> "dataframe":
     # crop the data based on selected are of FDM
-    detectorDist = np.sqrt(
-        (data_crop[:, 4] - variables.selected_x_fdm) ** 2 + (data_crop[:, 5] - variables.selected_y_fdm) ** 2)
-    mask_fdm = (detectorDist < variables.roi_fdm)
-    return data_crop[np.array(mask_fdm)]
+    x = data_crop['x (mm)'].to_numpy()
+    y = data_crop['y (mm)'].to_numpy()
+    detector_dist = np.sqrt(
+        (x - variables.selected_x_fdm) ** 2 + (y - variables.selected_y_fdm) ** 2)
+    mask_fdm = (detector_dist > variables.roi_fdm)
+    data_crop.drop(np.where(mask_fdm)[0], inplace=True)
+    data_crop.reset_index(inplace=True, drop=True)
+    return data_crop
 
-
-def plot_FDM(ax1, fig1, data_crop: "type:list  - cropped list content", bins=(256,256), save_name=None):
-    # Plot FDM
-    FDM, xedges, yedges = np.histogram2d(data_crop[:, 4], data_crop[:, 5], bins=bins)
-    FDM[FDM == 0] = 1  # to have zero after apply log
-    FDM = np.log(FDM)
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    # set x-axis label
-    ax1.set_xlabel("x [mm]", color="red", fontsize=10)
-    # set y-axis label
-    ax1.set_ylabel("y [mm]", color="red", fontsize=10)
-    plt.title("FDM")
-    plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
-    if save_name != None:
-        logger.info("Plot saved by the name {}".format(save_name))
-        plt.savefig("%s.png" % save_name, format="png", dpi=600)
-        plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
-    plt.show(block=True)
-
-
-def save_croppped_data_to_hdf5(data_crop: "type:list  - cropped list content",
-                               dld_masterDataframe: "type:list - list of dataframes",
-                               name: "type:string - name of h5 file", tdc: "type: string - model of tdc",
-                               pulser_mode: "type: string - mode of pulser"):
-    # save the cropped data
-    hierarchyName = 'df'
-    logger.info('tofCropLossPct {}'.format(str(int((1 - len(data_crop) / len(dld_masterDataframe)) * 100))))
-    print('tofCropLossPct {}'.format(str(int((1 - len(data_crop) / len(dld_masterDataframe)) * 100))))
+def create_pandas_dataframe(data_crop: "type:numpy array", tdc: "type: string - model of tdc",
+                            pulser_mode: "type: string - mode of pulser"):
     if tdc == 'surface_concept':
         if pulser_mode == 'voltage':
-            hdf5Dataframe = pd.DataFrame(data=data_crop,
+            hdf_dataframe = pd.DataFrame(data=data_crop,
                                          columns=['high_voltage (V)', 'pulse (V)', 'start_counter', 't (ns)',
-                                                  'x (mm)', 'y (mm)', 'pulse_pi', 'ion_pp'])
+                                                  'x (mm)', 'y (mm)'])
         elif pulser_mode == 'laser':
-            hdf5Dataframe = pd.DataFrame(data=data_crop,
+            hdf_dataframe = pd.DataFrame(data=data_crop,
                                          columns=['high_voltage (V)', 'pulse (deg)', 'start_counter', 't (ns)',
-                                                  'x (mm)', 'y (mm)', 'pulse_pi', 'ion_pp'])
+                                                  'x (mm)', 'y (mm)'])
     elif tdc == 'roentdec':
         if pulser_mode == 'voltage':
-            hdf5Dataframe = pd.DataFrame(data=data_crop,
-                                         columns=['high_voltage (V)', 'pulse (V)', 'time_stamp', 't (ns)',
-                                                  'x (mm)', 'y (mm)', 'pulse_pi', 'ion_pp'])
+            hdf_dataframe = pd.DataFrame(data=data_crop,
+                                         columns=['high_voltage (V)', 'pulse (V)', 'start_counter', 't (ns)',
+                                                  'x (mm)', 'y (mm)'])
         elif pulser_mode == 'laser':
-            hdf5Dataframe = pd.DataFrame(data=data_crop,
-                                         columns=['high_voltage (V)', 'pulse (deg)', 'time_stamp', 't (ns)',
-                                                  'x (mm)', 'y (mm)', 'pulse_pi', 'ion_pp'])
-
-    data_tools.store_df_to_hdf(name, hdf5Dataframe, hierarchyName)
-
-
-
-
-
+            hdf_dataframe = pd.DataFrame(data=data_crop,
+                                         columns=['high_voltage (V)', 'pulse (deg)', 'start_counter', 't (ns)',
+                                                  'x (mm)', 'y (mm)'])
+    return hdf_dataframe

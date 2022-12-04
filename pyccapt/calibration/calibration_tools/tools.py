@@ -3,22 +3,26 @@ This is file contains tools for mass calibration process.
 """
 
 import numpy as np
+
 from scipy.signal import find_peaks, peak_widths
 import matplotlib.pyplot as plt
 import math
 from scipy.optimize import curve_fit
+from scipy.stats import gmean
 from mpl_toolkits.mplot3d import Axes3D
 from scipy import interpolate
 
 # Local module and scripts
-from pyccapt.calibration.calibration_tools import variables, data_tools
-from pyccapt.calibration.calibration_tools import intractive_point_identification
+from pyccapt.calibration.calibration_tools import variables, data_tools, data_loadcrop
+from pyccapt.calibration.calibration_tools import intractive_point_identification, selectors_data
 from pyccapt.calibration.calibration_tools import logging_library
 
-logger = logging_library.logger_creator('data_loadcrop')
+from ipywidgets import fixed, interact_manual
 
-def massSpecPlot(mc, bin, mc_ideal=[], mode='count', percent=50, peaks_find=True, peaks_find_plot=True, plot=False,
-                 prominence=500, distance=None, fig_name=None, text_loc='right', label='mc'):
+
+def hist_plot(mc_tof, bin, mc_tof_ideal=[], mode='count', percent=50, peaks_find=True, peaks_find_plot=True, plot=False,
+              prominence=500, distance=None, h_line=False, selector='None', fast_hist=True, fig_name=None,
+              text_loc='right', label='mc'):
     """
     massSpecPlot plots the data from pos to get a mass spectrum as a figure
 
@@ -42,130 +46,111 @@ def massSpecPlot(mc, bin, mc_ideal=[], mode='count', percent=50, peaks_find=True
               (counts/Dalton)/totalCounts over Dalton. Used in further
               analysis to find new ions
     """
+    logger = logging_library.logger_creator('data_loadcrop')
 
-    def find_nearest(x, y, index_peak, percent):
-
-        peak = y[index_peak]
-        max_possible = min(abs(len(y) - index_peak), index_peak)
-
-        for i in range(max_possible):
-            if y[index_peak + i] < peak * percent / 100:
-                index_right_edge = index_peak + i
-                break
-            if i == max_possible - 1:
-                index_right_edge = index_peak + i
-
-        for i in range(max_possible):
-            if y[index_peak - i] < peak * percent / 100:
-                index_left_edge = index_peak - i
-                break
-            if i == max_possible - 1:
-                index_left_edge = index_peak + i
-
-        return [x[index_left_edge], x[index_right_edge], y[index_left_edge], y[index_right_edge]]
-
-    bins = np.linspace(np.min(mc), np.max(mc), round(np.max(mc) / bin))
+    bins = np.linspace(np.min(mc_tof), np.max(mc_tof), round(np.max(mc_tof) / bin))
 
     if mode == 'count':
-        y, x = np.histogram(mc, bins=bins)
+        y, x = np.histogram(mc_tof, bins=bins)
         logger.info("Selected Mode = count")
     elif mode == 'normalised':
         # calculate as counts/(Da * totalCts) so that mass spectra with different
         # count numbers are comparable
-        y, x = np.histogram(mc, bins=bins)
-        mc = mc / bin / len(mc)
+        mc_tof = (mc_tof / bin) / len(mc_tof)
+        y, x = np.histogram(mc_tof, bins=bins)
         # med = median(y);
         logger.info("Selected Mode = normalised")
-    else:
-        y, x = np.histogram(mc, bins=bins)
-        logger.info("Mode not selected")
 
     fig1, ax1 = plt.subplots(figsize=(8, 4))
 
     if peaks_find:
-        max_hist = x[np.where(y == y.max())]
-        index_max = np.where(y == y.max())[0].tolist()[0]
-        edges = find_nearest(x, y, index_max, percent=percent)
-
-        peaks, properties = find_peaks(y, prominence=prominence, distance=distance)
-        # prominences, left_bases, right_bases = peak_prominences(y, peaks)
-        # print(prominences, left_bases, right_bases)
+        peaks, properties = find_peaks(y, prominence=prominence, distance=distance, height=0)
+        index_peak_max = np.argmax(properties['peak_heights'])
         # find peak width
-        results_half = peak_widths(y, peaks, rel_height=0.998, prominence_data=None)
-
-        # results_full = peak_widths(y, peaks, rel_height=1)
-        peaks = peaks.tolist()
-        for i in range(len(peaks)):
-            peakLocIs_tmp = [x[peaks[i]], y[peaks[i]]]
-            if peakLocIs_tmp[0] > 0.8:
-                index_peak = peaks[i]
-                if 'peakLocIs' in locals():
-                    edges = find_nearest(x, y, index_peak, percent=percent)
-                    peakLocIs_tmp = np.append(peakLocIs_tmp, edges)
-                    peakLocIs = np.append(peakLocIs, np.expand_dims(peakLocIs_tmp, 0), axis=0)
-                else:
-                    edges = find_nearest(x, y, index_peak, percent=percent)
-                    peakLocIs_tmp = np.append(peakLocIs_tmp, edges)
-                    peakLocIs = np.expand_dims(peakLocIs_tmp, 0)
-
-        index_peak_max = np.argmax(peakLocIs[:, 1])
-        edges = peakLocIs[index_peak_max, 2:4]
+        peak_widths_p = peak_widths(y, peaks, rel_height=(percent / 100), prominence_data=None)
 
     if plot:
-        y, x, _ = plt.hist(mc, bins=bins, log=True)
+        if fast_hist:
+            y, x, _ = plt.hist(mc_tof, bins=bins, log=True, histtype='step')
+        else:
+            y, x, _ = plt.hist(mc_tof, bins=bins, log=True)
         if label == 'mc':
             plt.title("Mass Spectrum")
             ax1.set_xlabel("mass-to-charge-state ratio [Da]", color="red", fontsize=10)
         elif label == 'tof':
             plt.title("Time of Flight")
             ax1.set_xlabel("Time of Flight [ns]", color="red", fontsize=10)
-        if mode == 'count':
-            ax1.set_ylabel("frequency [cts / Da / totCts]", color="red", fontsize=10)
-        elif mode == 'normalised':
-            ax1.set_ylabel("frequency [cts / Da / totCts]", color="red", fontsize=10)
 
-        # annotation with range stats
-        upperLim = 4.5  # Da
-        lowerLim = 3.5  # Da
-        mask = np.logical_and((x >= lowerLim), (x <= upperLim))
-        BG4 = np.sum(y[np.array(mask[:-1])]) / (upperLim - lowerLim)
-        BG4 = BG4 / len(mc) * 1E6
-        mrp = '{:.2f}'.format((max_hist / (edges[1] - edges[0]))[0])
-        txt = 'bin width: %s Da\nnum atoms: %s\nbackG @ 4 Da: %s ppm/Da\nMRP: %s' % (bin, len(mc), int(BG4), mrp)
+        ax1.set_ylabel("frequency [cts]", color="red", fontsize=10)
+        if peaks_find:
+            if label == 'mc':
+                # annotation with range stats
+                upperLim = 4.5  # Da
+                lowerLim = 3.5  # Da
+                mask = np.logical_and((x >= lowerLim), (x <= upperLim))
+                BG4 = np.sum(y[np.array(mask[:-1])]) / (upperLim - lowerLim)
+                BG4 = BG4 / len(mc_tof) * 1E6
+                # BG = gmean(y, weights=1 / y) / len(mc_tof) * 1E6
+                mrp = '{:.2f}'.format(x[peaks[index_peak_max]] / (x[int(peak_widths_p[3][index_peak_max])] -
+                                                                  x[int(peak_widths_p[2][index_peak_max])]))
 
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-        if text_loc == 'left':
-            ax1.text(0.05, 0.82, txt, transform=ax1.transAxes, bbox=props, fontsize=8)
-        elif text_loc == 'right':
-            ax1.text(0.7, 0.82, txt, transform=ax1.transAxes, bbox=props, fontsize=8)
-        ax1.tick_params(axis='both', which='major', labelsize=12)
-        ax1.tick_params(axis='both', which='minor', labelsize=10)
+                txt = 'bin width: %s Da\nnum atoms: %s\nbackG: @4 Da %s ppm/Da\nMRP: %s' \
+                      % (bin, len(mc_tof), int(BG4), mrp)
+                # txt = 'bin width: %s Da\nnum atoms: %s\nbackG: %s ppm/Da\nbackG: @4 Da %s ppm/Da\nMRP: %s'\
+                #       % (bin, len(mc_tof), int(BG), int(BG4), mrp)
 
-        if peaks_find_plot:
+            elif label == 'tof':
+                # annotation with range stats
+                # upperLim = 4.5  # Da
+                # lowerLim = 3.5  # Da
+                # mask = np.logical_and((x >= lowerLim), (x <= upperLim))
+                # BG4 = np.sum(y[np.array(mask[:-1])]) / (upperLim - lowerLim)
+                # BG4 = BG4 / len(mc_tof) * 1E6
+                # BG = gmean(y, weights=1 / y) / len(mc_tof) * 1E6
+                mrp = '{:.2f}'.format(x[peaks[index_peak_max]] / (x[int(peak_widths_p[3][index_peak_max])] -
+                                                                  x[int(peak_widths_p[2][index_peak_max])]))
+                # txt = 'bin width: %s Da\nnum atoms: %s\nbackG: %s ppm/ns\nbackG: @4 ns %s ppm/ns\nMRP: %s' \
+                #       % (bin, len(mc_tof), int(BG), int(BG4), mrp)
+                txt = 'bin width: %s Da\nnum atoms: %s\nMRP: %s' % (bin, len(mc_tof), mrp)
 
-            if 'peakLocIs' in locals():
+            props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+            if text_loc == 'left':
+                ax1.text(0.05, 0.75, txt, transform=ax1.transAxes, bbox=props, fontsize=8)
+            elif text_loc == 'right':
+                ax1.text(0.7, 0.75, txt, transform=ax1.transAxes, bbox=props, fontsize=8)
 
-                plt.scatter(peakLocIs[:, 0], peakLocIs[:, 1], marker="x", color='red')
-                # plot a red line for width of each peak
-                # for i in range(len(peaks)):
-                #     peakLocIs_tmp = [x[peaks[i]], y[peaks[i]]]
-                # Draw a horizontal line for width of each peak
-                # if peakLocIs_tmp[0] > 0.8:
-                #     plt.hlines(results_half[1][i], x[int(results_half[2][i])], x[int(results_half[3][i])], color="red")
+            ax1.tick_params(axis='both', which='major', labelsize=12)
+            ax1.tick_params(axis='both', which='minor', labelsize=10)
+
+            if peaks_find_plot:
                 annotes = []
-                for i in range(len(peakLocIs)):
-                    if len(mc_ideal) != 0:
-                        ax1.annotate(mc_ideal[i],
-                                     xy=(peakLocIs[i, 0], peakLocIs[i, 1]),
-                                     xytext=(peakLocIs[i, 0] + 1.5, peakLocIs[i, 1]), size=6, color='gray')
-                         # plt.axvline(mc_ideal[i], color='k', linewidth=1)
+                for i in range(len(peaks)):
+                    if len(mc_tof_ideal) != 0:
+                        mc_ideal = mc_tof_ideal[i]
+                        mc_ideal = mc_ideal.split('+')
+                        ax1.annotate(r'$%s^%s$' % (mc_ideal[0], (len(mc_ideal) - 1) * '+'),
+                                     xy=(x[peaks][i], y[peaks][i]),
+                                     xytext=(x[peaks][i] + 1.5, y[peaks][i]), size=6, color='gray')
+                        # plt.axvline(mc_ideal[i], color='k', linewidth=1)
                     else:
-                        ax1.annotate('%s' % '{:.2f}'.format(peakLocIs[i, 0]),
-                                     xy=(peakLocIs[i, 0], peakLocIs[i, 1]),
-                                     xytext=(peakLocIs[i, 0] + 1.5, peakLocIs[i, 1]), size=6, color='gray')
+                        ax1.annotate('%s' % '{:.2f}'.format(x[peaks][i]),
+                                     xy=(x[peaks][i], y[peaks[i]]),
+                                     xytext=(x[peaks][i] + 1.5, y[peaks][i]), size=6, color='gray')
                         annotes.append(str(i + 1))
-                af = intractive_point_identification.AnnoteFinder(peakLocIs[:, 0], peakLocIs[:, 1], annotes, ax=ax1)
-                fig1.canvas.mpl_connect('button_press_event', af)
+                    if h_line:
+                        right_side_x = x[int(peak_widths_p[3][i])]
+                        left_side_x = x[int(peak_widths_p[2][i])]
+                        left_side_y = y[int(peak_widths_p[2][i])]
+                        plt.hlines(left_side_y, left_side_x, right_side_x, color="red")
+
+                if selector == 'rect':
+                    # Connect and initialize rectangle box selector
+                    data_loadcrop.rectangle_box_selector(ax1)
+                    plt.connect('key_press_event', selectors_data.toggle_selector)
+                elif selector == 'peak':
+                    # connect peak selector
+                    af = intractive_point_identification.AnnoteFinder(x[peaks], y[peaks], annotes, ax=ax1)
+                    fig1.canvas.mpl_connect('button_press_event', af)
 
         if fig_name is not None:
             if label == 'mc':
@@ -179,16 +164,10 @@ def massSpecPlot(mc, bin, mc_ideal=[], mode='count', percent=50, peaks_find=True
     else:
         plt.close(fig1)
 
-    if 'peakLocIs' in locals():
-        max_paek_edges = [x[int(results_half[2][index_peak_max])], x[int(results_half[3][index_peak_max])]]
-    else:
-        max_hist = 0
-        edges = 0
-        peakLocIs = 0
-        max_paek_edges = 0
-        index_max = 0
-
-    return max_hist, edges, peakLocIs, max_paek_edges, index_max
+    peak_widths_f = []
+    for i in range(len(peaks)):
+        peak_widths_f.append([y[int(peak_widths_p[2][i])], x[int(peak_widths_p[2][i])], x[int(peak_widths_p[3][i])]])
+    return x[peaks], y[peaks], peak_widths_f
 
 
 def find_closest_element(input_value):
@@ -210,6 +189,7 @@ def find_closest_element(input_value):
     closest_mass, closest_element = closest_value(mass_list, element_list, input_value)
 
     return closest_mass, closest_element
+
 
 def history_ex(mc, dld_highVoltage, mean_t=1.5, mc_max=100, plot=False, fig_name=None):
     MAXMC = mc_max  # maximum mc that makes sense
@@ -276,6 +256,7 @@ def voltage_corr(highVoltage, mc, fitPeak, ionsPerFitSegment, plot=False, fig_na
         # return (np.sqrt(b + x + c*(x**2))) * a
         return a * (x ** 2) + b * x + c
 
+    logger = logging_library.logger_creator('data_loadcrop')
     if not isinstance(highVoltage, np.ndarray) or not isinstance(mc, np.ndarray) or not isinstance(fitPeak, np.ndarray):
         logger.error("Incorrect data type of passed arguments")
     numAtom = len(mc)

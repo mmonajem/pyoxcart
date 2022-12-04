@@ -37,7 +37,7 @@ def tof2mcSimple(t:"Unit: ns", t0:"Unit:ns", V:"Unit:volts", xDet:"Unit:mm", yDe
 
 def tof2mc(t:"Unit:ns", t0:"Unit:ns", V:"Unit:volts", 
            V_pulse:"Unit:volts", xDet:"Unit:mm", yDet:"Unit:mm",
-           flightPathLength:"Unit:mm", mode='voltage_pulse')->"Unit:Dalton":
+           flightPathLength:"Unit:mm", mode='voltage')->"Unit:Dalton":
     # calculates m/c based on idealized geometry / electrostatics
     # m/c = 2 e alpha (V + beta V_p) (t/L)^2
     try:
@@ -57,10 +57,10 @@ def tof2mc(t:"Unit:ns", t0:"Unit:ns", V:"Unit:volts",
 
         flightPathLength = np.sqrt(xDet ** 2 + yDet ** 2 + flightPathLength ** 2)
 
-        if mode == 'voltage_pulse':
+        if mode == 'voltage':
             # mc = 2 * e * alpha * (V + beta * V_pulse) * (t / flightPathLength)**2
             mc = 2 * V * e * (t / flightPathLength) ** 2
-        elif mode == 'laser_pulse':
+        elif mode == 'laser':
             mc = 2 * V * e * (t / flightPathLength) ** 2
 
         mc = mc / amu  # converstion from kg/C to Da 6.022E23 g/mol, 1.6E-19C/ec

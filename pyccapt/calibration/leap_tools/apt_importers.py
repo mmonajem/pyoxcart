@@ -126,7 +126,7 @@ def label_ions(pos, rrngs):
     pos['comp'] = ''
     pos['colour'] = '#FFFFFF'
 
-    for n,r in rrngs.iterrows():
+    for n, r in rrngs.iterrows():
         pos.loc[(pos.loc[:, 'm/n (Da)'] >= r.lower) & (pos.loc[:, 'm/n (Da)'] <= r.upper),
                 ['comp', 'colour']] = [r['comp'], '#' + r['colour']]
 
@@ -207,3 +207,4 @@ def volvis(pos, size=2, alpha=1):
     canvas.show()
     if sys.flags.interactive == 0:
         app.run()
+

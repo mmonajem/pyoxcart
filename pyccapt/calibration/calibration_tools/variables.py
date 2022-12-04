@@ -1,6 +1,7 @@
 """
 This is the main script for global variables.
 """
+import numpy as np
 
 
 def init():
@@ -20,6 +21,11 @@ def init():
     global result_path
     global path
 
+    global dld_t_calib
+    global mc_calib
+    global max_peak
+    global peak
+
 
     selected_x_fdm = 0
     selected_y_fdm = 0
@@ -35,3 +41,8 @@ def init():
 
     result_path = ''
     path = ''
+
+    dld_t_calib = np.zeros(0)
+    mc_calib = np.zeros(0)
+    max_peak = 0
+    peak = []
