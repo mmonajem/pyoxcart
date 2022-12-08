@@ -155,7 +155,7 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes",
 
 def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256), circle=False,
                   save_name=False, only_plot=False):
-    fig1, ax1 = plt.subplots(figsize=(6, 6), constrained_layout=True)
+    fig1, ax1 = plt.subplots(figsize=(7, 6), constrained_layout=True)
     # Plot and crop FDM
     x = data_crop['x (mm)'].to_numpy()
     y = data_crop['y (mm)'].to_numpy()

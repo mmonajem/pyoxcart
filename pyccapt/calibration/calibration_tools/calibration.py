@@ -293,7 +293,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, sample_size, calibration
 
 
 def plot_FDM(xx, yy, save, bins_s):
-    fig1, ax1 = plt.subplots(figsize=(6, 6), constrained_layout=True)
+    fig1, ax1 = plt.subplots(figsize=(7, 6), constrained_layout=True)
     # Plot and crop FDM
     FDM, xedges, yedges = np.histogram2d(xx, yy, bins=(bins_s[0],bins_s[1]))
     print(bins_s)

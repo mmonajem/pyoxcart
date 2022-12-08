@@ -55,12 +55,14 @@ def camera():
 
         # Get all attached devices and exit application if no device is found.
         devices = tlFactory.EnumerateDevices()
+        for device in devices:
+            print('devices name:', device.GetFriendlyName())
         if len(devices) == 0:
             raise pylon.RUNTIME_EXCEPTION("No camera present.")
 
         # Create an array of instant cameras for the found devices and avoid exceeding a maximum number of devices.
         cameras = pylon.InstantCameraArray(min(len(devices), maxCamerasToUse))
-
+        print(cameras)
         # l = cameras.GetSize()
 
         # Create and attach all Pylon Devices.
@@ -158,6 +160,7 @@ def camera():
 
     # Comment the following two lines to disable waiting on exit.
     sys.exit(exitCode)
+
 
 if __name__ == '__main__':
     camera()

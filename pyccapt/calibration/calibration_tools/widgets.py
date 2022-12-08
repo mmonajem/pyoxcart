@@ -202,20 +202,20 @@ def compute_element_isotope_values_according_to_selected_charge(mode='calibratio
 
 def dataset_tdc_selection():
 
-    flightPathLength = widgets.Text(
+    flightPathLength = widgets.FloatText(
         value='110',
         placeholder='Flight path length',
         description='Flight path length:',
         disabled=False
     )
-    t0 = widgets.Text(
+    t0 = widgets.FloatText(
         value='51.74',
         placeholder='T_0 of the instrument',
         description='t0:',
         disabled=False
     )
 
-    max_tof = widgets.Text(
+    max_tof = widgets.IntText(
         value='5000',
         placeholder='Maximum possible tof',
         description='Max tof:',
