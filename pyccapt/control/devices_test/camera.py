@@ -27,27 +27,29 @@ except:
     print('Please install opencv2')
 import numpy as np
 
-# Number of images to be grabbed.
-countOfImagesToGrab = 10
 
-# Limits the amount of cameras used for grabbing.
-# It is important to manage the available bandwidth when grabbing with multiple cameras.
-# This applies, for instance, if two GigE cameras are connected to the same network adapter via a switch.
-# To manage the bandwidth, the GevSCPD interpacket delay parameter and the GevSCFTD transmission delay
-# parameter can be set for each GigE camera device.
-# The "Controlling Packet Transmission Timing with the Interpacket and Frame Transmission Delays on Basler GigE Vision Cameras"
-# Application Notes (AW000649xx000)
-# provide more information about this topic.
-# The bandwidth used by a FireWire camera device can be limited by adjusting the packet size.
-maxCamerasToUse = 2
-
-# The exit code of the sample application.
-exitCode = 0
-img0 = []
-img1 = []
-windowName = 'title'
 
 def camera():
+    # Number of images to be grabbed.
+    countOfImagesToGrab = 10
+
+    # Limits the amount of cameras used for grabbing.
+    # It is important to manage the available bandwidth when grabbing with multiple cameras.
+    # This applies, for instance, if two GigE cameras are connected to the same network adapter via a switch.
+    # To manage the bandwidth, the GevSCPD interpacket delay parameter and the GevSCFTD transmission delay
+    # parameter can be set for each GigE camera device.
+    # The "Controlling Packet Transmission Timing with the Interpacket and Frame Transmission Delays on Basler GigE Vision Cameras"
+    # Application Notes (AW000649xx000)
+    # provide more information about this topic.
+    # The bandwidth used by a FireWire camera device can be limited by adjusting the packet size.
+    maxCamerasToUse = 2
+
+    # The exit code of the sample application.
+    exitCode = 0
+    img0 = []
+    img1 = []
+    windowName = 'title'
+
     try:
 
         # Get the transport layer factory.

@@ -11,7 +11,7 @@ from scipy.optimize import curve_fit
 from scipy.stats import gmean
 from mpl_toolkits.mplot3d import Axes3D
 from scipy import interpolate
-
+from adjustText import adjust_text
 # Local module and scripts
 from pyccapt.calibration.calibration_tools import variables, data_tools, data_loadcrop
 from pyccapt.calibration.calibration_tools import intractive_point_identification, selectors_data
@@ -124,25 +124,31 @@ def hist_plot(mc_tof, bin, mc_tof_ideal=[], mode='count', percent=50, peaks_find
 
             if peaks_find_plot:
                 annotes = []
+                texts = []
                 for i in range(len(peaks)):
                     if len(mc_tof_ideal) != 0:
                         mc_ideal = mc_tof_ideal[i]
                         mc_ideal = mc_ideal.split('+')
-                        ax1.annotate(r'$%s^%s$' % (mc_ideal[0], (len(mc_ideal) - 1) * '+'),
-                                     xy=(x[peaks][i], y[peaks][i]),
-                                     xytext=(x[peaks][i] + 1.5, y[peaks][i]), size=6, color='gray')
+                        texts.append(plt.text(x[peaks][i], y[peaks][i], r'$%s^%s$' % (mc_ideal[0], (len(mc_ideal) - 1) * '+'), color='gray', size=7,
+                                 alpha=0.5))
+                        # ax1.annotate(r'$%s^%s$' % (mc_ideal[0], (len(mc_ideal) - 1) * '+'),
+                        #              xy=(x[peaks][i], y[peaks][i]),
+                        #              xytext=(x[peaks][i] + 1.5, y[peaks][i]), size=6, color='gray')
                         # plt.axvline(mc_ideal[i], color='k', linewidth=1)
                     else:
-                        ax1.annotate('%s' % '{:.2f}'.format(x[peaks][i]),
-                                     xy=(x[peaks][i], y[peaks[i]]),
-                                     xytext=(x[peaks][i] + 1.5, y[peaks][i]), size=6, color='gray')
-                        annotes.append(str(i + 1))
+                        texts.append(plt.text(x[peaks][i], y[peaks][i], '%s' % '{:.2f}'.format(x[peaks][i]), color='gray', size=7,
+                                 alpha=0.5))
+                        #     ax1.annotate('%s' % '{:.2f}'.format(x[peaks][i]),
+                        #                  xy=(x[peaks][i], y[peaks][i]),
+                        #                  xytext=(x[peaks][i] + 1.5, y[peaks][i]), size=6, color='gray')
+                    annotes.append(str(i + 1))
                     if h_line:
                         right_side_x = x[int(peak_widths_p[3][i])]
                         left_side_x = x[int(peak_widths_p[2][i])]
                         left_side_y = y[int(peak_widths_p[2][i])]
                         plt.hlines(left_side_y, left_side_x, right_side_x, color="red")
 
+                adjust_text(texts, arrowprops=dict(arrowstyle='-', color='red', lw=0.5))
                 if selector == 'rect':
                     # Connect and initialize rectangle box selector
                     data_loadcrop.rectangle_box_selector(ax1)

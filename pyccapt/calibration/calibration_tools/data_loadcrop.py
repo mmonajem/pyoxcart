@@ -13,12 +13,13 @@ from pyccapt.calibration.calibration_tools import selectors_data
 from pyccapt.calibration.calibration_tools import variables, data_tools
 from pyccapt.calibration.calibration_tools import logging_library
 
-logger = logging_library.logger_creator('data_loadcrop')
+
 
 
 def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc",
                                pulse_mode: "type: string - mode of pulse",
                                max_tof: "type: float - maximum possible tof") -> "type: dataframes":
+    logger = logging_library.logger_creator('data_loadcrop')
     try:
         print("Filename>>", filename)
         hdf5Data = data_tools.read_hdf5(filename, tdc)
@@ -43,8 +44,8 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
             dld_pulse = dld_pulse[mask]
             dld_startCounter = dld_startCounter[mask]
             dld_t = dld_t[mask]
-            dld_x = dld_x[mask]
-            dld_y = dld_y[mask]
+            dld_x = dld_x[mask] * 0.1 # to convert them from mm to cm
+            dld_y = dld_y[mask] * 0.1 # to convert them from mm to cm
 
             dld_highVoltage = np.expand_dims(dld_highVoltage, axis=1)
             dld_pulse = np.expand_dims(dld_pulse, axis=1)
@@ -93,7 +94,7 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
         return dld_group_storage
     except KeyError as error:
         logger.info(error)
-        logger.critical("[*]Keys missing in the dataset")
+        logger.critical("[*] Keys missing in the dataset")
     except FileNotFoundError as error:
         logger.info(error)
         logger.critical("[*] HDF5 file not found")
@@ -155,10 +156,11 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes",
 
 def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256), circle=False,
                   save_name=False, only_plot=False):
-    fig1, ax1 = plt.subplots(figsize=(7, 6), constrained_layout=True)
+    fig1, ax1 = plt.subplots(figsize=(6, 5), constrained_layout=True)
+    logger = logging_library.logger_creator('data_loadcrop')
     # Plot and crop FDM
-    x = data_crop['x (mm)'].to_numpy()
-    y = data_crop['y (mm)'].to_numpy()
+    x = data_crop['x_det (cm)'].to_numpy()
+    y = data_crop['y_det (cm)'].to_numpy()
     FDM, xedges, yedges = np.histogram2d(x, y, bins=bins)
 
     FDM[FDM == 0] = 1  # to have zero after apply log
@@ -166,9 +168,9 @@ def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256
 
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     # set x-axis label
-    ax1.set_xlabel("x [mm]", color="red", fontsize=10)
+    ax1.set_xlabel("x_det [cm]", color="red", fontsize=10)
     # set y-axis label
-    ax1.set_ylabel("y [mm]", color="red", fontsize=10)
+    ax1.set_ylabel("y_det [cm]", color="red", fontsize=10)
     plt.title("FDM")
     img = plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
     fig1.colorbar(img)
@@ -215,8 +217,8 @@ def elliptical_shape_selector(axisObject: "type:object", figureObject: "type:obj
 
 def crop_data_after_selection(data_crop: "dataframe") -> "dataframe":
     # crop the data based on selected are of FDM
-    x = data_crop['x (mm)'].to_numpy()
-    y = data_crop['y (mm)'].to_numpy()
+    x = data_crop['x_det (cm)'].to_numpy()
+    y = data_crop['y_det (cm)'].to_numpy()
     detector_dist = np.sqrt(
         (x - variables.selected_x_fdm) ** 2 + (y - variables.selected_y_fdm) ** 2)
     mask_fdm = (detector_dist > variables.roi_fdm)
@@ -230,18 +232,18 @@ def create_pandas_dataframe(data_crop: "type:numpy array", tdc: "type: string - 
         if pulser_mode == 'voltage':
             hdf_dataframe = pd.DataFrame(data=data_crop,
                                          columns=['high_voltage (V)', 'pulse (V)', 'start_counter', 't (ns)',
-                                                  'x (mm)', 'y (mm)'])
+                                                  'x_det (cm)', 'y_det (cm)'])
         elif pulser_mode == 'laser':
             hdf_dataframe = pd.DataFrame(data=data_crop,
                                          columns=['high_voltage (V)', 'pulse (deg)', 'start_counter', 't (ns)',
-                                                  'x (mm)', 'y (mm)'])
+                                                  'x_det (cm)', 'y_det (cm)'])
     elif tdc == 'roentdec':
         if pulser_mode == 'voltage':
             hdf_dataframe = pd.DataFrame(data=data_crop,
                                          columns=['high_voltage (V)', 'pulse (V)', 'start_counter', 't (ns)',
-                                                  'x (mm)', 'y (mm)'])
+                                                  'x_det (cm)', 'y_det (cm)'])
         elif pulser_mode == 'laser':
             hdf_dataframe = pd.DataFrame(data=data_crop,
                                          columns=['high_voltage (V)', 'pulse (deg)', 'start_counter', 't (ns)',
-                                                  'x (mm)', 'y (mm)'])
+                                                  'x_det (cm)', 'y_det (cm)'])
     return hdf_dataframe

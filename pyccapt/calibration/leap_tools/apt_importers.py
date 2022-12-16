@@ -75,9 +75,9 @@ def read_epos(f):
         d = struct.unpack('>'+'fffffffffII'*rs, data)
 
     # unpack data
-    epos = pd.DataFrame({'x': d[0::11],
-                        'y': d[1::11],
-                        'z': d[2::11],
+    epos = pd.DataFrame({'x (nm)': d[0::11],
+                        'y (nm)': d[1::11],
+                        'z (nm)': d[2::11],
                         'm/n (Da)': d[3::11],
                         'TOF (ns)': d[4::11],
                         'HV_DC (kV)': d[5::11],

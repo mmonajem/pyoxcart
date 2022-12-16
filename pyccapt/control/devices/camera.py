@@ -52,8 +52,8 @@ class Camera:
         while self.cameras.IsGrabbing():
 
             # Fetch the raw images from camera
-            grabResult0 = self.cameras[0].RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
-            grabResult1 = self.cameras[1].RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
+            grabResult0 = self.cameras[0].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
+            grabResult1 = self.cameras[1].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
 
             image0 = self.converter.Convert(grabResult0)
             img0 = image0.GetArray()

@@ -7,20 +7,20 @@ import numpy as np
 # Local module and scripts
 from pyccapt.calibration.calibration_tools import logging_library
 
-logger = logging_library.logger_creator('data_loadcrop')
+
 
 def tof2mcSimple(t:"Unit: ns", t0:"Unit:ns", V:"Unit:volts", xDet:"Unit:mm", yDet:"Unit:mm", flightPathLength:"Unit:mm")->"Unit: Dalton":
     # calculates m/c based on idealized geometry / electrostatics
     # m/c = 2 e V (t/L)^2
-
+    logger = logging_library.logger_creator('data_loadcrop')
     # t0 is in ns
     try:
         t = t - t0  # t0 correction
 
         t = t * 1E-9  # tof from ns to s
 
-        xDet = xDet * 1E-3  # xDet from mm to m
-        yDet = yDet * 1E-3
+        xDet = xDet * 1E-2  # xDet from cm to m
+        yDet = yDet * 1E-2
         flightPathLength = flightPathLength * 1E-3
         e = 1.6E-19  # coulombs per electron
         amu = 1.66E-27  # conversion kg to Dalton
@@ -38,6 +38,7 @@ def tof2mcSimple(t:"Unit: ns", t0:"Unit:ns", V:"Unit:volts", xDet:"Unit:mm", yDe
 def tof2mc(t:"Unit:ns", t0:"Unit:ns", V:"Unit:volts", 
            V_pulse:"Unit:volts", xDet:"Unit:mm", yDet:"Unit:mm",
            flightPathLength:"Unit:mm", mode='voltage')->"Unit:Dalton":
+    logger = logging_library.logger_creator('data_loadcrop')
     # calculates m/c based on idealized geometry / electrostatics
     # m/c = 2 e alpha (V + beta V_p) (t/L)^2
     try:
@@ -49,8 +50,8 @@ def tof2mc(t:"Unit:ns", t0:"Unit:ns", V:"Unit:volts",
 
         t = t * 1E-9  # tof in s
 
-        xDet = xDet * 1E-3  # xDet in mm
-        yDet = yDet * 1E-3
+        xDet = xDet * 1E-2  # xDet in cm
+        yDet = yDet * 1E-2
         flightPathLength = flightPathLength * 1E-3
         e = 1.6E-19  # coulombs per electron
         amu = 1.66E-27  # conversion kg to Dalton

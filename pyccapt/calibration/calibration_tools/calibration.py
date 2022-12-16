@@ -105,7 +105,7 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, inde
     if calibration_mode == 'tof':
         variables.dld_t_calib = variables.dld_t_calib * (1 / (f_v / f_v[0]))
     elif calibration_mode == 'mc':
-        variables.dld_t_calib = variables.mc_calib * (1 / (f_v / f_v[0]))
+        variables.mc_calib = variables.mc_calib * (1 / (f_v / f_v[0]))
 
 
     if plot:
@@ -296,7 +296,7 @@ def plot_FDM(xx, yy, save, bins_s):
     fig1, ax1 = plt.subplots(figsize=(7, 6), constrained_layout=True)
     # Plot and crop FDM
     FDM, xedges, yedges = np.histogram2d(xx, yy, bins=(bins_s[0],bins_s[1]))
-    print(bins_s)
+
     FDM[FDM == 0] = 1  # to have zero after apply log
     FDM = np.log(FDM)
 
@@ -313,3 +313,5 @@ def plot_FDM(xx, yy, save, bins_s):
         plt.savefig(variables.result_path + "fdm.png", format="png", dpi=600)
         plt.savefig(variables.result_path + "fdm.svg", format="svg", dpi=600)
     plt.show(block=True)
+
+

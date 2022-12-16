@@ -2,7 +2,7 @@
 This is the main script for global variables.
 """
 import numpy as np
-
+from ipywidgets import widgets
 
 def init():
 
@@ -22,7 +22,9 @@ def init():
     global path
 
     global dld_t_calib
+    global dld_t_calib_backup
     global mc_calib
+    global mc_calib_backup
     global max_peak
     global peak
 
@@ -43,6 +45,8 @@ def init():
     path = ''
 
     dld_t_calib = np.zeros(0)
+    dld_t_calib_backup = np.zeros(0)
     mc_calib = np.zeros(0)
+    mc_calib_backup = np.zeros(0)
     max_peak = 0
     peak = []

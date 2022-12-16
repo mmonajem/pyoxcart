@@ -64,8 +64,11 @@ setup(
                         "vispy",
                         "plotly",
                         "faker",
-                        "jupyter",
+                        "jupyterlab",
                         "scipy",
+                        "nodejs",
+                        "ipympl",
+                        "adjustText"
                       ],
     # not to be confused with definitions in pyproject.toml [build-system]
     setup_requires=["pytest-runner"],
