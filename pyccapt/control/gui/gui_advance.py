@@ -1554,8 +1554,10 @@ class UI_APT_A(Camera, object):
                 """
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(True)
-        QScreen.grabWindow(self.app.primaryScreen(),
-                           QApplication.desktop().winId()).save(variables.path + '\screenshot.png')
+        w = self.centralwidget
+        screen = QtWidgets.QApplication.primaryScreen()
+        screenshot = screen.grabWindow(w.winId())
+        screenshot.save(variables.path + '\shot.png', 'png')
         if variables.index_line < self.num_line:  # Do next experiment in case of TextLine
             self.thread_main()
         else:

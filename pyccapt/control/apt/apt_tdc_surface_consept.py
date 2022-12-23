@@ -136,34 +136,6 @@ class APT_ADVANCE:
         except:
             self.com_port_v_p.write('VOLT %s' % (variables.v_p_min * (1 / variables.pulse_amp_per_supply_voltage)))
 
-    def initialize_counter(self):
-        """
-        This class method initializes the edge counter of National Instrument.
-        It helps to count the riding edges of a detector  signal.
-
-        The function utilizes the nidaqmx library to communicate
-        through NI Instruments to count the edges.
-
-        NI-DAQmx can help you use National Instruments (NI) data acquisition and
-        signal conditioning hardware
-
-        Attributes:
-            Accepts only the self (class object)
-
-        Returns:
-            Returns the counted edges
-
-        """
-        task_counter = nidaqmx.Task()
-        task_counter.ci_channels.add_ci_count_edges_chan(self.conf['COM_PORT_NI_counter'])
-        # reference the terminal you want to use for the counter here
-        task_counter.ci_channels[0].ci_count_edges_term = "PFI0"
-        if variables.log:
-            self.log_apt_tdc_surface_consept.info("Function - initialize_counter | task counter - > {}".format(task_counter))
-
-        return task_counter
-
-
     def command_v_dc(self, cmd):
         """
         This class method is used to send commands on the high voltage parameter: v_dc.
@@ -306,7 +278,7 @@ class APT_ADVANCE:
             if variables.end_experiment:
                 break
 
-    def main_ex_loop(self, task_counter, counts_target):
+    def main_ex_loop(self, counts_target):
 
         """
         This function is contain all methods that iteratively has to run to control the experiment.
@@ -319,7 +291,6 @@ class APT_ADVANCE:
         This function is called in each loop of main function.
 
         Attributes:
-            task_counter: Counter edges
             counts_target:
 
         Returns:
@@ -332,9 +303,6 @@ class APT_ADVANCE:
         elif variables.counter_source == 'TDC_Raw':
             if len(variables.channel) > 0:
                 variables.total_ions = int(len(variables.channel) / 4)
-        elif variables.counter_source == 'Pulse Counter':
-            # reading detector MCP pulse counter and calculating pulses since last loop iteration
-            variables.total_ions = task_counter.read(number_of_samples_per_channel=1)[0]
         elif variables.counter_source == 'DRS':
             pass
 
@@ -408,7 +376,7 @@ class APT_ADVANCE:
 
 
 
-    def clear_up(self, task_counter):
+    def clear_up(self,):
         """
         This function clears global variables and deinitialize high voltage and pulser function
         and clear up global variables
@@ -493,11 +461,6 @@ class APT_ADVANCE:
             self.com_port_v_p.write('OUTPut OFF')
             self.com_port_v_p.close()
 
-        if self.conf['edge_counter'] != "off":
-            if variables.counter_source == 'Pulse Counter':
-                # Close the task of counter
-                task_counter.stop()
-                task_counter.close()
         if self.conf['signal_generator'] != "off":
             # Turn off the signal generator
             signal_generator.turn_off_signal_generator()
@@ -509,7 +472,7 @@ class APT_ADVANCE:
 def main(conf):
     """
     Main function for doing experiments
-    1- Initialize all the devices (High voltage, pulser, TDC or Edge-Counter)
+    1- Initialize all the devices (High voltage, pulser, TDC)
     2- Create and start reader DLD and TDC thread
     3- Create and start the TDC process if TDC is selected in GUI
     4- Iterate over the main loop of experiments and control the experiment frequency
@@ -524,7 +487,7 @@ def main(conf):
 
     variables.start_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
-    if conf['tdc'] != "off" and variables.counter_source != 'DRS' and variables.counter_source != 'Pulse Counter':
+    if conf['tdc'] != "off" and variables.counter_source != 'DRS':
         # Create and start the TDC process and related queues
         if variables.counter_source == 'TDC':
             queue_x = Queue(maxsize=-1, ctx=multiprocessing.get_context())
@@ -651,12 +614,6 @@ def main(conf):
         experiment.initialize_v_p()
         logger.info('Pulser is initialized')
 
-    if variables.counter_source == 'Pulse Counter':
-        task_counter = experiment.initialize_counter()
-        logger.info('Edge counter is initialized')
-    else:
-        task_counter = None
-
     # start the timer for main experiment
     variables.specimen_voltage = variables.vdc_min
     variables.pulse_voltage_min = variables.v_p_min * (1 / variables.pulse_amp_per_supply_voltage)
@@ -706,10 +663,7 @@ def main(conf):
             if conf['v_dc'] != "off":
                 experiment.command_v_dc("F1")
                 time.sleep(0.5)
-            if conf['edge_counter'] != "off":
-                if variables.counter_source == 'Pulse Counter':
-                    # start the Counter
-                    task_counter.start()
+
 
             variables.start_flag = True
             # Wait for 4 second to all devices get ready
@@ -725,7 +679,7 @@ def main(conf):
             init_detection_rate = variables.detection_rate
 
         # main loop function
-        experiment.main_ex_loop(task_counter, counts_target)
+        experiment.main_ex_loop(counts_target)
         end = datetime.datetime.now()
         # If the main experiment function takes less than experiment frequency we have to waite
         if (1000 / variables.ex_freq) > ((end - start).microseconds / 1000):  # time in milliseconds
@@ -889,5 +843,5 @@ def main(conf):
     experiment_statistics.save_statistics_apt_oxcart()
 
     # Clear up all the variables and deinitialize devices
-    experiment.clear_up(task_counter)
+    experiment.clear_up()
     logger.info('Variables and devices is cleared')

@@ -27,11 +27,13 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
                 scTDC.SC_DATA_FIELD_DIF1 \
                 | scTDC.SC_DATA_FIELD_DIF2 \
                 | scTDC.SC_DATA_FIELD_TIME \
+                | scTDC.SC_DATA_FIELD_SUBDEVICE \
                 | scTDC.SC_DATA_FIELD_START_COUNTER
         elif raw_mode:
             data_field_selection = \
                 scTDC.SC_DATA_FIELD_TIME \
                 | scTDC.SC_DATA_FIELD_CHANNEL \
+                | scTDC.SC_DATA_FIELD_SUBDEVICE \
                 | scTDC.SC_DATA_FIELD_START_COUNTER
 
         '''
