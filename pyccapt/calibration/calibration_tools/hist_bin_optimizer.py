@@ -18,11 +18,8 @@ import numpy as np
 from numpy.random import normal
 from matplotlib import rcParams
 from numpy import array, arange, sum, mean, var, size, zeros
-from numpy.random import normal
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure,  plot, xlabel, ylabel, title, savefig
-
 
 
 def bin_width_optimizer_1d(data):

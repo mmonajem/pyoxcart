@@ -12,7 +12,7 @@ def hdf5_to_pos(data, path=None, name=None):
         z: Reconstructed z position
         Da: Mass/charge ratio of i
     """
-    dd = data[['x (nm)', 'y (nm)', 'z (nm)', 'mc (Da)']]
+    dd = data[['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)']]
     dd = dd.astype(np.single)
     records = dd.to_records(index=False)
     list_records = list(records)
@@ -60,7 +60,7 @@ def hdf5_to_epos(data, path=None, name=None):
           notes on ePOS format.
     """
     dd = data[
-        ['x (nm)', 'y (nm)', 'z (nm)', 'mc (Da)', 't (ns)', 'high_voltage (V)', 'pulse (V)', 'x_det (cm)', 'y_det (cm)',
+        ['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)', 't (ns)', 'high_voltage (V)', 'pulse (V)', 'x_det (cm)', 'y_det (cm)',
          'pulse_pi', 'ion_pp']]
     dd = dd.astype(np.single)
     dd = dd.astype({'pulse_pi': np.uintc})

@@ -12,9 +12,14 @@ def init():
 
     global selected_x1
     global selected_x2
+    global selected_y1
+    global selected_y2
 
     # List that stores mass/weights of added elements
     global listMaterial
+    global charge
+    global element
+    global isotope
 
     global peaks_idx
 
@@ -27,6 +32,8 @@ def init():
     global mc_calib_backup
     global max_peak
     global peak
+    global peak_y
+    global peak_width
 
 
     selected_x_fdm = 0
@@ -35,9 +42,14 @@ def init():
 
     selected_x1 = 0
     selected_x2 = 0
+    selected_y1 = 0
+    selected_y2 = 0
 
 
     listMaterial = []
+    charge = []
+    element = []
+    isotope = []
 
     peaks_idx = []
 
@@ -50,3 +62,5 @@ def init():
     mc_calib_backup = np.zeros(0)
     max_peak = 0
     peak = []
+    peak_y = []
+    peak_width = []

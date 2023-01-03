@@ -3,13 +3,13 @@ This is the script containing widgets for ions selection from isotopic table.
 """
 
 import ipywidgets as widgets
-
+import re
 # Local module and scripts
 from pyccapt.calibration.calibration_tools import variables, data_tools
 
 # Stores values currently selected element in dropdown.
 elementDict = {}
-# Stores values currently selected charge in dropdown. 
+# Stores values currently selected charge in dropdown.
 chargeDict = {}
 elementWithChargeDict = {}
 
@@ -17,14 +17,11 @@ elementWithChargeDict = {}
 def dropdownWidget(elementsList, dropdownLabel):
     '''
     This function creates a dropdown widget which offers selection of different elements.
-
     Attributes:
         elementsList: List of element with its correponding mass/weight [list]
                       For eg: [('H',1.01),('He',3.02)]
-
     Returns:
         dropdown: object for the created widget [object]
-
     '''
     dropdown = widgets.Dropdown(options=elementsList, description=dropdownLabel, disabled=False)
 
@@ -40,10 +37,8 @@ def dropdownWidget(elementsList, dropdownLabel):
 def buttonWidget(buttonText):
     """
     This function creates a button widget.
-
     Attributes:
         buttonText:  Text to be displayed on the button [string]
-
     Returns:
         button: object for the created widget [object]
     """
@@ -61,10 +56,8 @@ def onClickAdd(b):
     """
     This is a callback function when the ADD button is clicked/pressed.
     It adds the selected element in dropdown in to a list.
-
     Attributes:
         Accepts only a internal object as an argument
-
     Returns:
         Does not return anything
     """
@@ -72,6 +65,15 @@ def onClickAdd(b):
         elementMass = elementWithChargeDict['element']
         if elementMass not in variables.listMaterial:
             variables.listMaterial.append(elementMass)
+
+            selectedElement = elementDict['element']
+            charge = chargeDict['charge']
+            variables.charge.append(charge)
+            element = re.sub("\d+", "", selectedElement)
+            variables.element.append(element)
+            isotope = int(re.findall("\d+", selectedElement)[0])
+            variables.isotope.append(isotope)
+
             print("Updated List : ", variables.listMaterial, ''.ljust(40), end='\r')
     else:
         print("Please select the charge before adding", end='\r')
@@ -81,10 +83,8 @@ def onClickDelete(b):
     """
     This is a callback function when the DELETE button is clicked/pressed.
     It deletes the selected element in the dropdown from the list.
-
     Attributes:
         Accepts only a internal object as an argument
-
     Returns:
         Does not return anything
     """
@@ -92,6 +92,9 @@ def onClickDelete(b):
         elementMass = elementWithChargeDict['element']
         if elementMass in variables.listMaterial:
             variables.listMaterial.remove(elementMass)
+            variables.element.pop()
+            variables.isotope.pop()
+            variables.charge.pop()
             print("Updated List : ", variables.listMaterial, ''.ljust(40), end='\r')
         else:
             print("Nothing Deleted. Choose carefully(Enter right combination of element and charge)", end='\r')
@@ -103,14 +106,15 @@ def onClickReset(b):
     """
     This is a callback function when the RESET button is clicked/pressed.
     It clears the list and deletes all the elements from the list.
-
     Attributes:
         Accepts only a internal object as an argument
-
     Returns:
         Does not return anything
     """
     variables.listMaterial.clear()
+    variables.element.clear()
+    variables.isotope.clear()
+    variables.charge.clear()
     print("Updated List : ", variables.listMaterial, ''.ljust(40), end='\r')
 
 
@@ -119,10 +123,8 @@ def on_change(change):
     This is a callback function which observes change in the dropdown widget.
     It updates the element and its corresponding weight/mass based on the selection from the dropdown.
     Updates the selected value in a global dict. [This dict could be replaced by a single variable]
-
     Attributes:
         Accepts only a internal object as an argument
-
     Returns:
         Does not return anything
     """
@@ -139,10 +141,8 @@ def on_change_ions_selection(change):
     This is a callback function which observes change in the dropdown widget.
     It updates the element and its corresponding weight/mass based on the selection from the dropdown.
     Updates the selected value in a global dict. [This dict could be replaced by a single variable]
-
     Attributes:
         Accepts only a internal object as an argument
-
     Returns:
         Does not return anything
     """
@@ -157,10 +157,8 @@ def on_change_charge(change):
     This is a callback function which observes change in the dropdown widget.
     It updates the element and its corresponding weight/mass based on the selection from the dropdown.
     Updates the selected value in a global dict. [This dict could be replaced by a single variable]
-
     Attributes:
         Accepts only a internal object as an argument
-
     Returns:
         Does not return anything
     """
@@ -175,10 +173,8 @@ def on_change_charge_ions_selection(change):
     This is a callback function which observes change in the dropdown widget.
     It updates the element and its corresponding weight/mass based on the selection from the dropdown.
     Updates the selected value in a global dict. [This dict could be replaced by a single variable]
-
     Attributes:
         Accepts only a internal object as an argument
-
     Returns:
         Does not return anything
     """
@@ -208,6 +204,12 @@ def dataset_tdc_selection():
         description='Flight path length:',
         disabled=False
     )
+    det_diam  = widgets.FloatText(
+        value='78',
+        placeholder='Detector diameter',
+        description='Detector diameter:',
+        disabled=False
+    )
     t0 = widgets.FloatText(
         value='51.74',
         placeholder='T_0 of the instrument',
@@ -234,7 +236,7 @@ def dataset_tdc_selection():
         description='Pulse mode:',
     )
 
-    return tdc, pulse_mode, flightPathLength, t0, max_tof
+    return tdc, det_diam, pulse_mode, flightPathLength, t0, max_tof
 
 def density_field_selection():
     TableFile = '../../../files/field_density_table.h5'
@@ -257,4 +259,3 @@ def density_field_selection():
         description='Element'
     )
     return element
-

@@ -1,6 +1,8 @@
 import pandas as pd
 
-from pyccapt.calibration.calibration_tools import data_tools
+from pyccapt.calibration.calibration_tools import data_tools, ion_selection
+
+
 def molecule_dataframe():
     isotopeTableFile = '../../../files/isotopeTable.h5'
     dataframe = data_tools.read_hdf5_through_pandas(isotopeTableFile)
@@ -12,18 +14,14 @@ def molecule_dataframe():
     for i in range(len(ff)):
         #     print(i, ff[i])
         if i == 0:
-            df2 = molecule_isotop_list(dataframe, ff[i], latex=False)
+            df2 = ion_selection.molecule_isotop_list(dataframe, ff[i], latex=False)
         else:
-            df3 = molecule_isotop_list(dataframe, ff[i], latex=False)
+            df3 = ion_selection.molecule_isotop_list(dataframe, ff[i], latex=False)
             df2 = pd.concat([df2, df3], ignore_index=True)
     return df2
 
 
-
-
-
 if __name__ == "__main__":
-
-df = molecule_dataframe()
-print(len(df2))
-# df2.to_hdf('molecule_table.h5', 'df', mode='w')
+    df = molecule_dataframe()
+    print(len(df))
+    # df2.to_hdf('molecule_table.h5', 'df', mode='w')

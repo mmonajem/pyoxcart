@@ -1,6 +1,10 @@
 import numpy as np
+import plotly.graph_objects as go
+import plotly.express as plot_x
+import plotly
 
-
+# Local module and scripts
+from pyccapt.calibration.calibration_tools import tools, data_tools, variables, calibration, data_loadcrop, ion_selection, reconstruction
 def cart2pol(x, y):
     """
     x, y are the detector hit coordinates in mm
@@ -47,7 +51,7 @@ def atom_probe_recons_from_detector_Gault_et_al(detx, dety, hv, flight_path_leng
     # Fevap  # evaporation field in V / nm
 
     # detector coordinates in polar form
-    rad, ang = cart2pol(detx * 1E-3, dety * 1E-3)
+    rad, ang = cart2pol(detx * 1E-2, dety * 1E-2)
     # calculating effective detector area:
     det_area = (np.max(rad) ** 2) * np.pi
     # f_evap   evaporation field in V / nm
@@ -130,3 +134,131 @@ def atom_probe_recons_Bas_et_al(detx, dety, hv, flight_path_length, kf, det_eff,
     z = np.cumsum(dz) + dz_p
 
     return x * 1E9, y * 1E9, z * 1E9
+
+
+def reconstruction_calculation_plot(dld_x, dld_y, dld_highVoltage, data, range_data, element_percentage,
+                                    flight_path_length, kf, det_eff, icf, field_evap, avg_dens, rotary_fig_save,
+                                    range_file_exist, figname):
+    px, py, pz = reconstruction.atom_probe_recons_from_detector_Gault_et_al(dld_x, dld_y, dld_highVoltage,
+                                                                            flight_path_length, kf, det_eff, icf,
+                                                                            field_evap, avg_dens)
+    #     px, py, pz = reconstruction.atom_probe_recons_Bas_et_al(dld_x, dld_y, dld_highVoltage, flight_path_length, kf, det_eff, icfe, field_evap, avg_dens)
+    data['x (nm)'] = px
+    data['y (nm)'] = py
+    data['z (nm)'] = pz
+
+    element_percentage = element_percentage.replace('[', '')
+    element_percentage = element_percentage.replace(']', '')
+    element_percentage = element_percentage.split(',')
+
+    fig = go.Figure()
+    if range_file_exist:
+        phases = range_data['element'].tolist()
+        colors = range_data['color'].tolist()
+        mc_low = range_data['mc_low'].tolist()
+        mc_up = range_data['mc_up'].tolist()
+        charge = range_data['charge'].tolist()
+        isotope = range_data['isotope'].tolist()
+        for index, elemen in enumerate(phases):
+            df_s = data.copy(deep=True)
+            df_s = df_s[(df_s['mc_c (Da)'] > mc_low[index]) & (df_s['mc_c (Da)'] < mc_up[index])]
+            df_s.reset_index(inplace=True, drop=True)
+
+            remove_n = int(len(df_s) - (len(df_s) * float(element_percentage[index])))
+            #         print(len(df_s))
+            drop_indices = np.random.choice(df_s.index, remove_n, replace=False)
+            df_subset = df_s.drop(drop_indices)
+            #         print(len(df_subset))
+            name_element = r'${}^{%s}%s^{%s+}$' % (isotope[index], phases[index], charge[index])
+            fig.add_trace(
+                go.Scatter3d(x=df_subset['x (nm)'], y=df_subset['y (nm)'], z=df_subset['z (nm)'], mode='markers',
+                             name=name_element,
+                             showlegend=True,
+                             marker=dict(
+                                 size=2,
+                                 color=colors[index],
+                                 opacity=.2,
+                             )
+                             ))
+    elif not range_file_exist:
+        df_s = data.copy(deep=True)
+        remove_n = int(len(df_s) - (len(df_s) * float(element_percentage[0])))
+        # print(len(df_s))
+        drop_indices = np.random.choice(df_s.index, remove_n, replace=False)
+        df_subset = df_s.drop(drop_indices)
+        fig.add_trace(go.Scatter3d(x=df_subset['x (nm)'], y=df_subset['y (nm)'], z=df_subset['z (nm)'], mode='markers',
+                                   name='unranged',
+                                   showlegend=True,
+                                   marker=dict(
+                                       size=2,
+                                       opacity=.2,
+                                   )
+                                   ))
+    #         print(elemen)
+    fig.update_scenes(
+        xaxis_title="x (nm)",
+        yaxis_title="y (nm)",
+        zaxis_title="z (nm)")
+    fig.update_layout(legend_title="Elements:", title="PyCCAPT", )
+    fig.update_scenes(zaxis_autorange="reversed")
+    fig.update_layout(legend={'itemsizing': 'constant'})
+
+    if rotary_fig_save:
+        rotary_fig(fig, figname)
+    config = dict(
+        {'scrollZoom': True, 'displayModeBar': True, 'modeBarButtonsToAdd': ['drawline',
+                                        'drawopenpath',
+                                        'drawclosedpath',
+                                        'drawcircle',
+                                        'drawrect',
+                                        'eraseshape'
+                                       ]})
+    plotly.offline.plot(fig, filename=variables.result_path + '\\{fn}.html'.format(fn=figname), show_link=True,
+                        auto_open=False)
+    fig.show(config=config)
+
+def rotary_fig(fig1, figname):
+    fig = go.Figure(fig1)
+    x_eye = -1.25
+    y_eye = 2
+    z_eye = 0.5
+
+    fig.update_scenes(xaxis_visible=False, yaxis_visible=False,zaxis_visible=False )
+
+    fig.update_layout(
+             width=600,
+             height=600,
+             scene_camera_eye=dict(x=x_eye, y=y_eye, z=z_eye),
+             updatemenus=[dict(type='buttons',
+                      showactive=False,
+                      y=1.2,
+                      x=0.8,
+                      xanchor='left',
+                      yanchor='bottom',
+                      pad=dict(t=45, r=10),
+                      buttons=[dict(label='Play',
+                                     method='animate',
+                                     args=[None, dict(frame=dict(duration=15, redraw=True),
+                                                                 transition=dict(duration=0),
+                                                                 fromcurrent=True,
+                                                                 mode='immediate'
+                                                                )]
+                                                )
+                                          ]
+                                  )
+                            ]
+    )
+
+
+    def rotate_z(x, y, z, theta):
+        w = x+1j*y
+        return np.real(np.exp(1j*theta)*w), np.imag(np.exp(1j*theta)*w), z
+
+    frames = []
+    for t in np.arange(0, 20, 0.1):
+        xe, ye, ze = rotate_z(x_eye, y_eye, z_eye, -t)
+        frames.append(go.Frame(layout=dict(scene_camera_eye=dict(x=xe, y=ye, z=ze))))
+    fig.frames = frames
+    plotly.offline.plot(fig, filename=variables.result_path + '\\{fn}.html'.format(fn='rota_'+figname), show_link=True, auto_open=False)
+#     fig.show()
+

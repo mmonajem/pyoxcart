@@ -17,7 +17,8 @@ def voltage_corr(x, a, b, c, d):
     return a + (b * (x ** 2) + (c * x) + d)
 
 
-def voltage_correction(dld_highVoltage_peak, dld_t_peak, index_fig, figname, sample_size, mode, plot=True, save=False):
+def voltage_correction(dld_highVoltage_peak, dld_t_peak, index_fig, figname, sample_size, mode, calibration_mode,
+                       plot=True, save=False):
     high_voltage_mean_list = []
     dld_t_peak_list = []
 
@@ -62,7 +63,10 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, index_fig, figname, sam
         mask = np.random.randint(0, len(high_voltage_mean_list), 1000)
         x = plt.scatter(np.array(high_voltage_mean_list)[mask], np.array(dld_t_peak_list)[mask], color="blue",
                         label='t', alpha=0.1)
-        ax1.set_ylabel("Time of flight (ns)", color="red", fontsize=10)
+        if calibration_mode == 'tof':
+            ax1.set_ylabel("Time of flight (ns)", color="red", fontsize=10)
+        elif calibration_mode == 'mc':
+            ax1.set_ylabel("mc (Da)", color="red", fontsize=10)
         ax1.set_xlabel("Voltage (V)", color="red", fontsize=10)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=2)
 
@@ -98,7 +102,8 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, inde
     print('The number of ions are:', len(dld_highVoltage_peak_v))
     print('The number of samples are:', int(len(dld_highVoltage_peak_v) / sample_size))
     fitresult = voltage_correction(dld_highVoltage_peak_v, dld_t_peak_v, index_fig=index_fig, figname='voltage_corr',
-                                   sample_size=sample_size, mode=mode, plot=plot, save=save)
+                                   sample_size=sample_size, mode=mode, calibration_mode=calibration_mode,
+                                   plot=plot, save=save)
 
     f_v = voltage_corr(dld_highVoltage, *fitresult)
 
@@ -106,7 +111,6 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, inde
         variables.dld_t_calib = variables.dld_t_calib * (1 / (f_v / f_v[0]))
     elif calibration_mode == 'mc':
         variables.mc_calib = variables.mc_calib * (1 / (f_v / f_v[0]))
-
 
     if plot:
         # plot how correction factor for selected peak
@@ -116,7 +120,10 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, inde
         mask = np.random.randint(0, len(dld_highVoltage_peak_v), 1000)
         x = plt.scatter(dld_highVoltage_peak_v[mask], dld_t_peak_v[mask], color="blue", label='t', alpha=0.1)
 
-        ax1.set_ylabel("Time of flight (ns)", color="red", fontsize=10)
+        if calibration_mode == 'tof':
+            ax1.set_ylabel("Time of flight (ns)", color="red", fontsize=10)
+        elif calibration_mode == 'mc':
+            ax1.set_ylabel("mc (Da)", color="red", fontsize=10)
         ax1.set_xlabel("Voltage (V)", color="red", fontsize=10)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=2)
 
@@ -138,7 +145,10 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, inde
         mask = np.random.randint(0, len(dld_highVoltage_peak_v), 10000)
 
         x = plt.scatter(dld_highVoltage_peak_v[mask], dld_t_peak_v[mask], color="blue", label='t', alpha=0.1)
-        ax1.set_ylabel("Time of flight (ns)", color="red", fontsize=10)
+        if calibration_mode == 'tof':
+            ax1.set_ylabel("Time of flight (ns)", color="red", fontsize=10)
+        elif calibration_mode == 'mc':
+            ax1.set_ylabel("mc (Da)", color="red", fontsize=10)
         ax1.set_xlabel("Voltage (V)", color="red", fontsize=10)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=2)
 
@@ -162,31 +172,36 @@ def bowl_corr_fit(data_xy, a, b, c, d, e, f):
     return result
 
 
-def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, sample_size, index_fig, plot, save):
+def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, det_diam, sample_size, index_fig, plot, save):
     x_sample_list = []
     y_sample_list = []
     dld_t_peak_list = []
 
-    w1 = math.floor(np.min(dld_x_bowl))
-    w2 = math.ceil(np.max(dld_x_bowl))
-    h1 = math.floor(np.min(dld_y_bowl))
-    h2 = math.ceil(np.max(dld_y_bowl))
+    # w1 = math.floor(np.min(dld_x_bowl))
+    # w2 = math.ceil(np.max(dld_x_bowl))
+    # h1 = math.floor(np.min(dld_y_bowl))
+    # h2 = math.ceil(np.max(dld_y_bowl))
 
-    d = sample_size
+    w1 = -int(det_diam)
+    w2 = int(det_diam)
+    h1 = w1
+    h2 = w2
+
+
+    d = sample_size  # sample size is in mm - so we change it to cm
     grid = product(range(h1, h2 - h2 % d, d), range(w1, w2 - w2 % d, d))
     x_y = np.vstack((dld_x_bowl, dld_y_bowl)).T
 
     for i, j in grid:
-        box = (j, i, j + d, i + d)
+        # box = (j, i, j + d, i + d)
         mask_x = np.logical_and((dld_x_bowl < j + d), (dld_x_bowl > j))
         mask_y = np.logical_and((dld_y_bowl < i + d), (dld_y_bowl > i))
         mask = np.logical_and(mask_x, mask_y)
-        if len(mask[mask == True]) > 0:
+        if len(mask[mask]) > 0:
             x_y_slected = x_y[mask]
             x_sample_list.append(np.median(x_y_slected[:, 0]))
             y_sample_list.append(np.median(x_y_slected[:, 1]))
             dld_t_peak_list.append(np.mean(dld_t_bowl[mask]) / variables.max_peak)
-
     parameters, covariance = curve_fit(bowl_corr_fit, [np.array(x_sample_list), np.array(y_sample_list)],
                                        np.array(dld_t_peak_list))
 
@@ -224,25 +239,26 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, sample_size, index_fig, 
     return parameters
 
 
-def bowl_correction_main(dld_x, dld_y, dld_highVoltage, sample_size, calibration_mode, index_fig, plot, save):
+def bowl_correction_main(dld_x, dld_y, dld_highVoltage, det_diam, sample_size, calibration_mode, index_fig, plot, save):
     if calibration_mode == 'tof':
         mask_temporal = np.logical_and((variables.dld_t_calib > variables.selected_x1),
                                        (variables.dld_t_calib < variables.selected_x2))
         dld_t_peak_b = variables.dld_t_calib[mask_temporal]
-        print('The number of ions are:', len(variables.dld_t_calib))
+
     elif calibration_mode == 'mc':
         mask_temporal = np.logical_and((variables.mc_calib > variables.selected_x1),
                                        (variables.mc_calib < variables.selected_x2))
         dld_t_peak_b = variables.mc_calib[mask_temporal]
-        print('The number of ions are:', len(variables.mc_calib))
+    print('The number of ions are:', len(variables.mc_calib))
 
-
+    dld_x = dld_x * 10 # change the x position to mm from cm
+    dld_y = dld_y * 10 # change the y position to mm from cm
 
     dld_x_peak_b = dld_x[mask_temporal]
     dld_y_peak_b = dld_y[mask_temporal]
     dld_highVoltage_peak_b = dld_highVoltage[mask_temporal]
 
-    parameters = bowl_correction(dld_x_peak_b, dld_y_peak_b, dld_t_peak_b, sample_size=sample_size, index_fig=index_fig,
+    parameters = bowl_correction(dld_x_peak_b, dld_y_peak_b, dld_t_peak_b, det_diam, sample_size=sample_size, index_fig=index_fig,
                                  plot=plot, save=save)
 
     f_bowl = bowl_corr_fit([dld_x, dld_y], *parameters)
@@ -257,7 +273,10 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, sample_size, calibration
         mask = np.random.randint(0, len(dld_highVoltage_peak_b), 10000)
 
         x = plt.scatter(dld_highVoltage_peak_b[mask], dld_t_peak_b[mask], color="blue", label=r"$t_V$", alpha=0.1)
-        ax1.set_ylabel("Time of flight (ns)", color="red", fontsize=10)
+        if calibration_mode == 'tof':
+            ax1.set_ylabel("Time of flight (ns)", color="red", fontsize=10)
+        elif calibration_mode == 'mc':
+            ax1.set_ylabel("mc (Da)", color="red", fontsize=10)
         ax1.set_xlabel("Voltage (V)", color="red", fontsize=10)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=2)
 
@@ -282,7 +301,10 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, sample_size, calibration
 
         x = plt.scatter(dld_x_peak_b[mask], dld_t_peak_b[mask], color="blue", label='X', alpha=0.1)
         y = plt.scatter(dld_x_peak_b[mask], dld_t_plot, color="red", label='X_corr', alpha=0.1)
-        ax1.set_ylabel("Time of flight (ns)", color="red", fontsize=10)
+        if calibration_mode == 'tof':
+            ax1.set_ylabel("Time of flight (ns)", color="red", fontsize=10)
+        elif calibration_mode == 'mc':
+            ax1.set_ylabel("mc (Da)", color="red", fontsize=10)
         ax1.set_xlabel("position (mm)", color="red", fontsize=10)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=2)
         plt.legend(handles=[x, y], loc='upper right')

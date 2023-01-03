@@ -110,11 +110,11 @@ def read_rrng(f):
 
     ions = pd.DataFrame(ions, columns=['number','name'])
     ions.set_index('number', inplace=True)
-    rrngs = pd.DataFrame(rrngs, columns=['number','lower','upper','vol','comp','colour'])
+    rrngs = pd.DataFrame(rrngs, columns=['number', 'lower', 'upper', 'vol', 'comp', 'colour'])
     rrngs.set_index('number',inplace=True)
 
     rrngs[['lower', 'upper', 'vol']] = rrngs[['lower', 'upper', 'vol']].astype(float)
-    rrngs[['comp','colour']] = rrngs[['comp', 'colour']].astype(str)
+    rrngs[['comp', 'colour']] = rrngs[['comp', 'colour']].astype(str)
 
     return ions,rrngs
 
