@@ -116,7 +116,7 @@ def read_rrng(f):
     rrngs[['lower', 'upper', 'vol']] = rrngs[['lower', 'upper', 'vol']].astype(float)
     rrngs[['comp', 'colour']] = rrngs[['comp', 'colour']].astype(str)
 
-    return ions,rrngs
+    return ions, rrngs
 
 
 def label_ions(pos, rrngs):

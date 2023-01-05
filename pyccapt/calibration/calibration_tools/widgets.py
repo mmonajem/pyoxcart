@@ -61,6 +61,7 @@ def onClickAdd(b):
     Returns:
         Does not return anything
     """
+
     if 'element' in elementWithChargeDict:
         elementMass = elementWithChargeDict['element']
         if elementMass not in variables.listMaterial:
@@ -70,11 +71,15 @@ def onClickAdd(b):
             charge = chargeDict['charge']
             variables.charge.append(charge)
             element = re.sub("\d+", "", selectedElement)
+            element = re.sub("[\(\[].*?[\)\]]", "", element)
             variables.element.append(element)
             isotope = int(re.findall("\d+", selectedElement)[0])
             variables.isotope.append(isotope)
 
-            print("Updated List : ", variables.listMaterial, ''.ljust(40), end='\r')
+            print("Updated List : ", variables.listMaterial)
+            print("Updated element List : ", variables.element)
+            print("Updated isotope List : ", variables.isotope)
+            print("Updated charge List : ", variables.charge)
     else:
         print("Please select the charge before adding", end='\r')
 
@@ -95,7 +100,10 @@ def onClickDelete(b):
             variables.element.pop()
             variables.isotope.pop()
             variables.charge.pop()
-            print("Updated List : ", variables.listMaterial, ''.ljust(40), end='\r')
+            print("Updated List : ", variables.listMaterial)
+            print("Updated element List : ", variables.element)
+            print("Updated isotope List : ", variables.isotope)
+            print("Updated charge List : ", variables.charge)
         else:
             print("Nothing Deleted. Choose carefully(Enter right combination of element and charge)", end='\r')
     else:
@@ -115,7 +123,10 @@ def onClickReset(b):
     variables.element.clear()
     variables.isotope.clear()
     variables.charge.clear()
-    print("Updated List : ", variables.listMaterial, ''.ljust(40), end='\r')
+    print("Updated List : ", variables.listMaterial)
+    print("Updated element List : ", variables.element)
+    print("Updated isotope List : ", variables.isotope)
+    print("Updated charge List : ", variables.charge)
 
 
 def on_change(change):

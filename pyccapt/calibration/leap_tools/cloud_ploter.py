@@ -2,21 +2,21 @@ import os
 import matplotlib.pyplot as plt
 import plotly
 
-from pyccapt.calibration.leap_tools import apt_importers
+from pyccapt.calibration.leap_tools import leap_tools
 
 
 def pre_data(pos_file, rrng_file, input_type):
     if input_type == 'pos':
-        pos = apt_importers.read_pos(pos_file)
-        ions, rrngs = apt_importers.read_rrng(rrng_file)
-        pos_comp = apt_importers.label_ions(pos, rrngs)
-        elements = apt_importers.deconvolve(pos_comp)
+        pos = leap_tools.read_pos(pos_file)
+        ions, rrngs = leap_tools.read_rrng(rrng_file)
+        pos_comp = leap_tools.label_ions(pos, rrngs)
+        elements = leap_tools.deconvolve(pos_comp)
 
     elif input_type == 'epos':
-        epos = apt_importers.read_epos(pos_file)
-        ions, rrngs = apt_importers.read_rrng(rrng_file)
-        epos_comp = apt_importers.label_ions(epos, rrngs)
-        elements = apt_importers.deconvolve(epos_comp)
+        epos = leap_tools.read_epos(pos_file)
+        ions, rrngs = leap_tools.read_rrng(rrng_file)
+        epos_comp = leap_tools.label_ions(epos, rrngs)
+        elements = leap_tools.deconvolve(epos_comp)
 
     return elements
 
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     pos_elements = pre_data(path + 'voldata.pos', path + 'rangefile.rrng', input_type='pos')
     # epos_elements = pre_data(path + 'voldata.epos', path + 'rangefile.rrng', input_type='epos')
 
-    ions, rrngs = apt_importers.read_rrng(path + 'rangefile.rrng')
+    ions, rrngs = leap_tools.read_rrng(path + 'rangefile.rrng')
 
     pos_elements_l = pos_elements[['x (nm)', 'y (nm)', 'z (nm)', 'element', 'colour']].set_index("element")
 

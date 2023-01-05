@@ -136,16 +136,14 @@ def atom_probe_recons_Bas_et_al(detx, dety, hv, flight_path_length, kf, det_eff,
     return x * 1E9, y * 1E9, z * 1E9
 
 
-def reconstruction_calculation_plot(dld_x, dld_y, dld_highVoltage, data, range_data, element_percentage,
-                                    flight_path_length, kf, det_eff, icf, field_evap, avg_dens, rotary_fig_save,
-                                    range_file_exist, figname):
-    px, py, pz = reconstruction.atom_probe_recons_from_detector_Gault_et_al(dld_x, dld_y, dld_highVoltage,
-                                                                            flight_path_length, kf, det_eff, icf,
-                                                                            field_evap, avg_dens)
-    #     px, py, pz = reconstruction.atom_probe_recons_Bas_et_al(dld_x, dld_y, dld_highVoltage, flight_path_length, kf, det_eff, icfe, field_evap, avg_dens)
-    data['x (nm)'] = px
-    data['y (nm)'] = py
-    data['z (nm)'] = pz
+def reconstruction_plot(data, range_data, element_percentage, rotary_fig_save, range_file_exist, selected_area, figname):
+    data_f = data.copy(deep=True)
+    if selected_area:
+        data_f = data_f[(data_f['x (nm)'] > variables.selected_x1) & (data_f['x (nm)'] < variables.selected_x2) &
+                        (data_f['y (nm)'] > variables.selected_y1) & (data_f['y (nm)'] < variables.selected_y2) &
+                        (data_f['z (nm)'] > variables.selected_z1) & (data_f['z (nm)'] < variables.selected_z2)]
+
+        data_f.reset_index(inplace=True, drop=True)
 
     element_percentage = element_percentage.replace('[', '')
     element_percentage = element_percentage.replace(']', '')
@@ -160,7 +158,7 @@ def reconstruction_calculation_plot(dld_x, dld_y, dld_highVoltage, data, range_d
         charge = range_data['charge'].tolist()
         isotope = range_data['isotope'].tolist()
         for index, elemen in enumerate(phases):
-            df_s = data.copy(deep=True)
+            df_s = data_f.copy(deep=True)
             df_s = df_s[(df_s['mc_c (Da)'] > mc_low[index]) & (df_s['mc_c (Da)'] < mc_up[index])]
             df_s.reset_index(inplace=True, drop=True)
 

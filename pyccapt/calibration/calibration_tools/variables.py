@@ -10,10 +10,13 @@ def init():
     global selected_y_fdm
     global roi_fdm
 
+    global selected_calculated
     global selected_x1
     global selected_x2
     global selected_y1
     global selected_y2
+    global selected_z1
+    global selected_z2
 
     # List that stores mass/weights of added elements
     global listMaterial
@@ -40,10 +43,13 @@ def init():
     selected_y_fdm = 0
     roi_fdm = 0
 
+    selected_calculated = False
     selected_x1 = 0
     selected_x2 = 0
     selected_y1 = 0
     selected_y2 = 0
+    selected_z1 = 0
+    selected_z2 = 0
 
 
     listMaterial = []

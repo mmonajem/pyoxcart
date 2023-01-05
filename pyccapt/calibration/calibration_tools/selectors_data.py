@@ -24,6 +24,7 @@ def line_select_callback(eclick, erelease):
     variables.selected_x2 = x2
     variables.selected_y1 = y1
     variables.selected_y2 = y2
+    variables.selected_calculated = False
 
 
 def toggle_selector(event):

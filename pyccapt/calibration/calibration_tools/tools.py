@@ -20,7 +20,7 @@ from pyccapt.calibration.calibration_tools import logging_library
 from ipywidgets import fixed, interact_manual
 
 
-def hist_plot(mc_tof, bin, mc_tof_ideal=[], mode='count', percent=50, peaks_find=True, peaks_find_plot=True, plot=False,
+def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=False, ranging=False, log=True, mode='count', percent=50, peaks_find=True, peaks_find_plot=True, plot=False,
               prominence=500, distance=None, h_line=False, selector='None', fast_hist=True, fig_name=None,
               text_loc='right', label='mc'):
     """
@@ -71,9 +71,29 @@ def hist_plot(mc_tof, bin, mc_tof_ideal=[], mode='count', percent=50, peaks_find
 
     if plot:
         if fast_hist:
-            y, x, _ = plt.hist(mc_tof, bins=bins, log=True, histtype='step')
+            steps = 'step'
         else:
-            y, x, _ = plt.hist(mc_tof, bins=bins, log=True)
+            steps = 'bar'
+        if ranging:
+            phases = range_data['element'].tolist()
+            colors = range_data['color'].tolist()
+            mc_low = range_data['mc_low'].tolist()
+            mc_up = range_data['mc_up'].tolist()
+            charge = range_data['charge'].tolist()
+            isotope = range_data['isotope'].tolist()
+            mask_all = np.full((len(mc_tof)), False)
+            for i in range(len(phases) + 1):
+                if i < len(phases):
+                    mask = np.logical_and((mc_tof < mc_up[i]), mc_tof > mc_low[i])
+                    mask_all = np.logical_or(mask_all, mask)
+                    name_element = r'${}^{%s}%s^{%s+}$' % (isotope[i], phases[i], charge[i])
+                    y, x, _ = plt.hist(mc_tof[mask], bins=bins, log=log, histtype=steps, color=colors[i], label=name_element)
+                elif i == len(phases):
+                    mask_all = np.logical_or(mask_all, mask)
+                    y, x, _ = plt.hist(mc_tof[~mask_all], bins=bins, log=log, histtype=steps)
+        else:
+            y, x, _ = plt.hist(mc_tof, bins=bins, log=log, histtype=steps)
+
         if label == 'mc':
             plt.title("Mass Spectrum")
             ax1.set_xlabel("mass-to-charge-state ratio [Da]", color="red", fontsize=10)
@@ -126,11 +146,23 @@ def hist_plot(mc_tof, bin, mc_tof_ideal=[], mode='count', percent=50, peaks_find
                 annotes = []
                 texts = []
                 for i in range(len(peaks)):
-                    if len(mc_tof_ideal) != 0:
-                        mc_ideal = mc_tof_ideal[i]
-                        mc_ideal = mc_ideal.split('+')
-                        texts.append(plt.text(x[peaks][i], y[peaks][i], r'$%s^%s$' % (mc_ideal[0], (len(mc_ideal) - 1) * '+'), color='gray', size=7,
-                                 alpha=0.5))
+                    # if len(mc_tof_ideal) != 0:
+                    #     mc_ideal = mc_tof_ideal[i]
+                    #     mc_ideal = mc_ideal.split('+')
+                    #     texts.append(
+                    #         plt.text(x[peaks][i], y[peaks][i], r'$%s^%s$' % (mc_ideal[i], (len(mc_ideal) - 1) * '+'),
+                    #                  color='gray', size=7,
+                    #                  alpha=0.5))
+                    if mc_peak_label:
+                        phases = range_data['element'].tolist()
+                        charge = range_data['charge'].tolist()
+                        isotope = range_data['isotope'].tolist()
+                        name_element = r'${}^{%s}%s^{%s+}$' % (isotope[i], phases[i], charge[i])
+                        texts.append(
+                            plt.text(x[peaks][i], y[peaks][i], name_element,
+                                     color='gray', size=7,
+                                     alpha=0.5))
+
                         # ax1.annotate(r'$%s^%s$' % (mc_ideal[0], (len(mc_ideal) - 1) * '+'),
                         #              xy=(x[peaks][i], y[peaks][i]),
                         #              xytext=(x[peaks][i] + 1.5, y[peaks][i]), size=6, color='gray')
@@ -147,8 +179,8 @@ def hist_plot(mc_tof, bin, mc_tof_ideal=[], mode='count', percent=50, peaks_find
                         left_side_x = x[int(peak_widths_p[2][i])]
                         left_side_y = y[int(peak_widths_p[2][i])]
                         plt.hlines(left_side_y, left_side_x, right_side_x, color="red")
-
-                adjust_text(texts, arrowprops=dict(arrowstyle='-', color='red', lw=0.5))
+                if adjust_label:
+                    adjust_text(texts, arrowprops=dict(arrowstyle='-', color='red', lw=0.5))
                 if selector == 'rect':
                     # Connect and initialize rectangle box selector
                     data_loadcrop.rectangle_box_selector(ax1)
@@ -165,7 +197,8 @@ def hist_plot(mc_tof, bin, mc_tof_ideal=[], mode='count', percent=50, peaks_find
             elif label == 'tof':
                 plt.savefig(variables.result_path + "//tof_%s.svg" % fig_name, format="svg", dpi=600)
                 plt.savefig(variables.result_path + "//tof_%s.png" % fig_name, format="png", dpi=600)
-
+        if ranging:
+            plt.legend(loc='center right')
         plt.show()
     else:
         plt.close(fig1)
