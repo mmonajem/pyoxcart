@@ -1,10 +1,11 @@
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as plot_x
+import matplotlib.pyplot as plt
 import plotly
 
 # Local module and scripts
-from pyccapt.calibration.calibration_tools import tools, data_tools, variables, calibration, data_loadcrop, ion_selection, reconstruction
+from pyccapt.calibration.calibration_tools import variables, data_loadcrop, selectors_data
 def cart2pol(x, y):
     """
     x, y are the detector hit coordinates in mm
@@ -112,8 +113,8 @@ def atom_probe_recons_Bas_et_al(detx, dety, hv, flight_path_length, kf, det_eff,
 
     m = (flight_path_length * 1E-3) / (kf * radius_evolution)
 
-    x = (detx * 1E-3) / m
-    y = (dety * 1E-3) / m
+    x = (detx * 1E-2) / m
+    y = (dety * 1E-2) / m
 
     # detector coordinates in polar form
     rad, ang = cart2pol(detx * 1E-3, dety * 1E-3)
@@ -136,7 +137,7 @@ def atom_probe_recons_Bas_et_al(detx, dety, hv, flight_path_length, kf, det_eff,
     return x * 1E9, y * 1E9, z * 1E9
 
 
-def reconstruction_plot(data, range_data, element_percentage, rotary_fig_save, range_file_exist, selected_area, figname):
+def reconstruction_plot(data, range_data, element_percentage, rotary_fig_save, selected_area, figname):
     data_f = data.copy(deep=True)
     if selected_area:
         data_f = data_f[(data_f['x (nm)'] > variables.selected_x1) & (data_f['x (nm)'] < variables.selected_x2) &
@@ -150,48 +151,38 @@ def reconstruction_plot(data, range_data, element_percentage, rotary_fig_save, r
     element_percentage = element_percentage.split(',')
 
     fig = go.Figure()
-    if range_file_exist:
-        phases = range_data['element'].tolist()
-        colors = range_data['color'].tolist()
-        mc_low = range_data['mc_low'].tolist()
-        mc_up = range_data['mc_up'].tolist()
-        charge = range_data['charge'].tolist()
-        isotope = range_data['isotope'].tolist()
-        for index, elemen in enumerate(phases):
-            df_s = data_f.copy(deep=True)
-            df_s = df_s[(df_s['mc_c (Da)'] > mc_low[index]) & (df_s['mc_c (Da)'] < mc_up[index])]
-            df_s.reset_index(inplace=True, drop=True)
 
-            remove_n = int(len(df_s) - (len(df_s) * float(element_percentage[index])))
-            #         print(len(df_s))
-            drop_indices = np.random.choice(df_s.index, remove_n, replace=False)
-            df_subset = df_s.drop(drop_indices)
-            #         print(len(df_subset))
-            name_element = r'${}^{%s}%s^{%s+}$' % (isotope[index], phases[index], charge[index])
-            fig.add_trace(
-                go.Scatter3d(x=df_subset['x (nm)'], y=df_subset['y (nm)'], z=df_subset['z (nm)'], mode='markers',
-                             name=name_element,
-                             showlegend=True,
-                             marker=dict(
-                                 size=2,
-                                 color=colors[index],
-                                 opacity=.2,
-                             )
-                             ))
-    elif not range_file_exist:
-        df_s = data.copy(deep=True)
-        remove_n = int(len(df_s) - (len(df_s) * float(element_percentage[0])))
-        # print(len(df_s))
+    phases = range_data['element'].tolist()
+    colors = range_data['color'].tolist()
+    mc_low = range_data['mc_low'].tolist()
+    mc_up = range_data['mc_up'].tolist()
+    charge = range_data['charge'].tolist()
+    isotope = range_data['isotope'].tolist()
+    for index, elemen in enumerate(phases):
+        df_s = data_f.copy(deep=True)
+        df_s = df_s[(df_s['mc_c (Da)'] > mc_low[index]) & (df_s['mc_c (Da)'] < mc_up[index])]
+        df_s.reset_index(inplace=True, drop=True)
+
+        remove_n = int(len(df_s) - (len(df_s) * float(element_percentage[index])))
+        #         print(len(df_s))
         drop_indices = np.random.choice(df_s.index, remove_n, replace=False)
         df_subset = df_s.drop(drop_indices)
-        fig.add_trace(go.Scatter3d(x=df_subset['x (nm)'], y=df_subset['y (nm)'], z=df_subset['z (nm)'], mode='markers',
-                                   name='unranged',
-                                   showlegend=True,
-                                   marker=dict(
-                                       size=2,
-                                       opacity=.2,
-                                   )
-                                   ))
+        #         print(len(df_subset))
+        if phases[index] == 'unranged':
+            name_element = 'unranged'
+        else:
+            name_element = r'${}^{%s}%s^{%s+}$' % (isotope[index], phases[index], charge[index])
+        fig.add_trace(
+            go.Scatter3d(x=df_subset['x (nm)'], y=df_subset['y (nm)'], z=df_subset['z (nm)'], mode='markers',
+                         name=name_element,
+                         showlegend=True,
+                         marker=dict(
+                             size=2,
+                             color=colors[index],
+                             opacity=.2,
+                         )
+                         ))
+
     #         print(elemen)
     fig.update_scenes(
         xaxis_title="x (nm)",
@@ -260,3 +251,97 @@ def rotary_fig(fig1, figname):
     plotly.offline.plot(fig, filename=variables.result_path + '\\{fn}.html'.format(fn='rota_'+figname), show_link=True, auto_open=False)
 #     fig.show()
 
+def projection(data, range_data, element_percentage, selected_area, x_or_y, figname):
+
+    ax = plt.figure().add_subplot(111)
+
+    phases = range_data['element'].tolist()
+    colors = range_data['color'].tolist()
+    mc_low = range_data['mc_low'].tolist()
+    mc_up = range_data['mc_up'].tolist()
+    charge = range_data['charge'].tolist()
+    isotope = range_data['isotope'].tolist()
+    mc = data['mc_c (Da)']
+
+    element_percentage = element_percentage.replace('[', '')
+    element_percentage = element_percentage.replace(']', '')
+    element_percentage = element_percentage.split(',')
+
+    for index, elemen in enumerate(phases):
+        df_s = data.copy(deep=True)
+        df_s = df_s[(df_s['mc_c (Da)'] > mc_low[index]) & (df_s['mc_c (Da)'] < mc_up[index])]
+        df_s.reset_index(inplace=True, drop=True)
+        remove_n = int(len(df_s) - (len(df_s) * float(element_percentage[index])))
+        # print(len(df_s))
+        drop_indices = np.random.choice(df_s.index, remove_n, replace=False)
+        df_subset = df_s.drop(drop_indices)
+        # print(len(df_subset))
+        if phases[index] == 'unranged':
+            name_element = 'unranged'
+        else:
+            name_element = r'${}^{%s}%s^{%s+}$' % (isotope[index], phases[index], charge[index])
+        if x_or_y == 'x':
+            ax.scatter(df_subset['x (nm)'], df_subset['z (nm)'], s=2, label=name_element, color=colors[index])
+        elif x_or_y == 'y':
+            ax.scatter(df_subset['y (nm)'], df_subset['z (nm)'], s=2, label=name_element)
+
+    if not selected_area:
+        data_loadcrop.rectangle_box_selector(ax)
+        plt.connect('key_press_event', selectors_data.toggle_selector)
+    ax.xaxis.tick_top()
+    ax.invert_yaxis()
+    if x_or_y == 'x':
+        ax.set_xlabel('X (nm)')
+    elif x_or_y == 'y':
+        ax.set_xlabel('Y (nm)')
+    ax.xaxis.set_label_position('top')
+    ax.set_ylabel('Z (nm)')
+    plt.legend(loc='upper right')
+    plt.savefig(variables.result_path + '\\projection_{fn}.png'.format(fn=figname))
+    plt.show()
+
+
+def heatmap(data, range_data, selected_area, element_percentage, save):
+    ax = plt.figure().add_subplot(111)
+
+    phases = range_data['element'].tolist()
+    colors = range_data['color'].tolist()
+    mc_low = range_data['mc_low'].tolist()
+    mc_up = range_data['mc_up'].tolist()
+    charge = range_data['charge'].tolist()
+    isotope = range_data['isotope'].tolist()
+    mc = data['mc_c (Da)']
+
+    element_percentage = element_percentage.replace('[', '')
+    element_percentage = element_percentage.replace(']', '')
+    element_percentage = element_percentage.split(',')
+
+    for index, elemen in enumerate(phases):
+        df_s = data.copy(deep=True)
+        df_s = df_s[(df_s['mc_c (Da)'] > mc_low[index]) & (df_s['mc_c (Da)'] < mc_up[index])]
+        df_s.reset_index(inplace=True, drop=True)
+        remove_n = int(len(df_s) - (len(df_s) * float(element_percentage[index])))
+        # print(len(df_s))
+        drop_indices = np.random.choice(df_s.index, remove_n, replace=False)
+        df_subset = df_s.drop(drop_indices)
+        # print(len(df_subset))
+        if phases[index] == 'unranged':
+            name_element = 'unranged'
+        else:
+            name_element = r'${}^{%s}%s^{%s+}$' % (isotope[index], phases[index], charge[index])
+        # Plot heat map and convert from cm to mm
+        xx = df_subset['x_det (cm)'].to_numpy() * 10
+        yy = df_subset['y_det (cm)'].to_numpy() * 10
+        ax.scatter(xx, yy, s=2, label=name_element, color=colors[index])
+
+    # set x-axis label
+    ax.set_xlabel("x [mm]", color="red", fontsize=10)
+    # set y-axis label
+    ax.set_ylabel("y [mm]", color="red", fontsize=10)
+    plt.title("Detector Heatmap")
+    plt.legend(loc='upper right')
+
+    if save:
+        plt.savefig(variables.result_path + "heatmap.png", format="png", dpi=600)
+        plt.savefig(variables.result_path + "heatmap.svg", format="svg", dpi=600)
+    plt.show()

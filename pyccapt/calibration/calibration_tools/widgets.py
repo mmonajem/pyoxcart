@@ -201,7 +201,8 @@ def compute_element_isotope_values_according_to_selected_charge(mode='calibratio
     charge = chargeDict['charge']
 
     if mode == 'calibration':
-        elementWithCharge = round(float(selectedElement) / int(charge), 2)
+        elem = re.findall('\[(.*?)\]', selectedElement)
+        elementWithCharge = round(float(elem[0]) / int(charge), 2)
         elementWithChargeDict['element'] = elementWithCharge
     elif mode == 'ions_selection':
         elementWithCharge = selectedElement + '(' + str(charge) + '+)'
@@ -236,7 +237,7 @@ def dataset_tdc_selection():
     )
 
     tdc = widgets.Dropdown(
-        options=['surface_concept', 'roentdec'],
+        options=['surface_concept', 'roentdec', 'leap_epos', 'leap_pos'],
         value='surface_concept',
         description='TDC model:',
     )

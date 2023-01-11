@@ -92,4 +92,4 @@ def store_df_to_hdf(filename: "type: string - name of hdf5 file",
 
 
 def store_df_to_csv(data, path):
-    data.to_csv(path, encoding='utf-8', index=False)
+    data.to_csv(path, encoding='utf-8', index=False, sep=';')

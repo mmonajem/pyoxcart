@@ -245,7 +245,7 @@ if __name__ == '__main__':
     # or
     value, _ = tpg.pressure_gauge(2)
     unit = tpg.pressure_unit()
-    print ('pressure is {} {}'.format(value, unit))
+    print('pressure is {} {}'.format(value, unit))
 
 
 

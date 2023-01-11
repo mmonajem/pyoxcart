@@ -11,10 +11,10 @@ from scipy.signal import find_peaks
 from pyccapt.calibration.calibration_tools import variables
 
 
-def voltage_corr(x, a, b, c, d):
-    #     return a / np.sqrt((b + (c * x) + (d * (x**2))))
-    #     return a / (b * (x ** 2) + c * x + d)
-    return a + (b * (x ** 2) + (c * x) + d)
+def voltage_corr(x, a, b, c):
+    #     return 1 / np.sqrt((a + (c * x) + (b * (x**2))))
+    #     return 1 / (b * (x ** 2) + c * x + a)
+    return a + (b * (x ** 2)) + (c * x)
 
 
 def voltage_correction(dld_highVoltage_peak, dld_t_peak, index_fig, figname, sample_size, mode, calibration_mode,
@@ -68,6 +68,7 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, index_fig, figname, sam
         elif calibration_mode == 'mc':
             ax1.set_ylabel("mc (Da)", color="red", fontsize=10)
         ax1.set_xlabel("Voltage (V)", color="red", fontsize=10)
+        ax1.set_title("Fitted Curve", fontsize=12)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=2)
 
         # plot high voltage curve
@@ -125,6 +126,7 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, inde
         elif calibration_mode == 'mc':
             ax1.set_ylabel("mc (Da)", color="red", fontsize=10)
         ax1.set_xlabel("Voltage (V)", color="red", fontsize=10)
+        ax1.set_title("Correction Curve", fontsize=12)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=2)
 
         # plot high voltage curve
@@ -150,6 +152,7 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, inde
         elif calibration_mode == 'mc':
             ax1.set_ylabel("mc (Da)", color="red", fontsize=10)
         ax1.set_xlabel("Voltage (V)", color="red", fontsize=10)
+        ax1.set_title("Calibrated vs Uncalibrated Ions ", fontsize=12)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=2)
 
         f_v_plot = voltage_corr(dld_highVoltage_peak_v[mask], *fitresult)
@@ -228,6 +231,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, det_diam, sample_size, i
         ax.set_xlabel('X', color="red", fontsize=10)
         ax.set_ylabel('Y', color="red", fontsize=10)
         ax.set_zlabel(r"$F_B$", color="red", fontsize=10)
+        ax.set_title("Bowl", fontsize=12)
         ax.tick_params(axis='both', which='major', labelsize=8)
         # ax.tick_params(axis='both', which='minor', labelsize=8)
 
@@ -278,6 +282,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, det_diam, sample_size, c
         elif calibration_mode == 'mc':
             ax1.set_ylabel("mc (Da)", color="red", fontsize=10)
         ax1.set_xlabel("Voltage (V)", color="red", fontsize=10)
+        ax1.set_title("Calibrated vs Uncalibrated Ions ", fontsize=12)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=2)
 
         f_bowl_plot = bowl_corr_fit([dld_x_peak_b[mask], dld_y_peak_b[mask]], *parameters)
@@ -306,6 +311,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, det_diam, sample_size, c
         elif calibration_mode == 'mc':
             ax1.set_ylabel("mc (Da)", color="red", fontsize=10)
         ax1.set_xlabel("position (mm)", color="red", fontsize=10)
+        ax1.set_title("Calibrated vs Uncalibrated Ions (detector hit position) ", fontsize=12)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=2)
         plt.legend(handles=[x, y], loc='upper right')
         if save:
@@ -327,6 +333,7 @@ def plot_FDM(xx, yy, save, bins_s):
     ax1.set_xlabel("x [mm]", color="red", fontsize=10)
     # set y-axis label
     ax1.set_ylabel("y [mm]", color="red", fontsize=10)
+    ax1.set_title("FDM", fontsize=12)
     plt.title("FDM")
     img = plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
     fig1.colorbar(img)

@@ -86,7 +86,10 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
                 if i < len(phases):
                     mask = np.logical_and((mc_tof < mc_up[i]), mc_tof > mc_low[i])
                     mask_all = np.logical_or(mask_all, mask)
-                    name_element = r'${}^{%s}%s^{%s+}$' % (isotope[i], phases[i], charge[i])
+                    if phases[i] == 'unranged':
+                        name_element = 'unranged'
+                    else:
+                        name_element = r'${}^{%s}%s^{%s+}$' % (isotope[i], phases[i], charge[i])
                     y, x, _ = plt.hist(mc_tof[mask], bins=bins, log=log, histtype=steps, color=colors[i], label=name_element)
                 elif i == len(phases):
                     mask_all = np.logical_or(mask_all, mask)

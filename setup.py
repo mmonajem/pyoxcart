@@ -69,7 +69,8 @@ setup(
                         "nodejs",
                         "ipympl",
                         "adjustText",
-                        "ipysheet"
+                        "ipysheet",
+                        "mcculw",
                       ],
     # not to be confused with definitions in pyproject.toml [build-system]
     setup_requires=["pytest-runner"],

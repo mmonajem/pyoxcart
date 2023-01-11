@@ -80,8 +80,8 @@ def read_epos(f):
                         'z (nm)': d[2::11],
                         'm/n (Da)': d[3::11],
                         'TOF (ns)': d[4::11],
-                        'HV_DC (kV)': d[5::11],
-                        'pulse (kV)': d[6::11],
+                        'HV_DC (V)': d[5::11],
+                        'pulse (V)': d[6::11],
                         'det_x (cm)': d[7::11],
                         'det_y (cm)': d[8::11],
                         'pslep': d[9::11], # pulses since last event pulse
