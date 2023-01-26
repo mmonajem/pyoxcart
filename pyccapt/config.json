@@ -1,6 +1,6 @@
 {
 	"mode": "advance",
-	"visualization": "on",
+	"visualization": "tof",
 	"log": "off",
 	"tdc": "on",
 	"camera": "on",

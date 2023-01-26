@@ -92,6 +92,7 @@ def init(conf):
     global index_line
     global light
     global light_swich
+    global alignment_window
     global img0_orig
     global img0_zoom
     global img1_orig
@@ -185,6 +186,7 @@ def init(conf):
     email = ''
     tweet = False
     light = False
+    alignment_window = True
     light_swich = False
     camera_0_ExposureTime = 2000
     camera_1_ExposureTime = 2000

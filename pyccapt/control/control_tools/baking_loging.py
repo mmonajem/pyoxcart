@@ -375,7 +375,7 @@ def read():
 
         data.loc[len(data)] = new_row
 
-        time.sleep(0.5)
+        time.sleep(1)
         index = index + 1
         if index % 20 == 0:
             try:
@@ -425,32 +425,78 @@ fig = plt.figure()
 ax1 = fig.add_subplot(2, 1, 1)
 ax2 = fig.add_subplot(2, 1, 2)
 
-
-if __name__ == '__main__':
-    # datetime object containing current date and time
-    now = datetime.now()
-    now_time = now.strftime("%d-%m-%Y_%H-%M-%S")
-    global file_name
-    file_name = 'baking_loging_%s.csv' % now_time
-    global file_name_backup
-    file_name_backup = 'backup_baking_loging_%s.csv' % now_time
-    global data
-    data = pd.DataFrame(
-        columns=['data','Time', 'MC_vacuum', 'BC_vacuum', 'MC_NEG', 'MC_Det', 'Mc_Top', 'MC_Gate', 'BC_Top', 'BC_Pump'])
+def plot_baking(df, window=0):
 
 
+    MC_NEG = df['MC_NEG'].to_numpy()
+    MC_Det = df['MC_Det'].to_numpy()
+    Mc_Top = df['Mc_Top'].to_numpy()
+    MC_Gate = df['MC_Gate'].to_numpy()
+    BC_Top = df['BC_Top'].to_numpy()
+    BC_Pump = df['BC_Pump'].to_numpy()
+    MC_vacuum = df['MC_vacuum'].to_numpy()
+    BC_vacuum = df['BC_vacuum'].to_numpy()
+    time = np.arange(0, len(BC_vacuum))
 
-    thread_read = Thread(target=read)
-    thread_read.daemon = True
-    thread_read.start()
 
-    ani = animation.FuncAnimation(fig, animate, interval=1000)
+    ax1.plot(time[window:], MC_NEG[window:], label='MC_NEG', color='b')
+    ax1.plot(time[window:], MC_Det[window:], label='MC_Det', color='g')
+    ax1.plot(time[window:], Mc_Top[window:], label='Mc_Top', color='r')
+    ax1.plot(time[window:], MC_Gate[window:], label='MC_Gate', color='c')
+    ax1.plot(time[window:], BC_Top[window:], label='BC_Top', color='m')
+    ax1.plot(time[window:], BC_Pump[window:], label='BC_Pump', color='y')
+
+    ax2.plot(time[window:], MC_vacuum[window:], label='MC_vacuum', color='orange')
+    ax2.plot(time[window:], BC_vacuum[window:], label='BC_vacuum', color='darkviolet')
+
+
+    ax1.set_title('Baking')
+
+    ax1.set_ylabel('Temperature (C)')
+    ax2.set_ylabel('Vacuum (mbar)')
+    ax1.set_xlabel('Time (0.5 s)')
+    ax2.set_xlabel('Time (0.5 s)')
+
+    ax1.legend(loc='upper right')
+    ax2.legend(['MC_vacuum', 'BC_vacuum'], loc='upper right')
     plt.show()
 
-    try:
-        data.to_csv(file_name, sep=';', index=False)
-    except:
-        data.to_csv(file_name_backup, sep=';', index=False)
+
+if __name__ == '__main__':
+
+    recording = True
+    ploting = False
+    if recording:
+        # datetime object containing current date and time
+        now = datetime.now()
+        now_time = now.strftime("%d-%m-%Y_%H-%M-%S")
+        global file_name
+        file_name = 'baking_loging_%s.csv' % now_time
+        global file_name_backup
+        file_name_backup = 'backup_baking_loging_%s.csv' % now_time
+        global data
+        data = pd.DataFrame(
+            columns=['data','Time', 'MC_vacuum', 'BC_vacuum', 'MC_NEG', 'MC_Det', 'Mc_Top', 'MC_Gate', 'BC_Top', 'BC_Pump'])
+
+
+
+        thread_read = Thread(target=read)
+        thread_read.daemon = True
+        thread_read.start()
+
+        ani = animation.FuncAnimation(fig, animate, interval=1000)
+        plt.show()
+
+        try:
+            data.to_csv(file_name, sep=';', index=False)
+        except:
+            data.to_csv(file_name_backup, sep=';', index=False)
+
+    if ploting:
+        df = pd.read_csv('baking_loging_13-01-2023_11-48-02.csv', sep=';')
+        plot_baking(df, window=0)
+        print(df)
+
 
 
 

@@ -117,15 +117,15 @@ def run():
 
     meas_remaining = NR_OF_MEASUREMENTS
     while True:
-        print(meas_remaining)
+        print('Number of remaining measurement',meas_remaining)
         eventtype_dld, data_dld = bufdatacb_dld.queue.get()  # waits until element available
         # eventtype_tdc, data_tdc = bufdatacb_tdc.queue.get()  # waits until element available
         if eventtype_dld == QUEUE_DATA:
 
             print(len(data_dld["start_counter"]))
-            # a_dld = np.array((data_dld["start_counter"],
-            #               data_dld["dif1"], data_dld["dif2"], data_dld["time"], data_tdc["subdevice"]))
-            # print(a_dld)
+            a_dld = np.array((data_dld["start_counter"],
+                          data_dld["dif1"], data_dld["dif2"], data_dld["time"]))
+            print(a_dld)
             print('+++++++++++++++++++++++++++')
         # if eventtype_tdc == QUEUE_DATA:
         #     print(len(data_tdc["start_counter"]))

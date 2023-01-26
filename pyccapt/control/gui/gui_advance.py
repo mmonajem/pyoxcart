@@ -1041,6 +1041,7 @@ class UI_APT_A(Camera, object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         # self.vdc_time = QtWidgets.QWidget(self.centralwidget)
         self.vdc_time = pg.PlotWidget(self.centralwidget)
+        self.vdc_time.setBackground('w')
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -1051,6 +1052,7 @@ class UI_APT_A(Camera, object):
         self.horizontalLayout.addWidget(self.vdc_time)
         # self.detection_rate_viz = QtWidgets.QWidget(self.centralwidget)
         self.detection_rate_viz = pg.PlotWidget(self.centralwidget)
+        self.detection_rate_viz.setBackground('w')
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -1082,8 +1084,9 @@ class UI_APT_A(Camera, object):
         self.visualization = pg.PlotWidget(self.centralwidget)
         self.visualization.setObjectName("visualization")
         self.detector_circle = pg.QtGui.QGraphicsEllipseItem(0, 0, 2400, 2400)  # x, y, width, height
-        self.detector_circle.setPen(pg.mkPen(color=(255, 0, 0), width=1))
+        self.detector_circle.setPen(pg.mkPen(color=(255, 0, 0), width=2))
         self.visualization.addItem(self.detector_circle)
+        self.visualization.setBackground('w')
         ###
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(1)
@@ -1095,6 +1098,7 @@ class UI_APT_A(Camera, object):
         self.horizontalLayout_4.addWidget(self.visualization)
         # self.histogram = QtWidgets.QWidget(self.centralwidget)
         self.histogram = pg.PlotWidget(self.centralwidget)
+        self.histogram.setBackground('w')
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -1167,16 +1171,16 @@ class UI_APT_A(Camera, object):
         self.vacuum_load_lock.setDigitCount(8)
         self.vacuum_load_lock_back.setDigitCount(8)
         self.temp.setDigitCount(8)
-
-        arrow1 = pg.ArrowItem(pos=(100, 1700), angle=-90)
+        # bottom camera (x, y)
+        arrow1 = pg.ArrowItem(pos=(310, 700), angle=-90)
         # arrow2 = pg.ArrowItem(pos=(100, 2100), angle=90)
-        arrow3 = pg.ArrowItem(pos=(130, 1800), angle=0)
+        arrow3 = pg.ArrowItem(pos=(520, 770), angle=0)
         self.cam_b_o.addItem(arrow1)
         # self.cam_b_o.addItem(arrow2)
         self.cam_b_o.addItem(arrow3)
-
-        arrow1 = pg.ArrowItem(pos=(590, 620), angle=-90)
-        arrow2 = pg.ArrowItem(pos=(570, 1120), angle=90)
+        # Side camera (x, y)
+        arrow1 = pg.ArrowItem(pos=(450, 450), angle=-90)
+        arrow2 = pg.ArrowItem(pos=(450, 1650), angle=90)
         # arrow3 = pg.ArrowItem(pos=(890, 1100), angle=0)
         self.cam_s_o.addItem(arrow1)
         self.cam_s_o.addItem(arrow2)
@@ -1284,7 +1288,7 @@ class UI_APT_A(Camera, object):
         self.menuFile.setTitle(_translate("UI_APT_A", "File"))
         self.actionExit.setText(_translate("UI_APT_A", "Exit"))
 
- ###
+        ###
         self.main_chamber_switch.clicked.connect(lambda: self.gates(1))
         self.load_lock_switch.clicked.connect(lambda: self.gates(2))
         self.cryo_switch.clicked.connect(lambda: self.gates(3))
@@ -1303,7 +1307,7 @@ class UI_APT_A(Camera, object):
         pen_vps = pg.mkPen(color=(0, 0, 255), width=3)
         self.data_line_vdc = self.vdc_time.plot(self.x_vdc, self.y_vdc, name="High Vol.", pen=pen_vdc)
         self.data_line_vps = self.vdc_time.plot(self.x_vdc, self.y_vps, name="Pulse Vol.", pen=pen_vps)
-        self.vdc_time.setBackground('w')
+
         # Add Axis Labels
         styles = {"color": "#f00", "font-size": "12px"}
         self.vdc_time.setLabel("left", "High Voltage (v)", **styles)
@@ -1320,7 +1324,7 @@ class UI_APT_A(Camera, object):
         self.y_dtec[:] = np.nan
         pen_dtec = pg.mkPen(color=(255, 0, 0), width=6)
         self.data_line_dtec = self.detection_rate_viz.plot(self.x_dtec, self.y_dtec, pen=pen_dtec)
-        self.detection_rate_viz.setBackground('w')
+
         # Add Axis Labels
         styles = {"color": "#f00", "font-size": "12px"}
         self.detection_rate_viz.setLabel("left", "Counts", **styles)
@@ -1335,9 +1339,9 @@ class UI_APT_A(Camera, object):
         # Add Axis Labels
         styles = {"color": "#f00", "font-size": "12px"}
         self.histogram.setLabel("left", "Frequency (counts)", **styles)
-        if self.conf["visualization"] == 'tof':
+        if self.conf["visualization"] == "tof":
                 self.histogram.setLabel("bottom", "Time (ns)", **styles)
-        elif self.conf["visualization"] == 'mc':
+        elif self.conf["visualization"] == "mc":
                 self.histogram.setLabel("bottom", "mc (Da)", **styles)
 
         # Temperature #########################
@@ -1358,7 +1362,7 @@ class UI_APT_A(Camera, object):
 
         # Visualization #####################
         self.scatter = pg.ScatterPlotItem(
-            size=self.doubleSpinBox.value(), brush=pg.mkBrush(255, 255, 255, 120))
+            size=self.doubleSpinBox.value(), brush='black')
         self.visualization.getPlotItem().hideAxis('bottom')
         self.visualization.getPlotItem().hideAxis('left')
 
@@ -1581,8 +1585,8 @@ class UI_APT_A(Camera, object):
                             The function for applying the command of closing or opening gate
                             """
             with nidaqmx.Task() as task:
-                if self.conf['gates'] != "off":
-                    task.do_channels.add_do_chan(self.conf['COM_PORT_gates'] + 'line%s' % num)
+                if self.conf["gates"] != "off":
+                    task.do_channels.add_do_chan(self.conf["COM_PORT_gates"] + 'line%s' % num)
                     task.start()
                     task.write([True])
                     time.sleep(.5)
@@ -1653,8 +1657,8 @@ class UI_APT_A(Camera, object):
 
     def light_switch(self):
         """
-                The function for switching the exposure time of cameras in case of swithching the light
-                """
+        The function for switching the exposure time of cameras in case of swithching the light
+        """
         if not variables.light:
             self.led_light.setPixmap(self.led_green)
             Camera.light_switch(self)
@@ -1680,9 +1684,9 @@ class UI_APT_A(Camera, object):
         """
                 The function for updating plots
             """
-        if self.conf['pump'] == "off":
+        if self.conf["pump"] == "off":
             self.pump_load_lock_switch.setEnabled(False)
-        if self.conf['gates'] == "off":
+        if self.conf["gates"] == "off":
             self.main_chamber_switch.setEnabled(False)
             self.load_lock_switch.setEnabled(False)
             self.cryo_switch.setEnabled(False)
@@ -1784,10 +1788,10 @@ class UI_APT_A(Camera, object):
                             data[data == 0] = min_nonzero
                             return data
 
-                        if self.conf["visualization"] == 'tof':
+                        if self.conf["visualization"] == "tof":
                             tof = variables.t * 27.432 / (1000 * 4)  # Time in ns
                             viz = tof[tof < 5000]
-                        elif self.conf["visualization"] == 'mc':
+                        elif self.conf["visualization"] == "mc":
                             max_lenght = max(len(variables.x), len(variables.y),
                                              len(variables.t), len(variables.main_v_dc_dld))
                             viz = tof2mc_simple.tof_bin2mc_sc(variables.t[:max_lenght], 0,
@@ -1796,14 +1800,14 @@ class UI_APT_A(Camera, object):
                                                               variables.x[:max_lenght],
                                                               variables.x[:max_lenght],
                                                               flightPathLength=110)
-                            viz = viz[viz < 200]
+                            viz = viz[viz < 400]
 
                         self.y_tof, self.x_tof = np.histogram(viz, bins=512)
                         self.histogram.clear()
                         self.y_tof = replaceZeroes(self.y_tof)
                         self.histogram.addItem(
                             pg.BarGraphItem(x=self.x_tof[:-1], height=np.log(self.y_tof),
-                                            width=0.1, brush='r'))
+                                            width=0.1, brush='black'))
 
                     except Exception as e:
                         print(

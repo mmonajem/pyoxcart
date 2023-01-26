@@ -14,11 +14,10 @@ from pyccapt.calibration.calibration_tools import variables, data_tools
 from pyccapt.calibration.calibration_tools import logging_library
 
 
-
-
 def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc",
                                pulse_mode: "type: string - mode of pulse",
-                               max_tof: "type: float - maximum possible tof") -> "type: dataframes":
+                               max_tof: "type: float - maximum possible tof",
+                               det_diam: "type: float - detector diameter") -> "type: dataframes":
     logger = logging_library.logger_creator('data_loadcrop')
     try:
         print("Filename>>", filename)
@@ -35,9 +34,20 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
             dld_t = hdf5Data['dld/t'].to_numpy()
             dld_x = hdf5Data['dld/x'].to_numpy()
             dld_y = hdf5Data['dld/y'].to_numpy()
-            # remove data that is location are out of the detector
 
-            mask_local = np.logical_and((np.abs(dld_x) <= 40.0), (np.abs(dld_y) <= 40.0))
+            # if the recorded data in unequal in length we can crop it
+            # print(dld_x.shape, dld_y.shape, dld_highVoltage.shape, dld_pulse.shape, dld_t.shape, dld_startCounter.shape)
+            # # if len(dld_x) != len(dld_y) != len(dld_highVoltage) != len(dld_pulse) != len(dld_t):
+            # mini = min(len(dld_x), len(dld_y), len(dld_highVoltage), len(dld_pulse), len(dld_t), len(dld_startCounter))
+            # dld_x = dld_x[:mini]
+            # dld_y = dld_y[:mini]
+            # dld_highVoltage = dld_highVoltage[:mini]
+            # dld_pulse = dld_pulse[:mini]
+            # dld_t = dld_t[:mini]
+            # dld_startCounter = dld_startCounter[:mini]
+
+            # remove data that is location are out of the detector
+            mask_local = np.logical_and((np.abs(dld_x) <= det_diam/2), (np.abs(dld_y) <= det_diam/2))
             mask_temporal = np.logical_and((dld_t > 0), (dld_t < max_tof))
             mask = np.logical_and(mask_temporal, mask_local)
             dld_highVoltage = dld_highVoltage[mask]
@@ -69,7 +79,7 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
             dld_y = hdf5Data['dld/y'].to_numpy()
             # remove data that is location are out of the detector
 
-            mask_local = np.logical_and((np.abs(dld_x) <= 60.0), (np.abs(dld_y) <= 60.0))
+            mask_local = np.logical_and((np.abs(dld_x) <= det_diam/2), (np.abs(dld_y) <= det_diam/2))
             mask_temporal = np.logical_and((dld_t > 0), (dld_t < max_tof))
             mask = np.logical_and(mask_temporal, mask_local)
             dld_highVoltage = dld_highVoltage[mask]

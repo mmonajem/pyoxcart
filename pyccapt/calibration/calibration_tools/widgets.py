@@ -223,7 +223,7 @@ def dataset_tdc_selection():
         disabled=False
     )
     t0 = widgets.FloatText(
-        value='51.74',
+        value='54',
         placeholder='T_0 of the instrument',
         description='t0:',
         disabled=False
@@ -233,13 +233,20 @@ def dataset_tdc_selection():
         value='5000',
         placeholder='Maximum possible tof',
         description='Max tof:',
-        disabled = False
+        disabled=False
+    )
+
+    max_mc = widgets.FloatText(
+        value='400',
+        placeholder='Maximum possible mc',
+        description='Max mc:',
+        disabled=False
     )
 
     tdc = widgets.Dropdown(
         options=['surface_concept', 'roentdec', 'leap_epos', 'leap_pos'],
         value='surface_concept',
-        description='TDC model:',
+        description='Data mode:',
     )
 
     pulse_mode = widgets.Dropdown(
@@ -248,7 +255,7 @@ def dataset_tdc_selection():
         description='Pulse mode:',
     )
 
-    return tdc, det_diam, pulse_mode, flightPathLength, t0, max_tof
+    return tdc, det_diam, pulse_mode, flightPathLength, t0, max_tof, max_mc
 
 def density_field_selection():
     TableFile = '../../../files/field_density_table.h5'
