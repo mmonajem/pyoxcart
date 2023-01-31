@@ -44,6 +44,7 @@ def command_cryovac(cmd, com_port_cryovac):
     # Wait for the complete response code.
     while com_port_cryovac.in_waiting > 0:
         response = com_port_cryovac.readline()  # all characters received, read line till '\r\n'
+
     return response.decode("utf-8")
 
 
@@ -196,8 +197,13 @@ def gauges_update(conf, lock, com_port_cryovac):
         E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll)
     while True:
         if conf['cryo'] != "off":
-            #  Temperature update
-            output = command_cryovac('getOutput', com_port_cryovac)
+            try:
+                #  Temperature update
+                output = command_cryovac('getOutput', com_port_cryovac)
+            except Exception as e:
+                print(e)
+                print("cannot read the cryo temperature")
+                output = '0'
             with lock:
                 variables.temperature = float(output.split()[0].replace(',', ''))
         if conf['COM_PORT_gauge_mc'] != "off":

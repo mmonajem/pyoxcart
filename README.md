@@ -1,12 +1,13 @@
 # PyCCAPT (APT_PyControl)
 # A modular, FAIR open-source python atom probe tomography software package for experiment control and data calibration 
 ![plot](pyccapt/files/logo.png)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7588996.svg)](https://doi.org/10.5281/zenodo.7588996)
 [![Documentation Status](https://readthedocs.org/projects/pyccapt/badge/?version=latest)](https://pyccapt.readthedocs.io/en/latest/?badge=latest)
 [![PyPi version](https://badgen.net/pypi/v/pyccapt/)](https://pypi.org/project/pyccapt)
 <!--[![coverage report](https://gitlab.com/jesseds/apav/badges/master/coverage.svg)](https://gitlab.com/jesseds/apav/commits/master)
 [![pipeline status](https://gitlab.com/jesseds/apav/badges/master/pipeline.svg)](https://gitlab.com/jesseds/apav/-/commits/master)-->
 
-/pypi/license/pip
+
 This package aims to provide an open-source software for controlind atom probe systems and calibrate 
 the data. The package is modular and can be used in a wide range of applications.
 

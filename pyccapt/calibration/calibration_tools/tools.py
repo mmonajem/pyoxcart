@@ -134,7 +134,7 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
                                                                   x[int(peak_widths_p[2][index_peak_max])]))
                 # txt = 'bin width: %s Da\nnum atoms: %s\nbackG: %s ppm/ns\nbackG: @4 ns %s ppm/ns\nMRP: %s' \
                 #       % (bin, len(mc_tof), int(BG), int(BG4), mrp)
-                txt = 'bin width: %s Da\nnum atoms: %s\nMRP: %s' % (bin, len(mc_tof), mrp)
+                txt = 'bin width: %s ns\nnum atoms: %s\nMRP: %s' % (bin, len(mc_tof), mrp)
 
             props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
             if text_loc == 'left':
