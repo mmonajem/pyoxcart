@@ -68,29 +68,16 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, maximum_location, index
             max_peak = peaks[index_peak_max_ini]
             dld_t_peak_list.append(x[max_peak]/maximum_location)
 
-    huber = linear_model.LinearRegression()
-    huber.fit(np.array([high_voltage_mean_list]).squeeze(0).reshape(-1, 1), np.array([dld_t_peak_list]).squeeze(0))
-    d_seb_huber = huber.coef_.item()
-    t0_seb_huber = huber.intercept_.item()
-    print('Huber: {:.2f}'.format(d_seb_huber),',{:.2f}'.format(t0_seb_huber))
 
-    # z = np.concatenate((np.expand_dims(np.array(high_voltage_mean_list), axis=1),
-    #                     np.expand_dims(np.array(dld_t_peak_list), axis=1)), axis=1)
-    #
-    # centroid, label = kmeans2(z, 2, minit='points')
-    # counts = np.bincount(label)
-    # print('cluster pints:', counts)
-    # fig1, ax1 = plt.subplots(figsize=(6, 6))
-    # w0 = z[label == 0]
-    # w1 = z[label == 1]
-    # w2 = z[label == 2]
-    # print(w0.shape)
-    # plt.plot(w0[:, 0], w0[:, 1], 'o', alpha=0.5, label='cluster 0')
-    # plt.plot(w1[:, 0], w1[:, 1], 'd', alpha=0.5, label='cluster 1')
-    # plt.plot(w2[:, 0], w2[:, 1], 'd', alpha=0.5, label='cluster 2')
-    # plt.plot(centroid[:, 0], centroid[:, 1], 'k*', label='centroids')
-    # plt.legend(shadow=True)
-    # plt.show()
+    ransac = linear_model.RANSACRegressor()
+    X = np.expand_dims(np.array(high_voltage_mean_list), axis=1)
+    y = np.expand_dims(np.array(dld_t_peak_list), axis=1)
+    ransac.fit(X, y)
+    # Predict data of estimated models
+    line_X = np.arange(X.min(), np.max(dld_highVoltage_peak))[:, np.newaxis]
+    line_y_ransac = ransac.predict(line_X)
+
+
 
     fitresult, _ = curve_fit(voltage_corr, np.array(high_voltage_mean_list), np.array(dld_t_peak_list))
     # fitresult, _ = curve_fit(voltage_corr, np.array(high_voltage_mean_list), np.array(dld_t_peak_list), bounds=(0, 3), max_nfev=3000)
@@ -106,9 +93,13 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, maximum_location, index
             ax1.set_ylabel("mc (Da)", color="red", fontsize=10)
             lable = 'mc'
 
-        # axes = plt.gca()
-        # x_vals = np.array(axes.get_xlim())
-        # huber, = plt.plot(x_vals, t0_seb_huber + d_seb_huber * x_vals, '--', color='g', label='Huber')
+        z = plt.plot(
+            line_X,
+            line_y_ransac,
+            color="black",
+            linewidth=2,
+            label="RANSAC regressor",
+        )
 
         x = plt.scatter(np.array(high_voltage_mean_list), np.array(dld_t_peak_list)*maximum_location, color="blue",
                         label=lable, alpha=0.1)
