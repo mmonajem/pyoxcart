@@ -1,5 +1,5 @@
 """
-This is the main vew script for reading TDC Surface Concept .
+This is the main vew script for reading TDC Surface Concept dld and tdc event at the same time .
 """
 
 import time
@@ -10,21 +10,11 @@ from queue import Queue
 # Local module and scripts
 from tdc_surface_concept import scTDC
 
-raw_mode = False
-NR_OF_MEASUREMENTS = 10  # number of measurements
+
+NR_OF_MEASUREMENTS = 4  # number of measurements
 EXPOSURE_MS = 3000  # exposure duration in milliseconds
 
-if not raw_mode:
-    DATA_FIELD_SEL1 = \
-        scTDC.SC_DATA_FIELD_DIF1 \
-        | scTDC.SC_DATA_FIELD_DIF2 \
-        | scTDC.SC_DATA_FIELD_TIME \
-        | scTDC.SC_DATA_FIELD_START_COUNTER
-elif raw_mode:
-    DATA_FIELD_SEL1 = \
-        scTDC.SC_DATA_FIELD_TIME \
-        | scTDC.SC_DATA_FIELD_CHANNEL \
-        | scTDC.SC_DATA_FIELD_START_COUNTER
+
 # define some constants to distinguish the type of element placed in the queue
 QUEUE_DATA = 0
 QUEUE_ENDOFMEAS = 1
@@ -32,9 +22,8 @@ QUEUE_ENDOFMEAS = 1
 
 class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
     def __init__(self, lib, dev_desc,
-                 data_field_selection=DATA_FIELD_SEL1,
-                 max_buffered_data_len=500000,
-                 dld_events=not raw_mode):
+                 data_field_selection, dld_events,
+                 max_buffered_data_len=500000,):
         super().__init__(lib, dev_desc, data_field_selection,  # <-- mandatory!
                          max_buffered_data_len, dld_events)  # <-- mandatory!
 
@@ -77,8 +66,18 @@ def test4():
     else:
         print("successfully initialized")
 
+    DATA_FIELD_SEL = \
+        scTDC.SC_DATA_FIELD_DIF1 \
+        | scTDC.SC_DATA_FIELD_DIF2 \
+        | scTDC.SC_DATA_FIELD_TIME \
+        | scTDC.SC_DATA_FIELD_START_COUNTER
+    DATA_FIELD_SEL_raw = \
+        scTDC.SC_DATA_FIELD_TIME \
+        | scTDC.SC_DATA_FIELD_CHANNEL \
+        | scTDC.SC_DATA_FIELD_START_COUNTER
     # open a BUFFERED_DATA_CALLBACKS pipe
-    bufdatacb = BufDataCB4(device.lib, device.dev_desc)
+    bufdatacb = BufDataCB4(device.lib, device.dev_desc, DATA_FIELD_SEL, dld_events=True)
+    bufdatacb_raw = BufDataCB4(device.lib, device.dev_desc, DATA_FIELD_SEL_raw, dld_events=False)
 
     # define a closure that checks return codes for errors and does clean up
     def errorcheck(retcode):
@@ -100,18 +99,20 @@ def test4():
     meas_remaining = NR_OF_MEASUREMENTS
     while True:
         eventtype, data = bufdatacb.queue.get()  # waits until element available
+        eventtype_raw, data_raw = bufdatacb_raw.queue.get()  # waits until element available
         if eventtype == QUEUE_DATA:
-            if not raw_mode:
-                print(len(data["start_counter"]))
-                a = np.array((data["start_counter"],
-                              data["dif1"], data["dif2"], data["time"]))
-            elif raw_mode:
-                a = np.array((data["channel"], data["start_counter"],
-                              data["time"]))
+            print(len(data["start_counter"]))
+            a = np.array((data["start_counter"],
+                          data["dif1"], data["dif2"], data["time"]))
+            b = np.array((data_raw["channel"], data_raw["start_counter"],
+                          data_raw["time"]))
         elif eventtype == QUEUE_ENDOFMEAS:
             # data_to_textfile.write_measurement_separator()
-
+            print('Length data', len(a[0]))
             print(a)
+            print('--------------------------')
+            print('Length raw data', len(b[0]))
+            print(b)
             print('==========================')
             print(meas_remaining)
             meas_remaining -= 1

@@ -629,7 +629,6 @@ class UI_APT_A(Camera, object):
         self.counter_source.addItem("")
         self.counter_source.addItem("")
         self.counter_source.addItem("")
-        self.counter_source.addItem("")
         self.gridLayout_3.addWidget(self.counter_source, 19, 2, 1, 1)
         self.parameters_source = QtWidgets.QComboBox(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
@@ -1172,15 +1171,15 @@ class UI_APT_A(Camera, object):
         self.vacuum_load_lock_back.setDigitCount(8)
         self.temp.setDigitCount(8)
         # bottom camera (x, y)
-        arrow1 = pg.ArrowItem(pos=(310, 700), angle=-90)
+        arrow1 = pg.ArrowItem(pos=(650, 670), angle=-90)
         # arrow2 = pg.ArrowItem(pos=(100, 2100), angle=90)
-        arrow3 = pg.ArrowItem(pos=(520, 770), angle=0)
+        arrow3 = pg.ArrowItem(pos=(940, 770), angle=0)
         self.cam_b_o.addItem(arrow1)
         # self.cam_b_o.addItem(arrow2)
         self.cam_b_o.addItem(arrow3)
         # Side camera (x, y)
-        arrow1 = pg.ArrowItem(pos=(450, 450), angle=-90)
-        arrow2 = pg.ArrowItem(pos=(450, 1650), angle=90)
+        arrow1 = pg.ArrowItem(pos=(450, 550), angle=-90)
+        arrow2 = pg.ArrowItem(pos=(450, 1500), angle=90)
         # arrow3 = pg.ArrowItem(pos=(890, 1100), angle=0)
         self.cam_s_o.addItem(arrow1)
         self.cam_s_o.addItem(arrow2)
@@ -1244,9 +1243,8 @@ class UI_APT_A(Camera, object):
         self.tweet.setItemText(0, _translate("UI_APT_A", "No"))
         self.tweet.setItemText(1, _translate("UI_APT_A", "Yes"))
         self.counter_source.setItemText(0, _translate("UI_APT_A", "TDC"))
-        self.counter_source.setItemText(1, _translate("UI_APT_A", "TDC_Raw"))
-        self.counter_source.setItemText(2, _translate("UI_APT_A", "DRS"))
-        self.counter_source.setItemText(3, _translate("UI_APT_A", "Pulse Counter"))
+        self.counter_source.setItemText(1, _translate("UI_APT_A", "DRS"))
+        self.counter_source.setItemText(2, _translate("UI_APT_A", "Pulse Counter"))
         self.parameters_source.setItemText(0, _translate("UI_APT_A", "TextBox"))
         self.parameters_source.setItemText(1, _translate("UI_APT_A", "TextLine"))
         self.label_21.setText(_translate("UI_APT_A", "Experiment Name"))
@@ -1339,6 +1337,7 @@ class UI_APT_A(Camera, object):
         # Add Axis Labels
         styles = {"color": "#f00", "font-size": "12px"}
         self.histogram.setLabel("left", "Frequency (counts)", **styles)
+        self.histogram.setLogMode(y=True)
         if self.conf["visualization"] == "tof":
                 self.histogram.setLabel("bottom", "Time (ns)", **styles)
         elif self.conf["visualization"] == "mc":
@@ -1451,12 +1450,10 @@ class UI_APT_A(Camera, object):
                 if text_line_b[i][0] == 'counter_source':
                     if text_line_b[i][1] == 'TDC':
                         self.counter_source.setCurrentIndex(0)
-                    if text_line_b[i][1] == 'TDC_Raw':
-                        self.counter_source.setCurrentIndex(1)
                     if text_line_b[i][1] == 'Pulse Counter':
-                        self.counter_source.setCurrentIndex(2)
+                        self.counter_source.setCurrentIndex(1)
                     if text_line_b[i][1] == 'DRS':
-                        self.counter_source.setCurrentIndex(3)
+                        self.counter_source.setCurrentIndex(2)
                 if text_line_b[i][0] == 'tweet':
                     if text_line_b[i][1] == 'NO':
                         self.tweet.setCurrentIndex(0)
@@ -1523,8 +1520,6 @@ class UI_APT_A(Camera, object):
                 variables.criteria_vdc = True
             elif not self.criteria_vdc.isChecked():
                 variables.criteria_vdc = False
-            if variables.counter_source == 'TDC_Raw':
-                variables.raw_mode = True
 
             if self.tweet.currentText() == 'Yes':
                 variables.tweet = True
@@ -1779,15 +1774,10 @@ class UI_APT_A(Camera, object):
                 variables.index_plot += 1
             # Time of Flight
             if variables.counter_source == 'TDC' and variables.total_ions > 0 and variables.index_wait_on_plot_start > 16 \
-                    and variables.index_wait_on_plot_start > 16 and not variables.raw_mode:
+                    and variables.index_wait_on_plot_start > 16:
                 if variables.index_wait_on_plot_start > 16:
 
                     try:
-                        def replaceZeroes(data):
-                            min_nonzero = np.min(data[np.nonzero(data)])
-                            data[data == 0] = min_nonzero
-                            return data
-
                         if self.conf["visualization"] == "tof":
                             tof = variables.t * 27.432 / (1000 * 4)  # Time in ns
                             viz = tof[tof < 5000]
@@ -1798,16 +1788,23 @@ class UI_APT_A(Camera, object):
                                                               variables.main_v_dc_dld[
                                                               :max_lenght],
                                                               variables.x[:max_lenght],
-                                                              variables.x[:max_lenght],
+                                                              variables.y[:max_lenght],
                                                               flightPathLength=110)
                             viz = viz[viz < 400]
-
-                        self.y_tof, self.x_tof = np.histogram(viz, bins=512)
+                        # bin size of 0.1
+                        bin_size = 0.1
+                        bins = np.linspace(np.min(viz), np.max(viz), round(np.max(viz) / bin_size))
+                        y_tof_mc, x_tof_mc = np.histogram(viz, bins=bins)
+                        # put 1 instead of zero to fix problem of log(0) = -inf
+                        y_tof_mc[y_tof_mc == 0] = 1
                         self.histogram.clear()
-                        self.y_tof = replaceZeroes(self.y_tof)
-                        self.histogram.addItem(
-                            pg.BarGraphItem(x=self.x_tof[:-1], height=np.log(self.y_tof),
-                                            width=0.1, brush='black'))
+                        # self.histogram.addItem(
+                        #     pg.BarGraphItem(x=self.x_tof[:-1], height=self.y_tof,
+                        #                     width=bin_size, brush='black'))
+                        self.histogram.plot(x_tof_mc, y_tof_mc, stepMode="center", fillLevel=0,
+                                        brush='black')
+
+
 
                     except Exception as e:
                         print(

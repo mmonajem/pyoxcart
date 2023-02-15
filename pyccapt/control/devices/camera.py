@@ -66,13 +66,15 @@ class Camera:
 
             # Original size is 2048 * 2448
             # Resize the original to the required size. Utilize the openCV tool.
-            img0_orig = cv2.resize(img0, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
+            # img0_orig = cv2.resize(img0, dsize=(2048, 2448), interpolation=cv2.INTER_CUBIC).astype(np.int32)
+            img0_orig = img0
             # img0[y, x] - the first range is for y-axis and second range is for x-axis
-            img0_zoom = cv2.resize(img0[500:1700, 1900:2400], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(
+            img0_zoom = cv2.resize(img0[850:1250, 1900:2200], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(
                 np.int32)
 
-            img1_orig = cv2.resize(img1, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            img1_zoom = cv2.resize(img1[300:1500, 1700:2200], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(
+            # img1_orig = cv2.resize(img1, dsize=(2048, 2448), interpolation=cv2.INTER_CUBIC).astype(np.int32)
+            img1_orig = img1
+            img1_zoom = cv2.resize(img1[600:1200, 1800:2400], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(
                 np.int32)
 
             # Store the captured processed image at a desired location.

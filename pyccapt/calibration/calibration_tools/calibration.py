@@ -9,12 +9,14 @@ from scipy.signal import find_peaks
 from scipy.cluster.vq import vq, kmeans, whiten
 from scipy.cluster.vq import kmeans2
 from sklearn import linear_model
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
 
 # Local module and scripts
 from pyccapt.calibration.calibration_tools import variables
 
 
-def voltage_corr(x, a, b, c):
+def voltage_corr(x, a, b):
     # return np.sqrt((a + (c * x) + (b * (x**2))))
     # return 1 / (b * (x ** 2) + c * x + a)
     # return a + (b * (x ** 2)) + (c * x)
@@ -69,13 +71,15 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, maximum_location, index
             dld_t_peak_list.append(x[max_peak]/maximum_location)
 
 
-    ransac = linear_model.RANSACRegressor()
-    X = np.expand_dims(np.array(high_voltage_mean_list), axis=1)
-    y = np.expand_dims(np.array(dld_t_peak_list), axis=1)
-    ransac.fit(X, y)
-    # Predict data of estimated models
-    line_X = np.arange(X.min(), np.max(dld_highVoltage_peak))[:, np.newaxis]
-    line_y_ransac = ransac.predict(line_X)
+    model = linear_model.RANSACRegressor()
+    # # model = make_pipeline(PolynomialFeatures(1), ransac)
+    # X = np.expand_dims(np.array(high_voltage_mean_list), axis=1)
+    # y = np.expand_dims(np.array(dld_t_peak_list), axis=1)
+    # model.fit(X, y)
+    # # Predict data of estimated models
+    # line_X = np.arange(X.min(), X.max())[:, np.newaxis]
+    # line_y_ransac = model.predict(line_X)
+    # fitresult = np.array([model.estimator_.intercept_[0], model.estimator_.coef_[0]])
 
 
 
@@ -93,13 +97,6 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, maximum_location, index
             ax1.set_ylabel("mc (Da)", color="red", fontsize=10)
             lable = 'mc'
 
-        z = plt.plot(
-            line_X,
-            line_y_ransac,
-            color="black",
-            linewidth=2,
-            label="RANSAC regressor",
-        )
 
         x = plt.scatter(np.array(high_voltage_mean_list), np.array(dld_t_peak_list)*maximum_location, color="blue",
                         label=lable, alpha=0.1)
@@ -110,6 +107,7 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, maximum_location, index
         # plot high voltage curve
         ax2 = ax1.twinx()
         f_v = voltage_corr(np.array(high_voltage_mean_list), *fitresult)
+        # f_v = model.predict(np.expand_dims(np.array(high_voltage_mean_list), axis=1))
         y = ax2.plot(np.array(high_voltage_mean_list), f_v, color='r', label=r"$F_V$")
         ax2.set_ylabel(r"$F_V$", color="red", fontsize=10)
         plt.legend(handles=[x, y[0]], loc='upper right')
@@ -120,7 +118,7 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, maximum_location, index
 
         plt.show()
 
-    return fitresult
+    return fitresult, model
 
 
 def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, index_fig, plot, save):
@@ -157,22 +155,22 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, inde
     dld_highVoltage_peak_v = dld_highVoltage[mask_temporal]
     print('The number of ions are:', len(dld_highVoltage_peak_v))
     print('The number of samples are:', int(len(dld_highVoltage_peak_v) / sample_size))
-    fitresult = voltage_correction(dld_highVoltage_peak_v, dld_peak_b, maximum_location, index_fig=index_fig, figname='voltage_corr',
+    fitresult, model = voltage_correction(dld_highVoltage_peak_v, dld_peak_b, maximum_location, index_fig=index_fig, figname='voltage_corr',
                                    sample_size=sample_size, mode=mode, calibration_mode=calibration_mode,
                                    plot=plot, save=save)
 
     f_v = voltage_corr(dld_highVoltage, *fitresult)
+    # f_v = model.predict(np.expand_dims(dld_highVoltage, axis=1))
     print('The fit result are:', fitresult)
     if calibration_mode == 'tof':
-        variables.dld_t_calib = variables.dld_t_calib * (1 / f_v)
+        variables.dld_t_calib = variables.dld_t_calib / f_v
     elif calibration_mode == 'mc':
-        variables.mc_calib = variables.mc_calib * (1 / f_v)
+        variables.mc_calib = variables.mc_calib / f_v
 
     if plot:
         # plot how correction factor for selected peak
         fig1, ax1 = plt.subplots(figsize=(6, 6))
 
-        # f_v = tof_calibration.voltage_corr(dld_highVoltage_peak_v, *fitresult)
         mask = np.random.randint(0, len(dld_highVoltage_peak_v), 1000)
         x = plt.scatter(dld_highVoltage_peak_v[mask], dld_peak_b[mask], color="blue", label='t', alpha=0.1)
 
@@ -186,8 +184,10 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, inde
 
         # plot high voltage curve
         ax2 = ax1.twinx()
-        f_v = voltage_corr(dld_highVoltage_peak_v, *fitresult)
-        y = ax2.plot(dld_highVoltage_peak_v, 1 / f_v, color='r', label=r"$F_{V}^{-1}$")
+        f_v_plot = voltage_corr(dld_highVoltage_peak_v, *fitresult)
+        # f_v_plot = model.predict(np.expand_dims(dld_highVoltage_peak_v, axis=1))
+
+        y = ax2.plot(dld_highVoltage_peak_v, 1 / f_v_plot, color='r', label=r"$F_{V}^{-1}$")
         ax2.set_ylabel(r"$F_{V}^{-1}$", color="red", fontsize=10)
 
         plt.legend(handles=[x, y[0]], loc='upper right')
@@ -211,8 +211,9 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, inde
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=2)
 
         f_v_plot = voltage_corr(dld_highVoltage_peak_v[mask], *fitresult)
+        # f_v_plot = model.predict(np.expand_dims(dld_highVoltage_peak_v[mask], axis=1))
 
-        dld_t_plot = dld_peak_b[mask] * (1 / f_v_plot )
+        dld_t_plot = dld_peak_b[mask] * (1 / f_v_plot)
 
         y = plt.scatter(dld_highVoltage_peak_v[mask], dld_t_plot, color="red", label=r"$t_V$", alpha=0.1)
 

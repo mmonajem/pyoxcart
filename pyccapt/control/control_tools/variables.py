@@ -21,7 +21,6 @@ def init(conf):
     global COM_PORT_thorlab_motor
 
     # Setup parameters
-    global raw_mode
     global counter_source
     global counter
     global ex_time
@@ -162,7 +161,6 @@ def init(conf):
     COM_PORT_signal_generator = conf["COM_PORT_signal_generator"]
     COM_PORT_thorlab_motor = conf["COM_PORT_thorlab_motor"]
 
-    raw_mode = False
     counter = 0
     ex_time = 0
     max_ions = 0

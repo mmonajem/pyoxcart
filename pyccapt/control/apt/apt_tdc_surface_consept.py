@@ -300,9 +300,6 @@ class APT_ADVANCE:
 
         if variables.counter_source == 'TDC':
             variables.total_ions = len(variables.x)
-        elif variables.counter_source == 'TDC_Raw':
-            if len(variables.channel) > 0:
-                variables.total_ions = int(len(variables.channel) / 4)
         elif variables.counter_source == 'DRS':
             pass
 
@@ -494,27 +491,6 @@ def main(conf):
             queue_y = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_t = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_dld_start_counter = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            queue_channel = None
-            queue_time_data = None
-            queue_tdc_start_counter = None
-            queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
-
-            # Initialize and initiate a process(Refer to imported file 'tdc_new' for process function declaration )
-            # Module used: multiprocessing
-            tdc_process = multiprocessing.Process(target=tdc_surface_consept.experiment_measure,
-                                                  args=(variables.raw_mode, queue_x,
-                                                        queue_y, queue_t,
-                                                        queue_dld_start_counter,
-                                                        queue_channel,
-                                                        queue_time_data,
-                                                        queue_tdc_start_counter,
-                                                        queue_stop_measurement))
-
-        elif variables.counter_source == 'TDC_Raw':
-            queue_x = None
-            queue_y = None
-            queue_t = None
-            queue_dld_start_counter = None
             queue_channel = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_time_data = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_tdc_start_counter = Queue(maxsize=-1, ctx=multiprocessing.get_context())
@@ -523,13 +499,14 @@ def main(conf):
             # Initialize and initiate a process(Refer to imported file 'tdc_new' for process function declaration )
             # Module used: multiprocessing
             tdc_process = multiprocessing.Process(target=tdc_surface_consept.experiment_measure,
-                                                  args=(variables.raw_mode, queue_x,
+                                                  args=(queue_x,
                                                         queue_y, queue_t,
                                                         queue_dld_start_counter,
                                                         queue_channel,
                                                         queue_time_data,
                                                         queue_tdc_start_counter,
                                                         queue_stop_measurement))
+
         tdc_process.daemon = True
         tdc_process.start()
 
@@ -629,16 +606,15 @@ def main(conf):
     logger.info('Starting the main loop')
 
     if conf['tdc'] != "off":
-        # Initialize threads that will read from the queue for the group: dld
+        # Initialize threads that will read from the queue for the group: dld and tdc
         if variables.counter_source == 'TDC':
             read_dld_queue_thread = threading.Thread(target=experiment.reader_queue_dld)
             read_dld_queue_thread.setDaemon(True)
             read_dld_queue_thread.start()
-        # Initialize threads that will read from the queue for the group: tdc
-        elif variables.counter_source == 'TDC_Raw':
             read_tdc_queue_thread = threading.Thread(target=experiment.reader_queue_tdc)
             read_tdc_queue_thread.setDaemon(True)
             read_tdc_queue_thread.start()
+
     # Initialize threads that will read from the queue for the group: drs
     elif variables.counter_source == 'DRS':
         read_drs_queue_thread = threading.Thread(target=experiment.reader_queue_drs)
@@ -704,7 +680,7 @@ def main(conf):
         if variables.stop_flag:
             logger.info('Experiment is stopped by user')
             if conf['tdc'] != "off":
-                if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+                if variables.counter_source == 'TDC':
                     queue_stop_measurement.put(True)
             time.sleep(1)
             break
@@ -713,7 +689,7 @@ def main(conf):
             if variables.max_ions <= variables.total_ions:
                 logger.info('Total number of Ions is achieved')
                 if conf['tdc'] != "off":
-                    if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+                    if variables.counter_source == 'TDC':
                         queue_stop_measurement.put(True)
                 time.sleep(1)
                 break
@@ -722,7 +698,7 @@ def main(conf):
                 if flag_achieved_high_voltage > variables.ex_freq * 10:
                     logger.info('High Voltage Max. is achieved')
                     if conf['tdc'] != "off":
-                        if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+                        if variables.counter_source == 'TDC':
                             queue_stop_measurement.put(True)
                     time.sleep(1)
                     break
@@ -731,7 +707,7 @@ def main(conf):
             if steps + 1 == total_steps:
                 logger.info('Experiment time Max. is achieved')
                 if conf['tdc'] != "off":
-                    if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+                    if variables.counter_source == 'TDC':
                         queue_stop_measurement.put(True)
                 time.sleep(1)
                 break
@@ -746,7 +722,7 @@ def main(conf):
     if conf['tdc'] != "off":
         # Stop the TDC process
         try:
-            if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+            if variables.counter_source == 'TDC':
                 tdc_process.join(3)
                 if tdc_process.is_alive():
                     tdc_process.terminate()
@@ -770,7 +746,6 @@ def main(conf):
         # Stop the TDC and DLD thread
         if variables.counter_source == 'TDC':
             read_dld_queue_thread.join(1)
-        elif variables.counter_source == 'TDC_Raw':
             read_tdc_queue_thread.join(1)
     elif variables.counter_source == 'DRS':
         read_drs_queue_thread.join(1)
@@ -778,8 +753,6 @@ def main(conf):
     if conf['tdc'] != "off":
         if variables.counter_source == 'TDC':
             variables.total_ions = len(variables.x)
-        elif variables.counter_source == 'TDC_Raw':
-            variables.total_ions = int(len(variables.channel) / 4)
     elif variables.counter_source == 'DRS':
         pass
 
@@ -792,7 +765,7 @@ def main(conf):
                                                         variables.t, variables.dld_start_counter,
                                                         variables.main_v_dc_dld, variables.main_v_p_dld]):
             logger.warning('dld data have not same length')
-    elif variables.counter_source == 'TDC_Raw':
+
         if all(len(lst) == len(variables.channel) for lst in [variables.channel, variables.time_data,
                                                               variables.tdc_start_counter,
                                                               variables.main_v_dc_tdc, variables.main_v_p_tdc]):

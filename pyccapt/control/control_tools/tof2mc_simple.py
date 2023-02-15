@@ -54,7 +54,7 @@ def tof_bin2mc_sc(t, t0, V, xDet, yDet, flightPathLength):
     return mc
 
 
-def tof_bin2mc_ro(t, t0, V, xDet, yDet, flightPathLength):
+def tof_bin2mc_roentdec(t, t0, V, xDet, yDet, flightPathLength):
     """
     Calculate the m/c for Roentdec delay line.
     """

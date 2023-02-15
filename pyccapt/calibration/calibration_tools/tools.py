@@ -12,6 +12,8 @@ from scipy.stats import gmean
 from mpl_toolkits.mplot3d import Axes3D
 from scipy import interpolate
 from adjustText import adjust_text
+from pybaselines import Baseline
+import pybaselines
 # Local module and scripts
 from pyccapt.calibration.calibration_tools import variables, data_tools, data_loadcrop
 from pyccapt.calibration.calibration_tools import intractive_point_identification, selectors_data
@@ -20,9 +22,10 @@ from pyccapt.calibration.calibration_tools import logging_library
 from ipywidgets import fixed, interact_manual
 
 
-def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=False, ranging=False, log=True, mode='count', percent=50, peaks_find=True, peaks_find_plot=True, plot=False,
-              prominence=500, distance=None, h_line=False, selector='None', fast_hist=True, fig_name=None,
-              text_loc='right', label='mc'):
+def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=False, ranging=False, log=True,
+              mode='count', percent=50, peaks_find=True, peaks_find_plot=True, plot=False, prominence=500,
+              distance=None, h_line=False, selector='None', fast_hist=True, fig_name=None, text_loc='right', label='mc',
+              background={'calculation': False}):
     """
     massSpecPlot plots the data from pos to get a mass spectrum as a figure
 
@@ -69,33 +72,53 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
         # find peak width
         peak_widths_p = peak_widths(y, peaks, rel_height=(percent / 100), prominence_data=None)
 
+
+    # calculate the background
+    if background['calculation']:
+
+        # baseline_fitter = Baseline(x_data=bins[:-1])
+        # fit_1, params_1 = baseline_fitter.aspls(y, lam=5e10, tol=1e-1, max_iter=100)
+
+
+
+        if background['mode'] == 'fabc':
+            fit_2, params_2 = pybaselines.classification.fabc(y, lam=background['lam'], num_std=background['num_std'],
+                                                              pad_kwargs='edges')
+        if background['mode'] == 'dietrich':
+            fit_2, params_2 = pybaselines.classification.dietrich(y, num_std=background['num_std'])
+        if background['mode'] == 'cwt_br':
+            fit_2, params_2 = pybaselines.classification.cwt_br(y, poly_order=background['poly_order'],
+                                                                num_std=background['num_std'], tol=background['tol'])
+        mask_2 = params_2['mask']
+        if background['plot_no_back']:
+            mask_f = np.full((len(mc_tof)), False)
+            for i in range(len(mask_2)):
+                if mask_2[i]:
+                    step_loc = np.min(mc_tof) + bin * i
+                    mask_t = np.logical_and((mc_tof < step_loc + bin), (mc_tof > step_loc))
+                    mask_f = np.logical_or(mask_f, mask_t)
+
     if plot:
         if fast_hist:
-            steps = 'step'
+            steps = 'stepfilled'
         else:
             steps = 'bar'
-        if ranging:
-            phases = range_data['element'].tolist()
-            colors = range_data['color'].tolist()
-            mc_low = range_data['mc_low'].tolist()
-            mc_up = range_data['mc_up'].tolist()
-            charge = range_data['charge'].tolist()
-            isotope = range_data['isotope'].tolist()
-            mask_all = np.full((len(mc_tof)), False)
-            for i in range(len(phases) + 1):
-                if i < len(phases):
-                    mask = np.logical_and((mc_tof < mc_up[i]), mc_tof > mc_low[i])
-                    mask_all = np.logical_or(mask_all, mask)
-                    if phases[i] == 'unranged':
-                        name_element = 'unranged'
-                    else:
-                        name_element = r'${}^{%s}%s^{%s+}$' % (isotope[i], phases[i], charge[i])
-                    y, x, _ = plt.hist(mc_tof[mask], bins=bins, log=log, histtype=steps, color=colors[i], label=name_element)
-                elif i == len(phases):
-                    mask_all = np.logical_or(mask_all, mask)
-                    y, x, _ = plt.hist(mc_tof[~mask_all], bins=bins, log=log, histtype=steps)
-        else:
-            y, x, _ = plt.hist(mc_tof, bins=bins, log=log, histtype=steps)
+
+        y, x = plot_hist(ranging, range_data, mc_tof, bins, log, steps)
+        if background['calculation']:
+            if background['plot_no_back']:
+                fig2, ax2 = plt.subplots(figsize=(8, 4))
+                y1, x1 = plot_hist(ranging, range_data, mc_tof[~mask_f], bins, log, steps)
+                if background['plot']:
+                    ax1.plot(bins[:-1], fit_2, label='class', color='r')
+                    print('gggg', 10e6 * np.sum(fit_2) / np.sum(y))
+                    # ax3 = ax1.twiny()
+                    # ax3.axis("off")
+                    # ax3.plot(fit_1, label='aspls', color='black')
+
+                mask_2 = params_2['mask']
+                if background['patch']:
+                    ax1.plot(bins[:-1][mask_2], y[mask_2], 'o', color='orange')[0]
 
         if label == 'mc':
             plt.title("Mass Spectrum")
@@ -105,6 +128,7 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
             ax1.set_xlabel("Time of Flight [ns]", color="red", fontsize=10)
 
         ax1.set_ylabel("frequency [cts]", color="red", fontsize=10)
+
         if peaks_find:
             if label == 'mc':
                 # annotation with range stats
@@ -209,7 +233,36 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
     peak_widths_f = []
     for i in range(len(peaks)):
         peak_widths_f.append([y[int(peak_widths_p[2][i])], x[int(peak_widths_p[2][i])], x[int(peak_widths_p[3][i])]])
+
     return x[peaks], y[peaks], peak_widths_f
+
+
+def plot_hist(ranging, range_data, mc_tof, bins, log, steps):
+
+    if ranging:
+        phases = range_data['element'].tolist()
+        colors = range_data['color'].tolist()
+        mc_low = range_data['mc_low'].tolist()
+        mc_up = range_data['mc_up'].tolist()
+        charge = range_data['charge'].tolist()
+        isotope = range_data['isotope'].tolist()
+        mask_all = np.full((len(mc_tof)), False)
+        for i in range(len(phases) + 1):
+            if i < len(phases):
+                mask = np.logical_and((mc_tof < mc_up[i]), mc_tof > mc_low[i])
+                mask_all = np.logical_or(mask_all, mask)
+                if phases[i] == 'unranged':
+                    name_element = 'unranged'
+                else:
+                    name_element = r'${}^{%s}%s^{%s+}$' % (isotope[i], phases[i], charge[i])
+                y, x, _ = plt.hist(mc_tof[mask], bins=bins, log=log, histtype=steps, color=colors[i],
+                                   label=name_element)
+            elif i == len(phases):
+                mask_all = np.logical_or(mask_all, mask)
+                y, x, _ = plt.hist(mc_tof[~mask_all], bins=bins, log=log, histtype=steps)
+    else:
+        y, x, _ = plt.hist(mc_tof, bins=bins, log=log, histtype=steps)
+    return y, x
 
 
 def find_closest_element(input_value):
@@ -233,7 +286,7 @@ def find_closest_element(input_value):
     return closest_mass, closest_element
 
 
-def history_ex(mc, dld_highVoltage, mean_t=1.5, mc_max=100, plot=False, fig_name=None):
+def history_ex(mc, dld_highVoltage, label='mc', mean_t=1.5, mc_max=100, plot=False, fig_name=None):
     MAXMC = mc_max  # maximum mc that makes sense
     HISTORYPIX = 1024  # number of pixels in the hit sequence tof image
     TOFPIX = 512  # number of vertical pixels for tof image
@@ -246,40 +299,43 @@ def history_ex(mc, dld_highVoltage, mean_t=1.5, mc_max=100, plot=False, fig_name
     mcImage[mcImage == 0] = 1  # to have zero after apply log
     mcImage = np.log(mcImage)  # if weak peaks are to be imaged
 
-    #### find the peaks
-    mean = np.mean(mcImage.T, axis=1)
-    # mean_t =  np.mean(mean)
-    ##################
-
-    maximum = np.amax(mean)
-    index = np.where(mean == maximum)
-    print(index)
-    for i in range(100):
-        if mean[index[0] + i] > mean_t:
-            index_max = index[0] + i
-            continue
-        else:
-            break
-
-    for i in range(100):
-        if mean[index[0] - i] > mean_t:
-            index_min = index[0] - i
-            continue
-        else:
-            break
-
-    peak_mean = (index[0] / 512) * 100
-    peak_begin = index_min * 100 / 512
-    peak_end = index_max * 100 / 512
+    # #### find the peaks
+    # mean = np.mean(mcImage.T, axis=1)
+    # # mean_t =  np.mean(mean)
+    # ##################
+    #
+    # maximum = np.amax(mean)
+    # index = np.where(mean == maximum)
+    # print(index)
+    # for i in range(100):
+    #     if mean[index[0] + i] > mean_t:
+    #         index_max = index[0] + i
+    #         continue
+    #     else:
+    #         break
+    #
+    # for i in range(100):
+    #     if mean[index[0] - i] > mean_t:
+    #         index_min = index[0] - i
+    #         continue
+    #     else:
+    #         break
+    #
+    # peak_mean = (index[0] / 512) * 100
+    # peak_begin = index_min * 100 / 512
+    # peak_end = index_max * 100 / 512
 
     #### plotting data history
     if plot:
         fig1, ax1 = plt.subplots(figsize=(6, 3))
         extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
         # set x-axis label
-        ax1.set_xlabel("DC voltage", color="red", fontsize=20)
+        ax1.set_xlabel("dc voltage [V]", color="red", fontsize=20)
         # set y-axis label
-        ax1.set_ylabel("mass to charge [Da]", color="red", fontsize=12)
+        if label == 'mc':
+            ax1.set_ylabel("mass to charge [Da]", color="red", fontsize=12)
+        elif label == 'tof':
+            ax1.set_ylabel("time 0f flight [ns]", color="red", fontsize=12)
         ax1.tick_params(axis='both', which='major', labelsize=12)
         ax1.tick_params(axis='both', which='minor', labelsize=12)
         plt.title("Experiment history")
@@ -290,7 +346,7 @@ def history_ex(mc, dld_highVoltage, mean_t=1.5, mc_max=100, plot=False, fig_name
             plt.savefig(variables.result_path + "//ex_his_%s.png" % fig_name, format="png", dpi=600)
         plt.show()
 
-    return [peak_begin, peak_end]  # peaks as beginning/end
+    # return [peak_begin, peak_end]  # peaks as beginning/end
 
 
 def voltage_corr(highVoltage, mc, fitPeak, ionsPerFitSegment, plot=False, fig_name=None):
