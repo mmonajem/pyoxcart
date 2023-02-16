@@ -184,7 +184,7 @@ def init(conf):
     email = ''
     tweet = False
     light = False
-    alignment_window = True
+    alignment_window = False
     light_swich = False
     camera_0_ExposureTime = 2000
     camera_1_ExposureTime = 2000

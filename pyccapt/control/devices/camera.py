@@ -38,7 +38,6 @@ class Camera:
 
         self.thread_read = Thread(target=self.camera_s_d)
         self.thread_read.daemon = True
-        print('fffffffffff', variables.sample_adjust)
 
     def update_cameras(self, lock):
         """
@@ -169,40 +168,8 @@ class Camera:
         windowName = 'Sample Alignment'
 
         while True:
-            if variables.sample_adjust:
-                # Initiates a while loop which checks if the camera is grabbing the images.
-                # while self.cameras.IsGrabbing():
-                #
-                #     # If window has been closed using the X button, close program
-                #     # getWindowProperty() returns -1 as soon as the window is closed
-                #     # try:
-                #     #     if cv2.getWindowProperty(windowName, cv2.WND_PROP_VISIBLE) < 1:
-                #     #         print('hhhhhhhhhhhhhhhh')
-                #     #         variables.alignment_window = False
-                #     # except:
-                #     #     print('Switch the light off because you closed the alignment window')
-                #
-                #     if not self.cameras.IsGrabbing():
-                #         break
-                #
-                #     try:
-                #         grabResult = self.cameras.RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
-                #
-                #         # When the cameras in the array are created the camera context value
-                #         # is set to the index of the camera in the array.
-                #         # The camera context is a user settable value.
-                #         # This value is attached to each grab result and can be used
-                #         # to determine the camera that produced the grab result.
-                #         cameraContextValue = grabResult.GetCameraContext()
-                #
-                #         if grabResult.GrabSucceeded():
-                #             image = self.converter.Convert(grabResult)  # Access the openCV image data
-                #
-                #             if cameraContextValue == 0:  # If camera 0, save array into img0[]
-                #                 img0 = image.GetArray()
-                #             else:  # if camera 1, save array into img1[]
-                #                 img1 = image.GetArray()
-                #
+            if variables.sample_adjust or variables.alignment_window:
+
                 img0_zoom = cv2.resize(self.img0_orig[500:2048, 1300:2400], dsize=(2448, 1000),
                                        interpolation=cv2.INTER_CUBIC)
                 img1_zoom = cv2.resize(self.img1_orig[500:1500, 1500:2448], dsize=(2448, 1000),
@@ -225,27 +192,7 @@ class Camera:
                 k = cv2.waitKey(1)
                 if k == 27:
                     break
-                # k = cv2.waitKey(1)
-                # # Close all windows when ESC key is pressed.
-                # if k == 27:  # If press ESC key
-                #     print('ESC')
-                #     cv2.destroyAllWindows()
-                #     break
 
-                # except Exception as e:
-                #     print('Grabbing failed')
-                #     print(e)
-
-                # grabResult.Release()
-                # time.sleep(0.05)
-                #
-                # if not variables.sample_adjust:
-                #     break
-
-            # if not variables.light_swich:
-            #     grabResult.Release()
-            #     cv2.destroyAllWindows()
-            #     break
             else:
                 cv2.destroyAllWindows()
                 time.sleep(1)

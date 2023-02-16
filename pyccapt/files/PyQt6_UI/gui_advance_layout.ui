@@ -1848,7 +1848,32 @@ padding: 4 4px;
       </item>
       <item row="0" column="1" colspan="2">
        <layout class="QGridLayout" name="gridLayout_18">
-        <item row="0" column="0">
+        <item row="0" column="7">
+         <widget class="QPushButton" name="light">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QPushButton{
+background: rgb(193, 193, 193)
+}</string>
+          </property>
+          <property name="text">
+           <string>Light</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="8">
+         <widget class="QLabel" name="led_light">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" rowspan="2">
          <widget class="QTextEdit" name="textEdit">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1880,7 +1905,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="0" column="7">
+        <item row="1" column="7">
          <widget class="QPushButton" name="win_alignment">
           <property name="styleSheet">
            <string notr="true">QPushButton{
@@ -1889,24 +1914,6 @@ background: rgb(193, 193, 193)
           </property>
           <property name="text">
            <string>Alignment window</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="6">
-         <widget class="QPushButton" name="light">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QPushButton{
-background: rgb(193, 193, 193)
-}</string>
-          </property>
-          <property name="text">
-           <string>Light</string>
           </property>
          </widget>
         </item>
