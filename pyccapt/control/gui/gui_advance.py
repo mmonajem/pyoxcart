@@ -23,14 +23,13 @@ from pyccapt.control.devices.camera import Camera
 from pyccapt.control.devices import initialize_devices
 
 
-class UI_APT_A(Camera, object):
+class UI_APT_A(object):
     """
     The GUI class of advance atom probe GUI
     """
 
-    def __init__(self, devices, tlFactory, cameras, converter, lock, app, conf):
-        if conf['camera'] == "on":
-            super().__init__(devices, tlFactory, cameras, converter)  # Cameras variables and converter
+    def __init__(self, camera, lock, app, conf):
+        self.camera = camera
         self.lock = lock  # Lock for thread ...
         self.app = app
         self.conf = conf
@@ -1367,7 +1366,7 @@ class UI_APT_A(Camera, object):
 
         # timer plot, variables, and cameras
         self.timer1 = QtCore.QTimer()
-        self.timer1.setInterval(1000)
+        self.timer1.setInterval(200)
         self.timer1.timeout.connect(self.update_cameras)
         self.timer1.start()
         self.timer2 = QtCore.QTimer()
@@ -1656,14 +1655,14 @@ class UI_APT_A(Camera, object):
         """
         if not variables.light:
             self.led_light.setPixmap(self.led_green)
-            Camera.light_switch(self)
+            self.camera.light_switch()
             self.timer1.setInterval(500)
             variables.light = True
             variables.sample_adjust = True
             variables.light_swich = True
         elif variables.light:
             self.led_light.setPixmap(self.led_red)
-            Camera.light_switch(self)
+            self.camera.light_switch()
             self.timer1.setInterval(500)
             variables.light = False
             variables.sample_adjust = False

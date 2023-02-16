@@ -31,13 +31,14 @@ class Camera:
         self.converter = converter
         self.cameras[0].Open()
         self.cameras[0].ExposureAuto.SetValue('Off')
-        self.cameras[0].ExposureTime.SetValue(2000000)
+        self.cameras[0].ExposureTime.SetValue(800000)
         self.cameras[1].Open()
         self.cameras[1].ExposureAuto.SetValue('Off')
-        self.cameras[1].ExposureTime.SetValue(1000000)
+        self.cameras[1].ExposureTime.SetValue(100000)
 
         self.thread_read = Thread(target=self.camera_s_d)
         self.thread_read.daemon = True
+        print('fffffffffff', variables.sample_adjust)
 
     def update_cameras(self, lock):
         """
@@ -52,12 +53,14 @@ class Camera:
         Returns:
             Does not return anything.
         """
+        self.thread_read.start()
+
         self.cameras.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
         while self.cameras.IsGrabbing():
 
             # Fetch the raw images from camera
-            grabResult0 = self.cameras[0].RetrieveResult(3000, pylon.TimeoutHandling_ThrowException)
-            grabResult1 = self.cameras[1].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
+            grabResult0 = self.cameras[0].RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
+            grabResult1 = self.cameras[1].RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
 
             image0 = self.converter.Convert(grabResult0)
             img0 = image0.GetArray()
@@ -66,65 +69,61 @@ class Camera:
 
             # Original size is 2048 * 2448
             # Resize the original to the required size. Utilize the openCV tool.
-            # img0_orig = cv2.resize(img0, dsize=(2048, 2448), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            img0_orig = img0
+            # img0_orig = cv2.resize(img0, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
+            self.img0_orig = img0
             # img0[y, x] - the first range is for y-axis and second range is for x-axis
-            img0_zoom = cv2.resize(img0[850:1250, 1900:2200], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(
+            self.img0_zoom = cv2.resize(img0[750:1150, 1650:2250], dsize=(1200, 500),
+                                        interpolation=cv2.INTER_CUBIC).astype(
                 np.int32)
 
-            # img1_orig = cv2.resize(img1, dsize=(2048, 2448), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            img1_orig = img1
-            img1_zoom = cv2.resize(img1[600:1200, 1800:2400], dsize=(1200, 500), interpolation=cv2.INTER_CUBIC).astype(
+            # img1_orig = cv2.resize(img1, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
+            self.img1_orig = img1
+            self.img1_zoom = cv2.resize(img1[600:1000, 1600:2200], dsize=(1200, 500),
+                                        interpolation=cv2.INTER_CUBIC).astype(
                 np.int32)
 
-            # Store the captured processed image at a desired location.
-            if variables.index_save_image % 100 == 0 and variables.start_flag:
-                cv2.imwrite(variables.path + "/side_%s.png" % variables.index_save_image, img0_orig)
-                cv2.imwrite(variables.path + "/side_zoom_%s.png" % variables.index_save_image, img0_zoom)
-                cv2.imwrite(variables.path + '/bottom_%s.png' % variables.index_save_image, img1_orig)
-                cv2.imwrite(variables.path + '/bottom_zoom_%s.png' % variables.index_save_image, img1_zoom)
-
-            # The function cv::drawMarker draws a marker on a given position in the image. 
-            img0_zoom_marker = cv2.drawMarker(img0_zoom, (1050, 310), (0, 0, 255), markerType=cv2.MARKER_TRIANGLE_UP,
-                                              markerSize=40, thickness=2, line_type=cv2.LINE_AA)
-            img1_zoom_marker = cv2.drawMarker(img1_zoom, (1100, 285), (0, 0, 255), markerType=cv2.MARKER_TRIANGLE_UP,
-                                              markerSize=40, thickness=2, line_type=cv2.LINE_AA)
+            # The function cv::drawMarker draws a marker on a given position in the image.
+            self.img0_zoom_marker = cv2.drawMarker(self.img0_zoom, (1050, 310), (0, 0, 255),
+                                                   markerType=cv2.MARKER_TRIANGLE_UP,
+                                                   markerSize=40, thickness=2, line_type=cv2.LINE_AA)
+            self.img1_zoom_marker = cv2.drawMarker(self.img1_zoom, (1100, 285), (0, 0, 255),
+                                                   markerType=cv2.MARKER_TRIANGLE_UP,
+                                                   markerSize=40, thickness=2, line_type=cv2.LINE_AA)
 
             # Acquire the lock and releases after process using context manager
             # To ensure that the marked array is a C-contiguous array
             with lock:
-                variables.img0_zoom = np.require(img0_zoom_marker, np.uint8, 'C')
-                variables.img1_zoom = np.require(img1_zoom_marker, np.uint8, 'C')
+                variables.img0_zoom = np.require(self.img0_zoom_marker, np.uint8, 'C')
+                variables.img1_zoom = np.require(self.img1_zoom_marker, np.uint8, 'C')
 
                 # Interchange two axes of an array.
-                variables.img0_orig = np.swapaxes(img0_orig, 0, 1)
-                variables.img1_orig = np.swapaxes(img1_orig, 0, 1)
+                variables.img0_orig = np.swapaxes(self.img0_orig, 0, 1)
+                variables.img1_orig = np.swapaxes(self.img1_orig, 0, 1)
                 variables.index_save_image += 1
 
             # Store the captured processed image at a desired location.
             if variables.index_save_image % 100 == 0 and variables.start_flag:
-                cv2.imwrite(variables.path + "/side_%s.png" % variables.index_save_image, img0_orig)
-                cv2.imwrite(variables.path + "/side_zoom_%s.png" % variables.index_save_image, img0_zoom)
-                cv2.imwrite(variables.path + '/bottom_%s.png' % variables.index_save_image, img1_orig)
-                cv2.imwrite(variables.path + '/bottom_zoom_%s.png' % variables.index_save_image, img1_zoom)
+                cv2.imwrite(variables.path + "/side_%s.png" % variables.index_save_image, self.img0_orig)
+                cv2.imwrite(variables.path + "/side_zoom_%s.png" % variables.index_save_image, self.img0_zoom)
+                cv2.imwrite(variables.path + '/bottom_%s.png' % variables.index_save_image, self.img1_orig)
+                cv2.imwrite(variables.path + '/bottom_zoom_%s.png' % variables.index_save_image, self.img1_zoom)
 
             grabResult0.Release()
             grabResult1.Release()
 
             # if the light bottom is pressed a separate window with a new thread will be created
-            if variables.sample_adjust:
-                if not self.thread_read.is_alive():
-                    if not variables.alignment_window:
-                        self.thread_read.start()
-                    elif variables.alignment_window:
-                        self.thread_read.run()
-                # self.camera_s_d()
-                # variables.sample_adjust = False
-            elif not variables.sample_adjust:
-                if self.thread_read.is_alive():
-                    # self.thread_read.join()
-                    variables.alignment_window = True
-
+            # if variables.sample_adjust:
+            #     if not self.thread_read.is_alive():
+            #         if not variables.alignment_window:
+            #             self.thread_read.start()
+            #         elif variables.alignment_window:
+            #             self.thread_read.run()
+            #     # self.camera_s_d()
+            #     # variables.sample_adjust = False
+            # elif not variables.sample_adjust:
+            #     if self.thread_read.is_alive():
+            #         # self.thread_read.join()
+            #         variables.alignment_window = True
 
     def light_switch(self, ):
         """
@@ -145,9 +144,9 @@ class Camera:
             variables.sample_adjust = True
         elif variables.light:
             self.cameras[0].Open()
-            self.cameras[0].ExposureTime.SetValue(1000000)
+            self.cameras[0].ExposureTime.SetValue(800000)
             self.cameras[1].Open()
-            self.cameras[1].ExposureTime.SetValue(1000000)
+            self.cameras[1].ExposureTime.SetValue(100000)
             variables.light = False
             variables.sample_adjust = False
 
@@ -164,82 +163,91 @@ class Camera:
             Does not return anything.
         """
 
-        # The exit code of the sample application.
-        img0 = []
-        img1 = []
+        # # The exit code of the sample application.
+        # img0 = []
+        # img1 = []
         windowName = 'Sample Alignment'
 
-        # Initiates a while loop which checks if the camera is grabbing the images.
-        while self.cameras.IsGrabbing():
+        while True:
+            if variables.sample_adjust:
+                # Initiates a while loop which checks if the camera is grabbing the images.
+                # while self.cameras.IsGrabbing():
+                #
+                #     # If window has been closed using the X button, close program
+                #     # getWindowProperty() returns -1 as soon as the window is closed
+                #     # try:
+                #     #     if cv2.getWindowProperty(windowName, cv2.WND_PROP_VISIBLE) < 1:
+                #     #         print('hhhhhhhhhhhhhhhh')
+                #     #         variables.alignment_window = False
+                #     # except:
+                #     #     print('Switch the light off because you closed the alignment window')
+                #
+                #     if not self.cameras.IsGrabbing():
+                #         break
+                #
+                #     try:
+                #         grabResult = self.cameras.RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
+                #
+                #         # When the cameras in the array are created the camera context value
+                #         # is set to the index of the camera in the array.
+                #         # The camera context is a user settable value.
+                #         # This value is attached to each grab result and can be used
+                #         # to determine the camera that produced the grab result.
+                #         cameraContextValue = grabResult.GetCameraContext()
+                #
+                #         if grabResult.GrabSucceeded():
+                #             image = self.converter.Convert(grabResult)  # Access the openCV image data
+                #
+                #             if cameraContextValue == 0:  # If camera 0, save array into img0[]
+                #                 img0 = image.GetArray()
+                #             else:  # if camera 1, save array into img1[]
+                #                 img1 = image.GetArray()
+                #
+                img0_zoom = cv2.resize(self.img0_orig[500:2048, 1300:2400], dsize=(2448, 1000),
+                                       interpolation=cv2.INTER_CUBIC)
+                img1_zoom = cv2.resize(self.img1_orig[500:1500, 1500:2448], dsize=(2448, 1000),
+                                       interpolation=cv2.INTER_CUBIC)
+                img0_zoom = cv2.drawMarker(img0_zoom, (2150, 620), (0, 0, 255),
+                                           markerType=cv2.MARKER_TRIANGLE_UP,
+                                           markerSize=80, thickness=2, line_type=cv2.LINE_AA)
+                img1_zoom = cv2.drawMarker(img1_zoom, (2100, 530), (0, 0, 255),
+                                           markerType=cv2.MARKER_TRIANGLE_UP,
+                                           markerSize=80, thickness=2, line_type=cv2.LINE_AA)
+                img0_f = np.concatenate((self.img0_orig, img0_zoom), axis=0)
+                img1_f = np.concatenate((self.img1_orig, img1_zoom), axis=0)
+                vis = np.concatenate((img0_f, img1_f), axis=1)  # Combine 2 images horizontally
+                # Label the window
+                cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
+                # Resize the window
+                cv2.resizeWindow(windowName, 2500, 1200)
+                # displays image in specified window
+                cv2.imshow(windowName, vis)
+                k = cv2.waitKey(1)
+                if k == 27:
+                    break
+                # k = cv2.waitKey(1)
+                # # Close all windows when ESC key is pressed.
+                # if k == 27:  # If press ESC key
+                #     print('ESC')
+                #     cv2.destroyAllWindows()
+                #     break
 
-            # If window has been closed using the X button, close program
-            # getWindowProperty() returns -1 as soon as the window is closed
-            # try:
-            #     if cv2.getWindowProperty(windowName, cv2.WND_PROP_VISIBLE) < 1:
-            #         print('hhhhhhhhhhhhhhhh')
-            #         variables.alignment_window = False
-            # except:
-            #     print('Switch the light off because you closed the alignment window')
+                # except Exception as e:
+                #     print('Grabbing failed')
+                #     print(e)
 
-            if not self.cameras.IsGrabbing():
-                break
-
-            try:
-                grabResult = self.cameras.RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
-
-                # When the cameras in the array are created the camera context value
-                # is set to the index of the camera in the array.
-                # The camera context is a user settable value.
-                # This value is attached to each grab result and can be used
-                # to determine the camera that produced the grab result.
-                cameraContextValue = grabResult.GetCameraContext()
-
-                if grabResult.GrabSucceeded():
-                    image = self.converter.Convert(grabResult)  # Access the openCV image data
-
-                    if cameraContextValue == 0:  # If camera 0, save array into img0[]
-                        img0 = image.GetArray()
-                    else:  # if camera 1, save array into img1[]
-                        img1 = image.GetArray()
-
-                    img0_zoom = cv2.resize(img0[500:2048, 1300:2400], dsize=(2448, 1000),
-                                           interpolation=cv2.INTER_CUBIC)
-                    img1_zoom = cv2.resize(img1[500:1500, 1500:2448], dsize=(2448, 1000),
-                                           interpolation=cv2.INTER_CUBIC)
-                    img0_zoom = cv2.drawMarker(img0_zoom, (2150, 620), (0, 0, 255),
-                                               markerType=cv2.MARKER_TRIANGLE_UP,
-                                               markerSize=80, thickness=2, line_type=cv2.LINE_AA)
-                    img1_zoom = cv2.drawMarker(img1_zoom, (2100, 530), (0, 0, 255),
-                                               markerType=cv2.MARKER_TRIANGLE_UP,
-                                               markerSize=80, thickness=2, line_type=cv2.LINE_AA)
-                    img0_f = np.concatenate((img0, img0_zoom), axis=0)
-                    img1_f = np.concatenate((img1, img1_zoom), axis=0)
-                    vis = np.concatenate((img0_f, img1_f), axis=1)  # Combine 2 images horizontally
-                    # Label the window
-                    cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
-                    # Resize the window
-                    cv2.resizeWindow(windowName, 2500, 1200)
-                    # displays image in specified window
-                    cv2.imshow(windowName, vis)
-                    k = cv2.waitKey(1)
-                    # Close all windows when ESC key is pressed.
-                    if k == 27:  # If press ESC key
-                        print('ESC')
-                        cv2.destroyAllWindows()
-                        break
-
-            except Exception as e:
-                print('Grabbing failed')
-                print(e)
-
-            grabResult.Release()
-            time.sleep(0.05)
-
-            if not variables.sample_adjust:
-                break
+                # grabResult.Release()
+                # time.sleep(0.05)
+                #
+                # if not variables.sample_adjust:
+                #     break
 
             # if not variables.light_swich:
             #     grabResult.Release()
             #     cv2.destroyAllWindows()
             #     break
+            else:
+                cv2.destroyAllWindows()
+                time.sleep(1)
+                pass
 

@@ -338,11 +338,11 @@ class APT_ADVANCE:
             self.log_apt_tdc_surface_consept.info("Function - main_ex_loop | counts_error | value - {}| type - {}".format(counts_error,type(counts_error)))
 
         # simple proportional control with averaging
-        rate = ((variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000))
-        if rate < 0.01 and variables.specimen_voltage < 5000:
-            ramp_speed_factor = 2.5
-        else:
-            ramp_speed_factor = 1
+        # rate = ((variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000))
+        # if rate < 0.01 and variables.specimen_voltage < 5000:
+        #     ramp_speed_factor = 2.5
+        # else:
+        ramp_speed_factor = 1
         if counts_error > 0:
             voltage_step = counts_error * variables.vdc_step_up * ramp_speed_factor
         elif counts_error <= 0:
