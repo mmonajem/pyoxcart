@@ -44,13 +44,7 @@ The images below are an overview of the two version of user interface:
 
 3- Install the package:
 
-    pip install pyccapt
-
----------------------
-
-# Local installation of PyCCAPT
-
-Clone/download this repository and unzip it. In the project directory enter the following command
+Clone/download this repository and unzip it. In the project directory enter the following command:
 
 
     pip install -e .

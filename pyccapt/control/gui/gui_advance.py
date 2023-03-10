@@ -1059,8 +1059,11 @@ class UI_APT_A(object):
 "}")
         self.vdc_time.setObjectName("vdc_time")
         self.horizontalLayout.addWidget(self.vdc_time)
+        ####
         # self.detection_rate_viz = QtWidgets.QWidget(self.centralwidget)
         self.detection_rate_viz = pg.PlotWidget(self.centralwidget)
+        self.detection_rate_viz.setBackground('w')
+        ####
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -1096,7 +1099,7 @@ class UI_APT_A(object):
         # self.visualization = QtWidgets.QWidget(self.centralwidget)
         self.visualization = pg.PlotWidget(self.centralwidget)
         self.visualization.setObjectName("visualization")
-        self.detector_circle = pg.QtGui.QGraphicsEllipseItem(0, 0, 2400, 2400)  # x, y, width, height
+        self.detector_circle = QtWidgets.QGraphicsEllipseItem(0, 0, 2400, 2400)  # x, y, width, height
         self.detector_circle.setPen(pg.mkPen(color=(255, 0, 0), width=2))
         self.visualization.addItem(self.detector_circle)
         self.visualization.setBackground('w')
@@ -1294,7 +1297,7 @@ class UI_APT_A(object):
         self.tweet.setItemText(0, _translate("UI_APT_A", "No"))
         self.tweet.setItemText(1, _translate("UI_APT_A", "Yes"))
         self.label_6.setText(_translate("UI_APT_A", "K_p Upwards"))
-        self.vol_fix.setText(_translate("UI_APT_A", "Fix"))
+        self.vol_fix.setText(_translate("UI_APT_A", "Hold"))
         self.label_18.setText(_translate("UI_APT_A", "Diagram"))
         self.label_34.setText(_translate("UI_APT_A", "Camera Side"))
         self.label_30.setText(_translate("UI_APT_A", "Overview"))
@@ -1325,6 +1328,7 @@ class UI_APT_A(object):
         self.cryo_switch.clicked.connect(lambda: self.gates(3))
         self.light.clicked.connect(lambda: self.light_switch())
         self.win_alignment.clicked.connect(lambda: self.win_alignment_switch())
+        self.vol_fix.clicked.connect(lambda: self.vol_fix_switch())
         self.pump_load_lock_switch.clicked.connect(lambda: self.pump_switch())
 
         # High Voltage visualization ################
@@ -1693,21 +1697,38 @@ class UI_APT_A(object):
             self.camera.light_switch()
             self.timer1.setInterval(200)
             variables.light = True
-            variables.sample_adjust = True
+
             variables.light_swich = True
         elif variables.light:
             self.led_light.setPixmap(self.led_red)
             self.camera.light_switch()
             self.timer1.setInterval(200)
             variables.light = False
-            variables.sample_adjust = False
             variables.light_swich = False
 
     def win_alignment_switch(self):
         if not variables.alignment_window:
             variables.alignment_window = True
+            self.win_alignment.setStyleSheet("QPushButton{\n"
+                                             "background: rgb(0, 255, 26)\n"
+                                             "}")
         elif variables.alignment_window:
             variables.alignment_window = False
+            self.win_alignment.setStyleSheet("QPushButton{\n"
+                                             "background: rgb(193, 193, 193)\n"
+                                             "}")
+
+    def vol_fix_switch(self):
+        if not variables.vol_fix:
+            variables.vol_fix = True
+            self.vol_fix.setStyleSheet("QPushButton{\n"
+                                             "background: rgb(0, 255, 26)\n"
+                                             "}")
+        elif variables.vol_fix:
+            variables.vol_fix = False
+            self.vol_fix.setStyleSheet("QPushButton{\n"
+                                             "background: rgb(193, 193, 193)\n"
+                                             "}")
 
     def thread_worker(self, target):
         """
@@ -1870,7 +1891,7 @@ class UI_APT_A(object):
                             f"{initialize_devices.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
                         print(e)
             # save plots to the file
-            if variables.index_plot_save % 100 == 0:
+            if variables.index_plot_save % 100 == 0 and variables.index_plot_save != 0:
                 exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
                 exporter.export(variables.path + '/v_dc_p_%s.png' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)

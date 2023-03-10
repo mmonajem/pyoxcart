@@ -92,6 +92,7 @@ def init(conf):
     global light
     global light_swich
     global alignment_window
+    global vol_fix
     global img0_orig
     global img0_zoom
     global img1_orig
@@ -186,6 +187,7 @@ def init(conf):
     light = False
     alignment_window = False
     light_swich = False
+    vol_fix = False
     camera_0_ExposureTime = 2000
     camera_1_ExposureTime = 2000
     img0_orig = np.ones((500, 500, 3), dtype=np.uint8)

@@ -7,6 +7,12 @@ import cv2
 import numpy as np
 from pypylon import pylon
 from threading import Thread
+import pyqtgraph as pg
+from pyqtgraph.Qt import QtGui
+from PyQt6 import QtWidgets
+from pyqtgraph import PlotWidget, plot
+import pyqtgraph as pg
+import sys
 
 # Local module and scripts
 from pyccapt.control.control_tools import variables
@@ -58,8 +64,8 @@ class Camera:
         while self.cameras.IsGrabbing():
 
             # Fetch the raw images from camera
-            grabResult0 = self.cameras[0].RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
-            grabResult1 = self.cameras[1].RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
+            grabResult0 = self.cameras[0].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
+            grabResult1 = self.cameras[1].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
 
             image0 = self.converter.Convert(grabResult0)
             img0 = image0.GetArray()
@@ -110,20 +116,6 @@ class Camera:
             grabResult0.Release()
             grabResult1.Release()
 
-            # if the light bottom is pressed a separate window with a new thread will be created
-            # if variables.sample_adjust:
-            #     if not self.thread_read.is_alive():
-            #         if not variables.alignment_window:
-            #             self.thread_read.start()
-            #         elif variables.alignment_window:
-            #             self.thread_read.run()
-            #     # self.camera_s_d()
-            #     # variables.sample_adjust = False
-            # elif not variables.sample_adjust:
-            #     if self.thread_read.is_alive():
-            #         # self.thread_read.join()
-            #         variables.alignment_window = True
-
     def light_switch(self, ):
         """
             This class method sets the Exposure time based on a flag.
@@ -136,18 +128,16 @@ class Camera:
         """
         if not variables.light:
             self.cameras[0].Open()
-            self.cameras[0].ExposureTime.SetValue(200)
+            self.cameras[0].ExposureTime.SetValue(400)
             self.cameras[1].Open()
-            self.cameras[1].ExposureTime.SetValue(1203)
+            self.cameras[1].ExposureTime.SetValue(2000)
             variables.light = True
-            variables.sample_adjust = True
         elif variables.light:
             self.cameras[0].Open()
             self.cameras[0].ExposureTime.SetValue(800000)
             self.cameras[1].Open()
             self.cameras[1].ExposureTime.SetValue(100000)
             variables.light = False
-            variables.sample_adjust = False
 
     def camera_s_d(self, ):
         """
@@ -163,16 +153,14 @@ class Camera:
         """
 
         # # The exit code of the sample application.
-        # img0 = []
-        # img1 = []
         windowName = 'Sample Alignment'
 
         while True:
-            if variables.sample_adjust or variables.alignment_window:
+            if variables.alignment_window:
 
-                img0_zoom = cv2.resize(self.img0_orig[500:2048, 1300:2400], dsize=(2448, 1000),
+                img0_zoom = cv2.resize(self.img0_orig[750:1150, 1650:2250], dsize=(2448, 1000),
                                        interpolation=cv2.INTER_CUBIC)
-                img1_zoom = cv2.resize(self.img1_orig[500:1500, 1500:2448], dsize=(2448, 1000),
+                img1_zoom = cv2.resize(self.img1_orig[600:1000, 1600:2200], dsize=(2448, 1000),
                                        interpolation=cv2.INTER_CUBIC)
                 img0_zoom = cv2.drawMarker(img0_zoom, (2150, 620), (0, 0, 255),
                                            markerType=cv2.MARKER_TRIANGLE_UP,
@@ -183,7 +171,7 @@ class Camera:
                 img0_f = np.concatenate((self.img0_orig, img0_zoom), axis=0)
                 img1_f = np.concatenate((self.img1_orig, img1_zoom), axis=0)
                 vis = np.concatenate((img0_f, img1_f), axis=1)  # Combine 2 images horizontally
-                # Label the window
+                # # Label the window
                 cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
                 # Resize the window
                 cv2.resizeWindow(windowName, 2500, 1200)
@@ -197,4 +185,5 @@ class Camera:
                 cv2.destroyAllWindows()
                 time.sleep(1)
                 pass
+
 

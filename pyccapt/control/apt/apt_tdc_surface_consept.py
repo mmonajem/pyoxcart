@@ -349,23 +349,24 @@ class APT_ADVANCE:
             voltage_step = counts_error * variables.vdc_step_down * ramp_speed_factor
 
         # update v_dc
-        if variables.specimen_voltage < variables.vdc_max:
-            if variables.specimen_voltage >= variables.vdc_min - 50:
-                specimen_voltage_temp = variables.specimen_voltage + voltage_step
-                if specimen_voltage_temp != variables.specimen_voltage:
-                    # sending VDC via serial
-                    if self.conf['v_dc'] != "off":
-                        self.command_v_dc(">S0 %s" % specimen_voltage_temp)
+        if not variables.vol_fix:
+            if variables.specimen_voltage < variables.vdc_max:
+                if variables.specimen_voltage >= variables.vdc_min - 50:
+                    specimen_voltage_temp = variables.specimen_voltage + voltage_step
+                    if specimen_voltage_temp != variables.specimen_voltage:
+                        # sending VDC via serial
+                        if self.conf['v_dc'] != "off":
+                            self.command_v_dc(">S0 %s" % specimen_voltage_temp)
 
-                    # update pulse voltage v_p
-                    new_vp = variables.specimen_voltage * variables.pulse_fraction * \
-                             (1 / variables.pulse_amp_per_supply_voltage)
-                    if variables.pulse_voltage_max > new_vp > variables.pulse_voltage_min:
-                        if self.conf['v_p'] != "off":
-                            self.com_port_v_p.write('VOLT %s' % new_vp)
-                        variables.pulse_voltage = new_vp * variables.pulse_amp_per_supply_voltage
+                        # update pulse voltage v_p
+                        new_vp = variables.specimen_voltage * variables.pulse_fraction * \
+                                 (1 / variables.pulse_amp_per_supply_voltage)
+                        if variables.pulse_voltage_max > new_vp > variables.pulse_voltage_min:
+                            if self.conf['v_p'] != "off":
+                                self.com_port_v_p.write('VOLT %s' % new_vp)
+                            variables.pulse_voltage = new_vp * variables.pulse_amp_per_supply_voltage
 
-                variables.specimen_voltage = specimen_voltage_temp
+                    variables.specimen_voltage = specimen_voltage_temp
 
         variables.main_temperature = np.append(variables.main_temperature, variables.temperature)
         variables.main_chamber_vacuum = np.append(variables.main_chamber_vacuum,

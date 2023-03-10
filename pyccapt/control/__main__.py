@@ -151,9 +151,9 @@ def main():
                 print('Can not initialize the cameras')
                 print(e)
                 conf['camera'] = "off"
-                ui = gui_advance.UI_APT_A(None, None, None, None, lock, app, conf)
+                ui = gui_advance.UI_APT_A(None, lock, app, conf)
         else:
-            ui = gui_advance.UI_APT_A(None, None, None, None, lock, app, conf)
+            ui = gui_advance.UI_APT_A(None, lock, app, conf)
 
     elif conf['mode'] == 'simple':
         # Initialize global experiment variables

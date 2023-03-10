@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import RectangleSelector, EllipseSelector
 from matplotlib.patches import Circle, Rectangle
 import pandas as pd
+from matplotlib import colors
+from copy import copy
 
 # Local module and scripts
 from pyccapt.calibration.calibration_tools import selectors_data
@@ -15,9 +17,7 @@ from pyccapt.calibration.calibration_tools import logging_library
 
 
 def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc",
-                               pulse_mode: "type: string - mode of pulse",
-                               max_tof: "type: float - maximum possible tof",
-                               det_diam: "type: float - detector diameter") -> "type: dataframes":
+                               pulse_mode: "type: string - mode of pulse") -> "type: dataframes":
     logger = logging_library.logger_creator('data_loadcrop')
     try:
         print("Filename>>", filename)
@@ -47,22 +47,27 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
             # dld_startCounter = dld_startCounter[:mini]
 
             # remove data that is location are out of the detector
-            mask_local = np.logical_and((np.abs(dld_x) <= det_diam/2), (np.abs(dld_y) <= det_diam/2))
-            mask_temporal = np.logical_and((dld_t > 0), (dld_t < max_tof))
-            mask = np.logical_and(mask_temporal, mask_local)
-            dld_highVoltage = dld_highVoltage[mask]
-            dld_pulse = dld_pulse[mask]
-            dld_startCounter = dld_startCounter[mask]
-            dld_t = dld_t[mask]
-            dld_x = dld_x[mask] * 0.1 # to convert them from mm to cm
-            dld_y = dld_y[mask] * 0.1 # to convert them from mm to cm
+            # mask_local = np.logical_and((np.abs(dld_x) <= det_diam/2), (np.abs(dld_y) <= det_diam/2))
+            # mask_temporal = np.logical_and((dld_t > 0), (dld_t < max_tof))
+            # mask = np.logical_and(mask_temporal, mask_local)
+            # dld_highVoltage = dld_highVoltage[mask]
+            # dld_pulse = dld_pulse[mask]
+            # dld_startCounter = dld_startCounter[mask]
+            # dld_t = dld_t[mask]
+            # dld_x = dld_x[mask]
+            # dld_y = dld_y[mask]
 
-            dld_highVoltage = np.expand_dims(dld_highVoltage, axis=1)
-            dld_pulse = np.expand_dims(dld_pulse, axis=1)
-            dld_startCounter = np.expand_dims(dld_startCounter, axis=1)
-            dld_t = np.expand_dims(dld_t, axis=1)
-            dld_x = np.expand_dims(dld_x, axis=1)
-            dld_y = np.expand_dims(dld_y, axis=1)
+            # dld_highVoltage = np.expand_dims(dld_highVoltage, axis=1)
+            # dld_pulse = np.expand_dims(dld_pulse, axis=1)
+            # dld_startCounter = np.expand_dims(dld_startCounter, axis=1)
+            # dld_t = np.expand_dims(dld_t, axis=1)
+            # dld_x = np.expand_dims(dld_x, axis=1)
+            # dld_y = np.expand_dims(dld_y, axis=1)
+
+            dld_x = dld_x * 0.1 # to convert them from mm to cm
+            dld_y = dld_y * 0.1 # to convert them from mm to cm
+
+
 
             dldGroupStorage = np.concatenate((dld_highVoltage, dld_pulse, dld_startCounter, dld_t, dld_x, dld_y),
                                              axis=1)
@@ -78,25 +83,27 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
             dld_x = hdf5Data['dld/x'].to_numpy()
             dld_y = hdf5Data['dld/y'].to_numpy()
             # remove data that is location are out of the detector
-
-            mask_local = np.logical_and((np.abs(dld_x) <= det_diam/2), (np.abs(dld_y) <= det_diam/2))
-            mask_temporal = np.logical_and((dld_t > 0), (dld_t < max_tof))
-            mask = np.logical_and(mask_temporal, mask_local)
-            dld_highVoltage = dld_highVoltage[mask]
-            dld_pulse = dld_pulse[mask]
             # TODO
-            # dld_AbsoluteTimeStamp = dld_AbsoluteTimeStamp[mask]
-            dld_AbsoluteTimeStamp = dld_t[mask]
-            dld_t = dld_t[mask]
-            dld_x = dld_x[mask]
-            dld_y = dld_y[mask]
+            dld_AbsoluteTimeStamp = np.copy(dld_t)
 
-            dld_highVoltage = np.expand_dims(dld_highVoltage, axis=1)
-            dld_pulse = np.expand_dims(dld_pulse, axis=1)
-            dld_AbsoluteTimeStamp = np.expand_dims(dld_AbsoluteTimeStamp, axis=1)
-            dld_t = np.expand_dims(dld_t, axis=1)
-            dld_x = np.expand_dims(dld_x, axis=1)
-            dld_y = np.expand_dims(dld_y, axis=1)
+            # mask_local = np.logical_and((np.abs(dld_x) <= det_diam/2), (np.abs(dld_y) <= det_diam/2))
+            # mask_temporal = np.logical_and((dld_t > 0), (dld_t < max_tof))
+            # mask = np.logical_and(mask_temporal, mask_local)
+            # dld_highVoltage = dld_highVoltage[mask]
+            # dld_pulse = dld_pulse[mask]
+            # # TODO
+            # # dld_AbsoluteTimeStamp = dld_AbsoluteTimeStamp[mask]
+            # dld_AbsoluteTimeStamp = dld_t[mask]
+            # dld_t = dld_t[mask]
+            # dld_x = dld_x[mask]
+            # dld_y = dld_y[mask]
+
+            # dld_highVoltage = np.expand_dims(dld_highVoltage, axis=1)
+            # dld_pulse = np.expand_dims(dld_pulse, axis=1)
+            # dld_AbsoluteTimeStamp = np.expand_dims(dld_AbsoluteTimeStamp, axis=1)
+            # dld_t = np.expand_dims(dld_t, axis=1)
+            # dld_x = np.expand_dims(dld_x, axis=1)
+            # dld_y = np.expand_dims(dld_y, axis=1)
 
             dldGroupStorage = np.concatenate((dld_highVoltage, dld_pulse, dld_AbsoluteTimeStamp, dld_t, dld_x, dld_y),
                                              axis=1)
@@ -118,35 +125,34 @@ def concatenate_dataframes_of_dld_grp(
 
 def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes",
                                  rect=False, only_plot=False, save_name=False):
-    fig1, ax1 = plt.subplots(figsize=(8, 4), constrained_layout=True)
-
+    fig1, ax1 = plt.subplots(figsize=(11/2.54, 4.5/2.54), constrained_layout=True)
     # Plot tof and high voltage
     yaxis = dldGroupStorage['t (ns)'].to_numpy()
-
     xaxis = np.arange(len(yaxis))
 
     high_voltage = dldGroupStorage['high_voltage (V)'].to_numpy()
 
     heatmap, xedges, yedges = np.histogram2d(xaxis, yaxis, bins=(1200, 800))
-    heatmap[heatmap == 0] = 1  # to have zero after apply log
-    heatmap = np.log(heatmap)
+    # heatmap[heatmap == 0] = 1  # to have zero after apply log
+    # heatmap = np.log(heatmap)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     # set x-axis label
-    ax1.set_xlabel("hit sequence number", color="red", fontsize=10)
+    ax1.set_xlabel("Hit Sequence Number", fontsize=8)
     # set y-axis label
-    ax1.set_ylabel("time of flight [ns]", color="red", fontsize=10)
-    plt.title("Experiment history")
+    ax1.set_ylabel("Time of Flight [ns]", fontsize=8)
     img = plt.imshow(heatmap.T, extent=extent, origin='lower', aspect="auto")
+    cmap = copy(plt.cm.plasma)
+    cmap.set_bad(cmap(0))
+    pcm = ax1.pcolormesh(xedges, yedges, heatmap.T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
+    fig1.colorbar(pcm, ax=ax1, pad=0)
 
-    cax = ax1.inset_axes([1.14, 0.0, 0.05, 1])
-    fig1.colorbar(img, ax=ax1, cax=cax)
 
     # plot high voltage curve
     ax2 = ax1.twinx()
 
     xaxis2 = np.arange(len(high_voltage))
     ax2.plot(xaxis2, high_voltage, color='b', linewidth=2)
-    ax2.set_ylabel("DC voltage [V]", color="blue", fontsize=10)
+    ax2.set_ylabel("DC voltage [V]", color="blue", fontsize=8)
     if not only_plot:
         if not rect:
             rectangle_box_selector(ax2)
@@ -158,32 +164,34 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes",
             ax1.add_patch(rect)
 
     if save_name:
-        plt.savefig("%s.png" % save_name, format="png", dpi=600)
-        plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
-
-    plt.show(block=True)
+        plt.savefig("%s.png" % save_name, format="png", dpi=300)
+        plt.savefig("%s.eps" % save_name, format="eps", dpi=300)
+    # cax = ax1.inset_axes([1.14, 0.0, 0.05, 1])
+    # plt.colorbar(img, ax=ax1, cax=cax)
+    plt.show()
 
 
 def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256), circle=False,
-                  save_name=False, only_plot=False):
-    fig1, ax1 = plt.subplots(figsize=(6, 5), constrained_layout=True)
+                  save_name=False, mask=True, only_plot=False):
+    fig1, ax1 = plt.subplots(figsize=(5.5/2.54, 4.5/2.54), constrained_layout=True)
     logger = logging_library.logger_creator('data_loadcrop')
     # Plot and crop FDM
     x = data_crop['x_det (cm)'].to_numpy()
     y = data_crop['y_det (cm)'].to_numpy()
+
     FDM, xedges, yedges = np.histogram2d(x, y, bins=bins)
 
-    FDM[FDM == 0] = 1  # to have zero after apply log
-    FDM = np.log(FDM)
 
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     # set x-axis label
-    ax1.set_xlabel("x_det [cm]", color="red", fontsize=10)
+    ax1.set_xlabel(r"$X_{det} (cm)$", fontsize=8)
     # set y-axis label
-    ax1.set_ylabel("y_det [cm]", color="red", fontsize=10)
-    plt.title("FDM")
-    img = plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
-    fig1.colorbar(img)
+    ax1.set_ylabel(r"$Y_{det} (cm)$", fontsize=8)
+
+    cmap = copy(plt.cm.plasma)
+    cmap.set_bad(cmap(0))
+    pcm = ax1.pcolormesh(xedges, yedges, FDM.T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
+    fig1.colorbar(pcm, ax=ax1, pad=0)
 
     if not only_plot:
         if not circle:
@@ -191,13 +199,13 @@ def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256
         else:
             print('x:', variables.selected_x_fdm, 'y:', variables.selected_y_fdm, 'roi:', variables.roi_fdm)
             circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
-                          alpha=0.2, color='r', linewidth=1)
+                          alpha=0.3, color='green', linewidth=1)
             ax1.add_patch(circ)
     if save_name:
         logger.info("Plot saved by the name {}".format(save_name))
-        plt.savefig("%s.png" % save_name, format="png", dpi=600)
-        plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
-    plt.show(block=True)
+        plt.savefig("%s.png" % save_name, format="png", dpi=300)
+        plt.savefig("%s.eps" % save_name, format="eps", dpi=300)
+    plt.show()
 
 
 def rectangle_box_selector(axisObject: "type:object"):
