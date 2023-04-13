@@ -5,6 +5,16 @@ import numpy as np
 import pandas as pd
 
 def ato_to_hdf(file, mode):
+    """
+    This function reads from .ato file and converts the content into pandas
+    dataframe and eventually stores it into a hdf file.
+
+    Attributes:
+        file: path to .ato file (type: string)
+    Returns:
+        mode: type of mode (oxcart/ato)
+        
+    """
     with open(file, 'rb') as f:
         data = f.read()
         # The first thing in the file is a 0

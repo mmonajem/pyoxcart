@@ -24,6 +24,25 @@ def voltage_corr(x, a, b, c):
 
 def voltage_correction(dld_highVoltage_peak, dld_t_peak, maximum_location, index_fig, figname, sample_size, mode,
                        calibration_mode, peak_mode, plot=True, save=False):
+    
+    """
+    This function is responsible for voltage correction and plot the graph based on
+    passed argument. 
+
+    Attributes:
+        dld_highVoltage_peak: peak of the high voltage (type: float)
+        dld_t_peak: peak of t (type: float)
+        maximum_location: 
+        index_fig : index of the saved plot (type: string)
+        figname: name of the saved plot image (type: string)
+        sample_size: sample size (type: string)
+        calibration_mode:  type of calibration mode (tof/mc)
+        peak_mode: type of peak mode (mean/mode/peak)
+    
+    Returns:
+        fitresult: corrected volatage array (type: array)
+
+    """
 
     high_voltage_mean_list = []
     dld_t_peak_list = []

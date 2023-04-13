@@ -10,10 +10,21 @@ from pyccapt.calibration.calibration_tools import logging_library
 
 
 def tof2mcSimple(t:"Unit: ns", t0:"Unit:ns", V:"Unit:volts", xDet:"Unit:mm", yDet:"Unit:mm", flightPathLength:"Unit:mm")->"Unit: Dalton":
-    # calculates m/c based on idealized geometry / electrostatics
-    # m/c = 2 e V (t/L)^2
+    """
+        This function calculates m/c based on idealized geometry/ electrostatics.
+        m/c = 2 e V (t/L)^2
+
+        Attributes:
+            t: time (type: int)
+            t0: initial time (type: int)
+            V: voltage (type: int/float)
+            xDet: Distance along x axis  (type: int)
+            yDet: Distance along y axis  (type: int)
+            flightPathLength: length of flight path  (type: int)
+        Returns:
+            mc: (type: float)
+    """
     logger = logging_library.logger_creator('data_loadcrop')
-    # t0 is in ns
     try:
         t = t - t0  # t0 correction
 
@@ -39,8 +50,22 @@ def tof2mc(t:"Unit:ns", t0:"Unit:ns", V:"Unit:volts",
            V_pulse:"Unit:volts", xDet:"Unit:mm", yDet:"Unit:mm",
            flightPathLength:"Unit:mm", mode='voltage')->"Unit:Dalton":
     logger = logging_library.logger_creator('data_loadcrop')
-    # calculates m/c based on idealized geometry / electrostatics
-    # m/c = 2 e alpha (V + beta V_p) (t/L)^2
+    """
+        This function calculates m/c based on idealized geometry/ electrostatics.
+        m/c = 2 e alpha (V + beta V_p) (t/L)^2
+
+        Attributes:
+            t: time (type: int)
+            t0: initial time (type: int)
+            V: voltage (type: int/float)
+            xDet: Distance along x axis  (type: int)
+            yDet: Distance along y axis  (type: int)
+            flightPathLength: length of flight path  (type: int)
+            mode: type of mode (voltage/laser)
+        Returns:
+            mc: (type: float)
+    """
+    # 
     try:
         alpha = 1.015
         beta = 0.7
