@@ -1776,14 +1776,17 @@ class UI_APT_A(object):
             self.y_vps = np.zeros(1000)  # 1000 data points
             self.y_vps[:] = np.nan
 
-            self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
-            self.data_line_vps.setData(self.x_vdc, self.y_vps)
+            pen_vdc = pg.mkPen(color=(255, 0, 0), width=6)
+            pen_vps = pg.mkPen(color=(0, 0, 255), width=3)
+            self.data_line_vdc = self.vdc_time.plot(self.x_vdc, self.y_vdc, pen=pen_vdc)
+            self.data_line_vps = self.vdc_time.plot(self.x_vdc, self.y_vps, pen=pen_vps)
 
             self.x_dtec = np.arange(1000)
             self.y_dtec = np.zeros(1000)
             self.y_dtec[:] = np.nan
 
-            self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+            pen_dtec = pg.mkPen(color=(255, 0, 0), width=6)
+            self.data_line_dtec = self.detection_rate_viz.plot(self.x_dtec, self.y_dtec, pen=pen_dtec)
 
             self.histogram.clear()
 
@@ -1862,8 +1865,8 @@ class UI_APT_A(object):
                         # self.histogram.addItem(
                         #     pg.BarGraphItem(x=self.x_tof[:-1], height=self.y_tof,
                         #                     width=bin_size, brush='black'))
-                        self.histogram.plot(x_tof_mc, y_tof_mc, stepMode="center", fillLevel=0,
-                                        brush='black')
+                        self.histogram.plot(x_tof_mc, y_tof_mc, stepMode="center", fillLevel=0, fillOutline=True,
+                                            brush='black')
 
                     except Exception as e:
                         print(
