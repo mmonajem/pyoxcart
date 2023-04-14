@@ -59,6 +59,11 @@ def read_hdf5_through_pandas(filename: "type:string - Path to hdf5(.h5) file") -
     """
     This function is different from read_hdf5 function. As it assumes, the content 
     of the HDF5 file passed as argument was created using the Pandas library.
+
+        Attributes:
+            filename: Path to the hdf5 file. (type: string)
+        Return:
+            hdf5_file_response:  content of hdf5 file (type: dataframe)       
     """
     try:
         hdf5_file_response = pd.read_hdf(filename, mode='r')
@@ -69,6 +74,13 @@ def read_hdf5_through_pandas(filename: "type:string - Path to hdf5(.h5) file") -
 
 
 def read_mat_files(filename: "type:string - Path to .mat file") -> " type: dict - Returns the content .mat file":
+    """
+        This function read data from .mat files.
+        Attributes:
+            filename: Path to the .mat file. (type: string)
+        Return:
+            hdf5_file_response:  content of hdf5 file (type: dict)  
+    """
     try:
         hdf5_file_response = scipy.io.loadmat(filename)
         return hdf5_file_response
@@ -78,6 +90,14 @@ def read_mat_files(filename: "type:string - Path to .mat file") -> " type: dict 
 
 
 def convert_mat_to_df(hdf5_file_response: "type: dict - content of .mat file"):
+    """
+        This function converts converts contents read from the .mat file
+        to pandas dataframe.
+        Attributes:
+            hdf5_file_response: contents of .mat file (type: dict)
+        Returns:
+            pd_dataframe: converted dataframes (type: pandas dataframe)
+    """
     pd_dataframe = pd.DataFrame(hdf5_file_response['None'])
     key = 'dataframe/isotope'
     filename = 'isotopeTable.h5'
@@ -88,8 +108,28 @@ def convert_mat_to_df(hdf5_file_response: "type: dict - content of .mat file"):
 def store_df_to_hdf(filename: "type: string - name of hdf5 file",
                     dataframe: "dataframe which is to be stored in h5 file",
                     key: "DirectoryStructure/columnName of content"):
+    """
+        This function stores dataframe to hdf5 file.
+
+        Atrributes:
+            filename: filename of hdf5 where dataframes needs to stored
+            dataframe: dataframe that needs to be stored.
+            key: Key that defines hierarchy of the hdf5
+        Returns:
+            Does not return anything
+    """
     dataframe.to_hdf(filename, key, mode='w')
 
 
 def store_df_to_csv(data, path):
+    """
+        This function stores dataframe to csv file.
+
+        Atrributes:
+            path: filename of hdf5 where dataframes needs to stored
+            data: data that needs to be stored.
+        Returns:
+            Does not return anything
+    """
+
     data.to_csv(path, encoding='utf-8', index=False, sep=';')

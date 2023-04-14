@@ -33,7 +33,7 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
     handle = plotMassSpec(mc, bin, mode)
     handle = plotMassSpec(mc, bin)
 
-    INPUT
+    Attributes
     mc:       is the mass-to-charge(mc)-ratio [Da] of the events in the
               APT measurement stored in pos, table
 
@@ -253,6 +253,18 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
 
 
 def plot_hist(ranging, range_data, mc_tof, bins, log, steps):
+    """
+        This function plots the histogram
+
+        Atrributes:
+            ranging: boolean value to define if ranging is defined
+            bin:is the width of the steps in which the plot is performed
+            range_data: Data corresponding to the range
+            mc_tof: time of flight of mass_to_charge
+            steps: type of histogram
+        Return:
+            returns the axis of the plot
+    """
 
     if ranging:
         phases = range_data['element'].tolist()
@@ -282,6 +294,16 @@ def plot_hist(ranging, range_data, mc_tof, bins, log, steps):
 
 
 def find_closest_element(input_value):
+    """
+        This function returns closest element and its corresponding 
+        mass.
+
+        Atrributes:
+            input_value: TODO 
+        Returns:
+            closest_mass: mass of the closest element (type: list)
+            closest_element: closest element (type: list)
+    """
     def closest_value(mass_list, element_list, input_value):
         element = np.array(element_list)
         closest_mass = []
