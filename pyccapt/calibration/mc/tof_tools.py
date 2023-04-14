@@ -6,8 +6,21 @@ import numpy as np
 
 
 def mc2tof(mc:"Unit: Da", V:"Unit:volts", xDet:"Unit:mm", yDet:"Unit:mm", flightPathLength:"Unit:mm")->"Unit: Dalton":
-    # calculates tof based on idealized geometry / electrostatics and ideal mc
-    # m/c = 2 e V (t/L)^2
+    """
+        This function calculates tof based on idealized geometry / electrostatics and ideal mc.
+        m/c = m/c = 2 e V (t/L)^2
+
+        Attributes:
+            t: time (type: int)
+            t0: initial time (type: int)
+            V: voltage (type: int/float)
+            xDet: Distance along x axis  (type: int)
+            yDet: Distance along y axis  (type: int)
+            flightPathLength: length of flight path  (type: int)
+            mode: type of mode (voltage/laser)
+        Returns:
+            t: time of flight (type: int)
+    """
     xDet = xDet * 1E-2  # xDet from mm to m
     yDet = yDet * 1E-2
     flightPathLength = flightPathLength * 1E-3

@@ -38,6 +38,16 @@ def logger_creator(script_name, file_handler=None):
 
 
 def add_file_handler(log_creator, formatter, file_handler):
+    """
+    This function is allows respective module to add the file handler.
+
+    Attributes:
+        log_creator: logger object
+        formatter: Type of logging format
+        file_handler: module specification of file handler
+    Returns:
+        log_creator: modified logging object with additional attributes
+    """
     print("add_file_handler called", file_handler)
     path = file_handler['path']
     log_file_name = file_handler['log_file_name']

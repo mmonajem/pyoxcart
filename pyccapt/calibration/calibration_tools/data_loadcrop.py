@@ -18,9 +18,22 @@ from pyccapt.calibration.calibration_tools import logging_library
 
 def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc",
                                pulse_mode: "type: string - mode of pulse") -> "type: dataframes":
+    """
+        This function fetches dataset from HDF5 file. The HDF5 files
+        contains data from the dld group. It fetches relevant
+        information, assembles and return all the information
+        in the form of dataframe
+
+        Attributes:
+            filename: Path to the HDF5 file (type: string)
+            pulse_mode: Represents type of laser/voltage.(type: string)
+        Returns:
+            dldGroupStorage: dataframe containig all relevant information
+                             from the dld group (type: pandas dataframe)
+        
+    """
     logger = logging_library.logger_creator('data_loadcrop')
     try:
-        print("Filename>>", filename)
         hdf5Data = data_tools.read_hdf5(filename, tdc)
         if hdf5Data is None:
             raise FileNotFoundError
@@ -119,12 +132,41 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
 
 def concatenate_dataframes_of_dld_grp(
         dataframeList: "type:list - list of dataframes") -> "type:list - list of dataframes":
+    """
+        This function is helper function used to concatenate all relevant 
+        information into a single list. 
+
+        Attributes:
+            dataframeList: List of different information from dld group. (type:list)
+        Returns:
+            dld_masterDataframe: Single concatenated list contaning 
+                                 all relevant info (type: list)
+
+    """
     dld_masterDataframeList = dataframeList
     dld_masterDataframe = pd.concat(dld_masterDataframeList, axis=1)
     return dld_masterDataframe
 
 def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes",
                                  rect=False, only_plot=False, save_name=False):
+    """
+        This function plots the experiment history. The plots showcase the 
+        relationship between tof(time of flight) and voltage.
+
+        Atrributes:
+            dldGroupStorage: Dataframe containing info about dld group 
+                             (type: pandas dataframe)
+            only_plot: Default parameter set to false. if false it shows only the plot 
+                       else it allows croppping functionality. (type: bool) 
+            rect: Default parameter set to False. If true allows to crop
+                  data by drawing a rectangular box (type: bool) 
+            save_name: Default parameter set to False. Flag to choose whether
+                       to save plot or not. (type: bool) 
+        Returns:
+            Does not return anything.
+
+
+    """
     fig1, ax1 = plt.subplots(figsize=(11/2.54, 4.5/2.54), constrained_layout=True)
     # Plot tof and high voltage
     yaxis = dldGroupStorage['t (ns)'].to_numpy()
@@ -173,6 +215,22 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes",
 
 def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256), circle=False,
                   save_name=False, mask=True, only_plot=False):
+    """
+        This function is responsible for plotting the FDM. This function
+        also allows  croping the plot to select the region of interest.
+
+        Attributes:
+            data_crop: Cropped dataset (type: list)
+            bins: NA
+            Circle: Default parameter set to False. If true, it allows 
+                    to select region of interest by drawing the circle.
+            save_name: Default parameter set to False. Flag to choose whether
+                       to save plot or not. (type: bool) 
+            only_plot: Default parameter set to false. if false it shows only the plot 
+                       else it allows croppping functionality. (type: bool)
+        Returns:
+            Does not return anything.
+    """
     fig1, ax1 = plt.subplots(figsize=(5.5/2.54, 4.5/2.54), constrained_layout=True)
     logger = logging_library.logger_creator('data_loadcrop')
     # Plot and crop FDM
@@ -180,7 +238,6 @@ def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256
     y = data_crop['y_det (cm)'].to_numpy()
 
     FDM, xedges, yedges = np.histogram2d(x, y, bins=bins)
-
 
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     # set x-axis label
@@ -210,6 +267,17 @@ def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256
 
 def rectangle_box_selector(axisObject: "type:object"):
     # drawtype is 'box' or 'line' or 'none'
+    """
+        This function allows to create rectangular box to select region 
+        of interest. 
+
+        Atrributes:
+            axisObject: Object to create rectangular box
+        
+        Returns:
+            Does not return anything
+
+    """
     selectors_data.toggle_selector.RS = RectangleSelector(axisObject, selectors_data.line_select_callback,
                                                           useblit=True,
                                                           button=[1, 3],  # don't use middle button
@@ -219,12 +287,32 @@ def rectangle_box_selector(axisObject: "type:object"):
 
 
 def crop_dataset(dld_master_dataframe: "type: dataframes") -> "type: dataframe":
+    """
+        This function allows to crop dataset.    
+
+        Atrributes:
+            dld_master_dataframe: concatenated dataset (type: dataframe)
+        Returns:
+            data_crop: cropped dataset (type: dataframe)
+
+    """
     data_crop = dld_master_dataframe.loc[int(variables.selected_x1):int(variables.selected_x2), :]
     data_crop.reset_index(inplace=True, drop=True)
     return data_crop
 
 
 def elliptical_shape_selector(axisObject: "type:object", figureObject: "type:object"):
+    """
+       This function allows to create elliptical box to select region 
+       of interest. 
+
+        Atrributes:
+            axisObject: Object to create axis of the plot.
+            figureObject: Object to create figure.
+        Returns:
+            Does not return anything.
+        
+    """
     selectors_data.toggle_selector.ES = EllipseSelector(axisObject, selectors_data.onselect, useblit=True,
                                                         button=[1, 3],  # don't use middle button
                                                         minspanx=1, minspany=1,
@@ -234,6 +322,16 @@ def elliptical_shape_selector(axisObject: "type:object", figureObject: "type:obj
 
 
 def crop_data_after_selection(data_crop: "dataframe") -> "dataframe":
+    """
+        This function crops the dataset after region of interest has been
+        selected.
+
+        Atrributes:
+            data_crop: Original dataset that is to be cropped. (type:dataframe)
+        Returns:
+            data_crop: Cropped dataset. (type: dataframe)
+        
+    """
     # crop the data based on selected are of FDM
     x = data_crop['x_det (cm)'].to_numpy()
     y = data_crop['y_det (cm)'].to_numpy()
@@ -246,6 +344,17 @@ def crop_data_after_selection(data_crop: "dataframe") -> "dataframe":
 
 def create_pandas_dataframe(data_crop: "type:numpy array", tdc: "type: string - model of tdc",
                             pulser_mode: "type: string - mode of pulser"):
+    """
+        This function create a pandas dataframe from the cropped data. 
+
+        Attributes:
+            data_crop: Cropped dataset (type: dataframe) (type: string)
+            tdc: Type of tdc (surface_concept/roentdec) (type: string)
+            pulser_mode: Type of pulse mode (voltage/laser) (type: string)
+        Returns:
+            hdf_dataframe: dataframe that is to be inserted in hdf file. 
+                           (type: dataframe)
+    """
     if tdc == 'surface_concept':
         if pulser_mode == 'voltage':
             hdf_dataframe = pd.DataFrame(data=data_crop,
