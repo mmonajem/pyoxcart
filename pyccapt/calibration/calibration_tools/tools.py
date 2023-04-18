@@ -157,7 +157,7 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
                 mrp = '{:.2f}'.format(x[peaks[index_peak_max]] / (x[int(peak_widths_p[3][index_peak_max])] -
                                                             x[int(peak_widths_p[2][index_peak_max])]))
                 if background['calculation'] and background['plot_no_back']:
-                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nMRP(FWHM): %s' \
+                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nMRP(FWHM): %s' \
                               % (bin, len(mc_tof)/1000000, int(background_ppm), mrp)
                 else:
                     # annotation with range stats
@@ -166,7 +166,7 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
                     mask = np.logical_and((x >= lowerLim), (x <= upperLim))
                     BG50 = np.sum(y[np.array(mask[:-1])]) / (upperLim - lowerLim)
                     BG50 = BG50 / len(mc_tof) * 1E6
-                    txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$ \nBG@50: %s ppm/ns\nMRP(FWHM): %s' \
+                    txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nBG@50: %s ppm/ns\nMRP(FWHM): %s' \
                           % (bin, len(mc_tof)/1000000, int(BG50), mrp)
 
             props = dict(boxstyle='round', facecolor='wheat', alpha=1)
@@ -289,7 +289,7 @@ def plot_hist(ranging, range_data, mc_tof, bins, log, steps):
                 mask_all = np.logical_or(mask_all, mask)
                 y, x, _ = plt.hist(mc_tof[~mask_all], bins=bins, log=log, histtype=steps, color='slategray')
     else:
-        y, x, _ = plt.hist(mc_tof, bins=bins, log=log, histtype=steps, color='slategray')
+        y, x, _ = plt.hist(mc_tof, bins=bins, log=log, histtype=steps, color='slategray') #slategray
     return y, x
 
 
