@@ -1,5 +1,6 @@
 {
 	"mode": "advance",
+	"flightPathLength": 110,
 	"visualization": "mc",
 	"log": "off",
 	"tdc": "on",

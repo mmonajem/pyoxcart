@@ -188,15 +188,12 @@ class APT_ADVANCE:
                 # Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock1:
                     length = self.queue_x.get()
-                    variables.x = np.append(variables.x, length)
-                    variables.y = np.append(variables.y, self.queue_y.get())
-                    variables.t = np.append(variables.t, self.queue_t.get())
-                    variables.dld_start_counter = np.append(variables.dld_start_counter,
-                                                            self.queue_dld_start_counter.get())
-                    variables.main_v_dc_dld = np.append(variables.main_v_dc_dld,
-                                                        np.tile(variables.specimen_voltage, len(length)))
-                    variables.main_v_p_dld = np.append(variables.main_v_p_dld,
-                                                       np.tile(variables.pulse_voltage, len(length)))
+                    variables.x.extend((length).tolist())
+                    variables.y.extend((self.queue_y.get()).tolist())
+                    variables.t.extend((self.queue_t.get()).tolist())
+                    variables.dld_start_counter.extend((self.queue_dld_start_counter.get()).tolist())
+                    variables.main_v_dc_dld.extend((np.tile(variables.specimen_voltage, len(length))).tolist())
+                    variables.main_v_p_dld.extend((np.tile(variables.pulse_voltage, len(length))).tolist())
             # If end of experiment flag is set break the while loop
             if variables.end_experiment:
                 break
@@ -225,19 +222,17 @@ class APT_ADVANCE:
                 # Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock1:
                     length = self.queue_ch0_time.get()
-                    variables.ch0_time = np.append(variables.ch0_time, length)
-                    variables.ch0_wave = np.append(variables.ch0_wave, self.queue_ch0_wave.get())
-                    variables.ch1_time = np.append(variables.ch1_time, self.queue_ch1_time.get())
-                    variables.ch1_wave = np.append(variables.ch1_wave, self.queue_ch1_wave.get())
-                    variables.ch2_time = np.append(variables.ch2_time, self.queue_ch2_time.get())
-                    variables.ch2_wave = np.append(variables.ch2_wave, self.queue_ch2_wave.get())
-                    variables.ch3_time = np.append(variables.ch3_time, self.queue_ch3_time.get())
-                    variables.ch3_wave = np.append(variables.ch3_wave, self.queue_ch3_wave.get())
+                    variables.ch0_time.extend(length)
+                    variables.ch0_wave.extend((self.queue_ch0_wave.get()).tolist())
+                    variables.ch1_time.extend((self.queue_ch1_time.get()).tolist())
+                    variables.ch1_wave.extend((self.queue_ch1_wave.get()).tolist())
+                    variables.ch2_time.extend((self.queue_ch2_time.get()).tolist())
+                    variables.ch2_wave.extend((self.queue_ch2_wave.get()).tolist())
+                    variables.ch3_time.extend((self.queue_ch3_time.get()).tolist())
+                    variables.ch3_wave.extend((self.queue_ch3_wave.get()).tolist())
 
-                    variables.main_v_dc_drs = np.append(variables.main_v_dc_drs,
-                                                        np.tile(variables.specimen_voltage, len(length)))
-                    variables.main_v_p_drs = np.append(variables.main_v_p_drs,
-                                                       np.tile(variables.pulse_voltage, len(length)))
+                    variables.main_v_dc_drs.extend((np.tile(variables.specimen_voltage, len(length))).tolist())
+                    variables.main_v_p_drs.extend((np.tile(variables.pulse_voltage, len(length))).tolist())
             # If end of experiment flag is set break the while loop
             if variables.end_experiment:
                 break
@@ -266,14 +261,11 @@ class APT_ADVANCE:
                 # Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock2:
                     length = self.queue_channel.get()
-                    variables.channel = np.append(variables.channel, length)
-                    variables.time_data = np.append(variables.time_data, self.queue_time_data.get())
-                    variables.tdc_start_counter = np.append(variables.tdc_start_counter,
-                                                            self.queue_tdc_start_counter.get())
-                    variables.main_v_dc_tdc = np.append(variables.main_v_dc_tdc,
-                                                        np.tile(variables.specimen_voltage, len(length)))
-                    variables.main_v_p_tdc = np.append(variables.main_v_p_tdc,
-                                                       np.tile(variables.pulse_voltage, len(length)))
+                    variables.channel.extend(length.tolist())
+                    variables.time_data.extend((self.queue_time_data.get()).tolist())
+                    variables.tdc_start_counter.extend((self.queue_tdc_start_counter.get()).tolist())
+                    variables.main_v_dc_tdc.extend((np.tile(variables.specimen_voltage, len(length))).tolist())
+                    variables.main_v_p_tdc.extend((np.tile(variables.pulse_voltage, len(length))).tolist())
             # If end of experiment flag is set break the while loop
             if variables.end_experiment:
                 break
@@ -307,9 +299,9 @@ class APT_ADVANCE:
         variables.count_last = variables.total_ions
 
         # saving the values of high dc voltage, pulse, and current iteration ions
-        variables.main_v_dc = np.append(variables.main_v_dc, variables.specimen_voltage)
-        variables.main_v_p = np.append(variables.main_v_p, variables.pulse_voltage)
-        variables.main_counter = np.append(variables.main_counter, variables.count_temp)
+        variables.main_v_dc.append(variables.specimen_voltage)
+        variables.main_v_p.append(variables.pulse_voltage)
+        variables.main_counter.append(variables.count_temp)
         # averaging count rate of N_averg counts
         variables.avg_n_count = variables.ex_freq * (
                 sum(variables.main_counter[-variables.cycle_avg:]) / variables.cycle_avg)
@@ -368,9 +360,8 @@ class APT_ADVANCE:
 
                     variables.specimen_voltage = specimen_voltage_temp
 
-        variables.main_temperature = np.append(variables.main_temperature, variables.temperature)
-        variables.main_chamber_vacuum = np.append(variables.main_chamber_vacuum,
-                                                  float(variables.vacuum_main))
+        variables.main_temperature.append(variables.temperature)
+        variables.main_chamber_vacuum.append(float(variables.vacuum_main))
 
 
 
@@ -410,33 +401,33 @@ class APT_ADVANCE:
             variables.index_plot_save = 0
             variables.index_plot = 0
 
-            variables.x = np.zeros(0)
-            variables.y = np.zeros(0)
-            variables.t = np.zeros(0)
-            variables.dld_start_counter = np.zeros(0)
+            variables.x = []
+            variables.y = []
+            variables.t = []
+            variables.dld_start_counter = []
 
-            variables.channel = np.zeros(0)
-            variables.time_data = np.zeros(0)
-            variables.tdc_start_counter = np.zeros(0)
+            variables.channel = []
+            variables.time_data = []
+            variables.tdc_start_counter = []
 
-            variables.ch0_time = np.zeros(0)
-            variables.ch0_wave = np.zeros(0)
-            variables.ch1_time = np.zeros(0)
-            variables.ch1_wave = np.zeros(0)
-            variables.ch2_time = np.zeros(0)
-            variables.ch2_wave = np.zeros(0)
-            variables.ch3_time = np.zeros(0)
-            variables.ch3_wave = np.zeros(0)
+            variables.ch0_time = []
+            variables.ch0_wave = []
+            variables.ch1_time = []
+            variables.ch1_wave = []
+            variables.ch2_time = []
+            variables.ch2_wave = []
+            variables.ch3_time = []
+            variables.ch3_wave = []
 
-            variables.main_v_dc = np.zeros(0)
-            variables.main_v_p = np.zeros(0)
-            variables.main_counter = np.zeros(0)
-            variables.main_temperature = np.zeros(0)
-            variables.main_chamber_vacuum = np.zeros(0)
-            variables.main_v_dc_dld = np.zeros(0)
-            variables.main_v_p_dld = np.zeros(0)
-            variables.main_v_dc_tdc = np.zeros(0)
-            variables.main_v_p_tdc = np.zeros(0)
+            variables.main_v_dc = []
+            variables.main_v_p = []
+            variables.main_counter = []
+            variables.main_temperature = []
+            variables.main_chamber_vacuum = []
+            variables.main_v_dc_dld = []
+            variables.main_v_p_dld = []
+            variables.main_v_dc_tdc = []
+            variables.main_v_p_tdc = []
             if variables.log:
                 self.log_apt_tdc_surface_consept.info("Function - cleanup_variables | ch1 | value - {}| type - {}".format(
                     variables.count_temp, type(variables.count_temp)))
@@ -598,10 +589,10 @@ def main(conf):
     variables.pulse_voltage_max = variables.v_p_max * (1 / variables.pulse_amp_per_supply_voltage)
     variables.pulse_voltage = variables.v_p_min
 
-    time_ex_s = np.zeros(0)
-    time_ex_m = np.zeros(0)
-    time_ex_h = np.zeros(0)
-    time_counter = np.zeros(0)
+    time_ex_s = []
+    time_ex_m = []
+    time_ex_h = []
+    time_counter = []
 
 
     logger.info('Starting the main loop')
@@ -669,14 +660,14 @@ def main(conf):
             logger.error('Experiment loop takes longer than %s Millisecond' % (int(1000 / variables.ex_freq)))
             print('%s- The iteration time:' % index_time, ((end - start).microseconds / 1000))
             index_time += 1
-        time_ex_s = np.append(time_ex_s, int(end.strftime("%S")))
-        time_ex_m = np.append(time_ex_m, int(end.strftime("%M")))
-        time_ex_h = np.append(time_ex_h, int(end.strftime("%H")))
+        time_ex_s.append(int(end.strftime("%S")))
+        time_ex_m.append(int(end.strftime("%M")))
+        time_ex_h.append(int(end.strftime("%H")))
         end_main_ex_loop = time.time()
         variables.elapsed_time = end_main_ex_loop - start_main_ex
 
         # Counter of iteration
-        time_counter = np.append(time_counter, steps)
+        time_counter.append(steps)
         steps += 1
         if variables.stop_flag:
             logger.info('Experiment is stopped by user')

@@ -202,7 +202,7 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes",
         else:
             left, bottom, width, height = (
                 variables.selected_x1, 0, variables.selected_x2 - variables.selected_x1, np.max(yaxis))
-            rect = Rectangle((left, bottom), width, height, fill=True, alpha=0.2, color="r", linewidth=2)
+            rect = Rectangle((left, bottom), width, height, fill=True, alpha=0.3, color="r", linewidth=2)
             ax1.add_patch(rect)
 
     if save_name:

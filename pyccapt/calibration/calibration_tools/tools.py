@@ -169,11 +169,11 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
                     txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$ \nBG@50: %s ppm/ns\nMRP(FWHM): %s' \
                           % (bin, len(mc_tof)/1000000, int(BG50), mrp)
 
-            props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+            props = dict(boxstyle='round', facecolor='wheat', alpha=1)
             if text_loc == 'left':
-                ax1.text(0.1, 0.95, txt, va='top', ma='left', transform=ax1.transAxes, bbox=props, fontsize=8, alpha=0.8)
+                ax1.text(0.1, 0.95, txt, va='top', ma='left', transform=ax1.transAxes, bbox=props, fontsize=8, alpha=1)
             elif text_loc == 'right':
-                ax1.text(0.50, 0.95, txt, va='top', ma='left', transform=ax1.transAxes, bbox=props, fontsize=8, alpha=0.8)
+                ax1.text(0.50, 0.95, txt, va='top', ma='left', transform=ax1.transAxes, bbox=props, fontsize=8, alpha=1)
 
 
             ax1.tick_params(axis='both', which='major', labelsize=12)
@@ -190,7 +190,7 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
                         #     texts.append(
                         #         plt.text(x[peaks][i], y[peaks][i], r'$%s^%s$' % (mc_ideal[i], (len(mc_ideal) - 1) * '+'),
                         #                  color='gray', size=7,
-                        #                  alpha=0.5))
+                        #                  alpha=1))
                         if mc_peak_label:
                             phases = range_data['element'].tolist()
                             charge = range_data['charge'].tolist()
@@ -199,7 +199,7 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
                             texts.append(
                                 plt.text(x[peaks][i], y[peaks][i], name_element,
                                          color='r', size=7,
-                                         alpha=0.7))
+                                         alpha=1))
 
                             # ax1.annotate(r'$%s^%s$' % (mc_ideal[0], (len(mc_ideal) - 1) * '+'),
                             #              xy=(x[peaks][i], y[peaks][i]),
@@ -207,7 +207,7 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
                             # plt.axvline(mc_ideal[i], color='k', linewidth=1)
                         else:
                             texts.append(plt.text(x[peaks][i], y[peaks][i], '%s' % '{:.2f}'.format(x[peaks][i]), color='r',
-                                                  size=7, alpha=0.7))
+                                                  size=7, alpha=1))
                             #     ax1.annotate('%s' % '{:.2f}'.format(x[peaks][i]),
                             #                  xy=(x[peaks][i], y[peaks][i]),
                             #                  xytext=(x[peaks][i] + 1.5, y[peaks][i]), size=6, color='gray')

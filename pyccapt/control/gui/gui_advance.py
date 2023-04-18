@@ -1322,7 +1322,7 @@ class UI_APT_A(object):
         self.menuFile.setTitle(_translate("UI_APT_A", "File"))
         self.actionExit.setText(_translate("UI_APT_A", "Exit"))
 
-  ###
+        ###
         self.main_chamber_switch.clicked.connect(lambda: self.gates(1))
         self.load_lock_switch.clicked.connect(lambda: self.gates(2))
         self.cryo_switch.clicked.connect(lambda: self.gates(3))
@@ -1432,6 +1432,10 @@ class UI_APT_A(object):
         self.led_light.setPixmap(self.led_red)
         self.led_pump_load_lock.setPixmap(self.led_green)
 
+        # for getting screenshot of GUI
+        self.screen = QtWidgets.QApplication.primaryScreen()
+        w = self.centralwidget
+        self.screenshot = self.screen.grabWindow(w.winId())
     def thread_main(self):
         """
                 Main thread for running experiment
@@ -1591,10 +1595,8 @@ class UI_APT_A(object):
                 """
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(True)
-        w = self.centralwidget
-        screen = QtWidgets.QApplication.primaryScreen()
-        screenshot = screen.grabWindow(w.winId())
-        screenshot.save(variables.path + '\shot.png', 'png')
+
+        self.screenshot.save(variables.path + '\shot.png', 'png')
         if variables.index_line < self.num_line:  # Do next experiment in case of TextLine
             self.thread_main()
         else:
@@ -1776,6 +1778,7 @@ class UI_APT_A(object):
             self.y_vps = np.zeros(1000)  # 1000 data points
             self.y_vps[:] = np.nan
 
+            self.vdc_time.clear()
             pen_vdc = pg.mkPen(color=(255, 0, 0), width=6)
             pen_vps = pg.mkPen(color=(0, 0, 255), width=3)
             self.data_line_vdc = self.vdc_time.plot(self.x_vdc, self.y_vdc, pen=pen_vdc)
@@ -1785,6 +1788,7 @@ class UI_APT_A(object):
             self.y_dtec = np.zeros(1000)
             self.y_dtec[:] = np.nan
 
+            self.detection_rate_viz.clear()
             pen_dtec = pg.mkPen(color=(255, 0, 0), width=6)
             self.data_line_dtec = self.detection_rate_viz.plot(self.x_dtec, self.y_dtec, pen=pen_dtec)
 
@@ -1840,20 +1844,23 @@ class UI_APT_A(object):
             if variables.counter_source == 'TDC' and variables.total_ions > 0 and variables.index_wait_on_plot_start > 16 \
                     and variables.index_wait_on_plot_start > 16:
                 if variables.index_wait_on_plot_start > 16:
-
+                    xx = np.array(variables.x)
+                    yy = np.array(variables.y)
+                    tt = np.array(variables.t)
+                    main_v_dc_dld = np.array(variables.main_v_dc_dld)
                     try:
                         if self.conf["visualization"] == "tof":
-                            tof = variables.t * 27.432 / (1000 * 4)  # Time in ns
+                            tof = tt * 27.432 / (1000 * 4)  # Time in ns
                             viz = tof[tof < 5000]
                         elif self.conf["visualization"] == "mc":
-                            max_lenght = max(len(variables.x), len(variables.y),
-                                             len(variables.t), len(variables.main_v_dc_dld))
-                            viz = tof2mc_simple.tof_bin2mc_sc(variables.t[:max_lenght], 0,
-                                                              variables.main_v_dc_dld[
+                            max_lenght = min(len(xx), len(yy),
+                                             len(tt), len(main_v_dc_dld))
+                            viz = tof2mc_simple.tof_bin2mc_sc(tt[:max_lenght], 0,
+                                                              main_v_dc_dld[
                                                               :max_lenght],
-                                                              variables.x[:max_lenght],
-                                                              variables.y[:max_lenght],
-                                                              flightPathLength=110)
+                                                              xx[:max_lenght],
+                                                              yy[:max_lenght],
+                                                              flightPathLength=self.conf["flightPathLength"])
                             viz = viz[viz < 400]
                         # bin size of 0.1
                         bin_size = 0.1
@@ -1875,13 +1882,13 @@ class UI_APT_A(object):
                     # Visualization
                     try:
                         # adding points to the scatter plot
-                        self.scatter.clear()
                         self.scatter.setSize(self.doubleSpinBox.value())
                         x = variables.x
                         y = variables.y
                         min_length = min(len(x), len(y))
                         x = variables.x[-min_length:]
                         y = variables.y[-min_length:]
+                        self.scatter.clear()
                         self.scatter.setData(x=x[-variables.hit_display:],
                                              y=y[-variables.hit_display:])
                         # add item to plot window
@@ -1903,6 +1910,9 @@ class UI_APT_A(object):
                 exporter.export(variables.path + '/visualization_%s.png' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
                 exporter.export(variables.path + '/tof_%s.png' % variables.index_plot_save)
+
+                # save screenshot of GUI
+                self.screenshot.save(variables.path + '\shot_%s.png' % variables.index_plot_save, 'png')
 
             # Increase the index
             variables.index_plot_save += 1

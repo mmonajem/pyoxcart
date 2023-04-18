@@ -179,7 +179,7 @@ def reconstruction_plot(data, range_data, element_percentage, rotary_fig_save, s
                          marker=dict(
                              size=2,
                              color=colors[index],
-                             opacity=0.8,
+                             opacity=1,
                          )
                          ))
 
