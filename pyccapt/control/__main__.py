@@ -145,15 +145,15 @@ def main():
         lock = threading.Lock()
         if conf['camera'] != "off":
             try:
-                ui = gui_advance.UI_APT_A(camera.devices, camera.tlFactory, camera.cameras, camera.converter, lock, app,
+                ui = gui_advance.UI_APT_A(camera, lock, app,
                                           conf)
             except Exception as e:
                 print('Can not initialize the cameras')
                 print(e)
                 conf['camera'] = "off"
-                ui = gui_advance.UI_APT_A(None, None, None, None, lock, app, conf)
+                ui = gui_advance.UI_APT_A(None, lock, app, conf)
         else:
-            ui = gui_advance.UI_APT_A(None, None, None, None, lock, app, conf)
+            ui = gui_advance.UI_APT_A(None, lock, app, conf)
 
     elif conf['mode'] == 'simple':
         # Initialize global experiment variables

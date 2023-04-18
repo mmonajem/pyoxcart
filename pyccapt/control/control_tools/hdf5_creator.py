@@ -42,7 +42,7 @@ def hdf_creator_oxcart(time_counter, time_ex_s, time_ex_m, time_ex_h):
             f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld, dtype='f')
             f.create_dataset("dld/pulse_voltage", data=variables.main_v_p_dld, dtype='f')
 
-        elif variables.counter_source == 'TDC_Raw':
+
             f.create_dataset("tdc/start_counter", data=variables.tdc_start_counter, dtype='i')
             f.create_dataset("tdc/channel", data=variables.channel, dtype='i')
             f.create_dataset("tdc/time_data", data=variables.time_data, dtype='i')

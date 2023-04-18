@@ -179,7 +179,7 @@ def reconstruction_plot(data, range_data, element_percentage, rotary_fig_save, s
                          marker=dict(
                              size=2,
                              color=colors[index],
-                             opacity=.2,
+                             opacity=1,
                          )
                          ))
 
@@ -188,9 +188,12 @@ def reconstruction_plot(data, range_data, element_percentage, rotary_fig_save, s
         xaxis_title="x (nm)",
         yaxis_title="y (nm)",
         zaxis_title="z (nm)")
-    fig.update_layout(legend_title="Elements:", title="PyCCAPT", )
     fig.update_scenes(zaxis_autorange="reversed")
-    fig.update_layout(legend={'itemsizing': 'constant'})
+    fig.update_layout(legend_title="", title="PyCCAPT", legend={'itemsizing': 'constant'}, font=dict(
+        size=8,
+    ))
+
+
 
     if rotary_fig_save:
         rotary_fig(fig, figname)
@@ -204,6 +207,10 @@ def reconstruction_plot(data, range_data, element_percentage, rotary_fig_save, s
                                        ]})
     plotly.offline.plot(fig, filename=variables.result_path + '\\{fn}.html'.format(fn=figname), show_link=True,
                         auto_open=False)
+    fig.update_layout(height=500, width=500)
+    fig.update_scenes(xaxis_visible=False, yaxis_visible=False,zaxis_visible=False)
+    fig.write_image(variables.result_path + "\\3d.png")
+    fig.update_scenes(xaxis_visible=True, yaxis_visible=True,zaxis_visible=True)
     fig.show(config=config)
 
 def rotary_fig(fig1, figname):
@@ -212,7 +219,7 @@ def rotary_fig(fig1, figname):
     y_eye = 2
     z_eye = 0.5
 
-    fig.update_scenes(xaxis_visible=False, yaxis_visible=False,zaxis_visible=False )
+    fig.update_scenes(xaxis_visible=False, yaxis_visible=False,zaxis_visible=False)
 
     fig.update_layout(
              width=600,
@@ -297,6 +304,7 @@ def projection(data, range_data, element_percentage, selected_area, x_or_y, fign
     ax.xaxis.set_label_position('top')
     ax.set_ylabel('Z (nm)')
     plt.legend(loc='upper right')
+
     plt.savefig(variables.result_path + '\\projection_{fn}.png'.format(fn=figname))
     plt.show()
 

@@ -44,13 +44,7 @@ The images below are an overview of the two version of user interface:
 
 3- Install the package:
 
-    pip install pyccapt
-
----------------------
-
-# Local installation of PyCCAPT
-
-Clone/download this repository and unzip it. In the project directory enter the following command
+Clone/download this repository and unzip it. In the project directory enter the following command:
 
 
     pip install -e .
@@ -82,7 +76,10 @@ After installing the project locally or via pip command enter the following comm
 Edite the GUI with Qt-Designer and run command below to create your own GUI
 UI (simple or advance) in the GUI module. 
 
-    pyuic6 -x gui_simple_layout.ui -o gui_simple_layout.py. You should then merge the created file with the targeted 
+    pyuic6 -x gui_simple_layout.ui -o gui_simple_layout.py 
+
+You should then merge the created file with the targeted 
+
 ---------------------
 # Using PyCCAPT
 

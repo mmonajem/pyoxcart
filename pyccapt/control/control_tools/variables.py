@@ -21,7 +21,6 @@ def init(conf):
     global COM_PORT_thorlab_motor
 
     # Setup parameters
-    global raw_mode
     global counter_source
     global counter
     global ex_time
@@ -93,6 +92,7 @@ def init(conf):
     global light
     global light_swich
     global alignment_window
+    global vol_fix
     global img0_orig
     global img0_zoom
     global img1_orig
@@ -162,7 +162,6 @@ def init(conf):
     COM_PORT_signal_generator = conf["COM_PORT_signal_generator"]
     COM_PORT_thorlab_motor = conf["COM_PORT_thorlab_motor"]
 
-    raw_mode = False
     counter = 0
     ex_time = 0
     max_ions = 0
@@ -186,8 +185,9 @@ def init(conf):
     email = ''
     tweet = False
     light = False
-    alignment_window = True
+    alignment_window = False
     light_swich = False
+    vol_fix = False
     camera_0_ExposureTime = 2000
     camera_1_ExposureTime = 2000
     img0_orig = np.ones((500, 500, 3), dtype=np.uint8)
@@ -248,47 +248,47 @@ def init(conf):
 
     laser_degree = 0
 
-    x = np.zeros(0)
-    y = np.zeros(0)
-    t = np.zeros(0)
-    dld_start_counter = np.zeros(0)
-    time_stamp = np.zeros(0)
+    x = []
+    y = []
+    t = []
+    dld_start_counter = []
+    time_stamp = []
 
-    laser_intensity = np.zeros(0)
+    laser_intensity = []
 
-    channel = np.zeros(0)
-    time_data = np.zeros(0)
-    tdc_start_counter = np.zeros(0)
+    channel = []
+    time_data = []
+    tdc_start_counter = []
 
-    ch0_time = np.zeros(0)
-    ch0_wave = np.zeros(0)
-    ch1_time = np.zeros(0)
-    ch1_wave = np.zeros(0)
-    ch2_time = np.zeros(0)
-    ch2_wave = np.zeros(0)
-    ch3_time = np.zeros(0)
-    ch3_wave = np.zeros(0)
+    ch0_time = []
+    ch0_wave = []
+    ch1_time = []
+    ch1_wave = []
+    ch2_time = []
+    ch2_wave = []
+    ch3_time = []
+    ch3_wave = []
 
-    ch0 = np.zeros(0)
-    ch1 = np.zeros(0)
-    ch2 = np.zeros(0)
-    ch3 = np.zeros(0)
-    ch4 = np.zeros(0)
-    ch5 = np.zeros(0)
-    ch6 = np.zeros(0)
-    ch7 = np.zeros(0)
+    ch0 = []
+    ch1 = []
+    ch2 = []
+    ch3 = []
+    ch4 = []
+    ch5 = []
+    ch6 = []
+    ch7 = []
 
     # Source of calculating the detected events pulse_counter or TDC
     counter_source = 'pulse_counter'
 
-    main_v_dc = np.zeros(0)
-    main_v_p = np.zeros(0)
-    main_counter = np.zeros(0)
-    main_temperature = np.zeros(0)
-    main_chamber_vacuum = np.zeros(0)
-    main_v_dc_dld = np.zeros(0)
-    main_v_p_dld = np.zeros(0)
-    main_v_dc_tdc = np.zeros(0)
-    main_v_p_tdc = np.zeros(0)
-    main_v_dc_drs = np.zeros(0)
-    main_v_p_drs = np.zeros(0)
+    main_v_dc = []
+    main_v_p = []
+    main_counter = []
+    main_temperature = []
+    main_chamber_vacuum = []
+    main_v_dc_dld = []
+    main_v_p_dld = []
+    main_v_dc_tdc = []
+    main_v_p_tdc = []
+    main_v_dc_drs = []
+    main_v_p_drs = []

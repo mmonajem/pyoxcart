@@ -12,7 +12,7 @@ def gui_fname(directory='./'):
 
 
 if __name__ == "__main__":
-    os.chdir('..//..//..//..//')
+    os.chdir('..//..//..//..//tests//data//')
     directory = argv[1]
     app = QApplication([directory])
     fname = QFileDialog.getOpenFileName(None, "Select a file...",

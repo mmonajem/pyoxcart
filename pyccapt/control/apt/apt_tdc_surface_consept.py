@@ -188,15 +188,12 @@ class APT_ADVANCE:
                 # Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock1:
                     length = self.queue_x.get()
-                    variables.x = np.append(variables.x, length)
-                    variables.y = np.append(variables.y, self.queue_y.get())
-                    variables.t = np.append(variables.t, self.queue_t.get())
-                    variables.dld_start_counter = np.append(variables.dld_start_counter,
-                                                            self.queue_dld_start_counter.get())
-                    variables.main_v_dc_dld = np.append(variables.main_v_dc_dld,
-                                                        np.tile(variables.specimen_voltage, len(length)))
-                    variables.main_v_p_dld = np.append(variables.main_v_p_dld,
-                                                       np.tile(variables.pulse_voltage, len(length)))
+                    variables.x.extend((length).tolist())
+                    variables.y.extend((self.queue_y.get()).tolist())
+                    variables.t.extend((self.queue_t.get()).tolist())
+                    variables.dld_start_counter.extend((self.queue_dld_start_counter.get()).tolist())
+                    variables.main_v_dc_dld.extend((np.tile(variables.specimen_voltage, len(length))).tolist())
+                    variables.main_v_p_dld.extend((np.tile(variables.pulse_voltage, len(length))).tolist())
             # If end of experiment flag is set break the while loop
             if variables.end_experiment:
                 break
@@ -225,19 +222,17 @@ class APT_ADVANCE:
                 # Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock1:
                     length = self.queue_ch0_time.get()
-                    variables.ch0_time = np.append(variables.ch0_time, length)
-                    variables.ch0_wave = np.append(variables.ch0_wave, self.queue_ch0_wave.get())
-                    variables.ch1_time = np.append(variables.ch1_time, self.queue_ch1_time.get())
-                    variables.ch1_wave = np.append(variables.ch1_wave, self.queue_ch1_wave.get())
-                    variables.ch2_time = np.append(variables.ch2_time, self.queue_ch2_time.get())
-                    variables.ch2_wave = np.append(variables.ch2_wave, self.queue_ch2_wave.get())
-                    variables.ch3_time = np.append(variables.ch3_time, self.queue_ch3_time.get())
-                    variables.ch3_wave = np.append(variables.ch3_wave, self.queue_ch3_wave.get())
+                    variables.ch0_time.extend(length)
+                    variables.ch0_wave.extend((self.queue_ch0_wave.get()).tolist())
+                    variables.ch1_time.extend((self.queue_ch1_time.get()).tolist())
+                    variables.ch1_wave.extend((self.queue_ch1_wave.get()).tolist())
+                    variables.ch2_time.extend((self.queue_ch2_time.get()).tolist())
+                    variables.ch2_wave.extend((self.queue_ch2_wave.get()).tolist())
+                    variables.ch3_time.extend((self.queue_ch3_time.get()).tolist())
+                    variables.ch3_wave.extend((self.queue_ch3_wave.get()).tolist())
 
-                    variables.main_v_dc_drs = np.append(variables.main_v_dc_drs,
-                                                        np.tile(variables.specimen_voltage, len(length)))
-                    variables.main_v_p_drs = np.append(variables.main_v_p_drs,
-                                                       np.tile(variables.pulse_voltage, len(length)))
+                    variables.main_v_dc_drs.extend((np.tile(variables.specimen_voltage, len(length))).tolist())
+                    variables.main_v_p_drs.extend((np.tile(variables.pulse_voltage, len(length))).tolist())
             # If end of experiment flag is set break the while loop
             if variables.end_experiment:
                 break
@@ -266,14 +261,11 @@ class APT_ADVANCE:
                 # Utilize locking mechanism to avoid concurrent use of resources and dirty reads
                 with self.lock2:
                     length = self.queue_channel.get()
-                    variables.channel = np.append(variables.channel, length)
-                    variables.time_data = np.append(variables.time_data, self.queue_time_data.get())
-                    variables.tdc_start_counter = np.append(variables.tdc_start_counter,
-                                                            self.queue_tdc_start_counter.get())
-                    variables.main_v_dc_tdc = np.append(variables.main_v_dc_tdc,
-                                                        np.tile(variables.specimen_voltage, len(length)))
-                    variables.main_v_p_tdc = np.append(variables.main_v_p_tdc,
-                                                       np.tile(variables.pulse_voltage, len(length)))
+                    variables.channel.extend(length.tolist())
+                    variables.time_data.extend((self.queue_time_data.get()).tolist())
+                    variables.tdc_start_counter.extend((self.queue_tdc_start_counter.get()).tolist())
+                    variables.main_v_dc_tdc.extend((np.tile(variables.specimen_voltage, len(length))).tolist())
+                    variables.main_v_p_tdc.extend((np.tile(variables.pulse_voltage, len(length))).tolist())
             # If end of experiment flag is set break the while loop
             if variables.end_experiment:
                 break
@@ -300,9 +292,6 @@ class APT_ADVANCE:
 
         if variables.counter_source == 'TDC':
             variables.total_ions = len(variables.x)
-        elif variables.counter_source == 'TDC_Raw':
-            if len(variables.channel) > 0:
-                variables.total_ions = int(len(variables.channel) / 4)
         elif variables.counter_source == 'DRS':
             pass
 
@@ -310,9 +299,9 @@ class APT_ADVANCE:
         variables.count_last = variables.total_ions
 
         # saving the values of high dc voltage, pulse, and current iteration ions
-        variables.main_v_dc = np.append(variables.main_v_dc, variables.specimen_voltage)
-        variables.main_v_p = np.append(variables.main_v_p, variables.pulse_voltage)
-        variables.main_counter = np.append(variables.main_counter, variables.count_temp)
+        variables.main_v_dc.append(variables.specimen_voltage)
+        variables.main_v_p.append(variables.pulse_voltage)
+        variables.main_counter.append(variables.count_temp)
         # averaging count rate of N_averg counts
         variables.avg_n_count = variables.ex_freq * (
                 sum(variables.main_counter[-variables.cycle_avg:]) / variables.cycle_avg)
@@ -341,38 +330,38 @@ class APT_ADVANCE:
             self.log_apt_tdc_surface_consept.info("Function - main_ex_loop | counts_error | value - {}| type - {}".format(counts_error,type(counts_error)))
 
         # simple proportional control with averaging
-        rate = ((variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000))
-        if rate < 0.01 and variables.specimen_voltage < 5000:
-            ramp_speed_factor = 2.5
-        else:
-            ramp_speed_factor = 1
+        # rate = ((variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000))
+        # if rate < 0.01 and variables.specimen_voltage < 5000:
+        #     ramp_speed_factor = 2.5
+        # else:
+        ramp_speed_factor = 1
         if counts_error > 0:
             voltage_step = counts_error * variables.vdc_step_up * ramp_speed_factor
         elif counts_error <= 0:
             voltage_step = counts_error * variables.vdc_step_down * ramp_speed_factor
 
         # update v_dc
-        if variables.specimen_voltage < variables.vdc_max:
-            if variables.specimen_voltage >= variables.vdc_min - 50:
-                specimen_voltage_temp = variables.specimen_voltage + voltage_step
-                if specimen_voltage_temp != variables.specimen_voltage:
-                    # sending VDC via serial
-                    if self.conf['v_dc'] != "off":
-                        self.command_v_dc(">S0 %s" % specimen_voltage_temp)
+        if not variables.vol_fix:
+            if variables.specimen_voltage < variables.vdc_max:
+                if variables.specimen_voltage >= variables.vdc_min - 50:
+                    specimen_voltage_temp = variables.specimen_voltage + voltage_step
+                    if specimen_voltage_temp != variables.specimen_voltage:
+                        # sending VDC via serial
+                        if self.conf['v_dc'] != "off":
+                            self.command_v_dc(">S0 %s" % specimen_voltage_temp)
 
-                    # update pulse voltage v_p
-                    new_vp = variables.specimen_voltage * variables.pulse_fraction * \
-                             (1 / variables.pulse_amp_per_supply_voltage)
-                    if variables.pulse_voltage_max > new_vp > variables.pulse_voltage_min:
-                        if self.conf['v_p'] != "off":
-                            self.com_port_v_p.write('VOLT %s' % new_vp)
-                        variables.pulse_voltage = new_vp * variables.pulse_amp_per_supply_voltage
+                        # update pulse voltage v_p
+                        new_vp = variables.specimen_voltage * variables.pulse_fraction * \
+                                 (1 / variables.pulse_amp_per_supply_voltage)
+                        if variables.pulse_voltage_max > new_vp > variables.pulse_voltage_min:
+                            if self.conf['v_p'] != "off":
+                                self.com_port_v_p.write('VOLT %s' % new_vp)
+                            variables.pulse_voltage = new_vp * variables.pulse_amp_per_supply_voltage
 
-                variables.specimen_voltage = specimen_voltage_temp
+                    variables.specimen_voltage = specimen_voltage_temp
 
-        variables.main_temperature = np.append(variables.main_temperature, variables.temperature)
-        variables.main_chamber_vacuum = np.append(variables.main_chamber_vacuum,
-                                                  float(variables.vacuum_main))
+        variables.main_temperature.append(variables.temperature)
+        variables.main_chamber_vacuum.append(float(variables.vacuum_main))
 
 
 
@@ -412,33 +401,33 @@ class APT_ADVANCE:
             variables.index_plot_save = 0
             variables.index_plot = 0
 
-            variables.x = np.zeros(0)
-            variables.y = np.zeros(0)
-            variables.t = np.zeros(0)
-            variables.dld_start_counter = np.zeros(0)
+            variables.x = []
+            variables.y = []
+            variables.t = []
+            variables.dld_start_counter = []
 
-            variables.channel = np.zeros(0)
-            variables.time_data = np.zeros(0)
-            variables.tdc_start_counter = np.zeros(0)
+            variables.channel = []
+            variables.time_data = []
+            variables.tdc_start_counter = []
 
-            variables.ch0_time = np.zeros(0)
-            variables.ch0_wave = np.zeros(0)
-            variables.ch1_time = np.zeros(0)
-            variables.ch1_wave = np.zeros(0)
-            variables.ch2_time = np.zeros(0)
-            variables.ch2_wave = np.zeros(0)
-            variables.ch3_time = np.zeros(0)
-            variables.ch3_wave = np.zeros(0)
+            variables.ch0_time = []
+            variables.ch0_wave = []
+            variables.ch1_time = []
+            variables.ch1_wave = []
+            variables.ch2_time = []
+            variables.ch2_wave = []
+            variables.ch3_time = []
+            variables.ch3_wave = []
 
-            variables.main_v_dc = np.zeros(0)
-            variables.main_v_p = np.zeros(0)
-            variables.main_counter = np.zeros(0)
-            variables.main_temperature = np.zeros(0)
-            variables.main_chamber_vacuum = np.zeros(0)
-            variables.main_v_dc_dld = np.zeros(0)
-            variables.main_v_p_dld = np.zeros(0)
-            variables.main_v_dc_tdc = np.zeros(0)
-            variables.main_v_p_tdc = np.zeros(0)
+            variables.main_v_dc = []
+            variables.main_v_p = []
+            variables.main_counter = []
+            variables.main_temperature = []
+            variables.main_chamber_vacuum = []
+            variables.main_v_dc_dld = []
+            variables.main_v_p_dld = []
+            variables.main_v_dc_tdc = []
+            variables.main_v_p_tdc = []
             if variables.log:
                 self.log_apt_tdc_surface_consept.info("Function - cleanup_variables | ch1 | value - {}| type - {}".format(
                     variables.count_temp, type(variables.count_temp)))
@@ -494,27 +483,6 @@ def main(conf):
             queue_y = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_t = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_dld_start_counter = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            queue_channel = None
-            queue_time_data = None
-            queue_tdc_start_counter = None
-            queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
-
-            # Initialize and initiate a process(Refer to imported file 'tdc_new' for process function declaration )
-            # Module used: multiprocessing
-            tdc_process = multiprocessing.Process(target=tdc_surface_consept.experiment_measure,
-                                                  args=(variables.raw_mode, queue_x,
-                                                        queue_y, queue_t,
-                                                        queue_dld_start_counter,
-                                                        queue_channel,
-                                                        queue_time_data,
-                                                        queue_tdc_start_counter,
-                                                        queue_stop_measurement))
-
-        elif variables.counter_source == 'TDC_Raw':
-            queue_x = None
-            queue_y = None
-            queue_t = None
-            queue_dld_start_counter = None
             queue_channel = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_time_data = Queue(maxsize=-1, ctx=multiprocessing.get_context())
             queue_tdc_start_counter = Queue(maxsize=-1, ctx=multiprocessing.get_context())
@@ -523,13 +491,14 @@ def main(conf):
             # Initialize and initiate a process(Refer to imported file 'tdc_new' for process function declaration )
             # Module used: multiprocessing
             tdc_process = multiprocessing.Process(target=tdc_surface_consept.experiment_measure,
-                                                  args=(variables.raw_mode, queue_x,
+                                                  args=(queue_x,
                                                         queue_y, queue_t,
                                                         queue_dld_start_counter,
                                                         queue_channel,
                                                         queue_time_data,
                                                         queue_tdc_start_counter,
                                                         queue_stop_measurement))
+
         tdc_process.daemon = True
         tdc_process.start()
 
@@ -620,25 +589,24 @@ def main(conf):
     variables.pulse_voltage_max = variables.v_p_max * (1 / variables.pulse_amp_per_supply_voltage)
     variables.pulse_voltage = variables.v_p_min
 
-    time_ex_s = np.zeros(0)
-    time_ex_m = np.zeros(0)
-    time_ex_h = np.zeros(0)
-    time_counter = np.zeros(0)
+    time_ex_s = []
+    time_ex_m = []
+    time_ex_h = []
+    time_counter = []
 
 
     logger.info('Starting the main loop')
 
     if conf['tdc'] != "off":
-        # Initialize threads that will read from the queue for the group: dld
+        # Initialize threads that will read from the queue for the group: dld and tdc
         if variables.counter_source == 'TDC':
             read_dld_queue_thread = threading.Thread(target=experiment.reader_queue_dld)
             read_dld_queue_thread.setDaemon(True)
             read_dld_queue_thread.start()
-        # Initialize threads that will read from the queue for the group: tdc
-        elif variables.counter_source == 'TDC_Raw':
             read_tdc_queue_thread = threading.Thread(target=experiment.reader_queue_tdc)
             read_tdc_queue_thread.setDaemon(True)
             read_tdc_queue_thread.start()
+
     # Initialize threads that will read from the queue for the group: drs
     elif variables.counter_source == 'DRS':
         read_drs_queue_thread = threading.Thread(target=experiment.reader_queue_drs)
@@ -692,19 +660,19 @@ def main(conf):
             logger.error('Experiment loop takes longer than %s Millisecond' % (int(1000 / variables.ex_freq)))
             print('%s- The iteration time:' % index_time, ((end - start).microseconds / 1000))
             index_time += 1
-        time_ex_s = np.append(time_ex_s, int(end.strftime("%S")))
-        time_ex_m = np.append(time_ex_m, int(end.strftime("%M")))
-        time_ex_h = np.append(time_ex_h, int(end.strftime("%H")))
+        time_ex_s.append(int(end.strftime("%S")))
+        time_ex_m.append(int(end.strftime("%M")))
+        time_ex_h.append(int(end.strftime("%H")))
         end_main_ex_loop = time.time()
         variables.elapsed_time = end_main_ex_loop - start_main_ex
 
         # Counter of iteration
-        time_counter = np.append(time_counter, steps)
+        time_counter.append(steps)
         steps += 1
         if variables.stop_flag:
             logger.info('Experiment is stopped by user')
             if conf['tdc'] != "off":
-                if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+                if variables.counter_source == 'TDC':
                     queue_stop_measurement.put(True)
             time.sleep(1)
             break
@@ -713,7 +681,7 @@ def main(conf):
             if variables.max_ions <= variables.total_ions:
                 logger.info('Total number of Ions is achieved')
                 if conf['tdc'] != "off":
-                    if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+                    if variables.counter_source == 'TDC':
                         queue_stop_measurement.put(True)
                 time.sleep(1)
                 break
@@ -722,7 +690,7 @@ def main(conf):
                 if flag_achieved_high_voltage > variables.ex_freq * 10:
                     logger.info('High Voltage Max. is achieved')
                     if conf['tdc'] != "off":
-                        if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+                        if variables.counter_source == 'TDC':
                             queue_stop_measurement.put(True)
                     time.sleep(1)
                     break
@@ -731,7 +699,7 @@ def main(conf):
             if steps + 1 == total_steps:
                 logger.info('Experiment time Max. is achieved')
                 if conf['tdc'] != "off":
-                    if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+                    if variables.counter_source == 'TDC':
                         queue_stop_measurement.put(True)
                 time.sleep(1)
                 break
@@ -746,7 +714,7 @@ def main(conf):
     if conf['tdc'] != "off":
         # Stop the TDC process
         try:
-            if variables.counter_source == 'TDC' or variables.counter_source == 'TDC_Raw':
+            if variables.counter_source == 'TDC':
                 tdc_process.join(3)
                 if tdc_process.is_alive():
                     tdc_process.terminate()
@@ -770,7 +738,6 @@ def main(conf):
         # Stop the TDC and DLD thread
         if variables.counter_source == 'TDC':
             read_dld_queue_thread.join(1)
-        elif variables.counter_source == 'TDC_Raw':
             read_tdc_queue_thread.join(1)
     elif variables.counter_source == 'DRS':
         read_drs_queue_thread.join(1)
@@ -778,8 +745,6 @@ def main(conf):
     if conf['tdc'] != "off":
         if variables.counter_source == 'TDC':
             variables.total_ions = len(variables.x)
-        elif variables.counter_source == 'TDC_Raw':
-            variables.total_ions = int(len(variables.channel) / 4)
     elif variables.counter_source == 'DRS':
         pass
 
@@ -792,7 +757,7 @@ def main(conf):
                                                         variables.t, variables.dld_start_counter,
                                                         variables.main_v_dc_dld, variables.main_v_p_dld]):
             logger.warning('dld data have not same length')
-    elif variables.counter_source == 'TDC_Raw':
+
         if all(len(lst) == len(variables.channel) for lst in [variables.channel, variables.time_data,
                                                               variables.tdc_start_counter,
                                                               variables.main_v_dc_tdc, variables.main_v_p_tdc]):

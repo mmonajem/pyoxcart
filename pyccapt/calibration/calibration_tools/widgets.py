@@ -216,23 +216,18 @@ def dataset_tdc_selection():
         description='Flight path length:',
         disabled=False
     )
+
     det_diam  = widgets.FloatText(
         value='78',
         placeholder='Detector diameter',
         description='Detector diameter:',
         disabled=False
     )
+
     t0 = widgets.FloatText(
         value='54',
         placeholder='T_0 of the instrument',
         description='t0:',
-        disabled=False
-    )
-
-    max_tof = widgets.IntText(
-        value='5000',
-        placeholder='Maximum possible tof',
-        description='Max tof:',
         disabled=False
     )
 
@@ -255,7 +250,7 @@ def dataset_tdc_selection():
         description='Pulse mode:',
     )
 
-    return tdc, det_diam, pulse_mode, flightPathLength, t0, max_tof, max_mc
+    return tdc, pulse_mode, flightPathLength, t0, max_mc, det_diam
 
 def density_field_selection():
     TableFile = '../../../files/field_density_table.h5'

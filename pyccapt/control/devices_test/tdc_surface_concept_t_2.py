@@ -11,23 +11,19 @@ from queue import Queue
 from tdc_surface_concept import scTDC
 
 raw_mode = False
-NR_OF_MEASUREMENTS = 4  # number of measurements
-EXPOSURE_MS = 1000  # exposure duration in milliseconds
+NR_OF_MEASUREMENTS = 10  # number of measurements
+EXPOSURE_MS = 3000  # exposure duration in milliseconds
 
 if not raw_mode:
     DATA_FIELD_SEL1 = \
         scTDC.SC_DATA_FIELD_DIF1 \
         | scTDC.SC_DATA_FIELD_DIF2 \
         | scTDC.SC_DATA_FIELD_TIME \
-        | scTDC.SC_DATA_FIELD_CHANNEL \
-        | scTDC.SC_DATA_FIELD_SUBDEVICE \
         | scTDC.SC_DATA_FIELD_START_COUNTER
 elif raw_mode:
     DATA_FIELD_SEL1 = \
         scTDC.SC_DATA_FIELD_TIME \
         | scTDC.SC_DATA_FIELD_CHANNEL \
-        | scTDC.SC_DATA_FIELD_SUBDEVICE \
-        | scTDC.SC_DATA_FIELD_TIME_TAG \
         | scTDC.SC_DATA_FIELD_START_COUNTER
 # define some constants to distinguish the type of element placed in the queue
 QUEUE_DATA = 0
@@ -35,22 +31,10 @@ QUEUE_ENDOFMEAS = 1
 
 
 class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
-    def __init__(self, lib, dev_desc, raw_mode,  dld_events,
-                 max_buffered_data_len=500000):
-        if not raw_mode:
-            data_field_selection = \
-                scTDC.SC_DATA_FIELD_DIF1 \
-                | scTDC.SC_DATA_FIELD_DIF2 \
-                | scTDC.SC_DATA_FIELD_TIME \
-                | scTDC.SC_DATA_FIELD_START_COUNTER
-        elif raw_mode:
-            data_field_selection = \
-                scTDC.SC_DATA_FIELD_TIME \
-                | scTDC.SC_DATA_FIELD_CHANNEL \
-                | scTDC.SC_DATA_FIELD_SUBDEVICE \
-                | scTDC.SC_DATA_FIELD_START_COUNTER \
-                | scTDC.SC_DATA_FIELD_TIME_TAG \
-
+    def __init__(self, lib, dev_desc,
+                 data_field_selection=DATA_FIELD_SEL1,
+                 max_buffered_data_len=500000,
+                 dld_events=not raw_mode):
         super().__init__(lib, dev_desc, data_field_selection,  # <-- mandatory!
                          max_buffered_data_len, dld_events)  # <-- mandatory!
 
@@ -82,7 +66,7 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
 # -----------------------------------------------------------------------------
 
 
-def run():
+def test4():
     device = scTDC.Device(autoinit=False)
 
     # initialize TDC --- and check for error!
@@ -94,15 +78,13 @@ def run():
         print("successfully initialized")
 
     # open a BUFFERED_DATA_CALLBACKS pipe
-    bufdatacb_dld = BufDataCB4(device.lib, device.dev_desc, raw_mode=False, dld_events=True)
-    # bufdatacb_tdc = BufDataCB4(device.lib, device.dev_desc, raw_mode=True, dld_events=False)
+    bufdatacb = BufDataCB4(device.lib, device.dev_desc)
 
     # define a closure that checks return codes for errors and does clean up
     def errorcheck(retcode):
         if retcode < 0:
             print(device.lib.sc_get_err_msg(retcode))
-            bufdatacb_dld.close()
-            # bufdatacb_tdc.close()
+            bufdatacb.close()
             device.deinitialize()
             return -1
         else:
@@ -111,37 +93,34 @@ def run():
     start = timeit.default_timer()
 
     # start a first measurement
-    retcode = bufdatacb_dld.start_measurement(EXPOSURE_MS)
+    retcode = bufdatacb.start_measurement(EXPOSURE_MS)
     if errorcheck(retcode) < 0:
         return -1
 
     meas_remaining = NR_OF_MEASUREMENTS
     while True:
-        print('Number of remaining measurement',meas_remaining)
-        eventtype_dld, data_dld = bufdatacb_dld.queue.get()  # waits until element available
-        # eventtype_tdc, data_tdc = bufdatacb_tdc.queue.get()  # waits until element available
-        if eventtype_dld == QUEUE_DATA:
+        eventtype, data = bufdatacb.queue.get()  # waits until element available
+        if eventtype == QUEUE_DATA:
+            if not raw_mode:
+                print(len(data["start_counter"]))
+                a = np.array((data["start_counter"],
+                              data["dif1"], data["dif2"], data["time"]))
+            elif raw_mode:
+                a = np.array((data["channel"], data["start_counter"],
+                              data["time"]))
+        elif eventtype == QUEUE_ENDOFMEAS:
+            # data_to_textfile.write_measurement_separator()
 
-            print(len(data_dld["start_counter"]))
-            a_dld = np.array((data_dld["start_counter"],
-                          data_dld["dif1"], data_dld["dif2"], data_dld["time"]))
-            print(a_dld)
-            print('+++++++++++++++++++++++++++')
-        # if eventtype_tdc == QUEUE_DATA:
-        #     print(len(data_tdc["start_counter"]))
-        #     # a_tdc = np.array((data_tdc["channel"], data_tdc["start_counter"],
-        #     #               data_tdc["time"], data_tdc["time_tag"], data_tdc["subdevice"]))
-        #     print(data_tdc["time_tag"])
-            # print(a_tdc)
-
+            print(a)
             print('==========================')
-        meas_remaining = meas_remaining - 1
-        if meas_remaining > 0:
-            retcode = bufdatacb_dld.start_measurement(EXPOSURE_MS)
-            if errorcheck(retcode) < 0:
-                return -1
-            # else:
-            #     break
+            print(meas_remaining)
+            meas_remaining -= 1
+            if meas_remaining > 0:
+                retcode = bufdatacb.start_measurement(EXPOSURE_MS)
+                if errorcheck(retcode) < 0:
+                    return -1
+            else:
+                break
         else:  # unknown event
             break  # break out of the event loop
 
@@ -150,12 +129,11 @@ def run():
 
     time.sleep(0.1)
     # clean up
-    bufdatacb_dld.close()  # closes the user callbacks pipe, method inherited from base class
-    # bufdatacb_tdc.close()
+    bufdatacb.close()  # closes the user callbacks pipe, method inherited from base class
     device.deinitialize()
 
     return 0
 
 
 if __name__ == "__main__":
-    run()
+    test4()

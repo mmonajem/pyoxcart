@@ -20,21 +20,8 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
     The class inherits from python wrapper module scTDC and class: buffered_data_callbacks_pipe
     """
 
-    def __init__(self, lib, dev_desc, raw_mode, dld_events,
+    def __init__(self, lib, dev_desc, data_field_selection, dld_events,
                  max_buffered_data_len=500000):
-        if not raw_mode:
-            data_field_selection = \
-                scTDC.SC_DATA_FIELD_DIF1 \
-                | scTDC.SC_DATA_FIELD_DIF2 \
-                | scTDC.SC_DATA_FIELD_TIME \
-                | scTDC.SC_DATA_FIELD_SUBDEVICE \
-                | scTDC.SC_DATA_FIELD_START_COUNTER
-        elif raw_mode:
-            data_field_selection = \
-                scTDC.SC_DATA_FIELD_TIME \
-                | scTDC.SC_DATA_FIELD_CHANNEL \
-                | scTDC.SC_DATA_FIELD_SUBDEVICE \
-                | scTDC.SC_DATA_FIELD_START_COUNTER
 
         '''
         Initialize the base class: scTDC.buffered_data_callbacks_pipe
@@ -110,7 +97,7 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
 # -----------------------------------------------------------------------------
 
 
-def experiment_measure(raw_mode, queue_x,
+def experiment_measure(queue_x,
                        queue_y, queue_t,
                        queue_dld_start_counter,
                        queue_channel,
@@ -150,8 +137,18 @@ def experiment_measure(raw_mode, queue_x,
     else:
         print("TDC is successfully initialized")
 
+    DATA_FIELD_SEL = \
+        scTDC.SC_DATA_FIELD_DIF1 \
+        | scTDC.SC_DATA_FIELD_DIF2 \
+        | scTDC.SC_DATA_FIELD_TIME \
+        | scTDC.SC_DATA_FIELD_START_COUNTER
+    DATA_FIELD_SEL_raw = \
+        scTDC.SC_DATA_FIELD_TIME \
+        | scTDC.SC_DATA_FIELD_CHANNEL \
+        | scTDC.SC_DATA_FIELD_START_COUNTER
     # open a BUFFERED_DATA_CALLBACKS pipe
-    bufdatacb = BufDataCB4(device.lib, device.dev_desc, raw_mode, dld_events=not raw_mode)
+    bufdatacb = BufDataCB4(device.lib, device.dev_desc, DATA_FIELD_SEL, dld_events=True)
+    bufdatacb_raw = BufDataCB4(device.lib, device.dev_desc, DATA_FIELD_SEL_raw, dld_events=False)
     def errorcheck(retcode):
         """
         This function define a closure that checks return codes for errors and does clean up.
@@ -178,16 +175,16 @@ def experiment_measure(raw_mode, queue_x,
 
     while True:
         eventtype, data = bufdatacb.queue.get()  # waits until element available
+        eventtype_raw, data_raw = bufdatacb_raw.queue.get()  # waits until element available
         if eventtype == QUEUE_DATA:
-            if not raw_mode:
-                queue_x.put(data["dif1"])
-                queue_y.put(data["dif2"])
-                queue_t.put(data["time"])
-                queue_dld_start_counter.put(data["start_counter"])
-            elif raw_mode:
-                queue_channel.put(data["channel"])
-                queue_time_data.put(data["time"])
-                queue_tdc_start_counter.put(data["start_counter"])
+            queue_x.put(data["dif1"])
+            queue_y.put(data["dif2"])
+            queue_t.put(data["time"])
+            queue_dld_start_counter.put(data["start_counter"])
+            # raw data
+            queue_channel.put(data_raw["channel"])
+            queue_time_data.put(data_raw["time"])
+            queue_tdc_start_counter.put(data_raw["start_counter"])
         elif eventtype == QUEUE_ENDOFMEAS:
             if queue_stop_measurement.empty():
                 retcode = bufdatacb.start_measurement(300)

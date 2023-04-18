@@ -19,25 +19,23 @@ import pyqtgraph.exporters
 # Local module and scripts
 from pyccapt.control.apt import apt_tdc_surface_consept
 from pyccapt.control.control_tools import variables, tof2mc_simple
-from pyccapt.control.devices.camera import Camera
 from pyccapt.control.devices import initialize_devices
 
 
-class UI_APT_A(Camera, object):
+class UI_APT_A(object):
     """
     The GUI class of advance atom probe GUI
     """
 
-    def __init__(self, devices, tlFactory, cameras, converter, lock, app, conf):
-        if conf['camera'] == "on":
-            super().__init__(devices, tlFactory, cameras, converter)  # Cameras variables and converter
+    def __init__(self, camera, lock, app, conf):
+        self.camera = camera
         self.lock = lock  # Lock for thread ...
         self.app = app
         self.conf = conf
 
     def setupUi(self, UI_APT_A):
         UI_APT_A.setObjectName("UI_APT_A")
-        UI_APT_A.resize(1854, 1059)
+        UI_APT_A.resize(1857, 1059)
         self.centralwidget = QtWidgets.QWidget(UI_APT_A)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout_9 = QtWidgets.QGridLayout(self.centralwidget)
@@ -153,7 +151,7 @@ class UI_APT_A(Camera, object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.vacuum_load_lock.sizePolicy().hasHeightForWidth())
         self.vacuum_load_lock.setSizePolicy(sizePolicy)
-        self.vacuum_load_lock.setMinimumSize(QtCore.QSize(130, 50))
+        self.vacuum_load_lock.setMinimumSize(QtCore.QSize(100, 50))
         self.vacuum_load_lock.setStyleSheet("QLCDNumber{\n"
 "border: 2px solid yellow;\n"
 "border-radius: 10px;\n"
@@ -209,8 +207,12 @@ class UI_APT_A(Camera, object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.temperature.sizePolicy().hasHeightForWidth())
         self.temperature.setSizePolicy(sizePolicy)
-        self.temperature.setMinimumSize(QtCore.QSize(200, 200))
-        self.temperature.setMaximumSize(QtCore.QSize(400, 200))
+        self.temperature.setMinimumSize(QtCore.QSize(100, 100))
+        self.temperature.setStyleSheet("QWidget{\n"
+"border: 2px solid gray;\n"
+"border-radius: 10px;\n"
+"padding: 4 4px;\n"
+"}")
         self.temperature.setObjectName("temperature")
         self.horizontalLayout_8.addWidget(self.temperature)
         self.horizontalLayout_7 = QtWidgets.QHBoxLayout()
@@ -396,54 +398,19 @@ class UI_APT_A(Camera, object):
         self.gridLayout_7.addLayout(self.gridLayout_4, 1, 0, 1, 1)
         self.gridLayout_5 = QtWidgets.QGridLayout()
         self.gridLayout_5.setObjectName("gridLayout_5")
+        self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.gridLayout_5.addLayout(self.verticalLayout, 0, 1, 1, 1)
         self.gridLayout_3 = QtWidgets.QGridLayout()
         self.gridLayout_3.setObjectName("gridLayout_3")
-        self.label_23 = QtWidgets.QLabel(self.centralwidget)
+        self.label_42 = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_23.sizePolicy().hasHeightForWidth())
-        self.label_23.setSizePolicy(sizePolicy)
-        self.label_23.setObjectName("label_23")
-        self.gridLayout_3.addWidget(self.label_23, 14, 0, 1, 2)
-        self.vdc_steps_down = QtWidgets.QLineEdit(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.vdc_steps_down.sizePolicy().hasHeightForWidth())
-        self.vdc_steps_down.setSizePolicy(sizePolicy)
-        self.vdc_steps_down.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
-        self.vdc_steps_down.setObjectName("vdc_steps_down")
-        self.gridLayout_3.addWidget(self.vdc_steps_down, 9, 2, 1, 1)
-        self.pulse_frequency = QtWidgets.QLineEdit(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pulse_frequency.sizePolicy().hasHeightForWidth())
-        self.pulse_frequency.setSizePolicy(sizePolicy)
-        self.pulse_frequency.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
-        self.pulse_frequency.setObjectName("pulse_frequency")
-        self.gridLayout_3.addWidget(self.pulse_frequency, 14, 2, 1, 1)
-        self.label_17 = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_17.sizePolicy().hasHeightForWidth())
-        self.label_17.setSizePolicy(sizePolicy)
-        self.label_17.setObjectName("label_17")
-        self.gridLayout_3.addWidget(self.label_17, 15, 0, 1, 2)
-        self.label_20 = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_20.sizePolicy().hasHeightForWidth())
-        self.label_20.setSizePolicy(sizePolicy)
-        self.label_20.setObjectName("label_20")
-        self.gridLayout_3.addWidget(self.label_20, 10, 0, 1, 2)
+        sizePolicy.setHeightForWidth(self.label_42.sizePolicy().hasHeightForWidth())
+        self.label_42.setSizePolicy(sizePolicy)
+        self.label_42.setObjectName("label_42")
+        self.gridLayout_3.addWidget(self.label_42, 19, 0, 1, 1)
         self.pulse_fraction = QtWidgets.QLineEdit(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -454,29 +421,7 @@ class UI_APT_A(Camera, object):
 "background: rgb(223,223,233)\n"
 "}")
         self.pulse_fraction.setObjectName("pulse_fraction")
-        self.gridLayout_3.addWidget(self.pulse_fraction, 13, 2, 1, 1)
-        self.detection_rate_init = QtWidgets.QLineEdit(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.detection_rate_init.sizePolicy().hasHeightForWidth())
-        self.detection_rate_init.setSizePolicy(sizePolicy)
-        self.detection_rate_init.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
-        self.detection_rate_init.setObjectName("detection_rate_init")
-        self.gridLayout_3.addWidget(self.detection_rate_init, 15, 2, 1, 1)
-        self.cycle_avg = QtWidgets.QLineEdit(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.cycle_avg.sizePolicy().hasHeightForWidth())
-        self.cycle_avg.setSizePolicy(sizePolicy)
-        self.cycle_avg.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
-        self.cycle_avg.setObjectName("cycle_avg")
-        self.gridLayout_3.addWidget(self.cycle_avg, 10, 2, 1, 1)
+        self.gridLayout_3.addWidget(self.pulse_fraction, 13, 3, 1, 1)
         self.vp_max = QtWidgets.QLineEdit(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -487,37 +432,7 @@ class UI_APT_A(Camera, object):
 "background: rgb(223,223,233)\n"
 "}")
         self.vp_max.setObjectName("vp_max")
-        self.gridLayout_3.addWidget(self.vp_max, 12, 2, 1, 1)
-        self.vdc_steps_up = QtWidgets.QLineEdit(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.vdc_steps_up.sizePolicy().hasHeightForWidth())
-        self.vdc_steps_up.setSizePolicy(sizePolicy)
-        self.vdc_steps_up.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
-        self.vdc_steps_up.setObjectName("vdc_steps_up")
-        self.gridLayout_3.addWidget(self.vdc_steps_up, 8, 2, 1, 1)
-        self.label_8 = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_8.sizePolicy().hasHeightForWidth())
-        self.label_8.setSizePolicy(sizePolicy)
-        self.label_8.setObjectName("label_8")
-        self.gridLayout_3.addWidget(self.label_8, 11, 0, 1, 2)
-        self.label_9 = QtWidgets.QLabel(self.centralwidget)
-        self.label_9.setObjectName("label_9")
-        self.gridLayout_3.addWidget(self.label_9, 12, 0, 1, 2)
-        self.label_25 = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_25.sizePolicy().hasHeightForWidth())
-        self.label_25.setSizePolicy(sizePolicy)
-        self.label_25.setObjectName("label_25")
-        self.gridLayout_3.addWidget(self.label_25, 13, 0, 1, 2)
+        self.gridLayout_3.addWidget(self.vp_max, 12, 3, 1, 1)
         self.label_28 = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -526,33 +441,6 @@ class UI_APT_A(Camera, object):
         self.label_28.setSizePolicy(sizePolicy)
         self.label_28.setObjectName("label_28")
         self.gridLayout_3.addWidget(self.label_28, 9, 0, 1, 1)
-        self.vp_min = QtWidgets.QLineEdit(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.vp_min.sizePolicy().hasHeightForWidth())
-        self.vp_min.setSizePolicy(sizePolicy)
-        self.vp_min.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
-        self.vp_min.setObjectName("vp_min")
-        self.gridLayout_3.addWidget(self.vp_min, 11, 2, 1, 1)
-        self.label_42 = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_42.sizePolicy().hasHeightForWidth())
-        self.label_42.setSizePolicy(sizePolicy)
-        self.label_42.setObjectName("label_42")
-        self.gridLayout_3.addWidget(self.label_42, 19, 0, 1, 1)
-        self.label_22 = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_22.sizePolicy().hasHeightForWidth())
-        self.label_22.setSizePolicy(sizePolicy)
-        self.label_22.setObjectName("label_22")
-        self.gridLayout_3.addWidget(self.label_22, 16, 0, 1, 1)
         self.doubleSpinBox = QtWidgets.QDoubleSpinBox(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -563,19 +451,85 @@ class UI_APT_A(Camera, object):
 "background: rgb(223,223,233)\n"
 "}")
         self.doubleSpinBox.setObjectName("doubleSpinBox")
-        self.gridLayout_3.addWidget(self.doubleSpinBox, 16, 1, 1, 1)
-        self.email = QtWidgets.QLineEdit(self.centralwidget)
+        self.gridLayout_3.addWidget(self.doubleSpinBox, 16, 2, 1, 1)
+        self.label = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.email.sizePolicy().hasHeightForWidth())
-        self.email.setSizePolicy(sizePolicy)
-        self.email.setStyleSheet("QLineEdit{\n"
+        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label.setFont(font)
+        self.label.setObjectName("label")
+        self.gridLayout_3.addWidget(self.label, 0, 0, 1, 3)
+        self.parameters_source = QtWidgets.QComboBox(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.parameters_source.sizePolicy().hasHeightForWidth())
+        self.parameters_source.setSizePolicy(sizePolicy)
+        self.parameters_source.setStyleSheet("QComboBox{\n"
 "background: rgb(223,223,233)\n"
 "}")
-        self.email.setText("")
-        self.email.setObjectName("email")
-        self.gridLayout_3.addWidget(self.email, 17, 2, 1, 1)
+        self.parameters_source.setObjectName("parameters_source")
+        self.parameters_source.addItem("")
+        self.parameters_source.addItem("")
+        self.gridLayout_3.addWidget(self.parameters_source, 0, 3, 1, 1)
+        self.label_21 = QtWidgets.QLabel(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_21.sizePolicy().hasHeightForWidth())
+        self.label_21.setSizePolicy(sizePolicy)
+        self.label_21.setObjectName("label_21")
+        self.gridLayout_3.addWidget(self.label_21, 2, 0, 1, 1)
+        self.vdc_steps_down = QtWidgets.QLineEdit(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.vdc_steps_down.sizePolicy().hasHeightForWidth())
+        self.vdc_steps_down.setSizePolicy(sizePolicy)
+        self.vdc_steps_down.setStyleSheet("QLineEdit{\n"
+"background: rgb(223,223,233)\n"
+"}")
+        self.vdc_steps_down.setObjectName("vdc_steps_down")
+        self.gridLayout_3.addWidget(self.vdc_steps_down, 9, 3, 1, 1)
+        self.label_5 = QtWidgets.QLabel(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_5.sizePolicy().hasHeightForWidth())
+        self.label_5.setSizePolicy(sizePolicy)
+        self.label_5.setObjectName("label_5")
+        self.gridLayout_3.addWidget(self.label_5, 7, 0, 1, 1)
+        self.label_43 = QtWidgets.QLabel(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_43.sizePolicy().hasHeightForWidth())
+        self.label_43.setSizePolicy(sizePolicy)
+        self.label_43.setObjectName("label_43")
+        self.gridLayout_3.addWidget(self.label_43, 1, 0, 1, 1)
+        self.label_41 = QtWidgets.QLabel(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_41.sizePolicy().hasHeightForWidth())
+        self.label_41.setSizePolicy(sizePolicy)
+        self.label_41.setObjectName("label_41")
+        self.gridLayout_3.addWidget(self.label_41, 4, 0, 1, 1)
+        self.ex_time = QtWidgets.QLineEdit(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.ex_time.sizePolicy().hasHeightForWidth())
+        self.ex_time.setSizePolicy(sizePolicy)
+        self.ex_time.setStyleSheet("QLineEdit{\n"
+"background: rgb(223,223,233)\n"
+"}")
+        self.ex_time.setObjectName("ex_time")
+        self.gridLayout_3.addWidget(self.ex_time, 3, 3, 1, 1)
         self.label_27 = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -584,17 +538,58 @@ class UI_APT_A(Camera, object):
         self.label_27.setSizePolicy(sizePolicy)
         self.label_27.setObjectName("label_27")
         self.gridLayout_3.addWidget(self.label_27, 18, 0, 1, 1)
-        self.hit_displayed = QtWidgets.QLineEdit(self.centralwidget)
+        self.vp_min = QtWidgets.QLineEdit(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.hit_displayed.sizePolicy().hasHeightForWidth())
-        self.hit_displayed.setSizePolicy(sizePolicy)
-        self.hit_displayed.setStyleSheet("QLineEdit{\n"
+        sizePolicy.setHeightForWidth(self.vp_min.sizePolicy().hasHeightForWidth())
+        self.vp_min.setSizePolicy(sizePolicy)
+        self.vp_min.setStyleSheet("QLineEdit{\n"
 "background: rgb(223,223,233)\n"
 "}")
-        self.hit_displayed.setObjectName("hit_displayed")
-        self.gridLayout_3.addWidget(self.hit_displayed, 16, 2, 1, 1)
+        self.vp_min.setObjectName("vp_min")
+        self.gridLayout_3.addWidget(self.vp_min, 11, 3, 1, 1)
+        self.vdc_min = QtWidgets.QLineEdit(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.vdc_min.sizePolicy().hasHeightForWidth())
+        self.vdc_min.setSizePolicy(sizePolicy)
+        self.vdc_min.setStyleSheet("QLineEdit{\n"
+"background: rgb(223,223,233)\n"
+"}")
+        self.vdc_min.setObjectName("vdc_min")
+        self.gridLayout_3.addWidget(self.vdc_min, 6, 3, 1, 1)
+        self.vdc_max = QtWidgets.QLineEdit(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.vdc_max.sizePolicy().hasHeightForWidth())
+        self.vdc_max.setSizePolicy(sizePolicy)
+        self.vdc_max.setStyleSheet("QLineEdit{\n"
+"background: rgb(223,223,233)\n"
+"}")
+        self.vdc_max.setObjectName("vdc_max")
+        self.gridLayout_3.addWidget(self.vdc_max, 7, 3, 1, 1)
+        self.cycle_avg = QtWidgets.QLineEdit(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.cycle_avg.sizePolicy().hasHeightForWidth())
+        self.cycle_avg.setSizePolicy(sizePolicy)
+        self.cycle_avg.setStyleSheet("QLineEdit{\n"
+"background: rgb(223,223,233)\n"
+"}")
+        self.cycle_avg.setObjectName("cycle_avg")
+        self.gridLayout_3.addWidget(self.cycle_avg, 10, 3, 1, 1)
+        self.label_8 = QtWidgets.QLabel(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_8.sizePolicy().hasHeightForWidth())
+        self.label_8.setSizePolicy(sizePolicy)
+        self.label_8.setObjectName("label_8")
+        self.gridLayout_3.addWidget(self.label_8, 11, 0, 1, 3)
         self.label_26 = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -603,19 +598,36 @@ class UI_APT_A(Camera, object):
         self.label_26.setSizePolicy(sizePolicy)
         self.label_26.setObjectName("label_26")
         self.gridLayout_3.addWidget(self.label_26, 17, 0, 1, 1)
-        self.tweet = QtWidgets.QComboBox(self.centralwidget)
+        self.ex_user = QtWidgets.QLineEdit(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.tweet.sizePolicy().hasHeightForWidth())
-        self.tweet.setSizePolicy(sizePolicy)
-        self.tweet.setStyleSheet("QComboBox{\n"
+        sizePolicy.setHeightForWidth(self.ex_user.sizePolicy().hasHeightForWidth())
+        self.ex_user.setSizePolicy(sizePolicy)
+        self.ex_user.setStyleSheet("QLineEdit{\n"
 "background: rgb(223,223,233)\n"
 "}")
-        self.tweet.setObjectName("tweet")
-        self.tweet.addItem("")
-        self.tweet.addItem("")
-        self.gridLayout_3.addWidget(self.tweet, 18, 2, 1, 1)
+        self.ex_user.setObjectName("ex_user")
+        self.gridLayout_3.addWidget(self.ex_user, 1, 3, 1, 1)
+        self.ex_name = QtWidgets.QLineEdit(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.ex_name.sizePolicy().hasHeightForWidth())
+        self.ex_name.setSizePolicy(sizePolicy)
+        self.ex_name.setStyleSheet("QLineEdit{\n"
+"background: rgb(223,223,233)\n"
+"}")
+        self.ex_name.setObjectName("ex_name")
+        self.gridLayout_3.addWidget(self.ex_name, 2, 3, 1, 1)
+        self.label_25 = QtWidgets.QLabel(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_25.sizePolicy().hasHeightForWidth())
+        self.label_25.setSizePolicy(sizePolicy)
+        self.label_25.setObjectName("label_25")
+        self.gridLayout_3.addWidget(self.label_25, 13, 0, 1, 3)
         self.counter_source = QtWidgets.QComboBox(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -629,89 +641,49 @@ class UI_APT_A(Camera, object):
         self.counter_source.addItem("")
         self.counter_source.addItem("")
         self.counter_source.addItem("")
-        self.counter_source.addItem("")
-        self.gridLayout_3.addWidget(self.counter_source, 19, 2, 1, 1)
-        self.parameters_source = QtWidgets.QComboBox(self.centralwidget)
+        self.gridLayout_3.addWidget(self.counter_source, 19, 3, 1, 1)
+        self.detection_rate_init = QtWidgets.QLineEdit(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.parameters_source.sizePolicy().hasHeightForWidth())
-        self.parameters_source.setSizePolicy(sizePolicy)
-        self.parameters_source.setStyleSheet("QComboBox{\n"
+        sizePolicy.setHeightForWidth(self.detection_rate_init.sizePolicy().hasHeightForWidth())
+        self.detection_rate_init.setSizePolicy(sizePolicy)
+        self.detection_rate_init.setStyleSheet("QLineEdit{\n"
 "background: rgb(223,223,233)\n"
 "}")
-        self.parameters_source.setObjectName("parameters_source")
-        self.parameters_source.addItem("")
-        self.parameters_source.addItem("")
-        self.gridLayout_3.addWidget(self.parameters_source, 0, 2, 1, 1)
-        self.label_21 = QtWidgets.QLabel(self.centralwidget)
+        self.detection_rate_init.setObjectName("detection_rate_init")
+        self.gridLayout_3.addWidget(self.detection_rate_init, 15, 3, 1, 1)
+        self.hit_displayed = QtWidgets.QLineEdit(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_21.sizePolicy().hasHeightForWidth())
-        self.label_21.setSizePolicy(sizePolicy)
-        self.label_21.setObjectName("label_21")
-        self.gridLayout_3.addWidget(self.label_21, 2, 0, 1, 1)
-        self.ex_user = QtWidgets.QLineEdit(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.ex_user.sizePolicy().hasHeightForWidth())
-        self.ex_user.setSizePolicy(sizePolicy)
-        self.ex_user.setStyleSheet("QLineEdit{\n"
+        sizePolicy.setHeightForWidth(self.hit_displayed.sizePolicy().hasHeightForWidth())
+        self.hit_displayed.setSizePolicy(sizePolicy)
+        self.hit_displayed.setStyleSheet("QLineEdit{\n"
 "background: rgb(223,223,233)\n"
 "}")
-        self.ex_user.setObjectName("ex_user")
-        self.gridLayout_3.addWidget(self.ex_user, 1, 2, 1, 1)
-        self.label_43 = QtWidgets.QLabel(self.centralwidget)
+        self.hit_displayed.setObjectName("hit_displayed")
+        self.gridLayout_3.addWidget(self.hit_displayed, 16, 3, 1, 1)
+        self.label_23 = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_43.sizePolicy().hasHeightForWidth())
-        self.label_43.setSizePolicy(sizePolicy)
-        self.label_43.setObjectName("label_43")
-        self.gridLayout_3.addWidget(self.label_43, 1, 0, 1, 1)
-        self.label = QtWidgets.QLabel(self.centralwidget)
+        sizePolicy.setHeightForWidth(self.label_23.sizePolicy().hasHeightForWidth())
+        self.label_23.setSizePolicy(sizePolicy)
+        self.label_23.setObjectName("label_23")
+        self.gridLayout_3.addWidget(self.label_23, 14, 0, 1, 3)
+        self.email = QtWidgets.QLineEdit(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setBold(True)
-        self.label.setFont(font)
-        self.label.setObjectName("label")
-        self.gridLayout_3.addWidget(self.label, 0, 0, 1, 2)
-        self.ex_name = QtWidgets.QLineEdit(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.ex_name.sizePolicy().hasHeightForWidth())
-        self.ex_name.setSizePolicy(sizePolicy)
-        self.ex_name.setStyleSheet("QLineEdit{\n"
+        sizePolicy.setHeightForWidth(self.email.sizePolicy().hasHeightForWidth())
+        self.email.setSizePolicy(sizePolicy)
+        self.email.setStyleSheet("QLineEdit{\n"
 "background: rgb(223,223,233)\n"
 "}")
-        self.ex_name.setObjectName("ex_name")
-        self.gridLayout_3.addWidget(self.ex_name, 2, 2, 1, 1)
-        self.label_3 = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_3.sizePolicy().hasHeightForWidth())
-        self.label_3.setSizePolicy(sizePolicy)
-        self.label_3.setObjectName("label_3")
-        self.gridLayout_3.addWidget(self.label_3, 5, 0, 1, 2)
-        self.ex_freq = QtWidgets.QLineEdit(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.ex_freq.sizePolicy().hasHeightForWidth())
-        self.ex_freq.setSizePolicy(sizePolicy)
-        self.ex_freq.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
-        self.ex_freq.setObjectName("ex_freq")
-        self.gridLayout_3.addWidget(self.ex_freq, 5, 2, 1, 1)
+        self.email.setText("")
+        self.email.setObjectName("email")
+        self.gridLayout_3.addWidget(self.email, 17, 3, 1, 1)
         self.max_ions = QtWidgets.QLineEdit(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -722,76 +694,40 @@ class UI_APT_A(Camera, object):
 "background: rgb(223,223,233)\n"
 "}")
         self.max_ions.setObjectName("max_ions")
-        self.gridLayout_3.addWidget(self.max_ions, 4, 2, 1, 1)
-        self.label_4 = QtWidgets.QLabel(self.centralwidget)
+        self.gridLayout_3.addWidget(self.max_ions, 4, 3, 1, 1)
+        self.vdc_steps_up = QtWidgets.QLineEdit(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_4.sizePolicy().hasHeightForWidth())
-        self.label_4.setSizePolicy(sizePolicy)
-        self.label_4.setObjectName("label_4")
-        self.gridLayout_3.addWidget(self.label_4, 6, 0, 1, 2)
-        self.ex_time = QtWidgets.QLineEdit(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.ex_time.sizePolicy().hasHeightForWidth())
-        self.ex_time.setSizePolicy(sizePolicy)
-        self.ex_time.setStyleSheet("QLineEdit{\n"
+        sizePolicy.setHeightForWidth(self.vdc_steps_up.sizePolicy().hasHeightForWidth())
+        self.vdc_steps_up.setSizePolicy(sizePolicy)
+        self.vdc_steps_up.setStyleSheet("QLineEdit{\n"
 "background: rgb(223,223,233)\n"
 "}")
-        self.ex_time.setObjectName("ex_time")
-        self.gridLayout_3.addWidget(self.ex_time, 3, 2, 1, 1)
-        self.vdc_min = QtWidgets.QLineEdit(self.centralwidget)
+        self.vdc_steps_up.setObjectName("vdc_steps_up")
+        self.gridLayout_3.addWidget(self.vdc_steps_up, 8, 3, 1, 1)
+        self.label_9 = QtWidgets.QLabel(self.centralwidget)
+        self.label_9.setObjectName("label_9")
+        self.gridLayout_3.addWidget(self.label_9, 12, 0, 1, 3)
+        self.label_22 = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.vdc_min.sizePolicy().hasHeightForWidth())
-        self.vdc_min.setSizePolicy(sizePolicy)
-        self.vdc_min.setStyleSheet("QLineEdit{\n"
+        sizePolicy.setHeightForWidth(self.label_22.sizePolicy().hasHeightForWidth())
+        self.label_22.setSizePolicy(sizePolicy)
+        self.label_22.setObjectName("label_22")
+        self.gridLayout_3.addWidget(self.label_22, 16, 0, 1, 1)
+        self.ex_freq = QtWidgets.QLineEdit(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.ex_freq.sizePolicy().hasHeightForWidth())
+        self.ex_freq.setSizePolicy(sizePolicy)
+        self.ex_freq.setStyleSheet("QLineEdit{\n"
 "background: rgb(223,223,233)\n"
 "}")
-        self.vdc_min.setObjectName("vdc_min")
-        self.gridLayout_3.addWidget(self.vdc_min, 6, 2, 1, 1)
-        self.vdc_max = QtWidgets.QLineEdit(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.vdc_max.sizePolicy().hasHeightForWidth())
-        self.vdc_max.setSizePolicy(sizePolicy)
-        self.vdc_max.setStyleSheet("QLineEdit{\n"
-"background: rgb(223,223,233)\n"
-"}")
-        self.vdc_max.setObjectName("vdc_max")
-        self.gridLayout_3.addWidget(self.vdc_max, 7, 2, 1, 1)
-        self.label_6 = QtWidgets.QLabel(self.centralwidget)
-        self.label_6.setObjectName("label_6")
-        self.gridLayout_3.addWidget(self.label_6, 8, 0, 1, 1)
-        self.label_41 = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_41.sizePolicy().hasHeightForWidth())
-        self.label_41.setSizePolicy(sizePolicy)
-        self.label_41.setObjectName("label_41")
-        self.gridLayout_3.addWidget(self.label_41, 4, 0, 1, 1)
-        self.criteria_ions = QtWidgets.QCheckBox(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.criteria_ions.sizePolicy().hasHeightForWidth())
-        self.criteria_ions.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setItalic(False)
-        self.criteria_ions.setFont(font)
-        self.criteria_ions.setMouseTracking(True)
-        self.criteria_ions.setStyleSheet("QCheckBox{\n"
-"background: rgb(223,223,233)\n"
-"}")
-        self.criteria_ions.setText("")
-        self.criteria_ions.setChecked(True)
-        self.criteria_ions.setObjectName("criteria_ions")
-        self.gridLayout_3.addWidget(self.criteria_ions, 4, 1, 1, 1)
+        self.ex_freq.setObjectName("ex_freq")
+        self.gridLayout_3.addWidget(self.ex_freq, 5, 3, 1, 1)
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -800,31 +736,65 @@ class UI_APT_A(Camera, object):
         self.label_2.setSizePolicy(sizePolicy)
         self.label_2.setObjectName("label_2")
         self.gridLayout_3.addWidget(self.label_2, 3, 0, 1, 1)
-        self.criteria_time = QtWidgets.QCheckBox(self.centralwidget)
+        self.label_3 = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.criteria_time.sizePolicy().hasHeightForWidth())
-        self.criteria_time.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setItalic(False)
-        self.criteria_time.setFont(font)
-        self.criteria_time.setMouseTracking(True)
-        self.criteria_time.setStyleSheet("QCheckBox{\n"
+        sizePolicy.setHeightForWidth(self.label_3.sizePolicy().hasHeightForWidth())
+        self.label_3.setSizePolicy(sizePolicy)
+        self.label_3.setObjectName("label_3")
+        self.gridLayout_3.addWidget(self.label_3, 5, 0, 1, 3)
+        self.label_20 = QtWidgets.QLabel(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_20.sizePolicy().hasHeightForWidth())
+        self.label_20.setSizePolicy(sizePolicy)
+        self.label_20.setObjectName("label_20")
+        self.gridLayout_3.addWidget(self.label_20, 10, 0, 1, 3)
+        self.label_4 = QtWidgets.QLabel(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_4.sizePolicy().hasHeightForWidth())
+        self.label_4.setSizePolicy(sizePolicy)
+        self.label_4.setObjectName("label_4")
+        self.gridLayout_3.addWidget(self.label_4, 6, 0, 1, 1)
+        self.pulse_frequency = QtWidgets.QLineEdit(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pulse_frequency.sizePolicy().hasHeightForWidth())
+        self.pulse_frequency.setSizePolicy(sizePolicy)
+        self.pulse_frequency.setStyleSheet("QLineEdit{\n"
 "background: rgb(223,223,233)\n"
 "}")
-        self.criteria_time.setText("")
-        self.criteria_time.setChecked(True)
-        self.criteria_time.setObjectName("criteria_time")
-        self.gridLayout_3.addWidget(self.criteria_time, 3, 1, 1, 1)
-        self.label_5 = QtWidgets.QLabel(self.centralwidget)
+        self.pulse_frequency.setObjectName("pulse_frequency")
+        self.gridLayout_3.addWidget(self.pulse_frequency, 14, 3, 1, 1)
+        self.label_17 = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_5.sizePolicy().hasHeightForWidth())
-        self.label_5.setSizePolicy(sizePolicy)
-        self.label_5.setObjectName("label_5")
-        self.gridLayout_3.addWidget(self.label_5, 7, 0, 1, 1)
+        sizePolicy.setHeightForWidth(self.label_17.sizePolicy().hasHeightForWidth())
+        self.label_17.setSizePolicy(sizePolicy)
+        self.label_17.setObjectName("label_17")
+        self.gridLayout_3.addWidget(self.label_17, 15, 0, 1, 3)
+        self.tweet = QtWidgets.QComboBox(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.tweet.sizePolicy().hasHeightForWidth())
+        self.tweet.setSizePolicy(sizePolicy)
+        self.tweet.setStyleSheet("QComboBox{\n"
+"background: rgb(223,223,233)\n"
+"}")
+        self.tweet.setObjectName("tweet")
+        self.tweet.addItem("")
+        self.tweet.addItem("")
+        self.gridLayout_3.addWidget(self.tweet, 18, 3, 1, 1)
+        self.label_6 = QtWidgets.QLabel(self.centralwidget)
+        self.label_6.setObjectName("label_6")
+        self.gridLayout_3.addWidget(self.label_6, 8, 0, 1, 1)
         self.criteria_vdc = QtWidgets.QCheckBox(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -842,10 +812,44 @@ class UI_APT_A(Camera, object):
         self.criteria_vdc.setChecked(True)
         self.criteria_vdc.setObjectName("criteria_vdc")
         self.gridLayout_3.addWidget(self.criteria_vdc, 7, 1, 1, 1)
+        self.vol_fix = QtWidgets.QPushButton(self.centralwidget)
+        self.vol_fix.setObjectName("vol_fix")
+        self.gridLayout_3.addWidget(self.vol_fix, 7, 2, 1, 1)
+        self.criteria_ions = QtWidgets.QCheckBox(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.criteria_ions.sizePolicy().hasHeightForWidth())
+        self.criteria_ions.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setItalic(False)
+        self.criteria_ions.setFont(font)
+        self.criteria_ions.setMouseTracking(True)
+        self.criteria_ions.setStyleSheet("QCheckBox{\n"
+"background: rgb(223,223,233)\n"
+"}")
+        self.criteria_ions.setText("")
+        self.criteria_ions.setChecked(True)
+        self.criteria_ions.setObjectName("criteria_ions")
+        self.gridLayout_3.addWidget(self.criteria_ions, 4, 1, 1, 1)
+        self.criteria_time = QtWidgets.QCheckBox(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.criteria_time.sizePolicy().hasHeightForWidth())
+        self.criteria_time.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setItalic(False)
+        self.criteria_time.setFont(font)
+        self.criteria_time.setMouseTracking(True)
+        self.criteria_time.setStyleSheet("QCheckBox{\n"
+"background: rgb(223,223,233)\n"
+"}")
+        self.criteria_time.setText("")
+        self.criteria_time.setChecked(True)
+        self.criteria_time.setObjectName("criteria_time")
+        self.gridLayout_3.addWidget(self.criteria_time, 3, 1, 1, 1)
         self.gridLayout_5.addLayout(self.gridLayout_3, 0, 0, 1, 1)
-        self.verticalLayout = QtWidgets.QVBoxLayout()
-        self.verticalLayout.setObjectName("verticalLayout")
-        self.gridLayout_5.addLayout(self.verticalLayout, 0, 1, 1, 1)
         self.gridLayout_7.addLayout(self.gridLayout_5, 0, 0, 1, 1)
         self.gridLayout_13.addLayout(self.gridLayout_7, 0, 0, 1, 1)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout()
@@ -922,7 +926,6 @@ class UI_APT_A(Camera, object):
 "}")
         # self.cam_b_o.setText("")
         self.cam_b_o.setObjectName("cam_b_o")
-        self.cam_b_o.setObjectName("cam_b_o")
         self.horizontalLayout_6.addWidget(self.cam_b_o)
         self.cam_b_d = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
@@ -964,7 +967,6 @@ class UI_APT_A(Camera, object):
 "padding: 4 4px;\n"
 "}")
         # self.cam_s_o.setText("")
-        self.cam_s_o.setObjectName("cam_s_o")
         self.cam_s_o.setObjectName("cam_s_o")
         self.horizontalLayout_5.addWidget(self.cam_s_o)
         self.cam_s_d = QtWidgets.QLabel(self.centralwidget)
@@ -1039,26 +1041,40 @@ class UI_APT_A(Camera, object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
+        ####
         # self.vdc_time = QtWidgets.QWidget(self.centralwidget)
         self.vdc_time = pg.PlotWidget(self.centralwidget)
         self.vdc_time.setBackground('w')
+        ####
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(self.vdc_time.sizePolicy().hasHeightForWidth())
         self.vdc_time.setSizePolicy(sizePolicy)
         self.vdc_time.setMinimumSize(QtCore.QSize(300, 300))
+        self.vdc_time.setStyleSheet("QWidget{\n"
+"border: 2px solid gray;\n"
+"border-radius: 10px;\n"
+"padding: 4 4px;\n"
+"}")
         self.vdc_time.setObjectName("vdc_time")
         self.horizontalLayout.addWidget(self.vdc_time)
+        ####
         # self.detection_rate_viz = QtWidgets.QWidget(self.centralwidget)
         self.detection_rate_viz = pg.PlotWidget(self.centralwidget)
         self.detection_rate_viz.setBackground('w')
+        ####
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(self.detection_rate_viz.sizePolicy().hasHeightForWidth())
         self.detection_rate_viz.setSizePolicy(sizePolicy)
         self.detection_rate_viz.setMinimumSize(QtCore.QSize(300, 300))
+        self.detection_rate_viz.setStyleSheet("QWidget{\n"
+"border: 2px solid gray;\n"
+"border-radius: 10px;\n"
+"padding: 4 4px;\n"
+"}")
         self.detection_rate_viz.setObjectName("detection_rate_viz")
         self.horizontalLayout.addWidget(self.detection_rate_viz)
         self.verticalLayout_3.addLayout(self.horizontalLayout)
@@ -1083,7 +1099,7 @@ class UI_APT_A(Camera, object):
         # self.visualization = QtWidgets.QWidget(self.centralwidget)
         self.visualization = pg.PlotWidget(self.centralwidget)
         self.visualization.setObjectName("visualization")
-        self.detector_circle = pg.QtGui.QGraphicsEllipseItem(0, 0, 2400, 2400)  # x, y, width, height
+        self.detector_circle = QtWidgets.QGraphicsEllipseItem(0, 0, 2400, 2400)  # x, y, width, height
         self.detector_circle.setPen(pg.mkPen(color=(255, 0, 0), width=2))
         self.visualization.addItem(self.detector_circle)
         self.visualization.setBackground('w')
@@ -1094,17 +1110,29 @@ class UI_APT_A(Camera, object):
         sizePolicy.setHeightForWidth(self.visualization.sizePolicy().hasHeightForWidth())
         self.visualization.setSizePolicy(sizePolicy)
         self.visualization.setMinimumSize(QtCore.QSize(300, 300))
+        self.visualization.setStyleSheet("QWidget{\n"
+"border: 2px solid gray;\n"
+"border-radius: 10px;\n"
+"padding: 4 4px;\n"
+"}")
         self.visualization.setObjectName("visualization")
         self.horizontalLayout_4.addWidget(self.visualization)
+        ####
         # self.histogram = QtWidgets.QWidget(self.centralwidget)
         self.histogram = pg.PlotWidget(self.centralwidget)
         self.histogram.setBackground('w')
+        ####
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(self.histogram.sizePolicy().hasHeightForWidth())
         self.histogram.setSizePolicy(sizePolicy)
         self.histogram.setMinimumSize(QtCore.QSize(300, 300))
+        self.histogram.setStyleSheet("QWidget{\n"
+"border: 2px solid gray;\n"
+"border-radius: 10px;\n"
+"padding: 4 4px;\n"
+"}")
         self.histogram.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
         self.histogram.setObjectName("histogram")
         self.horizontalLayout_4.addWidget(self.histogram)
@@ -1112,6 +1140,20 @@ class UI_APT_A(Camera, object):
         self.gridLayout_8.addLayout(self.verticalLayout_3, 1, 1, 1, 1)
         self.gridLayout_18 = QtWidgets.QGridLayout()
         self.gridLayout_18.setObjectName("gridLayout_18")
+        self.light = QtWidgets.QPushButton(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.light.sizePolicy().hasHeightForWidth())
+        self.light.setSizePolicy(sizePolicy)
+        self.light.setStyleSheet("QPushButton{\n"
+"background: rgb(193, 193, 193)\n"
+"}")
+        self.light.setObjectName("light")
+        self.gridLayout_18.addWidget(self.light, 0, 7, 1, 1)
+        self.led_light = QtWidgets.QLabel(self.centralwidget)
+        self.led_light.setObjectName("led_light")
+        self.gridLayout_18.addWidget(self.led_light, 0, 8, 1, 1)
         self.textEdit = QtWidgets.QTextEdit(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -1126,28 +1168,18 @@ class UI_APT_A(Camera, object):
 "background: rgb(223,223,233)\n"
 "}")
         self.textEdit.setObjectName("textEdit")
-        self.gridLayout_18.addWidget(self.textEdit, 0, 0, 1, 1)
-        self.light = QtWidgets.QPushButton(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.light.sizePolicy().hasHeightForWidth())
-        self.light.setSizePolicy(sizePolicy)
-        self.light.setStyleSheet("QPushButton{\n"
+        self.gridLayout_18.addWidget(self.textEdit, 0, 0, 2, 1)
+        self.win_alignment = QtWidgets.QPushButton(self.centralwidget)
+        self.win_alignment.setStyleSheet("QPushButton{\n"
 "background: rgb(193, 193, 193)\n"
 "}")
-        self.light.setObjectName("light")
-        self.gridLayout_18.addWidget(self.light, 0, 1, 1, 1)
-        self.led_light = QtWidgets.QLabel(self.centralwidget)
-        self.led_light.setMinimumSize(QtCore.QSize(90, 30))
-        self.led_light.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.led_light.setObjectName("led_light")
-        self.gridLayout_18.addWidget(self.led_light, 0, 2, 1, 1)
+        self.win_alignment.setObjectName("win_alignment")
+        self.gridLayout_18.addWidget(self.win_alignment, 1, 7, 1, 1)
         self.gridLayout_8.addLayout(self.gridLayout_18, 0, 1, 1, 2)
         self.gridLayout_9.addLayout(self.gridLayout_8, 1, 0, 1, 1)
         UI_APT_A.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(UI_APT_A)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1854, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1857, 22))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -1172,19 +1204,20 @@ class UI_APT_A(Camera, object):
         self.vacuum_load_lock_back.setDigitCount(8)
         self.temp.setDigitCount(8)
         # bottom camera (x, y)
-        arrow1 = pg.ArrowItem(pos=(310, 700), angle=-90)
+        arrow1 = pg.ArrowItem(pos=(650, 670), angle=-90)
         # arrow2 = pg.ArrowItem(pos=(100, 2100), angle=90)
-        arrow3 = pg.ArrowItem(pos=(520, 770), angle=0)
+        arrow3 = pg.ArrowItem(pos=(940, 770), angle=0)
         self.cam_b_o.addItem(arrow1)
         # self.cam_b_o.addItem(arrow2)
         self.cam_b_o.addItem(arrow3)
         # Side camera (x, y)
-        arrow1 = pg.ArrowItem(pos=(450, 450), angle=-90)
-        arrow2 = pg.ArrowItem(pos=(450, 1650), angle=90)
+        arrow1 = pg.ArrowItem(pos=(450, 550), angle=-90)
+        arrow2 = pg.ArrowItem(pos=(450, 1500), angle=90)
         # arrow3 = pg.ArrowItem(pos=(890, 1100), angle=0)
         self.cam_s_o.addItem(arrow1)
         self.cam_s_o.addItem(arrow2)
         # self.cam_s_o.addItem(arrow3)
+
     def retranslateUi(self, UI_APT_A):
         _translate = QtCore.QCoreApplication.translate
         UI_APT_A.setWindowTitle(_translate("UI_APT_A", "OXCART"))
@@ -1221,50 +1254,50 @@ class UI_APT_A(Camera, object):
         self.label_14.setText(_translate("UI_APT_A", "Specimen Voltage (V)"))
         self.label_13.setText(_translate("UI_APT_A", "Total Ions"))
         self.label_15.setText(_translate("UI_APT_A", "Detection Rate (%)"))
-        self.label_23.setText(_translate("UI_APT_A", "Pulse Frequency (KHz)"))
-        self.vdc_steps_down.setText(_translate("UI_APT_A", "100"))
-        self.pulse_frequency.setText(_translate("UI_APT_A", "200"))
-        self.label_17.setText(_translate("UI_APT_A", "Detection Rate (%)"))
-        self.label_20.setText(_translate("UI_APT_A", "Cycle for Avg. (Hz)"))
-        self.pulse_fraction.setText(_translate("UI_APT_A", "20"))
-        self.detection_rate_init.setText(_translate("UI_APT_A", "1"))
-        self.cycle_avg.setText(_translate("UI_APT_A", "10"))
-        self.vp_max.setText(_translate("UI_APT_A", "3281"))
-        self.vdc_steps_up.setText(_translate("UI_APT_A", "100"))
-        self.label_8.setText(_translate("UI_APT_A", "Pulse Min. Voltage (V)"))
-        self.label_9.setText(_translate("UI_APT_A", "Pulse Max. Voltage (V)"))
-        self.label_25.setText(_translate("UI_APT_A", "Pulse Fraction (%)"))
-        self.label_28.setText(_translate("UI_APT_A", "K_p Downwards"))
-        self.vp_min.setText(_translate("UI_APT_A", "328"))
         self.label_42.setText(_translate("UI_APT_A", "Counter Source"))
-        self.label_22.setText(_translate("UI_APT_A", "# Hits Displayed"))
-        self.label_27.setText(_translate("UI_APT_A", "Twitter"))
-        self.hit_displayed.setText(_translate("UI_APT_A", "20000"))
-        self.label_26.setText(_translate("UI_APT_A", "Email"))
-        self.tweet.setItemText(0, _translate("UI_APT_A", "No"))
-        self.tweet.setItemText(1, _translate("UI_APT_A", "Yes"))
-        self.counter_source.setItemText(0, _translate("UI_APT_A", "TDC"))
-        self.counter_source.setItemText(1, _translate("UI_APT_A", "TDC_Raw"))
-        self.counter_source.setItemText(2, _translate("UI_APT_A", "DRS"))
-        self.counter_source.setItemText(3, _translate("UI_APT_A", "Pulse Counter"))
+        self.pulse_fraction.setText(_translate("UI_APT_A", "20"))
+        self.vp_max.setText(_translate("UI_APT_A", "3281"))
+        self.label_28.setText(_translate("UI_APT_A", "K_p Downwards"))
+        self.label.setText(_translate("UI_APT_A", "Setup Parameters"))
         self.parameters_source.setItemText(0, _translate("UI_APT_A", "TextBox"))
         self.parameters_source.setItemText(1, _translate("UI_APT_A", "TextLine"))
         self.label_21.setText(_translate("UI_APT_A", "Experiment Name"))
-        self.ex_user.setText(_translate("UI_APT_A", "user"))
+        self.vdc_steps_down.setText(_translate("UI_APT_A", "100"))
+        self.label_5.setText(_translate("UI_APT_A", "Specimen Stop Voltage (V)"))
         self.label_43.setText(_translate("UI_APT_A", "Experiment User"))
-        self.label.setText(_translate("UI_APT_A", "Setup Parameters"))
-        self.ex_name.setText(_translate("UI_APT_A", "test"))
-        self.label_3.setText(_translate("UI_APT_A", "Control refresh Freq.(Hz)"))
-        self.ex_freq.setText(_translate("UI_APT_A", "10"))
-        self.max_ions.setText(_translate("UI_APT_A", "2000"))
-        self.label_4.setText(_translate("UI_APT_A", "Specimen Start Voltage (V)"))
+        self.label_41.setText(_translate("UI_APT_A", "Max. Number of Ions"))
         self.ex_time.setText(_translate("UI_APT_A", "90"))
+        self.label_27.setText(_translate("UI_APT_A", "Twitter"))
+        self.vp_min.setText(_translate("UI_APT_A", "328"))
         self.vdc_min.setText(_translate("UI_APT_A", "500"))
         self.vdc_max.setText(_translate("UI_APT_A", "4000"))
-        self.label_6.setText(_translate("UI_APT_A", "K_p Upwards"))
-        self.label_41.setText(_translate("UI_APT_A", "Max. Number of Ions"))
+        self.cycle_avg.setText(_translate("UI_APT_A", "10"))
+        self.label_8.setText(_translate("UI_APT_A", "Pulse Min. Voltage (V)"))
+        self.label_26.setText(_translate("UI_APT_A", "Email"))
+        self.ex_user.setText(_translate("UI_APT_A", "user"))
+        self.ex_name.setText(_translate("UI_APT_A", "test"))
+        self.label_25.setText(_translate("UI_APT_A", "Pulse Fraction (%)"))
+        self.counter_source.setItemText(0, _translate("UI_APT_A", "TDC"))
+        self.counter_source.setItemText(1, _translate("UI_APT_A", "DRS"))
+        self.counter_source.setItemText(2, _translate("UI_APT_A", "Pulse Counter"))
+        self.detection_rate_init.setText(_translate("UI_APT_A", "1"))
+        self.hit_displayed.setText(_translate("UI_APT_A", "20000"))
+        self.label_23.setText(_translate("UI_APT_A", "Pulse Frequency (KHz)"))
+        self.max_ions.setText(_translate("UI_APT_A", "2000"))
+        self.vdc_steps_up.setText(_translate("UI_APT_A", "100"))
+        self.label_9.setText(_translate("UI_APT_A", "Pulse Max. Voltage (V)"))
+        self.label_22.setText(_translate("UI_APT_A", "# Hits Displayed"))
+        self.ex_freq.setText(_translate("UI_APT_A", "10"))
         self.label_2.setText(_translate("UI_APT_A", "Max. Experiment Time (S)"))
-        self.label_5.setText(_translate("UI_APT_A", "Specimen Stop Voltage (V)"))
+        self.label_3.setText(_translate("UI_APT_A", "Control refresh Freq.(Hz)"))
+        self.label_20.setText(_translate("UI_APT_A", "Cycle for Avg. (Hz)"))
+        self.label_4.setText(_translate("UI_APT_A", "Specimen Start Voltage (V)"))
+        self.pulse_frequency.setText(_translate("UI_APT_A", "200"))
+        self.label_17.setText(_translate("UI_APT_A", "Detection Rate (%)"))
+        self.tweet.setItemText(0, _translate("UI_APT_A", "No"))
+        self.tweet.setItemText(1, _translate("UI_APT_A", "Yes"))
+        self.label_6.setText(_translate("UI_APT_A", "K_p Upwards"))
+        self.vol_fix.setText(_translate("UI_APT_A", "Hold"))
         self.label_18.setText(_translate("UI_APT_A", "Diagram"))
         self.label_34.setText(_translate("UI_APT_A", "Camera Side"))
         self.label_30.setText(_translate("UI_APT_A", "Overview"))
@@ -1277,14 +1310,15 @@ class UI_APT_A(Camera, object):
         self.label_10.setText(_translate("UI_APT_A", "Detection Rate"))
         self.label_19.setText(_translate("UI_APT_A", "Visualization"))
         self.label_24.setText(_translate("UI_APT_A", "TOF"))
+        self.light.setText(_translate("UI_APT_A", "Light"))
+        self.led_light.setText(_translate("UI_APT_A", "TextLabel"))
         self.textEdit.setHtml(_translate("UI_APT_A", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Segoe UI\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">ex_user=user1;</span><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">ex_name=test1;ex_time=90;max_ions=2000;ex_freq=10;vdc_min=500;vdc_max=4000;vdc_steps_up=100;vdc_steps_down=100;vp_min=328;vp_max=3281;pulse_fraction=20;pulse_frequency=200;detection_rate_init=1;hit_displayed=20000;email=;tweet=No;counter_source=TDC</span><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">;criteria_time=True;criteria_ions=False;criteria_vdc=False</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">ex_user=user2;ex_name=test2;ex_time=100;max_ions=3000;ex_freq=5;vdc_min=1000;vdc_max=3000;vdc_steps_up=50;vdc_steps_down=50;vp_min=400;vp_max=2000;pulse_fraction=15;pulse_frequency=200;detection_rate_init=2;hit_displayed=40000;email=;tweet=No;counter_source=Pulse Counter;criteria_time=False;criteria_ions=False;criteria_vdc=True</span></p></body></html>"))
-        self.light.setText(_translate("UI_APT_A", "Light"))
-        self.led_light.setText(_translate("UI_APT_A", "light"))
+        self.win_alignment.setText(_translate("UI_APT_A", "Alignment window"))
         self.menuFile.setTitle(_translate("UI_APT_A", "File"))
         self.actionExit.setText(_translate("UI_APT_A", "Exit"))
 
@@ -1293,6 +1327,8 @@ class UI_APT_A(Camera, object):
         self.load_lock_switch.clicked.connect(lambda: self.gates(2))
         self.cryo_switch.clicked.connect(lambda: self.gates(3))
         self.light.clicked.connect(lambda: self.light_switch())
+        self.win_alignment.clicked.connect(lambda: self.win_alignment_switch())
+        self.vol_fix.clicked.connect(lambda: self.vol_fix_switch())
         self.pump_load_lock_switch.clicked.connect(lambda: self.pump_switch())
 
         # High Voltage visualization ################
@@ -1339,6 +1375,7 @@ class UI_APT_A(Camera, object):
         # Add Axis Labels
         styles = {"color": "#f00", "font-size": "12px"}
         self.histogram.setLabel("left", "Frequency (counts)", **styles)
+        self.histogram.setLogMode(y=True)
         if self.conf["visualization"] == "tof":
                 self.histogram.setLabel("bottom", "Time (ns)", **styles)
         elif self.conf["visualization"] == "mc":
@@ -1368,7 +1405,7 @@ class UI_APT_A(Camera, object):
 
         # timer plot, variables, and cameras
         self.timer1 = QtCore.QTimer()
-        self.timer1.setInterval(1000)
+        self.timer1.setInterval(200)
         self.timer1.timeout.connect(self.update_cameras)
         self.timer1.start()
         self.timer2 = QtCore.QTimer()
@@ -1395,6 +1432,10 @@ class UI_APT_A(Camera, object):
         self.led_light.setPixmap(self.led_red)
         self.led_pump_load_lock.setPixmap(self.led_green)
 
+        # for getting screenshot of GUI
+        self.screen = QtWidgets.QApplication.primaryScreen()
+        w = self.centralwidget
+        self.screenshot = self.screen.grabWindow(w.winId())
     def thread_main(self):
         """
                 Main thread for running experiment
@@ -1451,12 +1492,10 @@ class UI_APT_A(Camera, object):
                 if text_line_b[i][0] == 'counter_source':
                     if text_line_b[i][1] == 'TDC':
                         self.counter_source.setCurrentIndex(0)
-                    if text_line_b[i][1] == 'TDC_Raw':
-                        self.counter_source.setCurrentIndex(1)
                     if text_line_b[i][1] == 'Pulse Counter':
-                        self.counter_source.setCurrentIndex(2)
+                        self.counter_source.setCurrentIndex(1)
                     if text_line_b[i][1] == 'DRS':
-                        self.counter_source.setCurrentIndex(3)
+                        self.counter_source.setCurrentIndex(2)
                 if text_line_b[i][0] == 'tweet':
                     if text_line_b[i][1] == 'NO':
                         self.tweet.setCurrentIndex(0)
@@ -1523,8 +1562,6 @@ class UI_APT_A(Camera, object):
                 variables.criteria_vdc = True
             elif not self.criteria_vdc.isChecked():
                 variables.criteria_vdc = False
-            if variables.counter_source == 'TDC_Raw':
-                variables.raw_mode = True
 
             if self.tweet.currentText() == 'Yes':
                 variables.tweet = True
@@ -1558,10 +1595,8 @@ class UI_APT_A(Camera, object):
                 """
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(True)
-        w = self.centralwidget
-        screen = QtWidgets.QApplication.primaryScreen()
-        screenshot = screen.grabWindow(w.winId())
-        screenshot.save(variables.path + '\shot.png', 'png')
+
+        self.screenshot.save(variables.path + '\shot.png', 'png')
         if variables.index_line < self.num_line:  # Do next experiment in case of TextLine
             self.thread_main()
         else:
@@ -1661,18 +1696,41 @@ class UI_APT_A(Camera, object):
         """
         if not variables.light:
             self.led_light.setPixmap(self.led_green)
-            Camera.light_switch(self)
-            self.timer1.setInterval(500)
+            self.camera.light_switch()
+            self.timer1.setInterval(200)
             variables.light = True
-            variables.sample_adjust = True
+
             variables.light_swich = True
         elif variables.light:
             self.led_light.setPixmap(self.led_red)
-            Camera.light_switch(self)
-            self.timer1.setInterval(500)
+            self.camera.light_switch()
+            self.timer1.setInterval(200)
             variables.light = False
-            variables.sample_adjust = False
             variables.light_swich = False
+
+    def win_alignment_switch(self):
+        if not variables.alignment_window:
+            variables.alignment_window = True
+            self.win_alignment.setStyleSheet("QPushButton{\n"
+                                             "background: rgb(0, 255, 26)\n"
+                                             "}")
+        elif variables.alignment_window:
+            variables.alignment_window = False
+            self.win_alignment.setStyleSheet("QPushButton{\n"
+                                             "background: rgb(193, 193, 193)\n"
+                                             "}")
+
+    def vol_fix_switch(self):
+        if not variables.vol_fix:
+            variables.vol_fix = True
+            self.vol_fix.setStyleSheet("QPushButton{\n"
+                                             "background: rgb(0, 255, 26)\n"
+                                             "}")
+        elif variables.vol_fix:
+            variables.vol_fix = False
+            self.vol_fix.setStyleSheet("QPushButton{\n"
+                                             "background: rgb(193, 193, 193)\n"
+                                             "}")
 
     def thread_worker(self, target):
         """
@@ -1720,14 +1778,19 @@ class UI_APT_A(Camera, object):
             self.y_vps = np.zeros(1000)  # 1000 data points
             self.y_vps[:] = np.nan
 
-            self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
-            self.data_line_vps.setData(self.x_vdc, self.y_vps)
+            self.vdc_time.clear()
+            pen_vdc = pg.mkPen(color=(255, 0, 0), width=6)
+            pen_vps = pg.mkPen(color=(0, 0, 255), width=3)
+            self.data_line_vdc = self.vdc_time.plot(self.x_vdc, self.y_vdc, pen=pen_vdc)
+            self.data_line_vps = self.vdc_time.plot(self.x_vdc, self.y_vps, pen=pen_vps)
 
             self.x_dtec = np.arange(1000)
             self.y_dtec = np.zeros(1000)
             self.y_dtec[:] = np.nan
 
-            self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+            self.detection_rate_viz.clear()
+            pen_dtec = pg.mkPen(color=(255, 0, 0), width=6)
+            self.data_line_dtec = self.detection_rate_viz.plot(self.x_dtec, self.y_dtec, pen=pen_dtec)
 
             self.histogram.clear()
 
@@ -1779,35 +1842,38 @@ class UI_APT_A(Camera, object):
                 variables.index_plot += 1
             # Time of Flight
             if variables.counter_source == 'TDC' and variables.total_ions > 0 and variables.index_wait_on_plot_start > 16 \
-                    and variables.index_wait_on_plot_start > 16 and not variables.raw_mode:
+                    and variables.index_wait_on_plot_start > 16:
                 if variables.index_wait_on_plot_start > 16:
-
+                    xx = np.array(variables.x)
+                    yy = np.array(variables.y)
+                    tt = np.array(variables.t)
+                    main_v_dc_dld = np.array(variables.main_v_dc_dld)
                     try:
-                        def replaceZeroes(data):
-                            min_nonzero = np.min(data[np.nonzero(data)])
-                            data[data == 0] = min_nonzero
-                            return data
-
                         if self.conf["visualization"] == "tof":
-                            tof = variables.t * 27.432 / (1000 * 4)  # Time in ns
+                            tof = tt * 27.432 / (1000 * 4)  # Time in ns
                             viz = tof[tof < 5000]
                         elif self.conf["visualization"] == "mc":
-                            max_lenght = max(len(variables.x), len(variables.y),
-                                             len(variables.t), len(variables.main_v_dc_dld))
-                            viz = tof2mc_simple.tof_bin2mc_sc(variables.t[:max_lenght], 0,
-                                                              variables.main_v_dc_dld[
+                            max_lenght = min(len(xx), len(yy),
+                                             len(tt), len(main_v_dc_dld))
+                            viz = tof2mc_simple.tof_bin2mc_sc(tt[:max_lenght], 0,
+                                                              main_v_dc_dld[
                                                               :max_lenght],
-                                                              variables.x[:max_lenght],
-                                                              variables.x[:max_lenght],
-                                                              flightPathLength=110)
+                                                              xx[:max_lenght],
+                                                              yy[:max_lenght],
+                                                              flightPathLength=self.conf["flightPathLength"])
                             viz = viz[viz < 400]
-
-                        self.y_tof, self.x_tof = np.histogram(viz, bins=512)
+                        # bin size of 0.1
+                        bin_size = 0.1
+                        bins = np.linspace(np.min(viz), np.max(viz), round(np.max(viz) / bin_size))
+                        y_tof_mc, x_tof_mc = np.histogram(viz, bins=bins)
+                        # put 1 instead of zero to fix problem of log(0) = -inf
+                        y_tof_mc[y_tof_mc == 0] = 1
                         self.histogram.clear()
-                        self.y_tof = replaceZeroes(self.y_tof)
-                        self.histogram.addItem(
-                            pg.BarGraphItem(x=self.x_tof[:-1], height=np.log(self.y_tof),
-                                            width=0.1, brush='black'))
+                        # self.histogram.addItem(
+                        #     pg.BarGraphItem(x=self.x_tof[:-1], height=self.y_tof,
+                        #                     width=bin_size, brush='black'))
+                        self.histogram.plot(x_tof_mc, y_tof_mc, stepMode="center", fillLevel=0, fillOutline=True,
+                                            brush='black')
 
                     except Exception as e:
                         print(
@@ -1816,13 +1882,13 @@ class UI_APT_A(Camera, object):
                     # Visualization
                     try:
                         # adding points to the scatter plot
-                        self.scatter.clear()
                         self.scatter.setSize(self.doubleSpinBox.value())
                         x = variables.x
                         y = variables.y
                         min_length = min(len(x), len(y))
                         x = variables.x[-min_length:]
                         y = variables.y[-min_length:]
+                        self.scatter.clear()
                         self.scatter.setData(x=x[-variables.hit_display:],
                                              y=y[-variables.hit_display:])
                         # add item to plot window
@@ -1835,7 +1901,7 @@ class UI_APT_A(Camera, object):
                             f"{initialize_devices.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
                         print(e)
             # save plots to the file
-            if variables.index_plot_save % 100 == 0:
+            if variables.index_plot_save % 100 == 0 and variables.index_plot_save != 0:
                 exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
                 exporter.export(variables.path + '/v_dc_p_%s.png' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
@@ -1844,6 +1910,9 @@ class UI_APT_A(Camera, object):
                 exporter.export(variables.path + '/visualization_%s.png' % variables.index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
                 exporter.export(variables.path + '/tof_%s.png' % variables.index_plot_save)
+
+                # save screenshot of GUI
+                self.screenshot.save(variables.path + '\shot_%s.png' % variables.index_plot_save, 'png')
 
             # Increase the index
             variables.index_plot_save += 1

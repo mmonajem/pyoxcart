@@ -26,7 +26,7 @@ def decompose(data, element):
     pos = initial[['x (nm)', 'y (nm)', 'z (nm)']].values
     # a bug existed, when only one line contained in pos.
     color = initial['colour'].values[0]
-    px, py, pz = (pos[:,0], pos[:,1], pos[:,2])
+    px, py, pz = (pos[:, 0], pos[:, 1], pos[:, 2])
     return px, py, pz, color
 
 
@@ -66,6 +66,12 @@ def cloud_plotter(data, phases, result_path, filename, plot_type='cloud', open_n
                        yaxis=dict(zeroline=False, title='y (nm)'),
                        zaxis=dict(zeroline=False, title='z (nm)', autorange='reversed'))
         )
+        # layout = dict(
+        #     title='APT 3D Point Cloud',
+        #     scene=dict(xaxis=dict(zeroline=False, showgrid=False, backgroundcolor='#FFFFFF', showticklabels=False),
+        #                yaxis=dict(zeroline=False, showgrid=False, backgroundcolor='#FFFFFF', showticklabels=False),
+        #                zaxis=dict(zeroline=False, autorange='reversed', showgrid=False, backgroundcolor='#FFFFFF', showticklabels=False))
+        # )
         fig = dict(data=plotly_data, layout=layout)
         if open_new_window:
             plotly.offline.plot(fig, filename=result_path + '{fn}.html'.format(fn=filename), show_link=False)
