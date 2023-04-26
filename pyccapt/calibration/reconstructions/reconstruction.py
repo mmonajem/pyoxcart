@@ -1,11 +1,13 @@
 import numpy as np
 import plotly.graph_objects as go
-import plotly.express as plot_x
 import matplotlib.pyplot as plt
 import plotly
 
 # Local module and scripts
-from pyccapt.calibration.calibration_tools import variables, data_loadcrop, selectors_data
+from pyccapt.calibration.calibration_tools import variables
+from data_tools import data_loadcrop, selectors_data
+
+
 def cart2pol(x, y):
     """
     x, y are the detector hit coordinates in mm

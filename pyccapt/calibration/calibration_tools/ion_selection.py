@@ -6,7 +6,8 @@ import itertools
 import re
 
 # Local module and scripts
-from pyccapt.calibration.calibration_tools import data_tools
+from data_tools import data_tools
+
 
 def find_nearest(a, a0, num):
     # Element in nd array that is closest to the scalar value a0

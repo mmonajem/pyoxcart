@@ -1,6 +1,7 @@
 import pandas as pd
 
-from pyccapt.calibration.calibration_tools import data_tools, ion_selection
+from pyccapt.calibration.calibration_tools import ion_selection
+from data_tools import data_tools
 
 
 def molecule_dataframe():

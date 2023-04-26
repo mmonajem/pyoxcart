@@ -5,7 +5,7 @@ import scipy
 from deepdiff import DeepDiff
 
 # Local module and scripts
-from calibration_tools import data_tools
+from data_tools import data_tools
 
 p = os.path.abspath(os.path.join("", "."))
 path = p + '//data//data_tests//'

@@ -11,8 +11,8 @@ from matplotlib import colors
 from copy import copy
 
 # Local module and scripts
-from pyccapt.calibration.calibration_tools import selectors_data
-from pyccapt.calibration.calibration_tools import variables, data_tools
+from pyccapt.calibration.calibration_tools import variables
+from pyccapt.calibration.data_tools import data_tools, selectors_data
 from pyccapt.calibration.calibration_tools import logging_library
 
 
@@ -147,8 +147,8 @@ def concatenate_dataframes_of_dld_grp(
     dld_masterDataframe = pd.concat(dld_masterDataframeList, axis=1)
     return dld_masterDataframe
 
-def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes",
-                                 rect=False, only_plot=False, save_name=False):
+def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes", figure_size=(11/2.54, 4.5/2.54),
+                                 rect=False, only_plot=False, save_name=False, laser=np.zeros(0)):
     """
         This function plots the experiment history. The plots showcase the 
         relationship between tof(time of flight) and voltage.
@@ -156,18 +156,22 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes",
         Atrributes:
             dldGroupStorage: Dataframe containing info about dld group 
                              (type: pandas dataframe)
+            figure_size: The figure size
             only_plot: Default parameter set to false. if false it shows only the plot 
                        else it allows croppping functionality. (type: bool) 
             rect: Default parameter set to False. If true allows to crop
                   data by drawing a rectangular box (type: bool) 
             save_name: Default parameter set to False. Flag to choose whether
-                       to save plot or not. (type: bool) 
+                       to save plot or not. (type: bool)
+            laser: Default parameter set to False. Flag to choose whether
+                       to plot laser intensity. (type: bool)
         Returns:
             Does not return anything.
 
 
     """
-    fig1, ax1 = plt.subplots(figsize=(11/2.54, 4.5/2.54), constrained_layout=True)
+    fig1, ax1 = plt.subplots(figsize=figure_size, constrained_layout=True)
+    fig1.subplots_adjust(right=0.75)
     # Plot tof and high voltage
     yaxis = dldGroupStorage['t (ns)'].to_numpy()
     xaxis = np.arange(len(yaxis))
@@ -205,6 +209,12 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes",
             rect = Rectangle((left, bottom), width, height, fill=True, alpha=0.3, color="r", linewidth=2)
             ax1.add_patch(rect)
 
+    if len(laser) > 1:
+        ax3 = ax1.twinx()
+        ax3.plot(xaxis, laser, color='green', linewidth=2)
+        ax3.spines.right.set_position(("axes", 1.15))
+        ax3.set_ylabel("Laser Intensity [${pJ}/{\mu m^2}$]", color="green", fontsize=10)
+
     if save_name:
         plt.savefig("%s.png" % save_name, format="png", dpi=300)
         plt.savefig("%s.eps" % save_name, format="eps", dpi=300)
@@ -213,8 +223,8 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes",
     plt.show()
 
 
-def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256), circle=False,
-                  save_name=False, mask=True, only_plot=False):
+def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256), figure_size=(5.5/2.54, 4.5/2.54),
+                  circle=False, save_name=False, mask=True, only_plot=False):
     """
         This function is responsible for plotting the FDM. This function
         also allows  croping the plot to select the region of interest.
@@ -222,6 +232,7 @@ def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256
         Attributes:
             data_crop: Cropped dataset (type: list)
             bins: NA
+            figure_size: size of the plot
             Circle: Default parameter set to False. If true, it allows 
                     to select region of interest by drawing the circle.
             save_name: Default parameter set to False. Flag to choose whether
@@ -231,7 +242,7 @@ def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256
         Returns:
             Does not return anything.
     """
-    fig1, ax1 = plt.subplots(figsize=(5.5/2.54, 4.5/2.54), constrained_layout=True)
+    fig1, ax1 = plt.subplots(figsize=figure_size, constrained_layout=True)
     logger = logging_library.logger_creator('data_loadcrop')
     # Plot and crop FDM
     x = data_crop['x_det (cm)'].to_numpy()

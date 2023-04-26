@@ -1432,10 +1432,7 @@ class UI_APT_A(object):
         self.led_light.setPixmap(self.led_red)
         self.led_pump_load_lock.setPixmap(self.led_green)
 
-        # for getting screenshot of GUI
-        self.screen = QtWidgets.QApplication.primaryScreen()
-        w = self.centralwidget
-        self.screenshot = self.screen.grabWindow(w.winId())
+
     def thread_main(self):
         """
                 Main thread for running experiment
@@ -1596,7 +1593,12 @@ class UI_APT_A(object):
         self.start_button.setEnabled(True)
         self.stop_button.setEnabled(True)
 
-        self.screenshot.save(variables.path + '\shot.png', 'png')
+        # for getting screenshot of GUI
+        screen = QtWidgets.QApplication.primaryScreen()
+        w = self.centralwidget
+        screenshot = screen.grabWindow(w.winId())
+        screenshot.save(variables.path + '\last_screen_shot.png', 'png')
+
         if variables.index_line < self.num_line:  # Do next experiment in case of TextLine
             self.thread_main()
         else:
@@ -1911,8 +1913,11 @@ class UI_APT_A(object):
                 exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
                 exporter.export(variables.path + '/tof_%s.png' % variables.index_plot_save)
 
-                # save screenshot of GUI
-                self.screenshot.save(variables.path + '\shot_%s.png' % variables.index_plot_save, 'png')
+                # for getting screenshot of GUI
+                screen = QtWidgets.QApplication.primaryScreen()
+                w = self.centralwidget
+                screenshot = screen.grabWindow(w.winId())
+                screenshot.save(variables.path + '\screen_shot_%s.png' % variables.index_plot_save, 'png')
 
             # Increase the index
             variables.index_plot_save += 1

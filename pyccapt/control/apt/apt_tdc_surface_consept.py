@@ -571,7 +571,13 @@ def main(conf):
 
     if conf['signal_generator'] != "off":
         # Initialize the signal generator
-        signal_generator.initialize_signal_generator(variables.pulse_frequency)
+        try:
+            signal_generator.initialize_signal_generator(variables.pulse_frequency)
+        except Exception as e:
+            print('Can not initialize the signal generator')
+            print('Make the signal_generator off in the config file or fix the error below')
+            print(e)
+            raise
 
     if conf['v_dc'] != 'off':
         # Initialize high voltage

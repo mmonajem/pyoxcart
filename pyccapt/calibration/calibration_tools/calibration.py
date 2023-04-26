@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 from matplotlib import cm
+from matplotlib import colors
 import copy
 from scipy.cluster.vq import vq, kmeans, whiten
 from scipy.cluster.vq import kmeans2
@@ -442,27 +443,27 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, det_diam, sample_size, c
         plt.show()
 
 
-def plot_FDM(xx, yy, save, bins_s):
-    fig1, ax1 = plt.subplots(figsize=(5.5/2.54, 5.5/2.54), constrained_layout=True)
-    # Plot and crop FDM
-    FDM, xedges, yedges = np.histogram2d(xx, yy, bins=(bins_s[0], bins_s[1]))
+def plot_FDM(x, y, save, bins_s, figure_size=(4,5)):
+    fig1, ax1 = plt.subplots(figsize=figure_size, constrained_layout=True)
 
-    FDM[FDM == 0] = 1  # to have zero after apply log
-    FDM = np.log(FDM)
+
+    FDM, xedges, yedges = np.histogram2d(x, y, bins=bins_s)
 
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     # set x-axis label
-    ax1.set_xlabel("x [mm]", fontsize=8)
+    ax1.set_xlabel(r"$X_{det} (cm)$", fontsize=8)
     # set y-axis label
-    ax1.set_ylabel("y [mm]", fontsize=8)
-    plt.title("FDM")
-    img = plt.imshow(FDM.T, extent=extent, origin='lower', aspect="auto")
-    fig1.colorbar(img)
-    plt.tight_layout()
+    ax1.set_ylabel(r"$Y_{det} (cm)$", fontsize=8)
+
+    cmap = copy(plt.cm.plasma)
+    cmap.set_bad(cmap(0))
+    pcm = ax1.pcolormesh(xedges, yedges, FDM.T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
+    fig1.colorbar(pcm, ax=ax1, pad=0)
+
     if save:
         plt.savefig(variables.result_path + "fdm.png", format="png", dpi=300)
         plt.savefig(variables.result_path + "fdm.eps", format="svg", dpi=300)
-
     plt.show()
+
 
 

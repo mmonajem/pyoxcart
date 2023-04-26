@@ -4,7 +4,7 @@ import os
 
 
 # Local module and scripts
-from pyccapt.calibration.calibration_tools import data_loadcrop, data_tools
+from data_tools import data_loadcrop, data_tools
 
 p = os.path.abspath(os.path.join("", "."))
 path = p + '\\data\\data_tests\\'

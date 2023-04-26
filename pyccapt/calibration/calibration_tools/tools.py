@@ -6,21 +6,15 @@ import numpy as np
 
 from scipy.signal import find_peaks, peak_widths
 import matplotlib.pyplot as plt
-import math
 from scipy.optimize import curve_fit
-from scipy.stats import gmean
-from mpl_toolkits.mplot3d import Axes3D
-from scipy import interpolate
 from adjustText import adjust_text
 from pybaselines import Baseline
 import pybaselines
 # Local module and scripts
-from pyccapt.calibration.calibration_tools import variables, data_tools, data_loadcrop
-from pyccapt.calibration.calibration_tools import intractive_point_identification, selectors_data
+from pyccapt.calibration.calibration_tools import variables
+from pyccapt.calibration.data_tools import data_loadcrop, data_tools, selectors_data
+from pyccapt.calibration.calibration_tools import intractive_point_identification
 from pyccapt.calibration.calibration_tools import logging_library
-
-
-from ipywidgets import fixed, interact_manual
 
 
 def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=False, ranging=False, log=True,
@@ -171,9 +165,15 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
 
             props = dict(boxstyle='round', facecolor='wheat', alpha=1)
             if text_loc == 'left':
-                ax1.text(0.1, 0.95, txt, va='top', ma='left', transform=ax1.transAxes, bbox=props, fontsize=8, alpha=1)
+                ax1.text(.01, .97, txt, va='top', ma='left', transform=ax1.transAxes, bbox=props, fontsize=8, alpha=1,
+                         horizontalalignment='left', verticalalignment='top')
+                # anchored_text = AnchoredText(txt, loc=2, prop={'size': 8, 'color': 'b'})
+                # ax1.add_artist(anchored_text)
             elif text_loc == 'right':
-                ax1.text(0.50, 0.95, txt, va='top', ma='left', transform=ax1.transAxes, bbox=props, fontsize=8, alpha=1)
+                ax1.text(.99, .97, txt, va='top', ma='left', transform=ax1.transAxes, bbox=props, fontsize=8, alpha=1,
+                         horizontalalignment='right', verticalalignment='top')
+                # anchored_text = AnchoredText(txt, loc=1, prop={'size': 8, 'color': 'b'})
+                # ax1.add_artist(anchored_text)
 
 
             ax1.tick_params(axis='both', which='major', labelsize=12)

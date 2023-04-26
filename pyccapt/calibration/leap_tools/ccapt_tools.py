@@ -20,11 +20,18 @@ def ccapt_to_pos(data, path=None, name=None):
     return pos
 
 
-def ccapt_to_epos(data, path=None, name=None):
+def ccapt_to_epos(data, pulse_mode, path=None, name=None):
+    if pulse_mode == 'voltage':
+        dd = data[
+            ['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)', 't (ns)', 'high_voltage (V)', 'pulse (V)', 'x_det (cm)',
+             'y_det (cm)',
+             'pulse_pi', 'ion_pp']]
+    elif pulse_mode == 'laser':
+        dd = data[
+            ['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)', 't (ns)', 'high_voltage (V)', 'pulse (deg)', 'x_det (cm)',
+             'y_det (cm)',
+             'pulse_pi', 'ion_pp']]
 
-    dd = data[
-        ['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)', 't (ns)', 'high_voltage (V)', 'pulse (V)', 'x_det (cm)', 'y_det (cm)',
-         'pulse_pi', 'ion_pp']]
     dd = dd.astype(np.single)
     dd = dd.astype({'pulse_pi': np.uintc})
     dd = dd.astype({'ion_pp': np.uintc})
