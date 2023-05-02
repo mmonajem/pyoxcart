@@ -55,7 +55,7 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
 # -----------------------------------------------------------------------------
 
 
-def test4():
+def check4():
     device = scTDC.Device(autoinit=False)
 
     # initialize TDC --- and check for error!
@@ -137,4 +137,4 @@ def test4():
 
 
 if __name__ == "__main__":
-    test4()
+    check4()
