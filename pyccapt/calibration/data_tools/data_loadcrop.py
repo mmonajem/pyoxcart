@@ -149,7 +149,7 @@ def concatenate_dataframes_of_dld_grp(
     return dld_masterDataframe
 
 
-def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes", max_tof=0, figure_size=(11/2.54, 4.5/2.54),
+def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes", max_tof=0, figure_size=(11/2.54, 5/2.54),
                                  rect=False, only_plot=False, save_name=False, laser=np.zeros(0)):
     """
         This function plots the experiment history. The plots showcase the 

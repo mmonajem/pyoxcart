@@ -29,7 +29,7 @@ def mc2tof(mc:"Unit: Da", V:"Unit:volts", xDet:"Unit:mm", yDet:"Unit:mm", flight
 
     flightPathLength = np.sqrt(xDet ** 2 + yDet ** 2 + flightPathLength ** 2)
 
-    t = np.sqrt(((mc * amu * (flightPathLength) ** 2)) / (2 * e * V))# in ns
+    t = np.sqrt(((mc * amu * (flightPathLength) ** 2)) / (2 * e * V))
     t = t * 1E9  # tof from s to ns
     return t
 

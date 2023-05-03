@@ -5,7 +5,7 @@ import plotly
 
 # Local module and scripts
 from pyccapt.calibration.calibration_tools import variables
-from data_tools import data_loadcrop, selectors_data
+from pyccapt.calibration.data_tools import data_loadcrop, selectors_data
 
 
 def cart2pol(x, y):
@@ -191,7 +191,7 @@ def reconstruction_plot(data, range_data, element_percentage, rotary_fig_save, s
         yaxis_title="y (nm)",
         zaxis_title="z (nm)")
     fig.update_scenes(zaxis_autorange="reversed")
-    fig.update_layout(legend_title="", title="PyCCAPT", legend={'itemsizing': 'constant'}, font=dict(
+    fig.update_layout(legend_title="", legend={'itemsizing': 'constant'}, font=dict(
         size=8,
     ))
 
@@ -209,10 +209,19 @@ def reconstruction_plot(data, range_data, element_percentage, rotary_fig_save, s
                                        ]})
     plotly.offline.plot(fig, filename=variables.result_path + '\\{fn}.html'.format(fn=figname), show_link=True,
                         auto_open=False)
-    fig.update_layout(height=500, width=500)
-    fig.update_scenes(xaxis_visible=False, yaxis_visible=False,zaxis_visible=False)
-    fig.write_image(variables.result_path + "\\3d.png")
-    fig.update_scenes(xaxis_visible=True, yaxis_visible=True,zaxis_visible=True)
+    # fig.update_layout(height=600, width=600)
+    fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
+    fig.write_image(variables.result_path + "\\3d_o.png", scale=0.6,  format='png')
+    fig.write_image(variables.result_path + "\\3d_o.svg", scale=0.4,  format='svg')
+    fig.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
+    fig.update_layout(legend=dict(
+        yanchor="top",
+        y=0.99,
+        xanchor="left",
+        x=0.99
+    ))
+    fig.write_image(variables.result_path + "\\3d.png", scale=0.6,  format='png')
+    fig.write_image(variables.result_path + "\\3d.svg", scale=0.4,  format='svg')
     fig.show(config=config)
 
 def rotary_fig(fig1, figname):
@@ -221,7 +230,7 @@ def rotary_fig(fig1, figname):
     y_eye = 2
     z_eye = 0.5
 
-    fig.update_scenes(xaxis_visible=False, yaxis_visible=False,zaxis_visible=False)
+    fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
 
     fig.update_layout(
              width=600,
