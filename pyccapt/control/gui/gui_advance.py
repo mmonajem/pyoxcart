@@ -1374,12 +1374,14 @@ class UI_APT_A(object):
         # Histogram #########################
         # Add Axis Labels
         styles = {"color": "#f00", "font-size": "12px"}
+        self.histogram.plotItem.setMouseEnabled(y=False)  # Only allow zoom in X-axis
         self.histogram.setLabel("left", "Frequency (counts)", **styles)
         self.histogram.setLogMode(y=True)
         if self.conf["visualization"] == "tof":
-                self.histogram.setLabel("bottom", "Time (ns)", **styles)
+                self.histogram.setLabel("bottom", "Time (ns)", units='ns', **styles)
         elif self.conf["visualization"] == "mc":
-                self.histogram.setLabel("bottom", "mc (Da)", **styles)
+                self.histogram.setLabel("bottom", "m/c (Da)", units='Da', **styles)
+                self.histogram
 
         # Temperature #########################
         self.x_tem = np.arange(100)  # 1000 time points
@@ -1764,6 +1766,7 @@ class UI_APT_A(object):
         if variables.index_auto_scale_graph == 30:
             self.temperature.enableAutoRange(axis='x')
             self.vdc_time.enableAutoRange(axis='x')
+            self.histogram.enableAutoRange(axis='y')
             self.detection_rate_viz.enableAutoRange(axis='x')
             variables.index_auto_scale_graph = 0
 
