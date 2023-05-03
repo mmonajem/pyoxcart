@@ -107,8 +107,8 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
             steps = 'stepfilled'
         else:
             steps = 'bar'
-
         y, x = plot_hist(ranging, range_data, mc_tof, bins, log, steps)
+
         if background['calculation']:
             if background['plot_no_back']:
                 if background['plot']:
@@ -122,11 +122,11 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
                     ax1.plot(bins[:-1][mask_2], y[mask_2], 'o', color='orange')[0]
 
         if label == 'mc':
-            ax1.set_xlabel("mass-to-charge-state ratio [Da]", fontsize=8)
+            ax1.set_xlabel("Mass/Charge [Da]", fontsize=8)
         elif label == 'tof':
             ax1.set_xlabel("Time of Flight [ns]", fontsize=8)
 
-        ax1.set_ylabel("frequency [cts]", fontsize=8)
+        ax1.set_ylabel("Frequency [cts]", fontsize=8)
 
         if peaks_find:
             print("The peak index for MRP calculation is:", index_peak_max)
@@ -242,14 +242,19 @@ def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=Fa
     else:
         plt.close(fig1)
 
-    peak_widths_f = []
-    for i in range(len(peaks)):
-        peak_widths_f.append([y[int(peak_widths_p[2][i])], x[int(peak_widths_p[2][i])], x[int(peak_widths_p[3][i])]])
+    if peaks_find:
+        peak_widths_f = []
+        for i in range(len(peaks)):
+            peak_widths_f.append([y[int(peak_widths_p[2][i])], x[int(peak_widths_p[2][i])], x[int(peak_widths_p[3][i])]])
 
-    if background['calculation'] and background['plot_no_back']:
-        return x[peaks], y[peaks], peak_widths_f, mask_f
+    if peaks_find:
+        if background['calculation'] and background['plot_no_back']:
+            return x[peaks], y[peaks], peak_widths_f, mask_f
+        else:
+            return x[peaks], y[peaks], peak_widths_f, None
+
     else:
-        return x[peaks], y[peaks], peak_widths_f
+        return None, None, None, None
 
 
 def plot_hist(ranging, range_data, mc_tof, bins, log, steps):

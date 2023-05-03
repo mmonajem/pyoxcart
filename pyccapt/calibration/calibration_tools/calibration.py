@@ -24,7 +24,7 @@ def voltage_corr(x, a, b, c):
     return a + b * x + c * x**2
 
 def voltage_correction(dld_highVoltage_peak, dld_t_peak, maximum_location, index_fig, figname, sample_size, mode,
-                       calibration_mode, peak_mode, plot=True, save=False):
+                       calibration_mode, peak_mode, plot=True, save=False, fig_size=(7.5/2.54, 5.5/2.54)):
     
     """
     This function is responsible for voltage correction and plot the graph based on
@@ -123,7 +123,7 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, maximum_location, index
     if plot:
         # plot fitted curve
         # fig1, ax1 = plt.subplots(figsize=(6, 6))
-        fig1, ax1 = plt.subplots(figsize=(6.5/2.54, 5.5/2.54), constrained_layout=True)
+        fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
         if calibration_mode == 'tof':
             ax1.set_ylabel("Time of Flight (ns)", fontsize=8)
             lable = 't'
@@ -147,13 +147,14 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, maximum_location, index
         if save:
             plt.savefig(variables.result_path + "//vol_corr_%s_%s.eps" % (figname, index_fig), format="eps", dpi=300)
             plt.savefig(variables.result_path + "//vol_corr_%s_%s.png" % (figname, index_fig), format="png", dpi=300)
-        plt.tight_layout()
+        # plt.tight_layout()
         plt.show()
 
     return fitresult
 
 
-def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, peak_mode, index_fig, plot, save):
+def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, peak_mode, index_fig, plot, save,
+                      fig_size=(5.5/2.54, 5.5/2.54)):
 
     if calibration_mode == 'tof':
         mask_temporal = np.logical_and((variables.dld_t_calib > variables.selected_x1),
@@ -201,7 +202,7 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, peak
 
     if plot:
         # plot how correction factor for selected peak
-        fig1, ax1 = plt.subplots(figsize=(5.5/2.54, 5.5/2.54), constrained_layout=True)
+        fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
 
         mask = np.random.randint(0, len(dld_highVoltage_peak_v), 1000)
         x = plt.scatter(dld_highVoltage_peak_v[mask], dld_peak_b[mask], color="blue", label=r"$t$", alpha=0.1, s=1)
@@ -226,10 +227,10 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, peak
         if save:
             plt.savefig(variables.result_path + "//vol_corr_%s.eps" % index_fig, format="eps", dpi=300)
             plt.savefig(variables.result_path + "//vol_corr_%s.png" % index_fig, format="png", dpi=300)
-        plt.tight_layout()
+        # plt.tight_layout()
         plt.show()
         # plot corrected tof.mc vs un calibrated tof/mc
-        fig1, ax1 = plt.subplots(figsize=(5.5/2.54, 5.5/2.54), constrained_layout=True)
+        fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
         mask = np.random.randint(0, len(dld_highVoltage_peak_v), 10000)
 
         x = plt.scatter(dld_highVoltage_peak_v[mask], dld_peak_b[mask], color="blue", label='t', alpha=0.1, s=1)
@@ -251,7 +252,7 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, peak
         if save:
             plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.eps" % index_fig, format="svg", dpi=300)
             plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.png" % index_fig, format="png", dpi=300)
-        plt.tight_layout()
+        # plt.tight_layout()
         plt.show()
 
 
@@ -262,7 +263,8 @@ def bowl_corr_fit(data_xy, a, b, c, d, e, f):
     return result
 
 
-def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, det_diam, maximum_location, sample_size, index_fig, plot, save):
+def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, det_diam, maximum_location, sample_size, index_fig, plot, save,
+                    fig_size=(7.5/2.54, 5.5/2.54)):
     x_sample_list = []
     y_sample_list = []
     dld_t_peak_list = []
@@ -308,22 +310,21 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, det_diam, maximum_locati
         Z = bowl_corr_fit(np.array([X, Y]), *parameters)
 
         # setup figure object
-        # fig = plt.figure(figsize=(5.5/2.54, 5.5/2.54))
-        # ax = fig.add_subplot(1,1,1,projection='3d')
-        fig, ax = plt.subplots(figsize=(5.5/2.54, 4.5/2.54), subplot_kw=dict(projection="3d"),
+        fig, ax = plt.subplots(figsize=fig_size, subplot_kw=dict(projection="3d"),
                                constrained_layout=True)
         # setup 3d object
-        # ax = Axes3D(fig, auto_add_to_figure=False)
         fig.add_axes(ax)
         # plot surface
         ax.plot_surface(X, Y, 1/Z, cmap=cm.plasma)
         # plot input data
         # set plot descriptions
-        ax.set_xlabel('X', fontsize=8)
+        ax.set_xlabel('X', fontsize=8, labelpad=0)
         ax.set_ylabel('Y', fontsize=8)
-        ax.set_zlabel(r"${C_B}^{-1}$", fontsize=8)
+        ax.set_zlabel(r"${C_B}^{-1}$", fontsize=8, labelpad=2)
+        from matplotlib.ticker import FormatStrFormatter
+        ax.zaxis.set_major_formatter(FormatStrFormatter('%.2f'))
         # ax.tick_params(axis='z', which='minor', labelsize=8)
-        plt.tight_layout()
+        # plt.tight_layout()
         if save:
             plt.savefig(variables.result_path + "//bowl_corr_%s.eps" % index_fig, format="eps", dpi=300)
             plt.savefig(variables.result_path + "//bowl_corr_%s.png" % index_fig, format="png", dpi=300)
@@ -331,7 +332,8 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, det_diam, maximum_locati
     return parameters
 
 
-def bowl_correction_main(dld_x, dld_y, dld_highVoltage, det_diam, sample_size, calibration_mode, index_fig, plot, save):
+def bowl_correction_main(dld_x, dld_y, dld_highVoltage, det_diam, sample_size, calibration_mode, index_fig, plot, save
+                         , fig_size=(5.5/2.54, 5.5/2.54)):
     if calibration_mode == 'tof':
         mask_temporal = np.logical_and((variables.dld_t_calib > variables.selected_x1),
                                        (variables.dld_t_calib < variables.selected_x2))
@@ -394,7 +396,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, det_diam, sample_size, c
         variables.mc_calib = variables.mc_calib * 1 / f_bowl
     if plot:
         # plot how bowl correct tof/mc vs high voltage
-        fig1, ax1 = plt.subplots(figsize=(5.5/2.54, 5.5/2.54), constrained_layout=True)
+        fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
 
         mask = np.random.randint(0, len(dld_highVoltage_peak_b), 10000)
 
@@ -416,7 +418,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, det_diam, sample_size, c
         if save:
             plt.savefig(variables.result_path + "//peak_tof_bowl_corr_%s.eps" % index_fig, format="eps", dpi=300)
             plt.savefig(variables.result_path + "//peak_tof_bowl_corr_%s.png" % index_fig, format="png", dpi=300)
-        plt.tight_layout()
+        # plt.tight_layout()
         plt.show()
         # plot how bowl correction correct tof/mc vs dld_x position
         fig1, ax1 = plt.subplots(figsize=(5.5/2.54, 5.5/2.54), constrained_layout=True)
@@ -432,10 +434,10 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, det_diam, sample_size, c
             ax1.set_ylabel("Time of Flight (ns)", fontsize=8)
         elif calibration_mode == 'mc':
             ax1.set_ylabel("mc (Da)", fontsize=8)
-        ax1.set_xlabel("Hit Position X(mm)", fontsize=8)
+        ax1.set_xlabel("X_det(mm)", fontsize=8)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
         plt.legend(handles=[x, y], loc='upper right', prop={'size': 6})
-        plt.tight_layout()
+        # plt.tight_layout()
         if save:
             plt.savefig(variables.result_path + "//peak_tof_bowl_corr_p_%s.eps" % index_fig, format="svg", dpi=300)
             plt.savefig(variables.result_path + "//peak_tof_bowl_corr_p_%s.png" % index_fig, format="png", dpi=300)

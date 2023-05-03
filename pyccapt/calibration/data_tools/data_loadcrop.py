@@ -5,6 +5,7 @@ This is the main script of loading and cropping the dataset.
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import RectangleSelector, EllipseSelector
+from matplotlib.ticker import FormatStrFormatter
 from matplotlib.patches import Circle, Rectangle
 import pandas as pd
 from matplotlib import colors
@@ -147,7 +148,8 @@ def concatenate_dataframes_of_dld_grp(
     dld_masterDataframe = pd.concat(dld_masterDataframeList, axis=1)
     return dld_masterDataframe
 
-def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes", figure_size=(11/2.54, 4.5/2.54),
+
+def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes", max_tof=0, figure_size=(11/2.54, 4.5/2.54),
                                  rect=False, only_plot=False, save_name=False, laser=np.zeros(0)):
     """
         This function plots the experiment history. The plots showcase the 
@@ -156,6 +158,7 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes", figure_siz
         Atrributes:
             dldGroupStorage: Dataframe containing info about dld group 
                              (type: pandas dataframe)
+            max_tof: the maximum tof to be plot
             figure_size: The figure size
             only_plot: Default parameter set to false. if false it shows only the plot 
                        else it allows croppping functionality. (type: bool) 
@@ -171,19 +174,23 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes", figure_siz
 
     """
     fig1, ax1 = plt.subplots(figsize=figure_size, constrained_layout=True)
-    fig1.subplots_adjust(right=0.75)
+
     # Plot tof and high voltage
     yaxis = dldGroupStorage['t (ns)'].to_numpy()
-    xaxis = np.arange(len(yaxis))
-
     high_voltage = dldGroupStorage['high_voltage (V)'].to_numpy()
+    if max_tof > 0:
+        high_voltage = high_voltage[yaxis < max_tof]
+        yaxis = yaxis[yaxis < max_tof]
+
+    high_voltage = high_voltage / 1000 # change to kv
+    xaxis = np.arange(len(yaxis))
 
     heatmap, xedges, yedges = np.histogram2d(xaxis, yaxis, bins=(1200, 800))
     # heatmap[heatmap == 0] = 1  # to have zero after apply log
     # heatmap = np.log(heatmap)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     # set x-axis label
-    ax1.set_xlabel("Hit Sequence Number", fontsize=8)
+    ax1.set_xlabel("Hit sequence Number", fontsize=8)
     # set y-axis label
     ax1.set_ylabel("Time of Flight [ns]", fontsize=8)
     img = plt.imshow(heatmap.T, extent=extent, origin='lower', aspect="auto")
@@ -193,12 +200,16 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes", figure_siz
     fig1.colorbar(pcm, ax=ax1, pad=0)
 
 
+
+    # Make the x-axis ticks formatted to 0 decimal places
+    ax1.xaxis.set_major_formatter(FormatStrFormatter('%0.0f'))
+
     # plot high voltage curve
     ax2 = ax1.twinx()
 
     xaxis2 = np.arange(len(high_voltage))
     ax2.plot(xaxis2, high_voltage, color='b', linewidth=2)
-    ax2.set_ylabel("DC voltage [V]", color="blue", fontsize=8)
+    ax2.set_ylabel("High Voltage [kV]", color="blue", fontsize=8)
     if not only_plot:
         if not rect:
             rectangle_box_selector(ax2)
@@ -210,6 +221,7 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes", figure_siz
             ax1.add_patch(rect)
 
     if len(laser) > 1:
+        fig1.subplots_adjust(right=0.75)
         ax3 = ax1.twinx()
         ax3.plot(xaxis, laser, color='green', linewidth=2)
         ax3.spines.right.set_position(("axes", 1.15))
@@ -223,7 +235,7 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes", figure_siz
     plt.show()
 
 
-def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256), figure_size=(5.5/2.54, 4.5/2.54),
+def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256), figure_size=(10/2.54, 10/2.54),
                   circle=False, save_name=False, mask=True, only_plot=False):
     """
         This function is responsible for plotting the FDM. This function
