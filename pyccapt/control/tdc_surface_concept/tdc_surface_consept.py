@@ -3,12 +3,12 @@ This is the main script for reading TDC.
 """
 
 import time
-import numpy as np
 from queue import Queue
+
+import numpy as np
 
 from devices import initialize_devices
 from tdc_surface_concept import scTDC
-
 
 # define some constants to distinguish the type of element placed in the queue
 QUEUE_DATA = 0
@@ -173,10 +173,16 @@ def experiment_measure(queue_x,
     if errorcheck(retcode) < 0:
         return -1
 
+    x = []
+    y = []
+    t = []
     while True:
         eventtype, data = bufdatacb.queue.get()  # waits until element available
         eventtype_raw, data_raw = bufdatacb_raw.queue.get()  # waits until element available
         if eventtype == QUEUE_DATA:
+            x.append(data["dif1"])
+            y.append(data["dif2"])
+            t.append(data["time"])
             queue_x.put(data["dif1"])
             queue_y.put(data["dif2"])
             queue_t.put(data["time"])
@@ -196,6 +202,9 @@ def experiment_measure(queue_x,
             break  # break out of the event loop
         # print('tdc process time:', time.time() - start)
 
+    np.save('x.npy', np.array(x))
+    np.save('y.npy', np.array(y))
+    np.save('t.npy', np.array(t))
     time.sleep(0.1)
     # clean up
     # closes the user callbacks pipe, method inherited from base class
