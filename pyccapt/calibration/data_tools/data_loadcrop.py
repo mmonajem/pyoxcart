@@ -2,19 +2,20 @@
 This is the main script of loading and cropping the dataset.
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.widgets import RectangleSelector, EllipseSelector
-from matplotlib.ticker import FormatStrFormatter
-from matplotlib.patches import Circle, Rectangle
-import pandas as pd
-from matplotlib import colors
 from copy import copy
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from matplotlib import colors
+from matplotlib.patches import Circle, Rectangle
+from matplotlib.ticker import FormatStrFormatter
+from matplotlib.widgets import RectangleSelector, EllipseSelector
+
+from pyccapt.calibration.calibration_tools import logging_library
 # Local module and scripts
 from pyccapt.calibration.calibration_tools import variables
 from pyccapt.calibration.data_tools import data_tools, selectors_data
-from pyccapt.calibration.calibration_tools import logging_library
 
 
 def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file", tdc: "type: string - model of tdc",
@@ -92,7 +93,7 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
                 dld_pulse = hdf5Data['dld/laser_intensity'].to_numpy()
             elif pulse_mode == 'voltage':
                 dld_pulse = hdf5Data['dld/pulse_voltage'].to_numpy()
-            dld_AbsoluteTimeStamp = hdf5Data['dld/AbsoluteTimeStamp'].to_numpy()
+            dld_AbsoluteTimeStamp = hdf5Data['dld/AbsoluteTimeStamp'].to_numpy().astype(np.uintc)
             dld_t = hdf5Data['dld/t'].to_numpy()
             dld_x = hdf5Data['dld/x'].to_numpy()
             dld_y = hdf5Data['dld/y'].to_numpy()
@@ -121,7 +122,7 @@ def fetch_dataset_from_dld_grp(filename: "type: string - Path to hdf5(.h5) file"
 
             dldGroupStorage = np.concatenate((dld_highVoltage, dld_pulse, dld_AbsoluteTimeStamp, dld_t, dld_x, dld_y),
                                              axis=1)
-        dld_group_storage = create_pandas_dataframe(dldGroupStorage, tdc, pulse_mode)
+        dld_group_storage = create_pandas_dataframe(dldGroupStorage)
         return dld_group_storage
     except KeyError as error:
         logger.info(error)
@@ -365,8 +366,8 @@ def crop_data_after_selection(data_crop: "dataframe") -> "dataframe":
     data_crop.reset_index(inplace=True, drop=True)
     return data_crop
 
-def create_pandas_dataframe(data_crop: "type:numpy array", tdc: "type: string - model of tdc",
-                            pulser_mode: "type: string - mode of pulser"):
+
+def create_pandas_dataframe(data_crop: "type:numpy array"):
     """
         This function create a pandas dataframe from the cropped data. 
 
@@ -378,22 +379,9 @@ def create_pandas_dataframe(data_crop: "type:numpy array", tdc: "type: string - 
             hdf_dataframe: dataframe that is to be inserted in hdf file. 
                            (type: dataframe)
     """
-    if tdc == 'surface_concept':
-        if pulser_mode == 'voltage':
-            hdf_dataframe = pd.DataFrame(data=data_crop,
-                                         columns=['high_voltage (V)', 'pulse (V)', 'start_counter', 't (ns)',
-                                                  'x_det (cm)', 'y_det (cm)'])
-        elif pulser_mode == 'laser':
-            hdf_dataframe = pd.DataFrame(data=data_crop,
-                                         columns=['high_voltage (V)', 'pulse (deg)', 'start_counter', 't (ns)',
-                                                  'x_det (cm)', 'y_det (cm)'])
-    elif tdc == 'roentdec':
-        if pulser_mode == 'voltage':
-            hdf_dataframe = pd.DataFrame(data=data_crop,
-                                         columns=['high_voltage (V)', 'pulse (V)', 'start_counter', 't (ns)',
-                                                  'x_det (cm)', 'y_det (cm)'])
-        elif pulser_mode == 'laser':
-            hdf_dataframe = pd.DataFrame(data=data_crop,
-                                         columns=['high_voltage (V)', 'pulse (deg)', 'start_counter', 't (ns)',
-                                                  'x_det (cm)', 'y_det (cm)'])
+    hdf_dataframe = pd.DataFrame(data=data_crop,
+                                 columns=['high_voltage (V)', 'pulse', 'start_counter', 't (ns)',
+                                          'x_det (cm)', 'y_det (cm)'])
+
+    hdf_dataframe['start_counter'] = hdf_dataframe['start_counter'].astype('uint32')
     return hdf_dataframe

@@ -2,25 +2,25 @@
 This is file contains tools for mass calibration process.
 """
 
-import numpy as np
-
-from scipy.signal import find_peaks, peak_widths
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
+import numpy as np
+import pybaselines
 from adjustText import adjust_text
 from pybaselines import Baseline
-import pybaselines
+from scipy.optimize import curve_fit
+from scipy.signal import find_peaks, peak_widths
+
+from pyccapt.calibration.calibration_tools import intractive_point_identification
+from pyccapt.calibration.calibration_tools import logging_library
 # Local module and scripts
 from pyccapt.calibration.calibration_tools import variables
 from pyccapt.calibration.data_tools import data_loadcrop, data_tools, selectors_data
-from pyccapt.calibration.calibration_tools import intractive_point_identification
-from pyccapt.calibration.calibration_tools import logging_library
 
 
 def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=False, ranging=False, log=True,
-              mode='count', percent=50, peaks_find=True, peaks_find_plot=False, plot=False, prominence=500,
+              mode='count', percent=50, peaks_find=True, peaks_find_plot=True, plot=False, prominence=500,
               distance=None, h_line=False, selector='None', fast_hist=True, fig_name=None, text_loc='right', label='mc',
-            peak_val_plot=True, fig_size=(9/2.54, 5/2.54), background={'calculation': False}):
+              peak_val_plot=True, fig_size=(9 / 2.54, 5 / 2.54), background={'calculation': False}):
     """
     massSpecPlot plots the data from pos to get a mass spectrum as a figure
 

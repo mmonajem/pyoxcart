@@ -3,27 +3,23 @@ This is the main script for controlling the experiment.
 It contains the main control loop of experiment.
 """
 
-import time
 import datetime
 import multiprocessing
-from multiprocessing.queues import Queue
 import threading
+import time
+from multiprocessing.queues import Queue
+
 import numpy as np
-import serial.tools.list_ports
 import pyvisa as visa
+import serial.tools.list_ports
 
-try:
-    import nidaqmx
-except:
-    print('Please install nidaqmx')
-
+from pyccapt.control.control_tools import experiment_statistics
+from pyccapt.control.control_tools import variables, hdf5_creator, loggi
+from pyccapt.control.devices import email_send
 # Local module and scripts
 from pyccapt.control.devices import tweet_send, initialize_devices, signal_generator
-from pyccapt.control.devices import email_send
-from pyccapt.control.tdc_surface_concept import tdc_surface_consept
 from pyccapt.control.drs import drs
-from pyccapt.control.control_tools import variables, hdf5_creator, loggi
-from pyccapt.control.control_tools import experiment_statistics
+from pyccapt.control.tdc_surface_concept import tdc_surface_consept
 
 
 class APT_ADVANCE:

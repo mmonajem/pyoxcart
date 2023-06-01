@@ -4,12 +4,12 @@ This is the main vew script for reading TDC Surface Concept dld and tdc event at
 
 import time
 import timeit
-import numpy as np
 from queue import Queue
 
-# Local module and scripts
-from tdc_surface_concept import scTDC
+import numpy as np
 
+# Local module and scripts
+from pyccapt.control.tdc_surface_concept import scTDC
 
 NR_OF_MEASUREMENTS = 4  # number of measurements
 EXPOSURE_MS = 3000  # exposure duration in milliseconds

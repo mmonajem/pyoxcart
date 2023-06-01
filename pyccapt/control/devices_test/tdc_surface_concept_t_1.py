@@ -36,7 +36,7 @@ Test of the user callbacks interface.
 import timeit
 
 # Local module and scripts
-from tdc_surface_concept import scTDC
+from pyccapt.control.tdc_surface_concept import scTDC
 
 
 # -----------------------------------------------------------------------------

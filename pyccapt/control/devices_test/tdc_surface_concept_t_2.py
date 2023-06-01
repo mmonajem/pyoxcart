@@ -4,11 +4,12 @@ This is the main vew script for reading TDC Surface Concept .
 
 import time
 import timeit
-import numpy as np
 from queue import Queue
 
+import numpy as np
+
 # Local module and scripts
-from tdc_surface_concept import scTDC
+from pyccapt.control.tdc_surface_concept import scTDC
 
 raw_mode = False
 NR_OF_MEASUREMENTS = 10  # number of measurements

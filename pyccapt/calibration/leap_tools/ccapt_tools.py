@@ -1,10 +1,12 @@
 import struct
 from itertools import chain
+
 import numpy as np
 import pandas as pd
 
 # Local module and scripts
 from pyccapt.calibration.leap_tools import leap_tools
+
 
 def ccapt_to_pos(data, path=None, name=None):
 
@@ -56,10 +58,10 @@ def pos_to_ccapt(data):
                           'mc_c (Da)': pos['m/n (Da)'].to_numpy(),
                           'mc (Da)': np.zeros(length),
                           'high_voltage (V)': np.zeros(length),
-                          'pulse (V)': np.zeros(length),
-                          'start_counter': np.zeros(length),
+                          'pulse': np.zeros(length),
+                          'start_counter': np.zeros(length, dtype=int),
                           't (ns)': np.zeros(length),
-                          't_c (nm)': np.zeros(length),
+                          't_c (ns)': np.zeros(length),
                           'x_det (cm)': np.zeros(length),
                           'y_det (cm)': np.zeros(length),
                           'pulse_pi': np.zeros(length, dtype=int),
@@ -77,10 +79,10 @@ def epos_to_ccapt(data):
                           'mc_c (Da)': epos['m/n (Da)'].to_numpy(),
                           'mc (Da)': np.zeros(length),
                           'high_voltage (V)': epos['HV_DC (V)'].to_numpy(),
-                          'pulse (V)': epos['pulse (V)'].to_numpy(),
-                          'start_counter': np.zeros(length),
+                          'pulse': epos['pulse (V)'].to_numpy(),
+                          'start_counter': np.zeros(length, dtype=int),
                           't (ns)': epos['TOF (ns)'].to_numpy(),
-                          't_c (nm)': np.zeros(length),
+                          't_c (ns)': np.zeros(length),
                           'x_det (cm)': epos['det_x (cm)'].to_numpy(),
                           'y_det (cm)': epos['det_y (cm)'].to_numpy(),
                           'pulse_pi': epos['pslep'].to_numpy(),
