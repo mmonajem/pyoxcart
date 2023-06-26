@@ -1,19 +1,12 @@
-import numpy as np
-import math
+import copy
 from itertools import product
-from sklearn.preprocessing import MinMaxScaler
-from mpl_toolkits.mplot3d import Axes3D
+
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
-from scipy.signal import find_peaks
+import numpy as np
 from matplotlib import cm
 from matplotlib import colors
-import copy
-from scipy.cluster.vq import vq, kmeans, whiten
-from scipy.cluster.vq import kmeans2
-from sklearn import linear_model
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.pipeline import make_pipeline
+from scipy.optimize import curve_fit
+from scipy.signal import find_peaks
 
 # Local module and scripts
 from pyccapt.calibration.calibration_tools import variables
@@ -49,8 +42,8 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, maximum_location, index
     dld_t_peak_list = []
     if mode == 'ion_seq':
         for i in range(int(len(dld_highVoltage_peak) / sample_size) + 1):
-            dld_highVoltage_peak_selected = dld_highVoltage_peak[(i) * sample_size:(i + 1) * sample_size]
-            dld_t_peak_selected = dld_t_peak[(i) * sample_size:(i + 1) * sample_size]
+            dld_highVoltage_peak_selected = dld_highVoltage_peak[i * sample_size:(i + 1) * sample_size]
+            dld_t_peak_selected = dld_t_peak[i * sample_size:(i + 1) * sample_size]
 
             high_voltage_mean = np.mean(dld_highVoltage_peak_selected)
             high_voltage_mean_list.append(high_voltage_mean)

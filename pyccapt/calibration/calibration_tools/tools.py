@@ -18,7 +18,7 @@ from pyccapt.calibration.data_tools import data_loadcrop, data_tools, selectors_
 
 
 def hist_plot(mc_tof, bin, range_data=None, mc_peak_label=False, adjust_label=False, ranging=False, log=True,
-              mode='count', percent=50, peaks_find=True, peaks_find_plot=True, plot=False, prominence=500,
+              mode='count', percent=50, peaks_find=True, peaks_find_plot=False, plot=False, prominence=500,
               distance=None, h_line=False, selector='None', fast_hist=True, fig_name=None, text_loc='right', label='mc',
               peak_val_plot=True, fig_size=(9 / 2.54, 5 / 2.54), background={'calculation': False}):
     """

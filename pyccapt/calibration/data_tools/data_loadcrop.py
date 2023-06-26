@@ -191,16 +191,14 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes", max_tof=0,
     # heatmap = np.log(heatmap)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     # set x-axis label
-    ax1.set_xlabel("Hit sequence Number", fontsize=8)
+    ax1.set_xlabel("Hit sequence Number", fontsize=12)
     # set y-axis label
-    ax1.set_ylabel("Time of Flight [ns]", fontsize=8)
+    ax1.set_ylabel("Time of Flight [ns]", fontsize=12)
     img = plt.imshow(heatmap.T, extent=extent, origin='lower', aspect="auto")
     cmap = copy(plt.cm.plasma)
     cmap.set_bad(cmap(0))
     pcm = ax1.pcolormesh(xedges, yedges, heatmap.T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
     fig1.colorbar(pcm, ax=ax1, pad=0)
-
-
 
     # Make the x-axis ticks formatted to 0 decimal places
     ax1.xaxis.set_major_formatter(FormatStrFormatter('%0.0f'))
@@ -209,8 +207,8 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes", max_tof=0,
     ax2 = ax1.twinx()
 
     xaxis2 = np.arange(len(high_voltage))
-    ax2.plot(xaxis2, high_voltage, color='b', linewidth=2)
-    ax2.set_ylabel("High Voltage [kV]", color="blue", fontsize=8)
+    ax2.plot(xaxis2, high_voltage, color='dodgerblue', linewidth=2)
+    ax2.set_ylabel("High Voltage [kV]", color="dodgerblue", fontsize=12)
     if not only_plot:
         if not rect:
             rectangle_box_selector(ax2)
@@ -224,13 +222,13 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes", max_tof=0,
     if len(laser) > 1:
         fig1.subplots_adjust(right=0.75)
         ax3 = ax1.twinx()
-        ax3.plot(xaxis, laser, color='green', linewidth=2)
+        ax3.plot(xaxis, laser, color='limegreen', linewidth=2)
         ax3.spines.right.set_position(("axes", 1.15))
-        ax3.set_ylabel("Laser Intensity [${pJ}/{\mu m^2}$]", color="green", fontsize=10)
+        ax3.set_ylabel("Laser Intensity [${pJ}/{\mu m^2}$]", color="limegreen", fontsize=12)
 
     if save_name:
-        plt.savefig("%s.png" % save_name, format="png", dpi=300)
-        plt.savefig("%s.eps" % save_name, format="eps", dpi=300)
+        plt.savefig("%s.png" % save_name, format="png", dpi=600)
+        plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
     # cax = ax1.inset_axes([1.14, 0.0, 0.05, 1])
     # plt.colorbar(img, ax=ax1, cax=cax)
     plt.show()
@@ -265,9 +263,9 @@ def plot_crop_FDM(data_crop: "type:list  - cropped list content", bins=(256, 256
 
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     # set x-axis label
-    ax1.set_xlabel(r"$X_{det} (cm)$", fontsize=8)
+    ax1.set_xlabel(r"$X_{det} (cm)$", fontsize=12)
     # set y-axis label
-    ax1.set_ylabel(r"$Y_{det} (cm)$", fontsize=8)
+    ax1.set_ylabel(r"$Y_{det} (cm)$", fontsize=12)
 
     cmap = copy(plt.cm.plasma)
     cmap.set_bad(cmap(0))
