@@ -1,31 +1,28 @@
-import re
 import struct
+from itertools import chain
 
 import numpy as np
 import pandas as pd
 
-def ato_to_hdf(file, mode):
-    """
-    This function reads from .ato file and converts the content into pandas
-    dataframe and eventually stores it into a hdf file.
 
-    Attributes:
-        file: path to .ato file (type: string)
-    Returns:
-        mode: type of mode (oxcart/ato)
-        
+def ato_to_ccapt(file_path: str, mode: str) -> pd.DataFrame:
     """
-    with open(file, 'rb') as f:
+    Read data from an .ato file version 6 and convert it into a pandas DataFrame.
+
+    Args:
+        file_path: Path to the .ato file
+        mode: Type of mode (oxcart/ato)
+
+    Returns:
+        Pandas DataFrame containing the converted data
+    """
+    with open(file_path, 'rb') as f:
         data = f.read()
-        # The first thing in the file is a 0
+
         zero = struct.unpack('i', data[:4])
-        print(zero)
-        # The second thing is the version of the file
         version = struct.unpack('i', data[4:8])
-        print(version)
-        # The Third thing is the version of the file
         num_atoms = struct.unpack('i', data[8:12])
-        print(num_atoms)
+
         atom_id = []
         pulse_pi = []
         x = []
@@ -40,6 +37,7 @@ def ato_to_hdf(file, mode):
         num_cluster = []
         cluster_id = []
         bias = 12
+
         for i in range(num_atoms[0]):
             atom_id.append(struct.unpack('I', data[bias:bias+4])[0])
             pulse_pi.append(struct.unpack('i', data[bias+4:bias+8])[0])
@@ -54,44 +52,76 @@ def ato_to_hdf(file, mode):
             mcp_amp.append(struct.unpack('H', data[bias+30:bias+32])[0])
             num_cluster_tmp = struct.unpack('B', data[bias+32:bias+33])[0]
             num_cluster.append(num_cluster_tmp)
-            # for each ions we have cluster ids base on the number of cluster in num_cluster
+
             if num_cluster_tmp > 0:
                 cluster_id.append(struct.unpack('H' * num_cluster_tmp, data[bias+33:bias+33+num_cluster_tmp*2])[0])
-            # we have 33 + num_cluster_tmp * 2 bytes for each ion
+
             bias = 12 + (35 * (i+1))
 
-        # convert values to right unit
-        # unpack data
         if mode == 'ato':
             data_f = pd.DataFrame({'atom_id': atom_id,
-                                'pulse_pi': pulse_pi,
-                                'x (nm)': x,
-                                'y (nm)': y,
-                                'z (nm)': z,
-                                'mc (Da)': mc,
-                                'tof (ns)': tof,
-                                'x_det (mm)': x_det,
-                                'y_det (mm)': y_det,
-                                'dc_voltage (v)': dc_voltage,
-                                'mcp_amp': mcp_amp,
-                                'num_cluster': num_cluster,
-                                'cluster_id': cluster_id,})
-        elif mode == 'oxcart':
-            data_f = pd.DataFrame({'high_voltage (V)': dc_voltage,
-                                   'pulse (V)': np.zeros(len(dc_voltage)),
-                                   'start counter': np.zeros(len(dc_voltage)),
-                                   't (ns)': tof,
+                                   'pulse_pi': pulse_pi,
+                                   'x (nm)': x,
+                                   'y (nm)': y,
+                                   'z (nm)': z,
                                    'mc (Da)': mc,
+                                   'tof (ns)': tof,
                                    'x_det (mm)': x_det,
                                    'y_det (mm)': y_det,
-                                   'pulse_pi': pulse_pi,
-                                   'ion_pp': np.zeros(len(dc_voltage)),})
+                                   'dc_voltage (V)': dc_voltage,
+                                   'mcp_amp': mcp_amp,
+                                   'num_cluster': num_cluster,
+                                   'cluster_id': cluster_id})
+        elif mode == 'pyccapt':
+            data_f = pd.DataFrame({
+                'x (nm)': np.zeros(len(dc_voltage)),
+                'y (nm)': np.zeros(len(dc_voltage)),
+                'z (nm)': np.zeros(len(dc_voltage)),
+                'mc (Da)': np.zeros(len(dc_voltage)),
+                'mc_c (Da)': np.zeros(len(dc_voltage)),
+                'high_voltage (V)': dc_voltage,
+                'pulse (V)': np.zeros(len(dc_voltage)),
+                'start_counter': np.zeros(len(dc_voltage)),
+                't (ns)': tof,
+                't_c (ns)': np.zeros(len(dc_voltage)),
+                'mc (Da)': mc,
+                'x_det (mm)': x_det,
+                'y_det (mm)': y_det,
+                'pulse_pi': pulse_pi,
+                'ion_pp': np.zeros(len(dc_voltage))})
     return data_f
 
 
-if __name__ == "__main__":
-    # save data as csv
-    data_f = ato_to_hdf(file='Bicrys_version5_Al_1_12_22_francois_V6.ato', mode='oxcart')
-    data_f.to_hdf('Bicrys_version5_Al_1_12_22_francois_V6_our_structure.h5', 'df', mode='w')
-    # save data in csv format
-    # data_f.to_csv('Bicrys_version5_Al_1_12_22_francois_V6.csv', encoding='utf-8', index=False)
+def ccapt_to_ato(data, path=None, name=None):
+    """
+    Converts CCAPT data to ATO file format.
+        Args:
+        data (pd.DataFrame): Input data containing the columns:
+            'x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)', 't (ns)', 'high_voltage (V)', 'pulse (V)', 'x_det (cm)',
+            'y_det (cm)', 'pulse_pi', 'ion_pp'.
+        path (str): Optional path to save the ATO file. If not provided, the file will not be saved.
+        name (str): Optional name for the ATO file. If not provided, the file will not be named.
+
+    Returns:
+        bytes: ATO file data.
+
+    """
+    # TODO: correct it for ato files
+    dd = data[
+        ['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)', 't (ns)', 'high_voltage (V)', 'pulse (V)', 'x_det (cm)',
+         'y_det (cm)',
+         'pulse_pi', 'ion_pp']]
+
+    dd = dd.astype(np.single)
+    dd = dd.astype({'pulse_pi': np.uintc})
+    dd = dd.astype({'ion_pp': np.uintc})
+
+    records = dd.to_records(index=False)
+    list_records = list(records)
+    d = tuple(chain(*list_records))
+    ato = struct.pack('>' + 'IihhfffhhHHb' * len(dd), *d)
+    if name is not None:
+        with open(path + name, 'w+b') as f:
+            f.write(ato)
+
+    return ato

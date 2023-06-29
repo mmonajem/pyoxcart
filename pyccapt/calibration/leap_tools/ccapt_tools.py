@@ -9,7 +9,18 @@ from pyccapt.calibration.leap_tools import leap_tools
 
 
 def ccapt_to_pos(data, path=None, name=None):
+    """
+    Convert CCAPT data to POS format.
 
+    Args:
+        data (pandas.DataFrame): CCAPT data.
+        path (str): Optional. Path to save the POS file.
+        name (str): Optional. Name of the POS file.
+
+    Returns:
+        bytes: POS data.
+
+    """
     dd = data[['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)']]
     dd = dd.astype(np.single)
     records = dd.to_records(index=False)
@@ -22,17 +33,22 @@ def ccapt_to_pos(data, path=None, name=None):
     return pos
 
 
-def ccapt_to_epos(data, pulse_mode, path=None, name=None):
-    if pulse_mode == 'voltage':
-        dd = data[
-            ['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)', 't (ns)', 'high_voltage (V)', 'pulse (V)', 'x_det (cm)',
-             'y_det (cm)',
-             'pulse_pi', 'ion_pp']]
-    elif pulse_mode == 'laser':
-        dd = data[
-            ['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)', 't (ns)', 'high_voltage (V)', 'pulse (deg)', 'x_det (cm)',
-             'y_det (cm)',
-             'pulse_pi', 'ion_pp']]
+def ccapt_to_epos(data, path=None, name=None):
+    """
+    Convert CCAPT data to EPOS format.
+
+    Args:
+        data (pandas.DataFrame): CCAPT data.
+        path (str): Optional. Path to save the EPOS file.
+        name (str): Optional. Name of the EPOS file.
+
+    Returns:
+        bytes: EPOS data.
+
+    """
+    dd = data[
+        ['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)', 't (ns)', 'high_voltage (V)', 'pulse (V)', 'x_det (cm)',
+         'y_det (cm)', 'pulse_pi', 'ion_pp']]
 
     dd = dd.astype(np.single)
     dd = dd.astype({'pulse_pi': np.uintc})
@@ -41,15 +57,25 @@ def ccapt_to_epos(data, pulse_mode, path=None, name=None):
     records = dd.to_records(index=False)
     list_records = list(records)
     d = tuple(chain(*list_records))
-    epos = struct.pack('>'+'fffffffffII'*len(dd), *d)
+    epos = struct.pack('>' + 'fffffffffII' * len(dd), *d)
     if name is not None:
         with open(path + name, 'w+b') as f:
             f.write(epos)
 
     return epos
 
-def pos_to_ccapt(data):
 
+def pos_to_ccapt(data):
+    """
+    Convert POS data to CCAPT format.
+
+    Args:
+        data (bytes): POS data.
+
+    Returns:
+        pandas.DataFrame: CCAPT data.
+
+    """
     pos = leap_tools.read_pos(data)
     length = len(pos['m/n (Da)'].to_numpy())
     ccapt = pd.DataFrame({'x (nm)': pos['x (nm)'].to_numpy(),
@@ -71,6 +97,16 @@ def pos_to_ccapt(data):
 
 
 def epos_to_ccapt(data):
+    """
+    Convert EPOS data to CCAPT format.
+
+    Args:
+        data (bytes): EPOS data.
+
+    Returns:
+        pandas.DataFrame: CCAPT data.
+
+    """
     epos = leap_tools.read_epos(data)
     length = len(epos['m/n (Da)'].to_numpy())
     ccapt = pd.DataFrame({'x (nm)': epos['x (nm)'].to_numpy(),

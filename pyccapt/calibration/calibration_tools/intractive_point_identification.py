@@ -1,18 +1,14 @@
-"""
-This is the script containing interactive peak selection on m/c plot.
-"""
-
 import math
+
 import matplotlib.pyplot as plt
 
-# Local module and scripts
 from pyccapt.calibration.calibration_tools import variables
 
 
 class AnnoteFinder(object):
-    """callback for matplotlib to display an annotation when points are
-    clicked on.  The point which is closest to the click and within
-    xtol and ytol is identified.
+    """
+    Callback for matplotlib to display an annotation when points are clicked on.
+    The point which is closest to the click and within xtol and ytol is identified.
 
     Register this function like this:
 
@@ -22,6 +18,17 @@ class AnnoteFinder(object):
     """
 
     def __init__(self, xdata, ydata, annotes, ax=None, xtol=None, ytol=None):
+        """
+        Initialize the AnnoteFinder object.
+
+        Args:
+            xdata (list): X-coordinates of the data points.
+            ydata (list): Y-coordinates of the data points.
+            annotes (list): List of annotations corresponding to the data points.
+            ax (Axes, optional): The matplotlib Axes instance. Defaults to None.
+            xtol (float, optional): The tolerance value in the x-direction. Defaults to None.
+            ytol (float, optional): The tolerance value in the y-direction. Defaults to None.
+        """
         self.data = list(zip(xdata, ydata, annotes))
         if xtol is None:
             xtol = ((max(xdata) - min(xdata)) / float(len(xdata))) / 2
@@ -38,21 +45,32 @@ class AnnoteFinder(object):
 
     def distance(self, x1, x2, y1, y2):
         """
-        return the distance between two points
+        Calculate the Euclidean distance between two points.
+
+        Args:
+            x1 (float): X-coordinate of the first point.
+            x2 (float): X-coordinate of the second point.
+            y1 (float): Y-coordinate of the first point.
+            y2 (float): Y-coordinate of the second point.
+
+        Returns:
+            float: The Euclidean distance between the two points.
         """
-        return (math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2))
+        return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
     def __call__(self, event):
+        """
+        Callback function to handle button press event.
 
+        Args:
+            event (Event): The matplotlib event object.
+        """
         if event.inaxes:
-
             clickX = event.xdata
             clickY = event.ydata
             if (self.ax is None) or (self.ax is event.inaxes):
                 annotes = []
-                # print(event.xdata, event.ydata)
                 for x, y, a in self.data:
-                    # print(x, y, a)
                     if ((clickX - self.xtol < x < clickX + self.xtol) and
                             (clickY - self.ytol < y < clickY + self.ytol)):
                         annotes.append(
@@ -66,16 +84,21 @@ class AnnoteFinder(object):
 
     def drawAnnote(self, ax, x, y, annote):
         """
-        Draw the annotation on the plot
+        Draw the annotation on the plot.
+
+        Args:
+            ax (Axes): The matplotlib Axes instance.
+            x (float): X-coordinate of the annotation.
+            y (float): Y-coordinate of the annotation.
+            annote (str): The annotation text.
         """
         if (x, y) in self.drawnAnnotations:
-
             markers = self.drawnAnnotations[(x, y)]
             for m in markers:
                 m.set_visible(not m.get_visible())
             self.ax.figure.canvas.draw_idle()
         else:
-            t = ax.text(x, y, " - %s" % (annote), )
+            t = ax.text(x, y, " - %s" % (annote))
             m = ax.scatter([x], [y], marker='d', c='r', zorder=100)
             self.drawnAnnotations[(x, y)] = (t, m)
             self.ax.figure.canvas.draw_idle()
@@ -83,6 +106,12 @@ class AnnoteFinder(object):
         variables.peaks_idx.append(int(annote) - 1)
 
     def drawSpecificAnnote(self, annote):
+        """
+        Draw specific annotation on the plot.
+
+        Args:
+            annote (str): The annotation to be drawn.
+        """
         annotesToDraw = [(x, y, a) for x, y, a in self.data if a == annote]
         for x, y, a in annotesToDraw:
             self.drawAnnote(self.ax, x, y, a)

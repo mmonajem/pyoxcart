@@ -1,5 +1,5 @@
-import numpy as np
 import h5py
+import numpy as np
 import pandas as pd
 import scipy.io
 
@@ -38,9 +38,9 @@ def read_hdf5(filename: "type: string - Path to hdf5(.h5) file",
                         if key == 'dld' and item == 't':
                             dataset = dataset * TOFFACTOR
                         elif key == 'dld' and item == 'x':
-                            dataset = (dataset - XYBINSHIFT) * XYFACTOR
+                            dataset = (dataset - XYBINSHIFT) * XYFACTOR * 0.1  # to convert them from mm to cm
                         elif key == 'dld' and item == 'y':
-                            dataset = (dataset - XYBINSHIFT) * XYFACTOR
+                            dataset = (dataset - XYBINSHIFT) * XYFACTOR * 0.1  # to convert them from mm to cm
                     else:
                         dataset = dataset
                     dataframeStorage["{}/{}".format(key, item)] = dataset
