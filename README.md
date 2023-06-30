@@ -1,6 +1,9 @@
 # PyCCAPT (APT_PyControl)
-# A modular, FAIR open-source python atom probe tomography software package for experiment control and data calibration 
-![plot](pyccapt/files/logo.png)
+
+# A modular, FAIR open-source python atom probe tomography software package for experiment control and data calibration
+
+<img style="float: right;" src="pyccapt/files/logo.png">
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7588996.svg)](https://doi.org/10.5281/zenodo.7588996)
 [![Documentation Status](https://readthedocs.org/projects/pyccapt/badge/?version=latest)](https://pyccapt.readthedocs.io/en/latest/?badge=latest)
 [![PyPi version](https://badgen.net/pypi/v/pyccapt/)](https://pypi.org/project/pyccapt)
@@ -19,12 +22,14 @@ Atom probe instruments are predominantly commercial systems with proprietary sof
 This limits the accessibility and customization of experiments requiring low-level control and data analysis.
 PyCCAPT addresses this limitation by providing an open-source software package that can control atom probe systems and
 perform data calibration.
-The package is modular and adaptable to a wide range of applications.
 
 PyCCAPT was initially developed and tested on the OXCART atom probe, an in-house atom probe system. The OXCART atom
 probe features a measuring chamber made of titanium, which enables a particularly low-hydrogen vacuum. It is equipped
 with a highly efficient detector (~80% detection efficiency). The PyCCAPT package can also be used to control other atom
 probe systems.
+
+The package is modular and adaptable to a wide range of instrument, such as Pfeifer gauges, Fug power supply and Siglent
+signal generator. So far it is capable of collecting data from Surface consept and ReoenDek TDC systems.
 
 ![plot](pyccapt/files/oxcart.jpg)
 
