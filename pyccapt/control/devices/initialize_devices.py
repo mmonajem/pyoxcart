@@ -3,12 +3,13 @@ This is the main script for initializing Edward and Pfeifer gauges.
 """
 
 import time
+
 import serial.tools.list_ports
 
+from pyccapt.control.control_tools import variables
+from pyccapt.control.devices.edwards_tic import EdwardsAGC
 # Local module and scripts
 from pyccapt.control.devices.pfeiffer_gauges import TPG362
-from pyccapt.control.devices.edwards_tic import EdwardsAGC
-from pyccapt.control.control_tools import variables
 
 # get available COM ports and store as list
 com_ports = list(serial.tools.list_ports.comports())
@@ -173,7 +174,7 @@ def initialize_pfeiffer_gauges():
     variables.vacuum_buffer = '{}'.format(value)
 
 
-def gauges_update(conf, lock, com_port_cryovac):
+def state_update(conf, lock, com_port_cryovac):
     """
     This function is used for reading gauge parameters.
     It does so by executing command on the devices to read value.
