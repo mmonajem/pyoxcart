@@ -2,7 +2,7 @@ import re
 
 import ipywidgets as widgets
 
-from pyccapt.calibration.calibration_tools import variables
+
 from pyccapt.calibration.data_tools import data_tools
 
 # Stores values of the currently selected element in the dropdown.

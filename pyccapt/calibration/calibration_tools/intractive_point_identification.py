@@ -2,7 +2,7 @@ import math
 
 import matplotlib.pyplot as plt
 
-from pyccapt.calibration.calibration_tools import variables
+from pyccapt.calibration.calibration_tools import share_variables
 
 
 class AnnoteFinder(object):

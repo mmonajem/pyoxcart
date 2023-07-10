@@ -9,7 +9,6 @@ from matplotlib.ticker import FormatStrFormatter
 from matplotlib.widgets import RectangleSelector, EllipseSelector
 
 from pyccapt.calibration.calibration_tools import logging_library
-from pyccapt.calibration.calibration_tools import variables
 from pyccapt.calibration.data_tools import data_tools
 from pyccapt.calibration.data_tools import selectors_data
 
@@ -61,23 +60,27 @@ def concatenate_dataframes_of_dld_grp(dataframeList: list) -> pd.DataFrame:
     return dld_masterDataframe
 
 
-def plot_crop_experiment_history(dldGroupStorage: pd.DataFrame, max_tof=0, figure_size=(11 / 2.54, 5 / 2.54),
-                                 rect=False, only_plot=False, save_name=False, laser=np.zeros(0)):
+def plot_crop_experiment_history(dldGroupStorage: pd.DataFrame, variables, max_tof, frac, figure_size=(7, 3),
+                                 draw_rect=False, data_crop=True, pulse=False, pulse_mode='voltage', save=True):
     """
     Plots the experiment history.
 
     Args:
         dldGroupStorage: DataFrame containing info about the dld group.
         max_tof: The maximum tof to be plotted.
+        frac: Fraction of the data to be plotted.
         figure_size: The size of the figure.
-        only_plot: Flag to control if only the plot should be shown or cropping functionality should be enabled.
-        rect: Flag to enable cropping data by drawing a rectangular box.
-        save_name: Flag to choose whether to save the plot or not.
-        laser: Flag to choose whether to plot laser intensity.
+        data_crop: Flag to control if only the plot should be shown or cropping functionality should be enabled.
+        draw_rect: Flag to draw  a rectangle over the slected area.
+        pulse: Flag to choose whether to plot pulse.
+        pulse_mode: Flag to choose whether to plot pulse voltage or pulse.
+        save: Flag to choose whether to save the plot or not.
 
     Returns:
         None.
     """
+    # dldGroupStorage = dldGroupStorage.sample(frac=frac, random_state=42)
+    # dldGroupStorage.reset_index(inplace=True, drop=True)
     fig1, ax1 = plt.subplots(figsize=figure_size, constrained_layout=True)
 
     # Plot tof and high voltage
@@ -94,9 +97,9 @@ def plot_crop_experiment_history(dldGroupStorage: pd.DataFrame, max_tof=0, figur
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 
     # Set x-axis label
-    ax1.set_xlabel("Hit sequence Number", fontsize=12)
+    ax1.set_xlabel("Hit sequence Number", fontsize=10)
     # Set y-axis label
-    ax1.set_ylabel("Time of Flight [ns]", fontsize=12)
+    ax1.set_ylabel("Time of Flight [ns]", fontsize=10)
     img = plt.imshow(heatmap.T, extent=extent, origin='lower', aspect="auto")
     cmap = copy(plt.cm.plasma)
     cmap.set_bad(cmap(0))
@@ -110,34 +113,37 @@ def plot_crop_experiment_history(dldGroupStorage: pd.DataFrame, max_tof=0, figur
     ax2 = ax1.twinx()
     xaxis2 = np.arange(len(high_voltage))
     ax2.plot(xaxis2, high_voltage, color='dodgerblue', linewidth=2)
-    ax2.set_ylabel("High Voltage [kV]", color="dodgerblue", fontsize=12)
+    ax2.set_ylabel("High Voltage [kV]", color="dodgerblue", fontsize=10)
 
-    if not only_plot:
-        if not rect:
-            rectangle_box_selector(ax2)
-            plt.connect('key_press_event', selectors_data.toggle_selector)
-        else:
+    if data_crop:
+        if not draw_rect:
+            rectangle_box_selector(ax2, variables)
+            plt.connect('key_press_event', selectors_data.toggle_selector(variables))
+        elif draw_rect:
             left, bottom, width, height = (
                 variables.selected_x1, 0, variables.selected_x2 - variables.selected_x1, np.max(yaxis))
             rect = Rectangle((left, bottom), width, height, fill=True, alpha=0.3, color="r", linewidth=2)
             ax1.add_patch(rect)
 
-    if len(laser) > 1:
+    if pulse:
         fig1.subplots_adjust(right=0.75)
         ax3 = ax1.twinx()
-        ax3.plot(xaxis, laser, color='limegreen', linewidth=2)
+        ax3.plot(xaxis, dldGroupStorage['pulse'].to_numpy(), color='limegreen', linewidth=2)
         ax3.spines.right.set_position(("axes", 1.15))
-        ax3.set_ylabel("Laser Intensity [${pJ}/{\mu m^2}$]", color="limegreen", fontsize=12)
+        if pulse_mode == 'laser':
+            ax3.set_ylabel("Laser Intensity (${pJ}/{\mu m^2}$)", color="limegreen", fontsize=10)
+        elif pulse_mode == 'voltage':
+            ax3.set_ylabel("Pulse (V)", color="limegreen", fontsize=10)
 
-    if save_name:
-        plt.savefig("%s.png" % save_name, format="png", dpi=600)
-        plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
+    if save:
+        plt.savefig("%s.png" % (variables.result_path + '//ex_hist_'), format="png", dpi=600)
+        plt.savefig("%s.svg" % (variables.result_path + '//ex_hist_'), format="svg", dpi=600)
 
     plt.show()
 
 
-def plot_crop_FDM(data_crop, bins=(256, 256), figure_size=(10 / 2.54, 10 / 2.54), circle=False, save_name=False,
-                  mask=True, only_plot=False):
+def plot_crop_FDM(data_crop, variables, bins=(256, 256), figure_size=(6, 6), circle=False,
+                  save_name=False, only_plot=False):
     """
     Plot and crop the FDM with the option to select a region of interest.
 
@@ -147,7 +153,6 @@ def plot_crop_FDM(data_crop, bins=(256, 256), figure_size=(10 / 2.54, 10 / 2.54)
         figure_size: Size of the plot
         circle: Flag to enable circular region of interest selection
         save_name: Flag to choose whether to save the plot or not
-        mask: Flag to control the mask of the region of interest
         only_plot: Flag to control whether only the plot is shown or cropping functionality is enabled
 
     Returns:
@@ -162,8 +167,8 @@ def plot_crop_FDM(data_crop, bins=(256, 256), figure_size=(10 / 2.54, 10 / 2.54)
     FDM, xedges, yedges = np.histogram2d(x, y, bins=bins)
 
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    ax1.set_xlabel(r"$X_{det} (cm)$", fontsize=12)
-    ax1.set_ylabel(r"$Y_{det} (cm)$", fontsize=12)
+    ax1.set_xlabel(r"$X_{det} (cm)$", fontsize=10)
+    ax1.set_ylabel(r"$Y_{det} (cm)$", fontsize=10)
 
     cmap = copy(plt.cm.plasma)
     cmap.set_bad(cmap(0))
@@ -184,7 +189,7 @@ def plot_crop_FDM(data_crop, bins=(256, 256), figure_size=(10 / 2.54, 10 / 2.54)
     plt.show()
 
 
-def rectangle_box_selector(axisObject):
+def rectangle_box_selector(axisObject, variables):
     """
     Enable the creation of a rectangular box to select the region of interest.
 
@@ -194,7 +199,7 @@ def rectangle_box_selector(axisObject):
     Returns:
         None
     """
-    selectors_data.toggle_selector.RS = RectangleSelector(axisObject, selectors_data.line_select_callback,
+    selectors_data.toggle_selector.RS = RectangleSelector(axisObject, selectors_data.line_select_callback(variables),
                                                           useblit=True,
                                                           button=[1, 3],
                                                           minspanx=1, minspany=1,
@@ -202,7 +207,7 @@ def rectangle_box_selector(axisObject):
                                                           interactive=True)
 
 
-def crop_dataset(dld_master_dataframe):
+def crop_dataset(dld_master_dataframe, variables):
     """
     Crop the dataset based on the selected region of interest.
 

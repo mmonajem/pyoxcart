@@ -8,7 +8,7 @@ from matplotlib import colors
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 
-from pyccapt.calibration.calibration_tools import variables
+from pyccapt.calibration.calibration_tools import share_variables
 
 
 def voltage_corr(x, a, b, c):
@@ -116,21 +116,21 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, maximum_location, index
     if plot:
         fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
         if calibration_mode == 'tof':
-            ax1.set_ylabel("Time of Flight (ns)", fontsize=8)
+            ax1.set_ylabel("Time of Flight (ns)", fontsize=10)
             label = 't'
         elif calibration_mode == 'mc':
-            ax1.set_ylabel("mc (Da)", fontsize=8)
+            ax1.set_ylabel("mc (Da)", fontsize=10)
             label = 'mc'
 
         x = plt.scatter(np.array(high_voltage_mean_list) / 1000, np.array(dld_t_peak_list) * maximum_location,
                         color="blue", label=label, s=1)
-        ax1.set_xlabel("Voltage (kV)", fontsize=8)
+        ax1.set_xlabel("Voltage (kV)", fontsize=10)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
 
         ax2 = ax1.twinx()
         f_v = voltage_corr(np.array(high_voltage_mean_list), *fitresult)
         y = ax2.plot(np.array(high_voltage_mean_list) / 1000, f_v, color='r', label=r"$C_V$", linewidth=0.5)
-        ax2.set_ylabel(r"$C_V$", color="red", fontsize=8)
+        ax2.set_ylabel(r"$C_V$", color="red", fontsize=10)
         plt.legend(handles=[x, y[0]], loc='lower left', prop={'size': 6})
 
         if save:
@@ -222,10 +222,10 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, peak
         x = plt.scatter(dld_highVoltage_peak_v[mask], dld_peak_b[mask], color="blue", label=r"$t$", alpha=0.1, s=1)
 
         if calibration_mode == 'tof':
-            ax1.set_ylabel("Time of Flight (ns)", fontsize=8)
+            ax1.set_ylabel("Time of Flight (ns)", fontsize=10)
         elif calibration_mode == 'mc':
-            ax1.set_ylabel("mc (Da)", fontsize=8)
-        ax1.set_xlabel("Voltage (V)", fontsize=8)
+            ax1.set_ylabel("mc (Da)", fontsize=10)
+        ax1.set_xlabel("Voltage (V)", fontsize=10)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
 
         # Plot high voltage curve
@@ -233,7 +233,7 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, peak
         f_v_plot = voltage_corr(dld_highVoltage_peak_v, *fitresult)
 
         y = ax2.plot(dld_highVoltage_peak_v, 1 / f_v_plot, color='r', label=r"$C_{V}^{-1}$")
-        ax2.set_ylabel(r"$C_{V}^{-1}$", color="red", fontsize=8)
+        ax2.set_ylabel(r"$C_{V}^{-1}$", color="red", fontsize=10)
 
         plt.legend(handles=[x, y[0]], loc='upper right', prop={'size': 6})
 
@@ -249,10 +249,10 @@ def voltage_corr_main(dld_highVoltage, sample_size, mode, calibration_mode, peak
 
         x = plt.scatter(dld_highVoltage_peak_v[mask], dld_peak_b[mask], color="blue", label='t', alpha=0.1, s=1)
         if calibration_mode == 'tof':
-            ax1.set_ylabel("Time of Flight (ns)", fontsize=8)
+            ax1.set_ylabel("Time of Flight (ns)", fontsize=10)
         elif calibration_mode == 'mc':
-            ax1.set_ylabel("mc (Da)", fontsize=8)
-        ax1.set_xlabel("Voltage (V)", fontsize=8)
+            ax1.set_ylabel("mc (Da)", fontsize=10)
+        ax1.set_xlabel("Voltage (V)", fontsize=10)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
 
         f_v_plot = voltage_corr(dld_highVoltage_peak_v[mask], *fitresult)
@@ -342,8 +342,8 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, det_diam, maximum_locati
         fig, ax = plt.subplots(figsize=fig_size, subplot_kw=dict(projection="3d"), constrained_layout=True)
         fig.add_axes(ax)
         ax.plot_surface(X, Y, 1 / Z, cmap=cm.plasma)
-        ax.set_xlabel('X', fontsize=8, labelpad=0)
-        ax.set_ylabel('Y', fontsize=8)
+        ax.set_xlabel('X', fontsize=10, labelpad=0)
+        ax.set_ylabel('Y', fontsize=10)
         ax.set_zlabel(r"${C_B}^{-1}$", fontsize=8, labelpad=2)
         ax.zaxis.set_major_formatter(plt.FormatStrFormatter('%.2f'))
 

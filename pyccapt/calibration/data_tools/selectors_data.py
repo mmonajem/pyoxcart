@@ -1,7 +1,7 @@
-from pyccapt.calibration.calibration_tools import variables
 
 
-def onselect(eclick, erelease):
+
+def onselect(eclick, erelease, variables):
     """
     Callback function for the selection event.
 
@@ -14,8 +14,7 @@ def onselect(eclick, erelease):
     variables.selected_y_fdm = eclick.ydata + (erelease.ydata - eclick.ydata) / 2
     variables.roi_fdm = min(erelease.xdata - eclick.xdata, erelease.ydata - eclick.ydata) / 2
 
-
-def line_select_callback(eclick, erelease):
+def line_select_callback(eclick, erelease, variables):
     """
     Callback function for line selection event.
 

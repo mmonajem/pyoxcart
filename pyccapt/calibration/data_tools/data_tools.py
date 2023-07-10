@@ -4,9 +4,7 @@ import pandas as pd
 import scipy.io
 
 # Local module and scripts
-from pyccapt.calibration.calibration_tools import logging_library
-
-logger = logging_library.logger_creator('data_loadcrop')
+from pyccapt.calibration.data_tools import dataset_path_qt
 
 
 def read_hdf5(filename: "type: string - Path to hdf5(.h5) file",
@@ -47,12 +45,10 @@ def read_hdf5(filename: "type: string - Path to hdf5(.h5) file",
 
             return dataframeStorage
     except FileNotFoundError as error:
-        logger.critical(error)
-        logger.critical("[*] HDF5 File could not be found")
+        print("[*] HDF5 File could not be found")
 
     except IndexError as error:
-        logger.critical(error)
-        logger.critical("[*] No Group keys could be found in HDF5 File")
+        print("[*] No Group keys could be found in HDF5 File")
 
 
 def read_hdf5_through_pandas(filename: "type:string - Path to hdf5(.h5) file") -> "type: dataframe - Pandas Dataframe":
@@ -69,8 +65,7 @@ def read_hdf5_through_pandas(filename: "type:string - Path to hdf5(.h5) file") -
         hdf5_file_response = pd.read_hdf(filename, mode='r')
         return hdf5_file_response
     except FileNotFoundError as error:
-        logger.info(error)
-        logger.critical("[*] HDF5 File could not be found")
+        print("[*] HDF5 File could not be found")
 
 
 def read_mat_files(filename: "type:string - Path to .mat file") -> " type: dict - Returns the content .mat file":
@@ -85,8 +80,7 @@ def read_mat_files(filename: "type:string - Path to .mat file") -> " type: dict 
         hdf5_file_response = scipy.io.loadmat(filename)
         return hdf5_file_response
     except FileNotFoundError as error:
-        logger.critical(error)
-        logger.critical("[*] Mat File could not be found")
+        print("[*] Mat File could not be found")
 
 
 def convert_mat_to_df(hdf5_file_response: "type: dict - content of .mat file"):
@@ -133,3 +127,44 @@ def store_df_to_csv(data, path):
     """
 
     data.to_csv(path, encoding='utf-8', index=False, sep=';')
+
+
+def open_file_on_click(b):
+    """
+    Event handler for button click event.
+    Prompts the user to select a dataset file and stores the selected file path in the global variable dataset_path.
+    """
+    global dataset_path
+    dataset_path = dataset_path_qt.gui_fname().decode('ASCII')
+
+def remove_invalid_data(dld_group_storage, max_tof):
+    """
+    Removes the data with time-of-flight (TOF) values greater than max_tof or lower than 0.
+
+    Args:
+        dld_group_storage (pandas.DataFrame): DataFrame containing the DLD group storage data.
+        max_tof (float): Maximum allowable TOF value.
+
+    Returns:
+        None. The DataFrame is modified in-place.
+
+    """
+    # Create a mask for data with TOF values greater than max_tof
+    mask_1 = dld_group_storage['t (ns)'].to_numpy() > max_tof
+
+    mask_2 = (dld_group_storage['t (ns)'].to_numpy() < 0)
+    mask = np.logical_or(mask_1, mask_2)
+
+    # Calculate the number of data points over max_tof
+    num_over_max_tof = len(mask[mask])
+
+    # Remove data points with TOF values greater than max_tof
+    dld_group_storage.drop(np.where(mask)[0], inplace=True)
+
+    # Reset the index of the DataFrame
+    dld_group_storage.reset_index(inplace=True, drop=True)
+
+    # Print the number of data points over max_tof
+    print('The number of data over max_tof:', num_over_max_tof)
+
+    return dld_group_storage

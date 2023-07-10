@@ -9,7 +9,7 @@ from scipy.signal import peak_widths
 
 from pyccapt.calibration.calibration_tools import intractive_point_identification
 from pyccapt.calibration.calibration_tools import logging_library
-from pyccapt.calibration.calibration_tools import variables
+from pyccapt.calibration.calibration_tools import share_variables
 from pyccapt.calibration.data_tools import data_loadcrop
 from pyccapt.calibration.data_tools import selectors_data
 
@@ -126,11 +126,11 @@ def hist_plot(mc_tof, bin, label, range_data=None, mc_peak_label=False, adjust_l
                 if background['patch']:
                     ax1.plot(bins[:-1][mask_2], y[mask_2], 'o', color='orange')[0]
         if peaks_find:
-            ax1.set_ylabel("Frequency [cts]", fontsize=8)
+            ax1.set_ylabel("Frequency [cts]", fontsize=10)
             if label == 'mc':
-                ax1.set_xlabel("Mass/Charge [Da]", fontsize=8)
+                ax1.set_xlabel("Mass/Charge [Da]", fontsize=10)
             elif label == 'tof':
-                ax1.set_xlabel("Time of Flight [ns]", fontsize=8)
+                ax1.set_xlabel("Time of Flight [ns]", fontsize=10)
             print("The peak index for MRP calculation is:", index_peak_max)
             if label == 'mc':
                 mrp = '{:.2f}'.format(x[peaks[index_peak_max]] / (x[int(peak_widths_p[3][index_peak_max])] -
@@ -167,10 +167,10 @@ def hist_plot(mc_tof, bin, label, range_data=None, mc_peak_label=False, adjust_l
 
             props = dict(boxstyle='round', facecolor='wheat', alpha=1)
             if text_loc == 'left':
-                ax1.text(.01, .95, txt, va='top', ma='left', transform=ax1.transAxes, bbox=props, fontsize=8, alpha=1,
+                ax1.text(.01, .95, txt, va='top', ma='left', transform=ax1.transAxes, bbox=props, fontsize=10, alpha=1,
                          horizontalalignment='left', verticalalignment='top')
             elif text_loc == 'right':
-                ax1.text(.98, .95, txt, va='top', ma='left', transform=ax1.transAxes, bbox=props, fontsize=8, alpha=1,
+                ax1.text(.98, .95, txt, va='top', ma='left', transform=ax1.transAxes, bbox=props, fontsize=10, alpha=1,
                          horizontalalignment='right', verticalalignment='top')
 
             ax1.tick_params(axis='both', which='major', labelsize=12)

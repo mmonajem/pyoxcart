@@ -4,7 +4,7 @@ import plotly
 import plotly.graph_objects as go
 
 # Local module and scripts
-from pyccapt.calibration.calibration_tools import variables
+from pyccapt.calibration.calibration_tools import share_variables
 from pyccapt.calibration.data_tools import data_loadcrop, selectors_data
 
 
