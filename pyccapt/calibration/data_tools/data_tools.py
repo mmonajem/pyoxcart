@@ -5,6 +5,7 @@ import scipy.io
 
 # Local module and scripts
 from pyccapt.calibration.data_tools import ato_tools
+from pyccapt.calibration.data_tools import data_loadcrop
 from pyccapt.calibration.leap_tools import ccapt_tools
 
 
@@ -163,21 +164,62 @@ def remove_invalid_data(dld_group_storage, max_tof):
     return dld_group_storage
 
 
-def save_data(data, variables, hdf=True, epos=False, pos=False, ato=False, csv=False):
+def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, csv=False):
+    """
+    save data in different formats
+
+    Args:
+        data (pandas.DataFrame): DataFrame containing the data.
+        vsriables (class): class containing the variables.
+        hdf (bool): save data as hdf5 file.
+        epos (bool): save data as epos file.
+        pos (bool): save data as pos file.
+        ato_6v (bool): save data as ato file.
+        csv (bool): save data as csv file.
+
+    Returns:
+        None. The DataFrame is modified in-place.
+
+    """
     if hdf:
         # save the dataset to hdf5 file
         hierarchyName = 'df'
         store_df_to_hdf(data, hierarchyName, variables.result_path + '//' + variables.dataset_name + '_cropped' + '.h5')
     if epos:
         # save data as epos file
-        epos = ccapt_tools.ccapt_to_epos(data, pulse_mode=variables.pulse_mode, path=variables.result_path,
-                                         name=variables.dataset_name + '.epos')
+        ccapt_tools.ccapt_to_epos(data, path=variables.result_path,
+                                  name=variables.dataset_name + '.epos')
     if pos:
         # save data in pos format
-        pos = ccapt_tools.ccapt_to_pos(data, path=variables.result_path, name=variables.dataset_name + '.pos')
-    if ato:
+        ccapt_tools.ccapt_to_pos(data, path=variables.result_path, name=variables.dataset_name + '.pos')
+    if ato_6v:
         # save data as ato file in  ersion 6
         ato_tools.ccapt_to_ato(data, path=variables.result_path, name=variables.dataset_name + '.ato')
     if csv:
         # save data in csv format
         store_df_to_csv(data, variables.result_path + variables.dataset_name + '.csv')
+
+
+def load_data(dataset_path, tdc):
+    """
+    save data in different formats
+
+    Args:
+        dataset_path (string): path to the dataset.
+        tdc (string): type of the dataset.
+
+    Returns:
+        data (pandas.DataFrame): DataFrame containing the data.
+
+    """
+    if tdc == 'leap_pos' or tdc == 'leap_epos':
+        if tdc == 'leap_epos':
+            data = ccapt_tools.epos_to_ccapt(dataset_path)
+        else:
+            print('The file has to be epos. With pos information this tutorial cannot be run')
+    elif tdc == 'ato_v6':
+        data = ato_tools.ato_to_ccapt(dataset_path, moed='pyccapt')
+    elif tdc == 'surface_concept' or tdc == 'roentdec':
+        data = data_loadcrop.fetch_dataset_from_dld_grp(dataset_path, tdc)
+
+    return data

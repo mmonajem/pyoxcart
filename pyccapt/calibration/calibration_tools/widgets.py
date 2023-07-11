@@ -2,7 +2,6 @@ import re
 
 import ipywidgets as widgets
 
-
 from pyccapt.calibration.data_tools import data_tools
 
 # Stores values of the currently selected element in the dropdown.
@@ -232,7 +231,7 @@ def dataset_instrument_specification_selection():
     )
 
     tdc = widgets.Dropdown(
-        options=['surface_concept', 'roentdec', 'leap_epos', 'leap_pos'],
+        options=['surface_concept', 'roentdec', 'leap_epos', 'leap_pos', 'ato_v6'],
         value='surface_concept',
         description='Data mode:',
     )

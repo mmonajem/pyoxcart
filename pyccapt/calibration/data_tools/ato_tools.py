@@ -77,13 +77,13 @@ def ato_to_ccapt(file_path: str, mode: str) -> pd.DataFrame:
                 'x (nm)': np.zeros(len(dc_voltage)),
                 'y (nm)': np.zeros(len(dc_voltage)),
                 'z (nm)': np.zeros(len(dc_voltage)),
-                'mc (Da)': np.zeros(len(dc_voltage)),
                 'mc_c (Da)': np.zeros(len(dc_voltage)),
+                'mc (Da)': np.zeros(len(dc_voltage)),
                 'high_voltage (V)': dc_voltage,
-                'pulse (V)': np.zeros(len(dc_voltage)),
+                'pulse': np.zeros(len(dc_voltage)),
                 'start_counter': np.zeros(len(dc_voltage)),
-                't (ns)': tof,
                 't_c (ns)': np.zeros(len(dc_voltage)),
+                't (ns)': tof,
                 'mc (Da)': mc,
                 'x_det (mm)': x_det,
                 'y_det (mm)': y_det,
@@ -108,7 +108,7 @@ def ccapt_to_ato(data, path=None, name=None):
     """
     # TODO: correct it for ato files
     dd = data[
-        ['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)', 't (ns)', 'high_voltage (V)', 'pulse (V)', 'x_det (cm)',
+        ['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)', 't (ns)', 'high_voltage (V)', 'pulse', 'x_det (cm)',
          'y_det (cm)',
          'pulse_pi', 'ion_pp']]
 
