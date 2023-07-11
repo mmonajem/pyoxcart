@@ -8,6 +8,7 @@ def onselect(eclick, erelease, variables):
     Args:
         eclick (MouseEvent): Event object representing the click event.
         erelease (MouseEvent): Event object representing the release event.
+        variables (object): Object containing the variables.
 
     """
     variables.selected_x_fdm = eclick.xdata + (erelease.xdata - eclick.xdata) / 2
@@ -21,6 +22,7 @@ def line_select_callback(eclick, erelease, variables):
     Args:
         eclick (MouseEvent): Event object representing the press event.
         erelease (MouseEvent): Event object representing the release event.
+        variables (object): Object containing the variables.
 
     """
     x1, y1 = eclick.xdata, eclick.ydata
@@ -41,7 +43,10 @@ def toggle_selector(event):
         event (KeyEvent): Event object representing the key press event.
 
     """
-    if event.key in ['Q', 'q'] and toggle_selector.RS.active:
-        toggle_selector.RS.set_active(False)
-    if event.key in ['A', 'a'] and not toggle_selector.RS.active:
-        toggle_selector.RS.set_active(True)
+    try:
+        if event.key in ['Q', 'q'] and toggle_selector.RS.active:
+            toggle_selector.RS.set_active(False)
+        if event.key in ['A', 'a'] and not toggle_selector.RS.active:
+            toggle_selector.RS.set_active(True)
+    except:
+        pass

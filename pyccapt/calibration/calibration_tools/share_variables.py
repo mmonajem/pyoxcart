@@ -72,6 +72,7 @@ class Variables:
     A class that represents all shared variables.
 
     Attributes:
+        pulse_mode (str): The pulse mode.
         selected_x_fdm (int): The value of selected_x_fdm.
         selected_y_fdm (int): The value of selected_y_fdm.
         roi_fdm (int): The value of roi_fdm.
@@ -89,6 +90,7 @@ class Variables:
         peaks_idx (list): List of peaks indices.
         result_path (str): The result path.
         path (str): The path.
+        dataset_name (str): The dataset name.
         dld_t_calib (numpy.ndarray): Array for dld_t calibration.
         dld_t_calib_backup (numpy.ndarray): Backup array for dld_t calibration.
         mc_calib (numpy.ndarray): Array for mc calibration.
@@ -103,6 +105,8 @@ class Variables:
         """
         Initializes all the attributes of MyClass.
         """
+        self.pulse_mode = ''
+
         self.selected_x_fdm = 0
         self.selected_y_fdm = 0
         self.roi_fdm = 0
@@ -124,6 +128,7 @@ class Variables:
 
         self.result_path = ''
         self.path = ''
+        self.dataset_name = ''
 
         self.dld_t_calib = np.zeros(0)
         self.dld_t_calib_backup = np.zeros(0)

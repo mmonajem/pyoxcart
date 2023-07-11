@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from matplotlib import colors
 from matplotlib.patches import Circle, Rectangle
-from matplotlib.ticker import FormatStrFormatter
 from matplotlib.widgets import RectangleSelector, EllipseSelector
 
 from pyccapt.calibration.calibration_tools import logging_library
@@ -60,7 +59,7 @@ def concatenate_dataframes_of_dld_grp(dataframeList: list) -> pd.DataFrame:
     return dld_masterDataframe
 
 
-def plot_crop_experiment_history(dldGroupStorage: pd.DataFrame, variables, max_tof, frac, figure_size=(7, 3),
+def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.0, bins=(1200, 800), figure_size=(7, 3),
                                  draw_rect=False, data_crop=True, pulse=False, pulse_mode='voltage', save=True):
     """
     Plots the experiment history.
@@ -79,21 +78,27 @@ def plot_crop_experiment_history(dldGroupStorage: pd.DataFrame, variables, max_t
     Returns:
         None.
     """
-    # dldGroupStorage = dldGroupStorage.sample(frac=frac, random_state=42)
-    # dldGroupStorage.reset_index(inplace=True, drop=True)
+    if max_tof > 0:
+        mask_1 = (data['t (ns)'].to_numpy() > max_tof)
+        data.drop(np.where(mask_1)[0], inplace=True)
+        data.reset_index(inplace=True, drop=True)
+    if frac < 1:
+        # set axis limits based on fraction of data
+        dldGroupStorage = data.sample(frac=frac, random_state=42)
+        dldGroupStorage.sort_index(inplace=True)
+    else:
+        dldGroupStorage = data
+
     fig1, ax1 = plt.subplots(figsize=figure_size, constrained_layout=True)
 
-    # Plot tof and high voltage
-    yaxis = dldGroupStorage['t (ns)'].to_numpy()
-    high_voltage = dldGroupStorage['high_voltage (V)'].to_numpy()
-    if max_tof > 0:
-        high_voltage = high_voltage[yaxis < max_tof]
-        yaxis = yaxis[yaxis < max_tof]
-
+    # extract tof and high voltage from the data frame
+    tof = dldGroupStorage['t (ns)'].to_numpy()
+    high_voltage = data['high_voltage (V)'].to_numpy()
     high_voltage = high_voltage / 1000  # change to kV
-    xaxis = np.arange(len(yaxis))
 
-    heatmap, xedges, yedges = np.histogram2d(xaxis, yaxis, bins=(1200, 800))
+    xaxis = np.arange(len(tof))
+
+    heatmap, xedges, yedges = np.histogram2d(xaxis, tof, bins=bins)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 
     # Set x-axis label
@@ -106,24 +111,31 @@ def plot_crop_experiment_history(dldGroupStorage: pd.DataFrame, variables, max_t
     pcm = ax1.pcolormesh(xedges, yedges, heatmap.T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
     fig1.colorbar(pcm, ax=ax1, pad=0)
 
-    # Make the x-axis ticks formatted to 0 decimal places
-    ax1.xaxis.set_major_formatter(FormatStrFormatter('%0.0f'))
-
     # Plot high voltage curve
     ax2 = ax1.twinx()
     xaxis2 = np.arange(len(high_voltage))
     ax2.plot(xaxis2, high_voltage, color='dodgerblue', linewidth=2)
     ax2.set_ylabel("High Voltage [kV]", color="dodgerblue", fontsize=10)
 
+    if frac < 1:
+        # extract tof
+        tof_lim = data['t (ns)'].to_numpy()
+        high_voltage_lim = data['high_voltage (V)'].to_numpy()
+        high_voltage_lim = high_voltage_lim / 1000  # change to kV
+        # set axis limits based on entire data
+        ax1.set_xlim([0, len(tof)])
+        ax1.set_ylim([min(tof_lim), max(tof_lim)])
+        ax2.set_xlim([0, len(high_voltage_lim)])
+        ax2.set_ylim([min(high_voltage_lim), max(high_voltage_lim)])
+
     if data_crop:
-        if not draw_rect:
-            rectangle_box_selector(ax2, variables)
-            plt.connect('key_press_event', selectors_data.toggle_selector(variables))
-        elif draw_rect:
-            left, bottom, width, height = (
-                variables.selected_x1, 0, variables.selected_x2 - variables.selected_x1, np.max(yaxis))
-            rect = Rectangle((left, bottom), width, height, fill=True, alpha=0.3, color="r", linewidth=2)
-            ax1.add_patch(rect)
+        rectangle_box_selector(ax2, variables)
+        plt.connect('key_press_event', selectors_data.toggle_selector(variables))
+    if draw_rect:
+        left, bottom, width, height = (
+            variables.selected_x1, 0, variables.selected_x2 - variables.selected_x1, np.max(tof))
+        rect = Rectangle((left, bottom), width, height, fill=True, alpha=0.3, color="r", linewidth=5)
+        ax1.add_patch(rect)
 
     if pulse:
         fig1.subplots_adjust(right=0.75)
@@ -142,27 +154,34 @@ def plot_crop_experiment_history(dldGroupStorage: pd.DataFrame, variables, max_t
     plt.show()
 
 
-def plot_crop_FDM(data_crop, variables, bins=(256, 256), figure_size=(6, 6), circle=False,
-                  save_name=False, only_plot=False):
+def plot_crop_FDM(data, variables, bins=(256, 256), frac=1.0, data_crop=False, figure_size=(5, 4), draw_circle=False,
+                  save=True):
     """
     Plot and crop the FDM with the option to select a region of interest.
 
     Args:
-        data_crop: Cropped dataset (type: list)
+        data: Cropped dataset (type: list)
         bins: Number of bins for the histogram
         figure_size: Size of the plot
-        circle: Flag to enable circular region of interest selection
-        save_name: Flag to choose whether to save the plot or not
-        only_plot: Flag to control whether only the plot is shown or cropping functionality is enabled
+        draw_circle: Flag to enable circular region of interest selection
+        save: Flag to choose whether to save the plot or not
+        data_crop: Flag to control whether only the plot is shown or cropping functionality is enabled
 
     Returns:
         None
     """
+    if frac < 1:
+        # set axis limits based on fraction of data
+        dldGroupStorage = data.sample(frac=frac, random_state=42)
+        dldGroupStorage.sort_index(inplace=True)
+    else:
+        dldGroupStorage = data
+
     fig1, ax1 = plt.subplots(figsize=figure_size, constrained_layout=True)
 
     # Plot and crop FDM
-    x = data_crop['x_det (cm)'].to_numpy()
-    y = data_crop['y_det (cm)'].to_numpy()
+    x = dldGroupStorage['x_det (cm)'].to_numpy()
+    y = dldGroupStorage['y_det (cm)'].to_numpy()
 
     FDM, xedges, yedges = np.histogram2d(x, y, bins=bins)
 
@@ -175,17 +194,24 @@ def plot_crop_FDM(data_crop, variables, bins=(256, 256), figure_size=(6, 6), cir
     pcm = ax1.pcolormesh(xedges, yedges, FDM.T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
     fig1.colorbar(pcm, ax=ax1, pad=0)
 
-    if not only_plot:
-        if not circle:
-            rectangle_box_selector(ax1)
-        else:
-            print('x:', variables.selected_x_fdm, 'y:', variables.selected_y_fdm, 'roi:', variables.roi_fdm)
-            circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
-                          alpha=0.3, color='green', linewidth=1)
-            ax1.add_patch(circ)
-    if save_name:
-        plt.savefig("%s.png" % save_name, format="png", dpi=600)
-        plt.savefig("%s.svg" % save_name, format="svg", dpi=600)
+    if frac < 1:
+        # extract tof
+        x_lim = dldGroupStorage['x_det (cm)'].to_numpy()
+        y_lim = dldGroupStorage['y_det (cm)'].to_numpy()
+
+        ax1.set_xlim([min(x_lim), max(x_lim)])
+        ax1.set_ylim([min(y_lim), max(y_lim)])
+
+    if data_crop:
+        elliptical_shape_selector(ax1, fig1, variables)
+    if draw_circle:
+        print('x:', variables.selected_x_fdm, 'y:', variables.selected_y_fdm, 'roi:', variables.roi_fdm)
+        circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
+                      alpha=0.3, color='green', linewidth=5)
+        ax1.add_patch(circ)
+    if save:
+        plt.savefig("%s.png" % (variables.result_path + '//FDM_'), format="png", dpi=600)
+        plt.savefig("%s.svg" % (variables.result_path + '//FDM_'), format="svg", dpi=600)
     plt.show()
 
 
@@ -199,7 +225,9 @@ def rectangle_box_selector(axisObject, variables):
     Returns:
         None
     """
-    selectors_data.toggle_selector.RS = RectangleSelector(axisObject, selectors_data.line_select_callback(variables),
+    selectors_data.toggle_selector.RS = RectangleSelector(axisObject,
+                                                          lambda eclick, erelease: selectors_data.line_select_callback(
+                                                              eclick, erelease, variables),
                                                           useblit=True,
                                                           button=[1, 3],
                                                           minspanx=1, minspany=1,
@@ -213,6 +241,7 @@ def crop_dataset(dld_master_dataframe, variables):
 
     Args:
         dld_master_dataframe: Concatenated dataset
+        variables: Variables object
 
     Returns:
         data_crop: Cropped dataset
@@ -222,18 +251,23 @@ def crop_dataset(dld_master_dataframe, variables):
     return data_crop
 
 
-def elliptical_shape_selector(axisObject, figureObject):
+def elliptical_shape_selector(axisObject, figureObject, variables):
     """
     Enable the creation of an elliptical box to select the region of interest.
 
     Args:
         axisObject: Object to create the axis of the plot
         figureObject: Object to create the figure
+        variables: Variables object
 
     Returns:
         None
     """
-    selectors_data.toggle_selector.ES = EllipseSelector(axisObject, selectors_data.onselect, useblit=True,
+    selectors_data.toggle_selector.ES = EllipseSelector(axisObject,
+                                                        lambda eclick, erelease: selectors_data.onselect(eclick,
+                                                                                                         erelease,
+                                                                                                         variables),
+                                                        useblit=True,
                                                         button=[1, 3],
                                                         minspanx=1, minspany=1,
                                                         spancoords='pixels',
@@ -241,12 +275,13 @@ def elliptical_shape_selector(axisObject, figureObject):
     figureObject.canvas.mpl_connect('key_press_event', selectors_data.toggle_selector)
 
 
-def crop_data_after_selection(data_crop):
+def crop_data_after_selection(data_crop, variables):
     """
     Crop the dataset after the region of interest has been selected.
 
     Args:
         data_crop: Original dataset to be cropped
+        variables: Variables object
 
     Returns:
         data_crop: Cropped dataset
@@ -276,3 +311,44 @@ def create_pandas_dataframe(data_crop):
 
     hdf_dataframe['start_counter'] = hdf_dataframe['start_counter'].astype('uint32')
     return hdf_dataframe
+
+
+def calculate_ppi_and_ipp(data):
+    """
+    Calculate pulses since the last event pulse and ions per pulse.
+
+    Args:
+        data (dict): A dictionary containing the 'start_counter' data.
+
+    Returns:
+        tuple: A tuple containing two numpy arrays: pulse_pi and ion_pp.
+
+    Raises:
+        IndexError: If the length of counter is less than 1.
+
+    """
+
+    counter = data['start_counter'].to_numpy()
+    pulse_pi = np.zeros(len(counter))
+    ion_pp = np.zeros(len(counter))
+
+    pulse_to_previous_ion = 0
+    multi_hit_count = 1
+    previous_counter = counter[0]
+
+    for i, current_counter in enumerate(counter):
+        pulse_pi[i] = current_counter - previous_counter
+
+        if current_counter == previous_counter:
+            multi_hit_count += 1
+        else:
+            pulse_to_previous_ion = current_counter - previous_counter
+
+            for j in range(multi_hit_count):
+                ion_pp[i + j] = multi_hit_count
+                pulse_pi[i + j] = pulse_to_previous_ion
+
+            multi_hit_count = 1
+            previous_counter = current_counter
+
+    return pulse_pi, ion_pp

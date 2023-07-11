@@ -4,7 +4,8 @@ import pandas as pd
 import scipy.io
 
 # Local module and scripts
-from pyccapt.calibration.data_tools import dataset_path_qt
+from pyccapt.calibration.data_tools import ato_tools
+from pyccapt.calibration.leap_tools import ccapt_tools
 
 
 def read_hdf5(filename: "type: string - Path to hdf5(.h5) file",
@@ -99,9 +100,9 @@ def convert_mat_to_df(hdf5_file_response: "type: dict - content of .mat file"):
     return pd_dataframe
 
 
-def store_df_to_hdf(filename: "type: string - name of hdf5 file",
-                    dataframe: "dataframe which is to be stored in h5 file",
-                    key: "DirectoryStructure/columnName of content"):
+def store_df_to_hdf(dataframe: "dataframe which is to be stored in h5 file",
+                    key: "DirectoryStructure/columnName of content",
+                    filename: "type: string - name of hdf5 file"):
     """
         This function stores dataframe to hdf5 file.
 
@@ -128,14 +129,6 @@ def store_df_to_csv(data, path):
 
     data.to_csv(path, encoding='utf-8', index=False, sep=';')
 
-
-def open_file_on_click(b):
-    """
-    Event handler for button click event.
-    Prompts the user to select a dataset file and stores the selected file path in the global variable dataset_path.
-    """
-    global dataset_path
-    dataset_path = dataset_path_qt.gui_fname().decode('ASCII')
 
 def remove_invalid_data(dld_group_storage, max_tof):
     """
@@ -168,3 +161,23 @@ def remove_invalid_data(dld_group_storage, max_tof):
     print('The number of data over max_tof:', num_over_max_tof)
 
     return dld_group_storage
+
+
+def save_data(data, variables, hdf=True, epos=False, pos=False, ato=False, csv=False):
+    if hdf:
+        # save the dataset to hdf5 file
+        hierarchyName = 'df'
+        store_df_to_hdf(data, hierarchyName, variables.result_path + '//' + variables.dataset_name + '_cropped' + '.h5')
+    if epos:
+        # save data as epos file
+        epos = ccapt_tools.ccapt_to_epos(data, pulse_mode=variables.pulse_mode, path=variables.result_path,
+                                         name=variables.dataset_name + '.epos')
+    if pos:
+        # save data in pos format
+        pos = ccapt_tools.ccapt_to_pos(data, path=variables.result_path, name=variables.dataset_name + '.pos')
+    if ato:
+        # save data as ato file in  ersion 6
+        ato_tools.ccapt_to_ato(data, path=variables.result_path, name=variables.dataset_name + '.ato')
+    if csv:
+        # save data in csv format
+        store_df_to_csv(data, variables.result_path + variables.dataset_name + '.csv')
