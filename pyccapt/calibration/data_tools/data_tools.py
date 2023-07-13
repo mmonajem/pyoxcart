@@ -6,6 +6,7 @@ import scipy.io
 # Local module and scripts
 from pyccapt.calibration.data_tools import ato_tools
 from pyccapt.calibration.data_tools import data_loadcrop
+from pyccapt.calibration.data_tools import data_tools
 from pyccapt.calibration.leap_tools import ccapt_tools
 
 
@@ -184,23 +185,23 @@ def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, cs
     if hdf:
         # save the dataset to hdf5 file
         hierarchyName = 'df'
-        store_df_to_hdf(data, hierarchyName, variables.result_path + '//' + variables.dataset_name + '_cropped' + '.h5')
+        store_df_to_hdf(data, hierarchyName, variables.result_data_path + '//' + variables.result_data_name + '.h5')
     if epos:
         # save data as epos file
         ccapt_tools.ccapt_to_epos(data, path=variables.result_path,
-                                  name=variables.dataset_name + '.epos')
+                                  name=variables.result_data_name + '.epos')
     if pos:
         # save data in pos format
-        ccapt_tools.ccapt_to_pos(data, path=variables.result_path, name=variables.dataset_name + '.pos')
+        ccapt_tools.ccapt_to_pos(data, path=variables.result_path, name=variables.result_data_name + '.pos')
     if ato_6v:
         # save data as ato file in  ersion 6
-        ato_tools.ccapt_to_ato(data, path=variables.result_path, name=variables.dataset_name + '.ato')
+        ato_tools.ccapt_to_ato(data, path=variables.result_path, name=variables.result_data_name + '.ato')
     if csv:
         # save data in csv format
-        store_df_to_csv(data, variables.result_path + variables.dataset_name + '.csv')
+        store_df_to_csv(data, variables.result_path + variables.result_data_name + '.csv')
 
 
-def load_data(dataset_path, tdc):
+def load_data(dataset_path, tdc, mode='processed'):
     """
     save data in different formats
 
@@ -217,9 +218,11 @@ def load_data(dataset_path, tdc):
             data = ccapt_tools.epos_to_ccapt(dataset_path)
         else:
             print('The file has to be epos. With pos information this tutorial cannot be run')
+            data = ccapt_tools.pos_to_ccapt(dataset_path)
     elif tdc == 'ato_v6':
         data = ato_tools.ato_to_ccapt(dataset_path, moed='pyccapt')
-    elif tdc == 'surface_concept' or tdc == 'roentdec':
+    elif (tdc == 'surface_concept' or tdc == 'roentdec') and mode == 'raw':
         data = data_loadcrop.fetch_dataset_from_dld_grp(dataset_path, tdc)
-
+    elif (tdc == 'surface_concept' or tdc == 'roentdec') and mode == 'processed':
+        data = data_tools.read_hdf5_through_pandas(dataset_path)
     return data

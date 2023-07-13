@@ -42,8 +42,8 @@ def tof2mcSimple(t: int, t0: int, V: float, xDet: int, yDet: int, flightPathLeng
         logger.critical("Data type of the passed argument is incorrect")
 
 
-def tof2mc(t: int, t0: int, V: float, V_pulse: float, xDet: int, yDet: int,
-           flightPathLength: int, mode: str = 'voltage') -> float:
+def tof2mc(t: int, t0: int, V: float, xDet: int, yDet: int,
+           flightPathLength: int, V_pulse: float, mode: str = 'voltage') -> float:
     """
     Calculate m/c based on idealized geometry and electrostatics using the formula:
     m/c = 2eα(V + βV_pulse)(t/L)^2
@@ -64,7 +64,16 @@ def tof2mc(t: int, t0: int, V: float, V_pulse: float, xDet: int, yDet: int,
     logger = logging_library.logger_creator('data_loadcrop')
 
     try:
+        # cThe value of α is greater than one, accounting for the fact thatThe value of a
+        # is slightly greater than one, accounting for the fact that the
+        # evaporation pulse is slightly amplified due to reflections and
+        # impedance mismatches along the pulse transmission line.
         alpha = 1.015
+        # cThe value of b is less
+        # than one, accounting for the fact that the ions field evaporate,
+        # on average, not at the peak of the evaporation pulse, but
+        # during the ascending and descending edges of the incoming
+        # evaporation pulse.
         beta = 0.7
 
         t = t - t0  # t0 correction
@@ -78,10 +87,10 @@ def tof2mc(t: int, t0: int, V: float, V_pulse: float, xDet: int, yDet: int,
 
         flightPathLength = np.sqrt(xDet ** 2 + yDet ** 2 + flightPathLength ** 2)
 
-        if mode == 'voltage':
+        if mode == 'dc_voltage':
             mc = 2 * V * e * (t / flightPathLength) ** 2
-        elif mode == 'laser':
-            mc = 2 * V * e * (t / flightPathLength) ** 2
+        elif mode == 'dc_plus_p_voltage':
+            mc = 2 * alpha * (V + beta * V_pulse) * e * (t / flightPathLength) ** 2
 
         mc = mc / amu  # conversion from kg/C to Da (6.022E23 g/mol, 1.6E-19C/ec)
 

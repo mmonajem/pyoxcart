@@ -91,8 +91,15 @@ class Variables:
         result_path (str): The result path.
         path (str): The path.
         dataset_name (str): The dataset name.
+        result_data_path (str): The result data path.
+        result_data_name (str): The result data name.
+        dld_t (numpy.ndarray): Array for dld_t.
+        dld_x_det (numpy.ndarray): Array for dld_x_det.
+        dld_y_det (numpy.ndarray): Array for dld_y_det.
+        dld_high_voltage (numpy.ndarray): Array for dld_high_voltage.
         dld_t_calib (numpy.ndarray): Array for dld_t calibration.
         dld_t_calib_backup (numpy.ndarray): Backup array for dld_t calibration.
+        mc (numpy.ndarray): Array for mc.
         mc_calib (numpy.ndarray): Array for mc calibration.
         mc_calib_backup (numpy.ndarray): Backup array for mc calibration.
         max_peak (int): The maximum peak value.
@@ -129,9 +136,16 @@ class Variables:
         self.result_path = ''
         self.path = ''
         self.dataset_name = ''
+        self.result_data_path = ''
+        self.result_data_name = ''
 
+        self.dld_t = np.zeros(0)
+        self.dld_x_det = np.zeros(0)
+        self.dld_y_det = np.zeros(0)
+        self.dld_high_voltage = np.zeros(0)
         self.dld_t_calib = np.zeros(0)
         self.dld_t_calib_backup = np.zeros(0)
+        self.mc = np.zeros(0)
         self.mc_calib = np.zeros(0)
         self.mc_calib_backup = np.zeros(0)
         self.max_peak = 0

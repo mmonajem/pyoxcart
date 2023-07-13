@@ -60,7 +60,8 @@ def concatenate_dataframes_of_dld_grp(dataframeList: list) -> pd.DataFrame:
 
 
 def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.0, bins=(1200, 800), figure_size=(7, 3),
-                                 draw_rect=False, data_crop=True, pulse=False, pulse_mode='voltage', save=True):
+                                 draw_rect=False, data_crop=True, pulse=False, pulse_mode='voltage', save=True,
+                                 figname=''):
     """
     Plots the experiment history.
 
@@ -74,6 +75,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         pulse: Flag to choose whether to plot pulse.
         pulse_mode: Flag to choose whether to plot pulse voltage or pulse.
         save: Flag to choose whether to save the plot or not.
+        figname: Name of the figure to be saved.
 
     Returns:
         None.
@@ -148,14 +150,14 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
             ax3.set_ylabel("Pulse (V)", color="limegreen", fontsize=10)
 
     if save:
-        plt.savefig("%s.png" % (variables.result_path + '//ex_hist_'), format="png", dpi=600)
-        plt.savefig("%s.svg" % (variables.result_path + '//ex_hist_'), format="svg", dpi=600)
+        plt.savefig("%s.png" % (variables.result_path + figname), format="png", dpi=600)
+        plt.savefig("%s.svg" % (variables.result_path + figname), format="svg", dpi=600)
 
     plt.show()
 
 
-def plot_crop_FDM(data, variables, bins=(256, 256), frac=1.0, data_crop=False, figure_size=(5, 4), draw_circle=False,
-                  save=True):
+def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, figure_size=(5, 4), draw_circle=False,
+                  save=True, figname=''):
     """
     Plot and crop the FDM with the option to select a region of interest.
 
@@ -166,6 +168,7 @@ def plot_crop_FDM(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
         draw_circle: Flag to enable circular region of interest selection
         save: Flag to choose whether to save the plot or not
         data_crop: Flag to control whether only the plot is shown or cropping functionality is enabled
+        figname: Name of the figure to be saved
 
     Returns:
         None
@@ -210,8 +213,8 @@ def plot_crop_FDM(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
                       alpha=0.3, color='green', linewidth=5)
         ax1.add_patch(circ)
     if save:
-        plt.savefig("%s.png" % (variables.result_path + '//FDM_'), format="png", dpi=600)
-        plt.savefig("%s.svg" % (variables.result_path + '//FDM_'), format="svg", dpi=600)
+        plt.savefig("%s.png" % (variables.result_path + figname), format="png", dpi=600)
+        plt.savefig("%s.svg" % (variables.result_path + figname), format="svg", dpi=600)
     plt.show()
 
 
