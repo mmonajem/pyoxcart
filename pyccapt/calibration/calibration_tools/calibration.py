@@ -56,12 +56,11 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
         for i in range(int(len(dld_highVoltage_peak) / sample_size) + 1):
             dld_highVoltage_peak_selected = dld_highVoltage_peak[i * sample_size:(i + 1) * sample_size]
             dld_t_peak_selected = dld_t_peak[i * sample_size:(i + 1) * sample_size]
-
-            bins = np.linspace(np.min(dld_t_peak_selected), np.max(dld_t_peak_selected),
-                               round(np.max(dld_t_peak_selected) / 0.1))
-            y, x = np.histogram(dld_t_peak_selected, bins=bins)
             if peak_mode == 'peak':
                 try:
+                    bins = np.linspace(np.min(dld_t_peak_selected), np.max(dld_t_peak_selected),
+                                       round(np.max(dld_t_peak_selected) / 0.1))
+                    y, x = np.histogram(dld_t_peak_selected, bins=bins)
                     peaks, properties = find_peaks(y, height=0)
                     index_peak_max_ini = np.argmax(properties['peak_heights'])
                     max_peak = peaks[index_peak_max_ini]
@@ -293,7 +292,7 @@ def bowl_corr_fit(data_xy, a, b, c, d, e, f):
     Compute the result of a quadratic equation based on the input data.
 
     Args:
-        data_xy (tuple): Tuple containing the x and y data points.
+        data_xy (list): Tuple containing the x and y data points.
         a, b, c, d, e, f (float): Coefficients of the quadratic equation.
 
     Returns:
@@ -333,6 +332,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
     w2 = int(det_diam)
     h1 = w1
     h2 = w2
+
 
     d = sample_size  # sample size is in mm - so we change it to cm
     grid = product(range(h1, h2 - h2 % d, d), range(w1, w2 - w2 % d, d))
@@ -398,8 +398,10 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         tuple: Fit parameters.
 
     """
+
     dld_x = dld_x * 10  # convert to mm
     dld_y = dld_y * 10  # convert to mm
+
     if calibration_mode == 'tof':
         mask_temporal = np.logical_and((variables.dld_t_calib > variables.selected_x1),
                                        (variables.dld_t_calib < variables.selected_x2))
@@ -410,8 +412,8 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
     dld_peak = variables.dld_t_calib[mask_temporal] if calibration_mode == 'tof' else variables.mc_calib[mask_temporal]
     print('The number of ions is:', len(dld_peak))
 
-    mask_1 = np.logical_and((dld_x[mask_temporal] > -2), (dld_x[mask_temporal] < 2))
-    mask_2 = np.logical_and((dld_y[mask_temporal] > -2), (dld_y[mask_temporal] < 2))
+    mask_1 = np.logical_and((dld_x[mask_temporal] > - 2), (dld_x[mask_temporal] < 2))
+    mask_2 = np.logical_and((dld_y[mask_temporal] > - 2), (dld_y[mask_temporal] < 2))
     mask = np.logical_and(mask_1, mask_2)
     dld_peak_mid = dld_peak[mask]
 

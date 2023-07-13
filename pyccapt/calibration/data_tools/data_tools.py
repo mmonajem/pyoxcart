@@ -1,13 +1,17 @@
+import os
+
 import h5py
 import numpy as np
 import pandas as pd
 import scipy.io
 
+from pyccapt.calibration.calibration_tools import share_variables
 # Local module and scripts
 from pyccapt.calibration.data_tools import ato_tools
 from pyccapt.calibration.data_tools import data_loadcrop
 from pyccapt.calibration.data_tools import data_tools
 from pyccapt.calibration.leap_tools import ccapt_tools
+from pyccapt.calibration.mc import mc_tools, tof_tools
 
 
 def read_hdf5(filename: "type: string - Path to hdf5(.h5) file",
@@ -226,3 +230,58 @@ def load_data(dataset_path, tdc, mode='processed'):
     elif (tdc == 'surface_concept' or tdc == 'roentdec') and mode == 'processed':
         data = data_tools.read_hdf5_through_pandas(dataset_path)
     return data
+
+
+def extract_data(dataset_path, flightPathLength_d, t0_d, max_mc, tdc, pulse_mode, mode='processed'):
+    """
+    exctract data from the dataset
+
+    Args:
+        dataset_path (string): path to the dataset.
+        flightPathLength_d (float): flight path length in m.
+        t0_d (float): time of flight offset in ns.
+        max_mc (float): maximum time of flight in ns.
+        tdc (string): type of the dataset.
+        pulse_mode (string): pulse mode of the dataset.
+        mode (string): mode of the dataset.
+    Returns:
+        data (pandas.DataFrame): DataFrame containing the data.
+        variables (class): class containing the variables.
+    """
+    # Create data farame out of hdf5 file dataset
+    data = data_tools.load_data(dataset_path, tdc, mode='processed')
+    # exctract needed data from Pandas data frame as an numpy array
+
+    # create an instance of the Variables opject
+    variables = share_variables.Variables()
+    variables.pulse_mode = pulse_mode
+    dataset_main_path = os.path.dirname(dataset_path)
+    dataset_name_with_extention = os.path.basename(dataset_path)
+    variables.dataset_name = os.path.splitext(dataset_name_with_extention)[0]
+    variables.result_data_path = dataset_main_path + '/' + variables.dataset_name
+    variables.result_data_name = 'tof_calibration_' + variables.dataset_name
+    variables.result_path = dataset_main_path + '/' + '/tof_calibration/'
+
+    if not os.path.isdir(variables.result_path):
+        os.makedirs(variables.result_path, mode=0o777, exist_ok=True)
+
+    # Create data farame out of hdf5 file dataset
+    data = data_tools.load_data(dataset_path, tdc, mode='processed')
+
+    variables.dld_high_voltage = data['high_voltage (V)'].to_numpy()
+    variables.dld_pulse = data['pulse'].to_numpy()
+    variables.dld_t = data['t (ns)'].to_numpy()
+    variables.dld_x_det = data['x_det (cm)'].to_numpy()
+    variables.dld_y_det = data['y_det (cm)'].to_numpy()
+    variables.mc = mc_tools.tof2mc(variables.dld_t, t0_d, variables.dld_high_voltage, variables.dld_x_det,
+                                   variables.dld_y_det, flightPathLength_d, V_pulse=variables.dld_pulse,
+                                   mode='dc_voltage')
+
+    # Calculate the maximum possible time of flight (TOF)
+    variables.max_tof = int(tof_tools.mc2tof(max_mc, 1000, 0, 0, flightPathLength_d))
+    variables.dld_t_calib = data['t (ns)'].to_numpy()
+    variables.dld_t_calib_backup = data['t (ns)'].to_numpy()
+    # ion_distance = np.sqrt(flightPathLength_d**2 + (variables.dld_x_det*10)**2 + (variables.dld_y_det*10)**2)
+    # ion_distance = flightPathLength_d / ion_distance
+    # variables.dld_t = variables.dld_t * ion_distance
+    return data, variables

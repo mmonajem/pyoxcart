@@ -103,6 +103,7 @@ class Variables:
         mc_calib (numpy.ndarray): Array for mc calibration.
         mc_calib_backup (numpy.ndarray): Backup array for mc calibration.
         max_peak (int): The maximum peak value.
+        max_tof (int): The maximum tof value.
         peak (list): List of peaks.
         peak_y (list): List of peak y-values.
         peak_width (list): List of peak widths.
@@ -149,6 +150,7 @@ class Variables:
         self.mc_calib = np.zeros(0)
         self.mc_calib_backup = np.zeros(0)
         self.max_peak = 0
+        self.max_tof = 0
         self.peak = []
         self.peak_y = []
         self.peak_width = []
