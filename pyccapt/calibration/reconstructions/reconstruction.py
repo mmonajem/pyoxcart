@@ -1,7 +1,7 @@
-import numpy as np
-import plotly.graph_objects as go
 import matplotlib.pyplot as plt
+import numpy as np
 import plotly
+import plotly.graph_objects as go
 
 # Local module and scripts
 from pyccapt.calibration.calibration_tools import variables
@@ -81,7 +81,7 @@ def atom_probe_recons_from_detector_Gault_et_al(detx, dety, hv, flight_path_leng
 
     ## calculate z coordinate
     # the z shift with respect to the top of the cap is Rspec - zP
-    #     z_p = radius_evolution - z_p
+    #     dz_p = radius_evolution - z_p
     dz_p = radius_evolution * (1 - np.cos(theta_a))
     # accumulative part of z
     omega = 1E-9 ** 3 / avg_dens  # atomic volume in nm ^ 3

@@ -4,7 +4,7 @@
 	"visualization": "mc",
 	"log": "off",
 	"tdc": "on",
-	"tdc_model": 'surface_concept',
+	"tdc_model": "surface_concept",
 	"camera": "on",
 	"pump": "on",
 	"gates": "on",
