@@ -203,7 +203,7 @@ def plot_crop_experimetn_history(dldGroupStorage: "type: dataframes", max_tof=0,
 
 
     # Make the x-axis ticks formatted to 0 decimal places
-    ax1.xaxis.set_major_formatter(FormatStrFormatter('%0.0f'))
+    # ax1.xaxis.set_major_formatter(FormatStrFormatter('%0.0f'))
 
     # plot high voltage curve
     ax2 = ax1.twinx()
