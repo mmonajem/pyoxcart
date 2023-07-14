@@ -56,10 +56,15 @@ def buttonWidget(buttonText):
     return button
 
 
-def onClickAdd(b):
+def onClickAdd(b, variables):
     """
     Callback function for the ADD button click event.
     Adds the selected element in the dropdown to a list.
+
+    Args:
+        variables (object): Object of the Variables class.
+    Returns:
+        None
     """
     if 'element' in elementWithChargeDict:
         elementMass = elementWithChargeDict['element']
@@ -83,10 +88,14 @@ def onClickAdd(b):
         print("Please select the charge before adding", end='\r')
 
 
-def onClickDelete(b):
+def onClickDelete(b, variables):
     """
     Callback function for the DELETE button click event.
     Deletes the selected element in the dropdown from the list.
+    Args:
+        variables (object): Variables object.
+    Returns:
+        None
     """
     if 'element' in elementWithChargeDict:
         elementMass = elementWithChargeDict['element']
@@ -105,10 +114,14 @@ def onClickDelete(b):
         print("Please select the element with the right combination of charge to efficiently delete", end='\r')
 
 
-def onClickReset(b):
+def onClickReset(b, variables):
     """
     Callback function for the RESET button click event.
     Clears the list and deletes all the elements from it.
+    Args:
+        variables (object): Variables object.
+    Returns:
+        None
     """
     variables.listMaterial.clear()
     variables.element.clear()
@@ -210,7 +223,7 @@ def dataset_instrument_specification_selection():
     )
 
     det_diam = widgets.FloatText(
-        value='78',
+        value='80',
         placeholder='Detector diameter',
         description='Detector diameter:',
         disabled=False

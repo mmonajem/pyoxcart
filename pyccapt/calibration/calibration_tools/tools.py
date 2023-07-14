@@ -62,11 +62,15 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, mc_peak_label=Fals
         y, x = np.histogram(mc_tof, bins=bins)
         # med = median(y);
 
-    if peaks_find:
-        peaks, properties = find_peaks(y, prominence=prominence, distance=distance, height=0)
-        index_peak_max = np.argmax(properties['peak_heights'])
-        # find peak width
-        peak_widths_p = peak_widths(y, peaks, rel_height=(percent / 100), prominence_data=None)
+    try:
+        if peaks_find:
+            peaks, properties = find_peaks(y, prominence=prominence, distance=distance, height=0)
+            index_peak_max = np.argmax(properties['peak_heights'])
+            # find peak width
+            peak_widths_p = peak_widths(y, peaks, rel_height=(percent / 100), prominence_data=None)
+    except ValueError:
+        print('Peak finding failed.')
+        peaks_find = False
 
     if fast_hist:
         steps = 'stepfilled'
@@ -196,11 +200,12 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, mc_peak_label=Fals
             ax1.tick_params(axis='both', which='major', labelsize=12)
             ax1.tick_params(axis='both', which='minor', labelsize=10)
 
-            if peaks_find_plot:
-                annotes = []
-                texts = []
-                if peak_val_plot:
-                    for i in range(len(peaks)):
+
+            annotes = []
+            texts = []
+            if peak_val_plot:
+                for i in range(len(peaks)):
+                    if peaks_find_plot:
                         if mc_peak_label:
                             phases = range_data['element'].tolist()
                             charge = range_data['charge'].tolist()
@@ -213,21 +218,22 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, mc_peak_label=Fals
                         else:
                             texts.append(plt.text(x[peaks][i], y[peaks][i], '%s' % '{:.2f}'.format(x[peaks][i]), color='r',
                                                   size=7, alpha=1))
-                        annotes.append(str(i + 1))
+
                         if h_line:
                             right_side_x = x[int(peak_widths_p[3][i])]
                             left_side_x = x[int(peak_widths_p[2][i])]
                             left_side_y = y[int(peak_widths_p[2][i])]
                             plt.hlines(left_side_y, left_side_x, right_side_x, color="red")
-                if adjust_label:
-                    adjust_text(texts, arrowprops=dict(arrowstyle='-', color='red', lw=0.5))
+                    annotes.append(str(i + 1))
+            if adjust_label:
+                adjust_text(texts, arrowprops=dict(arrowstyle='-', color='red', lw=0.5))
             if selector == 'rect':
                 # Connect and initialize rectangle box selector
                 data_loadcrop.rectangle_box_selector(ax1, variables)
                 plt.connect('key_press_event', selectors_data.toggle_selector(variables))
             elif selector == 'peak':
                 # connect peak selector
-                af = intractive_point_identification.AnnoteFinder(x[peaks], y[peaks], annotes, ax=ax1)
+                af = intractive_point_identification.AnnoteFinder(x[peaks], y[peaks], annotes, variables, ax=ax1)
                 fig1.canvas.mpl_connect('button_press_event', af)
         plt.tight_layout()
         if fig_name is not None:
@@ -264,7 +270,7 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, mc_peak_label=Fals
         y_peaks = None
         peaks_widths = None
         mask = None
-    return x_peaks, y_peaks, peaks_widths, mask
+    return x_peaks, y_peaks, peaks_widths, peaks_find, mask
 
 
 def fit_background(x, a, b):
@@ -283,21 +289,44 @@ def fit_background(x, a, b):
     return yy
 
 
-def mc_hist_plot(variables, bin_size, mode, prominence, distance, percent, selector, plot, figname, lim):
+def mc_hist_plot(variables, bin_size, mode, prominence, distance, percent, selector, plot, figname, lim,
+                 peaks_find_plot):
+    """
+    Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
+    Args:
+        variables (object): Variables object.
+        bin_size (float): Bin size for the histogram.
+        mode (str): 'mc' for mass spectrum or 'tof' for tof spectrum.
+        prominence (float): Prominence for the peak finding.
+        distance (float): Distance for the peak finding.
+        percent (float): Percent for the peak finding.
+        selector (str): Selector for the peak finding.
+        plot (bool): Plot the histogram.
+        figname (str): Figure name.
+        lim (float): Limit for the histogram.
+        peaks_find_plot (bool): Plot the peaks.
+    Returns:
+        None
+
+    """
     if mode == 'mc':
-        hist = variables.mc
+        hist = variables.mc_calib
     elif mode == 'tof':
-        hist = variables.dld_t
-    peaks_ini, peaks_y_ini, peak_widths_p_ini, _ = hist_plot(hist[hist < lim], variables, bin_size, label=mode,
+        hist = variables.dld_t_calib
+    if selector=='peak':
+        variables.peaks_idx = []
+    peaks_ini, peaks_y_ini, peak_widths_p_ini, peak_find, _ = hist_plot(hist[hist < lim], variables, bin_size, label=mode,
                                                              distance=distance, percent=percent, prominence=prominence,
-                                                             selector=selector, plot=plot, fig_name=figname)
-    index_max_ini = np.argmax(peaks_y_ini)
-    variables.max_peak = peaks_ini[index_max_ini]
-    variables.peak = peaks_ini
-    mrp = (peaks_ini[index_max_ini] / (peak_widths_p_ini[index_max_ini][2] - peak_widths_p_ini[index_max_ini][1]))
-    print('Mass resolving power for the highest peak (MRP --> m/m_2-m_1):', mrp)
-    for i in range(len(peaks_ini)):
-        print('Peaks ', i, 'is at location and height: ({:.2f}, {:.2f})'.format(peaks_ini[i], peaks_y_ini[i]),
-              'peak window sides ({:.1f}-maximum) are: ({:.2f}, {:.2f})'.format(percent, peak_widths_p_ini[i][1],
-                                                                                peak_widths_p_ini[i][2]),
-              '-> {:.2f}'.format(peak_widths_p_ini[i][2] - peak_widths_p_ini[i][1]))
+                                                             selector=selector, plot=plot, fig_name=figname,
+                                                            peaks_find_plot=peaks_find_plot)
+    if peak_find:
+        index_max_ini = np.argmax(peaks_y_ini)
+        variables.max_peak = peaks_ini[index_max_ini]
+        variables.peak = peaks_ini
+        mrp = (peaks_ini[index_max_ini] / (peak_widths_p_ini[index_max_ini][2] - peak_widths_p_ini[index_max_ini][1]))
+        print('Mass resolving power for the highest peak (MRP --> m/m_2-m_1):', mrp)
+        for i in range(len(peaks_ini)):
+            print('Peaks ', i, 'is at location and height: ({:.2f}, {:.2f})'.format(peaks_ini[i], peaks_y_ini[i]),
+                  'peak window sides ({:.1f}-maximum) are: ({:.2f}, {:.2f})'.format(percent, peak_widths_p_ini[i][1],
+                                                                                    peak_widths_p_ini[i][2]),
+                  '-> {:.2f}'.format(peak_widths_p_ini[i][2] - peak_widths_p_ini[i][1]))

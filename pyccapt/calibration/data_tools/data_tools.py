@@ -232,41 +232,19 @@ def load_data(dataset_path, tdc, mode='processed'):
     return data
 
 
-def extract_data(dataset_path, flightPathLength_d, t0_d, max_mc, tdc, pulse_mode, mode='processed'):
+def extract_data(data, variables, flightPathLength_d, t0_d, max_mc):
     """
     exctract data from the dataset
 
     Args:
-        dataset_path (string): path to the dataset.
+        data (pandas.DataFrame): DataFrame containing the data.
+        variables (class): class containing the variables.
         flightPathLength_d (float): flight path length in m.
         t0_d (float): time of flight offset in ns.
         max_mc (float): maximum time of flight in ns.
-        tdc (string): type of the dataset.
-        pulse_mode (string): pulse mode of the dataset.
-        mode (string): mode of the dataset.
     Returns:
-        data (pandas.DataFrame): DataFrame containing the data.
-        variables (class): class containing the variables.
+
     """
-    # Create data farame out of hdf5 file dataset
-    data = data_tools.load_data(dataset_path, tdc, mode='processed')
-    # exctract needed data from Pandas data frame as an numpy array
-
-    # create an instance of the Variables opject
-    variables = share_variables.Variables()
-    variables.pulse_mode = pulse_mode
-    dataset_main_path = os.path.dirname(dataset_path)
-    dataset_name_with_extention = os.path.basename(dataset_path)
-    variables.dataset_name = os.path.splitext(dataset_name_with_extention)[0]
-    variables.result_data_path = dataset_main_path + '/' + variables.dataset_name
-    variables.result_data_name = 'tof_calibration_' + variables.dataset_name
-    variables.result_path = dataset_main_path + '/' + '/tof_calibration/'
-
-    if not os.path.isdir(variables.result_path):
-        os.makedirs(variables.result_path, mode=0o777, exist_ok=True)
-
-    # Create data farame out of hdf5 file dataset
-    data = data_tools.load_data(dataset_path, tdc, mode='processed')
 
     variables.dld_high_voltage = data['high_voltage (V)'].to_numpy()
     variables.dld_pulse = data['pulse'].to_numpy()
@@ -281,7 +259,39 @@ def extract_data(dataset_path, flightPathLength_d, t0_d, max_mc, tdc, pulse_mode
     variables.max_tof = int(tof_tools.mc2tof(max_mc, 1000, 0, 0, flightPathLength_d))
     variables.dld_t_calib = data['t (ns)'].to_numpy()
     variables.dld_t_calib_backup = data['t (ns)'].to_numpy()
+    print('The maximum time of flight')
     # ion_distance = np.sqrt(flightPathLength_d**2 + (variables.dld_x_det*10)**2 + (variables.dld_y_det*10)**2)
     # ion_distance = flightPathLength_d / ion_distance
     # variables.dld_t = variables.dld_t * ion_distance
-    return data, variables
+
+def extract_data(data, variables, flightPathLength_d, max_mc):
+    """
+    exctract data from the dataset
+
+    Args:
+        data (pandas.DataFrame): DataFrame containing the data.
+        variables (class): class containing the variables.
+        flightPathLength_d (float): flight path length in m.
+        t0_d (float): time of flight offset in ns.
+        max_mc (float): maximum time of flight in ns.
+    Returns:
+
+    """
+
+    variables.dld_high_voltage = data['high_voltage (V)'].to_numpy()
+    variables.dld_pulse = data['pulse'].to_numpy()
+    variables.dld_t = data['t (ns)'].to_numpy()
+    variables.dld_x_det = data['x_det (cm)'].to_numpy()
+    variables.dld_y_det = data['y_det (cm)'].to_numpy()
+    variables.mc = data['mc (Da)'].to_numpy()
+
+    # Calculate the maximum possible time of flight (TOF)
+    variables.max_tof = int(tof_tools.mc2tof(max_mc, 1000, 0, 0, flightPathLength_d))
+    variables.dld_t_calib = data['t (ns)'].to_numpy()
+    variables.dld_t_calib_backup = data['t (ns)'].to_numpy()
+    variables.mc_calib = data['mc (Da)'].to_numpy()
+    variables.mc_calib_backup = data['mc (Da)'].to_numpy()
+    print('The maximum time of flight:', variables.max_tof)
+    # ion_distance = np.sqrt(flightPathLength_d**2 + (variables.dld_x_det*10)**2 + (variables.dld_y_det*10)**2)
+    # ion_distance = flightPathLength_d / ion_distance
+    # variables.dld_t = variables.dld_t * ion_distance

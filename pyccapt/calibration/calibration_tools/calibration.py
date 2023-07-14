@@ -300,7 +300,7 @@ def bowl_corr_fit(data_xy, a, b, c, d, e, f):
     """
     x = data_xy[0]
     y = data_xy[1]
-    result = (a + b * x + c * y + d * (x ** 2) + e * x * y + f * (y ** 2))
+    result = a + b * x + c * y + d * (x ** 2) + e * x * y + f * (y ** 2)
     return result
 
 
@@ -339,6 +339,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
     x_y = np.vstack((dld_x_bowl, dld_y_bowl)).T
 
     for i, j in grid:
+        # box = (j, i, j + d, i + d)   # box = (left, upper, right, lower)
         mask_x = np.logical_and((dld_x_bowl < j + d), (dld_x_bowl > j))
         mask_y = np.logical_and((dld_y_bowl < i + d), (dld_y_bowl > i))
         mask = np.logical_and(mask_x, mask_y)
@@ -399,8 +400,8 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
 
     """
 
-    dld_x = dld_x * 10  # convert to mm
-    dld_y = dld_y * 10  # convert to mm
+    dld_x = dld_x * 10 # change the x position to mm from cm
+    dld_y = dld_y * 10 # change the y position to mm from cm
 
     if calibration_mode == 'tof':
         mask_temporal = np.logical_and((variables.dld_t_calib > variables.selected_x1),
@@ -412,20 +413,23 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
     dld_peak = variables.dld_t_calib[mask_temporal] if calibration_mode == 'tof' else variables.mc_calib[mask_temporal]
     print('The number of ions is:', len(dld_peak))
 
-    mask_1 = np.logical_and((dld_x[mask_temporal] > - 2), (dld_x[mask_temporal] < 2))
-    mask_2 = np.logical_and((dld_y[mask_temporal] > - 2), (dld_y[mask_temporal] < 2))
+    mask_1 = np.logical_and((dld_x[mask_temporal] > -2), (dld_x[mask_temporal] < 2))
+    mask_2 = np.logical_and((dld_y[mask_temporal] > -2), (dld_y[mask_temporal] < 2))
     mask = np.logical_and(mask_1, mask_2)
     dld_peak_mid = dld_peak[mask]
 
     if maximum_cal_method == 'histogram':
-        bins = np.linspace(np.min(dld_peak_mid), np.max(dld_peak_mid), round(np.max(dld_peak_mid) / 0.1))
-        y, x = np.histogram(dld_peak_mid, bins=bins)
-        peaks, properties = find_peaks(y, height=0)
-        index_peak_max_ini = np.argmax(properties['peak_heights'])
-        maximum_location = x[peaks[index_peak_max_ini]]
+        try:
+            bins = np.linspace(np.min(dld_peak_mid), np.max(dld_peak_mid), round(np.max(dld_peak_mid) / 0.1))
+            y, x = np.histogram(dld_peak_mid, bins=bins)
+            peaks, properties = find_peaks(y, height=0)
+            index_peak_max_ini = np.argmax(properties['peak_heights'])
+            maximum_location = x[peaks[index_peak_max_ini]]
+        except:
+            print('The histogram max calculation method failed, using mean instead.')
+            maximum_location = np.mean(dld_peak_mid)
     elif maximum_cal_method == 'mean':
         maximum_location = np.mean(dld_peak_mid)
-
     print('The maximum of histogram is located at:', maximum_location)
 
     dld_x_peak = dld_x[mask_temporal]
@@ -439,9 +443,9 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
     f_bowl = bowl_corr_fit([dld_x, dld_y], *parameters)
 
     if calibration_mode == 'tof':
-        variables.dld_t_calib *= 1 / f_bowl
+        variables.dld_t_calib = variables.dld_t_calib / f_bowl
     elif calibration_mode == 'mc':
-        variables.mc_calib *= 1 / f_bowl
+        variables.mc_calib = variables.mc_calib / f_bowl
 
     if plot:
         # Plot how bowl correct tof/mc vs high voltage

@@ -17,7 +17,7 @@ class AnnoteFinder(object):
     connect('button_press_event', af)
     """
 
-    def __init__(self, xdata, ydata, annotes, ax=None, xtol=None, ytol=None):
+    def __init__(self, xdata, ydata, annotes, variables, ax=None, xtol=None, ytol=None):
         """
         Initialize the AnnoteFinder object.
 
@@ -42,6 +42,7 @@ class AnnoteFinder(object):
             self.ax = ax
         self.drawnAnnotations = {}
         self.links = []
+        self.variables = variables
 
     def distance(self, x1, x2, y1, y2):
         """
@@ -103,7 +104,7 @@ class AnnoteFinder(object):
             self.drawnAnnotations[(x, y)] = (t, m)
             self.ax.figure.canvas.draw_idle()
 
-        variables.peaks_idx.append(int(annote) - 1)
+        self.variables.peaks_idx.append(int(annote) - 1)
 
     def drawSpecificAnnote(self, annote):
         """
