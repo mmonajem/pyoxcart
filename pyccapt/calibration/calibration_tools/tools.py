@@ -9,6 +9,7 @@ from scipy.signal import peak_widths
 
 from pyccapt.calibration.calibration_tools import intractive_point_identification
 from pyccapt.calibration.data_tools import data_loadcrop
+from pyccapt.calibration.data_tools import plot_vline_draw
 from pyccapt.calibration.data_tools import selectors_data
 
 
@@ -235,6 +236,13 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, mc_peak_label=Fals
                 # connect peak selector
                 af = intractive_point_identification.AnnoteFinder(x[peaks], y[peaks], annotes, variables, ax=ax1)
                 fig1.canvas.mpl_connect('button_press_event', af)
+            elif selector == 'range':
+                # connect peak selector
+                af = intractive_point_identification.AnnoteFinder(x[peaks], y[peaks], annotes, variables, ax=ax1)
+                fig1.canvas.mpl_connect('button_press_event', af)
+                fig2, ax2 = plt.subplots(figsize=fig_size)
+                y, x, _ = ax2.hist(mc_tof, bins=bins, log=log, histtype=steps, color='slategray')
+                manager = plot_vline_draw.VerticalLineManager(ax2, [], [])
         plt.tight_layout()
         if fig_name is not None:
             if label == 'mc':
@@ -311,14 +319,24 @@ def mc_hist_plot(variables, bin_size, mode, prominence, distance, percent, selec
     """
     if mode == 'mc':
         hist = variables.mc_calib
+        label = 'mc'
+    elif mode == 'mc_c':
+        hist = variables.mc_c
+        label = 'mc'
     elif mode == 'tof':
         hist = variables.dld_t_calib
-    if selector=='peak':
+        label = 'tof'
+    elif mode == 'tof_c':
+        hist = variables.dld_t_c
+        label = 'tof'
+    if selector == 'peak':
         variables.peaks_idx = []
-    peaks_ini, peaks_y_ini, peak_widths_p_ini, peak_find, _ = hist_plot(hist[hist < lim], variables, bin_size, label=mode,
-                                                             distance=distance, percent=percent, prominence=prominence,
-                                                             selector=selector, plot=plot, fig_name=figname,
-                                                            peaks_find_plot=peaks_find_plot)
+    peaks_ini, peaks_y_ini, peak_widths_p_ini, peak_find, _ = hist_plot(hist[hist < lim], variables, bin_size,
+                                                                        label=label,
+                                                                        distance=distance, percent=percent,
+                                                                        prominence=prominence,
+                                                                        selector=selector, plot=plot, fig_name=figname,
+                                                                        peaks_find_plot=peaks_find_plot)
     if peak_find:
         index_max_ini = np.argmax(peaks_y_ini)
         variables.max_peak = peaks_ini[index_max_ini]

@@ -2,8 +2,6 @@ import math
 
 import matplotlib.pyplot as plt
 
-from pyccapt.calibration.calibration_tools import share_variables
-
 
 class AnnoteFinder(object):
     """
@@ -43,6 +41,25 @@ class AnnoteFinder(object):
         self.drawnAnnotations = {}
         self.links = []
         self.variables = variables
+
+    def __call__(self, event):
+        if event.inaxes:
+            clickX = event.xdata
+            clickY = event.ydata
+            if (self.ax is None) or (self.ax is event.inaxes):
+                if event.button == MouseButton.LEFT and event.dblclick:
+                    annotes = []
+                    for x, y, a in self.data:
+                        if ((clickX - self.xtol < x < clickX + self.xtol) and
+                                (clickY - self.ytol < y < clickY + self.ytol)):
+                            annotes.append(
+                                (self.distance(x, clickX, y, clickY), x, y, a))
+                    if annotes:
+                        annotes.sort()
+                        distance, x, y, annote = annotes[0]
+                        self.drawAnnote(event.inaxes, x, y, annote)
+                        for l in self.links:
+                            l.drawSpecificAnnote(annote)
 
     def distance(self, x1, x2, y1, y2):
         """

@@ -1,11 +1,8 @@
-import os
-
 import h5py
 import numpy as np
 import pandas as pd
 import scipy.io
 
-from pyccapt.calibration.calibration_tools import share_variables
 # Local module and scripts
 from pyccapt.calibration.data_tools import ato_tools
 from pyccapt.calibration.data_tools import data_loadcrop
@@ -281,9 +278,11 @@ def extract_data(data, variables, flightPathLength_d, max_mc):
     variables.dld_high_voltage = data['high_voltage (V)'].to_numpy()
     variables.dld_pulse = data['pulse'].to_numpy()
     variables.dld_t = data['t (ns)'].to_numpy()
+    variables.dld_t_c = data['t_c (ns)'].to_numpy()
     variables.dld_x_det = data['x_det (cm)'].to_numpy()
     variables.dld_y_det = data['y_det (cm)'].to_numpy()
     variables.mc = data['mc (Da)'].to_numpy()
+    variables.mc_c = data['mc_c (Da)'].to_numpy()
 
     # Calculate the maximum possible time of flight (TOF)
     variables.max_tof = int(tof_tools.mc2tof(max_mc, 1000, 0, 0, flightPathLength_d))
