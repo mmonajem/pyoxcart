@@ -2,9 +2,9 @@
 This is the main script for controlling the experiment.
 It contains the main control loop of experiment.
 """
-
 import datetime
 import multiprocessing
+import os
 import threading
 import time
 from multiprocessing.queues import Queue
@@ -792,9 +792,10 @@ def main(conf):
     variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
     # Save new value of experiment counter
-    with open('./files/counter_oxcart.txt', 'w') as f:
-        f.write(str(variables.counter + 1))
-        logger.info('Experiment counter is increased')
+    if os.path.exists("./files/counter_experiments.txt"):
+        with open('./files/counter_experiments.txt', 'w') as f:
+            f.write(str(variables.counter + 1))
+            logger.info('Experiment counter is increased')
 
     # Adding results of the experiment to the log file
     logger.info('Total number of Ions is: %s' % variables.total_ions)

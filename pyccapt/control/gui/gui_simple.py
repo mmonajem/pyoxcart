@@ -2,18 +2,19 @@
 This is the main script of main GUI of the simple Atom Probe control GUI.
 """
 
-import numpy as np
-import threading
 import datetime
+import multiprocessing
 import os
+import threading
+
+import numpy as np
+import pyqtgraph as pg
+import pyqtgraph.exporters
 # PyQt and PyQtgraph libraries
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QThread, pyqtSignal
-from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QScreen
-import pyqtgraph as pg
-import pyqtgraph.exporters
-import multiprocessing
+from PyQt6.QtWidgets import QApplication
 
 # Local module and scripts
 from pyccapt.control.apt import apt_tdc_roetdec
@@ -952,8 +953,14 @@ class UI_APT_S(object):
             variables.criteria_laser = False
 
         # Read the experiment counter
-        with open('./files/counter_physic.txt') as f:
-            variables.counter = int(f.readlines()[0])
+        if os.path.exists("./files/counter_experiments.txt"):
+            # Read the experiment counter
+            with open('./files/counter_experiments.txt') as f:
+                variables.counter = int(f.readlines()[0])
+        else:
+            # create a new txt file
+            with open('./files/counter_experiments.txt', 'w') as f:
+                f.write(str(1))  # Current time and date
         # Current time and date
         now = datetime.datetime.now()
         variables.exp_name = "%s_" % variables.counter + \
