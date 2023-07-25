@@ -128,6 +128,7 @@ class Variables:
         self.selected_y2 = 0
         self.selected_z1 = 0
         self.selected_z2 = 0
+        self.h_line_pos = []
 
         self.listMaterial = []
         self.charge = []

@@ -54,13 +54,20 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, mc_peak_label=Fals
 
     bins = np.linspace(np.min(mc_tof), np.max(mc_tof), round(np.max(mc_tof) / bin))
 
+    if fast_hist:
+        steps = 'stepfilled'
+    else:
+        steps = 'bar'
+
     if mode == 'count':
-        y, x = np.histogram(mc_tof, bins=bins)
+        # y, x = np.histogram(mc_tof, bins=bins, log=log)
+        y, x, _ = plt.hist(mc_tof, bins=bins, log=log, histtype=steps)
     elif mode == 'normalised':
         # calculate as counts/(Da * totalCts) so that mass spectra with different
         # count numbers are comparable
         mc_tof = (mc_tof / bin) / len(mc_tof)
-        y, x = np.histogram(mc_tof, bins=bins)
+        # y, x = np.histogram(mc_tof, bins=bins)
+        y, x, _ = plt.hist(mc_tof, bins=bins, log=log, histtype=steps)
         # med = median(y);
 
     try:
@@ -73,10 +80,6 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, mc_peak_label=Fals
         print('Peak finding failed.')
         peaks_find = False
 
-    if fast_hist:
-        steps = 'stepfilled'
-    else:
-        steps = 'bar'
 
     if plot:
         fig1, ax1 = plt.subplots(figsize=fig_size)
@@ -217,14 +220,19 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, mc_peak_label=Fals
                                          color='r', size=7,
                                          alpha=1))
                         else:
-                            texts.append(plt.text(x[peaks][i], y[peaks][i], '%s' % '{:.2f}'.format(x[peaks][i]), color='r',
-                                                  size=7, alpha=1))
+                            if selector == 'range':
+                                if i in variables.peaks_idx:
+                                    texts.append(plt.text(x[peaks][i], y[peaks][i], '%s' % '{:.2f}'.format(x[peaks][i]),
+                                                          color='r',
+                                                          size=7, alpha=1))
+                            else:
+                                texts.append(
+                                    plt.text(x[peaks][i], y[peaks][i], '%s' % '{:.2f}'.format(x[peaks][i]), color='r',
+                                             size=7, alpha=1))
 
                         if h_line:
-                            right_side_x = x[int(peak_widths_p[3][i])]
-                            left_side_x = x[int(peak_widths_p[2][i])]
-                            left_side_y = y[int(peak_widths_p[2][i])]
-                            plt.hlines(left_side_y, left_side_x, right_side_x, color="red")
+                            for i in range(len(variables.h_line_pos)):
+                                plt.axvline(x=variables.h_line_pos[i], color='b', linestyle='--', linewidth=2)
                     annotes.append(str(i + 1))
             if adjust_label:
                 adjust_text(texts, arrowprops=dict(arrowstyle='-', color='red', lw=0.5))
@@ -237,12 +245,15 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, mc_peak_label=Fals
                 af = intractive_point_identification.AnnoteFinder(x[peaks], y[peaks], annotes, variables, ax=ax1)
                 fig1.canvas.mpl_connect('button_press_event', af)
             elif selector == 'range':
-                # connect peak selector
-                af = intractive_point_identification.AnnoteFinder(x[peaks], y[peaks], annotes, variables, ax=ax1)
-                fig1.canvas.mpl_connect('button_press_event', af)
-                fig2, ax2 = plt.subplots(figsize=fig_size)
-                y, x, _ = ax2.hist(mc_tof, bins=bins, log=log, histtype=steps, color='slategray')
-                manager = plot_vline_draw.VerticalLineManager(ax2, [], [])
+                variables.h_line_pos = []
+                peak_widths_r = peak_widths(y, peaks, rel_height=(99 / 100), prominence_data=None)
+                peak_widths_r_v = []
+                for i in variables.peaks_idx:
+                    peak_widths_r_v.append(x[int(peak_widths_r[2][i])])
+                    peak_widths_r_v.append(x[int(peak_widths_r[3][i])])
+                # connect range selector
+                line_manager = plot_vline_draw.VerticalLineManager(variables, ax1, peak_widths_r_v, [], [])
+                # line_manager.add_vertical_lines()
         plt.tight_layout()
         if fig_name is not None:
             if label == 'mc':

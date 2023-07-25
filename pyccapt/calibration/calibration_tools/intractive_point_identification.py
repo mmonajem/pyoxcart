@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 
 class AnnoteFinder(object):
     """
-    Callback for matplotlib to display an annotation when points are clicked on.
+    Callback for matplotlib to display an annotation when points are left clicked on
+    and deselect when right click on with mouse.
     The point which is closest to the click and within xtol and ytol is identified.
 
     Register this function like this:
@@ -23,6 +24,7 @@ class AnnoteFinder(object):
             xdata (list): X-coordinates of the data points.
             ydata (list): Y-coordinates of the data points.
             annotes (list): List of annotations corresponding to the data points.
+            variables (list): List of variables corresponding to the data points.
             ax (Axes, optional): The matplotlib Axes instance. Defaults to None.
             xtol (float, optional): The tolerance value in the x-direction. Defaults to None.
             ytol (float, optional): The tolerance value in the y-direction. Defaults to None.
@@ -41,40 +43,6 @@ class AnnoteFinder(object):
         self.drawnAnnotations = {}
         self.links = []
         self.variables = variables
-
-    def __call__(self, event):
-        if event.inaxes:
-            clickX = event.xdata
-            clickY = event.ydata
-            if (self.ax is None) or (self.ax is event.inaxes):
-                if event.button == MouseButton.LEFT and event.dblclick:
-                    annotes = []
-                    for x, y, a in self.data:
-                        if ((clickX - self.xtol < x < clickX + self.xtol) and
-                                (clickY - self.ytol < y < clickY + self.ytol)):
-                            annotes.append(
-                                (self.distance(x, clickX, y, clickY), x, y, a))
-                    if annotes:
-                        annotes.sort()
-                        distance, x, y, annote = annotes[0]
-                        self.drawAnnote(event.inaxes, x, y, annote)
-                        for l in self.links:
-                            l.drawSpecificAnnote(annote)
-
-    def distance(self, x1, x2, y1, y2):
-        """
-        Calculate the Euclidean distance between two points.
-
-        Args:
-            x1 (float): X-coordinate of the first point.
-            x2 (float): X-coordinate of the second point.
-            y1 (float): Y-coordinate of the first point.
-            y2 (float): Y-coordinate of the second point.
-
-        Returns:
-            float: The Euclidean distance between the two points.
-        """
-        return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
     def __call__(self, event):
         """
@@ -96,9 +64,30 @@ class AnnoteFinder(object):
                 if annotes:
                     annotes.sort()
                     distance, x, y, annote = annotes[0]
-                    self.drawAnnote(event.inaxes, x, y, annote)
+                    if event.button == 3:  # right-click
+                        # Call deselectPoint method on right-click
+                        self.deselectPoint(event.inaxes, x, y, annote)
+                    else:
+                        # Call drawAnnote method on left-click
+                        self.drawAnnote(event.inaxes, x, y, annote)
                     for l in self.links:
                         l.drawSpecificAnnote(annote)
+
+    def distance(self, x1, x2, y1, y2):
+        """
+        Calculate the Euclidean distance between two points.
+
+        Args:
+            x1 (float): X-coordinate of the first point.
+            x2 (float): X-coordinate of the second point.
+            y1 (float): Y-coordinate of the first point.
+            y2 (float): Y-coordinate of the second point.
+
+        Returns:
+            float: The Euclidean distance between the two points.
+        """
+        return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
 
     def drawAnnote(self, ax, x, y, annote):
         """
@@ -110,18 +99,42 @@ class AnnoteFinder(object):
             y (float): Y-coordinate of the annotation.
             annote (str): The annotation text.
         """
+
         if (x, y) in self.drawnAnnotations:
-            markers = self.drawnAnnotations[(x, y)]
-            for m in markers:
-                m.set_visible(not m.get_visible())
-            self.ax.figure.canvas.draw_idle()
+            return
         else:
-            t = ax.text(x, y, " - %s" % (annote))
+            # Calculate an offset to move the annotation to the left of the peak
+            x_offset = - 1.2
+            # Draw the annotation without the dash "-"
+            t = ax.text(x + x_offset, y, str(annote), ha='right', va='center')
+
             m = ax.scatter([x], [y], marker='d', c='r', zorder=100)
             self.drawnAnnotations[(x, y)] = (t, m)
             self.ax.figure.canvas.draw_idle()
 
         self.variables.peaks_idx.append(int(annote) - 1)
+        self.variables.peaks_idx.sort()
+
+    def deselectPoint(self, ax, x, y, annote):
+        """
+        Draw the annotation on the plot.
+
+        Args:
+            ax (Axes): The matplotlib Axes instance.
+            x (float): X-coordinate of the annotation.
+            y (float): Y-coordinate of the annotation.
+            annote (str): The annotation text.
+        """
+
+        if (x, y) in self.drawnAnnotations:
+            markers = self.drawnAnnotations[(x, y)]
+            for m in markers:
+                m.set_visible(not m.get_visible())
+            self.ax.figure.canvas.draw_idle()
+
+        # Remove the deselected peak index from peaks_idx
+        self.variables.peaks_idx.remove(int(annote) - 1)
+        self.variables.peaks_idx.sort()
 
     def drawSpecificAnnote(self, annote):
         """

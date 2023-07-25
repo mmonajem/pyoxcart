@@ -65,7 +65,7 @@ def fix_parentheses(c):
     return ''.join(c)
 
 
-def find_close_element(target_elem, num_c, abundance_threshold=1, charge=4):
+def find_close_element(target_elem, num_c, abundance_threshold=0.0, charge=4):
     """
     Find the closest elements to a target element.
 
@@ -101,15 +101,19 @@ def find_close_element(target_elem, num_c, abundance_threshold=1, charge=4):
     idxs = find_nearest(np.copy(element_weights), target_elem, num_c)
 
     element_c = element_list[idxs]
+
     element_weights_c = element_weights[idxs]
     abundance_c = element_abundance[idxs]
 
     index_sort = np.argsort(abundance_c)
     index_sort = np.flip(index_sort)
 
-    element_c = element_c[index_sort]
     element_weights_c = element_weights_c[index_sort]
     abundance_c = abundance_c[index_sort]
+    isotope_number_c = []
+    element_simbol_c = []
+    charge_c = []
+    num_c = []
 
     # Make the formula in LaTeX format
     for i in range(len(element_c)):
@@ -123,17 +127,20 @@ def find_close_element(target_elem, num_c, abundance_threshold=1, charge=4):
             if cc[j].isnumeric():
                 cc[j] = int(cc[j])
         element_c[i] = '$${}^{%s}%s^{%s}$$' % (cc[1], cc[0], cc[2])
+        isotope_number_c.append(cc[1])
+        element_simbol_c.append(cc[0])
+        charge_c.append(cc[2])
+        num_c.append(1)
 
-    if abundance_threshold < 1.0:
-        element_c = element_c[abundance_c < abundance_threshold]
-        element_weights_c = element_weights_c[abundance_c < abundance_threshold]
-        abundance_c = abundance_c[abundance_c < abundance_threshold]
-
-    df = pd.DataFrame({'element': element_c, 'weight': element_weights_c, 'abundance': abundance_c})
+    df = pd.DataFrame({'element': element_c, 'weight': element_weights_c, 'abundance': abundance_c,
+                       'isotope': isotope_number_c, 'element_s': element_simbol_c, 'num': num_c, 'charge': charge_c})
+    # Filter the DataFrame based on the "abundance" column
+    abundance_threshold = abundance_threshold * 100
+    df = df[df['abundance'] > abundance_threshold]
     return df
 
 
-def find_close_molecule(target_mole, num_c, abundance_threshold=1, charge=4):
+def find_close_molecule(target_mole, num_c, abundance_threshold=0.0, charge=4):
     """
     Find the closest molecules to a target molecule.
 
@@ -178,7 +185,15 @@ def find_close_molecule(target_mole, num_c, abundance_threshold=1, charge=4):
     element_c = element_c[index_sort]
     element_weights_c = element_weights_c[index_sort]
     abundance_c = abundance_c[index_sort]
-
+    print(element_c)
+    isotope_number_c = [[int(num) for num in re.findall(r'\d+', element)] for element in element_c]
+    element_simbol_c = [re.findall(r'\b[A-Z][a-zA-Z]*\b', element) for element in element_c]
+    num_c = [len(re.findall(r'(\D)\d*', re.sub(r'\(\d+\)', '', element))) for element in element_c]
+    charge_c = [element.count('+') for element in element_c]
+    print(isotope_number_c)
+    print(element_simbol_c)
+    print(num_c)
+    print(charge_c)
     # Make the formula in LaTeX format
     for i in range(len(element_c)):
         ff = element_c[i]
@@ -186,12 +201,12 @@ def find_close_molecule(target_mole, num_c, abundance_threshold=1, charge=4):
         ff = ff.replace('+', '')
         element_c[i] = create_formula_latex(ff, num_charge)
 
-    if abundance_threshold < 1.0:
-        element_c = element_c[abundance_c < abundance_threshold]
-        element_weights_c = element_weights_c[abundance_c < abundance_threshold]
-        abundance_c = abundance_c[abundance_c < abundance_threshold]
-
-    df = pd.DataFrame({'molecule': element_c, 'weight': element_weights_c, 'abundance': abundance_c})
+    df = pd.DataFrame({'element': element_c, 'weight': element_weights_c, 'abundance': abundance_c,
+                       'isotope': isotope_number_c, 'element_s': element_simbol_c, 'num': num_c, 'charge': charge_c})
+    # df = pd.DataFrame({'molecule': element_c, 'weight': element_weights_c, 'abundance': abundance_c})
+    # Filter the DataFrame based on the "abundance" column
+    abundance_threshold = abundance_threshold * 100
+    df = df[df['abundance'] > abundance_threshold]
     return df
 
 
@@ -225,13 +240,13 @@ def create_formula_latex(aa, num_charge=0):
             aa[i] = ' '
     for i in range(int(len(aa) / 3)):
         if i == 0:
-            bb = '{}^{{{}}}_{{{}}}'.format(aa[(i * 3) + 1], aa[(i * 3)], aa[(i * 3) + 2])
+            bb = '{}^{%s}%s_{%s}' % (aa[(i * 3) + 1], aa[(i * 3)], aa[(i * 3) + 2])
         else:
-            bb += '{}^{{{}}}_{{{}}}'.format(aa[(i * 3) + 1], aa[(i * 3)], aa[(i * 3) + 2])
+            bb += '{}^{%s}%s_{%s}' % (aa[(i * 3) + 1], aa[(i * 3)], aa[(i * 3) + 2])
     if num_charge == 0:
-        bb = r'${}$'.format(bb)
+        bb = r'$' + bb + '$'
     else:
-        bb = r'${}^{{{}}+}$'.format(bb, num_charge)
+        bb = r'$(' + bb + ')^{%s+}' % num_charge + '$'
     return bb
 
 
@@ -251,13 +266,15 @@ def chunks(lst, n):
         yield lst[i:i + n]
 
 
-def molecule_isotope_list(dataframe, target_element, latex=True):
+def molecule_isotope_list(dataframe, target_element, charge, abundance_threshold, latex=True):
     """
     Generate a list of isotopes for a given target element.
 
     Args:
         dataframe (pd.DataFrame): The input DataFrame containing isotope data.
         target_element (str): The target element to find isotopes for.
+        charge (int): The charge of the target element.
+        aboundance_threshold (float): The abundance threshold for filtering isotopes.
         latex (bool, optional): Whether to generate LaTeX representation of formulas. Defaults to True.
 
     Returns:
@@ -302,12 +319,12 @@ def molecule_isotope_list(dataframe, target_element, latex=True):
                         elements[idx_element[0][j]] + '(' + str(isotope_number[idx_element[0][j]]) + ')')
 
                 elem_weights_tmp.append(weight[idx_element[0][j]] * number_of_elem)
+
                 abundance_i = abundance[idx_element[0][j]] / 100
                 if number_of_elem > 1:
-                    for k in range(number_of_elem):
-                        abundance_i = abundance_i * abundance_i
-                elem_abundance_tmp.append(abundance_i)
+                    abundance_i = abundance_i ** number_of_elem
 
+                elem_abundance_tmp.append(abundance_i)
             elem_compo.append(elem_compo_temp)
             elem_weights.append(elem_weights_tmp)
             elem_abundance.append(elem_abundance_tmp)
@@ -317,11 +334,23 @@ def molecule_isotope_list(dataframe, target_element, latex=True):
     list_elem_abundance = list(itertools.product(*elem_abundance))
 
     list_elem_compo = [''.join(item) for item in list_elem_compo]
-    if latex:
-        for i in range(len(list_elem_compo)):
-            list_elem_compo[i] = create_formula_latex(list_elem_compo[i])
+    num_element = len(list_elem_compo)
+
     list_elem_weights = [sum(item) for item in list_elem_weights]
     list_elem_abundance = [math.prod(item) for item in list_elem_abundance]
     list_elem_abundance = [item * 100 for item in list_elem_abundance]
+
+    # duplicate the list base on the charge
+    list_elem_compo = [item for item in list_elem_compo for _ in range(charge)]
+    list_elem_weights = [val / (charge / x) for val in list_elem_weights for x in range(charge, 0, -1)]
+    list_elem_abundance = [item for item in list_elem_abundance for _ in range(charge)]
+    list_elem_charge = [x for x in range(1, charge + 1)] * num_element
+    if latex:
+        for i in range(len(list_elem_compo)):
+            list_elem_compo[i] = create_formula_latex(list_elem_compo[i], list_elem_charge[i])
+
     df = pd.DataFrame({'molecule': list_elem_compo, 'weight': list_elem_weights, 'abundance': list_elem_abundance})
+    # Filter the DataFrame based on the "abundance" column
+    abundance_threshold = abundance_threshold * 100
+    df = df[df['abundance'] > abundance_threshold]
     return df
