@@ -2,8 +2,10 @@ import itertools
 import math
 import re
 
+import matplotlib
 import numpy as np
 import pandas as pd
+from faker import Factory
 
 from pyccapt.calibration.data_tools import data_tools
 
@@ -65,7 +67,7 @@ def fix_parentheses(c):
     return ''.join(c)
 
 
-def find_close_element(target_elem, num_c, abundance_threshold=0.0, charge=4):
+def find_close_element(target_elem, num_c, abundance_threshold=0.0, charge=4, variables=None):
     """
     Find the closest elements to a target element.
 
@@ -74,6 +76,7 @@ def find_close_element(target_elem, num_c, abundance_threshold=0.0, charge=4):
         num_c (int): Number of closest elements to find.
         abundance_threshold (float): Abundance threshold for filtering elements.
         charge (int): Charge value.
+        variables (object): object containing the variables.
 
     Returns:
         pandas.DataFrame: DataFrame containing closest elements and their properties.
@@ -131,79 +134,10 @@ def find_close_element(target_elem, num_c, abundance_threshold=0.0, charge=4):
         element_simbol_c.append(cc[0])
         charge_c.append(cc[2])
         num_c.append(1)
-
-    df = pd.DataFrame({'element': element_c, 'weight': element_weights_c, 'abundance': abundance_c,
-                       'isotope': isotope_number_c, 'element_s': element_simbol_c, 'num': num_c, 'charge': charge_c})
-    # Filter the DataFrame based on the "abundance" column
-    abundance_threshold = abundance_threshold * 100
-    df = df[df['abundance'] > abundance_threshold]
-    return df
-
-
-def find_close_molecule(target_mole, num_c, abundance_threshold=0.0, charge=4):
-    """
-    Find the closest molecules to a target molecule.
-
-    Args:
-        target_mole (float): Target molecule.
-        num_c (int): Number of closest molecules to find.
-        abundance_threshold (float): Abundance threshold for filtering molecules.
-        charge (int): Charge value.
-
-    Returns:
-        pandas.DataFrame: DataFrame containing closest molecules and their properties.
-    """
-    data_table = '../../../files/molecule_table.h5'
-    dataframe = data_tools.read_hdf5_through_pandas(data_table)
-
-    elements = dataframe['molecule'].to_numpy()
-    weight_number = dataframe['weight'].to_numpy()
-    abundance = dataframe['abundance'].to_numpy()
-    element_abundance = np.repeat(abundance, charge)
-
-    element_weights = np.zeros((len(elements), charge))
-    elements_w = weight_number
-    for i in range(charge):
-        element_weights[:, i] = elements_w / (i + 1)
-    element_weights = element_weights.flatten()
-
-    elem = elements
-    element_list = np.zeros(len(elem) * charge).astype('U')
-    for i in range(len(elem)):
-        for j in range(charge):
-            element_list[i + j + ((charge - 1) * i)] = elem[i] + '+' * (j + 1)
-
-    idxs = find_nearest(np.copy(element_weights), target_mole, num_c)
-
-    element_c = element_list[idxs]
-    element_weights_c = element_weights[idxs]
-    abundance_c = element_abundance[idxs]
-
-    index_sort = np.argsort(abundance_c)
-    index_sort = np.flip(index_sort)
-
-    element_c = element_c[index_sort]
-    element_weights_c = element_weights_c[index_sort]
-    abundance_c = abundance_c[index_sort]
-    print(element_c)
-    isotope_number_c = [[int(num) for num in re.findall(r'\d+', element)] for element in element_c]
-    element_simbol_c = [re.findall(r'\b[A-Z][a-zA-Z]*\b', element) for element in element_c]
-    num_c = [len(re.findall(r'(\D)\d*', re.sub(r'\(\d+\)', '', element))) for element in element_c]
-    charge_c = [element.count('+') for element in element_c]
-    print(isotope_number_c)
-    print(element_simbol_c)
-    print(num_c)
-    print(charge_c)
-    # Make the formula in LaTeX format
-    for i in range(len(element_c)):
-        ff = element_c[i]
-        num_charge = ff.count('+')
-        ff = ff.replace('+', '')
-        element_c[i] = create_formula_latex(ff, num_charge)
-
-    df = pd.DataFrame({'element': element_c, 'weight': element_weights_c, 'abundance': abundance_c,
-                       'isotope': isotope_number_c, 'element_s': element_simbol_c, 'num': num_c, 'charge': charge_c})
-    # df = pd.DataFrame({'molecule': element_c, 'weight': element_weights_c, 'abundance': abundance_c})
+    df = pd.DataFrame({'ion': element_c, 'mass': element_weights_c, 'element': element_simbol_c,
+                       'complex': num_c, 'isotope': isotope_number_c, 'charge': charge_c, 'abundance': abundance_c, })
+    if variables is not None:
+        variables.range_data_backup = df.copy()
     # Filter the DataFrame based on the "abundance" column
     abundance_threshold = abundance_threshold * 100
     df = df[df['abundance'] > abundance_threshold]
@@ -266,12 +200,11 @@ def chunks(lst, n):
         yield lst[i:i + n]
 
 
-def molecule_isotope_list(dataframe, target_element, charge, abundance_threshold, latex=True):
+def molecule_isotope_list(target_element, charge, abundance_threshold, latex=True):
     """
     Generate a list of isotopes for a given target element.
 
     Args:
-        dataframe (pd.DataFrame): The input DataFrame containing isotope data.
         target_element (str): The target element to find isotopes for.
         charge (int): The charge of the target element.
         aboundance_threshold (float): The abundance threshold for filtering isotopes.
@@ -281,6 +214,8 @@ def molecule_isotope_list(dataframe, target_element, charge, abundance_threshold
         pd.DataFrame: A DataFrame containing the list of isotopes with their weights and abundances.
 
     """
+    isotopeTableFile = '../../../files/isotopeTable.h5'
+    dataframe = data_tools.read_hdf5_through_pandas(isotopeTableFile)
     target_element = fix_parentheses(target_element)
 
     elements = dataframe['element'].to_numpy()
@@ -350,7 +285,53 @@ def molecule_isotope_list(dataframe, target_element, charge, abundance_threshold
             list_elem_compo[i] = create_formula_latex(list_elem_compo[i], list_elem_charge[i])
 
     df = pd.DataFrame({'molecule': list_elem_compo, 'weight': list_elem_weights, 'abundance': list_elem_abundance})
+    # df = pd.DataFrame({'ion': element_c, 'mass': element_weights_c, 'element': element_simbol_c,
+    #                    'complex': num_c, 'isotope': isotope_number_c, 'charge': charge_c, 'abundance': abundance_c,})
     # Filter the DataFrame based on the "abundance" column
     abundance_threshold = abundance_threshold * 100
     df = df[df['abundance'] > abundance_threshold]
     return df
+
+
+def molecule_create(formula, complexity, charge, abundance_threshold, latex=True):
+    pass
+
+
+def rangging_dataset_create(variables, row_index):
+    """
+    This function is used to create the rangging dataset
+
+        Arg:
+            variables (class): The class of the variables
+            row_index (int): The index of the selected row
+
+        Returns:
+            None
+    """
+    selected_row = variables.range_data_backup.iloc[row_index].tolist()
+    selected_row.pop()
+    print(selected_row)
+    fake = Factory.create()
+    data_table = '../../../files/color_scheme.h5'
+    dataframe = data_tools.read_hdf5_through_pandas(data_table)
+    element_selec = selected_row[3]
+    try:
+        r = dataframe[dataframe['ion'] == re.sub(r'[0-9]', '', element_selec)]['r'].to_numpy()
+        g = dataframe[dataframe['ion'] == re.sub(r'[0-9]', '', element_selec)]['g'].to_numpy()
+        b = dataframe[dataframe['ion'] == re.sub(r'[0-9]', '', element_selec)]['b'].to_numpy()
+        cc = matplotlib.colors.to_hex([r[0], g[0], b[0]])
+        color = cc
+    except:
+        print('The element is not clor list')
+        color = fake.hex_color()
+
+    mass = selected_row[1]
+    range = sorted(variables.h_line_pos, key=lambda x: abs(x - mass))[:2]
+    print(range)
+    print(color)
+    selected_row.insert(2, range[0])
+    selected_row.insert(3, range[1])
+    selected_row.insert(4, color)
+    print(selected_row)
+    # Add the row to the DataFrame using the .loc method
+    variables.range_data.loc[len(variables.range_data)] = selected_row

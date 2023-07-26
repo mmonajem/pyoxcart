@@ -1,5 +1,5 @@
 import numpy as np
-
+import pandas as pd
 
 # def init():
 #
@@ -109,6 +109,9 @@ class Variables:
         peak (list): List of peaks.
         peak_y (list): List of peak y-values.
         peak_width (list): List of peak widths.
+        h_line_pos (list): List of horizontal line positions.
+        range_data (data frame): List of range data.
+        range_data_backup (data frame): Backup list of range data.
     """
 
     def __init__(self):
@@ -159,3 +162,9 @@ class Variables:
         self.peak = []
         self.peak_y = []
         self.peak_width = []
+
+        # Create an empty DataFrame with the specified columns
+        self.range_data = pd.DataFrame(columns=['ion', 'mass', 'mc_low', 'mc_up', 'color', 'element', 'complex',
+                                                'isotope', 'charge'])
+
+        self.range_data_backup = None
