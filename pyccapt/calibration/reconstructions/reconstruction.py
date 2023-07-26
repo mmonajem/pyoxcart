@@ -84,8 +84,12 @@ def atom_probe_recons_from_detector_Gault_et_al(detx, dety, hv, flight_path_leng
     # Calculate z coordinate
     dz_p = radius_evolution * (1 - np.cos(theta_a))
     omega = 1E-9 ** 3 / avg_dens
+    # icf_2 = theta_a / theta_p
+    # dz = (omega * ((flight_path_length * 1E-3) ** 2) * (kf ** 2) * ((field_evap / 1E-9) ** 2)) / (
+    #         det_area * det_eff * (icf_2 ** 2) * (hv ** 2))
+
     dz = (omega * ((flight_path_length * 1E-3) ** 2) * (kf ** 2) * ((field_evap / 1E-9) ** 2)) / (
-            det_area * det_eff * (icf_2 ** 2) * (hv ** 2))
+            det_area * det_eff * (icf ** 2) * (hv ** 2))
     cum_z = np.cumsum(dz)
     z = cum_z + dz_p
 
@@ -129,13 +133,14 @@ def atom_probe_recons_Bas_et_al(detx, dety, hv, flight_path_length, kf, det_eff,
     return x * 1E9, y * 1E9, z * 1E9
 
 
-def reconstruction_plot(data, range_data, element_percentage, rotary_fig_save, selected_area, figname):
+def reconstruction_plot(data, range_data, variables, element_percentage, rotary_fig_save, selected_area, figname):
     """
     Generate a 3D plot for atom probe reconstruction data.
 
     Args:
         data (DataFrame): Atom probe reconstruction data.
         range_data (DataFrame): Range data for different elements.
+        variables (object): Variables object.
         element_percentage (str): Percentage of elements to display.
         rotary_fig_save (bool): Whether to save the rotary figure.
         selected_area (bool): Whether a specific area is selected.
@@ -266,12 +271,13 @@ def rotate_z(x, y, z, theta):
     return np.real(np.exp(1j * theta) * w), np.imag(np.exp(1j * theta) * w), z
 
 
-def rotary_fig(fig1, figname):
+def rotary_fig(fig1, variables, figname):
     """
     Generate a rotating figure using Plotly.
 
     Args:
         fig1 (plotly.graph_objects.Figure): The base figure.
+        variables (object): The variables object.
         figname (str): The name of the figure.
 
     Returns:
@@ -329,13 +335,14 @@ def rotary_fig(fig1, figname):
     )
 
 
-def scatter_plot(data, range_data, element_percentage, selected_area, x_or_y, figname):
+def scatter_plot(data, range_data, variables, element_percentage, selected_area, x_or_y, figname):
     """
     Generate a scatter plot based on the provided data.
 
     Args:
         data (pandas.DataFrame): The input data.
         range_data (pandas.DataFrame): Data containing range information for different elements.
+        variables (object): The variables object.
         element_percentage (str): Element percentage information.
         selected_area (bool): True if a specific area is selected, False otherwise.
         x_or_y (str): Either 'x' or 'y' indicating the axis to plot.
@@ -391,13 +398,14 @@ def scatter_plot(data, range_data, element_percentage, selected_area, x_or_y, fi
     plt.show()
 
 
-def heatmap(data, range_data, element_percentage, save):
+def heatmap(data, range_data, variables, element_percentage, save):
     """
     Generate a heatmap based on the provided data.
 
     Args:
         data (pandas.DataFrame): The input data.
         range_data (pandas.DataFrame): Data containing range information for different elements.
+        variables (object): The variables object.
         element_percentage (str): Element percentage information.
         save (bool): True to save the plot, False to display it.
 

@@ -129,18 +129,18 @@ def find_close_element(target_elem, num_c, abundance_threshold=0.0, charge=4, va
         for j in range(len(cc)):
             if cc[j].isnumeric():
                 cc[j] = int(cc[j])
-        element_c[i] = '$${}^{%s}%s^{%s}$$' % (cc[1], cc[0], cc[2])
+        element_c[i] = '${}^{%s}%s^{%s}$' % (cc[1], cc[0], cc[2])
         isotope_number_c.append(cc[1])
         element_simbol_c.append(cc[0])
         charge_c.append(cc[2])
         num_c.append(1)
     df = pd.DataFrame({'ion': element_c, 'mass': element_weights_c, 'element': element_simbol_c,
                        'complex': num_c, 'isotope': isotope_number_c, 'charge': charge_c, 'abundance': abundance_c, })
-    if variables is not None:
-        variables.range_data_backup = df.copy()
     # Filter the DataFrame based on the "abundance" column
     abundance_threshold = abundance_threshold * 100
     df = df[df['abundance'] > abundance_threshold]
+    if variables is not None:
+        variables.range_data_backup = df.copy()
     return df
 
 
@@ -200,7 +200,7 @@ def chunks(lst, n):
         yield lst[i:i + n]
 
 
-def molecule_isotope_list(target_element, charge, abundance_threshold, latex=True):
+def molecule_isotope_list(target_element, charge, abundance_threshold, latex=True, variables=None):
     """
     Generate a list of isotopes for a given target element.
 
@@ -290,6 +290,8 @@ def molecule_isotope_list(target_element, charge, abundance_threshold, latex=Tru
     # Filter the DataFrame based on the "abundance" column
     abundance_threshold = abundance_threshold * 100
     df = df[df['abundance'] > abundance_threshold]
+    if variables is not None:
+        variables.range_data_backup = df.copy()
     return df
 
 
@@ -297,7 +299,7 @@ def molecule_create(formula, complexity, charge, abundance_threshold, latex=True
     pass
 
 
-def rangging_dataset_create(variables, row_index):
+def rangging_dataset_create(variables, row_index, mass_unknown):
     """
     This function is used to create the rangging dataset
 
@@ -308,30 +310,47 @@ def rangging_dataset_create(variables, row_index):
         Returns:
             None
     """
-    selected_row = variables.range_data_backup.iloc[row_index].tolist()
-    selected_row.pop()
-    print(selected_row)
+    if row_index >= 0:
+        selected_row = variables.range_data_backup.iloc[row_index].tolist()
+        selected_row = selected_row[:-1]
+    else:
+        selected_row = ['unranged', mass_unknown, 'unranged', 0, 0, 0]
     fake = Factory.create()
     data_table = '../../../files/color_scheme.h5'
     dataframe = data_tools.read_hdf5_through_pandas(data_table)
-    element_selec = selected_row[3]
+    element_selec = selected_row[2]
     try:
-        r = dataframe[dataframe['ion'] == re.sub(r'[0-9]', '', element_selec)]['r'].to_numpy()
-        g = dataframe[dataframe['ion'] == re.sub(r'[0-9]', '', element_selec)]['g'].to_numpy()
-        b = dataframe[dataframe['ion'] == re.sub(r'[0-9]', '', element_selec)]['b'].to_numpy()
-        cc = matplotlib.colors.to_hex([r[0], g[0], b[0]])
-        color = cc
-    except:
-        print('The element is not clor list')
+        color_rgb = dataframe[dataframe['ion'].str.contains(element_selec, na=False)].to_numpy().tolist()
+        color = matplotlib.colors.to_hex([color_rgb[0][1], color_rgb[0][2], color_rgb[0][3]])
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        print('The element is not color list')
         color = fake.hex_color()
 
     mass = selected_row[1]
-    range = sorted(variables.h_line_pos, key=lambda x: abs(x - mass))[:2]
-    print(range)
-    print(color)
-    selected_row.insert(2, range[0])
-    selected_row.insert(3, range[1])
-    selected_row.insert(4, color)
-    print(selected_row)
+    if not variables.h_line_pos:
+        print('The h_line_pos is empty')
+        print('first do the ranging')
+        range = [0, 0]
+    else:
+        range = sorted(variables.h_line_pos, key=lambda x: abs(x - mass))[:2]
+        mc = sorted(variables.peak, key=lambda x: abs(x - mass))[:1]
+    selected_row.insert(2, mc[0])
+    selected_row.insert(3, range[0])
+    selected_row.insert(4, range[1])
+    selected_row.insert(5, color)
     # Add the row to the DataFrame using the .loc method
+
     variables.range_data.loc[len(variables.range_data)] = selected_row
+
+def display_color(color):
+    """
+    This function is used to display the color in the table
+
+        Arg:
+            color (str): The color in hex format
+
+        Returns:
+            str: The color in hex format
+    """
+    return f'background-color: {color}; width: 50px; height: 20px;'

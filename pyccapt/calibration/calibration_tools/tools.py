@@ -13,8 +13,8 @@ from pyccapt.calibration.data_tools import plot_vline_draw
 from pyccapt.calibration.data_tools import selectors_data
 
 
-def hist_plot(mc_tof, variables, bin, label, range_data=None, mc_peak_label=False, adjust_label=False, ranging=False,
-              log=True, mode='count', percent=50, peaks_find=True, peaks_find_plot=False, plot=False, prominence=500,
+def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False, ranging=False,
+              log=True, mode='count', percent=50, peaks_find=True, peaks_find_plot=False, plot=False, prominence=50,
               distance=None, h_line=False, selector='None', fast_hist=True, fig_name=None, text_loc='right',
               peak_val_plot=True, fig_size=(9, 5), background={'calculation': False}):
     """
@@ -25,7 +25,6 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, mc_peak_label=Fals
         bin (float): Bin width for the histogram.
         label (str): Label type ('mc' or 'tof').
         range_data (optional, array-like): Range data.
-        mc_peak_label (bool): Flag to label peaks on the plot.
         adjust_label (bool): Flag to adjust overlapping peak labels.
         ranging (bool): Flag to enable ranging.
         log (bool): Flag to enable logarithmic y-axis scale.
@@ -84,27 +83,25 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, mc_peak_label=Fals
     if plot:
         fig1, ax1 = plt.subplots(figsize=fig_size)
         if ranging:
-            phases = range_data['element'].tolist()
             colors = range_data['color'].tolist()
             mc_low = range_data['mc_low'].tolist()
             mc_up = range_data['mc_up'].tolist()
-            charge = range_data['charge'].tolist()
-            isotope = range_data['isotope'].tolist()
+            ion = range_data['ion'].tolist()
             mask_all = np.full(len(mc_tof), False)
 
-            for i in range(len(phases) + 1):
-                if i < len(phases):
+            for i in range(len(ion) + 1):
+                if i < len(ion):
                     mask = np.logical_and((mc_tof < mc_up[i]), mc_tof > mc_low[i])
                     mask_all = np.logical_or(mask_all, mask)
 
-                    if phases[i] == 'unranged':
+                    if ion[i] == 'unranged':
                         name_element = 'unranged'
                     else:
-                        name_element = r'${}^{%s}%s^{%s+}$' % (isotope[i], phases[i], charge[i])
+                        name_element = r'%s' %ion[i]
 
                     y, x, _ = plt.hist(mc_tof[mask], bins=bins, log=log, histtype=steps, color=colors[i],
                                        label=name_element)
-                elif i == len(phases):
+                elif i == len(ion):
                     mask_all = np.logical_or(mask_all, mask)
                     y, x, _ = plt.hist(mc_tof[~mask_all], bins=bins, log=log, histtype=steps, color='slategray')
         else:
@@ -210,11 +207,11 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, mc_peak_label=Fals
             if peak_val_plot:
                 for i in range(len(peaks)):
                     if peaks_find_plot:
-                        if mc_peak_label:
-                            phases = range_data['element'].tolist()
+                        if ranging:
+                            ion = range_data['ion'].tolist()
                             charge = range_data['charge'].tolist()
                             isotope = range_data['isotope'].tolist()
-                            name_element = r'${}^{%s}%s^{%s+}$' % (isotope[i], phases[i], charge[i])
+                            name_element = r'${}^{%s}%s^{%s+}$' % (isotope[i], ion[i], charge[i])
                             texts.append(
                                 plt.text(x[peaks][i], y[peaks][i], name_element,
                                          color='r', size=7,
@@ -283,13 +280,15 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, mc_peak_label=Fals
             y_peaks = y[peaks]
             peaks_widths = peak_widths_f
             mask = None
-
+        index_max_ini = np.argmax(y_peaks)
+        variables.max_peak = x_peaks[index_max_ini]
+        variables.peak = x_peaks
     else:
         x_peaks = None
         y_peaks = None
         peaks_widths = None
         mask = None
-    return x_peaks, y_peaks, peaks_widths, peaks_find, mask
+    return x_peaks, y_peaks, peaks_widths, mask
 
 
 def fit_background(x, a, b):
@@ -342,16 +341,14 @@ def mc_hist_plot(variables, bin_size, mode, prominence, distance, percent, selec
         label = 'tof'
     if selector == 'peak':
         variables.peaks_idx = []
-    peaks_ini, peaks_y_ini, peak_widths_p_ini, peak_find, _ = hist_plot(hist[hist < lim], variables, bin_size,
+    peaks_ini, peaks_y_ini, peak_widths_p_ini, _ = hist_plot(hist[hist < lim], variables, bin_size,
                                                                         label=label,
                                                                         distance=distance, percent=percent,
                                                                         prominence=prominence,
                                                                         selector=selector, plot=plot, fig_name=figname,
                                                                         peaks_find_plot=peaks_find_plot)
-    if peak_find:
+    if peaks_ini is not None:
         index_max_ini = np.argmax(peaks_y_ini)
-        variables.max_peak = peaks_ini[index_max_ini]
-        variables.peak = peaks_ini
         mrp = (peaks_ini[index_max_ini] / (peak_widths_p_ini[index_max_ini][2] - peak_widths_p_ini[index_max_ini][1]))
         print('Mass resolving power for the highest peak (MRP --> m/m_2-m_1):', mrp)
         for i in range(len(peaks_ini)):
