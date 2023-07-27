@@ -408,7 +408,7 @@ def scatter_plot(data, range_data, variables, element_percentage, selected_area,
             ax.scatter(df_subset['y (nm)'], df_subset['z (nm)'], s=2, label=name_element)
 
     if not selected_area:
-        data_loadcrop.rectangle_box_selector(ax)
+        data_loadcrop.rectangle_box_selector(ax, variables)
         plt.connect('key_press_event', selectors_data.toggle_selector)
     ax.xaxis.tick_top()
     ax.invert_yaxis()
@@ -487,8 +487,6 @@ def heatmap(variables, selected_area, element_percentage, save):
     Generate a heatmap based on the provided data.
 
     Args:
-        data (pandas.DataFrame): The input data.
-        range_data (pandas.DataFrame): Data containing range information for different elements.
         variables (object): The variables object.
         element_percentage (str): Element percentage information.
         save (bool): True to save the plot, False to display it.

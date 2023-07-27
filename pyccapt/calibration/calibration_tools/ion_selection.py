@@ -209,6 +209,7 @@ def molecule_isotope_list(target_element, charge, abundance_threshold, latex=Tru
         charge (int): The charge of the target element.
         aboundance_threshold (float): The abundance threshold for filtering isotopes.
         latex (bool, optional): Whether to generate LaTeX representation of formulas. Defaults to True.
+        variables (object, optional): The variables object. Defaults to None.
 
     Returns:
         pd.DataFrame: A DataFrame containing the list of isotopes with their weights and abundances.
