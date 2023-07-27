@@ -20,7 +20,7 @@ from pyccapt.control.devices import email_send
 from pyccapt.control.devices import initialize_devices
 from pyccapt.control.control_tools import variables, hdf5_creator, loggi
 from pyccapt.control.control_tools import experiment_statistics
-from pyccapt.calibration.calibration_tools import logging_library, variables
+from pyccapt.calibration.calibration_tools import logging_library, share_variables
 
 logger = logging_library.logger_creator('data_loadcrop')
 

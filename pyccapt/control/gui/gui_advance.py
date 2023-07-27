@@ -2,19 +2,19 @@
 This is the main script of main GUI of the advance Atom Probe.
 """
 
-import numpy as np
-import nidaqmx
-import time
-import threading
 import datetime
 import os
+import threading
+import time
+
+import nidaqmx
+import numpy as np
+import pyqtgraph as pg
+import pyqtgraph.exporters
 # PyQt and PyQtgraph libraries
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QThread, pyqtSignal
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtGui import QScreen, QPixmap, QImage
-import pyqtgraph as pg
-import pyqtgraph.exporters
+from PyQt6.QtGui import QPixmap, QImage
 
 # Local module and scripts
 from pyccapt.control.apt import apt_tdc_surface_consept
@@ -1556,19 +1556,23 @@ class UI_APT_A(object):
             if self.criteria_ions.isChecked():
                 variables.criteria_ions = True
             elif not self.criteria_ions.isChecked():
-                variables.criteria_ions = False
+                    variables.criteria_ions = False
             if self.criteria_vdc.isChecked():
-                variables.criteria_vdc = True
+                    variables.criteria_vdc = True
             elif not self.criteria_vdc.isChecked():
-                variables.criteria_vdc = False
+                    variables.criteria_vdc = False
 
             if self.tweet.currentText() == 'Yes':
-                variables.tweet = True
+                    variables.tweet = True
 
-            # Read the experiment counter
-            with open('./files/counter_oxcart.txt') as f:
-                variables.counter = int(f.readlines()[0])
-            # Current time and date
+            if os.path.exists("./files/counter_experiments.txt"):
+                    # Read the experiment counter
+                    with open('./files/counter_experiments.txt') as f:
+                            variables.counter = int(f.readlines()[0])
+            else:
+                    # create a new txt file
+                    with open('./files/counter_experiments.txt', 'w') as f:
+                            f.write(str(1))  # Current time and date
             now = datetime.datetime.now()
             variables.exp_name = "%s_" % variables.counter + \
                                  now.strftime("%b-%d-%Y_%H-%M") + "_%s" % variables.hdf5_path
@@ -1577,7 +1581,7 @@ class UI_APT_A(object):
                                           'data_voltage_pulse_mode\\%s' % variables.exp_name)
             # Create folder to save the data
             if not os.path.isdir(variables.path):
-                os.makedirs(variables.path, mode=0o777, exist_ok=True)
+                    os.makedirs(variables.path, mode=0o777, exist_ok=True)
             # start the run methos of MainThread Class, which is main function of apt_voltage.py
             self.thread.start()
             if self.parameters_source.currentText() == 'TextLine':

@@ -2,19 +2,20 @@
 This is the main script is load the GUI base on the configuration file.
 """
 
-import sys
 import os
+import sys
 import threading
-from PyQt6 import QtWidgets
+
 import serial.tools.list_ports
+from PyQt6 import QtWidgets
 from pypylon import pylon
 
 # Local module and scripts
 from pyccapt.control.control_tools import variables, read_files
 from pyccapt.control.devices import initialize_devices
 from pyccapt.control.devices.camera import Camera
-from pyccapt.control.gui import gui_simple
 from pyccapt.control.gui import gui_advance
+from pyccapt.control.gui import gui_simple
 
 
 def main():
@@ -25,8 +26,9 @@ def main():
         os.chdir(p)
         conf = read_files.read_json_file(configFile)
     except Exception as e:
-        print("The config.json was not found")
+        print('Can not load the configuration file')
         print(e)
+        sys.exit()
 
     if conf['mode'] == 'advance':
         # Initialize global experiment variables
@@ -51,8 +53,9 @@ def main():
                 initialize_devices.initialize_cryovac(com_port_idx_cryovac)
             except Exception as e:
                 com_port_idx_cryovac = None
-                print('Can not initialize the Cryovac')
+                print('Can not initialize the cryovac')
                 print(e)
+
 
         if conf['gauges'] != "off":
             if conf['COM_PORT_gauge_mc'] == "off":
@@ -86,9 +89,9 @@ def main():
             print('Gauges are off')
 
         if conf['camera'] == "off":
-            print('The camera is off')
+            print('The cameras is off')
         else:
-            # Cameras thread
+            # Create cameras thread
             try:
                 # Limits the amount of cameras used for grabbing.
                 # The bandwidth used by a FireWire camera device can be limited by adjusting the packet size.
@@ -131,16 +134,13 @@ def main():
         lock1 = threading.Lock()
         if conf['gauges'] != "off":
             # Thread for reading gauges
-            gauges_thread = threading.Thread(target=initialize_devices.gauges_update,
+            gauges_thread = threading.Thread(target=initialize_devices.state_update,
                                              args=(conf, lock1, com_port_idx_cryovac))
             gauges_thread.setDaemon(True)
             gauges_thread.start()
 
         app = QtWidgets.QApplication(sys.argv)
         # get display resolution
-        # screen_resolution = app.desktop().screenGeometry()
-        # width, height = screen_resolution.width(), screen_resolution.height()
-        # print('Screen size is:(%s,%s)' % (width, height))
         APT = QtWidgets.QMainWindow()
         lock = threading.Lock()
         if conf['camera'] != "off":

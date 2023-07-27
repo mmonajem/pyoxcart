@@ -1,12 +1,14 @@
-import numpy as np
 import h5py
+import numpy as np
 import pandas as pd
 import scipy.io
 
 # Local module and scripts
-from pyccapt.calibration.calibration_tools import logging_library
-
-logger = logging_library.logger_creator('data_loadcrop')
+from pyccapt.calibration.data_tools import ato_tools
+from pyccapt.calibration.data_tools import data_loadcrop
+from pyccapt.calibration.data_tools import data_tools
+from pyccapt.calibration.leap_tools import ccapt_tools
+from pyccapt.calibration.mc import mc_tools, tof_tools
 
 
 def read_hdf5(filename: "type: string - Path to hdf5(.h5) file",
@@ -38,21 +40,19 @@ def read_hdf5(filename: "type: string - Path to hdf5(.h5) file",
                         if key == 'dld' and item == 't':
                             dataset = dataset * TOFFACTOR
                         elif key == 'dld' and item == 'x':
-                            dataset = (dataset - XYBINSHIFT) * XYFACTOR
+                            dataset = (dataset - XYBINSHIFT) * XYFACTOR * 0.1  # to convert them from mm to cm
                         elif key == 'dld' and item == 'y':
-                            dataset = (dataset - XYBINSHIFT) * XYFACTOR
+                            dataset = (dataset - XYBINSHIFT) * XYFACTOR * 0.1  # to convert them from mm to cm
                     else:
                         dataset = dataset
                     dataframeStorage["{}/{}".format(key, item)] = dataset
 
             return dataframeStorage
     except FileNotFoundError as error:
-        logger.critical(error)
-        logger.critical("[*] HDF5 File could not be found")
+        print("[*] HDF5 File could not be found")
 
     except IndexError as error:
-        logger.critical(error)
-        logger.critical("[*] No Group keys could be found in HDF5 File")
+        print("[*] No Group keys could be found in HDF5 File")
 
 
 def read_hdf5_through_pandas(filename: "type:string - Path to hdf5(.h5) file") -> "type: dataframe - Pandas Dataframe":
@@ -69,8 +69,7 @@ def read_hdf5_through_pandas(filename: "type:string - Path to hdf5(.h5) file") -
         hdf5_file_response = pd.read_hdf(filename, mode='r')
         return hdf5_file_response
     except FileNotFoundError as error:
-        logger.info(error)
-        logger.critical("[*] HDF5 File could not be found")
+        print("[*] HDF5 File could not be found")
 
 
 def read_mat_files(filename: "type:string - Path to .mat file") -> " type: dict - Returns the content .mat file":
@@ -85,8 +84,7 @@ def read_mat_files(filename: "type:string - Path to .mat file") -> " type: dict 
         hdf5_file_response = scipy.io.loadmat(filename)
         return hdf5_file_response
     except FileNotFoundError as error:
-        logger.critical(error)
-        logger.critical("[*] Mat File could not be found")
+        print("[*] Mat File could not be found")
 
 
 def convert_mat_to_df(hdf5_file_response: "type: dict - content of .mat file"):
@@ -105,9 +103,9 @@ def convert_mat_to_df(hdf5_file_response: "type: dict - content of .mat file"):
     return pd_dataframe
 
 
-def store_df_to_hdf(filename: "type: string - name of hdf5 file",
-                    dataframe: "dataframe which is to be stored in h5 file",
-                    key: "DirectoryStructure/columnName of content"):
+def store_df_to_hdf(dataframe: "dataframe which is to be stored in h5 file",
+                    key: "DirectoryStructure/columnName of content",
+                    filename: "type: string - name of hdf5 file"):
     """
         This function stores dataframe to hdf5 file.
 
@@ -133,3 +131,166 @@ def store_df_to_csv(data, path):
     """
 
     data.to_csv(path, encoding='utf-8', index=False, sep=';')
+
+
+def remove_invalid_data(dld_group_storage, max_tof):
+    """
+    Removes the data with time-of-flight (TOF) values greater than max_tof or lower than 0.
+
+    Args:
+        dld_group_storage (pandas.DataFrame): DataFrame containing the DLD group storage data.
+        max_tof (float): Maximum allowable TOF value.
+
+    Returns:
+        None. The DataFrame is modified in-place.
+
+    """
+    # Create a mask for data with TOF values greater than max_tof
+    mask_1 = dld_group_storage['t (ns)'].to_numpy() > max_tof
+
+    mask_2 = (dld_group_storage['t (ns)'].to_numpy() < 0)
+    mask = np.logical_or(mask_1, mask_2)
+
+    # Calculate the number of data points over max_tof
+    num_over_max_tof = len(mask[mask])
+
+    # Remove data points with TOF values greater than max_tof
+    dld_group_storage.drop(np.where(mask)[0], inplace=True)
+
+    # Reset the index of the DataFrame
+    dld_group_storage.reset_index(inplace=True, drop=True)
+
+    # Print the number of data points over max_tof
+    print('The number of data over max_tof:', num_over_max_tof)
+
+    return dld_group_storage
+
+
+def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, csv=False):
+    """
+    save data in different formats
+
+    Args:
+        data (pandas.DataFrame): DataFrame containing the data.
+        vsriables (class): class containing the variables.
+        hdf (bool): save data as hdf5 file.
+        epos (bool): save data as epos file.
+        pos (bool): save data as pos file.
+        ato_6v (bool): save data as ato file.
+        csv (bool): save data as csv file.
+
+    Returns:
+        None. The DataFrame is modified in-place.
+
+    """
+    if hdf:
+        # save the dataset to hdf5 file
+        hierarchyName = 'df'
+        store_df_to_hdf(data, hierarchyName, variables.result_data_path + '//' + variables.result_data_name + '.h5')
+    if epos:
+        # save data as epos file
+        ccapt_tools.ccapt_to_epos(data, path=variables.result_path,
+                                  name=variables.result_data_name + '.epos')
+    if pos:
+        # save data in pos format
+        ccapt_tools.ccapt_to_pos(data, path=variables.result_path, name=variables.result_data_name + '.pos')
+    if ato_6v:
+        # save data as ato file in  ersion 6
+        ato_tools.ccapt_to_ato(data, path=variables.result_path, name=variables.result_data_name + '.ato')
+    if csv:
+        # save data in csv format
+        store_df_to_csv(data, variables.result_path + variables.result_data_name + '.csv')
+
+
+def load_data(dataset_path, tdc, mode='processed'):
+    """
+    save data in different formats
+
+    Args:
+        dataset_path (string): path to the dataset.
+        tdc (string): type of the dataset.
+
+    Returns:
+        data (pandas.DataFrame): DataFrame containing the data.
+
+    """
+    if tdc == 'leap_pos' or tdc == 'leap_epos':
+        if tdc == 'leap_epos':
+            data = ccapt_tools.epos_to_ccapt(dataset_path)
+        else:
+            print('The file has to be epos. With pos information this tutorial cannot be run')
+            data = ccapt_tools.pos_to_ccapt(dataset_path)
+    elif tdc == 'ato_v6':
+        data = ato_tools.ato_to_ccapt(dataset_path, moed='pyccapt')
+    elif (tdc == 'surface_concept' or tdc == 'roentdec') and mode == 'raw':
+        data = data_loadcrop.fetch_dataset_from_dld_grp(dataset_path, tdc)
+    elif (tdc == 'surface_concept' or tdc == 'roentdec') and mode == 'processed':
+        data = data_tools.read_hdf5_through_pandas(dataset_path)
+    return data
+
+
+def extract_data(data, variables, flightPathLength_d, t0_d, max_mc):
+    """
+    exctract data from the dataset
+
+    Args:
+        data (pandas.DataFrame): DataFrame containing the data.
+        variables (class): class containing the variables.
+        flightPathLength_d (float): flight path length in m.
+        t0_d (float): time of flight offset in ns.
+        max_mc (float): maximum time of flight in ns.
+    Returns:
+
+    """
+
+    variables.dld_high_voltage = data['high_voltage (V)'].to_numpy()
+    variables.dld_pulse = data['pulse'].to_numpy()
+    variables.dld_t = data['t (ns)'].to_numpy()
+    variables.dld_x_det = data['x_det (cm)'].to_numpy()
+    variables.dld_y_det = data['y_det (cm)'].to_numpy()
+    variables.mc = mc_tools.tof2mc(variables.dld_t, t0_d, variables.dld_high_voltage, variables.dld_x_det,
+                                   variables.dld_y_det, flightPathLength_d, V_pulse=variables.dld_pulse,
+                                   mode='dc_voltage')
+
+    # Calculate the maximum possible time of flight (TOF)
+    variables.max_tof = int(tof_tools.mc2tof(max_mc, 1000, 0, 0, flightPathLength_d))
+    variables.dld_t_calib = data['t (ns)'].to_numpy()
+    variables.dld_t_calib_backup = data['t (ns)'].to_numpy()
+    print('The maximum time of flight')
+    # ion_distance = np.sqrt(flightPathLength_d**2 + (variables.dld_x_det*10)**2 + (variables.dld_y_det*10)**2)
+    # ion_distance = flightPathLength_d / ion_distance
+    # variables.dld_t = variables.dld_t * ion_distance
+
+def extract_data(data, variables, flightPathLength_d, max_mc):
+    """
+    exctract data from the dataset
+
+    Args:
+        data (pandas.DataFrame): DataFrame containing the data.
+        variables (class): class containing the variables.
+        flightPathLength_d (float): flight path length in m.
+        t0_d (float): time of flight offset in ns.
+        max_mc (float): maximum time of flight in ns.
+    Returns:
+
+    """
+
+    variables.dld_high_voltage = data['high_voltage (V)'].to_numpy()
+    variables.dld_pulse = data['pulse'].to_numpy()
+    variables.dld_t = data['t (ns)'].to_numpy()
+    variables.dld_t_c = data['t_c (ns)'].to_numpy()
+    variables.dld_x_det = data['x_det (cm)'].to_numpy()
+    variables.dld_y_det = data['y_det (cm)'].to_numpy()
+    variables.mc = data['mc (Da)'].to_numpy()
+    variables.mc_c = data['mc_c (Da)'].to_numpy()
+
+    # Calculate the maximum possible time of flight (TOF)
+    variables.max_tof = int(tof_tools.mc2tof(max_mc, 1000, 0, 0, flightPathLength_d))
+    variables.dld_t_calib = data['t (ns)'].to_numpy()
+    variables.dld_t_calib_backup = data['t (ns)'].to_numpy()
+    variables.mc_calib = data['mc (Da)'].to_numpy()
+    variables.mc_calib_backup = data['mc (Da)'].to_numpy()
+    print('The maximum time of flight:', variables.max_tof)
+    # ion_distance = np.sqrt(flightPathLength_d**2 + (variables.dld_x_det*10)**2 + (variables.dld_y_det*10)**2)
+    # ion_distance = flightPathLength_d / ion_distance
+    # variables.dld_t = variables.dld_t * ion_distance

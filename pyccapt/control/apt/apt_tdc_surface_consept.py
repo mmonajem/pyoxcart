@@ -2,9 +2,9 @@
 This is the main script for controlling the experiment.
 It contains the main control loop of experiment.
 """
-
 import datetime
 import multiprocessing
+import os
 import threading
 import time
 from multiprocessing.queues import Queue
@@ -151,13 +151,17 @@ class APT_ADVANCE:
         response = ''
         # Read the response code after execution(command write).
         try:
-
             while self.com_port_v_dc.in_waiting > 0:
                 response = self.com_port_v_dc.readline()  # all characters received, read line till '\r\n'
         except Exception as error:
             if variables.log:
-                self.log_apt_tdc_surface_consept.error("Function - command_v_dc | error reading lines - > {}".format(error))
-        response  =  response.decode("utf-8")
+                self.log_apt_tdc_surface_consept.error(
+                    "Function - command_v_dc | error reading lines - > {}".format(error))
+        try:
+            response = response.decode("utf-8")
+        except Exception as error:
+            if variables.log:
+                self.log_apt_tdc_surface_consept.error("Function - command_v_dc | error decoding - > {}".format(error))
         if variables.log:
             self.log_apt_tdc_surface_consept.info("Function - command_v_dc | response - > {}".format(response))
 
@@ -576,14 +580,26 @@ def main(conf):
             raise
 
     if conf['v_dc'] != 'off':
-        # Initialize high voltage
-        experiment.initialize_v_dc()
-        logger.info('High voltage is initialized')
+        try:
+            # Initialize high voltage
+            experiment.initialize_v_dc()
+            logger.info('High voltage is initialized')
+        except Exception as e:
+            print('Can not initialize the high voltage')
+            print('Make the v_dc off in the config file or fix the error below')
+            print(e)
+            raise
 
     if conf['v_p'] != 'off':
-        # Initialize pulser
-        experiment.initialize_v_p()
-        logger.info('Pulser is initialized')
+        try:
+            # Initialize pulser
+            experiment.initialize_v_p()
+            logger.info('Pulser is initialized')
+        except Exception as e:
+            print('Can not initialize the pulser')
+            print('Make the v_p off in the config file or fix the error below')
+            print(e)
+            raise
 
     # start the timer for main experiment
     variables.specimen_voltage = variables.vdc_min
@@ -776,9 +792,10 @@ def main(conf):
     variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
     # Save new value of experiment counter
-    with open('./files/counter_oxcart.txt', 'w') as f:
-        f.write(str(variables.counter + 1))
-        logger.info('Experiment counter is increased')
+    if os.path.exists("./files/counter_experiments.txt"):
+        with open('./files/counter_experiments.txt', 'w') as f:
+            f.write(str(variables.counter + 1))
+            logger.info('Experiment counter is increased')
 
     # Adding results of the experiment to the log file
     logger.info('Total number of Ions is: %s' % variables.total_ions)
