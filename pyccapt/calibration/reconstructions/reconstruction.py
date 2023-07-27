@@ -4,7 +4,6 @@ import plotly
 import plotly.graph_objects as go
 
 # Local module and scripts
-from pyccapt.calibration.calibration_tools import share_variables
 from pyccapt.calibration.data_tools import data_loadcrop, selectors_data
 
 
@@ -133,13 +132,11 @@ def atom_probe_recons_Bas_et_al(detx, dety, hv, flight_path_length, kf, det_eff,
     return x * 1E9, y * 1E9, z * 1E9
 
 
-def reconstruction_plot(data, range_data, variables, element_percentage, rotary_fig_save, selected_area, figname):
+def reconstruction_plot(variables, element_percentage, rotary_fig_save, selected_area, figname):
     """
     Generate a 3D plot for atom probe reconstruction data.
 
     Args:
-        data (DataFrame): Atom probe reconstruction data.
-        range_data (DataFrame): Range data for different elements.
         variables (object): Variables object.
         element_percentage (str): Percentage of elements to display.
         rotary_fig_save (bool): Whether to save the rotary figure.
@@ -149,46 +146,48 @@ def reconstruction_plot(data, range_data, variables, element_percentage, rotary_
     Returns:
         None
     """
-    data_f = data.copy(deep=True)
 
     if selected_area:
-        data_f = data_f[
-            (data_f['x (nm)'] > variables.selected_x1) & (data_f['x (nm)'] < variables.selected_x2) &
-            (data_f['y (nm)'] > variables.selected_y1) & (data_f['y (nm)'] < variables.selected_y2) &
-            (data_f['z (nm)'] > variables.selected_z1) & (data_f['z (nm)'] < variables.selected_z2)
-            ]
-        data_f.reset_index(inplace=True, drop=True)
+        mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
+                       (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
+                       (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+    else:
+        mask_spacial = np.ones(len(variables.dld_t), dtype=bool)
 
     element_percentage = element_percentage.replace('[', '').replace(']', '').split(',')
 
     fig = go.Figure()
 
-    phases = range_data['element'].tolist()
-    colors = range_data['color'].tolist()
-    mc_low = range_data['mc_low'].tolist()
-    mc_up = range_data['mc_up'].tolist()
-    charge = range_data['charge'].tolist()
-    isotope = range_data['isotope'].tolist()
+    colors = variables.range_data['color'].tolist()
+    mc_low = variables.range_data['mc_low'].tolist()
+    mc_up = variables.range_data['mc_up'].tolist()
+    ion = variables.range_data['ion'].tolist()
 
-    for index, elemen in enumerate(phases):
-        df_s = data_f.copy(deep=True)
-        df_s = df_s[(df_s['mc_c (Da)'] > mc_low[index]) & (df_s['mc_c (Da)'] < mc_up[index])]
-        df_s.reset_index(inplace=True, drop=True)
+    for index, elemen in enumerate(ion):
+        mask = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
+        mask = mask & mask_spacial
+        size = int(len(mask[mask == True]) * float(element_percentage[index]))
+        # Find indices where the original mask is True
+        true_indices = np.where(mask)[0]
+        # Randomly choose 100 indices from the true indices
+        random_true_indices = np.random.choice(true_indices, size=size, replace=False)
+        # Create a new mask with the same length as the original, initialized with False
+        new_mask = np.full(len(variables.dld_t), False)
+        # Set the selected indices to True in the new mask
+        new_mask[random_true_indices] = True
+        # Apply the new mask to the original mask
+        mask = mask & new_mask
 
-        remove_n = int(len(df_s) - (len(df_s) * float(element_percentage[index])))
-        drop_indices = np.random.choice(df_s.index, remove_n, replace=False)
-        df_subset = df_s.drop(drop_indices)
-
-        if phases[index] == 'unranged':
+        if ion[index] == 'unranged':
             name_element = 'unranged'
         else:
-            name_element = r'${}^{%s}%s^{%s+}$' % (isotope[index], phases[index], charge[index])
+            name_element = '%s' % ion[index]
 
         fig.add_trace(
             go.Scatter3d(
-                x=df_subset['x (nm)'],
-                y=df_subset['y (nm)'],
-                z=df_subset['z (nm)'],
+                x=variables.x[mask],
+                y=variables.y[mask],
+                z=variables.z[mask],
                 mode='markers',
                 name=name_element,
                 showlegend=True,
@@ -200,6 +199,32 @@ def reconstruction_plot(data, range_data, variables, element_percentage, rotary_
             )
         )
 
+    # Draw a edge of cube around the 3D plot in blue
+    x, y, z = variables.x[mask], variables.y[mask], variables.z[mask]
+    x_range = [min(x), max(x)]
+    y_range = [min(y), max(y)]
+    z_range = [min(z), max(z)]
+
+    x_corner = [x_range[0], x_range[0], x_range[0], x_range[0], x_range[1], x_range[1], x_range[1], x_range[1]]
+    y_corner = [y_range[0], y_range[0], y_range[1], y_range[1], y_range[0], y_range[0], y_range[1], y_range[1]]
+    z_corner = [z_range[0], z_range[1], z_range[0], z_range[1], z_range[0], z_range[1], z_range[0], z_range[1]]
+
+    edges = [(0, 1), (1, 5), (5, 4), (4, 0),  # Bottom edges
+             (2, 3), (3, 7), (7, 6), (6, 2),  # Top edges
+             (0, 2), (1, 3), (5, 7), (4, 6)]  # Vertical edges
+
+    for edge in edges:
+        fig.add_trace(
+            go.Scatter3d(
+                x=[x_corner[edge[0]], x_corner[edge[1]]],
+                y=[y_corner[edge[0]], y_corner[edge[1]]],
+                z=[z_corner[edge[0]], z_corner[edge[1]]],
+                mode='lines',
+                line=dict(color='black', width=2),
+                showlegend=False,
+                hoverinfo='none'
+            )
+        )
     fig.update_scenes(
         xaxis_title="x (nm)",
         yaxis_title="y (nm)",
@@ -213,7 +238,7 @@ def reconstruction_plot(data, range_data, variables, element_percentage, rotary_
     )
 
     if rotary_fig_save:
-        rotary_fig(fig, figname)
+        rotary_fig(fig, variables, figname)
 
     config = dict(
         {
@@ -333,6 +358,7 @@ def rotary_fig(fig1, variables, figname):
         show_link=True,
         auto_open=False
     )
+    fig.show()
 
 
 def scatter_plot(data, range_data, variables, element_percentage, selected_area, x_or_y, figname):
@@ -398,7 +424,65 @@ def scatter_plot(data, range_data, variables, element_percentage, selected_area,
     plt.show()
 
 
-def heatmap(data, range_data, variables, element_percentage, save):
+def projection(variables, element_percentage, selected_area, x_or_y, figname):
+    ax = plt.figure().add_subplot(111)
+
+    ions = variables.range_data['ion'].tolist()
+    colors = variables.range_data['color'].tolist()
+    mc_low = variables.range_data['mc_low'].tolist()
+    mc_up = variables.range_data['mc_up'].tolist()
+    if selected_area:
+        mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
+                       (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
+                       (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+    else:
+        mask_spacial = np.ones(len(variables.dld_t), dtype=bool)
+
+    element_percentage = element_percentage.replace('[', '')
+    element_percentage = element_percentage.replace(']', '')
+    element_percentage = element_percentage.split(',')
+
+    for index, elemen in enumerate(ions):
+        mask = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
+        mask = mask & mask_spacial
+        size = int(len(mask[mask == True]) * float(element_percentage[index]))
+        # Find indices where the original mask is True
+        true_indices = np.where(mask)[0]
+        # Randomly choose 100 indices from the true indices
+        random_true_indices = np.random.choice(true_indices, size=size, replace=False)
+        # Create a new mask with the same length as the original, initialized with False
+        new_mask = np.full(len(variables.dld_t), False)
+        # Set the selected indices to True in the new mask
+        new_mask[random_true_indices] = True
+        # Apply the new mask to the original mask
+        mask = mask & new_mask
+        if ions[index] == 'unranged':
+            name_element = 'unranged'
+        else:
+            name_element = '%s' % ions[index]
+        if x_or_y == 'x':
+            ax.scatter(variables.x[mask], variables.z[mask], s=2, label=name_element, color=colors[index])
+        elif x_or_y == 'y':
+            ax.scatter(variables.y[mask], variables.z[mask], s=2, label=name_element)
+
+    if not selected_area:
+        data_loadcrop.rectangle_box_selector(ax, variables)
+        plt.connect('key_press_event', selectors_data.toggle_selector)
+    ax.xaxis.tick_top()
+    ax.invert_yaxis()
+    if x_or_y == 'x':
+        ax.set_xlabel('X (nm)')
+    elif x_or_y == 'y':
+        ax.set_xlabel('Y (nm)')
+    ax.xaxis.set_label_position('top')
+    ax.set_ylabel('Z (nm)')
+    plt.legend(loc='upper right')
+
+    plt.savefig(variables.result_path + '\\projection_{fn}.png'.format(fn=figname))
+    plt.show()
+
+
+def heatmap(variables, selected_area, element_percentage, save):
     """
     Generate a heatmap based on the provided data.
 
@@ -414,32 +498,43 @@ def heatmap(data, range_data, variables, element_percentage, save):
     """
     ax = plt.figure().add_subplot(111)
 
-    phases = range_data['element'].tolist()
-    colors = range_data['color'].tolist()
-    mc_low = range_data['mc_low'].tolist()
-    mc_up = range_data['mc_up'].tolist()
-    charge = range_data['charge'].tolist()
-    isotope = range_data['isotope'].tolist()
-    mc = data['mc_c (Da)']
+    if selected_area:
+        mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
+                       (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
+                       (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+    else:
+        mask_spacial = np.ones(len(variables.dld_t), dtype=bool)
+
+    ions = variables.range_data['ion'].tolist()
+    colors = variables.range_data['color'].tolist()
+    mc_low = variables.range_data['mc_low'].tolist()
+    mc_up = variables.range_data['mc_up'].tolist()
 
     element_percentage = element_percentage.replace('[', '')
     element_percentage = element_percentage.replace(']', '')
     element_percentage = element_percentage.split(',')
 
-    for index, elemen in enumerate(phases):
-        df_s = data.copy(deep=True)
-        df_s = df_s[(df_s['mc_c (Da)'] > mc_low[index]) & (df_s['mc_c (Da)'] < mc_up[index])]
-        df_s.reset_index(inplace=True, drop=True)
-        remove_n = int(len(df_s) - (len(df_s) * float(element_percentage[index])))
-        drop_indices = np.random.choice(df_s.index, remove_n, replace=False)
-        df_subset = df_s.drop(drop_indices)
-        if phases[index] == 'unranged':
+    for index, elemen in enumerate(ions):
+        mask = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
+        mask = mask & mask_spacial
+        size = int(len(mask[mask == True]) * float(element_percentage[index]))
+        # Find indices where the original mask is True
+        true_indices = np.where(mask)[0]
+        # Randomly choose 100 indices from the true indices
+        random_true_indices = np.random.choice(true_indices, size=size, replace=False)
+        # Create a new mask with the same length as the original, initialized with False
+        new_mask = np.full(len(variables.dld_t), False)
+        # Set the selected indices to True in the new mask
+        new_mask[random_true_indices] = True
+        # Apply the new mask to the original mask
+        mask = mask & new_mask
+        if ions[index] == 'unranged':
             name_element = 'unranged'
         else:
-            name_element = r'${}^{%s}%s^{%s+}$' % (isotope[index], phases[index], charge[index])
-        xx = df_subset['x_det (cm)'].to_numpy() * 10
-        yy = df_subset['y_det (cm)'].to_numpy() * 10
-        ax.scatter(xx, yy, s=2, label=name_element, color=colors[index])
+            name_element = '%s' % ions[index]
+
+        ax.scatter(variables.dld_x_det[mask] * 10, variables.dld_y_det[mask] * 10, s=2, label=name_element,
+                   color=colors[index])
 
     ax.set_xlabel("x [mm]", color="red", fontsize=10)
     ax.set_ylabel("y [mm]", color="red", fontsize=10)
@@ -450,3 +545,42 @@ def heatmap(data, range_data, variables, element_percentage, save):
         plt.savefig(variables.result_path + "heatmap.png", format="png", dpi=600)
         plt.savefig(variables.result_path + "heatmap.svg", format="svg", dpi=600)
     plt.show()
+
+
+def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, field_evap,
+                               avg_dens, flight_path_length, rotary_fig_save, selected_are, mode, figname):
+    """
+    Calculate the x, y, z coordinates of the atoms and plot them.
+
+        Args:
+            variables (object): The variables object.
+            element_percentage (str): Element percentage information.
+            kf (float): The kinetic energy of the ions.
+            det_eff (float): The detector efficiency.
+            icf (float): The image compression factor.
+            field_evap (float): The field evaporation efficiency.
+            avg_dens (float): The average density of the atoms.
+            flight_path_length (float): The flight path length.
+            rotary_fig_save (bool): True to save the rotary plot, False to display it.
+            selected_are (bool): True to use the selected area, False to use the full area.
+            mode (str): The reconstruction mode.
+            figname (str): The name of the figure.
+
+        Returns:
+            None
+
+    """
+    dld_highVoltage = variables.dld_high_voltage
+    dld_x = variables.dld_x_det
+    dld_y = variables.dld_y_det
+    if mode == 'Gault':
+        px, py, pz = atom_probe_recons_from_detector_Gault_et_al(dld_x, dld_y, dld_highVoltage,
+                                                                 flight_path_length, kf, det_eff, icf,
+                                                                 field_evap, avg_dens)
+    elif mode == 'Bas':
+        px, py, pz = atom_probe_recons_Bas_et_al(dld_x, dld_y, dld_highVoltage, flight_path_length, kf, det_eff,
+                                                 icf, field_evap, avg_dens)
+    variables.x = px
+    variables.y = py
+    variables.z = pz
+    reconstruction_plot(variables, element_percentage, rotary_fig_save, selected_are, figname)

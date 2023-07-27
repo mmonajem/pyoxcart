@@ -505,7 +505,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
 
 def plot_fdm(x, y, variables, save, bins_s, index_fig, figure_size=(5, 4)):
     """
-    Plot the Frequency Distribution Map (FDM) based on the given x and y data.
+    Plot the File Desorption Map (FDM) based on the given x and y data and tof vs high voltage and x_det, and y_det.
 
     Args:
         x (array-like): The x-coordinates of the data points.
@@ -533,3 +533,68 @@ def plot_fdm(x, y, variables, save, bins_s, index_fig, figure_size=(5, 4)):
         plt.savefig(variables.result_path + "fdm_%s.png" % index_fig, format="png", dpi=600)
         plt.savefig(variables.result_path + "fdm_%s.svg" % index_fig, format="svg", dpi=600)
     plt.show()
+
+
+def plot_selected_statistic(variables, bin_fdm, index_fig, calibration_mode, save, fig_size=(5, 4)):
+    """
+    Plot the selected statistic based on the selected peak.
+
+        Args:
+            variables (object): The variables object.
+            bin_fdm (int or array-like): The number of bins or bin edges for histogram2d.
+            index_fig (int): The index of the figure.
+            calibration_mode (str): The calibration mode.
+            save (bool): Flag indicating whether to save the plot.
+            fig_size (tuple, optional): The size of the figure in inches (width, height)
+
+        Return:
+            None
+    """
+    if variables.selected_x1 == 0 or variables.selected_x2 == 0:
+        print('Please first select a peak')
+    else:
+        print('Selected tof are: (%s, %s)' % (variables.selected_x1, variables.selected_x2))
+        mask_temporal = np.logical_and((variables.dld_t_calib > variables.selected_x1),
+                                       (variables.dld_t_calib < variables.selected_x2))
+        x = variables.dld_x_det[mask_temporal]
+        y = variables.dld_y_det[mask_temporal]
+        dld_high_voltage = variables.dld_high_voltage[mask_temporal]
+        t = variables.dld_t_calib[mask_temporal]
+        bins = [bin_fdm, bin_fdm]
+
+        plot_fdm(x, y, variables, save, bins, index_fig)
+
+        fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
+        mask = np.random.randint(0, len(x), 1000)
+        plt.scatter(dld_high_voltage[mask], t[mask], color="blue", label=r"$t$", s=1)
+        if calibration_mode == 'tof':
+            ax1.set_ylabel("Time of Flight (ns)", fontsize=10)
+            label = 'tof'
+        elif calibration_mode == 'mc':
+            ax1.set_ylabel("mc (Da)", fontsize=10)
+            label = 'mc'
+        ax1.set_ylabel(label, fontsize=10)
+        ax1.set_xlabel("Voltage (V)", fontsize=10)
+        plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
+        if save:
+            plt.savefig(variables.result_path + "v_t_%s.png" % index_fig, format="png", dpi=600)
+            plt.savefig(variables.result_path + "v_t_%s.svg" % index_fig, format="svg", dpi=600)
+        plt.show()
+        fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
+        plt.scatter(x[mask], t[mask], color="blue", label=r"$t$", s=1)
+        ax1.set_xlabel(r"$X_{det} (cm)$", fontsize=10)
+        ax1.set_ylabel(label, fontsize=10)
+        plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
+        if save:
+            plt.savefig(variables.result_path + "x_t_%s.png" % index_fig, format="png", dpi=600)
+            plt.savefig(variables.result_path + "x_t_%s.svg" % index_fig, format="svg", dpi=600)
+        plt.show()
+        fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
+        plt.scatter(x[mask], t[mask], color="blue", label=r"$t$", s=1)
+        ax1.set_xlabel(r"$Y_{det} (cm)$", fontsize=10)
+        ax1.set_ylabel(label, fontsize=10)
+        plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
+        if save:
+            plt.savefig(variables.result_path + "y_t_%s.png" % index_fig, format="png", dpi=600)
+            plt.savefig(variables.result_path + "y_t_%s.svg" % index_fig, format="svg", dpi=600)
+        plt.show()

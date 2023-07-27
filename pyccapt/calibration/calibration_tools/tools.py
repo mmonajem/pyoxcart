@@ -13,10 +13,10 @@ from pyccapt.calibration.data_tools import plot_vline_draw
 from pyccapt.calibration.data_tools import selectors_data
 
 
-def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False, ranging=False,
+def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False, ranging=False, hist_color_range=False,
               log=True, mode='count', percent=50, peaks_find=True, peaks_find_plot=False, plot=False, prominence=50,
               distance=None, h_line=False, selector='None', fast_hist=True, fig_name=None, text_loc='right',
-              peak_val_plot=True, fig_size=(9, 5), background={'calculation': False}):
+              fig_size=(9, 5), background={'calculation': False}):
     """
     Generate a histogram plot with optional peak finding and background calculation.
 
@@ -27,6 +27,7 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
         range_data (optional, array-like): Range data.
         adjust_label (bool): Flag to adjust overlapping peak labels.
         ranging (bool): Flag to enable ranging.
+        hist_color_range (bool): Flag to enable histogram color ranging.
         log (bool): Flag to enable logarithmic y-axis scale.
         mode (str): Mode for histogram calculation ('count' or 'normalised').
         percent (int): Percentage value for peak width calculation.
@@ -40,7 +41,6 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
         fast_hist (bool): Flag to enable fast histogram calculation.
         fig_name (optional, str): Name of the figure file to save.
         text_loc (str): Location of the text annotation ('left' or 'right').
-        peak_val_plot (bool): Flag to enable peak value plot.
         fig_size (tuple): Size of the figure.
         background (dict): Background calculation options.
 
@@ -59,14 +59,15 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
         steps = 'bar'
 
     if mode == 'count':
-        # y, x = np.histogram(mc_tof, bins=bins, log=log)
-        y, x, _ = plt.hist(mc_tof, bins=bins, log=log, histtype=steps)
+        y, x = np.histogram(mc_tof, bins=bins)
+        # y = np.log(y)
     elif mode == 'normalised':
         # calculate as counts/(Da * totalCts) so that mass spectra with different
         # count numbers are comparable
         mc_tof = (mc_tof / bin) / len(mc_tof)
         # y, x = np.histogram(mc_tof, bins=bins)
-        y, x, _ = plt.hist(mc_tof, bins=bins, log=log, histtype=steps)
+        y, x = np.histogram(mc_tof, bins=bins)
+        # y = np.log(y)
         # med = median(y);
 
     try:
@@ -82,7 +83,7 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
 
     if plot:
         fig1, ax1 = plt.subplots(figsize=fig_size)
-        if ranging:
+        if ranging and hist_color_range:
             colors = range_data['color'].tolist()
             mc_low = range_data['mc_low'].tolist()
             mc_up = range_data['mc_up'].tolist()
@@ -198,38 +199,34 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
                 ax1.text(.98, .95, txt, va='top', ma='left', transform=ax1.transAxes, bbox=props, fontsize=10, alpha=1,
                          horizontalalignment='right', verticalalignment='top')
 
-            ax1.tick_params(axis='both', which='major', labelsize=12)
+            ax1.tick_params(axis='both', which='major', labelsize=10)
             ax1.tick_params(axis='both', which='minor', labelsize=10)
 
 
             annotes = []
             texts = []
-            if peak_val_plot:
+            if peaks_find_plot:
                 for i in range(len(peaks)):
-                    if peaks_find_plot:
-                        if ranging:
-                            ion = range_data['ion'].tolist()
-                            charge = range_data['charge'].tolist()
-                            isotope = range_data['isotope'].tolist()
-                            name_element = r'${}^{%s}%s^{%s+}$' % (isotope[i], ion[i], charge[i])
-                            texts.append(
-                                plt.text(x[peaks][i], y[peaks][i], name_element,
-                                         color='r', size=7,
-                                         alpha=1))
+                    if ranging:
+                        ion = range_data['ion'].tolist()
+                        x_peak_loc = range_data['mc'].tolist()
+                        y_peak_loc = range_data['peak_count'].tolist()
+                        texts.append(plt.text(x_peak_loc[i], y_peak_loc[i], r'%s' % ion[i], color='black', size=10,
+                                              alpha=1))
+                    else:
+                        if selector == 'range':
+                            if i in variables.peaks_idx:
+                                texts.append(plt.text(x[peaks][i], y[peaks][i], '%s' % '{:.2f}'.format(x[peaks][i]),
+                                                      color='black',
+                                                      size=10, alpha=1))
                         else:
-                            if selector == 'range':
-                                if i in variables.peaks_idx:
-                                    texts.append(plt.text(x[peaks][i], y[peaks][i], '%s' % '{:.2f}'.format(x[peaks][i]),
-                                                          color='r',
-                                                          size=7, alpha=1))
-                            else:
-                                texts.append(
-                                    plt.text(x[peaks][i], y[peaks][i], '%s' % '{:.2f}'.format(x[peaks][i]), color='r',
-                                             size=7, alpha=1))
+                            texts.append(
+                                plt.text(x[peaks][i], y[peaks][i], '%s' % '{:.2f}'.format(x[peaks][i]), color='black',
+                                         size=10, alpha=1))
 
-                        if h_line:
-                            for i in range(len(variables.h_line_pos)):
-                                plt.axvline(x=variables.h_line_pos[i], color='b', linestyle='--', linewidth=2)
+                    if h_line:
+                        for i in range(len(variables.h_line_pos)):
+                            plt.axvline(x=variables.h_line_pos[i], color='b', linestyle='--', linewidth=2)
                     annotes.append(str(i + 1))
             if adjust_label:
                 adjust_text(texts, arrowprops=dict(arrowstyle='-', color='red', lw=0.5))
@@ -259,7 +256,7 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
             elif label == 'tof':
                 plt.savefig(variables.result_path + "//tof_%s.svg" % fig_name, format="svg", dpi=300)
                 plt.savefig(variables.result_path + "//tof_%s.png" % fig_name, format="png", dpi=300)
-        if ranging:
+        if ranging and hist_color_range:
             plt.legend(loc='center right')
 
         plt.show()
@@ -283,6 +280,7 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
         index_max_ini = np.argmax(y_peaks)
         variables.max_peak = x_peaks[index_max_ini]
         variables.peak = x_peaks
+        variables.peak_y = y_peaks
     else:
         x_peaks = None
         y_peaks = None

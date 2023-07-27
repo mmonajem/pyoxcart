@@ -11,7 +11,6 @@ class Variables:
         selected_x_fdm (int): The value of selected_x_fdm.
         selected_y_fdm (int): The value of selected_y_fdm.
         roi_fdm (int): The value of roi_fdm.
-        selected_calculated (bool): Indicates if selected values are calculated.
         selected_x1 (int): The value of selected_x1.
         selected_x2 (int): The value of selected_x2.
         selected_y1 (int): The value of selected_y1.
@@ -59,7 +58,6 @@ class Variables:
         self.selected_y_fdm = 0
         self.roi_fdm = 0
 
-        self.selected_calculated = False
         self.selected_x1 = 0
         self.selected_x2 = 0
         self.selected_y1 = 0
@@ -85,6 +83,9 @@ class Variables:
         self.dld_t_c = np.zeros(0)
         self.dld_x_det = np.zeros(0)
         self.dld_y_det = np.zeros(0)
+        self.x = np.zeros(0)
+        self.y = np.zeros(0)
+        self.z = np.zeros(0)
         self.dld_high_voltage = np.zeros(0)
         self.dld_t_calib = np.zeros(0)
         self.dld_t_calib_backup = np.zeros(0)
@@ -99,7 +100,7 @@ class Variables:
         self.peak_width = []
 
         # Create an empty DataFrame with the specified columns
-        self.range_data = pd.DataFrame(columns=['ion', 'mass', 'mc', 'mc_low', 'mc_up', 'color', 'element', 'complex',
-                                                'isotope', 'charge'])
+        self.range_data = pd.DataFrame(columns=['ion', 'mass', 'mc', 'mc_low', 'mc_up', 'color', 'peak_count', 'element'
+            , 'complex', 'isotope', 'charge'])
 
         self.range_data_backup = None

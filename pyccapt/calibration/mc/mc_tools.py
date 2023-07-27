@@ -1,7 +1,5 @@
 import numpy as np
 
-from pyccapt.calibration.calibration_tools import logging_library
-
 
 def tof2mcSimple(t: int, t0: int, V: float, xDet: int, yDet: int, flightPathLength: int) -> float:
     """
@@ -19,7 +17,6 @@ def tof2mcSimple(t: int, t0: int, V: float, xDet: int, yDet: int, flightPathLeng
     Returns:
         mc: Mass-to-charge ratio (unit: Dalton)
     """
-    logger = logging_library.logger_creator('data_loadcrop')
 
     try:
         t = t - t0  # t0 correction
@@ -38,8 +35,8 @@ def tof2mcSimple(t: int, t0: int, V: float, xDet: int, yDet: int, flightPathLeng
 
         return mc
     except TypeError as error:
-        logger.info(error)
-        logger.critical("Data type of the passed argument is incorrect")
+        print(error)
+        return None
 
 
 def tof2mc(t: int, t0: int, V: float, xDet: int, yDet: int,
@@ -61,7 +58,6 @@ def tof2mc(t: int, t0: int, V: float, xDet: int, yDet: int,
     Returns:
         mc: Mass-to-charge ratio (unit: Dalton)
     """
-    logger = logging_library.logger_creator('data_loadcrop')
 
     try:
         # cThe value of α is greater than one, accounting for the fact thatThe value of a
@@ -96,8 +92,8 @@ def tof2mc(t: int, t0: int, V: float, xDet: int, yDet: int,
 
         return mc
     except TypeError as error:
-        logger.critical(error)
-        logger.critical("Data type of the passed argument is incorrect")
+        print(error)
+        return None
     except UnboundLocalError as error:
-        logger.critical(error)
-        logger.critical("Enter correct mode type")
+        print(error)
+        return None
