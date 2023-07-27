@@ -3,25 +3,24 @@ This is the main script for controlling the experiment.
 It contains the main control loop of experiment.
 """
 
-import copy
+import time
+import os
 import datetime
 import multiprocessing
-import os
-import shutil
-import threading
-import time
 from multiprocessing.queues import Queue
-
+import threading
 import numpy as np
+import copy
+import shutil
 import serial.tools.list_ports
 
-from pyccapt.calibration.calibration_tools import logging_library, variables
-from pyccapt.control.control_tools import experiment_statistics
-from pyccapt.control.control_tools import variables, hdf5_creator, loggi
-from pyccapt.control.devices import email_send
-from pyccapt.control.devices import initialize_devices
 # Local module and scripts
 from pyccapt.control.tdc_roentdec import tdc_roentdec
+from pyccapt.control.devices import email_send
+from pyccapt.control.devices import initialize_devices
+from pyccapt.control.control_tools import variables, hdf5_creator, loggi
+from pyccapt.control.control_tools import experiment_statistics
+from pyccapt.calibration.calibration_tools import logging_library, share_variables
 
 logger = logging_library.logger_creator('data_loadcrop')
 
@@ -235,6 +234,7 @@ class APT_SIMPLE:
             Does not return anything
 
         """
+
         if variables.counter_source == 'TDC':
             variables.total_ions = len(variables.x)
 
