@@ -229,38 +229,6 @@ def load_data(dataset_path, tdc, mode='processed'):
     return data
 
 
-def extract_data(data, variables, flightPathLength_d, t0_d, max_mc):
-    """
-    exctract data from the dataset
-
-    Args:
-        data (pandas.DataFrame): DataFrame containing the data.
-        variables (class): class containing the variables.
-        flightPathLength_d (float): flight path length in m.
-        t0_d (float): time of flight offset in ns.
-        max_mc (float): maximum time of flight in ns.
-    Returns:
-
-    """
-
-    variables.dld_high_voltage = data['high_voltage (V)'].to_numpy()
-    variables.dld_pulse = data['pulse'].to_numpy()
-    variables.dld_t = data['t (ns)'].to_numpy()
-    variables.dld_x_det = data['x_det (cm)'].to_numpy()
-    variables.dld_y_det = data['y_det (cm)'].to_numpy()
-    variables.mc = mc_tools.tof2mc(variables.dld_t, t0_d, variables.dld_high_voltage, variables.dld_x_det,
-                                   variables.dld_y_det, flightPathLength_d, V_pulse=variables.dld_pulse,
-                                   mode='dc_voltage')
-
-    # Calculate the maximum possible time of flight (TOF)
-    variables.max_tof = int(tof_tools.mc2tof(max_mc, 1000, 0, 0, flightPathLength_d))
-    variables.dld_t_calib = data['t (ns)'].to_numpy()
-    variables.dld_t_calib_backup = data['t (ns)'].to_numpy()
-    print('The maximum time of flight')
-    # ion_distance = np.sqrt(flightPathLength_d**2 + (variables.dld_x_det*10)**2 + (variables.dld_y_det*10)**2)
-    # ion_distance = flightPathLength_d / ion_distance
-    # variables.dld_t = variables.dld_t * ion_distance
-
 def extract_data(data, variables, flightPathLength_d, max_mc):
     """
     exctract data from the dataset
