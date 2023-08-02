@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>Form</class>
+    <widget class="QWidget" name="Form">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>626</width>
+                <height>670</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>Form</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="0">
+                <layout class="QGridLayout" name="gridLayout">
+                    <item row="0" column="1">
+                        <widget class="QLabel" name="label_201">
+                            <property name="font">
+                                <font>
+                                    <bold>true</bold>
+                                </font>
+                            </property>
+                            <property name="text">
+                                <string>Detection Rate</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="1" column="0">
+                        <widget class="QGraphicsView" name="vdc_time">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                    <horstretch>1</horstretch>
+                                    <verstretch>1</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>300</width>
+                                    <height>300</height>
+                                </size>
+                            </property>
+                            <property name="styleSheet">
+                                <string notr="true">QWidget{
+                                    border: 2px solid gray;
+                                    }
+                                </string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="1" column="1">
+                        <widget class="QGraphicsView" name="detection_rate_viz">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                    <horstretch>1</horstretch>
+                                    <verstretch>1</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>300</width>
+                                    <height>300</height>
+                                </size>
+                            </property>
+                            <property name="styleSheet">
+                                <string notr="true">QWidget{
+                                    border: 2px solid gray;
+                                    }
+                                </string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="2" column="0">
+                        <widget class="QLabel" name="label_206">
+                            <property name="font">
+                                <font>
+                                    <bold>true</bold>
+                                </font>
+                            </property>
+                            <property name="text">
+                                <string>Detector Heatmap</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="2" column="1">
+                        <widget class="QLabel" name="label_207">
+                            <property name="font">
+                                <font>
+                                    <bold>true</bold>
+                                </font>
+                            </property>
+                            <property name="text">
+                                <string>TOF</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="3" column="0">
+                        <widget class="QGraphicsView" name="visualization">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                    <horstretch>1</horstretch>
+                                    <verstretch>1</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>300</width>
+                                    <height>300</height>
+                                </size>
+                            </property>
+                            <property name="styleSheet">
+                                <string notr="true">QWidget{
+                                    border: 2px solid gray;
+                                    }
+                                </string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="3" column="1">
+                        <widget class="QGraphicsView" name="histogram">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                    <horstretch>1</horstretch>
+                                    <verstretch>1</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>300</width>
+                                    <height>300</height>
+                                </size>
+                            </property>
+                            <property name="styleSheet">
+                                <string notr="true">QWidget{
+                                    border: 2px solid gray;
+                                    }
+                                </string>
+                            </property>
+                            <property name="frameShape">
+                                <enum>QFrame::NoFrame</enum>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="0" column="0">
+                        <widget class="QLabel" name="label_200">
+                            <property name="font">
+                                <font>
+                                    <bold>true</bold>
+                                </font>
+                            </property>
+                            <property name="text">
+                                <string>Voltage</string>
+                            </property>
+                        </widget>
+                    </item>
+                </layout>
+            </item>
+        </layout>
+    </widget>
+    <resources/>
+    <connections/>
+</ui>

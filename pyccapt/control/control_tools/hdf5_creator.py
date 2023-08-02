@@ -24,7 +24,7 @@ def hdf_creator_oxcart(time_counter, time_ex_s, time_ex_m, time_ex_h):
 
     with h5py.File(variables.path + '\\data_%s.h5' % variables.exp_name, "w") as f:
         f.create_dataset("apt/high_voltage", data=variables.main_v_dc, dtype='f')
-        f.create_dataset("apt/pulse_voltage", data=variables.main_v_p, dtype='f')
+        f.create_dataset("apt/pulse", data=variables.main_v_p, dtype='f')
         f.create_dataset("apt/num_events", data=variables.main_counter, dtype='i')
         f.create_dataset('apt/temperature', data=variables.main_temperature, dtype='f')
         f.create_dataset('apt/main_chamber_vacuum', data=variables.main_chamber_vacuum, dtype='f')
@@ -79,7 +79,7 @@ def hdf_creator_physic(time_counter, time_ex_s, time_ex_m, time_ex_h):
             f.create_dataset("dld/t", data=variables.t, dtype='i')
             f.create_dataset("dld/AbsoluteTimeStamp", data=variables.time_stamp, dtype='i')
             f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld, dtype='f')
-            f.create_dataset("dld/laser_intensity", data=variables.laser_intensity, dtype='f')
+            f.create_dataset("dld/pulse", data=variables.laser_intensity, dtype='f')
 
             f.create_dataset("tdc/ch0", data=variables.ch0, dtype='i')
             f.create_dataset("tdc/ch1", data=variables.ch1, dtype='i')

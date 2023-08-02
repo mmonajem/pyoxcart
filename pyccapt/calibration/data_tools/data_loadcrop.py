@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import colors
 from matplotlib.patches import Circle, Rectangle
-from matplotlib.widgets import RectangleSelector, EllipseSelector
+from matplotlib.widgets import RectangleSelector
 
 from pyccapt.calibration.calibration_tools import logging_library
 from pyccapt.calibration.data_tools import data_tools
@@ -266,15 +266,25 @@ def elliptical_shape_selector(axisObject, figureObject, variables):
     Returns:
         None
     """
-    selectors_data.toggle_selector.ES = EllipseSelector(axisObject,
-                                                        lambda eclick, erelease: selectors_data.onselect(eclick,
-                                                                                                         erelease,
-                                                                                                         variables),
-                                                        useblit=True,
-                                                        button=[1, 3],
-                                                        minspanx=1, minspany=1,
-                                                        spancoords='pixels',
-                                                        interactive=True)
+    # selectors_data.toggle_selector.ES = EllipseSelector(axisObject,
+    #                                                     lambda eclick, erelease: selectors_data.onselect(eclick,
+    #                                                                                                      erelease,
+    #                                                                                                      variables),
+    #                                                     useblit=True,
+    #                                                     button=[1, 3],
+    #                                                     minspanx=1, minspany=1,
+    #                                                     spancoords='pixels',
+    #                                                     interactive=True)
+    selectors_data.toggle_selector.ES = selectors_data.CircleSelector(axisObject,
+                                                                      lambda eclick, erelease: selectors_data.onselect(
+                                                                          eclick,
+                                                                          erelease,
+                                                                          variables),
+                                                                      useblit=True,
+                                                                      button=[1, 3],
+                                                                      minspanx=1, minspany=1,
+                                                                      spancoords='pixels',
+                                                                      interactive=True)
     figureObject.canvas.mpl_connect('key_press_event', selectors_data.toggle_selector)
 
 
