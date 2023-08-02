@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import QApplication
 
 # Local module and scripts
 from pyccapt.control.apt import apt_tdc_roetdec
-from pyccapt.control.control_tools import variables, tof2mc_simple
+from pyccapt.control.control_tools import tof2mc_simple
 from pyccapt.control.devices import initialize_devices
 
 

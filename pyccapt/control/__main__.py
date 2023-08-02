@@ -11,7 +11,7 @@ from PyQt6 import QtWidgets
 from pypylon import pylon
 
 # Local module and scripts
-from pyccapt.control.control_tools import variables, read_files
+from pyccapt.control.control_tools import share_variables, read_files
 from pyccapt.control.devices import initialize_devices
 from pyccapt.control.devices.camera import Camera
 from pyccapt.control.gui import gui_advance
@@ -157,7 +157,7 @@ def main():
 
     elif conf['mode'] == 'simple':
         # Initialize global experiment variables
-        variables.init(conf)
+        variables = share_variables.Variables(conf)
         variables.log_path = p
         if conf['log'] == 'on':
             variables.log = True

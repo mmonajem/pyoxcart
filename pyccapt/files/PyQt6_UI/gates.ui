@@ -177,6 +177,11 @@
             </item>
         </layout>
     </widget>
+    <tabstops>
+        <tabstop>main_chamber_switch</tabstop>
+        <tabstop>load_lock_switch</tabstop>
+        <tabstop>cryo_switch</tabstop>
+    </tabstops>
     <resources/>
     <connections/>
 </ui>

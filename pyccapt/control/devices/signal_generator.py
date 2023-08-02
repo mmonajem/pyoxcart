@@ -2,11 +2,12 @@
 This is the main script for initializing and controlling signal generator.
 """
 
-import pyvisa
 import time
 
+import pyvisa
+
+
 # Local module and scripts
-from pyccapt.control.control_tools import variables
 
 
 def initialize_signal_generator(freq):

@@ -14,7 +14,7 @@ import pyvisa as visa
 import serial.tools.list_ports
 
 from pyccapt.control.control_tools import experiment_statistics
-from pyccapt.control.control_tools import variables, hdf5_creator, loggi
+from pyccapt.control.control_tools import hdf5_creator, loggi
 from pyccapt.control.devices import email_send
 # Local module and scripts
 from pyccapt.control.devices import tweet_send, initialize_devices, signal_generator

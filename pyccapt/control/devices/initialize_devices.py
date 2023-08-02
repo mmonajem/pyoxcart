@@ -6,7 +6,6 @@ import time
 
 import serial.tools.list_ports
 
-from pyccapt.control.control_tools import variables
 from pyccapt.control.devices.edwards_tic import EdwardsAGC
 # Local module and scripts
 from pyccapt.control.devices.pfeiffer_gauges import TPG362

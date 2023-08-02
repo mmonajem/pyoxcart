@@ -3,7 +3,6 @@ This is the script for saving the statistics of experiment in a txt file.
 """
 
 # Local module and scripts
-from pyccapt.control.control_tools import variables
 
 
 def save_statistics_apt_oxcart():

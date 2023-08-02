@@ -5,7 +5,7 @@ This is the script containing simple version of m/c calculation.
 import numpy as np
 
 # Local module and scripts
-from pyccapt.control.control_tools import loggi, variables
+from pyccapt.control.control_tools import loggi
 
 
 def tof_bin2mc_sc(t, t0, V, xDet, yDet, flightPathLength):

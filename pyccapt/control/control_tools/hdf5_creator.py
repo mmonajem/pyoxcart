@@ -6,7 +6,6 @@ import h5py
 
 # Local module and scripts
 from pyccapt.control.control_tools import loggi
-from pyccapt.control.control_tools import variables
 
 
 def hdf_creator_oxcart(time_counter, time_ex_s, time_ex_m, time_ex_h):

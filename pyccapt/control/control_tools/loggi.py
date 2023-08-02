@@ -5,7 +5,6 @@ This is the main script for saving the log file of the experiment.
 import logging
 
 # Local module and scripts
-from pyccapt.control.control_tools import variables
 
 
 def get_logging():

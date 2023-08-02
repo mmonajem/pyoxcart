@@ -3,19 +3,14 @@ This is the main script for controlling the BASLER Cameras.
 """
 
 import time
+from threading import Thread
+
 import cv2
 import numpy as np
 from pypylon import pylon
-from threading import Thread
-import pyqtgraph as pg
-from pyqtgraph.Qt import QtGui
-from PyQt6 import QtWidgets
-from pyqtgraph import PlotWidget, plot
-import pyqtgraph as pg
-import sys
+
 
 # Local module and scripts
-from pyccapt.control.control_tools import variables
 
 
 class Camera:
@@ -25,7 +20,7 @@ class Camera:
         process the image and display as per desired window size.
     """
 
-    def __init__(self, devices, tlFactory, cameras, converter):
+    def __init__(self, devices, tlFactory, cameras, converter, variables):
         """
         Constructor function which intializes and setups all variables
         and parameter for the class.
@@ -35,6 +30,7 @@ class Camera:
         self.tlFactory = tlFactory
         self.cameras = cameras
         self.converter = converter
+        self.variables = variables
         self.cameras[0].Open()
         self.cameras[0].ExposureAuto.SetValue('Off')
         self.cameras[0].ExposureTime.SetValue(800000)
@@ -45,7 +41,7 @@ class Camera:
         self.thread_read = Thread(target=self.camera_s_d)
         self.thread_read.daemon = True
 
-    def update_cameras(self, lock):
+    def update_cameras(self):
         """
         Note : Changed function to break it down into simpler functions
 
@@ -54,7 +50,7 @@ class Camera:
         set up for free-running continuous acquisition.
 
         Attributes:
-            lock: object to acquire and release locks.
+
         Returns:
             Does not return anything.
         """
@@ -74,47 +70,50 @@ class Camera:
 
             # Original size is 2048 * 2448
             # Resize the original to the required size. Utilize the openCV tool.
-            # img0_orig = cv2.resize(img0, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
             self.img0_orig = img0
-            # img0[y, x] - the first range is for y-axis and second range is for x-axis
             self.img0_zoom = cv2.resize(img0[750:1150, 1650:2250], dsize=(1200, 500),
                                         interpolation=cv2.INTER_CUBIC).astype(
                 np.int32)
 
             # img1_orig = cv2.resize(img1, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
             self.img1_orig = img1
-            self.img1_zoom = cv2.resize(img1[600:1000, 1600:2200], dsize=(1200, 500),
+            self.img1_zoom = cv2.resize(img1[900:1250, 1800:2350], dsize=(1200, 500),
                                         interpolation=cv2.INTER_CUBIC).astype(
                 np.int32)
 
             # The function cv::drawMarker draws a marker on a given position in the image.
-            self.img0_zoom_marker = cv2.drawMarker(self.img0_zoom, (1050, 310), (0, 0, 255),
+            # first is x direction
+            # second is y direction
+            self.img0_zoom_marker = cv2.drawMarker(self.img0_zoom, (490, 280), (0, 0, 255),
                                                    markerType=cv2.MARKER_TRIANGLE_UP,
                                                    markerSize=40, thickness=2, line_type=cv2.LINE_AA)
-            self.img1_zoom_marker = cv2.drawMarker(self.img1_zoom, (1100, 285), (0, 0, 255),
+            self.img1_zoom_marker = cv2.drawMarker(self.img1_zoom, (435, 300), (0, 0, 255),
                                                    markerType=cv2.MARKER_TRIANGLE_UP,
                                                    markerSize=40, thickness=2, line_type=cv2.LINE_AA)
 
             # Acquire the lock and releases after process using context manager
             # To ensure that the marked array is a C-contiguous array
-            with lock:
-                variables.img0_zoom = np.require(self.img0_zoom_marker, np.uint8, 'C')
-                variables.img1_zoom = np.require(self.img1_zoom_marker, np.uint8, 'C')
 
-                # Interchange two axes of an array.
-                variables.img0_orig = np.swapaxes(self.img0_orig, 0, 1)
-                variables.img1_orig = np.swapaxes(self.img1_orig, 0, 1)
-                variables.index_save_image += 1
+            self.variables.img0_zoom = np.require(self.img0_zoom_marker, np.uint8, 'C')
+            self.variables.img1_zoom = np.require(self.img1_zoom_marker, np.uint8, 'C')
+
+            # Interchange two axes of an array.
+            self.variables.img0_orig = np.swapaxes(self.img0_orig, 0, 1)
+            self.variables.img1_orig = np.swapaxes(self.img1_orig, 0, 1)
+            self.variables.index_save_image += 1
 
             # Store the captured processed image at a desired location.
-            if variables.index_save_image % 100 == 0 and variables.start_flag:
-                cv2.imwrite(variables.path + "/side_%s.png" % variables.index_save_image, self.img0_orig)
-                cv2.imwrite(variables.path + "/side_zoom_%s.png" % variables.index_save_image, self.img0_zoom)
-                cv2.imwrite(variables.path + '/bottom_%s.png' % variables.index_save_image, self.img1_orig)
-                cv2.imwrite(variables.path + '/bottom_zoom_%s.png' % variables.index_save_image, self.img1_zoom)
+            if self.variables.index_save_image % 100 == 0 and self.variables.start_flag:
+                cv2.imwrite(self.variables.path + "/side_%s.png" % self.variables.index_save_image, self.img0_orig)
+                cv2.imwrite(self.variables.path + "/side_zoom_%s.png" % self.variables.index_save_image, self.img0_zoom)
+                cv2.imwrite(self.variables.path + '/bottom_%s.png' % self.variables.index_save_image, self.img1_orig)
+                cv2.imwrite(self.variables.path + '/bottom_zoom_%s.png' % self.variables.index_save_image,
+                            self.img1_zoom)
 
             grabResult0.Release()
             grabResult1.Release()
+            if self.variables.start_flag == True:
+                time.sleep(0.5)
 
     def light_switch(self, ):
         """
@@ -126,18 +125,18 @@ class Camera:
             Return:
                 Does not return anything.
         """
-        if not variables.light:
+        if not self.variables.light:
             self.cameras[0].Open()
             self.cameras[0].ExposureTime.SetValue(400)
             self.cameras[1].Open()
             self.cameras[1].ExposureTime.SetValue(2000)
-            variables.light = True
-        elif variables.light:
+            self.variables.light = True
+        elif self.variables.light:
             self.cameras[0].Open()
             self.cameras[0].ExposureTime.SetValue(800000)
             self.cameras[1].Open()
             self.cameras[1].ExposureTime.SetValue(100000)
-            variables.light = False
+            self.variables.light = False
 
     def camera_s_d(self, ):
         """
@@ -156,16 +155,16 @@ class Camera:
         windowName = 'Sample Alignment'
 
         while True:
-            if variables.alignment_window:
+            if self.variables.alignment_window:
 
-                img0_zoom = cv2.resize(self.img0_orig[750:1150, 1650:2250], dsize=(2448, 1000),
+                img0_zoom = cv2.resize(self.img0_orig[850:1050, 1550:1950], dsize=(2448, 1000),
                                        interpolation=cv2.INTER_CUBIC)
-                img1_zoom = cv2.resize(self.img1_orig[600:1000, 1600:2200], dsize=(2448, 1000),
+                img1_zoom = cv2.resize(self.img1_orig[1020:1170, 1700:2050], dsize=(2448, 1000),
                                        interpolation=cv2.INTER_CUBIC)
-                img0_zoom = cv2.drawMarker(img0_zoom, (2150, 620), (0, 0, 255),
+                img0_zoom = cv2.drawMarker(img0_zoom, (2120, 600), (0, 0, 255),
                                            markerType=cv2.MARKER_TRIANGLE_UP,
                                            markerSize=80, thickness=2, line_type=cv2.LINE_AA)
-                img1_zoom = cv2.drawMarker(img1_zoom, (2100, 530), (0, 0, 255),
+                img1_zoom = cv2.drawMarker(img1_zoom, (2120, 560), (0, 0, 255),
                                            markerType=cv2.MARKER_TRIANGLE_UP,
                                            markerSize=80, thickness=2, line_type=cv2.LINE_AA)
                 img0_f = np.concatenate((self.img0_orig, img0_zoom), axis=0)

@@ -1,6 +1,4 @@
-"""
-This is the main script of main GUI of the advance Atom Probe.
-"""
+
 
 import datetime
 import os
@@ -18,7 +16,7 @@ from PyQt6.QtGui import QPixmap, QImage
 
 # Local module and scripts
 from pyccapt.control.apt import apt_tdc_surface_consept
-from pyccapt.control.control_tools import variables, tof2mc_simple
+from pyccapt.control.control_tools import tof2mc_simple
 from pyccapt.control.devices import initialize_devices
 
 
