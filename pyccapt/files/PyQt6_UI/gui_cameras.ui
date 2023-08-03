@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-    <class>Cameras_alignment</class>
-    <widget class="QWidget" name="Cameras_alignment">
+    <class>Cameras_Alignment</class>
+    <widget class="QWidget" name="Cameras_Alignment">
         <property name="geometry">
             <rect>
                 <x>0</x>
@@ -214,7 +214,7 @@
                     </item>
                     <item row="0" column="1">
                         <layout class="QGridLayout" name="gridLayout_2">
-                            <item row="0" column="0">
+                            <item row="0" column="0" alignment="Qt::AlignHCenter">
                                 <widget class="QPushButton" name="light">
                                     <property name="sizePolicy">
                                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -239,7 +239,7 @@
                                     </property>
                                 </widget>
                             </item>
-                            <item row="0" column="1">
+                            <item row="0" column="1" alignment="Qt::AlignHCenter">
                                 <widget class="QLabel" name="led_light">
                                     <property name="maximumSize">
                                         <size>
@@ -252,7 +252,7 @@
                                     </property>
                                 </widget>
                             </item>
-                            <item row="1" column="0">
+                            <item row="1" column="0" alignment="Qt::AlignHCenter">
                                 <widget class="QPushButton" name="win_alignment">
                                     <property name="minimumSize">
                                         <size>

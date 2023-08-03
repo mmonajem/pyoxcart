@@ -10,6 +10,7 @@ from pypylon import pylon
 from pyccapt.control.control_tools import share_variables, read_files
 from pyccapt.control.devices.camera import Camera
 from pyccapt.control.gui import gui_cameras
+from pyccapt.control.gui import gui_gates
 
 
 class Ui_PyCCAPT(object):
@@ -839,6 +840,7 @@ class Ui_PyCCAPT(object):
 
                 ###
                 self.Camears.clicked.connect(self.open_cameras_win)
+                self.gates_control.clicked.connect(self.open_gates_win)
 
         def retranslateUi(self, PyCCAPT):
                 _translate = QtCore.QCoreApplication.translate
@@ -921,10 +923,24 @@ class Ui_PyCCAPT(object):
                 self.actiontake_sceernshot.setText(_translate("PyCCAPT", "take sceernshot"))
 
         def open_cameras_win(self, ):
-                self.Cameras_alignment = QtWidgets.QWidget(flags=Qt.WindowType.Tool)
-                self.cameras = gui_cameras.Ui_Cameras_alignment(self.variables, self.conf, self.camera)
-                self.cameras.setupUi(self.Cameras_alignment)
-                self.Cameras_alignment.show()
+                if hasattr(self, 'Cameras_alignment') and self.Cameras_alignment.isVisible():
+                        self.Cameras_alignment.raise_()
+                        self.Cameras_alignment.activateWindow()
+                else:
+                        self.Cameras_alignment = QtWidgets.QWidget(flags=Qt.WindowType.Tool)
+                        self.cameras = gui_cameras.Ui_Cameras_Alignment(self.variables, self.conf, self.camera)
+                        self.cameras.setupUi(self.Cameras_alignment)
+                        self.Cameras_alignment.show()
+
+        def open_gates_win(self, ):
+                if hasattr(self, 'Gates') and self.Gates.isVisible():
+                        self.Gates.raise_()
+                        self.Gates.activateWindow()
+                else:
+                        self.Gates = QtWidgets.QWidget(flags=Qt.WindowType.Tool)
+                        self.gates = gui_gates.Ui_Gates(self.variables, self.conf)
+                        self.gates.setupUi(self.Gates)
+                        self.Gates.show()
 
 
 if __name__ == "__main__":

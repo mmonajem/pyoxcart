@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>Laser_Control</class>
+    <widget class="QWidget" name="Laser_Control">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>333</width>
+                <height>171</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>Form</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="0">
+                <layout class="QGridLayout" name="gridLayout">
+                    <item row="0" column="0">
+                        <widget class="QLabel" name="label_29">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="font">
+                                <font>
+                                    <bold>true</bold>
+                                </font>
+                            </property>
+                            <property name="text">
+                                <string>Laser Control</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="0" column="1">
+                        <widget class="QPushButton" name="home_motor">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>0</width>
+                                    <height>25</height>
+                                </size>
+                            </property>
+                            <property name="styleSheet">
+                                <string notr="true">QPushButton{
+                                    background: rgb(193, 193, 193)
+                                    }
+                                </string>
+                            </property>
+                            <property name="text">
+                                <string>Home</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="1" column="0">
+                        <widget class="QLabel" name="label_31">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="text">
+                                <string>Fix</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="1" column="1">
+                        <widget class="QCheckBox" name="criteria_laser">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="font">
+                                <font>
+                                    <italic>false</italic>
+                                </font>
+                            </property>
+                            <property name="mouseTracking">
+                                <bool>true</bool>
+                            </property>
+                            <property name="styleSheet">
+                                <string notr="true">QCheckBox{
+                                    background: rgb(223,223,233)
+                                    }
+                                </string>
+                            </property>
+                            <property name="text">
+                                <string/>
+                            </property>
+                            <property name="checked">
+                                <bool>true</bool>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="1" column="2">
+                        <widget class="QLineEdit" name="fixed_laser">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>0</width>
+                                    <height>20</height>
+                                </size>
+                            </property>
+                            <property name="styleSheet">
+                                <string notr="true">QLineEdit{
+                                    background: rgb(223,223,233)
+                                    }
+                                </string>
+                            </property>
+                            <property name="text">
+                                <string>0</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="2" column="0">
+                        <widget class="QLabel" name="label_18">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="text">
+                                <string># Ions per step</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="2" column="2">
+                        <widget class="QLineEdit" name="laser_num_ions_per_step">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>0</width>
+                                    <height>20</height>
+                                </size>
+                            </property>
+                            <property name="styleSheet">
+                                <string notr="true">QLineEdit{
+                                    background: rgb(223,223,233)
+                                    }
+                                </string>
+                            </property>
+                            <property name="text">
+                                <string>2000</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="3" column="0">
+                        <widget class="QLabel" name="label_30">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="text">
+                                <string>Increase per Step</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="3" column="2">
+                        <widget class="QLineEdit" name="laser_increase_per_step">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>0</width>
+                                    <height>10</height>
+                                </size>
+                            </property>
+                            <property name="styleSheet">
+                                <string notr="true">QLineEdit{
+                                    background: rgb(223,223,233)
+                                    }
+                                </string>
+                            </property>
+                            <property name="text">
+                                <string>2</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="4" column="0">
+                        <widget class="QLabel" name="label_16">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="text">
+                                <string>Start</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="4" column="2">
+                        <widget class="QLineEdit" name="laser_start">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>0</width>
+                                    <height>20</height>
+                                </size>
+                            </property>
+                            <property name="styleSheet">
+                                <string notr="true">QLineEdit{
+                                    background: rgb(223,223,233)
+                                    }
+                                </string>
+                            </property>
+                            <property name="text">
+                                <string>10</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="5" column="0">
+                        <widget class="QLabel" name="label_27">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="text">
+                                <string>Stop</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="5" column="2">
+                        <widget class="QLineEdit" name="laser_stop">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>0</width>
+                                    <height>20</height>
+                                </size>
+                            </property>
+                            <property name="styleSheet">
+                                <string notr="true">QLineEdit{
+                                    background: rgb(223,223,233)
+                                    }
+                                </string>
+                            </property>
+                            <property name="text">
+                                <string>40</string>
+                            </property>
+                        </widget>
+                    </item>
+                </layout>
+            </item>
+        </layout>
+    </widget>
+    <resources/>
+    <connections/>
+</ui>

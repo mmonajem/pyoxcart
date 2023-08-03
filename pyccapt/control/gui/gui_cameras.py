@@ -12,29 +12,29 @@ from pyccapt.control.control_tools import share_variables, read_files
 from pyccapt.control.devices.camera import Camera
 
 
-class Ui_Cameras_alignment(object):
+class Ui_Cameras_Alignment(object):
 
     def __init__(self, variables, conf, camera):
         self.camera = camera
         self.conf = conf
         self.variables = variables
 
-    def setupUi(self, Cameras_alignment):
-        Cameras_alignment.setObjectName("Cameras_alignment")
-        Cameras_alignment.resize(1049, 616)
-        self.gridLayout_4 = QtWidgets.QGridLayout(Cameras_alignment)
+    def setupUi(self, Cameras_Alignment):
+        Cameras_Alignment.setObjectName("Cameras_Alignment")
+        Cameras_Alignment.resize(1049, 616)
+        self.gridLayout_4 = QtWidgets.QGridLayout(Cameras_Alignment)
         self.gridLayout_4.setObjectName("gridLayout_4")
         self.gridLayout_3 = QtWidgets.QGridLayout()
         self.gridLayout_3.setObjectName("gridLayout_3")
         self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")
-        self.label_202 = QtWidgets.QLabel(parent=Cameras_alignment)
+        self.label_202 = QtWidgets.QLabel(parent=Cameras_Alignment)
         font = QtGui.QFont()
         font.setBold(True)
         self.label_202.setFont(font)
         self.label_202.setObjectName("label_202")
         self.gridLayout.addWidget(self.label_202, 0, 1, 1, 1)
-        self.label_203 = QtWidgets.QLabel(parent=Cameras_alignment)
+        self.label_203 = QtWidgets.QLabel(parent=Cameras_Alignment)
         font = QtGui.QFont()
         font.setBold(True)
         self.label_203.setFont(font)
@@ -42,7 +42,7 @@ class Ui_Cameras_alignment(object):
         self.gridLayout.addWidget(self.label_203, 1, 0, 1, 1)
         ###
         # self.cam_s_o = QtWidgets.QLabel(parent=Cameras_alignment)
-        self.cam_s_o = pg.ImageView(parent=Cameras_alignment)
+        self.cam_s_o = pg.ImageView(parent=Cameras_Alignment)
         self.cam_s_o.adjustSize()
         self.cam_s_o.ui.histogram.hide()
         self.cam_s_o.ui.roiBtn.hide()
@@ -62,7 +62,7 @@ class Ui_Cameras_alignment(object):
         # self.cam_s_o.setText("")
         self.cam_s_o.setObjectName("cam_s_o")
         self.gridLayout.addWidget(self.cam_s_o, 2, 0, 1, 4)
-        self.cam_s_d = QtWidgets.QLabel(parent=Cameras_alignment)
+        self.cam_s_d = QtWidgets.QLabel(parent=Cameras_Alignment)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,
                                            QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(2)
@@ -77,13 +77,13 @@ class Ui_Cameras_alignment(object):
         self.cam_s_d.setText("")
         self.cam_s_d.setObjectName("cam_s_d")
         self.gridLayout.addWidget(self.cam_s_d, 2, 4, 1, 1)
-        self.label_205 = QtWidgets.QLabel(parent=Cameras_alignment)
+        self.label_205 = QtWidgets.QLabel(parent=Cameras_Alignment)
         font = QtGui.QFont()
         font.setBold(True)
         self.label_205.setFont(font)
         self.label_205.setObjectName("label_205")
         self.gridLayout.addWidget(self.label_205, 3, 1, 1, 2)
-        self.label_208 = QtWidgets.QLabel(parent=Cameras_alignment)
+        self.label_208 = QtWidgets.QLabel(parent=Cameras_Alignment)
         font = QtGui.QFont()
         font.setBold(True)
         self.label_208.setFont(font)
@@ -91,7 +91,7 @@ class Ui_Cameras_alignment(object):
         self.gridLayout.addWidget(self.label_208, 4, 0, 1, 1)
         ###
         # self.cam_b_o = QtWidgets.QLabel(parent=Cameras_alignment)
-        self.cam_b_o = pg.ImageView(parent=Cameras_alignment)
+        self.cam_b_o = pg.ImageView(parent=Cameras_Alignment)
         self.cam_b_o.adjustSize()
         self.cam_b_o.ui.histogram.hide()
         self.cam_b_o.ui.roiBtn.hide()
@@ -111,7 +111,7 @@ class Ui_Cameras_alignment(object):
         # self.cam_b_o.setText("")
         self.cam_b_o.setObjectName("cam_b_o")
         self.gridLayout.addWidget(self.cam_b_o, 5, 0, 1, 4)
-        self.cam_b_d = QtWidgets.QLabel(parent=Cameras_alignment)
+        self.cam_b_d = QtWidgets.QLabel(parent=Cameras_Alignment)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,
                                            QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(2)
@@ -126,13 +126,13 @@ class Ui_Cameras_alignment(object):
         self.cam_b_d.setText("")
         self.cam_b_d.setObjectName("cam_b_d")
         self.gridLayout.addWidget(self.cam_b_d, 5, 4, 1, 1)
-        self.label_204 = QtWidgets.QLabel(parent=Cameras_alignment)
+        self.label_204 = QtWidgets.QLabel(parent=Cameras_Alignment)
         font = QtGui.QFont()
         font.setBold(True)
         self.label_204.setFont(font)
         self.label_204.setObjectName("label_204")
         self.gridLayout.addWidget(self.label_204, 1, 4, 1, 1)
-        self.label_209 = QtWidgets.QLabel(parent=Cameras_alignment)
+        self.label_209 = QtWidgets.QLabel(parent=Cameras_Alignment)
         font = QtGui.QFont()
         font.setBold(True)
         self.label_209.setFont(font)
@@ -141,7 +141,7 @@ class Ui_Cameras_alignment(object):
         self.gridLayout_3.addLayout(self.gridLayout, 0, 0, 1, 1)
         self.gridLayout_2 = QtWidgets.QGridLayout()
         self.gridLayout_2.setObjectName("gridLayout_2")
-        self.light = QtWidgets.QPushButton(parent=Cameras_alignment)
+        self.light = QtWidgets.QPushButton(parent=Cameras_Alignment)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -153,11 +153,11 @@ class Ui_Cameras_alignment(object):
                                  "}")
         self.light.setObjectName("light")
         self.gridLayout_2.addWidget(self.light, 0, 0, 1, 1)
-        self.led_light = QtWidgets.QLabel(parent=Cameras_alignment)
+        self.led_light = QtWidgets.QLabel(parent=Cameras_Alignment)
         self.led_light.setMaximumSize(QtCore.QSize(50, 50))
         self.led_light.setObjectName("led_light")
         self.gridLayout_2.addWidget(self.led_light, 0, 1, 1, 1)
-        self.win_alignment = QtWidgets.QPushButton(parent=Cameras_alignment)
+        self.win_alignment = QtWidgets.QPushButton(parent=Cameras_Alignment)
         self.win_alignment.setMinimumSize(QtCore.QSize(0, 25))
         self.win_alignment.setStyleSheet("QPushButton{\n"
                                          "background: rgb(193, 193, 193)\n"
@@ -170,9 +170,9 @@ class Ui_Cameras_alignment(object):
         self.gridLayout_3.addLayout(self.gridLayout_2, 0, 1, 1, 1)
         self.gridLayout_4.addLayout(self.gridLayout_3, 0, 0, 1, 1)
 
-        self.retranslateUi(Cameras_alignment)
-        QtCore.QMetaObject.connectSlotsByName(Cameras_alignment)
-        Cameras_alignment.setTabOrder(self.light, self.win_alignment)
+        self.retranslateUi(Cameras_Alignment)
+        QtCore.QMetaObject.connectSlotsByName(Cameras_Alignment)
+        Cameras_Alignment.setTabOrder(self.light, self.win_alignment)
 
         ###
         # timer cameras
@@ -207,7 +207,7 @@ class Ui_Cameras_alignment(object):
         _translate = QtCore.QCoreApplication.translate
         ###
         # Cameras_alignment.setWindowTitle(_translate("Cameras_alignment", "Form"))
-        Cameras_alignment.setWindowTitle(_translate("Cameras_alignment", "Cameras"))
+        Cameras_alignment.setWindowTitle(_translate("Cameras_alignment", "PyCCAPT Cameras"))
         Cameras_alignment.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
         ###
         self.label_202.setText(_translate("Cameras_alignment", "Camera Side"))
@@ -336,8 +336,8 @@ if __name__ == "__main__":
             camera = None
 
     app = QtWidgets.QApplication(sys.argv)
-    Cameras_alignment = QtWidgets.QWidget()
-    ui = Ui_Cameras_alignment(variables, conf, camera)
-    ui.setupUi(Cameras_alignment)
-    Cameras_alignment.show()
+    Cameras_Alignment = QtWidgets.QWidget()
+    ui = Ui_Cameras_Alignment(variables, conf, camera)
+    ui.setupUi(Cameras_Alignment)
+    Cameras_Alignment.show()
     sys.exit(app.exec())

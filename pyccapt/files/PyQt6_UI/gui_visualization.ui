@@ -6,7 +6,7 @@
             <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>626</width>
+                <width>932</width>
                 <height>670</height>
             </rect>
         </property>
@@ -16,6 +16,18 @@
         <layout class="QGridLayout" name="gridLayout_2">
             <item row="0" column="0">
                 <layout class="QGridLayout" name="gridLayout">
+                    <item row="0" column="0">
+                        <widget class="QLabel" name="label_200">
+                            <property name="font">
+                                <font>
+                                    <bold>true</bold>
+                                </font>
+                            </property>
+                            <property name="text">
+                                <string>Voltage</string>
+                            </property>
+                        </widget>
+                    </item>
                     <item row="0" column="1">
                         <widget class="QLabel" name="label_201">
                             <property name="font">
@@ -25,6 +37,18 @@
                             </property>
                             <property name="text">
                                 <string>Detection Rate</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="0" column="2">
+                        <widget class="QLabel" name="label_206">
+                            <property name="font">
+                                <font>
+                                    <bold>true</bold>
+                                </font>
+                            </property>
+                            <property name="text">
+                                <string>Detector Heatmap</string>
                             </property>
                         </widget>
                     </item>
@@ -72,31 +96,7 @@
                             </property>
                         </widget>
                     </item>
-                    <item row="2" column="0">
-                        <widget class="QLabel" name="label_206">
-                            <property name="font">
-                                <font>
-                                    <bold>true</bold>
-                                </font>
-                            </property>
-                            <property name="text">
-                                <string>Detector Heatmap</string>
-                            </property>
-                        </widget>
-                    </item>
-                    <item row="2" column="1">
-                        <widget class="QLabel" name="label_207">
-                            <property name="font">
-                                <font>
-                                    <bold>true</bold>
-                                </font>
-                            </property>
-                            <property name="text">
-                                <string>TOF</string>
-                            </property>
-                        </widget>
-                    </item>
-                    <item row="3" column="0">
+                    <item row="1" column="2">
                         <widget class="QGraphicsView" name="visualization">
                             <property name="sizePolicy">
                                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -118,7 +118,19 @@
                             </property>
                         </widget>
                     </item>
-                    <item row="3" column="1">
+                    <item row="2" column="0">
+                        <widget class="QLabel" name="label_207">
+                            <property name="font">
+                                <font>
+                                    <bold>true</bold>
+                                </font>
+                            </property>
+                            <property name="text">
+                                <string>TOF</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="3" column="0" colspan="3">
                         <widget class="QGraphicsView" name="histogram">
                             <property name="sizePolicy">
                                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -140,18 +152,6 @@
                             </property>
                             <property name="frameShape">
                                 <enum>QFrame::NoFrame</enum>
-                            </property>
-                        </widget>
-                    </item>
-                    <item row="0" column="0">
-                        <widget class="QLabel" name="label_200">
-                            <property name="font">
-                                <font>
-                                    <bold>true</bold>
-                                </font>
-                            </property>
-                            <property name="text">
-                                <string>Voltage</string>
                             </property>
                         </widget>
                     </item>

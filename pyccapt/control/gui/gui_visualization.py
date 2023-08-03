@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'visualization.ui'
+# Form implementation generated from reading ui file 'gui_visualization.ui'
 #
 # Created by: PyQt6 UI code generator 6.4.2
 #
@@ -12,17 +12,29 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_Visualization(object):
     def setupUi(self, Visualization):
         Visualization.setObjectName("Visualization")
-        Visualization.resize(626, 670)
+        Visualization.resize(932, 670)
         self.gridLayout_2 = QtWidgets.QGridLayout(Visualization)
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")
+        self.label_200 = QtWidgets.QLabel(parent=Visualization)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_200.setFont(font)
+        self.label_200.setObjectName("label_200")
+        self.gridLayout.addWidget(self.label_200, 0, 0, 1, 1)
         self.label_201 = QtWidgets.QLabel(parent=Visualization)
         font = QtGui.QFont()
         font.setBold(True)
         self.label_201.setFont(font)
         self.label_201.setObjectName("label_201")
         self.gridLayout.addWidget(self.label_201, 0, 1, 1, 1)
+        self.label_206 = QtWidgets.QLabel(parent=Visualization)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_206.setFont(font)
+        self.label_206.setObjectName("label_206")
+        self.gridLayout.addWidget(self.label_206, 0, 2, 1, 1)
         self.vdc_time = QtWidgets.QGraphicsView(parent=Visualization)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,
                                            QtWidgets.QSizePolicy.Policy.Expanding)
@@ -32,8 +44,9 @@ class Ui_Visualization(object):
         self.vdc_time.setSizePolicy(sizePolicy)
         self.vdc_time.setMinimumSize(QtCore.QSize(300, 300))
         self.vdc_time.setStyleSheet("QWidget{\n"
-                                    "border: 2px solid gray;\n"
-                                    "}")
+                                    "                                    border: 2px solid gray;\n"
+                                    "                                    }\n"
+                                    "                                ")
         self.vdc_time.setObjectName("vdc_time")
         self.gridLayout.addWidget(self.vdc_time, 1, 0, 1, 1)
         self.detection_rate_viz = QtWidgets.QGraphicsView(parent=Visualization)
@@ -45,22 +58,11 @@ class Ui_Visualization(object):
         self.detection_rate_viz.setSizePolicy(sizePolicy)
         self.detection_rate_viz.setMinimumSize(QtCore.QSize(300, 300))
         self.detection_rate_viz.setStyleSheet("QWidget{\n"
-                                              "border: 2px solid gray;\n"
-                                              "}")
+                                              "                                    border: 2px solid gray;\n"
+                                              "                                    }\n"
+                                              "                                ")
         self.detection_rate_viz.setObjectName("detection_rate_viz")
         self.gridLayout.addWidget(self.detection_rate_viz, 1, 1, 1, 1)
-        self.label_206 = QtWidgets.QLabel(parent=Visualization)
-        font = QtGui.QFont()
-        font.setBold(True)
-        self.label_206.setFont(font)
-        self.label_206.setObjectName("label_206")
-        self.gridLayout.addWidget(self.label_206, 2, 0, 1, 1)
-        self.label_207 = QtWidgets.QLabel(parent=Visualization)
-        font = QtGui.QFont()
-        font.setBold(True)
-        self.label_207.setFont(font)
-        self.label_207.setObjectName("label_207")
-        self.gridLayout.addWidget(self.label_207, 2, 1, 1, 1)
         self.visualization = QtWidgets.QGraphicsView(parent=Visualization)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,
                                            QtWidgets.QSizePolicy.Policy.Expanding)
@@ -70,10 +72,17 @@ class Ui_Visualization(object):
         self.visualization.setSizePolicy(sizePolicy)
         self.visualization.setMinimumSize(QtCore.QSize(300, 300))
         self.visualization.setStyleSheet("QWidget{\n"
-                                         "border: 2px solid gray;\n"
-                                         "}")
+                                         "                                    border: 2px solid gray;\n"
+                                         "                                    }\n"
+                                         "                                ")
         self.visualization.setObjectName("visualization")
-        self.gridLayout.addWidget(self.visualization, 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.visualization, 1, 2, 1, 1)
+        self.label_207 = QtWidgets.QLabel(parent=Visualization)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_207.setFont(font)
+        self.label_207.setObjectName("label_207")
+        self.gridLayout.addWidget(self.label_207, 2, 0, 1, 1)
         self.histogram = QtWidgets.QGraphicsView(parent=Visualization)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,
                                            QtWidgets.QSizePolicy.Policy.Expanding)
@@ -83,17 +92,12 @@ class Ui_Visualization(object):
         self.histogram.setSizePolicy(sizePolicy)
         self.histogram.setMinimumSize(QtCore.QSize(300, 300))
         self.histogram.setStyleSheet("QWidget{\n"
-                                     "border: 2px solid gray;\n"
-                                     "}")
+                                     "                                    border: 2px solid gray;\n"
+                                     "                                    }\n"
+                                     "                                ")
         self.histogram.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
         self.histogram.setObjectName("histogram")
-        self.gridLayout.addWidget(self.histogram, 3, 1, 1, 1)
-        self.label_200 = QtWidgets.QLabel(parent=Visualization)
-        font = QtGui.QFont()
-        font.setBold(True)
-        self.label_200.setFont(font)
-        self.label_200.setObjectName("label_200")
-        self.gridLayout.addWidget(self.label_200, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.histogram, 3, 0, 1, 3)
         self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
 
         self.retranslateUi(Visualization)
@@ -105,15 +109,14 @@ class Ui_Visualization(object):
     def retranslateUi(self, Visualization):
         _translate = QtCore.QCoreApplication.translate
         Visualization.setWindowTitle(_translate("Visualization", "Form"))
+        self.label_200.setText(_translate("Visualization", "Voltage"))
         self.label_201.setText(_translate("Visualization", "Detection Rate"))
         self.label_206.setText(_translate("Visualization", "Detector Heatmap"))
         self.label_207.setText(_translate("Visualization", "TOF"))
-        self.label_200.setText(_translate("Visualization", "Voltage"))
 
 
 if __name__ == "__main__":
     import sys
-
     app = QtWidgets.QApplication(sys.argv)
     Visualization = QtWidgets.QWidget()
     ui = Ui_Visualization()
