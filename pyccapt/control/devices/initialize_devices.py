@@ -76,7 +76,7 @@ def command_edwards(conf, variables, cmd, E_AGC, status=None):
             variables.flag_pump_load_lock = True
             variables.flag_pump_load_lock_led = True
             time.sleep(1)
-    if conf['COM_PORT_gauge_ll'] == "on":
+    if conf['COM_PORT_gauge_ll'] != "off":
         if cmd == 'pressure':
             # Execute command utilizing  EdwardsAGC class from edwards_tic module as an interface to read value.
             response_tmp = E_AGC.comm('?V911')
@@ -126,7 +126,7 @@ def initialize_edwards_tic_load_lock(conf, variables):
 
     E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll)
     # Execute command to read value(response)
-    response = command_edwards(conf, 'pressure', E_AGC=E_AGC_ll)
+    response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_ll)
     # Update the load lock parameters
     variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
     variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
@@ -144,7 +144,7 @@ def initialize_edwards_tic_buffer_chamber(conf, variables):
     """
 
     E_AGC_bc = EdwardsAGC(variables.COM_PORT_gauge_bc)
-    response = command_edwards(conf, 'pressure', E_AGC=E_AGC_bc)
+    response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_bc)
     variables.vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
 
 
@@ -186,12 +186,13 @@ def state_update(conf, variables, emitter):
         Does not return anything
 
     """
-    if conf['COM_PORT_gauge_mc'] == "on":
-        tpg = TPG362(port=variables.COM_PORT_gauge_mc)
-    if conf['COM_PORT_gauge_bc'] == "on":
-        E_AGC_bc = EdwardsAGC(variables.COM_PORT_gauge_bc)
-    if conf['COM_PORT_gauge_ll'] == "on":
-        E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll)
+    if conf['gauges'] == "on":
+        if conf['COM_PORT_gauge_mc'] != "off":
+            tpg = TPG362(port=variables.COM_PORT_gauge_mc)
+        if conf['COM_PORT_gauge_bc'] != "off":
+            E_AGC_bc = EdwardsAGC(variables.COM_PORT_gauge_bc, variables)
+        if conf['COM_PORT_gauge_ll'] != "off":
+            E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll, variables)
     if conf['cryo'] == "off":
         print('The cryo temperature monitoring is off')
         com_port_cryovac = None
@@ -207,7 +208,7 @@ def state_update(conf, variables, emitter):
                 parity=serial.PARITY_NONE,  # N
                 stopbits=serial.STOPBITS_ONE  # 1
             )
-            initialize_cryovac(com_port_cryovac)
+            initialize_cryovac(com_port_cryovac, variables)
         except Exception as e:
             com_port_cryovac = None
             print('Can not initialize the cryovac')
@@ -223,31 +224,33 @@ def state_update(conf, variables, emitter):
                 output = '0'
 
             variables.temperature = float(output.split()[0].replace(',', ''))
-            emitter.temp = '{:.2e}'.format(float(variables.temperature))
-        if conf['COM_PORT_gauge_mc'] == "off":
+            emitter.temp.emit(variables.temperature)
+        if conf['COM_PORT_gauge_mc'] != "off":
             # Pfeiffer gauges update
             value, _ = tpg.pressure_gauge(2)
             # unit = tpg.pressure_unit()
 
             variables.vacuum_main = '{}'.format(value)
-            emitter.vacuum_main = '{:.2e}'.format(float(variables.vacuum_main))
+            emitter.vacuum_main.emit(float(variables.vacuum_main))
             value, _ = tpg.pressure_gauge(1)
             # unit = tpg.pressure_unit()
 
             variables.vacuum_buffer = '{}'.format(value)
-            emitter.vacuum_buffer = '{:.2e}'.format(float(variables.vacuum_buffer))
+            emitter.vacuum_buffer.emit(float(variables.vacuum_buffer))
         if conf['COM_PORT_gauge_ll'] != "off" and conf['pump'] != "off":
             # Edwards Load Lock update
-            response = command_edwards(conf, 'pressure', E_AGC=E_AGC_ll, status='load_lock')
+            response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_ll, status='load_lock')
 
             variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
             variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
-            emitter.vacuum_load = variables.vacuum_load
-            emitter.vacuum_load_back = variables.vacuum_load_lock_backing
+            emitter.vacuum_load.emit(variables.vacuum_load_lock)
+            emitter.vacuum_load_back.emit(variables.vacuum_load_lock_backing)
+
         if conf['COM_PORT_gauge_bc'] != "off":
             # Edwards Buffer Chamber update
-            response = command_edwards(conf, 'pressure', E_AGC=E_AGC_bc)
+            response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_bc)
 
             variables.vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
-            emitter.vacuum_buffer_back = variables.vacuum_buffer_backing
+            emitter.vacuum_buffer_back.emit(variables.vacuum_buffer_backing)
+
         threading.Event().wait(1)  # wait for 1 second

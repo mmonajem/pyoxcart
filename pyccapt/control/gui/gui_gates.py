@@ -16,74 +16,96 @@ class Ui_Gates(object):
         self.variables = variables
         self.conf = conf
 
-    def setupUi(self, Ui_Gates):
-        Ui_Gates.setObjectName("Ui_Gates")
-        Ui_Gates.resize(398, 357)
-        self.gridLayout_2 = QtWidgets.QGridLayout(Ui_Gates)
+    def setupUi(self, Gates):
+        Gates.setObjectName("Gates")
+        Gates.resize(420, 411)
+        self.gridLayout_4 = QtWidgets.QGridLayout(Gates)
+        self.gridLayout_4.setObjectName("gridLayout_4")
+        self.gridLayout_3 = QtWidgets.QGridLayout()
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        self.gridLayout_2 = QtWidgets.QGridLayout()
         self.gridLayout_2.setObjectName("gridLayout_2")
-        self.gridLayout = QtWidgets.QGridLayout()
-        self.gridLayout.setObjectName("gridLayout")
-        self.diagram = QtWidgets.QLabel(parent=Ui_Gates)
+        self.diagram = QtWidgets.QLabel(parent=Gates)
         self.diagram.setMinimumSize(QtCore.QSize(378, 246))
         self.diagram.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.diagram.setStyleSheet("QWidget{\n"
                                    "border: 2px solid gray;\n"
                                    "background: rgb(255, 255, 255)\n"
-                                   "}")
+                                   "}\n"
+                                   "")
         self.diagram.setText("")
         self.diagram.setObjectName("diagram")
-        self.gridLayout.addWidget(self.diagram, 0, 0, 1, 1)
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.led_main_chamber = QtWidgets.QLabel(parent=Ui_Gates)
+        self.gridLayout_2.addWidget(self.diagram, 0, 0, 1, 1)
+        self.gridLayout = QtWidgets.QGridLayout()
+        self.gridLayout.setObjectName("gridLayout")
+        self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.led_main_chamber = QtWidgets.QLabel(parent=Gates)
         self.led_main_chamber.setMinimumSize(QtCore.QSize(50, 50))
         self.led_main_chamber.setMaximumSize(QtCore.QSize(50, 50))
         self.led_main_chamber.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.led_main_chamber.setObjectName("led_main_chamber")
-        self.horizontalLayout.addWidget(self.led_main_chamber)
-        self.led_load_lock = QtWidgets.QLabel(parent=Ui_Gates)
+        self.verticalLayout.addWidget(self.led_main_chamber, 0, QtCore.Qt.AlignmentFlag.AlignHCenter)
+        self.main_chamber_switch = QtWidgets.QPushButton(parent=Gates)
+        self.main_chamber_switch.setMinimumSize(QtCore.QSize(0, 25))
+        self.main_chamber_switch.setStyleSheet("QPushButton{\n"
+                                               "                                            background: rgb(193, 193, 193)\n"
+                                               "                                            }\n"
+                                               "                                        ")
+        self.main_chamber_switch.setObjectName("main_chamber_switch")
+        self.verticalLayout.addWidget(self.main_chamber_switch)
+        self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.led_load_lock = QtWidgets.QLabel(parent=Gates)
         self.led_load_lock.setMinimumSize(QtCore.QSize(50, 50))
         self.led_load_lock.setMaximumSize(QtCore.QSize(50, 50))
         self.led_load_lock.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.led_load_lock.setObjectName("led_load_lock")
-        self.horizontalLayout.addWidget(self.led_load_lock)
-        self.led_cryo = QtWidgets.QLabel(parent=Ui_Gates)
+        self.verticalLayout_2.addWidget(self.led_load_lock, 0, QtCore.Qt.AlignmentFlag.AlignHCenter)
+        self.load_lock_switch = QtWidgets.QPushButton(parent=Gates)
+        self.load_lock_switch.setMinimumSize(QtCore.QSize(0, 25))
+        self.load_lock_switch.setStyleSheet("QPushButton{\n"
+                                            "                                            background: rgb(193, 193, 193)\n"
+                                            "                                            }\n"
+                                            "                                        ")
+        self.load_lock_switch.setObjectName("load_lock_switch")
+        self.verticalLayout_2.addWidget(self.load_lock_switch)
+        self.gridLayout.addLayout(self.verticalLayout_2, 0, 1, 1, 1)
+        self.verticalLayout_3 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.led_cryo = QtWidgets.QLabel(parent=Gates)
         self.led_cryo.setMinimumSize(QtCore.QSize(50, 50))
         self.led_cryo.setMaximumSize(QtCore.QSize(50, 50))
         self.led_cryo.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.led_cryo.setObjectName("led_cryo")
-        self.horizontalLayout.addWidget(self.led_cryo)
-        self.gridLayout.addLayout(self.horizontalLayout, 1, 0, 1, 1)
-        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.main_chamber_switch = QtWidgets.QPushButton(parent=Ui_Gates)
-        self.main_chamber_switch.setMinimumSize(QtCore.QSize(0, 25))
-        self.main_chamber_switch.setStyleSheet("QPushButton{\n"
-                                               "background: rgb(193, 193, 193)\n"
-                                               "}")
-        self.main_chamber_switch.setObjectName("main_chamber_switch")
-        self.horizontalLayout_2.addWidget(self.main_chamber_switch)
-        self.load_lock_switch = QtWidgets.QPushButton(parent=Ui_Gates)
-        self.load_lock_switch.setMinimumSize(QtCore.QSize(0, 25))
-        self.load_lock_switch.setStyleSheet("QPushButton{\n"
-                                            "background: rgb(193, 193, 193)\n"
-                                            "}")
-        self.load_lock_switch.setObjectName("load_lock_switch")
-        self.horizontalLayout_2.addWidget(self.load_lock_switch)
-        self.cryo_switch = QtWidgets.QPushButton(parent=Ui_Gates)
+        self.verticalLayout_3.addWidget(self.led_cryo, 0, QtCore.Qt.AlignmentFlag.AlignHCenter)
+        self.cryo_switch = QtWidgets.QPushButton(parent=Gates)
         self.cryo_switch.setMinimumSize(QtCore.QSize(0, 25))
         self.cryo_switch.setStyleSheet("QPushButton{\n"
-                                       "background: rgb(193, 193, 193)\n"
-                                       "}")
+                                       "                                            background: rgb(193, 193, 193)\n"
+                                       "                                            }\n"
+                                       "                                        ")
         self.cryo_switch.setObjectName("cryo_switch")
-        self.horizontalLayout_2.addWidget(self.cryo_switch)
-        self.gridLayout.addLayout(self.horizontalLayout_2, 2, 0, 1, 1)
-        self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
+        self.verticalLayout_3.addWidget(self.cryo_switch)
+        self.gridLayout.addLayout(self.verticalLayout_3, 0, 2, 1, 1)
+        self.gridLayout_2.addLayout(self.gridLayout, 1, 0, 1, 1)
+        self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 1, 1)
+        self.Error = QtWidgets.QLabel(parent=Gates)
+        self.Error.setMinimumSize(QtCore.QSize(400, 30))
+        font = QtGui.QFont()
+        font.setPointSize(13)
+        font.setBold(True)
+        font.setStrikeOut(False)
+        self.Error.setFont(font)
+        self.Error.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.Error.setTextInteractionFlags(QtCore.Qt.TextInteractionFlag.LinksAccessibleByMouse)
+        self.Error.setObjectName("Error")
+        self.gridLayout_3.addWidget(self.Error, 1, 0, 1, 1)
+        self.gridLayout_4.addLayout(self.gridLayout_3, 0, 0, 1, 1)
 
-        self.retranslateUi(Ui_Gates)
-        QtCore.QMetaObject.connectSlotsByName(Ui_Gates)
-        Ui_Gates.setTabOrder(self.main_chamber_switch, self.load_lock_switch)
-        Ui_Gates.setTabOrder(self.load_lock_switch, self.cryo_switch)
+        self.retranslateUi(Gates)
+        QtCore.QMetaObject.connectSlotsByName(Gates)
 
         # Diagram and LEDs ##############
         self.diagram_close_all = QPixmap('./files/close_all.png')
@@ -103,18 +125,19 @@ class Ui_Gates(object):
         self.load_lock_switch.clicked.connect(lambda: self.gates(2))
         self.cryo_switch.clicked.connect(lambda: self.gates(3))
 
-    def retranslateUi(self, Ui_Gates):
+    def retranslateUi(self, Gates):
         _translate = QtCore.QCoreApplication.translate
         ###
-        Ui_Gates.setWindowTitle(_translate("Ui_Gates", "PyCCAPT Gates Control"))
-        Ui_Gates.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+        Gates.setWindowTitle(_translate("Ui_Gates", "PyCCAPT Gates Control"))
+        Gates.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
         ###
-        self.led_main_chamber.setText(_translate("Ui_Gates", "Main"))
-        self.led_load_lock.setText(_translate("Ui_Gates", "Load"))
-        self.led_cryo.setText(_translate("Ui_Gates", "Cryo"))
-        self.main_chamber_switch.setText(_translate("Ui_Gates", "Main Chamber"))
-        self.load_lock_switch.setText(_translate("Ui_Gates", "Load Lock"))
-        self.cryo_switch.setText(_translate("Ui_Gates", "Cryo"))
+        self.led_main_chamber.setText(_translate("Gates", "Main"))
+        self.main_chamber_switch.setText(_translate("Gates", "Main Chamber"))
+        self.led_load_lock.setText(_translate("Gates", "Load"))
+        self.load_lock_switch.setText(_translate("Gates", "Load Lock"))
+        self.led_cryo.setText(_translate("Gates", "Cryo"))
+        self.cryo_switch.setText(_translate("Gates", "Cryo"))
+        self.Error.setText(_translate("Gates", "<html><head/><body><p><br/></p></body></html>"))
 
     def gates(self, gate_num):
         """
@@ -205,3 +228,4 @@ if __name__ == "__main__":
     ui.setupUi(Gates)
     Gates.show()
     sys.exit(app.exec())
+

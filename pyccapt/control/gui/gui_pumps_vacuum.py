@@ -1,9 +1,12 @@
 import os
 import sys
 import threading
+import time
 
 from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtCore import QTimer
 from PyQt6.QtCore import pyqtSignal, QObject
+from PyQt6.QtGui import QPixmap
 
 # Local module and scripts
 from pyccapt.control.control_tools import share_variables, read_files
@@ -12,13 +15,14 @@ from pyccapt.control.devices import initialize_devices
 
 class Ui_Pumps_Vacuum(object):
 
-    def __init__(self, variables, conf):
+    def __init__(self, variables, conf, parent=None):
         self.variables = variables
         self.conf = conf
+        self.parent = parent
 
     def setupUi(self, Pumps_Vacuum):
         Pumps_Vacuum.setObjectName("Pumps_Vacuum")
-        Pumps_Vacuum.resize(850, 180)
+        Pumps_Vacuum.resize(850, 164)
         self.gridLayout_3 = QtWidgets.QGridLayout(Pumps_Vacuum)
         self.gridLayout_3.setObjectName("gridLayout_3")
         self.gridLayout_2 = QtWidgets.QGridLayout()
@@ -36,7 +40,7 @@ class Ui_Pumps_Vacuum(object):
         font.setBold(True)
         self.label_210.setFont(font)
         self.label_210.setObjectName("label_210")
-        self.gridLayout.addWidget(self.label_210, 0, 1, 1, 1, QtCore.Qt.AlignmentFlag.AlignHCenter)
+        self.gridLayout.addWidget(self.label_210, 0, 1, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft)
         self.vacuum_load_lock = QtWidgets.QLCDNumber(parent=Pumps_Vacuum)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
                                            QtWidgets.QSizePolicy.Policy.Preferred)
@@ -58,7 +62,7 @@ class Ui_Pumps_Vacuum(object):
         font.setBold(True)
         self.label_211.setFont(font)
         self.label_211.setObjectName("label_211")
-        self.gridLayout.addWidget(self.label_211, 0, 3, 1, 1, QtCore.Qt.AlignmentFlag.AlignHCenter)
+        self.gridLayout.addWidget(self.label_211, 0, 3, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft)
         self.vacuum_buffer = QtWidgets.QLCDNumber(parent=Pumps_Vacuum)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
                                            QtWidgets.QSizePolicy.Policy.Preferred)
@@ -83,7 +87,7 @@ class Ui_Pumps_Vacuum(object):
         font.setBold(True)
         self.label_212.setFont(font)
         self.label_212.setObjectName("label_212")
-        self.gridLayout.addWidget(self.label_212, 0, 5, 1, 1, QtCore.Qt.AlignmentFlag.AlignHCenter)
+        self.gridLayout.addWidget(self.label_212, 0, 5, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft)
         self.pump_load_lock_switch = QtWidgets.QPushButton(parent=Pumps_Vacuum)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -102,7 +106,7 @@ class Ui_Pumps_Vacuum(object):
         font.setBold(True)
         self.label_213.setFont(font)
         self.label_213.setObjectName("label_213")
-        self.gridLayout.addWidget(self.label_213, 1, 1, 1, 1, QtCore.Qt.AlignmentFlag.AlignHCenter)
+        self.gridLayout.addWidget(self.label_213, 1, 1, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft)
         self.vacuum_load_lock_back = QtWidgets.QLCDNumber(parent=Pumps_Vacuum)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
                                            QtWidgets.QSizePolicy.Policy.Preferred)
@@ -124,7 +128,7 @@ class Ui_Pumps_Vacuum(object):
         font.setBold(True)
         self.label_214.setFont(font)
         self.label_214.setObjectName("label_214")
-        self.gridLayout.addWidget(self.label_214, 1, 3, 1, 1)
+        self.gridLayout.addWidget(self.label_214, 1, 3, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft)
         self.vacuum_buffer_back = QtWidgets.QLCDNumber(parent=Pumps_Vacuum)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
                                            QtWidgets.QSizePolicy.Policy.Preferred)
@@ -149,7 +153,7 @@ class Ui_Pumps_Vacuum(object):
         font.setBold(True)
         self.label_215.setFont(font)
         self.label_215.setObjectName("label_215")
-        self.gridLayout.addWidget(self.label_215, 1, 5, 1, 1, QtCore.Qt.AlignmentFlag.AlignHCenter)
+        self.gridLayout.addWidget(self.label_215, 1, 5, 1, 1, QtCore.Qt.AlignmentFlag.AlignLeft)
         self.temp = QtWidgets.QLCDNumber(parent=Pumps_Vacuum)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
                                            QtWidgets.QSizePolicy.Policy.Preferred)
@@ -174,6 +178,9 @@ class Ui_Pumps_Vacuum(object):
         sizePolicy.setHeightForWidth(self.vacuum_main.sizePolicy().hasHeightForWidth())
         self.vacuum_main.setSizePolicy(sizePolicy)
         self.vacuum_main.setMinimumSize(QtCore.QSize(100, 50))
+        font = QtGui.QFont()
+        font.setPointSize(9)
+        self.vacuum_main.setFont(font)
         self.vacuum_main.setStyleSheet("QLCDNumber{\n"
                                        "                                    border: 2px solid green;\n"
                                        "                                    border-radius: 10px;\n"
@@ -200,25 +207,40 @@ class Ui_Pumps_Vacuum(object):
         QtCore.QMetaObject.connectSlotsByName(Pumps_Vacuum)
 
         ###
+        self.led_red = QPixmap('./files/led-red-on.png')
+        self.led_green = QPixmap('./files/green-led-on.png')
+        self.led_pump_load_lock.setPixmap(self.led_green)
+        self.pump_load_lock_switch.clicked.connect(self.pump_switch)
+        # Set 8 digits for each LCD to show
+        self.vacuum_main.setDigitCount(8)
+        self.vacuum_buffer.setDigitCount(8)
+        self.vacuum_buffer_back.setDigitCount(8)
+        self.vacuum_load_lock.setDigitCount(8)
+        self.vacuum_load_lock_back.setDigitCount(8)
+        self.temp.setDigitCount(8)
         # Create a SignalEmitter instance and connect the signal to the slot
         self.emitter = SignalEmitter()
-        if conf['gauges'] == "on":
+        if self.conf['gauges'] == "on":
             # Thread for reading gauges
             gauges_thread = threading.Thread(target=initialize_devices.state_update,
                                              args=(self.conf, self.variables, self.emitter,))
             gauges_thread.setDaemon(True)
             gauges_thread.start()
+
         ###
-        self.temp.valueChanged.connect(variables.temperature)
-        self.vacuum_main.valueChanged.connect('{:.2e}'.format(float(variables.vacuum_main)))
-        self.vacuum_buffer.valueChanged.connect('{:.2e}'.format(float(variables.vacuum_buffer)))
-        self.vacuum_buffer_back.valueChanged.connect('{:.2e}'.format(variables.vacuum_buffer_backing))
-        self.vacuum_load_lock.valueChanged.connect('{:.2e}'.format(variables.vacuum_load_lock))
-        self.vacuum_load_lock_back.valueChanged.connect('{:.2e}'.format(variables.vacuum_load_lock_backing))
+        self.emitter.temp.connect(self.update_temperature)
+        self.emitter.vacuum_main.connect(self.update_vacuum_main)
+        self.emitter.vacuum_buffer.connect(self.update_vacuum_buffer)
+        self.emitter.vacuum_buffer_back.connect(self.update_vacuum_buffer_back)
+        self.emitter.vacuum_load_back.connect(self.update_vacuum_load_back)
+        self.emitter.vacuum_load.connect(self.update_vacuum_load)
+
+        # Create a QTimer to hide the warning message after 8 seconds
+        self.timer = QTimer(self.parent)
+        self.timer.timeout.connect(self.hideMessage)
 
     def retranslateUi(self, Pumps_Vacuum):
         _translate = QtCore.QCoreApplication.translate
-
         ###
         # Pumps_Vacuum.setWindowTitle(_translate("Pumps_Vacuum", "Form"))
         Pumps_Vacuum.setWindowTitle(_translate("Pumps_Vacuum", "PyCCAPT Pumps and Vacuum Control"))
@@ -234,23 +256,62 @@ class Ui_Pumps_Vacuum(object):
         self.label_215.setText(_translate("Pumps_Vacuum", "Temperature (K)"))
         self.Error.setText(_translate("Pumps_Vacuum", "<html><head/><body><p><br/></p></body></html>"))
 
+    def update_temperature(self, value):
+        self.temp.display(value)
+
+    def update_vacuum_main(self, value):
+        self.vacuum_main.display('{:.2e}'.format(value))
+
+    def update_vacuum_buffer(self, value):
+        self.vacuum_buffer.display('{:.2e}'.format(value))
+
+    def update_vacuum_buffer_back(self, value):
+        self.vacuum_buffer_back.display('{:.2e}'.format(value))
+
+    def update_vacuum_load_back(self, value):
+        self.vacuum_load_lock.display('{:.2e}'.format(value))
+
+    def update_vacuum_load(self, value):
+        self.vacuum_load_lock_back.display('{:.2e}'.format(value))
+
+    def hideMessage(self):
+        # Hide the message and stop the timer
+        _translate = QtCore.QCoreApplication.translate
+        self.Error.setText(_translate("OXCART",
+                                      "<html><head/><body><p><span style=\" "
+                                      "color:#ff0000;\"></span></p></body></html>"))
+
+        self.timer.stop()
+
     def pump_switch(self):
         """
             The function for Switching the Load Lock pump
         """
-        if not self.variables.start_flag and not self.variables.flag_main_gate \
-                and not self.variables.flag_cryo_gate and not self.variables.flag_load_gate:
-            if self.variables.flag_pump_load_lock:
-                self.variables.flag_pump_load_lock_click = True
-                self.pump_load_lock_switch.setEnabled(False)
-            elif not variables.flag_pump_load_lock:
-                self.variables.flag_pump_load_lock_click = True
-                self.pump_load_lock_switch.setEnabled(False)
-        else:  # SHow error message in the GUI
-            _translate = QtCore.QCoreApplication.translate
-            self.Error.setText(_translate("OXCART",
-                                          "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all "
-                                          "the Gates !!!</span></p></body></html>"))
+        try:
+            if not self.variables.start_flag and not self.variables.flag_main_gate \
+                    and not self.variables.flag_cryo_gate and not self.variables.flag_load_gate:
+                if self.variables.flag_pump_load_lock:
+                    self.variables.flag_pump_load_lock_click = True
+                    self.led_pump_load_lock.setPixmap(self.led_red)
+                    self.pump_load_lock_switch.setEnabled(False)
+                    time.sleep(1)
+                    self.pump_load_lock_switch.setEnabled(True)
+                elif not variables.flag_pump_load_lock:
+                    self.variables.flag_pump_load_lock_click = True
+                    self.led_pump_load_lock.setPixmap(self.led_green)
+                    self.pump_load_lock_switch.setEnabled(False)
+                    time.sleep(1)
+                    self.pump_load_lock_switch.setEnabled(True)
+            else:  # SHow error message in the GUI
+                _translate = QtCore.QCoreApplication.translate
+                self.Error.setText(_translate("OXCART",
+                                              "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all "
+                                              "the Gates !!!</span></p></body></html>"))
+                self.timer.start(8000)
+        except Exception as e:
+            print('Error in pump_switch function')
+            print(e)
+            pass
 
 
 class SignalEmitter(QObject):
@@ -285,3 +346,4 @@ if __name__ == "__main__":
     ui.setupUi(Pumps_vacuum)
     Pumps_vacuum.show()
     sys.exit(app.exec())
+

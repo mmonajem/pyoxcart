@@ -11,6 +11,7 @@ from pyccapt.control.control_tools import share_variables, read_files
 from pyccapt.control.devices.camera import Camera
 from pyccapt.control.gui import gui_cameras
 from pyccapt.control.gui import gui_gates
+from pyccapt.control.gui import gui_pumps_vacuum
 
 
 class Ui_PyCCAPT(object):
@@ -841,6 +842,10 @@ class Ui_PyCCAPT(object):
                 ###
                 self.Camears.clicked.connect(self.open_cameras_win)
                 self.gates_control.clicked.connect(self.open_gates_win)
+                self.laser_control.clicked.connect(self.open_laser_control_win)
+                self.pumps_vaccum.clicked.connect(self.open_pumps_vacuum_win)
+                self.Visualization.clicked.connect(self.open_visualization_win)
+                # self.baking.clicked.connect(self.open_baking_win)
 
         def retranslateUi(self, PyCCAPT):
                 _translate = QtCore.QCoreApplication.translate
@@ -928,8 +933,9 @@ class Ui_PyCCAPT(object):
                         self.Cameras_alignment.activateWindow()
                 else:
                         self.Cameras_alignment = QtWidgets.QWidget(flags=Qt.WindowType.Tool)
-                        self.cameras = gui_cameras.Ui_Cameras_Alignment(self.variables, self.conf, self.camera)
-                        self.cameras.setupUi(self.Cameras_alignment)
+                        self.gui_cameras_alignment = gui_cameras.Ui_Cameras_Alignment(self.variables, self.conf,
+                                                                                      self.camera)
+                        self.gui_cameras_alignment.setupUi(self.Cameras_alignment)
                         self.Cameras_alignment.show()
 
         def open_gates_win(self, ):
@@ -938,9 +944,28 @@ class Ui_PyCCAPT(object):
                         self.Gates.activateWindow()
                 else:
                         self.Gates = QtWidgets.QWidget(flags=Qt.WindowType.Tool)
-                        self.gates = gui_gates.Ui_Gates(self.variables, self.conf)
-                        self.gates.setupUi(self.Gates)
+                        self.gui_gates = gui_gates.Ui_Gates(self.variables, self.conf)
+                        self.gui_gates.setupUi(self.Gates)
                         self.Gates.show()
+
+        def open_pumps_vacuum_win(self, ):
+                if hasattr(self, 'Pumps_Vacuum') and self.Pumps_vacuum.isVisible():
+                        self.Pumps_vacuum.raise_()
+                        self.Pumps_vacuum.activateWindow()
+                else:
+                        self.Pumps_vacuum = QtWidgets.QWidget(flags=Qt.WindowType.Tool)
+                        self.gui_pumps_vacuum = gui_pumps_vacuum.Ui_Pumps_Vacuum(self.variables, self.conf)
+                        self.gui_pumps_vacuum.setupUi(self.Pumps_vacuum)
+                        self.Pumps_vacuum.show()
+
+        def open_laser_control_win(self, ):
+                pass
+
+        def open_visualization_win(self, ):
+                pass
+
+        def open_baking_win(self, ):
+                pass
 
 
 if __name__ == "__main__":

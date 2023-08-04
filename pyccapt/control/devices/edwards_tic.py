@@ -15,7 +15,7 @@ class EdwardsAGC(object):
     http://www.idealvac.com/files/brochures/Edwards_AGC_D386-52-880_IssueM.pdf
     """
 
-    def __init__(self, port):
+    def __init__(self, port, variables):
         """
         The constructor function to initialze serial lib parameters
         Attributes:
@@ -24,8 +24,9 @@ class EdwardsAGC(object):
             Does not return anything
         """
         self.port = port
+        self.variables = variables
         self.serial = serial.Serial(self.port, baudrate=9600, timeout=0.5)
-        if variables.log:
+        if self.variables.log:
             self.log_edwards_tic = loggi.logger_creator('edwards_tic', 'edwards_tic.log', path=variables.log_path)
 
     def comm(self, command):
@@ -38,12 +39,12 @@ class EdwardsAGC(object):
             Returns the string read through serial
         """
         comm = command + "\r\n"
-        if variables.log:
+        if self.variables.log:
             self.log_edwards_tic.info("Function - comm | Command - > {} | type -> {} ".format(command, type(command)))
             self.log_edwards_tic.info("Function - comm | Comm - > {}".format(comm))
         self.serial.write(comm.encode())
         complete_string = self.serial.readline().decode()
         complete_string = complete_string.strip()
-        if variables.log:
+        if self.variables.log:
             self.log_edwards_tic.info("Function - comm | Response - > {}".format(complete_string))
         return complete_string
