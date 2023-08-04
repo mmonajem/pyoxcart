@@ -1,15 +1,16 @@
 # from __future__ import absolute_import, division, print_function
 from builtins import *  # @UnusedWildImport
-
-from mcculw import ul
-from mcculw.enums import InfoType, BoardInfo, AiChanType, TcType, TempScale, TInOptions
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib import style
 from datetime import datetime
-import pandas as pd
-import numpy as np
 from threading import Thread
+
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from matplotlib import style
+from mcculw import ul
+from mcculw.enums import InfoType, BoardInfo, TcType, TempScale, TInOptions
+
 """
 This module contains drivers for the following equipment from Pfeiffer
 Vacuum:

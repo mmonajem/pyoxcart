@@ -112,7 +112,7 @@ class Ui_Visualization(object):
         self.label_200.setText(_translate("Visualization", "Voltage"))
         self.label_201.setText(_translate("Visualization", "Detection Rate"))
         self.label_206.setText(_translate("Visualization", "Detector Heatmap"))
-        self.label_207.setText(_translate("Visualization", "TOF"))
+        self.label_207.setText(_translate("Visualization", "Mass Spectrum"))
 
 
 if __name__ == "__main__":

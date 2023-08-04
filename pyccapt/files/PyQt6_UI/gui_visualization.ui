@@ -126,7 +126,7 @@
                                 </font>
                             </property>
                             <property name="text">
-                                <string>TOF</string>
+                                <string>Mass Spectrum</string>
                             </property>
                         </widget>
                     </item>

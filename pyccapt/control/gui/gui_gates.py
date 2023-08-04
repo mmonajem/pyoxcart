@@ -201,8 +201,8 @@ class Ui_Gates(object):
         else:
             _translate = QtCore.QCoreApplication.translate
             self.Error.setText(_translate("OXCART",
-                                          "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all "
-                                          "the Gates and switch on the pump !!!</span></p></body></html>"))
+                                          "<html><head/><body><p><span style=\" color:#ff0000;\">!!! Close the previous"
+                                          " gate first !!!</span></p></body></html>"))
 
 
 if __name__ == "__main__":
