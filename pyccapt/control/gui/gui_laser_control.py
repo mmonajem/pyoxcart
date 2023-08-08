@@ -6,9 +6,9 @@ import sys
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer
 
-from pyccapt.control.apt import apt_tdc_roetdec
 # Local module and scripts
 from pyccapt.control.control_tools import share_variables, read_files
+from pyccapt.control.thorlabs_apt import thorlab_motor
 
 
 class Ui_Laser_Control(object):
@@ -221,7 +221,7 @@ class Ui_Laser_Control(object):
         try:
             self.disable_button_for_10_seconds()  # Disable the home button for 10 seconds
 
-            thorlab_process = multiprocessing.Process(target=apt_tdc_roetdec.thorlab,
+            thorlab_process = multiprocessing.Process(target=thorlab_motor.thorlab,
                                                       args=(self.conf, 0, False, True))
             thorlab_process.daemon = True
             thorlab_process.start()

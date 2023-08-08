@@ -89,7 +89,7 @@ class APT_Exp_Control:
             self.tdc_process = multiprocessing.Process(target=tdc_roentdec.experiment_measure,
                                                        args=(self.queue_x, self.queue_y, self.queue_tof,
                                                              self.queue_AbsoluteTimeStamp,
-                                                             self.queue_ch0, self.queue_ch1, qself.ueue_ch2,
+                                                             self.queue_ch0, self.queue_ch1, self.queue_ch2,
                                                              self.queue_ch3,
                                                              self.queue_ch4, self.queue_ch5, self.queue_ch6,
                                                              self.queue_ch7,
@@ -118,7 +118,7 @@ class APT_Exp_Control:
                                                        args=(self.queue_ch0_time, self.queue_ch0_wave,
                                                              self.queue_ch1_time, self.queue_ch1_wave,
                                                              self.queue_ch2_time, self.queue_ch2_wave,
-                                                             self.queue_ch3_time, qself.ueue_ch3_wave,
+                                                             self.queue_ch3_time, self.queue_ch3_wave,
                                                              self.queue_stop_measurement,
                                                              ))
             self.drs_process.daemon = True

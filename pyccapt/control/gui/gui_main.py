@@ -33,33 +33,33 @@ class Ui_PyCCAPT(object):
                 PyCCAPT.resize(905, 844)
                 self.centralwidget = QtWidgets.QWidget(parent=PyCCAPT)
                 self.centralwidget.setObjectName("centralwidget")
-        self.gridLayout_5 = QtWidgets.QGridLayout(self.centralwidget)
-        self.gridLayout_5.setObjectName("gridLayout_5")
-        self.gridLayout_4 = QtWidgets.QGridLayout()
-        self.gridLayout_4.setObjectName("gridLayout_4")
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.gates_control = QtWidgets.QPushButton(parent=self.centralwidget)
-        self.gates_control.setMinimumSize(QtCore.QSize(0, 40))
-        self.gates_control.setStyleSheet("QPushButton{\n"
-                                         "                                                background: rgb(85, 170, 255)\n"
-                                         "                                                }                   ")
-        self.gates_control.setObjectName("gates_control")
-        self.horizontalLayout.addWidget(self.gates_control)
-        self.pumps_vaccum = QtWidgets.QPushButton(parent=self.centralwidget)
-        self.pumps_vaccum.setMinimumSize(QtCore.QSize(0, 40))
-        self.pumps_vaccum.setStyleSheet("QPushButton{\n"
-                                        "                                                background: rgb(85, 170, 255)\n"
-                                        "                                                }\n"
-                                        "                                            ")
-        self.pumps_vaccum.setObjectName("pumps_vaccum")
-        self.horizontalLayout.addWidget(self.pumps_vaccum)
-        self.Camears = QtWidgets.QPushButton(parent=self.centralwidget)
-        self.Camears.setMinimumSize(QtCore.QSize(0, 40))
-        self.Camears.setStyleSheet("QPushButton{\n"
-                                   "                                                background: rgb(85, 170, 255)\n"
-                                   "                                                }\n"
-                                   "                                            ")
+                self.gridLayout_5 = QtWidgets.QGridLayout(self.centralwidget)
+                self.gridLayout_5.setObjectName("gridLayout_5")
+                self.gridLayout_4 = QtWidgets.QGridLayout()
+                self.gridLayout_4.setObjectName("gridLayout_4")
+                self.horizontalLayout = QtWidgets.QHBoxLayout()
+                self.horizontalLayout.setObjectName("horizontalLayout")
+                self.gates_control = QtWidgets.QPushButton(parent=self.centralwidget)
+                self.gates_control.setMinimumSize(QtCore.QSize(0, 40))
+                self.gates_control.setStyleSheet("QPushButton{\n"
+                                                 "                                                background: rgb(85, 170, 255)\n"
+                                                 "                                                }                   ")
+                self.gates_control.setObjectName("gates_control")
+                self.horizontalLayout.addWidget(self.gates_control)
+                self.pumps_vaccum = QtWidgets.QPushButton(parent=self.centralwidget)
+                self.pumps_vaccum.setMinimumSize(QtCore.QSize(0, 40))
+                self.pumps_vaccum.setStyleSheet("QPushButton{\n"
+                                                "                                                background: rgb(85, 170, 255)\n"
+                                                "                                                }\n"
+                                                "                                            ")
+                self.pumps_vaccum.setObjectName("pumps_vaccum")
+                self.horizontalLayout.addWidget(self.pumps_vaccum)
+                self.Camears = QtWidgets.QPushButton(parent=self.centralwidget)
+                self.Camears.setMinimumSize(QtCore.QSize(0, 40))
+                self.Camears.setStyleSheet("QPushButton{\n"
+                                           "                                                background: rgb(85, 170, 255)\n"
+                                           "                                                }\n"
+                                           "                                            ")
                 self.Camears.setObjectName("Camears")
                 self.horizontalLayout.addWidget(self.Camears)
                 self.laser_control = QtWidgets.QPushButton(parent=self.centralwidget)
@@ -164,10 +164,11 @@ class Ui_PyCCAPT(object):
                                            "                                                background: rgb(223,223,233)\n"
                                            "                                                }\n"
                                            "                                            ")
-        self.ex_name.setObjectName("ex_name")
-        self.gridLayout.addWidget(self.ex_name, 2, 6, 1, 1)
-        self.label_177 = QtWidgets.QLabel(parent=self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+                self.ex_name.setObjectName("ex_name")
+                self.gridLayout.addWidget(self.ex_name, 2, 6, 1, 1)
+                self.label_177 = QtWidgets.QLabel(parent=self.centralwidget)
+                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum,
+                                                   QtWidgets.QSizePolicy.Policy.Minimum)
                 sizePolicy.setHorizontalStretch(0)
                 sizePolicy.setVerticalStretch(0)
                 sizePolicy.setHeightForWidth(self.label_177.sizePolicy().hasHeightForWidth())
@@ -763,83 +764,85 @@ class Ui_PyCCAPT(object):
                 font.setPointSize(13)
                 font.setBold(True)
                 font.setStrikeOut(False)
-        self.Error.setFont(font)
-        self.Error.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.Error.setTextInteractionFlags(QtCore.Qt.TextInteractionFlag.LinksAccessibleByMouse)
-        self.Error.setObjectName("Error")
-        self.gridLayout_2.addWidget(self.Error, 0, 0, 1, 2)
-        self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 2, 1)
-        self.start_button = QtWidgets.QPushButton(parent=self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.start_button.sizePolicy().hasHeightForWidth())
-        self.start_button.setSizePolicy(sizePolicy)
-        self.start_button.setMinimumSize(QtCore.QSize(0, 25))
-        self.start_button.setStyleSheet("QPushButton{\n"
-                                        "                                                background: rgb(193, 193, 193)\n"
-                                        "                                                }\n"
-                                        "                                            ")
-        self.start_button.setObjectName("start_button")
-        self.gridLayout_3.addWidget(self.start_button, 0, 1, 1, 1)
-        self.stop_button = QtWidgets.QPushButton(parent=self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.stop_button.sizePolicy().hasHeightForWidth())
-        self.stop_button.setSizePolicy(sizePolicy)
-        self.stop_button.setMinimumSize(QtCore.QSize(0, 25))
-        self.stop_button.setStyleSheet("QPushButton{\n"
-                                       "                                                background: rgb(193, 193, 193)\n"
-                                       "                                                }\n"
-                                       "                                            ")
-        self.stop_button.setObjectName("stop_button")
-        self.gridLayout_3.addWidget(self.stop_button, 1, 1, 1, 1)
-        self.gridLayout_4.addLayout(self.gridLayout_3, 2, 0, 1, 2)
-        self.gridLayout_5.addLayout(self.gridLayout_4, 0, 0, 1, 1)
-        PyCCAPT.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(parent=PyCCAPT)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 905, 22))
-        self.menubar.setObjectName("menubar")
-        self.menuFile = QtWidgets.QMenu(parent=self.menubar)
-        self.menuFile.setObjectName("menuFile")
-        self.menuEdit = QtWidgets.QMenu(parent=self.menubar)
-        self.menuEdit.setObjectName("menuEdit")
-        self.menuHelp = QtWidgets.QMenu(parent=self.menubar)
-        self.menuHelp.setObjectName("menuHelp")
-        self.menuSettings = QtWidgets.QMenu(parent=self.menubar)
-        self.menuSettings.setObjectName("menuSettings")
-        self.menuView = QtWidgets.QMenu(parent=self.menubar)
-        self.menuView.setObjectName("menuView")
-        PyCCAPT.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(parent=PyCCAPT)
-        self.statusbar.setObjectName("statusbar")
-        PyCCAPT.setStatusBar(self.statusbar)
-        self.actionExit = QtGui.QAction(parent=PyCCAPT)
-        self.actionExit.setObjectName("actionExit")
-        self.actiontake_sceernshot = QtGui.QAction(parent=PyCCAPT)
-        self.actiontake_sceernshot.setObjectName("actiontake_sceernshot")
-        self.actionAbout = QtGui.QAction(parent=PyCCAPT)
-        self.actionAbout.setObjectName("actionAbout")
-        self.menuFile.addAction(self.actionExit)
-        self.menuEdit.addAction(self.actiontake_sceernshot)
-        self.menuHelp.addAction(self.actionAbout)
-        self.menubar.addAction(self.menuFile.menuAction())
-        self.menubar.addAction(self.menuEdit.menuAction())
-        self.menubar.addAction(self.menuView.menuAction())
-        self.menubar.addAction(self.menuSettings.menuAction())
-        self.menubar.addAction(self.menuHelp.menuAction())
+                self.Error.setFont(font)
+                self.Error.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+                self.Error.setTextInteractionFlags(QtCore.Qt.TextInteractionFlag.LinksAccessibleByMouse)
+                self.Error.setObjectName("Error")
+                self.gridLayout_2.addWidget(self.Error, 0, 0, 1, 2)
+                self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 2, 1)
+                self.start_button = QtWidgets.QPushButton(parent=self.centralwidget)
+                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed,
+                                                   QtWidgets.QSizePolicy.Policy.Fixed)
+                sizePolicy.setHorizontalStretch(0)
+                sizePolicy.setVerticalStretch(0)
+                sizePolicy.setHeightForWidth(self.start_button.sizePolicy().hasHeightForWidth())
+                self.start_button.setSizePolicy(sizePolicy)
+                self.start_button.setMinimumSize(QtCore.QSize(0, 25))
+                self.start_button.setStyleSheet("QPushButton{\n"
+                                                "                                                background: rgb(193, 193, 193)\n"
+                                                "                                                }\n"
+                                                "                                            ")
+                self.start_button.setObjectName("start_button")
+                self.gridLayout_3.addWidget(self.start_button, 0, 1, 1, 1)
+                self.stop_button = QtWidgets.QPushButton(parent=self.centralwidget)
+                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed,
+                                                   QtWidgets.QSizePolicy.Policy.Fixed)
+                sizePolicy.setHorizontalStretch(0)
+                sizePolicy.setVerticalStretch(0)
+                sizePolicy.setHeightForWidth(self.stop_button.sizePolicy().hasHeightForWidth())
+                self.stop_button.setSizePolicy(sizePolicy)
+                self.stop_button.setMinimumSize(QtCore.QSize(0, 25))
+                self.stop_button.setStyleSheet("QPushButton{\n"
+                                               "                                                background: rgb(193, 193, 193)\n"
+                                               "                                                }\n"
+                                               "                                            ")
+                self.stop_button.setObjectName("stop_button")
+                self.gridLayout_3.addWidget(self.stop_button, 1, 1, 1, 1)
+                self.gridLayout_4.addLayout(self.gridLayout_3, 2, 0, 1, 2)
+                self.gridLayout_5.addLayout(self.gridLayout_4, 0, 0, 1, 1)
+                PyCCAPT.setCentralWidget(self.centralwidget)
+                self.menubar = QtWidgets.QMenuBar(parent=PyCCAPT)
+                self.menubar.setGeometry(QtCore.QRect(0, 0, 905, 22))
+                self.menubar.setObjectName("menubar")
+                self.menuFile = QtWidgets.QMenu(parent=self.menubar)
+                self.menuFile.setObjectName("menuFile")
+                self.menuEdit = QtWidgets.QMenu(parent=self.menubar)
+                self.menuEdit.setObjectName("menuEdit")
+                self.menuHelp = QtWidgets.QMenu(parent=self.menubar)
+                self.menuHelp.setObjectName("menuHelp")
+                self.menuSettings = QtWidgets.QMenu(parent=self.menubar)
+                self.menuSettings.setObjectName("menuSettings")
+                self.menuView = QtWidgets.QMenu(parent=self.menubar)
+                self.menuView.setObjectName("menuView")
+                PyCCAPT.setMenuBar(self.menubar)
+                self.statusbar = QtWidgets.QStatusBar(parent=PyCCAPT)
+                self.statusbar.setObjectName("statusbar")
+                PyCCAPT.setStatusBar(self.statusbar)
+                self.actionExit = QtGui.QAction(parent=PyCCAPT)
+                self.actionExit.setObjectName("actionExit")
+                self.actiontake_sceernshot = QtGui.QAction(parent=PyCCAPT)
+                self.actiontake_sceernshot.setObjectName("actiontake_sceernshot")
+                self.actionAbout = QtGui.QAction(parent=PyCCAPT)
+                self.actionAbout.setObjectName("actionAbout")
+                self.menuFile.addAction(self.actionExit)
+                self.menuEdit.addAction(self.actiontake_sceernshot)
+                self.menuHelp.addAction(self.actionAbout)
+                self.menubar.addAction(self.menuFile.menuAction())
+                self.menubar.addAction(self.menuEdit.menuAction())
+                self.menubar.addAction(self.menuView.menuAction())
+                self.menubar.addAction(self.menuSettings.menuAction())
+                self.menubar.addAction(self.menuHelp.menuAction())
 
-        self.retranslateUi(PyCCAPT)
-        QtCore.QMetaObject.connectSlotsByName(PyCCAPT)
-        PyCCAPT.setTabOrder(self.parameters_source, self.ex_user)
-        PyCCAPT.setTabOrder(self.ex_user, self.ex_name)
-        PyCCAPT.setTabOrder(self.ex_name, self.criteria_time)
-        PyCCAPT.setTabOrder(self.criteria_time, self.ex_time)
-        PyCCAPT.setTabOrder(self.ex_time, self.criteria_ions)
-        PyCCAPT.setTabOrder(self.criteria_ions, self.max_ions)
-        PyCCAPT.setTabOrder(self.max_ions, self.ex_freq)
-        PyCCAPT.setTabOrder(self.ex_freq, self.vdc_min)
+                self.retranslateUi(PyCCAPT)
+                QtCore.QMetaObject.connectSlotsByName(PyCCAPT)
+                PyCCAPT.setTabOrder(self.parameters_source, self.ex_user)
+                PyCCAPT.setTabOrder(self.ex_user, self.ex_name)
+                PyCCAPT.setTabOrder(self.ex_name, self.criteria_time)
+                PyCCAPT.setTabOrder(self.criteria_time, self.ex_time)
+                PyCCAPT.setTabOrder(self.ex_time, self.criteria_ions)
+                PyCCAPT.setTabOrder(self.criteria_ions, self.max_ions)
+                PyCCAPT.setTabOrder(self.max_ions, self.ex_freq)
+                PyCCAPT.setTabOrder(self.ex_freq, self.vdc_min)
                 PyCCAPT.setTabOrder(self.vdc_min, self.criteria_vdc)
                 PyCCAPT.setTabOrder(self.criteria_vdc, self.vdc_max)
                 PyCCAPT.setTabOrder(self.vdc_max, self.vdc_steps_up)
@@ -924,99 +927,100 @@ class Ui_PyCCAPT(object):
                 self.emitter.detection_rate.connect(self.update_detection_rate)
 
                 self.result_list = []
-    def retranslateUi(self, PyCCAPT):
-        _translate = QtCore.QCoreApplication.translate
-        ###
-        # PyCCAPT.setWindowTitle(_translate("PyCCAPT", "OXCART"))
-        PyCCAPT.setWindowTitle(_translate("PyCCAPT", "PyCCAPT APT Experiment Control"))
-        PyCCAPT.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
-        _translate = QtCore.QCoreApplication.translate
-        ###
-        self.gates_control.setText(_translate("PyCCAPT", "Gates Control"))
-        self.pumps_vaccum.setText(_translate("PyCCAPT", "Pumps & Vacuum"))
-        self.Camears.setText(_translate("PyCCAPT", "Cameras & Alingment"))
-        self.laser_control.setText(_translate("PyCCAPT", "Laser Control"))
-        self.Visualization.setText(_translate("PyCCAPT", "Visualization"))
-        self.baking.setText(_translate("PyCCAPT", "Baking"))
-        self.label_197.setText(_translate("PyCCAPT", "Pulse Voltage (V)"))
-        self.detection_rate_init.setText(_translate("PyCCAPT", "1"))
-        self.label_176.setText(_translate("PyCCAPT", "Max. Experiment Time (S)"))
-        self.label_188.setText(_translate("PyCCAPT", "Detection Rate (%)"))
-        self.label_193.setText(_translate("PyCCAPT", "Run Statistics"))
-        self.label_198.setText(_translate("PyCCAPT", "Detection Rate (%)"))
-        self.ex_name.setText(_translate("PyCCAPT", "test"))
-        self.label_177.setText(_translate("PyCCAPT", "Max. Number of Ions"))
-        self.label_192.setText(_translate("PyCCAPT", "Detection Mode"))
-        self.control_algorithm.setItemText(0, _translate("PyCCAPT", "Proportional"))
-        self.control_algorithm.setItemText(1, _translate("PyCCAPT", "PID"))
-        self.hit_displayed.setText(_translate("PyCCAPT", "20000"))
-        self.label_179.setText(_translate("PyCCAPT", "Specimen Start Voltage (V)"))
-        self.label_195.setText(_translate("PyCCAPT", "Total Ions"))
-        self.ex_user.setText(_translate("PyCCAPT", "user"))
-        self.label_174.setText(_translate("PyCCAPT", "Experiment User"))
-        self.pulse_fraction.setText(_translate("PyCCAPT", "20"))
-        self.counter_source.setItemText(0, _translate("PyCCAPT", "TDC"))
-        self.counter_source.setItemText(1, _translate("PyCCAPT", "Digitizer"))
-        self.label_182.setText(_translate("PyCCAPT", "K_p Downwards"))
-        self.label_189.setText(_translate("PyCCAPT", "# Hits Displayed"))
-        self.label_184.setText(_translate("PyCCAPT", "Pulse Min. Voltage (V)"))
-        self.pulse_frequency.setText(_translate("PyCCAPT", "200"))
-        self.label_190.setText(_translate("PyCCAPT", "Email"))
-        self.label_194.setText(_translate("PyCCAPT", "Elapsed Time (S):"))
-        self.dc_hold.setText(_translate("PyCCAPT", "Hold"))
-        self.label_175.setText(_translate("PyCCAPT", "Experiment Name"))
-        self.label_178.setText(_translate("PyCCAPT", "Control refresh Freq.(Hz)"))
-        self.parameters_source.setItemText(0, _translate("PyCCAPT", "TextBox"))
-        self.parameters_source.setItemText(1, _translate("PyCCAPT", "TextLine"))
-        self.label_180.setText(_translate("PyCCAPT", "Specimen Stop Voltage (V)"))
-        self.label_186.setText(_translate("PyCCAPT", "Pulse Fraction (%)"))
-        self.label_173.setText(_translate("PyCCAPT", "Setup Parameters"))
-        self.label_191.setText(_translate("PyCCAPT", "Control Algorithm"))
-        self.vdc_steps_down.setText(_translate("PyCCAPT", "100"))
-        self.vp_min.setText(_translate("PyCCAPT", "328"))
-        self.label_187.setText(_translate("PyCCAPT", "Pulse Frequency (KHz)"))
-        self.max_ions.setText(_translate("PyCCAPT", "4000"))
-        self.label_185.setText(_translate("PyCCAPT", "Pulse Max. Voltage (V)"))
-        self.vp_max.setText(_translate("PyCCAPT", "3281"))
-        self.ex_freq.setText(_translate("PyCCAPT", "10"))
-        self.label_181.setText(_translate("PyCCAPT", "K_p Upwards"))
-        self.reset_heatmap.setText(_translate("PyCCAPT", "Reset"))
-        self.ex_time.setText(_translate("PyCCAPT", "900"))
-        self.vdc_max.setText(_translate("PyCCAPT", "4000"))
-        self.vdc_min.setText(_translate("PyCCAPT", "500"))
-        self.vdc_steps_up.setText(_translate("PyCCAPT", "100"))
-        self.label_196.setText(_translate("PyCCAPT", "Specimen Voltage (V)"))
-        self.text_line.setHtml(_translate("PyCCAPT",
-                                          "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                          "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
-                                          "p, li { white-space: pre-wrap; }\n"
-                                          "</style></head><body style=\" font-family:\'Segoe UI\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">{ex_user=user1;</span><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">ex_name=test1;</span></p>\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">ex_time=90;max_ions=2000;ex_freq=10;</span></p>\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vdc_min=500;vdc_max=4000;vdc_steps_up=100;</span></p>\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vdc_steps_down=100;</span><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">control_algorithm=PID;</span><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vp_min=328;</span></p>\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vp_max=3281;pulse_fraction=20;pulse_frequency=200;</span></p>\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">detection_rate_init=1;hit_displayed=20000;email=;counter_source=TDC</span><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">;</span></p>\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">criteria_time=True;criteria_ions=False;</span></p>\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">criteria_vdc=False}</span>                                        </p>\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">{ex_user=user2;ex_name=test2;ex_time=100;</span></p>\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">max_ions=3000;ex_freq=5;vdc_min=1000;</span></p>\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">vdc_max=3000;vdc_steps_up=50;vdc_steps_down=50;</span></p>\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">control_algorithm=proportional;vp_min=400;vp_max=2000;</span></p>\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">pulse_fraction=15;pulse_frequency=200;detection_rate_init=2;</span></p>\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">hit_displayed=40000;email=;counter_source=DRS;</span></p>\n"
-                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">criteria_time=False;criteria_ions=False;criteria_vdc=True}</span>                                    </p></body></html>"))
-        self.Error.setText(_translate("PyCCAPT", "<html><head/><body><p><br/></p></body></html>"))
-        self.start_button.setText(_translate("PyCCAPT", "Start"))
-        self.stop_button.setText(_translate("PyCCAPT", "Stop"))
-        self.menuFile.setTitle(_translate("PyCCAPT", "File"))
-        self.menuEdit.setTitle(_translate("PyCCAPT", "Edit"))
-        self.menuHelp.setTitle(_translate("PyCCAPT", "Help"))
-        self.menuSettings.setTitle(_translate("PyCCAPT", "Settings"))
-        self.menuView.setTitle(_translate("PyCCAPT", "View"))
-        self.actionExit.setText(_translate("PyCCAPT", "Exit"))
-        self.actiontake_sceernshot.setText(_translate("PyCCAPT", "take sceernshot"))
-        self.actionAbout.setText(_translate("PyCCAPT", "About PyCCAPT"))
+
+        def retranslateUi(self, PyCCAPT):
+                _translate = QtCore.QCoreApplication.translate
+                ###
+                # PyCCAPT.setWindowTitle(_translate("PyCCAPT", "OXCART"))
+                PyCCAPT.setWindowTitle(_translate("PyCCAPT", "PyCCAPT APT Experiment Control"))
+                PyCCAPT.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+                _translate = QtCore.QCoreApplication.translate
+                ###
+                self.gates_control.setText(_translate("PyCCAPT", "Gates Control"))
+                self.pumps_vaccum.setText(_translate("PyCCAPT", "Pumps & Vacuum"))
+                self.Camears.setText(_translate("PyCCAPT", "Cameras & Alingment"))
+                self.laser_control.setText(_translate("PyCCAPT", "Laser Control"))
+                self.Visualization.setText(_translate("PyCCAPT", "Visualization"))
+                self.baking.setText(_translate("PyCCAPT", "Baking"))
+                self.label_197.setText(_translate("PyCCAPT", "Pulse Voltage (V)"))
+                self.detection_rate_init.setText(_translate("PyCCAPT", "1"))
+                self.label_176.setText(_translate("PyCCAPT", "Max. Experiment Time (S)"))
+                self.label_188.setText(_translate("PyCCAPT", "Detection Rate (%)"))
+                self.label_193.setText(_translate("PyCCAPT", "Run Statistics"))
+                self.label_198.setText(_translate("PyCCAPT", "Detection Rate (%)"))
+                self.ex_name.setText(_translate("PyCCAPT", "test"))
+                self.label_177.setText(_translate("PyCCAPT", "Max. Number of Ions"))
+                self.label_192.setText(_translate("PyCCAPT", "Detection Mode"))
+                self.control_algorithm.setItemText(0, _translate("PyCCAPT", "Proportional"))
+                self.control_algorithm.setItemText(1, _translate("PyCCAPT", "PID"))
+                self.hit_displayed.setText(_translate("PyCCAPT", "20000"))
+                self.label_179.setText(_translate("PyCCAPT", "Specimen Start Voltage (V)"))
+                self.label_195.setText(_translate("PyCCAPT", "Total Ions"))
+                self.ex_user.setText(_translate("PyCCAPT", "user"))
+                self.label_174.setText(_translate("PyCCAPT", "Experiment User"))
+                self.pulse_fraction.setText(_translate("PyCCAPT", "20"))
+                self.counter_source.setItemText(0, _translate("PyCCAPT", "TDC"))
+                self.counter_source.setItemText(1, _translate("PyCCAPT", "Digitizer"))
+                self.label_182.setText(_translate("PyCCAPT", "K_p Downwards"))
+                self.label_189.setText(_translate("PyCCAPT", "# Hits Displayed"))
+                self.label_184.setText(_translate("PyCCAPT", "Pulse Min. Voltage (V)"))
+                self.pulse_frequency.setText(_translate("PyCCAPT", "200"))
+                self.label_190.setText(_translate("PyCCAPT", "Email"))
+                self.label_194.setText(_translate("PyCCAPT", "Elapsed Time (S):"))
+                self.dc_hold.setText(_translate("PyCCAPT", "Hold"))
+                self.label_175.setText(_translate("PyCCAPT", "Experiment Name"))
+                self.label_178.setText(_translate("PyCCAPT", "Control refresh Freq.(Hz)"))
+                self.parameters_source.setItemText(0, _translate("PyCCAPT", "TextBox"))
+                self.parameters_source.setItemText(1, _translate("PyCCAPT", "TextLine"))
+                self.label_180.setText(_translate("PyCCAPT", "Specimen Stop Voltage (V)"))
+                self.label_186.setText(_translate("PyCCAPT", "Pulse Fraction (%)"))
+                self.label_173.setText(_translate("PyCCAPT", "Setup Parameters"))
+                self.label_191.setText(_translate("PyCCAPT", "Control Algorithm"))
+                self.vdc_steps_down.setText(_translate("PyCCAPT", "100"))
+                self.vp_min.setText(_translate("PyCCAPT", "328"))
+                self.label_187.setText(_translate("PyCCAPT", "Pulse Frequency (KHz)"))
+                self.max_ions.setText(_translate("PyCCAPT", "4000"))
+                self.label_185.setText(_translate("PyCCAPT", "Pulse Max. Voltage (V)"))
+                self.vp_max.setText(_translate("PyCCAPT", "3281"))
+                self.ex_freq.setText(_translate("PyCCAPT", "10"))
+                self.label_181.setText(_translate("PyCCAPT", "K_p Upwards"))
+                self.reset_heatmap.setText(_translate("PyCCAPT", "Reset"))
+                self.ex_time.setText(_translate("PyCCAPT", "900"))
+                self.vdc_max.setText(_translate("PyCCAPT", "4000"))
+                self.vdc_min.setText(_translate("PyCCAPT", "500"))
+                self.vdc_steps_up.setText(_translate("PyCCAPT", "100"))
+                self.label_196.setText(_translate("PyCCAPT", "Specimen Voltage (V)"))
+                self.text_line.setHtml(_translate("PyCCAPT",
+                                                  "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                                  "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
+                                                  "p, li { white-space: pre-wrap; }\n"
+                                                  "</style></head><body style=\" font-family:\'Segoe UI\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">{ex_user=user1;</span><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">ex_name=test1;</span></p>\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">ex_time=90;max_ions=2000;ex_freq=10;</span></p>\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vdc_min=500;vdc_max=4000;vdc_steps_up=100;</span></p>\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vdc_steps_down=100;</span><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">control_algorithm=PID;</span><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vp_min=328;</span></p>\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vp_max=3281;pulse_fraction=20;pulse_frequency=200;</span></p>\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">detection_rate_init=1;hit_displayed=20000;email=;counter_source=TDC</span><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">;</span></p>\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">criteria_time=True;criteria_ions=False;</span></p>\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">criteria_vdc=False}</span>                                        </p>\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">{ex_user=user2;ex_name=test2;ex_time=100;</span></p>\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">max_ions=3000;ex_freq=5;vdc_min=1000;</span></p>\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">vdc_max=3000;vdc_steps_up=50;vdc_steps_down=50;</span></p>\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">control_algorithm=proportional;vp_min=400;vp_max=2000;</span></p>\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">pulse_fraction=15;pulse_frequency=200;detection_rate_init=2;</span></p>\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">hit_displayed=40000;email=;counter_source=DRS;</span></p>\n"
+                                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">criteria_time=False;criteria_ions=False;criteria_vdc=True}</span>                                    </p></body></html>"))
+                self.Error.setText(_translate("PyCCAPT", "<html><head/><body><p><br/></p></body></html>"))
+                self.start_button.setText(_translate("PyCCAPT", "Start"))
+                self.stop_button.setText(_translate("PyCCAPT", "Stop"))
+                self.menuFile.setTitle(_translate("PyCCAPT", "File"))
+                self.menuEdit.setTitle(_translate("PyCCAPT", "Edit"))
+                self.menuHelp.setTitle(_translate("PyCCAPT", "Help"))
+                self.menuSettings.setTitle(_translate("PyCCAPT", "Settings"))
+                self.menuView.setTitle(_translate("PyCCAPT", "View"))
+                self.actionExit.setText(_translate("PyCCAPT", "Exit"))
+                self.actiontake_sceernshot.setText(_translate("PyCCAPT", "take sceernshot"))
+                self.actionAbout.setText(_translate("PyCCAPT", "About PyCCAPT"))
 
         def update_elapsed_time(self, value):
                 self.elapsed_time.setText(str("{:.3f}".format(value)))
@@ -1261,19 +1265,19 @@ class Ui_PyCCAPT(object):
                         self.gui_gates.setupUi(self.Gates)
                         self.Gates.show()
 
-    def open_pumps_vacuum_win(self, ):
-        if hasattr(self, 'Pumps_Vacuum') and self.Pumps_vacuum.isVisible():
-            self.Pumps_vacuum.raise_()
-            self.Pumps_vacuum.activateWindow()
-        else:
-                self.SignalEmitter_Pumps_Vacuum = gui_pumps_vacuum.SignalEmitter()
-                self.gui_pumps_vacuum = gui_pumps_vacuum.Ui_Pumps_Vacuum(self.variables, self.conf,
-                                                                         self.SignalEmitter_Pumps_Vacuum)
-                self.Pumps_vacuum = gui_pumps_vacuum.PumpsVacuumWindow(self.gui_pumps_vacuum,
-                                                                       self.SignalEmitter_Pumps_Vacuum,
-                                                                       flags=Qt.WindowType.Tool)
-                self.gui_pumps_vacuum.setupUi(self.Pumps_vacuum)
-                self.Pumps_vacuum.show()
+        def open_pumps_vacuum_win(self, ):
+                if hasattr(self, 'Pumps_Vacuum') and self.Pumps_vacuum.isVisible():
+                        self.Pumps_vacuum.raise_()
+                        self.Pumps_vacuum.activateWindow()
+                else:
+                        self.SignalEmitter_Pumps_Vacuum = gui_pumps_vacuum.SignalEmitter()
+                        self.gui_pumps_vacuum = gui_pumps_vacuum.Ui_Pumps_Vacuum(self.variables, self.conf,
+                                                                                 self.SignalEmitter_Pumps_Vacuum)
+                        self.Pumps_vacuum = gui_pumps_vacuum.PumpsVacuumWindow(self.gui_pumps_vacuum,
+                                                                               self.SignalEmitter_Pumps_Vacuum,
+                                                                               flags=Qt.WindowType.Tool)
+                        self.gui_pumps_vacuum.setupUi(self.Pumps_vacuum)
+                        self.Pumps_vacuum.show()
 
         def open_laser_control_win(self):
                 if hasattr(self, 'Laser_Control') and self.Laser_control.isVisible():
@@ -1368,9 +1372,9 @@ if __name__ == "__main__":
                 os.chdir(p)
                 conf = read_files.read_json_file(configFile)
         except Exception as e:
-        print('Can not load the configuration file')
-        print(e)
-        sys.exit()
+                print('Can not load the configuration file')
+                print(e)
+                sys.exit()
     # Initialize global experiment variables
     variables = share_variables.Variables(conf)
     variables.log_path = p
