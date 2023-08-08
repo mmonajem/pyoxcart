@@ -4,6 +4,7 @@ import time
 
 import nidaqmx
 from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtCore import QTimer
 from PyQt6.QtGui import QPixmap
 
 # Local module and scripts
@@ -12,9 +13,10 @@ from pyccapt.control.control_tools import share_variables, read_files
 
 class Ui_Gates(object):
 
-    def __init__(self, variables, conf):
+    def __init__(self, variables, conf, parent=None):
         self.variables = variables
         self.conf = conf
+        self.parent = parent
 
     def setupUi(self, Gates):
         Gates.setObjectName("Gates")
@@ -125,6 +127,9 @@ class Ui_Gates(object):
         self.load_lock_switch.clicked.connect(lambda: self.gates(2))
         self.cryo_switch.clicked.connect(lambda: self.gates(3))
 
+        # Create a QTimer to hide the warning message after 8 seconds
+        self.timer = QTimer(self.parent)
+        self.timer.timeout.connect(self.hideMessage)
     def retranslateUi(self, Gates):
         _translate = QtCore.QCoreApplication.translate
         ###
@@ -199,10 +204,43 @@ class Ui_Gates(object):
                 self.variables.flag_cryo_gate = False
         # Show the error message in the GUI
         else:
-            _translate = QtCore.QCoreApplication.translate
-            self.Error.setText(_translate("OXCART",
-                                          "<html><head/><body><p><span style=\" color:#ff0000;\">!!! Close the previous"
-                                          " gate first !!!</span></p></body></html>"))
+            if not self.variables.start_flag:
+                self.error_message("!!! An experiment is running !!!")
+            else:
+                self.error_message("!!! Close the previous opened gate first !!!")
+
+            self.timer.start(8000)
+
+    def error_message(self, message):
+        _translate = QtCore.QCoreApplication.translate
+        self.Error.setText(_translate("OXCART",
+                                      "<html><head/><body><p><span style=\" color:#ff0000;\">"
+                                      + message + "</span></p></body></html>"))
+
+    def hideMessage(self):
+        # Hide the message and stop the timer
+        _translate = QtCore.QCoreApplication.translate
+        self.Error.setText(_translate("OXCART",
+                                      "<html><head/><body><p><span style=\" "
+                                      "color:#ff0000;\"></span></p></body></html>"))
+
+        self.timer.stop()
+
+    def stop(self):
+        # Stop any background processes, timers, or threads here
+        # Add any additional cleanup code here
+        pass
+
+
+class GatesWindow(QtWidgets.QWidget):
+    def __init__(self, gui_gates, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.gui_gates = gui_gates
+
+    def closeEvent(self, event):
+        self.gui_gates.stop()  # Call the stop method to stop any background activity
+        # Additional cleanup code here if needed
+        super().closeEvent(event)
 
 
 if __name__ == "__main__":

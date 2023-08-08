@@ -5,7 +5,6 @@ This is the main script for Reading the Edward gauges.
 import serial
 
 # Local module and scripts
-from pyccapt.control.control_tools import loggi
 
 
 class EdwardsAGC(object):
@@ -26,8 +25,6 @@ class EdwardsAGC(object):
         self.port = port
         self.variables = variables
         self.serial = serial.Serial(self.port, baudrate=9600, timeout=0.5)
-        if self.variables.log:
-            self.log_edwards_tic = loggi.logger_creator('edwards_tic', 'edwards_tic.log', path=variables.log_path)
 
     def comm(self, command):
         """
@@ -39,12 +36,9 @@ class EdwardsAGC(object):
             Returns the string read through serial
         """
         comm = command + "\r\n"
-        if self.variables.log:
-            self.log_edwards_tic.info("Function - comm | Command - > {} | type -> {} ".format(command, type(command)))
-            self.log_edwards_tic.info("Function - comm | Comm - > {}".format(comm))
+
         self.serial.write(comm.encode())
         complete_string = self.serial.readline().decode()
         complete_string = complete_string.strip()
-        if self.variables.log:
-            self.log_edwards_tic.info("Function - comm | Response - > {}".format(complete_string))
+
         return complete_string

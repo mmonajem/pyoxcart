@@ -97,7 +97,7 @@
                         </widget>
                     </item>
                     <item row="1" column="2">
-                        <widget class="QGraphicsView" name="visualization">
+                        <widget class="QGraphicsView" name="detector_heatmap">
                             <property name="sizePolicy">
                                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                                     <horstretch>1</horstretch>
@@ -162,7 +162,7 @@
     <tabstops>
         <tabstop>vdc_time</tabstop>
         <tabstop>detection_rate_viz</tabstop>
-        <tabstop>visualization</tabstop>
+        <tabstop>detector_heatmap</tabstop>
         <tabstop>histogram</tabstop>
     </tabstops>
     <resources/>

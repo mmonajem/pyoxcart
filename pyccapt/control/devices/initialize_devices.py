@@ -186,6 +186,7 @@ def state_update(conf, variables, emitter):
         Does not return anything
 
     """
+
     if conf['gauges'] == "on":
         if conf['COM_PORT_gauge_mc'] != "off":
             tpg = TPG362(port=variables.COM_PORT_gauge_mc)
@@ -213,7 +214,7 @@ def state_update(conf, variables, emitter):
             com_port_cryovac = None
             print('Can not initialize the cryovac')
             print(e)
-    while True:
+    while variables.bool_flag_while_loop_gages:
         if conf['cryo'] == "on":
             try:
                 #  Temperature update

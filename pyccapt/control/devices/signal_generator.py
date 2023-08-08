@@ -10,7 +10,7 @@ import pyvisa
 # Local module and scripts
 
 
-def initialize_signal_generator(freq):
+def initialize_signal_generator(variables, freq):
     """
     This function initializes the  signal generator functionality by utilizing pyvisa module
 

@@ -274,6 +274,22 @@ class Ui_Cameras_Alignment(object):
         self.cam_s_d.setPixmap(self.camera0_zoom)
         self.cam_b_d.setPixmap(self.camera1_zoom)
 
+    def stop(self):
+        # Stop the timer and any other background processes, timers, or threads here
+        self.timer1.stop()
+        # Add any additional cleanup code here
+
+
+class CamerasAlignmentWindow(QtWidgets.QWidget):
+    def __init__(self, gui_cameras_alignment, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.gui_cameras_alignment = gui_cameras_alignment
+
+    def closeEvent(self, event):
+        self.gui_cameras_alignment.stop()  # Call the stop method to stop any background activity
+        # Additional cleanup code here if needed
+        super().closeEvent(event)
+
 
 if __name__ == "__main__":
     try:

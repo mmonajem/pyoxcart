@@ -238,6 +238,22 @@ class Ui_Laser_Control(object):
         self.home_motor.setEnabled(True)
         self.button_disable_timer.stop()
 
+    def stop(self):
+        # Stop any background processes, timers, or threads here
+        self.button_disable_timer.stop()  # If you want to stop this timer when closing
+        # Add any additional cleanup code here
+
+
+class LaserControlWindow(QtWidgets.QWidget):
+    def __init__(self, gui_laser_control, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.gui_laser_control = gui_laser_control
+
+    def closeEvent(self, event):
+        self.gui_laser_control.stop()  # Call the stop method to stop any background activity
+        # Additional cleanup code here if needed
+        super().closeEvent(event)
+
 
 if __name__ == "__main__":
     try:

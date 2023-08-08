@@ -15,10 +15,11 @@ from pyccapt.control.devices import initialize_devices
 
 class Ui_Pumps_Vacuum(object):
 
-    def __init__(self, variables, conf, parent=None):
+    def __init__(self, variables, conf, SignalEmitter, parent=None):
         self.variables = variables
         self.conf = conf
         self.parent = parent
+        self.emitter = SignalEmitter
 
     def setupUi(self, Pumps_Vacuum):
         Pumps_Vacuum.setObjectName("Pumps_Vacuum")
@@ -218,14 +219,6 @@ class Ui_Pumps_Vacuum(object):
         self.vacuum_load_lock.setDigitCount(8)
         self.vacuum_load_lock_back.setDigitCount(8)
         self.temp.setDigitCount(8)
-        # Create a SignalEmitter instance and connect the signal to the slot
-        self.emitter = SignalEmitter()
-        if self.conf['gauges'] == "on":
-            # Thread for reading gauges
-            gauges_thread = threading.Thread(target=initialize_devices.state_update,
-                                             args=(self.conf, self.variables, self.emitter,))
-            gauges_thread.setDaemon(True)
-            gauges_thread.start()
 
         ###
         self.emitter.temp.connect(self.update_temperature)
@@ -234,6 +227,17 @@ class Ui_Pumps_Vacuum(object):
         self.emitter.vacuum_buffer_back.connect(self.update_vacuum_buffer_back)
         self.emitter.vacuum_load_back.connect(self.update_vacuum_load_back)
         self.emitter.vacuum_load.connect(self.update_vacuum_load)
+        # Connect the bool_flag_while_loop signal to a slot
+        self.emitter.bool_flag_while_loop.connect(self.update_bool_flag_while_loop_gauges)
+        self.emitter.bool_flag_while_loop.emit(True)
+
+        # Thread for reading gauges
+        if self.conf['gauges'] == "on":
+            # Thread for reading gauges
+            gauges_thread = threading.Thread(target=initialize_devices.state_update,
+                                             args=(self.conf, self.variables, self.emitter,))
+            gauges_thread.setDaemon(True)
+            gauges_thread.start()
 
         # Create a QTimer to hide the warning message after 8 seconds
         self.timer = QTimer(self.parent)
@@ -274,6 +278,10 @@ class Ui_Pumps_Vacuum(object):
     def update_vacuum_load(self, value):
         self.vacuum_load_lock_back.display('{:.2e}'.format(value))
 
+    def update_bool_flag_while_loop_gauges(self, value):
+        # Connect the bool_flag_while_loop signal to a slot in this function
+        self.variables.bool_flag_while_loop_gages = value
+
     def hideMessage(self):
         # Hide the message and stop the timer
         _translate = QtCore.QCoreApplication.translate
@@ -303,16 +311,27 @@ class Ui_Pumps_Vacuum(object):
                     time.sleep(1)
                     self.pump_load_lock_switch.setEnabled(True)
             else:  # SHow error message in the GUI
-                _translate = QtCore.QCoreApplication.translate
-                self.Error.setText(_translate("OXCART",
-                                              "<html><head/><body><p><span style=\" color:#ff0000;\">!!! First Close all "
-                                              "the Gates !!!</span></p></body></html>"))
+                if not self.variables.start_flag:
+                    self.error_message("!!! An experiment is running !!!")
+                else:
+                    self.error_message("!!! First Close all the Gates !!!")
+
                 self.timer.start(8000)
         except Exception as e:
             print('Error in pump_switch function')
             print(e)
             pass
 
+    def error_message(self, message):
+        _translate = QtCore.QCoreApplication.translate
+        self.Error.setText(_translate("OXCART",
+                                      "<html><head/><body><p><span style=\" color:#ff0000;\">"
+                                      + message + "</span></p></body></html>"))
+
+    def stop(self):
+        # Stop any background processes, timers, or threads here
+        self.timer.stop()  # If you want to stop this timer when closing
+        # Add any additional cleanup code here
 
 class SignalEmitter(QObject):
     temp = pyqtSignal(float)
@@ -321,7 +340,20 @@ class SignalEmitter(QObject):
     vacuum_buffer_back = pyqtSignal(float)
     vacuum_load_back = pyqtSignal(float)
     vacuum_load = pyqtSignal(float)
+    bool_flag_while_loop = pyqtSignal(bool)
 
+
+class PumpsVacuumWindow(QtWidgets.QWidget):
+    def __init__(self, gui_pumps_vacuum, signal_emitter, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.gui_pumps_vacuum = gui_pumps_vacuum
+        self.signal_emitter = signal_emitter
+
+    def closeEvent(self, event):
+        self.gui_pumps_vacuum.stop()  # Call the stop method to stop any background activity
+        # Additional cleanup code here if needed
+        super().closeEvent(event)
+        self.signal_emitter.bool_flag_while_loop.emit(False)
 
 if __name__ == "__main__":
     try:
@@ -342,8 +374,8 @@ if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
     Pumps_vacuum = QtWidgets.QWidget()
-    ui = Ui_Pumps_Vacuum(variables, conf)
+    signal_emitter = SignalEmitter()
+    ui = Ui_Pumps_Vacuum(variables, conf, signal_emitter)
     ui.setupUi(Pumps_vacuum)
     Pumps_vacuum.show()
     sys.exit(app.exec())
-

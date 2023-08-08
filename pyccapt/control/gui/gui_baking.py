@@ -40,6 +40,7 @@ class Ui_Baking(object):
         self.file_name = self.save_path + 'baking_loging_%s.csv' % now_time
         self.file_name_backup = self.save_path + 'backup_baking_loging_%s.csv' % now_time
 
+        self.running = True
     def setupUi(self, Baking):
         Baking.setObjectName("Baking")
         Baking.resize(820, 757)
@@ -105,7 +106,7 @@ class Ui_Baking(object):
 
         index = 0
         desired_period = 1.0
-        while True:
+        while self.running:
             start_time = time.perf_counter()
             # print('-----------', index, 'seconds', '--------------')
             gauge_bc, _ = tpg.pressure_gauge(1)
@@ -179,6 +180,21 @@ class Ui_Baking(object):
         now_time = now.strftime("%d-%m-%Y_%H-%M-%S")
         self.data.to_csv(self.save_path + '/manual_save_%s.csv' % now_time,
                          sep=';', index=False)
+
+    def stop(self):
+        self.running = False
+        self.timer.stop()  # Stop the QTimer
+
+
+class BakingWindow(QtWidgets.QWidget):
+    def __init__(self, gui_baking, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.gui_baking = gui_baking
+
+    def closeEvent(self, event):
+        self.gui_baking.stop()  # Call the stop method to stop the background thread
+        # Additional cleanup code here if needed
+        super().closeEvent(event)
 
 
 if __name__ == "__main__":

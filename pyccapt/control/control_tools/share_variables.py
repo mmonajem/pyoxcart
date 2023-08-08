@@ -35,19 +35,20 @@ class Variables:
         self.v_p_max = 0
         self.pulse_fraction = 0
         self.pulse_frequency = 0
-        self.pulse_amp_per_supply_voltage = 3500 / 160
-        self.cycle_avg = 0
+        # It is the pulse amplitude per supply voltage.
+        # You have to base on your own setup to change this value.
+        self.pulse_amp_per_supply_voltage = 3500 / 160  # It is the pulse amplitude per supply voltage.
         self.hdf5_path = ''
         self.flag_main_gate = False
         self.flag_load_gate = False
         self.flag_cryo_gate = False
         self.hit_display = 0
         self.email = ''
-        self.tweet = False
         self.light = False
         self.alignment_window = False
         self.light_swich = False
-        self.vol_fix = False
+        self.vdc_hold = False
+        self.reset_heatmap = False
         self.camera_0_ExposureTime = 2000
         self.camera_1_ExposureTime = 2000
         self.img0_orig = np.ones((500, 500, 3), dtype=np.uint8)
@@ -55,6 +56,7 @@ class Variables:
         self.img1_orig = np.ones((500, 500, 3), dtype=np.uint8)
         self.img1_zoom = np.ones((1200, 500, 3), dtype=np.uint8)
         self.path = ''
+        self.path_meta = ''
         self.index_save_image = 0
         self.flag_pump_load_lock = True
         self.flag_pump_load_lock_click = False
@@ -67,7 +69,6 @@ class Variables:
         self.point_size_detec_map = 1
         self.exp_name = ''
         self.log_path = ''
-        self.log = False
         self.fixed_laser = 0
         self.laser_num_ions_per_step = 0
         self.laser_increase_per_step = 0
@@ -81,7 +82,7 @@ class Variables:
         self.total_ions = 0
         self.specimen_voltage = 0.0
         self.detection_rate = 0.0
-        self.detection_rate_elapsed = 0.0
+        self.detection_rate_current = 0.0
         self.pulse_voltage = 0.0
         self.pulse_voltage_min = 0.0
         self.pulse_voltage_max = 0.0
@@ -99,6 +100,10 @@ class Variables:
         self.end_experiment = False
         self.start_flag = False
         self.plot_clear_flag = False
+        self.hitmap_plot_size = 1.0
+        self.number_of_experiment_in_text_line = 0
+        self.index_experiment_in_text_line = 0
+        self.bool_flag_while_loop_gages = False
         self.temperature = 0
         self.vacuum_main = 0
         self.vacuum_buffer = 0
@@ -106,7 +111,19 @@ class Variables:
         self.vacuum_load_lock = 0
         self.vacuum_load_lock_backing = 0
 
-        self.laser_degree = 0
+        # Experiment variables
+        self.main_v_dc = []
+        self.main_v_p = []
+        self.main_counter = []
+        self.main_temperature = []
+        self.main_chamber_vacuum = []
+        self.main_v_dc_dld = []
+        self.main_v_p_dld = []
+        self.main_v_dc_tdc = []
+        self.main_v_p_tdc = []
+        self.main_v_dc_drs = []
+        self.main_v_p_drs = []
+        self.laser_degree = []
 
         self.x = []
         self.y = []
