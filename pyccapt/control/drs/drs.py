@@ -9,6 +9,8 @@ import os
 import numpy as np
 from numpy.ctypeslib import ndpointer
 
+from pyccapt.control.control_tools import loggi
+
 
 class DRS(object):
     """

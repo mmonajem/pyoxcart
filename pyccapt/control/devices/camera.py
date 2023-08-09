@@ -89,11 +89,11 @@ class Camera:
 			# first is x direction
 			# second is y direction
 			self.img0_zoom_marker = cv2.drawMarker(self.img0_zoom, (490, 280), (0, 0, 255),
-			                                       markerType=cv2.MARKER_TRIANGLE_UP,
-			                                       markerSize=40, thickness=2, line_type=cv2.LINE_AA)
+			                                       markerType=cv2.MARKER_TRIANGLE_UP, markerSize=40,
+			                                       thickness=2, line_type=cv2.LINE_AA)
 			self.img1_zoom_marker = cv2.drawMarker(self.img1_zoom, (435, 300), (0, 0, 255),
-			                                       markerType=cv2.MARKER_TRIANGLE_UP,
-			                                       markerSize=40, thickness=2, line_type=cv2.LINE_AA)
+			                                       markerType=cv2.MARKER_TRIANGLE_UP, markerSize=40, thickness=2,
+			                                       line_type=cv2.LINE_AA)
 
 			# Acquire the lock and releases after process using context manager
 			# To ensure that the marked array is a C-contiguous array

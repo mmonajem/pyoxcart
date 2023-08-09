@@ -5,7 +5,7 @@ This is the main script for saving the log file of the experiment.
 import logging
 
 
-def logger_creator(script_name, log_name, path=None):
+def logger_creator(script_name, variables, log_name, path=None):
     """
     The function is used to instantiate and configure logger object for logging.
     The function use python native logging library.
