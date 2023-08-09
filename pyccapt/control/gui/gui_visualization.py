@@ -221,8 +221,10 @@ class Ui_Visualization(object):
             self.detection_rate_viz.enableAutoRange(axis='x')
             self.detector_heatmap.enableAutoRange(axis='x')
             self.detector_heatmap.enableAutoRange(axis='y')
-            self.variables.index_auto_scale_graph = 0
-        self.variables.index_auto_scale_graph += 1
+            with self.variables.lock_statistics:
+                self.variables.index_auto_scale_graph = 0
+        with self.variables.lock_statistics:
+            self.variables.index_auto_scale_graph += 1
 
         if self.variables.plot_clear_flag:
             self.x_vdc = np.arange(1000)  # 1000 time points
@@ -252,48 +254,56 @@ class Ui_Visualization(object):
             self.detector_heatmap.addItem(self.detector_circle)
             self.variables.plot_clear_flag = False
 
+        # with self.variables.lock_statistics and self.variables.lock_setup_parameters:
         if self.variables.start_flag:
-            if self.variables.index_wait_on_plot_start <= 16:
-                self.variables.index_wait_on_plot_start += 1
+            with self.variables.lock_statistics:
+                if self.variables.index_wait_on_plot_start <= 16:
+                    self.variables.index_wait_on_plot_start += 1
 
             if self.variables.index_wait_on_plot_start >= 8:
                 # V_dc and V_p
                 if self.variables.index_plot <= 999:
-                    self.y_vdc[variables.index_plot] = int(
-                        self.variables.specimen_voltage)  # Add a new value.
-                    self.y_vps[variables.index_plot] = int(self.variables.pulse_voltage)  # Add a new value.
+                    with self.variables.lock_statistics:
+                        self.y_vdc[variables.index_plot] = int(
+                            self.variables.specimen_voltage)  # Add a new value.
+                        self.y_vps[variables.index_plot] = int(self.variables.pulse_voltage)  # Add a new value.
                 else:
                     self.x_vdc = np.append(self.x_vdc,
                                            self.x_vdc[
                                                -1] + 1)  # Add a new value 1 higher than the last.
-                    self.y_vdc = np.append(self.y_vdc,
-                                           int(self.variables.specimen_voltage))  # Add a new value.
-                    self.y_vps = np.append(self.y_vps, int(self.variables.pulse_voltage))  # Add a new value.
+                    with self.variables.lock_statistics:
+                        self.y_vdc = np.append(self.y_vdc,
+                                               int(self.variables.specimen_voltage))  # Add a new value.
+                        self.y_vps = np.append(self.y_vps, int(self.variables.pulse_voltage))  # Add a new value.
 
                 self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
                 self.data_line_vps.setData(self.x_vdc, self.y_vps)
 
                 # Detection Rate Visualization
-                if self.variables.index_plot <= 999:
-                    self.y_dtec[self.variables.index_plot] = int(self.variables.avg_n_count)  # Add a new value.
-                else:
-                    self.x_dtec = self.x_dtec[1:]  # Remove the first element.
-                    self.x_dtec = np.append(self.x_dtec,
-                                            self.x_dtec[
-                                                -1] + 1)  # Add a new value 1 higher than the last.
-                    self.y_dtec = self.y_dtec[1:]
-                    self.y_dtec = np.append(self.y_dtec, int(self.variables.avg_n_count))
+                with self.variables.lock_statistics:
+                    if self.variables.index_plot <= 999:
+                        self.y_dtec[self.variables.index_plot] = int(self.variables.avg_n_count)  # Add a new value.
+                    else:
+                        self.x_dtec = self.x_dtec[1:]  # Remove the first element.
+                        self.x_dtec = np.append(self.x_dtec,
+                                                self.x_dtec[
+                                                    -1] + 1)  # Add a new value 1 higher than the last.
+                        self.y_dtec = self.y_dtec[1:]
+                        self.y_dtec = np.append(self.y_dtec, int(self.variables.avg_n_count))
 
                 self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
                 # Increase the index
-                self.variables.index_plot += 1
-            # Time of Flight
+                with self.variables.lock_statistics:
+                    self.variables.index_plot += 1
+            # mass spectrum
+
             if self.variables.counter_source == 'TDC' and self.variables.total_ions > 0 and \
                     self.variables.index_wait_on_plot_start > 16:
-                xx = np.array(self.variables.x)
-                yy = np.array(self.variables.y)
-                tt = np.array(self.variables.t)
-                main_v_dc_dld = np.array(self.variables.main_v_dc_dld)
+                with self.variables.lock_data:
+                    xx = np.array(self.variables.x)
+                    yy = np.array(self.variables.y)
+                    tt = np.array(self.variables.t)
+                    main_v_dc_dld = np.array(self.variables.main_v_dc_plot)
                 try:
                     if self.conf["visualization"] == "tof":
                         tof = tt * 27.432 / (1000 * 4)  # Time in ns
@@ -328,15 +338,19 @@ class Ui_Visualization(object):
                 # Visualization
                 try:
                     # adding points to the scatter plot
-                    self.scatter.setSize(self.variables.hitmap_plot_size)
-                    x = self.variables.x
-                    y = self.variables.y
+                    with self.variables.lock_statistics:
+                        self.scatter.setSize(self.variables.hitmap_plot_size)
+                    with self.variables.lock_setup_parameters:
+                        hit_display = self.variables.hit_display
+                    with self.variables.lock_data:
+                        x = self.variables.x
+                        y = self.variables.y
                     min_length = min(len(x), len(y))
-                    x = self.variables.x[-min_length:]
-                    y = self.variables.y[-min_length:]
+                    x = x[-min_length:]
+                    y = y[-min_length:]
                     self.scatter.clear()
-                    self.scatter.setData(x=x[-self.variables.hit_display:],
-                                         y=y[-self.variables.hit_display:])
+                    self.scatter.setData(x=x[-hit_display:],
+                                         y=y[-hit_display:])
                     # add item to plot window
                     # adding scatter plot item to the plot window
                     self.detector_heatmap.clear()
@@ -348,14 +362,17 @@ class Ui_Visualization(object):
                     print(e)
             # save plots to the file
             if self.variables.index_plot_save % 100 == 0 and self.variables.index_plot_save != 0:
+                with self.variables.lock_setup_parameters:
+                    path_meta = self.variables.path_meta
+                    index_plot_save = self.variables.index_plot_save
                 exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
-                exporter.export(self.variables.path_meata + '/v_dc_p_%s.png' % self.variables.index_plot_save)
+                exporter.export(path_meta + '/v_dc_p_%s.png' % index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
-                exporter.export(self.variables.path_meata + '/detection_rate_%s.png' % self.variables.index_plot_save)
+                exporter.export(path_meta + '/detection_rate_%s.png' % index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.detector_heatmap.plotItem)
-                exporter.export(self.variables.path_meata + '/visualization_%s.png' % self.variables.index_plot_save)
+                exporter.export(path_meta + '/visualization_%s.png' % index_plot_save)
                 exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
-                exporter.export(self.variables.path_meata + '/tof_%s.png' % self.variables.index_plot_save)
+                exporter.export(path_meta + '/tof_%s.png' % index_plot_save)
 
     def stop(self):
         # Stop any background processes, timers, or threads here

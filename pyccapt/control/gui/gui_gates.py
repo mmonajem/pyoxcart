@@ -154,62 +154,63 @@ class Ui_Gates(object):
                             The function for applying the command of closing or opening gate
                             """
             with nidaqmx.Task() as task:
-                if self.conf["gates"] != "off":
-                    task.do_channels.add_do_chan(self.conf["COM_PORT_gates"] + 'line%s' % num)
-                    task.start()
-                    task.write([True])
-                    time.sleep(.5)
-                    task.write([False])
-                else:
-                    print('The gates control is off')
+	            if self.conf["gates"] != "off":
+		            task.do_channels.add_do_chan(self.conf["COM_PORT_gates"] + 'line%s' % num)
+		            task.start()
+		            task.write([True])
+		            time.sleep(.5)
+		            task.write([False])
+	            else:
+		            print('The gates control is off')
 
         # Main gate
-        if not self.variables.start_flag and gate_num == 1 and not self.variables.flag_load_gate \
-                and not self.variables.flag_cryo_gate and self.variables.flag_pump_load_lock:
-            if not self.variables.flag_main_gate:  # Open the main gate
-                switch_gate(0)
-                self.led_main_chamber.setPixmap(self.led_green)
-                self.diagram.setPixmap(self.diagram_main_open)
-                self.variables.flag_main_gate = True
-            elif self.variables.flag_main_gate:  # Close the main gate
-                switch_gate(1)
-                self.led_main_chamber.setPixmap(self.led_red)
-                self.diagram.setPixmap(self.diagram_close_all)
-                self.variables.flag_main_gate = False
-        # Buffer gate
-        elif not self.variables.start_flag and gate_num == 2 and not self.variables.flag_main_gate \
-                and not self.variables.flag_cryo_gate and self.variables.flag_pump_load_lock:
-            if not self.variables.flag_load_gate:  # Open the main gate
-                switch_gate(2)
-                self.led_load_lock.setPixmap(self.led_green)
-                self.diagram.setPixmap(self.diagram_load_open)
-                self.variables.flag_load_gate = True
-            elif self.variables.flag_load_gate:  # Close the main gate
-                switch_gate(3)
-                self.led_load_lock.setPixmap(self.led_red)
-                self.diagram.setPixmap(self.diagram_close_all)
-                self.variables.flag_load_gate = False
-        # Cryo gate
-        elif not self.variables.start_flag and gate_num == 3 and not self.variables.flag_main_gate \
-                and not self.variables.flag_load_gate and self.variables.flag_pump_load_lock:
-            if not self.variables.flag_cryo_gate:  # Open the main gate
-                switch_gate(4)
-                self.led_cryo.setPixmap(self.led_green)
-                self.diagram.setPixmap(self.diagram_cryo_open)
-                self.variables.flag_cryo_gate = True
-            elif self.variables.flag_cryo_gate:  # Close the main gate
-                switch_gate(5)
-                self.led_cryo.setPixmap(self.led_red)
-                self.diagram.setPixmap(self.diagram_close_all)
-                self.variables.flag_cryo_gate = False
-        # Show the error message in the GUI
-        else:
-            if not self.variables.start_flag:
-                self.error_message("!!! An experiment is running !!!")
-            else:
-                self.error_message("!!! Close the previous opened gate first !!!")
+        with self.variables.lock_statistics:
+	        if not self.variables.start_flag and gate_num == 1 and not self.variables.flag_load_gate \
+			        and not self.variables.flag_cryo_gate and self.variables.flag_pump_load_lock:
+		        if not self.variables.flag_main_gate:  # Open the main gate
+			        switch_gate(0)
+			        self.led_main_chamber.setPixmap(self.led_green)
+			        self.diagram.setPixmap(self.diagram_main_open)
+			        self.variables.flag_main_gate = True
+		        elif self.variables.flag_main_gate:  # Close the main gate
+			        switch_gate(1)
+			        self.led_main_chamber.setPixmap(self.led_red)
+			        self.diagram.setPixmap(self.diagram_close_all)
+			        self.variables.flag_main_gate = False
+	        # Buffer gate
+	        elif not self.variables.start_flag and gate_num == 2 and not self.variables.flag_main_gate \
+			        and not self.variables.flag_cryo_gate and self.variables.flag_pump_load_lock:
+		        if not self.variables.flag_load_gate:  # Open the main gate
+			        switch_gate(2)
+			        self.led_load_lock.setPixmap(self.led_green)
+			        self.diagram.setPixmap(self.diagram_load_open)
+			        self.variables.flag_load_gate = True
+		        elif self.variables.flag_load_gate:  # Close the main gate
+			        switch_gate(3)
+			        self.led_load_lock.setPixmap(self.led_red)
+			        self.diagram.setPixmap(self.diagram_close_all)
+			        self.variables.flag_load_gate = False
+	        # Cryo gate
+	        elif not self.variables.start_flag and gate_num == 3 and not self.variables.flag_main_gate \
+			        and not self.variables.flag_load_gate and self.variables.flag_pump_load_lock:
+		        if not self.variables.flag_cryo_gate:  # Open the main gate
+			        switch_gate(4)
+			        self.led_cryo.setPixmap(self.led_green)
+			        self.diagram.setPixmap(self.diagram_cryo_open)
+			        self.variables.flag_cryo_gate = True
+		        elif self.variables.flag_cryo_gate:  # Close the main gate
+			        switch_gate(5)
+			        self.led_cryo.setPixmap(self.led_red)
+			        self.diagram.setPixmap(self.diagram_close_all)
+			        self.variables.flag_cryo_gate = False
+	        # Show the error message in the GUI
+	        else:
+		        if not self.variables.start_flag:
+			        self.error_message("!!! An experiment is running !!!")
+		        else:
+			        self.error_message("!!! Close the previous opened gate first !!!")
 
-            self.timer.start(8000)
+		        self.timer.start(8000)
 
     def error_message(self, message):
         _translate = QtCore.QCoreApplication.translate
@@ -257,8 +258,6 @@ if __name__ == "__main__":
         # Initialize global experiment variables
     variables = share_variables.Variables(conf)
     variables.log_path = p
-    if conf['log'] == 'on':
-        variables.log = True
 
     app = QtWidgets.QApplication(sys.argv)
     Gates = QtWidgets.QWidget()

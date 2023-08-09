@@ -2,8 +2,10 @@ import os
 import sys
 import threading
 
+import numpy as np
 import pyqtgraph as pg
 from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtCore import pyqtSignal, QObject
 from PyQt6.QtGui import QPixmap, QImage
 from pypylon import pylon
 
@@ -14,10 +16,10 @@ from pyccapt.control.devices.camera import Camera
 
 class Ui_Cameras_Alignment(object):
 
-    def __init__(self, variables, conf, camera):
-        self.camera = camera
-        self.conf = conf
-        self.variables = variables
+	def __init__(self, variables, conf, SignalEmitter):
+		self.conf = conf
+		self.emitter = SignalEmitter
+		self.variables = variables
 
     def setupUi(self, Cameras_Alignment):
         Cameras_Alignment.setObjectName("Cameras_Alignment")
@@ -175,11 +177,6 @@ class Ui_Cameras_Alignment(object):
         Cameras_Alignment.setTabOrder(self.light, self.win_alignment)
 
         ###
-        # timer cameras
-        self.timer1 = QtCore.QTimer()
-        self.timer1.setInterval(200)
-        self.timer1.timeout.connect(self.update_cameras)
-        self.timer1.start()
         # Diagram and LEDs ##############
         self.led_red = QPixmap('./files/led-red-on.png')
         self.led_green = QPixmap('./files/green-led-on.png')
@@ -203,157 +200,178 @@ class Ui_Cameras_Alignment(object):
         self.light.clicked.connect(self.light_switch)
         self.win_alignment.clicked.connect(self.win_alignment_switch)
 
-    def retranslateUi(self, Cameras_alignment):
-        _translate = QtCore.QCoreApplication.translate
-        ###
-        # Cameras_alignment.setWindowTitle(_translate("Cameras_alignment", "Form"))
-        Cameras_alignment.setWindowTitle(_translate("Cameras_alignment", "PyCCAPT Cameras"))
-        Cameras_alignment.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
-        ###
-        self.label_202.setText(_translate("Cameras_alignment", "Camera Side"))
-        font = QtGui.QFont()
+        self.emitter.img0_orig.connect(self.update_cam_s_o)
+        self.emitter.img0_zoom.connect(self.update_cam_s_d)
+        self.emitter.img1_orig.connect(self.update_cam_b_o)
+        self.emitter.img1_zoom.connect(self.update_cam_b_d)
+        self.initialize_camera_thread()
+
+	def retranslateUi(self, Cameras_alignment):
+		_translate = QtCore.QCoreApplication.translate
+		###
+		# Cameras_alignment.setWindowTitle(_translate("Cameras_alignment", "Form"))
+		Cameras_alignment.setWindowTitle(_translate("Cameras_alignment", "PyCCAPT Cameras"))
+		Cameras_alignment.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+		###
+		self.label_202.setText(_translate("Cameras_alignment", "Camera Side"))
+		font = QtGui.QFont()
         font.setPointSize(12)
         font.setBold(True)
         self.label_202.setFont(font)
         self.label_203.setText(_translate("Cameras_alignment", "Overview"))
         self.label_205.setText(_translate("Cameras_alignment", "Camera Bottom"))
         font = QtGui.QFont()
-        font.setPointSize(12)
-        font.setBold(True)
-        self.label_205.setFont(font)
-        self.label_208.setText(_translate("Cameras_alignment", "Overview"))
-        self.label_204.setText(_translate("Cameras_alignment", "Detail"))
-        self.label_209.setText(_translate("Cameras_alignment", "Detail"))
-        self.light.setText(_translate("Cameras_alignment", "Light"))
-        self.led_light.setText(_translate("Cameras_alignment", "TextLabel"))
-        self.win_alignment.setText(_translate("Cameras_alignment", "Alignment window"))
+		font.setPointSize(12)
+		font.setBold(True)
+		self.label_205.setFont(font)
+		self.label_208.setText(_translate("Cameras_alignment", "Overview"))
+		self.label_204.setText(_translate("Cameras_alignment", "Detail"))
+		self.label_209.setText(_translate("Cameras_alignment", "Detail"))
+		self.light.setText(_translate("Cameras_alignment", "Light"))
+		self.led_light.setText(_translate("Cameras_alignment", "TextLabel"))
+		self.win_alignment.setText(_translate("Cameras_alignment", "Alignment window"))
 
-    def light_switch(self):
-        """
-        The function for switching the exposure time of cameras in case of swithching the light
-        """
-        if not self.variables.light:
-            self.led_light.setPixmap(self.led_green)
-            self.camera.light_switch()
-            self.timer1.setInterval(200)
-            self.variables.light = True
+	def update_cam_s_o(self, img):
+		self.cam_s_o.setImage(img, autoRange=False)
 
-            self.variables.light_swich = True
+	def update_cam_s_d(self, img):
+		camera0_zoom = QImage(img, 1200, 500, QImage.Format.Format_RGB888)
+		camera0_zoom = QtGui.QPixmap(camera0_zoom)
+		self.cam_s_d.setPixmap(camera0_zoom)
+
+	def update_cam_b_o(self, img):
+		self.cam_b_o.setImage(img, autoRange=False)
+
+	def update_cam_b_d(self, img):
+		camera1_zoom = QImage(img, 1200, 500, QImage.Format.Format_RGB888)
+		camera1_zoom = QtGui.QPixmap(camera1_zoom)
+		self.cam_b_d.setPixmap(camera1_zoom)
+
+	def light_switch(self):
+		"""
+		The function for switching the exposure time of cameras in case of swithching the light
+		"""
+
+		if not self.variables.light:
+			self.led_light.setPixmap(self.led_green)
+			self.camera.light_switch()
+			with self.variables.lock_setup_parameters:
+				self.variables.light = True
+
+			self.variables.light_switch = True
         elif self.variables.light:
-            self.led_light.setPixmap(self.led_red)
-            self.camera.light_switch()
-            self.timer1.setInterval(200)
-            self.variables.light = False
-            self.variables.light_swich = False
+	        self.led_light.setPixmap(self.led_red)
+	        self.camera.light_switch()
+	        with self.variables.lock_setup_parameters:
+		        self.variables.light = False
+		        self.variables.light_switch = False
 
     def win_alignment_switch(self):
-        if not self.variables.alignment_window:
-            self.variables.alignment_window = True
-            self.win_alignment.setStyleSheet("QPushButton{\n"
-                                             "background: rgb(0, 255, 26)\n"
-                                             "}")
-        elif self.variables.alignment_window:
-            self.variables.alignment_window = False
-            self.win_alignment.setStyleSheet("QPushButton{\n"
-                                             "background: rgb(193, 193, 193)\n"
-                                             "}")
 
-    def update_cameras(self, ):
-        """
-                The function for updating cameras in the GUI
-                """
-        self.cam_s_o.setImage(self.variables.img0_orig, autoRange=False)
-        self.cam_b_o.setImage(self.variables.img1_orig, autoRange=False)
+	    if not self.variables.alignment_window:
+		    with self.variables.lock_setup_parameters:
+			    self.variables.alignment_window = True
+		    self.win_alignment.setStyleSheet("QPushButton{\n"
+		                                     "background: rgb(0, 255, 26)\n"
+		                                     "}")
+	    elif self.variables.alignment_window:
+		    with self.variables.lock_setup_parameters:
+			    self.variables.alignment_window = False
+		    self.win_alignment.setStyleSheet("QPushButton{\n"
+		                                     "background: rgb(193, 193, 193)\n"
+		                                     "}")
 
-        self.camera0_zoom = QImage(self.variables.img0_zoom, 1200, 500, QImage.Format.Format_RGB888)
-        self.camera1_zoom = QImage(self.variables.img1_zoom, 1200, 500, QImage.Format.Format_RGB888)
+	def initialize_camera_thread(self):
+		if self.conf['camera'] == "off":
+			print('The cameras is off')
+		else:
+			# Create cameras thread
+			try:
+				# Limits the amount of cameras used for grabbing.
+				# The bandwidth used by a FireWire camera device can be limited by adjusting the packet size.
+				maxCamerasToUse = 2
+				# The exit code of the sample application.
+				exitCode = 0
+				# Get the transport layer factory.
+				tlFactory = pylon.TlFactory.GetInstance()
+				# Get all attached devices and exit application if no device is found.
+				devices = tlFactory.EnumerateDevices()
 
-        self.camera0_zoom = QtGui.QPixmap(self.camera0_zoom)
-        self.camera1_zoom = QtGui.QPixmap(self.camera1_zoom)
+				if len(devices) == 0:
+					raise pylon.RuntimeException("No camera present.")
 
-        self.cam_s_d.setPixmap(self.camera0_zoom)
-        self.cam_b_d.setPixmap(self.camera1_zoom)
+				# Create an array of instant cameras for the found devices and avoid exceeding a maximum number of
+				# devices.
+				cameras = pylon.InstantCameraArray(min(len(devices), maxCamerasToUse))
 
-    def stop(self):
-        # Stop the timer and any other background processes, timers, or threads here
-        self.timer1.stop()
-        # Add any additional cleanup code here
+				# Create and attach all Pylon Devices.
+				for i, cam in enumerate(cameras):
+					cam.Attach(tlFactory.CreateDevice(devices[i]))
+				converter = pylon.ImageFormatConverter()
+
+				# converting to opencv bgr format
+				converter.OutputPixelFormat = pylon.PixelType_BGR8packed
+				converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
+
+				self.camera = Camera(devices, tlFactory, cameras, converter, self.variables, self.emitter)
+
+				# Thread for reading cameras
+				self.camera_thread = threading.Thread(target=self.camera.update_cameras)
+				self.camera_thread.setDaemon(True)
+				with self.variables.lock_setup_parameters:
+					self.variables.flag_camera_grab = True
+				self.camera_thread.start()
+
+			except Exception as e:
+				print('Can not initialize the Cameras')
+				print(e)
+
+	def stop(self):
+		# Stop the timer and any other background processes, timers, or threads here
+		# self.timer1.stop()
+		# Add any additional cleanup code here
+		with self.variables.lock_setup_parameters:
+			self.variables.flag_camera_grab = False
+		self.camera_thread.join()
+
+
+class SignalEmitter(QObject):
+	img0_orig = pyqtSignal(np.ndarray)
+	img0_zoom = pyqtSignal(np.ndarray)
+	img1_orig = pyqtSignal(np.ndarray)
+	img1_zoom = pyqtSignal(np.ndarray)
 
 
 class CamerasAlignmentWindow(QtWidgets.QWidget):
-    def __init__(self, gui_cameras_alignment, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.gui_cameras_alignment = gui_cameras_alignment
+	def __init__(self, gui_cameras_alignment, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.gui_cameras_alignment = gui_cameras_alignment
 
-    def closeEvent(self, event):
-        self.gui_cameras_alignment.stop()  # Call the stop method to stop any background activity
-        # Additional cleanup code here if needed
-        super().closeEvent(event)
+	def closeEvent(self, event):
+		self.gui_cameras_alignment.stop()  # Call the stop method to stop any background activity
+		# Additional cleanup code here if needed
+		super().closeEvent(event)
 
 
 if __name__ == "__main__":
-    try:
-        # load the Json file
-        configFile = 'config.json'
-        p = os.path.abspath(os.path.join(__file__, "../../.."))
-        os.chdir(p)
-        conf = read_files.read_json_file(configFile)
-    except Exception as e:
-        print('Can not load the configuration file')
-        print(e)
-        sys.exit()
-    # Initialize global experiment variables
-    variables = share_variables.Variables(conf)
-    variables.log_path = p
-    if conf['log'] == 'on':
-        variables.log = True
+	try:
+		# load the Json file
+		configFile = 'config.json'
+		p = os.path.abspath(os.path.join(__file__, "../../.."))
+		os.chdir(p)
+		conf = read_files.read_json_file(configFile)
+	except Exception as e:
+		print('Can not load the configuration file')
+		print(e)
+		sys.exit()
+	# Initialize global experiment variables
+	variables = share_variables.Variables(conf)
+	variables.log_path = p
 
-    if conf['camera'] == "off":
-        print('The cameras is off')
-    else:
-        # Create cameras thread
-        try:
-            # Limits the amount of cameras used for grabbing.
-            # The bandwidth used by a FireWire camera device can be limited by adjusting the packet size.
-            maxCamerasToUse = 2
-            # The exit code of the sample application.
-            exitCode = 0
-            # Get the transport layer factory.
-            tlFactory = pylon.TlFactory.GetInstance()
-            # Get all attached devices and exit application if no device is found.
-            devices = tlFactory.EnumerateDevices()
-
-            if len(devices) == 0:
-                raise pylon.RuntimeException("No camera present.")
-
-            # Create an array of instant cameras for the found devices and avoid exceeding a maximum number of
-            # devices.
-            cameras = pylon.InstantCameraArray(min(len(devices), maxCamerasToUse))
-
-            # Create and attach all Pylon Devices.
-            for i, cam in enumerate(cameras):
-                cam.Attach(tlFactory.CreateDevice(devices[i]))
-            converter = pylon.ImageFormatConverter()
-
-            # converting to opencv bgr format
-            converter.OutputPixelFormat = pylon.PixelType_BGR8packed
-            converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
-
-            camera = Camera(devices, tlFactory, cameras, converter, variables)
-
-            # Thread for reading cameras
-            camera_thread = threading.Thread(target=camera.update_cameras)
-            camera_thread.setDaemon(True)
-            camera_thread.start()
-
-        except Exception as e:
-            print('Can not initialize the Cameras')
-            print(e)
-            camera = None
-
-    app = QtWidgets.QApplication(sys.argv)
-    Cameras_Alignment = QtWidgets.QWidget()
-    ui = Ui_Cameras_Alignment(variables, conf, camera)
-    ui.setupUi(Cameras_Alignment)
-    Cameras_Alignment.show()
-    sys.exit(app.exec())
+	app = QtWidgets.QApplication(sys.argv)
+	Cameras_Alignment = QtWidgets.QWidget()
+	signal_emitter = SignalEmitter()
+	ui = Ui_Cameras_Alignment(variables, conf, signal_emitter)
+	ui.setupUi(Cameras_Alignment)
+	Cameras_Alignment.show()
+	sys.exit(app.exec())

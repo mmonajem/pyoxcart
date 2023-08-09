@@ -2,15 +2,14 @@
 This is the main script of all global variables.
 """
 
-import numpy as np
-
+import threading
 
 class Variables:
     def __init__(self, conf):
         """
         Initializing of global variables function
         """
-        # Device Ports
+        ### Device Ports
         self.COM_PORT_cryo = conf['COM_PORT_cryo']
         self.COM_PORT_V_dc = conf['COM_PORT_V_dc']
         self.COM_PORT_V_p = conf['COM_PORT_V_p']
@@ -20,7 +19,8 @@ class Variables:
         self.COM_PORT_signal_generator = conf["COM_PORT_signal_generator"]
         self.COM_PORT_thorlab_motor = conf["COM_PORT_thorlab_motor"]
 
-        # Setup parameters
+        ### Setup parameters
+        self.lock_setup_parameters = threading.Lock()
         self.counter_source = 'pulse_counter'
         self.counter = 0
         self.ex_time = 0
@@ -46,27 +46,22 @@ class Variables:
         self.email = ''
         self.light = False
         self.alignment_window = False
-        self.light_swich = False
+        self.light_switch = False
         self.vdc_hold = False
         self.reset_heatmap = False
         self.camera_0_ExposureTime = 2000
         self.camera_1_ExposureTime = 2000
-        self.img0_orig = np.ones((500, 500, 3), dtype=np.uint8)
-        self.img0_zoom = np.ones((1200, 500, 3), dtype=np.uint8)
-        self.img1_orig = np.ones((500, 500, 3), dtype=np.uint8)
-        self.img1_zoom = np.ones((1200, 500, 3), dtype=np.uint8)
         self.path = ''
         self.path_meta = ''
         self.index_save_image = 0
         self.flag_pump_load_lock = True
         self.flag_pump_load_lock_click = False
         self.flag_pump_load_lock_led = None
-        self.sample_adjust = False
+        self.flag_camera_grab = False
         self.criteria_time = True
         self.criteria_ions = True
         self.criteria_vdc = True
         self.criteria_laser = True
-        self.point_size_detec_map = 1
         self.exp_name = ''
         self.log_path = ''
         self.fixed_laser = 0
@@ -75,7 +70,8 @@ class Variables:
         self.laser_start = 0
         self.laser_stop = 0
 
-        # Run statistics
+        ### Run statistics
+        self.lock_statistics = threading.Lock()
         self.elapsed_time = 0.0
         self.start_time = ''
         self.end_time = ''
@@ -92,7 +88,6 @@ class Variables:
         self.index_plot = 0
         self.index_plot_save = 0
         self.index_wait_on_plot_start = 0
-        self.index_plot_temp = 0
         self.index_warning_message = 0
         self.index_auto_scale_graph = 0
         self.index_line = 0
@@ -111,27 +106,33 @@ class Variables:
         self.vacuum_load_lock = 0
         self.vacuum_load_lock_backing = 0
 
-        # Experiment variables
+        ### Experiment variables
+        self.lock_experiment_variables = threading.Lock()
         self.main_v_dc = []
         self.main_v_p = []
         self.main_counter = []
         self.main_temperature = []
         self.main_chamber_vacuum = []
-        self.main_v_dc_dld = []
-        self.main_v_p_dld = []
-        self.main_v_dc_tdc = []
-        self.main_v_p_tdc = []
-        self.main_v_dc_drs = []
         self.main_v_p_drs = []
         self.laser_degree = []
 
+        ### Data for saving
+        self.lock_data = threading.Lock()
         self.x = []
         self.y = []
         self.t = []
+        self.main_v_dc_plot = []
         self.dld_start_counter = []
         self.time_stamp = []
-
         self.laser_intensity = []
+
+        self.main_v_dc_dld_surface_concept = []
+        self.main_p_dld_surface_concept = []
+        self.main_v_dc_tdc_surface_concept = []
+        self.main_p_tdc_surface_concept = []
+        self.main_v_dc_drs = []
+        self.main_v_dc_tdc_roentdek = []
+        self.main_p_tdc_roentdek = []
 
         self.channel = []
         self.time_data = []
@@ -154,3 +155,4 @@ class Variables:
         self.ch5 = []
         self.ch6 = []
         self.ch7 = []
+

@@ -5,11 +5,9 @@ This is the main new script for reading DRS digitizer.
 # import the module
 import ctypes
 import os
-from numpy.ctypeslib import ndpointer
-import numpy as np
 
-# Local module and scripts
-from pyccapt.control.control_tools import loggi
+import numpy as np
+from numpy.ctypeslib import ndpointer
 
 
 class DRS(object):

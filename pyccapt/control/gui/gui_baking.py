@@ -211,8 +211,6 @@ if __name__ == "__main__":
         # Initialize global experiment variables
     variables = share_variables.Variables(conf)
     variables.log_path = p
-    if conf['log'] == 'on':
-        variables.log = True
 
     app = QtWidgets.QApplication(sys.argv)
     Baking = QtWidgets.QWidget()

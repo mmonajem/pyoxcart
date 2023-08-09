@@ -280,7 +280,8 @@ class Ui_Pumps_Vacuum(object):
 
     def update_bool_flag_while_loop_gauges(self, value):
         # Connect the bool_flag_while_loop signal to a slot in this function
-        self.variables.bool_flag_while_loop_gages = value
+        with self.variables.lock_statistics:
+	        self.variables.bool_flag_while_loop_gages = value
 
     def hideMessage(self):
         # Hide the message and stop the timer
@@ -292,35 +293,36 @@ class Ui_Pumps_Vacuum(object):
         self.timer.stop()
 
     def pump_switch(self):
-        """
-            The function for Switching the Load Lock pump
-        """
-        try:
-            if not self.variables.start_flag and not self.variables.flag_main_gate \
-                    and not self.variables.flag_cryo_gate and not self.variables.flag_load_gate:
-                if self.variables.flag_pump_load_lock:
-                    self.variables.flag_pump_load_lock_click = True
-                    self.led_pump_load_lock.setPixmap(self.led_red)
-                    self.pump_load_lock_switch.setEnabled(False)
-                    time.sleep(1)
-                    self.pump_load_lock_switch.setEnabled(True)
-                elif not variables.flag_pump_load_lock:
-                    self.variables.flag_pump_load_lock_click = True
-                    self.led_pump_load_lock.setPixmap(self.led_green)
-                    self.pump_load_lock_switch.setEnabled(False)
-                    time.sleep(1)
-                    self.pump_load_lock_switch.setEnabled(True)
-            else:  # SHow error message in the GUI
-                if not self.variables.start_flag:
-                    self.error_message("!!! An experiment is running !!!")
-                else:
-                    self.error_message("!!! First Close all the Gates !!!")
+	    """
+			The function for Switching the Load Lock pump
+		"""
+	    with self.variables.lock_statistics:
+		    try:
+			    if not self.variables.start_flag and not self.variables.flag_main_gate \
+					    and not self.variables.flag_cryo_gate and not self.variables.flag_load_gate:
+				    if self.variables.flag_pump_load_lock:
+					    self.variables.flag_pump_load_lock_click = True
+					    self.led_pump_load_lock.setPixmap(self.led_red)
+					    self.pump_load_lock_switch.setEnabled(False)
+					    time.sleep(1)
+					    self.pump_load_lock_switch.setEnabled(True)
+				    elif not variables.flag_pump_load_lock:
+					    self.variables.flag_pump_load_lock_click = True
+					    self.led_pump_load_lock.setPixmap(self.led_green)
+					    self.pump_load_lock_switch.setEnabled(False)
+					    time.sleep(1)
+					    self.pump_load_lock_switch.setEnabled(True)
+			    else:  # SHow error message in the GUI
+				    if not self.variables.start_flag:
+					    self.error_message("!!! An experiment is running !!!")
+				    else:
+					    self.error_message("!!! First Close all the Gates !!!")
 
-                self.timer.start(8000)
-        except Exception as e:
-            print('Error in pump_switch function')
-            print(e)
-            pass
+				    self.timer.start(8000)
+		    except Exception as e:
+			    print('Error in pump_switch function')
+			    print(e)
+			    pass
 
     def error_message(self, message):
         _translate = QtCore.QCoreApplication.translate
@@ -369,8 +371,6 @@ if __name__ == "__main__":
     # Initialize global experiment class variables
     variables = share_variables.Variables(conf)
     variables.log_path = p
-    if conf['log'] == 'on':
-        variables.log = True
 
     app = QtWidgets.QApplication(sys.argv)
     Pumps_vacuum = QtWidgets.QWidget()

@@ -183,6 +183,7 @@ class Ui_Laser_Control(object):
         self.laser_start.editingFinished.connect(self.setup_parameters_changes)
         self.laser_stop.editingFinished.connect(self.setup_parameters_changes)
         ###
+
     def retranslateUi(self, Laser_Control):
         _translate = QtCore.QCoreApplication.translate
         ###
@@ -204,15 +205,16 @@ class Ui_Laser_Control(object):
         self.laser_stop.setText(_translate("Laser_Control", "40"))
 
     def setup_parameters_changes(self):
-        if self.criteria_laser.isChecked():
-            self.variables.criteria_laser = True
-        elif not self.criteria_laser.isChecked():
-            self.variables.criteria_laser = False
-        self.variables.fixed_laser = int(float(self.fixed_laser.text()))
-        self.variables.laser_num_ions_per_step = int(float(self.laser_num_ions_per_step.text()))
-        self.variables.laser_increase_per_step = int(float(self.laser_increase_per_step.text()))
-        self.variables.laser_start = int(float(self.laser_start.text()))
-        self.variables.laser_stop = int(float(self.laser_stop.text()))
+        with self.variables.lock_setup_parameters:
+            if self.criteria_laser.isChecked():
+                self.variables.criteria_laser = True
+            elif not self.criteria_laser.isChecked():
+                self.variables.criteria_laser = False
+            self.variables.fixed_laser = int(float(self.fixed_laser.text()))
+            self.variables.laser_num_ions_per_step = int(float(self.laser_num_ions_per_step.text()))
+            self.variables.laser_increase_per_step = int(float(self.laser_increase_per_step.text()))
+            self.variables.laser_start = int(float(self.laser_start.text()))
+            self.variables.laser_stop = int(float(self.laser_stop.text()))
 
     def make_motor_home(self):
         """
@@ -269,8 +271,6 @@ if __name__ == "__main__":
         # Initialize global experiment variables
     variables = share_variables.Variables(conf)
     variables.log_path = p
-    if conf['log'] == 'on':
-        variables.log = True
 
     app = QtWidgets.QApplication(sys.argv)
     Laser_Control = QtWidgets.QWidget()
