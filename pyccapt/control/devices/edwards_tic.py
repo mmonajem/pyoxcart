@@ -9,8 +9,8 @@ class EdwardsAGC(object):
 	http://www.idealvac.com/files/brochures/Edwards_AGC_D386-52-880_IssueM.pdf
 	"""
 
-    def __init__(self, port, variables):
-	    """
+	def __init__(self, port, variables):
+		"""
 		The constructor function to initialize serial lib parameters.
 
 		Args:
@@ -20,12 +20,12 @@ class EdwardsAGC(object):
 		Returns:
 			None
 		"""
-        self.port = port
-        self.variables = variables
-        self.serial = serial.Serial(self.port, baudrate=9600, timeout=0.5)
+		self.port = port
+		self.variables = variables
+		self.serial = serial.Serial(self.port, baudrate=9600, timeout=0.5)
 
-    def comm(self, command):
-	    """
+	def comm(self, command):
+		"""
 		This class method implements serial communication using the serial library.
 		Reads the raw data through the serial line and returns it.
 
@@ -35,10 +35,10 @@ class EdwardsAGC(object):
 		Returns:
 			str: String read through the serial.
 		"""
-        comm = command + "\r\n"
+		comm = command + "\r\n"
 
-        self.serial.write(comm.encode())
-        complete_string = self.serial.readline().decode()
-        complete_string = complete_string.strip()
+		self.serial.write(comm.encode())
+		complete_string = self.serial.readline().decode()
+		complete_string = complete_string.strip()
 
-        return complete_string
+		return complete_string
