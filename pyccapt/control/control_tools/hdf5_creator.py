@@ -1,14 +1,22 @@
-"""
-This is the script for saving the hdf5 file containing the experiment data.
-"""
-
 import h5py
-
-# Local module and scripts
 
 
 def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
-	# save hdf5 file
+	"""
+	Save experiment data to an HDF5 file.
+
+	Args:
+		variables (object): An object containing experiment variables.
+		conf (dict): A dictionary containing configuration settings.
+		time_counter (list): A list of time counter data.
+		time_ex_s (list): A list of seconds for experiment time.
+		time_ex_m (list): A list of minutes for experiment time.
+		time_ex_h (list): A list of hours for experiment time.
+
+	Returns:
+		None
+	"""
+	# Save HDF5 file
 	with variables.lock_data and variables.lock_experiment_variables:
 		with h5py.File(variables.path + '\\data_%s.h5' % variables.exp_name, "w") as f:
 			f.create_dataset("apt/high_voltage", data=variables.main_v_dc, dtype='f')
@@ -29,13 +37,13 @@ def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
 				f.create_dataset("dld/t", data=variables.t, dtype='i')
 				f.create_dataset("dld/start_counter", data=variables.dld_start_counter, dtype='i')
 				f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld_surface_concept, dtype='f')
-				f.create_dataset("dld/pulse_voltage", data=variables.main_p_dld_surface_concept, dtype='f')
+				f.create_dataset("dld/pulse", data=variables.main_p_dld_surface_concept, dtype='f')
 
 				f.create_dataset("tdc/start_counter", data=variables.tdc_start_counter, dtype='i')
 				f.create_dataset("tdc/channel", data=variables.channel, dtype='i')
 				f.create_dataset("tdc/time_data", data=variables.time_data, dtype='i')
 				f.create_dataset("tdc/high_voltage", data=variables.main_v_dc_tdc_surface_concept, dtype='f')
-				f.create_dataset("tdc/pulse_voltage", data=variables.main_p_tdc_surface_concept, dtype='f')
+				f.create_dataset("tdc/pulse", data=variables.main_p_tdc_surface_concept, dtype='f')
 			elif conf['tdc'] == "on" and conf[
 				'tdc_model'] == 'RoentDek' and variables.counter_source == 'TDC':
 				f.create_dataset("dld/x", data=variables.x, dtype='i')
@@ -63,4 +71,4 @@ def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
 				f.create_dataset("drs/ch3_time", data=variables.ch3_time, dtype='f')
 				f.create_dataset("drs/ch3_wave", data=variables.ch3_wave, dtype='f')
 				f.create_dataset("drs/high_voltage", data=variables.main_v_dc_drs, dtype='f')
-				f.create_dataset("drs/pulse_voltage", data=variables.main_v_p_drs, dtype='f')
+				f.create_dataset("drs/pulse", data=variables.main_v_p_drs, dtype='f')

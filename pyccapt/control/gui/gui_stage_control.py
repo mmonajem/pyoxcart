@@ -1,7 +1,5 @@
-# Form implementation generated from reading ui file 'gui_laser_control.ui'
 import os
 import sys
-
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 # Local module and scripts
@@ -11,20 +9,39 @@ from pyccapt.control.control_tools import share_variables, read_files
 class Ui_Stage_Control(object):
 
     def __init__(self, variables, conf):
-        self.variables = variables
-        self.conf = conf
+	    """
+		Constructor for the Stage Control UI class.
+
+		Args:
+			variables (object): Global experiment variables.
+			conf (dict): Configuration settings.
+
+		Attributes:
+			variables: Global experiment variables.
+			conf: Configuration settings.
+		"""
+	    self.variables = variables
+	    self.conf = conf
 
     def setupUi(self, Stage_Control):
-        Stage_Control.setObjectName("Stage_Control")
-        Stage_Control.resize(226, 166)
-        self.gridLayout_4 = QtWidgets.QGridLayout(Stage_Control)
-        self.gridLayout_4.setObjectName("gridLayout_4")
-        self.gridLayout_3 = QtWidgets.QGridLayout()
-        self.gridLayout_3.setObjectName("gridLayout_3")
-        self.gridLayout_2 = QtWidgets.QGridLayout()
-        self.gridLayout_2.setObjectName("gridLayout_2")
-        self.forward = QtWidgets.QPushButton(parent=Stage_Control)
-        self.forward.setStyleSheet("QPushButton {\n"
+	    """
+		Set up the Stage Control UI.
+		Args:
+			Stage_Control (object): The Stage Control UI object.
+
+		Return:
+			None
+		"""
+	    Stage_Control.setObjectName("Stage_Control")
+	    Stage_Control.resize(226, 166)
+	    self.gridLayout_4 = QtWidgets.QGridLayout(Stage_Control)
+	    self.gridLayout_4.setObjectName("gridLayout_4")
+	    self.gridLayout_3 = QtWidgets.QGridLayout()
+	    self.gridLayout_3.setObjectName("gridLayout_3")
+	    self.gridLayout_2 = QtWidgets.QGridLayout()
+	    self.gridLayout_2.setObjectName("gridLayout_2")
+	    self.forward = QtWidgets.QPushButton(parent=Stage_Control)
+	    self.forward.setStyleSheet("QPushButton {\n"
                                    "                border: none;\n"
                                    "                background-image: url(\'arrow.png\');\n"
                                    "                background-repeat: no-repeat;\n"
@@ -123,39 +140,72 @@ class Ui_Stage_Control(object):
         QtCore.QMetaObject.connectSlotsByName(Stage_Control)
 
     def retranslateUi(self, Stage_Control):
-        _translate = QtCore.QCoreApplication.translate
-        ###
-        # Stage_Control.setWindowTitle(_translate("Stage_Control", "Form"))
-        Stage_Control.setWindowTitle(_translate("Stage_Control", "PyCCAPT Stage Control"))
-        Stage_Control.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
-        ###
-        self.forward.setText(_translate("Stage_Control", "Forward"))
-        self.left.setText(_translate("Stage_Control", "Left"))
-        self.up.setText(_translate("Stage_Control", "Up"))
-        self.back.setText(_translate("Stage_Control", "Back"))
+	    """
+		Set the text and titles of the UI elements
+		Args:
+			None
+
+		Return:
+			None
+		"""
+	    _translate = QtCore.QCoreApplication.translate
+	    ###
+	    # Stage_Control.setWindowTitle(_translate("Stage_Control", "Form"))
+	    Stage_Control.setWindowTitle(_translate("Stage_Control", "PyCCAPT Stage Control"))
+	    Stage_Control.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+	    ###
+	    self.forward.setText(_translate("Stage_Control", "Forward"))
+	    self.left.setText(_translate("Stage_Control", "Left"))
+	    self.up.setText(_translate("Stage_Control", "Up"))
+	    self.back.setText(_translate("Stage_Control", "Back"))
         self.right.setText(_translate("Stage_Control", "Right"))
         self.down.setText(_translate("Stage_Control", "Down"))
 
     def stop(self):
-        # Stop any background processes, timers, or threads here
-        # Add any additional cleanup code here
-        pass
+	    """
+		Stop any background processes, timers, or threads here
+		Args:
+			None
+
+		Return:
+			None
+		"""
+	    # Add any additional cleanup code here
+	    pass
 
 
 class StageControlWindow(QtWidgets.QWidget):
-    def __init__(self, gui_stage_control, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.gui_stage_control = gui_stage_control
+	"""
+	Widget for the Stage Control window.
+	"""
 
-    def closeEvent(self, event):
-        self.gui_stage_control.stop()  # Call the stop method to stop any background activity
-        # Additional cleanup code here if needed
-        super().closeEvent(event)
+	def __init__(self, gui_stage_control, *args, **kwargs):
+		"""
+		Constructor for the StageControlWindow class.
+
+		Args:
+			gui_stage_control: Instance of the StageControl.
+			*args: Additional positional arguments.
+			**kwargs: Additional keyword arguments.
+		"""
+		super().__init__(*args, **kwargs)
+		self.gui_stage_control = gui_stage_control
+
+	def closeEvent(self, event):
+		"""
+		Close event for the window.
+
+		Args:
+			event: Close event.
+		"""
+		self.gui_stage_control.stop()  # Call the stop method to stop any background activity
+		# Additional cleanup code here if needed
+		super().closeEvent(event)
 
 
 if __name__ == "__main__":
     try:
-        # load the Json file
+	    # Load the JSON file
         configFile = 'config.json'
         p = os.path.abspath(os.path.join(__file__, "../../.."))
         os.chdir(p)
@@ -164,7 +214,7 @@ if __name__ == "__main__":
         print('Can not load the configuration file')
         print(e)
         sys.exit()
-        # Initialize global experiment variables
+    # Initialize global experiment variables
     variables = share_variables.Variables(conf)
     variables.log_path = p
 

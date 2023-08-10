@@ -1,8 +1,6 @@
-# Form implementation generated from reading ui file 'gui_laser_control.ui'
 import multiprocessing
 import os
 import sys
-
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer
 
@@ -10,14 +8,27 @@ from PyQt6.QtCore import QTimer
 from pyccapt.control.control_tools import share_variables, read_files
 from pyccapt.control.thorlabs_apt import thorlab_motor
 
-
 class Ui_Laser_Control(object):
-
     def __init__(self, variables, conf):
+        """
+        Initialize the Ui_Laser_Control class.
+
+        Args:
+            variables: Global experiment variables.
+            conf: Configuration settings.
+        """
         self.variables = variables
         self.conf = conf
 
     def setupUi(self, Laser_Control):
+        """
+        Setup the GUI for the laser control.
+        Args:
+            Laser_Control: The GUI window
+
+        Return:
+            None
+        """
         Laser_Control.setObjectName("Laser_Control")
         Laser_Control.resize(333, 171)
         self.gridLayout_2 = QtWidgets.QGridLayout(Laser_Control)
@@ -185,6 +196,14 @@ class Ui_Laser_Control(object):
         ###
 
     def retranslateUi(self, Laser_Control):
+        """
+
+        Args:
+            Laser_Control:
+
+        Return:
+            None
+        """
         _translate = QtCore.QCoreApplication.translate
         ###
         # Laser_Control.setWindowTitle(_translate("Laser_Control", "Form"))
@@ -205,6 +224,14 @@ class Ui_Laser_Control(object):
         self.laser_stop.setText(_translate("Laser_Control", "40"))
 
     def setup_parameters_changes(self):
+        """
+        the function that is run if any of the setup parameters are changed
+        Args:
+            None
+
+        Return:
+            None
+        """
         with self.variables.lock_setup_parameters:
             if self.criteria_laser.isChecked():
                 self.variables.criteria_laser = True
@@ -218,8 +245,13 @@ class Ui_Laser_Control(object):
 
     def make_motor_home(self):
         """
-            The function that is run if home button for laser is pressed
-            """
+        the function that is run if home button for laser is pressed
+        Args:
+            None
+
+        Return:
+            None
+        """
         try:
             self.disable_button_for_10_seconds()  # Disable the home button for 10 seconds
 
@@ -233,14 +265,41 @@ class Ui_Laser_Control(object):
             print(e)
 
     def disable_button_for_10_seconds(self):
+        """
+        Handle the close event of the GatesWindow.
+
+        Args:
+            None
+
+        Return:
+            None
+        """
         self.home_motor.setEnabled(False)
         self.button_disable_timer.start(10000)  # 10 seconds in milliseconds
 
     def enable_button(self):
+        """
+        Handle the close event of the GatesWindow.
+
+        Args:
+            None
+
+        Return:
+            None
+        """
         self.home_motor.setEnabled(True)
         self.button_disable_timer.stop()
 
     def stop(self):
+        """
+        Handle the close event of the GatesWindow.
+
+        Args:
+            None
+
+        Return:
+            None
+        """
         # Stop any background processes, timers, or threads here
         self.button_disable_timer.stop()  # If you want to stop this timer when closing
         # Add any additional cleanup code here
@@ -248,10 +307,23 @@ class Ui_Laser_Control(object):
 
 class LaserControlWindow(QtWidgets.QWidget):
     def __init__(self, gui_laser_control, *args, **kwargs):
+        """
+        Initialize the LaserControlWindow class.
+
+        Args:
+            gui_laser_control: GUI for laser control.
+            *args, **kwargs: Additional arguments for QWidget initialization.
+        """
         super().__init__(*args, **kwargs)
         self.gui_laser_control = gui_laser_control
 
     def closeEvent(self, event):
+        """
+        Handle the close event of the LaserControlWindow.
+
+        Args:
+            event: Close event.
+        """
         self.gui_laser_control.stop()  # Call the stop method to stop any background activity
         # Additional cleanup code here if needed
         super().closeEvent(event)
@@ -259,7 +331,7 @@ class LaserControlWindow(QtWidgets.QWidget):
 
 if __name__ == "__main__":
     try:
-        # load the Json file
+        # Load the Json file
         configFile = 'config.json'
         p = os.path.abspath(os.path.join(__file__, "../../.."))
         os.chdir(p)
@@ -268,7 +340,7 @@ if __name__ == "__main__":
         print('Can not load the configuration file')
         print(e)
         sys.exit()
-        # Initialize global experiment variables
+    # Initialize global experiment variables
     variables = share_variables.Variables(conf)
     variables.log_path = p
 

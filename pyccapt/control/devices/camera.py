@@ -15,13 +15,13 @@ from pypylon import pylon
 
 class Camera:
 	"""
-	This class is used to control the BASLER Cameras. It is used to
+	This class is used to control the BASLER Cameras.
 	"""
 
 	def __init__(self, devices, tlFactory, cameras, converter, variables, emitter):
 		"""
-		Constructor function which intializes and setups all variables
-		and parameter for the class.
+		Constructor function which initializes and setups all variables
+		and parameters for the class.
 		"""
 
 		self.devices = devices
@@ -43,16 +43,7 @@ class Camera:
 
 	def update_cameras(self):
 		"""
-		Note : Changed function to break it down into simpler functions
-
-		This class method setup the cameras to capture the required images. It initiates
-		image capture for all cameras attached starting with index 0.The grabbing
-		set up for free-running continuous acquisition.
-
-		Attributes:
-
-		Returns:
-		    Does not return anything.
+		This class method sets up the cameras to capture the required images.
 		"""
 		self.thread_read.start()
 
@@ -124,16 +115,11 @@ class Camera:
 			else:
 				time.sleep(0.1)
 
-	def light_switch(self, ):
+	def light_switch(self):
 		"""
-			This class method sets the Exposure time based on a flag.
-			It reads the flag from the imported "variables" file.
+		This class method sets the Exposure time based on a flag.
+		"""
 
-			Attributes:
-				Does not accept any arguments.
-			Return:
-				Does not return anything.
-		"""
 		with self.variables.lock_setup_parameters:
 			if not self.variables.light:
 				self.cameras[0].Open()
@@ -150,18 +136,10 @@ class Camera:
 
 	def camera_s_d(self, ):
 		"""
-		This class method captures the images through the cameras, processes it
-		and displays the processed image. Utilizes OpenCv module and Numpy modules
-		to process the captured image. Utilizes OpenCV module to display the captured
-		image in a window.
-
-		Attributes:
-		    Does not accept any arguments
-		Return
-		    Does not return anything.
+		This class method captures the images through the cameras,
+		processes them and displays the processed image.
 		"""
 
-		# # The exit code of the sample application.
 		windowName = 'Sample Alignment'
 
 		while self.variables.flag_camera_grab:

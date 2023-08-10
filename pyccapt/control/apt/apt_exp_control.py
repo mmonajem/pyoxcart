@@ -1,18 +1,12 @@
-"""
-This is the main script for controlling the experiment.
-It contains the main control loop of experiment.
-"""
 import datetime
 import multiprocessing
 import os
 import threading
 import time
 from multiprocessing.queues import Queue
-
 import numpy as np
 import pyvisa as visa
 import serial.tools.list_ports
-
 from pyccapt.control.control_tools import experiment_statistics
 from pyccapt.control.control_tools import hdf5_creator, loggi
 from pyccapt.control.devices import email_send
@@ -24,7 +18,7 @@ from pyccapt.control.tdc_surface_concept import tdc_surface_consept
 
 class APT_Exp_Control:
     """
-    APT_VOLTAGE class is a main class for controlling voltage atom probe with Surface Consept TDC.
+    This class is responsible for controlling the experiment.
     """
 
     def __init__(self, variables, conf, emitter):
@@ -37,7 +31,19 @@ class APT_Exp_Control:
         self.log_apt.info('Experiment is starting')
         self.variables.start_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
         self.sleep_time = 1 / self.variables.ex_freq
-    def initialize_detecotr_process(self):
+
+    def initialize_detector_process(self):
+        """
+        Initialize the detector process based on the configured settings.
+
+        This method initializes the necessary queues and processes for data acquisition based on the configured settings.
+
+        Args:
+           None
+
+        Returns:
+           None
+        """
         print(self.conf['tdc'] == "on" and self.conf['tdc_model'] == 'Surface_Consept' \
               and self.variables.counter_source == 'TDC')
         if self.conf['tdc'] == "on" and self.conf['tdc_model'] == 'Surface_Consept' \
@@ -132,36 +138,31 @@ class APT_Exp_Control:
 
     def initialize_v_dc(self):
         """
-        This class method initializes the high voltage device:.
-        The function utilizes the serial library to communicate over the
-        COM port serially and read the corresponding v_dc parameter.
-        The COM port number has to be entered in the config file.
+        Initialize the V_dc source.
 
-        It exits if it is not able to connect on the COM Port.
+        This function initializes the V_dc source by configuring the COM port settings and sending commands to set
+        the parameters.
 
-        Attributes:
-            Accepts only the self (class object)
+        Args:
+            None
 
         Returns:
-            Does not return anything
+            None
         """
         com_ports = list(serial.tools.list_ports.comports())
-        # Setting the com port of V_dc
         self.com_port_v_dc = serial.Serial(
-            port=com_ports[self.variables.COM_PORT_V_dc].device,  # chosen COM port
-            baudrate=115200,  # 115200
-            bytesize=serial.EIGHTBITS,  # 8
-            parity=serial.PARITY_NONE,  # N
-            stopbits=serial.STOPBITS_ONE  # 1
+            port=com_ports[self.variables.COM_PORT_V_dc].device,
+            baudrate=115200,
+            bytesize=serial.EIGHTBITS,
+            parity=serial.PARITY_NONE,
+            stopbits=serial.STOPBITS_ONE
         )
 
-        # configure the COM port to talk to. Default values: 115200,8,N,1
         if self.com_port_v_dc.is_open:
             self.com_port_v_dc.flushInput()
             self.com_port_v_dc.flushOutput()
 
-            cmd_list = [">S1 3.0e-4", ">S0B 0", ">S0 %s" % self.variables.vdc_min, "F0", ">S0?", ">DON?",
-                        ">S0A?"]
+            cmd_list = [">S1 3.0e-4", ">S0B 0", ">S0 %s" % self.variables.vdc_min, "F0", ">S0?", ">DON?", ">S0A?"]
             for cmd in range(len(cmd_list)):
                 self.command_v_dc(cmd_list[cmd])
         else:
@@ -170,20 +171,16 @@ class APT_Exp_Control:
 
     def initialize_v_p(self):
         """
-        This class method initializes the Pulser device:
-        The function utilizes the serial library to communicate over the
-        COM port serially and read the corresponding v_p parameter.
-        The COM port number has to be enter in the config file.
+        Initialize the Pulser device.
 
-        Attributes:
-            Accepts only the self (class object)
+        This method initializes the Pulser device using the Visa library.
+
+        Args:
+            None
 
         Returns:
-            Does not return anything
-
+            None
         """
-
-        # set the port for v_p
         resources = visa.ResourceManager('@py')
         self.com_port_v_p = resources.open_resource(self.variables.COM_PORT_V_p)
 
@@ -195,28 +192,24 @@ class APT_Exp_Control:
 
     def command_v_dc(self, cmd):
         """
-        This class method is used to send commands on the high voltage parameter: v_dc.
-        The function utilizes the serial library to communicate over the
-        COM port serially and read the corresponding v_dc parameter.
+        Send commands to the high voltage parameter: v_dc.
 
-        Attributes:
-            Accepts only the self (class object)
+        This method sends commands to the V_dc source over the COM port and reads the response.
+
+        Args:
+            cmd (str): The command to send.
 
         Returns:
-            Returns the response code after executing the command.
+            str: The response received from the device.
         """
-        self.com_port_v_dc.write(
-            (cmd + '\r\n').encode())  # send cmd to device # might not work with older devices -> "LF" only needed!
-        time.sleep(0.005)  # small sleep for response
-        # Initialize the response to returned as string
+        self.com_port_v_dc.write((cmd + '\r\n').encode())
+        time.sleep(0.005)
         response = ''
-        # Read the response code after execution(command write).
         try:
             while self.com_port_v_dc.in_waiting > 0:
-                response = self.com_port_v_dc.readline()  # all characters received, read line till '\r\n'
+                response = self.com_port_v_dc.readline()
         except Exception as error:
-            self.log_apt.error(
-                "Function - command_v_dc | error reading lines - > {}".format(error))
+            self.log_apt.error("Function - command_v_dc | error reading lines - > {}".format(error))
         try:
             response = response.decode("utf-8")
         except Exception as error:
@@ -227,41 +220,42 @@ class APT_Exp_Control:
 
     def reader_queue_surface_concept(self):
         """
-        This class method runs in an infinite loop and listens and reads dld queues.
-        over the queues for the group: dld
+        Read data from Surface Concept TDC queues.
 
-        This function is called continuously by a separate thread in the main function.
+        This method continuously reads data from the queues for Surface Concept TDC and updates the corresponding
+        variables in the imported "variables" file.
 
-        The values read from the queues are updates in imported "variables" file
-
-        Attributes:
-            Accepts only the self (class object)
+        Args:
+            None
 
         Returns:
-            Does not return anything
+            None
         """
         while self.variables.start_flag and not self.variables.end_experiment:
-            # Process data from queue_x and queue_y
-            while not self.queue_x.empty() and not self.queue_y.empty() and not self.queue_t.empty() and not self.queue_dld_start_counter.empty():
-                length = self.queue_x.get()
+            while not self.queue_x.empty() and not self.queue_y.empty() and not self.queue_t.empty() \
+                    and not self.queue_dld_start_counter.empty():
+                x_data = self.queue_x.get()
                 y_data = self.queue_y.get()
                 t_data = self.queue_t.get()
                 dld_start_counter_data = self.queue_dld_start_counter.get()
 
                 with self.variables.lock_data:
-                    self.variables.x.extend(length.tolist())
+                    self.variables.x.extend(x_data.tolist())
                     self.variables.y.extend(y_data.tolist())
                     self.variables.t.extend(t_data.tolist())
                     self.variables.dld_start_counter.extend(dld_start_counter_data.tolist())
 
-                    voltage_data = np.tile(self.variables.specimen_voltage, len(length))
+                    voltage_data = np.tile(self.variables.specimen_voltage, len(x_data))
                     self.variables.main_v_dc_dld_surface_concept.extend(voltage_data.tolist())
-                    self.variables.main_v_dc_plot.extend(voltage_data.tolist())
                     self.variables.main_p_dld_surface_concept.extend(
-                        np.tile(self.variables.pulse_voltage, len(length)).tolist())
+                        np.tile(self.variables.pulse_voltage, len(x_data)).tolist())
+                with self.variables.lock_data_plot:
+                    self.variables.main_v_dc_plot.extend(voltage_data.tolist())
+                    self.variables.x_plot.extend(x_data.tolist())
+                    self.variables.y_plot.extend(y_data.tolist())
 
-            # Process data from queue_channel and queue_time_data
-            while not self.queue_channel.empty() and not self.queue_time_data.empty() and not self.queue_tdc_start_counter.empty():
+            while not self.queue_channel.empty() and not self.queue_time_data.empty() \
+                    and not self.queue_tdc_start_counter.empty():
                 channel_data = self.queue_channel.get()
                 time_data = self.queue_time_data.get()
                 tdc_start_counter_data = self.queue_tdc_start_counter.get()
@@ -276,16 +270,27 @@ class APT_Exp_Control:
                     self.variables.main_p_tdc_surface_concept.extend(
                         np.tile(self.variables.pulse_voltage, len(channel_data)).tolist())
             time.sleep(self.sleep_time)
+
     def reader_queue_roentdek(self):
+        """
+        Read data from RoentDek TDC queues.
 
+        This method continuously reads data from the queues for RoentDek TDC and updates the corresponding
+        variables in the imported "variables" file.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         while self.variables.start_flag and not self.variables.end_experiment:
-            # Check if any value is present in queue to read from
-            while not self.queue_x.empty() or not self.queue_y.empty() or not self.queue_tof.empty() or not self.queue_AbsoluteTimeStamp.empty() \
-                    or not self.queue_ch0.empty() or not self.queue_ch1.empty() or not self.queue_ch2.empty() or not self.queue_ch3.empty() \
-                    or not self.queue_ch4.empty() or not self.queue_ch5.empty() or not self.queue_ch6.empty() or not self.queue_ch7.empty():
-                # Utilize locking mechanism to avoid concurrent use of resources and dirty reads
-
-                length = self.queue_x.get()
+            while not self.queue_x.empty() or not self.queue_y.empty() or not self.queue_tof.empty() \
+                    or not self.queue_AbsoluteTimeStamp.empty() or not self.queue_ch0.empty() \
+                    or not self.queue_ch1.empty() or not self.queue_ch2.empty() or not self.queue_ch3.empty() \
+                    or not self.queue_ch4.empty() or not self.queue_ch5.empty() or not self.queue_ch6.empty() \
+                    or not self.queue_ch7.empty():
+                x_list = self.queue_x.get()
                 y_list = self.queue_y.get()
                 t_list = self.queue_tof.get()
                 time_stamp_list = self.queue_AbsoluteTimeStamp.get()
@@ -297,11 +302,11 @@ class APT_Exp_Control:
                 ch5_list = self.queue_ch5.get()
                 ch6_list = self.queue_ch6.get()
                 ch7_list = self.queue_ch7.get()
-                main_v_dc_dld_list = np.tile(self.variables.specimen_voltage, len(length))
-                main_p_tdc_roentdek = np.tile(self.variables.laser_degree, len(length))
+                main_v_dc_dld_list = np.tile(self.variables.specimen_voltage, len(x_list))
+                main_p_tdc_roentdek = np.tile(self.variables.laser_degree, len(x_list))
 
                 with self.variables.lock_data:
-                    self.variables.x.extend(length.tolist())
+                    self.variables.x.extend(x_list.tolist())
                     self.variables.y.extend(y_list.tolist())
                     self.variables.t.extend(t_list.tolist())
                     self.variables.time_stamp.extend(time_stamp_list.tolist())
@@ -314,32 +319,33 @@ class APT_Exp_Control:
                     self.variables.ch6.extend(ch6_list.tolist())
                     self.variables.ch7.extend(ch7_list.tolist())
                     self.variables.main_v_dc_tdc_roentdek.extend(main_v_dc_dld_list.tolist())
-                    self.variables.main_v_dc_plot.extend(main_v_dc_dld_list.tolist())
                     self.variables.main_p_tdc_roentdek.extend(main_p_tdc_roentdek.tolist())
 
+                with self.variables.lock_data_plot:
+                    self.variables.main_v_dc_plot.extend(main_v_dc_dld_list.tolist())
+                    self.variables.x_plot.extend(x_list.tolist())
+                    self.variables.y_plot.extend(y_list.tolist())
             time.sleep(self.sleep_time)
+
     def reader_queue_drs(self):
-
         """
-        This class method runs in an infinite loop and listens and reads DRS queues.
-        over the queues for the group: DRS
+        Read data from DRS queues.
 
-        This function is called continuously by a separate thread in the main function.
+        This method continuously reads data from the queues for DRS and updates the corresponding variables in
+        the imported "variables" file.
 
-        The values read from the queues are updates in imported "variables" file.
-        Attributes:
-            Accepts only the self (class object)
+        Args:
+            None
 
         Returns:
-            Does not return anything
+            None
         """
-
         while self.variables.start_flag and not self.variables.end_experiment:
-            # Check if any value is present in queue to read from
-            while not self.queue_ch0_time.empty() or not self.queue_ch0_wave.empty() or not self.queue_ch1_time.empty() or not \
-                    self.queue_ch1_wave.empty() or not self.queue_ch2_time.empty() or not \
-                    self.queue_ch2_wave.empty() or not self.queue_ch3_time.empty() or not self.queue_ch3_wave.empty():
-                length = self.queue_ch0_time.get()
+            while not self.queue_ch0_time.empty() or not self.queue_ch0_wave.empty() \
+                    or not self.queue_ch1_time.empty() or not self.queue_ch1_wave.empty() \
+                    or not self.queue_ch2_time.empty() or not self.queue_ch2_wave.empty() \
+                    or not self.queue_ch3_time.empty() or not self.queue_ch3_wave.empty():
+                ch0_time = self.queue_ch0_time.get()
                 ch0_wave = self.queue_ch0_wave.get()
                 ch1_time = self.queue_ch1_time.get()
                 ch1_wave = self.queue_ch1_wave.get()
@@ -349,7 +355,7 @@ class APT_Exp_Control:
                 ch3_wave = self.queue_ch3_wave.get()
 
                 with self.variables.lock_data:
-                    self.variables.ch0_time.extend(length)
+                    self.variables.ch0_time.extend(ch0_time)
                     self.variables.ch0_wave.extend(ch0_wave)
                     self.variables.ch1_time.extend(ch1_time)
                     self.variables.ch1_wave.extend(ch1_wave)
@@ -357,31 +363,38 @@ class APT_Exp_Control:
                     self.variables.ch2_wave.extend(ch2_wave)
                     self.variables.ch3_time.extend(ch3_time)
                     self.variables.ch3_wave.extend(ch3_wave)
-                    self.variables.main_v_dc_drs.extend(
-                        (np.tile(self.variables.specimen_voltage, len(length))).tolist())
-                    self.variables.main_v_dc_plot.extend(
-                        (np.tile(self.variables.specimen_voltage, len(length))).tolist())
-                    self.variables.main_v_p_drs.extend((np.tile(self.variables.pulse_voltage, len(length))).tolist())
+                    voltage_data = np.tile(self.variables.specimen_voltage, len(ch0_time))
+                    self.variables.main_v_dc_drs.extend(voltage_data.tolist())
+                    self.variables.main_p_drs.extend(
+                        np.tile(self.variables.pulse_voltage, len(ch0_time)).tolist())
+
+                with self.variables.lock_data_plot:
+                    self.variables.main_v_dc_plot.extend(voltage_data.tolist())
+                    # we have to calculate x and y from the wave data here
+                    self.variables.x_plot.extend(ch0_time.tolist())
+                    self.variables.y_plot.extend(ch0_time.tolist())
             time.sleep(self.sleep_time)
+
     def main_ex_loop(self, counts_target):
-
         """
-        This function is contain all methods that iteratively has to run to control the experiment.
-        This class method:
+        Execute main experiment loop.
 
-        1. Read the number of detected Ions(in TDC or Counter mode)
-        2- Calculate the error of detection rate of desire rate
-        3- Regulate the high voltage and pulser
+        This method contains all methods that iteratively run to control the experiment. It reads the number of detected
+        ions, calculates the error of the desired rate, and regulates the high voltage and pulser accordingly.
 
-        This function is called in each loop of main function.
-
-        Attributes:
-            counts_target:
+        Args:
+            counts_target: Target ion count
 
         Returns:
-            Does not return anything
-
+            None
         """
+        # Update total_ions based on the counter_source...
+        # Calculate count_temp and update variables...
+        # Save high voltage, pulse, and current iteration ions...
+        # Calculate counts_measured and counts_error...
+        # Perform proportional control with averaging...
+        # Update v_dc and v_p...
+        # Update other experiment variables...
 
         if self.variables.counter_source == 'TDC':
             self.variables.total_ions = len(self.variables.x)
@@ -444,6 +457,27 @@ class APT_Exp_Control:
         self.variables.main_chamber_vacuum.append(float(self.variables.vacuum_main))
 
     def run_experiment(self):
+        """
+        Run the main experiment.
+
+        This method initializes devices, starts the experiment loop, monitors various criteria, and manages experiment
+        stop conditions and data storage.
+
+        Returns:
+            None
+        """
+        # Initialize devices...
+        # Start the main experiment loop...
+        # Monitor various criteria...
+        # Perform experiment loop...
+        # Stop TDC process...
+        # Handle experiment ending...
+        # Save experiment counter...
+        # Send email...
+        # Save data in hdf5 file...
+        # Save setup parameters and statistics in a txt file...
+        # Clear up variables and deinitialize devices...
+        # Log completion...
 
         if os.path.exists("./files/counter_experiments.txt"):
             # Read the experiment counter
@@ -499,7 +533,7 @@ class APT_Exp_Control:
                 raise
 
         if self.conf['tdc'] == 'on':
-            self.initialize_detecotr_process()
+            self.initialize_detector_process()
         # start the timer for main experiment
         self.variables.specimen_voltage = self.variables.vdc_min
         self.variables.pulse_voltage_min = self.variables.v_p_min * (1 / self.variables.pulse_amp_per_supply_voltage)
@@ -736,19 +770,18 @@ class APT_Exp_Control:
 
     def clear_up(self):
         """
-        This function clears global variables and deinitialize high voltage and pulser function
-        and clear up global variables
+        Clear class variables, deinitialize high voltage and pulser, and reset variables.
 
-        Attributes:
-            Does not accept any arguments
+        This method performs the cleanup operations at the end of the experiment. It turns off the high voltage,
+        pulser, and signal generator, resets global variables, and performs other cleanup tasks.
+
         Returns:
-            Does not return anything
-
+            None
         """
 
         def cleanup_variables():
             """
-            Clear up all the global variables
+            Reset all the global variables.
             """
             self.variables.stop_flag = False
             self.variables.end_experiment = False
@@ -794,18 +827,15 @@ class APT_Exp_Control:
             self.variables.main_v_dc_tdc_roentdek = []
             self.variables.main_p_tdc_roentdek = []
 
-
-        self.log_apt.info('starting to clean up')
-
-        # save the data to the HDF5
+        self.log_apt.info('Starting cleanup')
 
         if self.conf['v_dc'] != "off":
-            # Switch off the v_dc
+            # Turn off the v_dc
             self.command_v_dc('F0')
             self.com_port_v_dc.close()
 
         if self.conf['v_p'] != "off":
-            # Switch off the v_p
+            # Turn off the v_p
             self.com_port_v_p.write('VOLT 0')
             self.com_port_v_p.write('OUTPut OFF')
             self.com_port_v_p.close()
@@ -813,6 +843,7 @@ class APT_Exp_Control:
         if self.conf['signal_generator'] != "off":
             # Turn off the signal generator
             signal_generator.turn_off_signal_generator()
-        # Zero variables
+
+        # Reset variables
         cleanup_variables()
-        self.log_apt.info('Clean up is finished')
+        self.log_apt.info('Cleanup is finished')

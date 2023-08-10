@@ -1,25 +1,22 @@
-"""
-This is the main script for saving the log file of the experiment.
-"""
-
 import logging
 
 
 def logger_creator(script_name, variables, log_name, path=None):
-    """
-    The function is used to instantiate and configure logger object for logging.
-    The function use python native logging library.
+	"""
+	Create and configure a logger object for logging.
 
-    Attributes:
-        Does not accept any arguments
-    Returns:
-        Returns the logger object which could be used log statements of following level:
-            1. INFO: "Useful information"
-            2. WARNING: "Something is not right"
-            3. DEBUG: "A debug message"
-            4. ERROR: "A Major error has happened."
-            5. CRITICAL "Fatal error. Cannot continue"
-    """
+	This function uses the native Python logging library to create a logger object
+	that can be used to log statements of different levels.
+
+	Args:
+		script_name (str): The name of the script using the logger.
+		variables (object): An object containing relevant variables.
+		log_name (str): The name of the log file.
+		path (str, optional): The path to the log directory. Defaults to None.
+
+	Returns:
+		logging.Logger: The configured logger object.
+	"""
     log_creator = logging.getLogger(script_name)
     log_creator.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s',

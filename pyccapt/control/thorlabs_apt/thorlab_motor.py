@@ -1,13 +1,23 @@
 import thorlabs_apt.core as apt
 
-
 def thorlab(conf, degree, step_increase=False, initialize=False):
-    """
-    Initialize the Thorlab controller and set it to zero degree
-    """
+	"""
+	Initialize the Thorlabs motor controller and move it to the specified degree.
+
+	Args:
+		conf (dict): Configuration settings.
+			Should contain 'COM_PORT_thorlab_motor' for the COM port number.
+		degree (float): Degree value to move the motor to.
+		step_increase (bool, optional): Whether to move the motor in steps if degree > 180.
+		initialize (bool, optional): Whether to initialize the motor and move to home position.
+
+	Returns:
+		None
+	"""
 
     motor = apt.Motor(int(conf['COM_PORT_thorlab_motor']))
-    if initialize:
+
+	if initialize:
         motor.set_move_home_parameters(2, 1, 10, 4)
         motor.move_home(True)
         if degree != 0:

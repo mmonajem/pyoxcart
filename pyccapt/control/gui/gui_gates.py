@@ -1,7 +1,6 @@
 import os
 import sys
 import time
-
 import nidaqmx
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer
@@ -12,13 +11,42 @@ from pyccapt.control.control_tools import share_variables, read_files
 
 
 class Ui_Gates(object):
+	"""
+	Load the GUI based on the configuration file.
+
+	Args:
+		None
+
+	Returns:
+		None
+	"""
 
 	def __init__(self, variables, conf, parent=None):
+		"""
+		Load the GUI based on the configuration file.
+
+		Args:
+			variables (object): Global variables
+			conf (dict): Configuration file
+			parent (object): Parent object
+
+		Returns:
+			None
+		"""
 		self.variables = variables
 		self.conf = conf
 		self.parent = parent
 
 	def setupUi(self, Gates):
+		"""
+		Load the GUI based on the configuration file.
+
+		Args:
+			Gates (object): Parent object
+
+		Returns:
+			None
+		"""
 		Gates.setObjectName("Gates")
 		Gates.resize(420, 411)
 		self.gridLayout_4 = QtWidgets.QGridLayout(Gates)
@@ -132,6 +160,14 @@ class Ui_Gates(object):
 		self.timer.timeout.connect(self.hideMessage)
 
 	def retranslateUi(self, Gates):
+		"""
+
+		Args:
+			Gates: The main window
+
+		Returns:
+			None
+		"""
 		_translate = QtCore.QCoreApplication.translate
 		###
 		Gates.setWindowTitle(_translate("Ui_Gates", "PyCCAPT Gates Control"))
@@ -147,13 +183,25 @@ class Ui_Gates(object):
 
 	def gates(self, gate_num):
 		"""
-				The function for closing or opening gates
-				"""
+		The function for applying the command of closing or opening gate
+
+		Args:
+			gate_num: The number of the gate to be opened or closed
+
+		Returns:
+			None
+		"""
 
 		def switch_gate(num):
 			"""
-							The function for applying the command of closing or opening gate
-							"""
+			The function for opening or closing the gate
+
+			Args:
+				num: The number of the gate to be opened or closed
+
+			Returns:
+				None
+			"""
 			with nidaqmx.Task() as task:
 				if self.conf["gates"] != "off":
 					task.do_channels.add_do_chan(self.conf["COM_PORT_gates"] + 'line%s' % num)
@@ -214,12 +262,30 @@ class Ui_Gates(object):
 				self.timer.start(8000)
 
 	def error_message(self, message):
+		"""
+		The function for showing the error message in the GUI
+
+		Args:
+			message: The message to be shown in the GUI
+
+		Returns:
+			None
+		"""
 		_translate = QtCore.QCoreApplication.translate
 		self.Error.setText(_translate("OXCART",
 		                              "<html><head/><body><p><span style=\" color:#ff0000;\">"
 		                              + message + "</span></p></body></html>"))
 
 	def hideMessage(self):
+		"""
+		The function for hiding the error message in the GUI
+
+		Args:
+			None
+
+		Returns:
+			None
+		"""
 		# Hide the message and stop the timer
 		_translate = QtCore.QCoreApplication.translate
 		self.Error.setText(_translate("OXCART",
@@ -229,17 +295,38 @@ class Ui_Gates(object):
 		self.timer.stop()
 
 	def stop(self):
-		# Stop any background processes, timers, or threads here
+		"""
+		The function for stopping the background activity
+
+		Args:
+			None
+
+		Returns:
+			None
+		"""
 		# Add any additional cleanup code here
 		pass
 
 
 class GatesWindow(QtWidgets.QWidget):
 	def __init__(self, gui_gates, *args, **kwargs):
+		"""
+		Initialize the GatesWindow class.
+
+		Args:
+			gui_gates: GUI for gates.
+			*args, **kwargs: Additional arguments for QWidget initialization.
+		"""
 		super().__init__(*args, **kwargs)
 		self.gui_gates = gui_gates
 
 	def closeEvent(self, event):
+		"""
+		Handle the close event of the GatesWindow.
+
+		Args:
+			event: Close event.
+		"""
 		self.gui_gates.stop()  # Call the stop method to stop any background activity
 		# Additional cleanup code here if needed
 		super().closeEvent(event)
@@ -247,7 +334,7 @@ class GatesWindow(QtWidgets.QWidget):
 
 if __name__ == "__main__":
 	try:
-		# load the Json file
+		# Load the Json file
 		configFile = 'config.json'
 		p = os.path.abspath(os.path.join(__file__, "../../.."))
 		os.chdir(p)

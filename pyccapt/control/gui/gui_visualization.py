@@ -1,7 +1,5 @@
-# Form implementation generated from reading ui file 'gui_laser_control.ui'
 import os
 import sys
-
 import numpy as np
 import pyqtgraph as pg
 import pyqtgraph.exporters
@@ -17,12 +15,33 @@ from pyccapt.control.devices import initialize_devices
 class Ui_Visualization(object):
 
     def __init__(self, variables, conf):
+        """
+        Constructor for the Visualization UI class.
+
+        Args:
+            variables (object): Global experiment variables.
+            conf (dict): Configuration settings.
+
+        Attributes:
+            variables: Global experiment variables.
+            conf: Configuration settings.
+            update_timer (QTimer): QTimer for updating graphs.
+        """
         self.variables = variables
         self.conf = conf
         self.update_timer = QTimer()  # Create a QTimer for updating graphs
         self.update_timer.timeout.connect(self.update_graphs)  # Connect it to the update_graphs slot
+        self.index_plot_heatmap = 0  # Index for the heatmap plot
 
     def setupUi(self, Visualization):
+        """
+        Setup the UI for the Visualization window.
+        Args:
+            Visualization (QMainWindow): Visualization window.
+
+        Return:
+            None
+        """
         Visualization.setObjectName("Visualization")
         Visualization.resize(932, 670)
         self.gridLayout_2 = QtWidgets.QGridLayout(Visualization)
@@ -201,6 +220,14 @@ class Ui_Visualization(object):
             self.histogram.setLabel("bottom", "m/c", units='Da', **styles)
 
     def retranslateUi(self, Visualization):
+        """
+        Set the text of the widgets
+        Args:
+            Visualization: The main window
+
+        Return:
+            None
+        """
         _translate = QtCore.QCoreApplication.translate
 
         ###
@@ -214,7 +241,14 @@ class Ui_Visualization(object):
         self.label_207.setText(_translate("Visualization", "Mass Spectrum"))
 
     def update_graphs(self):
+        """
+        Update the graphs
+        Args:
+            None
 
+        Return:
+            None
+        """
         if self.variables.index_auto_scale_graph == 30:
             self.vdc_time.enableAutoRange(axis='x')
             self.histogram.enableAutoRange(axis='y')
@@ -342,15 +376,21 @@ class Ui_Visualization(object):
                         self.scatter.setSize(self.variables.hitmap_plot_size)
                     with self.variables.lock_setup_parameters:
                         hit_display = self.variables.hit_display
-                    with self.variables.lock_data:
-                        x = self.variables.x
-                        y = self.variables.y
+                    with self.variables.lock_data_plot:
+                        x = self.variables.x_plot[-hit_display:]
+                        y = self.variables.y_plot[-hit_display:]
                     min_length = min(len(x), len(y))
                     x = x[-min_length:]
                     y = y[-min_length:]
+                    if self.variables.reset_heatmap:
+                        self.index_plot_heatmap = len(x)
+                        self.variables.reset_heatmap = False
+
+                    if self.index_plot_heatmap > 0:
+                        x = x[self.index_plot_heatmap:]
+                        y = y[self.index_plot_heatmap:]
                     self.scatter.clear()
-                    self.scatter.setData(x=x[-hit_display:],
-                                         y=y[-hit_display:])
+                    self.scatter.setData(x=x, y=y)
                     # add item to plot window
                     # adding scatter plot item to the plot window
                     self.detector_heatmap.clear()
@@ -375,18 +415,42 @@ class Ui_Visualization(object):
                 exporter.export(path_meta + '/tof_%s.png' % index_plot_save)
 
     def stop(self):
-        # Stop any background processes, timers, or threads here
+        """
+        Stop any background activity
+        Args:
+            None
 
+        Return:
+            None
+        """
         # Add any additional cleanup code here
         pass
 
 
 class VisualizationWindow(QtWidgets.QWidget):
+    """
+    Widget for the Visualization window.
+    """
+
     def __init__(self, gui_visualization, *args, **kwargs):
+        """
+        Constructor for the VisualizationWindow class.
+
+        Args:
+            gui_visualization: Instance of the Visualization.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+        """
         super().__init__(*args, **kwargs)
         self.gui_visualization = gui_visualization
 
     def closeEvent(self, event):
+        """
+        Close event for the window.
+
+        Args:
+            event: Close event.
+        """
         self.gui_visualization.stop()  # Call the stop method to stop any background activity
         # Additional cleanup code here if needed
         super().closeEvent(event)
@@ -394,7 +458,7 @@ class VisualizationWindow(QtWidgets.QWidget):
 
 if __name__ == "__main__":
     try:
-        # load the Json file
+        # Load the JSON file
         configFile = 'config.json'
         p = os.path.abspath(os.path.join(__file__, "../../.."))
         os.chdir(p)
@@ -403,7 +467,7 @@ if __name__ == "__main__":
         print('Can not load the configuration file')
         print(e)
         sys.exit()
-        # Initialize global experiment variables
+    # Initialize global experiment variables
     variables = share_variables.Variables(conf)
     variables.log_path = p
 

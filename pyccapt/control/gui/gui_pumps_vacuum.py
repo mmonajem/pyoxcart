@@ -2,7 +2,6 @@ import os
 import sys
 import threading
 import time
-
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer
 from PyQt6.QtCore import pyqtSignal, QObject
@@ -16,22 +15,42 @@ from pyccapt.control.devices import initialize_devices
 class Ui_Pumps_Vacuum(object):
 
     def __init__(self, variables, conf, SignalEmitter, parent=None):
-        self.variables = variables
-        self.conf = conf
-        self.parent = parent
-        self.emitter = SignalEmitter
+	    """
+		Constructor for the Pumps and Vacuum UI class.
+
+		Args:
+			variables (object): Global experiment variables.
+			conf (dict): Configuration settings.
+			SignalEmitter (object): Emitter for signals.
+			parent: Parent widget (optional).
+
+		Return:
+			None
+		"""
+	    self.variables = variables
+	    self.conf = conf
+	    self.parent = parent
+	    self.emitter = SignalEmitter
 
     def setupUi(self, Pumps_Vacuum):
-        Pumps_Vacuum.setObjectName("Pumps_Vacuum")
-        Pumps_Vacuum.resize(850, 164)
-        self.gridLayout_3 = QtWidgets.QGridLayout(Pumps_Vacuum)
-        self.gridLayout_3.setObjectName("gridLayout_3")
-        self.gridLayout_2 = QtWidgets.QGridLayout()
-        self.gridLayout_2.setObjectName("gridLayout_2")
-        self.gridLayout = QtWidgets.QGridLayout()
-        self.gridLayout.setObjectName("gridLayout")
-        self.led_pump_load_lock = QtWidgets.QLabel(parent=Pumps_Vacuum)
-        self.led_pump_load_lock.setMinimumSize(QtCore.QSize(50, 50))
+	    """
+		Sets up the UI for the Pumps and Vacuum tab.
+		Args:
+			Pumps_Vacuum (object): Pumps and Vacuum tab widget.
+
+		Return:
+			None
+		"""
+	    Pumps_Vacuum.setObjectName("Pumps_Vacuum")
+	    Pumps_Vacuum.resize(850, 164)
+	    self.gridLayout_3 = QtWidgets.QGridLayout(Pumps_Vacuum)
+	    self.gridLayout_3.setObjectName("gridLayout_3")
+	    self.gridLayout_2 = QtWidgets.QGridLayout()
+	    self.gridLayout_2.setObjectName("gridLayout_2")
+	    self.gridLayout = QtWidgets.QGridLayout()
+	    self.gridLayout.setObjectName("gridLayout")
+	    self.led_pump_load_lock = QtWidgets.QLabel(parent=Pumps_Vacuum)
+	    self.led_pump_load_lock.setMinimumSize(QtCore.QSize(50, 50))
         self.led_pump_load_lock.setMaximumSize(QtCore.QSize(50, 50))
         self.led_pump_load_lock.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.led_pump_load_lock.setObjectName("led_pump_load_lock")
@@ -244,16 +263,24 @@ class Ui_Pumps_Vacuum(object):
         self.timer.timeout.connect(self.hideMessage)
 
     def retranslateUi(self, Pumps_Vacuum):
-        _translate = QtCore.QCoreApplication.translate
-        ###
-        # Pumps_Vacuum.setWindowTitle(_translate("Pumps_Vacuum", "Form"))
-        Pumps_Vacuum.setWindowTitle(_translate("Pumps_Vacuum", "PyCCAPT Pumps and Vacuum Control"))
-        Pumps_Vacuum.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
-        ###
-        self.led_pump_load_lock.setText(_translate("Pumps_Vacuum", "pump"))
-        self.label_210.setText(_translate("Pumps_Vacuum", "Load lock (mBar)"))
-        self.label_211.setText(_translate("Pumps_Vacuum", "Buffer Chamber (mBar)"))
-        self.label_212.setText(_translate("Pumps_Vacuum", "Main Chamber (mBar)"))
+	    """
+		Set the text and title of the widgets
+		Args:
+			Pumps_Vacuum: the main window
+
+		Return:
+			None
+		"""
+	    _translate = QtCore.QCoreApplication.translate
+	    ###
+	    # Pumps_Vacuum.setWindowTitle(_translate("Pumps_Vacuum", "Form"))
+	    Pumps_Vacuum.setWindowTitle(_translate("Pumps_Vacuum", "PyCCAPT Pumps and Vacuum Control"))
+	    Pumps_Vacuum.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+	    ###
+	    self.led_pump_load_lock.setText(_translate("Pumps_Vacuum", "pump"))
+	    self.label_210.setText(_translate("Pumps_Vacuum", "Load lock (mBar)"))
+	    self.label_211.setText(_translate("Pumps_Vacuum", "Buffer Chamber (mBar)"))
+	    self.label_212.setText(_translate("Pumps_Vacuum", "Main Chamber (mBar)"))
         self.pump_load_lock_switch.setText(_translate("Pumps_Vacuum", "Load Lock Pump"))
         self.label_213.setText(_translate("Pumps_Vacuum", "Load Lock Pre(mBar)"))
         self.label_214.setText(_translate("Pumps_Vacuum", "Buffer Chamber Pre (mBar)"))
@@ -261,40 +288,109 @@ class Ui_Pumps_Vacuum(object):
         self.Error.setText(_translate("Pumps_Vacuum", "<html><head/><body><p><br/></p></body></html>"))
 
     def update_temperature(self, value):
-        self.temp.display(value)
+	    """
+		Update the temperature value in the GUI
+		Args:
+			value: the temperature value
+
+		Return:
+			None
+		"""
+	    self.temp.display(value)
 
     def update_vacuum_main(self, value):
-        self.vacuum_main.display('{:.2e}'.format(value))
+	    """
+		Update the vacuum value in the GUI
+		Args:
+			value: the temperature value
+
+		Return:
+			None
+		"""
+	    self.vacuum_main.display('{:.2e}'.format(value))
 
     def update_vacuum_buffer(self, value):
-        self.vacuum_buffer.display('{:.2e}'.format(value))
+	    """
+		Update the vacuum value in the GUI
+		Args:
+			value: the temperature value
+
+		Return:
+			None
+		"""
+	    self.vacuum_buffer.display('{:.2e}'.format(value))
 
     def update_vacuum_buffer_back(self, value):
-        self.vacuum_buffer_back.display('{:.2e}'.format(value))
+	    """
+		Update the vacuum value in the GUI
+		Args:
+			value: the temperature value
+
+		Return:
+			None
+		"""
+	    self.vacuum_buffer_back.display('{:.2e}'.format(value))
 
     def update_vacuum_load_back(self, value):
-        self.vacuum_load_lock.display('{:.2e}'.format(value))
+	    """
+		Update the vacuum value in the GUI
+		Args:
+			value: the temperature value
+
+		Return:
+			None
+		"""
+	    self.vacuum_load_lock.display('{:.2e}'.format(value))
 
     def update_vacuum_load(self, value):
-        self.vacuum_load_lock_back.display('{:.2e}'.format(value))
+	    """
+		Update the vacuum value in the GUI
+		Args:
+			value: the temperature value
+
+		Return:
+			None
+		"""
+	    self.vacuum_load_lock_back.display('{:.2e}'.format(value))
 
     def update_bool_flag_while_loop_gauges(self, value):
-        # Connect the bool_flag_while_loop signal to a slot in this function
-        with self.variables.lock_statistics:
-            self.variables.bool_flag_while_loop_gages = value
+	    """
+		Update the vacuum value in the GUI
+		Args:
+			value: the temperature value
+
+		Return:
+			None
+		"""
+	    # Connect the bool_flag_while_loop signal to a slot in this function
+	    with self.variables.lock_statistics:
+		    self.variables.bool_flag_while_loop_gages = value
 
     def hideMessage(self):
-        # Hide the message and stop the timer
-        _translate = QtCore.QCoreApplication.translate
-        self.Error.setText(_translate("OXCART",
-                                      "<html><head/><body><p><span style=\" "
-                                      "color:#ff0000;\"></span></p></body></html>"))
+	    """
+		Hide the warning message
+		Args:
+			None
 
-        self.timer.stop()
+		Return:
+			None
+		"""
+	    # Hide the message and stop the timer
+	    _translate = QtCore.QCoreApplication.translate
+	    self.Error.setText(_translate("OXCART",
+	                                  "<html><head/><body><p><span style=\" "
+	                                  "color:#ff0000;\"></span></p></body></html>"))
+
+	    self.timer.stop()
 
     def pump_switch(self):
-        """
-			The function for Switching the Load Lock pump
+	    """
+		Switch the pump on or off
+		Args:
+			None
+
+		Return:
+			None
 		"""
         with self.variables.lock_statistics:
             try:
@@ -325,43 +421,82 @@ class Ui_Pumps_Vacuum(object):
                 pass
 
     def error_message(self, message):
-        _translate = QtCore.QCoreApplication.translate
-        self.Error.setText(_translate("OXCART",
-                                      "<html><head/><body><p><span style=\" color:#ff0000;\">"
-                                      + message + "</span></p></body></html>"))
+	    """
+		Show the warning message
+		Args:
+			message: the message to be shown
+
+		Return:
+			None
+		"""
+	    _translate = QtCore.QCoreApplication.translate
+	    self.Error.setText(_translate("OXCART",
+	                                  "<html><head/><body><p><span style=\" color:#ff0000;\">"
+	                                  + message + "</span></p></body></html>"))
 
     def stop(self):
-        # Stop any background processes, timers, or threads here
-        self.timer.stop()  # If you want to stop this timer when closing
-        # Add any additional cleanup code here
+	    """
+		Stop the timer
+		Args:
+			None
+
+		Return:
+			None
+		"""
+	    # Stop any background processes, timers, or threads here
+	    self.timer.stop()  # If you want to stop this timer when closing
+	    # Add any additional cleanup code here
 
 
 class SignalEmitter(QObject):
-    temp = pyqtSignal(float)
-    vacuum_main = pyqtSignal(float)
-    vacuum_buffer = pyqtSignal(float)
-    vacuum_buffer_back = pyqtSignal(float)
-    vacuum_load_back = pyqtSignal(float)
-    vacuum_load = pyqtSignal(float)
-    bool_flag_while_loop = pyqtSignal(bool)
+	"""
+	Signal emitter class for emitting signals related to vacuum and pumps control.
+	"""
+
+	temp = pyqtSignal(float)
+	vacuum_main = pyqtSignal(float)
+	vacuum_buffer = pyqtSignal(float)
+	vacuum_buffer_back = pyqtSignal(float)
+	vacuum_load_back = pyqtSignal(float)
+	vacuum_load = pyqtSignal(float)
+	bool_flag_while_loop = pyqtSignal(bool)
 
 
 class PumpsVacuumWindow(QtWidgets.QWidget):
-    def __init__(self, gui_pumps_vacuum, signal_emitter, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.gui_pumps_vacuum = gui_pumps_vacuum
-        self.signal_emitter = signal_emitter
+	"""
+	Widget for Pumps and Vacuum control window.
+	"""
 
-    def closeEvent(self, event):
-        self.gui_pumps_vacuum.stop()  # Call the stop method to stop any background activity
-        # Additional cleanup code here if needed
-        super().closeEvent(event)
-        self.signal_emitter.bool_flag_while_loop.emit(False)
+	def __init__(self, gui_pumps_vacuum, signal_emitter, *args, **kwargs):
+		"""
+		Constructor for the PumpsVacuumWindow class.
+
+		Args:
+			gui_pumps_vacuum: Instance of the PumpsVacuum control.
+			signal_emitter: SignalEmitter object for communication.
+			*args: Additional positional arguments.
+			**kwargs: Additional keyword arguments.
+		"""
+		super().__init__(*args, **kwargs)
+		self.gui_pumps_vacuum = gui_pumps_vacuum
+		self.signal_emitter = signal_emitter
+
+	def closeEvent(self, event):
+		"""
+		Close event for the window.
+
+		Args:
+			event: Close event.
+		"""
+		self.gui_pumps_vacuum.stop()  # Call the stop method to stop any background activity
+		# Additional cleanup code here if needed
+		super().closeEvent(event)
+		self.signal_emitter.bool_flag_while_loop.emit(False)
 
 
 if __name__ == "__main__":
     try:
-        # load the Json file
+	    # Load the JSON file
         configFile = 'config.json'
         p = os.path.abspath(os.path.join(__file__, "../../.."))
         os.chdir(p)

@@ -1,13 +1,17 @@
-"""
-This is the main script of all global variables.
-"""
-
 import threading
 
+
 class Variables:
+    """
+    Global variables class for experiment setup, statistics, and data.
+    """
+
     def __init__(self, conf):
         """
-        Initializing of global variables function
+        Initialize the global variables.
+
+        Args:
+            conf (dict): Configuration dictionary containing various settings.
         """
         ### Device Ports
         self.COM_PORT_cryo = conf['COM_PORT_cryo']
@@ -116,12 +120,17 @@ class Variables:
         self.main_v_p_drs = []
         self.laser_degree = []
 
+        ### Data for plotting
+        self.lock_data_plot = threading.Lock()
+        self.main_v_dc_plot = []
+        self.x_plot = []
+        self.y_plot = []
         ### Data for saving
         self.lock_data = threading.Lock()
         self.x = []
         self.y = []
         self.t = []
-        self.main_v_dc_plot = []
+
         self.dld_start_counter = []
         self.time_stamp = []
         self.laser_intensity = []
@@ -131,6 +140,7 @@ class Variables:
         self.main_v_dc_tdc_surface_concept = []
         self.main_p_tdc_surface_concept = []
         self.main_v_dc_drs = []
+        self.main_p_drs = []
         self.main_v_dc_tdc_roentdek = []
         self.main_p_tdc_roentdek = []
 

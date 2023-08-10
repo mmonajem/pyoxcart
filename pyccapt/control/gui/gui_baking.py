@@ -1,12 +1,8 @@
-# Form implementation generated from reading ui file 'gui_baking.ui'
-# Form implementation generated from reading ui file 'gui_laser_control.ui'
 import os
 import sys
 import threading
 import time
-from builtins import *  # @UnusedWildImport
 from datetime import datetime
-
 import numpy as np
 import pandas as pd
 import pyqtgraph as pg
@@ -19,39 +15,53 @@ from mcculw.enums import TempScale, TInOptions
 from pyccapt.control.control_tools import share_variables, read_files
 from pyccapt.control.devices import initialize_devices
 
-
 class Ui_Baking(object):
 
     def __init__(self, variables, conf, parent=None):
-        self.variables = variables
-        self.conf = conf
-        self.parent = parent
-        # datetime object containing current date and time
-        self.now = datetime.now()
+	    """
+		Initialize the UiBaking class.
 
-        self.data = pd.DataFrame(
-            columns=['data', 'Time', 'timestamp', 'MC_vacuum', 'BC_vacuum', 'MC_NEG', 'MC_Det', 'Mc_Top', 'MC_Gate',
-                     'BC_Top', 'BC_Pump'])
-        now_time = self.now.strftime("%d-%m-%Y_%H-%M-%S")
-        folders_above = os.path.abspath(os.path.join(os.getcwd(), "../"))
-        self.save_path = folders_above + '/tests/data/baking_loging/%s/' % now_time
-        if not os.path.isdir(self.save_path):
-            os.makedirs(self.save_path, mode=0o777, exist_ok=True)
-        self.file_name = self.save_path + 'baking_loging_%s.csv' % now_time
-        self.file_name_backup = self.save_path + 'backup_baking_loging_%s.csv' % now_time
+		Args:
+			variables: Instance of variables class.
+			conf: Configuration settings.
+			parent: Parent widget (default is None).
+		"""
+	    self.variables = variables
+	    self.conf = conf
+	    self.parent = parent
+	    self.now = datetime.now()
+	    self.running = True
 
-        self.running = True
+	    self.data = pd.DataFrame(
+		    columns=['data', 'Time', 'timestamp', 'MC_vacuum', 'BC_vacuum', 'MC_NEG', 'MC_Det', 'Mc_Top', 'MC_Gate',
+		             'BC_Top', 'BC_Pump'])
+	    now_time = self.now.strftime("%d-%m-%Y_%H-%M-%S")
+	    folders_above = os.path.abspath(os.path.join(os.getcwd(), "../"))
+	    self.save_path = folders_above + '/tests/data/baking_logging/%s/' % now_time
+	    if not os.path.isdir(self.save_path):
+		    os.makedirs(self.save_path, mode=0o777, exist_ok=True)
+	    self.file_name = self.save_path + 'baking_logging_%s.csv' % now_time
+	    self.file_name_backup = self.save_path + 'backup_baking_logging_%s.csv' % now_time
+
     def setupUi(self, Baking):
-        Baking.setObjectName("Baking")
-        Baking.resize(820, 757)
-        self.gridLayout_2 = QtWidgets.QGridLayout(Baking)
-        self.gridLayout_2.setObjectName("gridLayout_2")
-        self.gridLayout = QtWidgets.QGridLayout()
-        self.gridLayout.setObjectName("gridLayout")
-        # self.tempretures = QtWidgets.QGraphicsView(parent=Baking)
-        self.tempretures = pg.PlotWidget(parent=Baking)
-        self.tempretures.setMinimumSize(QtCore.QSize(800, 500))
-        self.tempretures.setObjectName("tempretures")
+	    """
+		setupUi function.
+		Args:
+			Baking: Parent widget.
+
+		Returns:
+			None
+		"""
+	    Baking.setObjectName("Baking")
+	    Baking.resize(820, 757)
+	    self.gridLayout_2 = QtWidgets.QGridLayout(Baking)
+	    self.gridLayout_2.setObjectName("gridLayout_2")
+	    self.gridLayout = QtWidgets.QGridLayout()
+	    self.gridLayout.setObjectName("gridLayout")
+	    # self.tempretures = QtWidgets.QGraphicsView(parent=Baking)
+	    self.tempretures = pg.PlotWidget(parent=Baking)
+	    self.tempretures.setMinimumSize(QtCore.QSize(800, 500))
+	    self.tempretures.setObjectName("tempretures")
         self.gridLayout.addWidget(self.tempretures, 0, 0, 1, 1)
         self.save_data = QtWidgets.QPushButton(parent=Baking)
         self.save_data.setMinimumSize(QtCore.QSize(0, 25))
@@ -92,25 +102,41 @@ class Ui_Baking(object):
         self.presures.setLabel("bottom", "Time (s)", **styles)
 
     def retranslateUi(self, Baking):
-        _translate = QtCore.QCoreApplication.translate
-        ###
-        #  Baking.setWindowTitle(_translate("Baking", "Form"))
-        Baking.setWindowTitle(_translate("Baking", "PyCCAPT Baking"))
-        Baking.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
-        ###
-        self.save_data.setText(_translate("Baking", "Save CSV"))
+	    """
+		retranslateUi function.
+		Args:
+			Baking: Parent widget.
+
+		Returns:
+			None
+		"""
+	    _translate = QtCore.QCoreApplication.translate
+	    ###
+	    #  Baking.setWindowTitle(_translate("Baking", "Form"))
+	    Baking.setWindowTitle(_translate("Baking", "PyCCAPT Baking"))
+	    Baking.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+	    ###
+	    self.save_data.setText(_translate("Baking", "Save CSV"))
 
     def read(self):
-        tpg = initialize_devices.TPG362(port='COM5')
-        unit = tpg.pressure_unit()
+	    """
+		Read function.
 
-        index = 0
-        desired_period = 1.0
-        while self.running:
-            start_time = time.perf_counter()
-            # print('-----------', index, 'seconds', '--------------')
-            gauge_bc, _ = tpg.pressure_gauge(1)
-            # print('pressure BC is {} {}'.format(gauge_bc, unit))
+		Args:
+			None
+		Returns:
+			None
+		"""
+	    tpg = initialize_devices.TPG362(port='COM5')
+	    unit = tpg.pressure_unit()
+
+	    index = 0
+	    desired_period = 1.0
+	    while self.running:
+		    start_time = time.perf_counter()
+		    # print('-----------', index, 'seconds', '--------------')
+		    gauge_bc, _ = tpg.pressure_gauge(1)
+		    # print('pressure BC is {} {}'.format(gauge_bc, unit))
 
             gauge_mc, _ = tpg.pressure_gauge(2)
             # print('pressure MC is {} {}'.format(gauge_mc, unit))
@@ -148,16 +174,24 @@ class Ui_Baking(object):
                 time.sleep(remaining_time)
 
     def plot(self):
-        time_range = 900  # 15 minutes
-        time = self.data['timestamp'].tail(time_range).to_numpy()
-        MC_NEG = self.data['MC_NEG'].tail(time_range).to_numpy()
-        MC_Det = self.data['MC_Det'].tail(time_range).to_numpy()
-        Mc_Top = self.data['Mc_Top'].tail(time_range).to_numpy()
-        MC_Gate = self.data['MC_Gate'].tail(time_range).to_numpy()
-        BC_Top = self.data['BC_Top'].tail(time_range).to_numpy()
-        BC_Pump = self.data['BC_Pump'].tail(time_range).to_numpy()
-        MC_vacuum = self.data['MC_vacuum'].tail(time_range).to_numpy()
-        BC_vacuum = self.data['BC_vacuum'].tail(time_range).to_numpy()
+	    """
+		Plot function.
+
+		Args:
+			None
+		Returns:
+			None
+		"""
+	    time_range = 900  # 15 minutes
+	    time = self.data['timestamp'].tail(time_range).to_numpy()
+	    MC_NEG = self.data['MC_NEG'].tail(time_range).to_numpy()
+	    MC_Det = self.data['MC_Det'].tail(time_range).to_numpy()
+	    Mc_Top = self.data['Mc_Top'].tail(time_range).to_numpy()
+	    MC_Gate = self.data['MC_Gate'].tail(time_range).to_numpy()
+	    BC_Top = self.data['BC_Top'].tail(time_range).to_numpy()
+	    BC_Pump = self.data['BC_Pump'].tail(time_range).to_numpy()
+	    MC_vacuum = self.data['MC_vacuum'].tail(time_range).to_numpy()
+	    BC_vacuum = self.data['BC_vacuum'].tail(time_range).to_numpy()
 
         self.tempretures.clear()
         self.presures.clear()
@@ -176,45 +210,74 @@ class Ui_Baking(object):
         self.presures.enableAutoRange(axis='x')
 
     def save_data_csv(self):
-        now = datetime.now()
-        now_time = now.strftime("%d-%m-%Y_%H-%M-%S")
-        self.data.to_csv(self.save_path + '/manual_save_%s.csv' % now_time,
-                         sep=';', index=False)
+	    """
+		save_data_csv function.
+		Args:
+			None
+		Returns:
+			None
+		"""
+	    now = datetime.now()
+	    now_time = now.strftime("%d-%m-%Y_%H-%M-%S")
+	    self.data.to_csv(self.save_path + '/manual_save_%s.csv' % now_time,
+	                     sep=';', index=False)
 
     def stop(self):
-        self.running = False
-        self.timer.stop()  # Stop the QTimer
+	    """
+		Stop function.
+
+		Args:
+			None
+		Returns:
+			None
+		"""
+	    self.running = False
+	    self.timer.stop()  # Stop the QTimer
 
 
 class BakingWindow(QtWidgets.QWidget):
-    def __init__(self, gui_baking, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.gui_baking = gui_baking
+	def __init__(self, gui_baking, *args, **kwargs):
+		"""
+		Initialize the BakingWindow class.
 
-    def closeEvent(self, event):
-        self.gui_baking.stop()  # Call the stop method to stop the background thread
-        # Additional cleanup code here if needed
-        super().closeEvent(event)
+		Args:
+			gui_baking: An instance of the GUI baking class.
+			*args: Variable length argument list.
+			**kwargs: Arbitrary keyword arguments.
+		"""
+		super().__init__(*args, **kwargs)
+		self.gui_baking = gui_baking
 
+	def closeEvent(self, event):
+		"""
+		Override the close event to stop the background thread and perform additional cleanup if needed.
+
+		Args:
+			event: The close event.
+		"""
+		self.gui_baking.stop()  # Call the stop method to stop the background thread
+		# Additional cleanup code here if needed
+		super().closeEvent(event)
 
 if __name__ == "__main__":
-    try:
-        # load the Json file
-        configFile = 'config.json'
-        p = os.path.abspath(os.path.join(__file__, "../../.."))
-        os.chdir(p)
-        conf = read_files.read_json_file(configFile)
-    except Exception as e:
-        print('Can not load the configuration file')
-        print(e)
-        sys.exit()
-        # Initialize global experiment variables
-    variables = share_variables.Variables(conf)
-    variables.log_path = p
+	try:
+		# Load the JSON file
+		configFile = 'config.json'
+		p = os.path.abspath(os.path.join(__file__, "../../.."))
+		os.chdir(p)
+		conf = read_files.read_json_file(configFile)
+	except Exception as e:
+		print('Can not load the configuration file')
+		print(e)
+		sys.exit()
 
-    app = QtWidgets.QApplication(sys.argv)
-    Baking = QtWidgets.QWidget()
-    ui = Ui_Baking(variables, conf)
-    ui.setupUi(Baking)
-    Baking.show()
-    sys.exit(app.exec())
+	# Initialize global experiment variables
+	variables = share_variables.Variables(conf)
+	variables.log_path = p
+
+	app = QtWidgets.QApplication(sys.argv)
+	Baking = QtWidgets.QWidget()
+	ui = Ui_Baking(variables, conf)
+	ui.setupUi(Baking)
+	Baking.show()
+	sys.exit(app.exec())

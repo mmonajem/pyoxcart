@@ -1,40 +1,46 @@
-"""
-This is the main script is load the GUI base on the configuration file.
-"""
-
 import os
 import sys
-
 from PyQt6 import QtWidgets
-
-# Local module and scripts
 from pyccapt.control.control_tools import share_variables, read_files
 from pyccapt.control.gui import gui_main
 
 
-def main():
-	try:
-		# load the Json file
-		configFile = 'config.json'
-		p = os.path.abspath(os.path.join(__file__, "../.."))
-		os.chdir(p)
-		conf = read_files.read_json_file(configFile)
-	except Exception as e:
-		print('Can not load the configuration file')
-		print(e)
-		sys.exit()
-	# Initialize global experiment variables
-	variables = share_variables.Variables(conf)
-	variables.log_path = p
+def load_gui():
+    """
+    Load the GUI based on the configuration file.
 
-	app = QtWidgets.QApplication(sys.argv)
-	PyCCAPT = QtWidgets.QMainWindow()
-	signal_emitter = gui_main.SignalEmitter()
-	ui = gui_main.Ui_PyCCAPT(variables, conf, signal_emitter)
-	ui.setupUi(PyCCAPT)
-	PyCCAPT.show()
-	sys.exit(app.exec())
+    This function reads the configuration file, initializes global experiment variables, and
+    shows the GUI window.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
+    try:
+        # Load the JSON file
+        config_file = 'config.json'
+        p = os.path.abspath(os.path.join(__file__, "../.."))
+        os.chdir(p)
+        conf = read_files.read_json_file(config_file)
+    except Exception as e:
+        print('Cannot load the configuration file')
+        print(e)
+        sys.exit()
+
+    # Initialize global experiment variables
+    variables = share_variables.Variables(conf)
+    variables.log_path = p
+
+    app = QtWidgets.QApplication(sys.argv)
+    pyccapt_window = QtWidgets.QMainWindow()
+    signal_emitter = gui_main.SignalEmitter()
+    ui = gui_main.Ui_PyCCAPT(variables, conf, signal_emitter)
+    ui.setupUi(pyccapt_window)
+    pyccapt_window.show()
+    sys.exit(app.exec())
 
 
 if __name__ == '__main__':
-	main()
+    load_gui()

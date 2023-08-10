@@ -1,7 +1,6 @@
 import os
 import sys
 import threading
-
 import numpy as np
 import pyqtgraph as pg
 from PyQt6 import QtCore, QtGui, QtWidgets
@@ -15,13 +14,29 @@ from pyccapt.control.devices.camera import Camera
 
 
 class Ui_Cameras_Alignment(object):
-
 	def __init__(self, variables, conf, SignalEmitter):
+		"""
+		Initialize the UiCamerasAlignment class.
+
+		Args:
+		    variables: Global experiment variables.
+		    conf: Configuration data.
+		    SignalEmitter: Signal emitter for communication.
+		"""
 		self.conf = conf
 		self.emitter = SignalEmitter
 		self.variables = variables
 
 	def setupUi(self, Cameras_Alignment):
+		"""
+        Set up the GUI for the Cameras Alignment window.
+
+        Args:
+            Cameras_Alignment:
+
+        Returns:
+            None
+        """
 		Cameras_Alignment.setObjectName("Cameras_Alignment")
 
 		Cameras_Alignment.resize(1049, 616)
@@ -208,6 +223,14 @@ class Ui_Cameras_Alignment(object):
 		self.initialize_camera_thread()
 
 	def retranslateUi(self, Cameras_alignment):
+		"""
+
+		Args:
+			Cameras_alignment:
+
+		Returns:
+			None
+		"""
 		_translate = QtCore.QCoreApplication.translate
 		###
 		# Cameras_alignment.setWindowTitle(_translate("Cameras_alignment", "Form"))
@@ -233,7 +256,6 @@ class Ui_Cameras_Alignment(object):
 		self.led_light.setText(_translate("Cameras_alignment", "TextLabel"))
 		self.win_alignment.setText(_translate("Cameras_alignment", "Alignment window"))
 
-
 	def update_cam_s_o(self, img):
 		self.cam_s_o.setImage(img, autoRange=False)
 
@@ -252,9 +274,14 @@ class Ui_Cameras_Alignment(object):
 
 	def light_switch(self):
 		"""
-		The function for switching the exposure time of cameras in case of swithching the light
-		"""
+		light switch function
 
+		Args:
+			None
+
+		Return:
+			None
+		"""
 		if not self.variables.light:
 			self.led_light.setPixmap(self.led_green)
 			self.camera.light_switch()
@@ -271,6 +298,15 @@ class Ui_Cameras_Alignment(object):
 				self.variables.light_switch = False
 
 	def win_alignment_switch(self):
+		"""
+		Alignment window switch function
+
+		Args:
+			None
+
+		Return:
+			None
+		"""
 		if not self.variables.alignment_window:
 			with self.variables.lock_setup_parameters:
 				self.variables.alignment_window = True
@@ -285,6 +321,15 @@ class Ui_Cameras_Alignment(object):
 			                                 "}")
 
 	def initialize_camera_thread(self):
+		"""
+		Initialize camera thread
+
+		Args:
+			None
+
+		Return:
+			None
+		"""
 		if self.conf['camera'] == "off":
 			print('The cameras is off')
 		else:
@@ -330,8 +375,15 @@ class Ui_Cameras_Alignment(object):
 				print(e)
 
 	def stop(self):
-		# Stop the timer and any other background processes, timers, or threads here
-		# self.timer1.stop()
+		"""
+		Stop the timer and any other background processes, timers, or threads here
+
+		Args:
+			None
+
+		Return:
+			None
+		"""
 		# Add any additional cleanup code here
 		with self.variables.lock_setup_parameters:
 			self.variables.flag_camera_grab = False
@@ -347,10 +399,24 @@ class SignalEmitter(QObject):
 
 class CamerasAlignmentWindow(QtWidgets.QWidget):
 	def __init__(self, gui_cameras_alignment, *args, **kwargs):
+		"""
+		Initialize the CamerasAlignmentWindow class.
+
+		Args:
+		    gui_cameras_alignment: An instance of the GUI cameras alignment class.
+		    *args: Variable length argument list.
+		    **kwargs: Arbitrary keyword arguments.
+		"""
 		super().__init__(*args, **kwargs)
 		self.gui_cameras_alignment = gui_cameras_alignment
 
 	def closeEvent(self, event):
+		"""
+		Override the close event to stop any background activity and perform additional cleanup if needed.
+
+		Args:
+		    event: The close event.
+		"""
 		self.gui_cameras_alignment.stop()  # Call the stop method to stop any background activity
 		# Additional cleanup code here if needed
 		super().closeEvent(event)
@@ -358,7 +424,7 @@ class CamerasAlignmentWindow(QtWidgets.QWidget):
 
 if __name__ == "__main__":
 	try:
-		# load the Json file
+		# Load the JSON file
 		configFile = 'config.json'
 		p = os.path.abspath(os.path.join(__file__, "../../.."))
 		os.chdir(p)
@@ -367,6 +433,7 @@ if __name__ == "__main__":
 		print('Can not load the configuration file')
 		print(e)
 		sys.exit()
+
 	# Initialize global experiment variables
 	variables = share_variables.Variables(conf)
 	variables.log_path = p
