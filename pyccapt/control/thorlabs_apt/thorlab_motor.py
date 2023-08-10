@@ -15,9 +15,9 @@ def thorlab(conf, degree, step_increase=False, initialize=False):
 		None
 	"""
 
-    motor = apt.Motor(int(conf['COM_PORT_thorlab_motor']))
+	motor = apt.Motor(int(conf['COM_PORT_thorlab_motor']))
 
-	if initialize:
+    if initialize:
         motor.set_move_home_parameters(2, 1, 10, 4)
         motor.move_home(True)
         if degree != 0:

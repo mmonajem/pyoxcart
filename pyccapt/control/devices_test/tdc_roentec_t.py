@@ -1,8 +1,10 @@
 import ctypes
-from numpy.ctypeslib import ndpointer
-import numpy as np
-import time
 import os
+import time
+
+import numpy as np
+from numpy.ctypeslib import ndpointer
+
 
 class TdcRoentec:
 	def __init__(self, buf_size, time_out):
@@ -58,15 +60,15 @@ def experiment_measure_buf(buffer_size, time_out):
 		i += 1
 
 	print('Experiment time:', time.time() - start)
-    print(data.shape)
+	print(data.shape)
 
-    import pandas as pd
-    pd.DataFrame(data).to_csv("data.csv")
+	import pandas as pd
+	pd.DataFrame(data).to_csv("data.csv")
 
-    tdc.stop_tdc()
+	tdc.stop_tdc()
 
-    os.system('"lmf2txt.exe output.lmf -f"')
-    print('Finish the reading')
+	os.system('"lmf2txt.exe output.lmf -f"')
+	print('Finish the reading')
 
 if __name__ == '__main__':
-    experiment_measure_buf(1000, 300)
+	experiment_measure_buf(1000, 300)

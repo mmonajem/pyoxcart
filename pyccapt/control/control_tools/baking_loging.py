@@ -1,5 +1,7 @@
+import time
 from datetime import datetime
 from threading import Thread
+
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,7 +9,6 @@ import pandas as pd
 from matplotlib import style
 from mcculw import ul
 from mcculw.enums import InfoType, BoardInfo, TcType, TempScale, TInOptions
-import time
 
 # local imports
 from pyccapt.control.devices.pfeiffer_gauges import TPG362
@@ -27,23 +28,23 @@ def daq_tc():
 	except Exception as e:
 		if ul.ErrorCode(1):
 			print("\nNo board found at Board 0.")
-            print(e)
-            return
-    else:
-        if device_to_show in board_name:
-            print("{0} found as Board number {1}.\n".format(board_name, board_num))
-            ul.flash_led(board_num)
-        else:
-            print("\nNo {0} series found as Board 0. Please run InstaCal.".format(device_to_show))
-            return
+			print(e)
+			return
+	else:
+		if device_to_show in board_name:
+			print("{0} found as Board number {1}.\n".format(board_name, board_num))
+			ul.flash_led(board_num)
+		else:
+			print("\nNo {0} series found as Board 0. Please run InstaCal.".format(device_to_show))
+			return
 
-    try:
-	    channel = 1
-	    ul.set_config(InfoType.BOARDINFO, board_num, channel, BoardInfo.CHANTCTYPE, TcType.K)
-	    ul.set_config(InfoType.BOARDINFO, board_num, channel, BoardInfo.TEMPSCALE, TempScale.CELSIUS)
-	    ul.set_config(InfoType.BOARDINFO, board_num, channel, BoardInfo.ADDATARATE, 60)
-    except Exception as e:
-        print('\n', e)
+	try:
+		channel = 1
+		ul.set_config(InfoType.BOARDINFO, board_num, channel, BoardInfo.CHANTCTYPE, TcType.K)
+		ul.set_config(InfoType.BOARDINFO, board_num, channel, BoardInfo.TEMPSCALE, TempScale.CELSIUS)
+		ul.set_config(InfoType.BOARDINFO, board_num, channel, BoardInfo.ADDATARATE, 60)
+	except Exception as e:
+		print('\n', e)
 
 
 def read():
@@ -104,27 +105,27 @@ def animate(i):
 	MC_vacuum = data['MC_vacuum'].to_numpy()
 	BC_vacuum = data['BC_vacuum'].to_numpy()
 
-    ax1.clear()
-    ax2.clear()
+	ax1.clear()
+	ax2.clear()
 
-    ax1.plot(time[-20:], MC_NEG[-20:], label='MC_NEG', color='b')
-    ax1.plot(time[-20:], MC_Det[-20:], label='MC_Det', color='g')
-    ax1.plot(time[-20:], Mc_Top[-20:], label='Mc_Top', color='r')
-    ax1.plot(time[-20:], MC_Gate[-20:], label='MC_Gate', color='c')
-    ax1.plot(time[-20:], BC_Top[-20:], label='BC_Top', color='m')
-    ax1.plot(time[-20:], BC_Pump[-20:], label='BC_Pump', color='y')
+	ax1.plot(time[-20:], MC_NEG[-20:], label='MC_NEG', color='b')
+	ax1.plot(time[-20:], MC_Det[-20:], label='MC_Det', color='g')
+	ax1.plot(time[-20:], Mc_Top[-20:], label='Mc_Top', color='r')
+	ax1.plot(time[-20:], MC_Gate[-20:], label='MC_Gate', color='c')
+	ax1.plot(time[-20:], BC_Top[-20:], label='BC_Top', color='m')
+	ax1.plot(time[-20:], BC_Pump[-20:], label='BC_Pump', color='y')
 
-    ax2.plot(time[-20:], MC_vacuum[-20:], label='MC_vacuum', color='orange')
-    ax2.plot(time[-20:], BC_vacuum[-20:], label='BC_vacuum', color='darkviolet')
+	ax2.plot(time[-20:], MC_vacuum[-20:], label='MC_vacuum', color='orange')
+	ax2.plot(time[-20:], BC_vacuum[-20:], label='BC_vacuum', color='darkviolet')
 
-    ax1.set_title('Baking Temperature')
-    ax2.set_title('Baking Vacuum')
+	ax1.set_title('Baking Temperature')
+	ax2.set_title('Baking Vacuum')
 
-    ax1.set_ylabel('Temperature (C)')
-    ax2.set_ylabel('Vacuum (mbar)')
+	ax1.set_ylabel('Temperature (C)')
+	ax2.set_ylabel('Vacuum (mbar)')
 
-    ax1.legend(loc='upper right')
-    ax2.legend(['MC_vacuum', 'BC_vacuum'], loc='upper right')
+	ax1.legend(loc='upper right')
+	ax2.legend(['MC_vacuum', 'BC_vacuum'], loc='upper right')
 
 
 style.use('fivethirtyeight')
@@ -148,32 +149,32 @@ def plot_baking(df, window=0):
 	BC_vacuum = df['BC_vacuum'].to_numpy()
 	time = np.arange(0, len(BC_vacuum))
 
-    ax1.plot(time[window:], MC_NEG[window:], label='MC_NEG', color='b')
-    ax1.plot(time[window:], MC_Det[window:], label='MC_Det', color='g')
-    ax1.plot(time[window:], Mc_Top[window:], label='Mc_Top', color='r')
-    ax1.plot(time[window:], MC_Gate[window:], label='MC_Gate', color='c')
-    ax1.plot(time[window:], BC_Top[window:], label='BC_Top', color='m')
-    ax1.plot(time[window:], BC_Pump[window:], label='BC_Pump', color='y')
+	ax1.plot(time[window:], MC_NEG[window:], label='MC_NEG', color='b')
+	ax1.plot(time[window:], MC_Det[window:], label='MC_Det', color='g')
+	ax1.plot(time[window:], Mc_Top[window:], label='Mc_Top', color='r')
+	ax1.plot(time[window:], MC_Gate[window:], label='MC_Gate', color='c')
+	ax1.plot(time[window:], BC_Top[window:], label='BC_Top', color='m')
+	ax1.plot(time[window:], BC_Pump[window:], label='BC_Pump', color='y')
 
-    ax2.plot(time[window:], MC_vacuum[window:], label='MC_vacuum', color='orange')
-    ax2.plot(time[window:], BC_vacuum[window:], label='BC_vacuum', color='darkviolet')
+	ax2.plot(time[window:], MC_vacuum[window:], label='MC_vacuum', color='orange')
+	ax2.plot(time[window:], BC_vacuum[window:], label='BC_vacuum', color='darkviolet')
 
-    ax1.set_title('Baking')
+	ax1.set_title('Baking')
 
-    ax1.set_ylabel('Temperature (C)')
-    ax2.set_ylabel('Vacuum (mbar)')
-    ax1.set_xlabel('Time (0.5 s)')
-    ax2.set_xlabel('Time (0.5 s)')
+	ax1.set_ylabel('Temperature (C)')
+	ax2.set_ylabel('Vacuum (mbar)')
+	ax1.set_xlabel('Time (0.5 s)')
+	ax2.set_xlabel('Time (0.5 s)')
 
-    ax1.legend(loc='upper right')
-    ax2.legend(['MC_vacuum', 'BC_vacuum'], loc='upper right')
-    plt.show()
+	ax1.legend(loc='upper right')
+	ax2.legend(['MC_vacuum', 'BC_vacuum'], loc='upper right')
+	plt.show()
 
 
 if __name__ == '__main__':
 	# Set recording and plotting flags
-    recording = True
-    ploting = False
+	recording = True
+	ploting = False
 
 	if recording:
 		# Get current date and time for file names
@@ -198,10 +199,10 @@ if __name__ == '__main__':
 		ani = animation.FuncAnimation(fig, animate, interval=1000)
 		plt.show()
 
-        try:
-            data.to_csv(file_name, sep=';', index=False)
-        except:
-            data.to_csv(file_name_backup, sep=';', index=False)
+		try:
+			data.to_csv(file_name, sep=';', index=False)
+		except:
+			data.to_csv(file_name_backup, sep=';', index=False)
 
 	if ploting:
 		# Read data from CSV file

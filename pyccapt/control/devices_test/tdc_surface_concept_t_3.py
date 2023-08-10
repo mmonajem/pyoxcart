@@ -1,7 +1,9 @@
 import time
 import timeit
 from queue import Queue
+
 import numpy as np
+
 from pyccapt.control.tdc_surface_concept import scTDC
 
 NR_OF_MEASUREMENTS = 4
@@ -26,14 +28,14 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
 				dcopy[k] = d[k].copy()
 			else:
 				dcopy[k] = d[k]
-        self.queue.put((QUEUE_DATA, dcopy))
-        if self.end_of_meas:
-            self.end_of_meas = False
-            self.queue.put((QUEUE_ENDOFMEAS, None))
+		self.queue.put((QUEUE_DATA, dcopy))
+		if self.end_of_meas:
+			self.end_of_meas = False
+			self.queue.put((QUEUE_ENDOFMEAS, None))
 
-    def on_end_of_meas(self):
-        self.end_of_meas = True
-        return True
+	def on_end_of_meas(self):
+		self.end_of_meas = True
+		return True
 
 
 def check4():
@@ -73,13 +75,13 @@ def check4():
 		else:
 			return 0
 
-    start = timeit.default_timer()
+	start = timeit.default_timer()
 
-    retcode = bufdatacb.start_measurement(EXPOSURE_MS)
-    if errorcheck(retcode) < 0:
-        return -1
+	retcode = bufdatacb.start_measurement(EXPOSURE_MS)
+	if errorcheck(retcode) < 0:
+		return -1
 
-    meas_remaining = NR_OF_MEASUREMENTS
+	meas_remaining = NR_OF_MEASUREMENTS
 	while True:
 		eventtype, data = bufdatacb.queue.get()
 		eventtype_raw, data_raw = bufdatacb_raw.queue.get()
@@ -93,32 +95,32 @@ def check4():
 				data_raw["channel"], data_raw["start_counter"], data_raw["time"]
 			))
 		elif eventtype == QUEUE_ENDOFMEAS:
-            print('Length data', len(a[0]))
-            print(a)
-            print('--------------------------')
-            print('Length raw data', len(b[0]))
-            print(b)
-            print('==========================')
-            print(meas_remaining)
-            meas_remaining -= 1
-            if meas_remaining > 0:
-	            retcode = bufdatacb.start_measurement(EXPOSURE_MS)
-	            if errorcheck(retcode) < 0:
-		            return -1
-            else:
-	            break
+			print('Length data', len(a[0]))
+			print(a)
+			print('--------------------------')
+			print('Length raw data', len(b[0]))
+			print(b)
+			print('==========================')
+			print(meas_remaining)
+			meas_remaining -= 1
+			if meas_remaining > 0:
+				retcode = bufdatacb.start_measurement(EXPOSURE_MS)
+				if errorcheck(retcode) < 0:
+					return -1
+			else:
+				break
 		else:
 			break
 
-    end = timeit.default_timer()
+	end = timeit.default_timer()
 	print("\ntime elapsed:", end - start, "s")
 
 	time.sleep(0.1)
 	bufdatacb.close()
 	device.deinitialize()
 
-    return 0
+	return 0
 
 
 if __name__ == "__main__":
-    check4()
+	check4()

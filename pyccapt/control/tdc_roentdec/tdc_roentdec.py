@@ -1,7 +1,8 @@
-import os
 import ctypes
-from numpy.ctypeslib import ndpointer
+import os
+
 import numpy as np
+from numpy.ctypeslib import ndpointer
 
 
 class TDC:
@@ -104,27 +105,27 @@ def experiment_measure(queue_x, queue_y, queue_t, queue_AbsoluteTimeStamp,
 
 	tdc = TDC(tdc_lib, buf_size=30000, time_out=300)
 
-    ret_code = tdc.init_tdc()
+	ret_code = tdc.init_tdc()
 
-    tdc.run_tdc()
+	tdc.run_tdc()
 
-    while True:
-	    returnVale = tdc.get_data_tdc_buf()
-	    buffer_length = int(returnVale[0])
-	    returnVale_tmp = np.copy(returnVale[1:buffer_length * 12 + 1].reshape(buffer_length, 12))
+	while True:
+		returnVale = tdc.get_data_tdc_buf()
+		buffer_length = int(returnVale[0])
+		returnVale_tmp = np.copy(returnVale[1:buffer_length * 12 + 1].reshape(buffer_length, 12))
 
-	    for i in range(8):
-		    queue_ch = globals()[f'queue_ch{i}']
-		    queue_ch.put(returnVale_tmp[:, i])
+		for i in range(8):
+			queue_ch = globals()[f'queue_ch{i}']
+			queue_ch.put(returnVale_tmp[:, i])
 
-	    queue_x.put(returnVale_tmp[:, 8])
-	    queue_y.put(returnVale_tmp[:, 9])
-	    queue_t.put(returnVale_tmp[:, 10])
-	    queue_AbsoluteTimeStamp.put(returnVale_tmp[:, 11])
+		queue_x.put(returnVale_tmp[:, 8])
+		queue_y.put(returnVale_tmp[:, 9])
+		queue_t.put(returnVale_tmp[:, 10])
+		queue_AbsoluteTimeStamp.put(returnVale_tmp[:, 11])
 
-	    if not queue_stop_measurement.empty():
-		    break
+		if not queue_stop_measurement.empty():
+			break
 
-    tdc.stop_tdc()
+	tdc.stop_tdc()
 
-    return 0
+	return 0

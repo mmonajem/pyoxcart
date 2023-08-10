@@ -1,5 +1,6 @@
-import serial.tools.list_ports
 import time
+
+import serial.tools.list_ports
 
 
 def main():
@@ -44,24 +45,24 @@ def main():
 			print("Opened Port:", chosen_com_port)
 
 			# Loop until the entered cmd is "exit"
-            while True:
-	            cmd = input(">>: ")  # Get the cmd to send
+			while True:
+				cmd = input(">>: ")  # Get the cmd to send
 
-	            if cmd == 'exit':
-		            break
-	            else:
-		            com_port.write((cmd + '\r\n').encode())
-		            time.sleep(0.001)
+				if cmd == 'exit':
+					break
+				else:
+					com_port.write((cmd + '\r\n').encode())
+					time.sleep(0.001)
 
-	            response = ''
+				response = ''
 
-	            while com_port.in_waiting > 0:
-		            response = com_port.readline()
+				while com_port.in_waiting > 0:
+					response = com_port.readline()
 
-	            if response:
-		            print("<<:", response.decode("utf-8"))
-	            else:
-		            print("<< Error, no Response!")
+				if response:
+					print("<<:", response.decode("utf-8"))
+				else:
+					print("<< Error, no Response!")
 
 		else:
 			print("Couldn't open Port!")

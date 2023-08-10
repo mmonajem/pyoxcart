@@ -1,5 +1,6 @@
 import time
 from queue import Queue
+
 import numpy as np
 
 # local imports
@@ -10,13 +11,13 @@ QUEUE_DATA = 0
 QUEUE_ENDOFMEAS = 1
 
 class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
-    """
-    The class inherits from python wrapper module scTDC and class: buffered_data_callbacks_pipe
-    """
+	"""
+	The class inherits from python wrapper module scTDC and class: buffered_data_callbacks_pipe
+	"""
 
-    def __init__(self, lib, dev_desc, data_field_selection, dld_events,
-                 max_buffered_data_len=500000):
-	    '''
+	def __init__(self, lib, dev_desc, data_field_selection, dld_events,
+	             max_buffered_data_len=500000):
+		'''
 		Initialize the base class: scTDC.buffered_data_callbacks_pipe
 
 		Args:
@@ -26,13 +27,13 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
 			dld_events (bool): True to receive DLD events, False to receive TDC events.
 			max_buffered_data_len (int): Number of events buffered before invoking callbacks.
 		'''
-	    super().__init__(lib, dev_desc, data_field_selection, max_buffered_data_len, dld_events)
+		super().__init__(lib, dev_desc, data_field_selection, max_buffered_data_len, dld_events)
 
-        self.queue = Queue()
-        self.end_of_meas = False
+		self.queue = Queue()
+		self.end_of_meas = False
 
-    def on_data(self, d):
-	    """
+	def on_data(self, d):
+		"""
 		This class method function:
 			1. Makes a deep copy of numpy arrays in d
 			2. Inserts basic values by simple assignment
@@ -44,26 +45,27 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
 		Returns:
 			None
 		"""
-        dcopy = {}
-        for k in d.keys():
-            if isinstance(d[k], np.ndarray):
-                dcopy[k] = d[k].copy()
-            else:
-                dcopy[k] = d[k]
-        self.queue.put((QUEUE_DATA, dcopy))
-        if self.end_of_meas:
-            self.end_of_meas = False
-            self.queue.put((QUEUE_ENDOFMEAS, None))
+		dcopy = {}
+		for k in d.keys():
+			if isinstance(d[k], np.ndarray):
+				dcopy[k] = d[k].copy()
+			else:
+				dcopy[k] = d[k]
+		self.queue.put((QUEUE_DATA, dcopy))
+		if self.end_of_meas:
+			self.end_of_meas = False
+			self.queue.put((QUEUE_ENDOFMEAS, None))
 
-    def on_end_of_meas(self):
-	    """
+	def on_end_of_meas(self):
+		"""
 		This class method sets end_of_meas to True.
 
 		Returns:
 			True (bool)
 		"""
-        self.end_of_meas = True
-        return True
+		self.end_of_meas = True
+		return True
+
 
 def experiment_measure(queue_x,
                        queue_y, queue_t,
@@ -89,7 +91,7 @@ def experiment_measure(queue_x,
 		int: Return code.
 	"""
 
-    device = scTDC.Device(autoinit=False)
+	device = scTDC.Device(autoinit=False)
 	retcode, errmsg = device.initialize()
 
 	if retcode < 0:
@@ -121,17 +123,17 @@ def experiment_measure(queue_x,
 		Returns:
 			int: 0 if success return code or return code > 0, -1 if return code is error code or less than 0.
 		"""
-        if retcode < 0:
-            print(device.lib.sc_get_err_msg(retcode))
-            bufdatacb.close()
-            device.deinitialize()
-            return -1
-        else:
-            return 0
+		if retcode < 0:
+			print(device.lib.sc_get_err_msg(retcode))
+			bufdatacb.close()
+			device.deinitialize()
+			return -1
+		else:
+			return 0
 
-    retcode = bufdatacb.start_measurement(300)
-    if errorcheck(retcode) < 0:
-        return -1
+	retcode = bufdatacb.start_measurement(300)
+	if errorcheck(retcode) < 0:
+		return -1
 
 	while True:
 		eventtype, data = bufdatacb.queue.get()
@@ -146,17 +148,17 @@ def experiment_measure(queue_x,
 			queue_time_data.put(data_raw["time"])
 			queue_tdc_start_counter.put(data_raw["start_counter"])
 		elif eventtype == QUEUE_ENDOFMEAS:
-            if queue_stop_measurement.empty():
-                retcode = bufdatacb.start_measurement(300)
-                if errorcheck(retcode) < 0:
-                    return -1
-            else:
-                break
-        else:  # unknown event
-	        break
+			if queue_stop_measurement.empty():
+				retcode = bufdatacb.start_measurement(300)
+				if errorcheck(retcode) < 0:
+					return -1
+			else:
+				break
+		else:  # unknown event
+			break
 
-    time.sleep(0.1)
-    bufdatacb.close()
-    device.deinitialize()
+	time.sleep(0.1)
+	bufdatacb.close()
+	device.deinitialize()
 
-    return 0
+	return 0
