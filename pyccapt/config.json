@@ -1,8 +1,10 @@
 {
-	"flight_path": 110,
+	"flight_path_length": 110,
 	"max_vdc": 10000,
 	"max_vp": 3281,
 	"t_0": 51,
+	"bin_size": 0.1,
+	"save_meta_interval": 300,
 	"visualization": "mc",
 	"tdc": "on",
 	"tdc_model": "Surface_Consept",

@@ -10,6 +10,7 @@ from pyccapt.control.tdc_surface_concept import scTDC
 QUEUE_DATA = 0
 QUEUE_ENDOFMEAS = 1
 
+
 class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
 	"""
 	The class inherits from python wrapper module scTDC and class: buffered_data_callbacks_pipe

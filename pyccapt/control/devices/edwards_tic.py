@@ -1,6 +1,5 @@
 import serial
 
-# Local module and scripts
 
 class EdwardsAGC(object):
 	"""

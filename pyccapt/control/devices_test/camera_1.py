@@ -117,5 +117,6 @@ def camera():
 
 	sys.exit(exitCode)
 
+
 if __name__ == '__main__':
 	camera()

@@ -238,6 +238,7 @@ class Ui_Baking(object):
 
 
 class BakingWindow(QtWidgets.QWidget):
+	closed = QtCore.pyqtSignal()  # Define a custom closed signal
 	def __init__(self, gui_baking, *args, **kwargs):
 		"""
 		Initialize the BakingWindow class.
@@ -259,6 +260,7 @@ class BakingWindow(QtWidgets.QWidget):
 		"""
 		self.gui_baking.stop()  # Call the stop method to stop the background thread
 		# Additional cleanup code here if needed
+		self.closed.emit()  # Emit the custom closed signal
 		super().closeEvent(event)
 
 if __name__ == "__main__":

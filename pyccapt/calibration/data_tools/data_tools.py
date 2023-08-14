@@ -8,24 +8,19 @@ from pyccapt.calibration.data_tools import ato_tools
 from pyccapt.calibration.data_tools import data_loadcrop
 from pyccapt.calibration.data_tools import data_tools
 from pyccapt.calibration.leap_tools import ccapt_tools
-from pyccapt.calibration.mc import mc_tools, tof_tools
+from pyccapt.calibration.mc import tof_tools
 
 
-def read_hdf5(filename: "type: string - Path to hdf5(.h5) file",
-              tdc: "type: string - model of tdc") -> "type: dataframe":
-    """
-    This function differs from read_hdf5_through_pandas as it does not assume that 
-    the contents of the HDF5 file as argument was created using pandas. It could have been
-    created using other tools like h5py/MATLAB.
-    """
-    try:
-        TOFFACTOR = 27.432 / (1000 * 4)  # 27.432 ps/bin, tof in ns, data is TDC time sum
-        DETBINS = 4900
-        BINNINGFAC = 2
-        XYFACTOR = 78 / DETBINS * BINNINGFAC  # XXX mm/bin
-        XYBINSHIFT = DETBINS / BINNINGFAC / 2  # to center detector
-        dataframeStorage = {}
-        groupDict = {}
+def read_hdf5(filename: "type: string - Path to hdf5(.h5) file") -> "type: dataframe":
+	"""
+	This function differs from read_hdf5_through_pandas as it does not assume that
+	the contents of the HDF5 file as argument was created using pandas. It could have been
+	created using other tools like h5py/MATLAB.
+	"""
+
+	try:
+		dataframeStorage = {}
+		groupDict = {}
 
         with h5py.File(filename, 'r') as hdf:
             groups = list(hdf.keys())
@@ -36,15 +31,6 @@ def read_hdf5(filename: "type: string - Path to hdf5(.h5) file",
             for key, value in groupDict.items():
                 for item in value:
                     dataset = pd.DataFrame(np.array(hdf['{}/{}'.format(key, item)]), columns=['values'])
-                    if tdc == 'surface_concept':
-                        if key == 'dld' and item == 't':
-                            dataset = dataset * TOFFACTOR
-                        elif key == 'dld' and item == 'x':
-                            dataset = (dataset - XYBINSHIFT) * XYFACTOR * 0.1  # to convert them from mm to cm
-                        elif key == 'dld' and item == 'y':
-                            dataset = (dataset - XYBINSHIFT) * XYFACTOR * 0.1  # to convert them from mm to cm
-                    else:
-                        dataset = dataset
                     dataframeStorage["{}/{}".format(key, item)] = dataset
 
             return dataframeStorage

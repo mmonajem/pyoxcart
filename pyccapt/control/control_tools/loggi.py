@@ -1,7 +1,7 @@
 import logging
 
 
-def logger_creator(script_name, variables, log_name, path=None):
+def logger_creator(script_name, variables, log_name, path):
 	"""
 	Create and configure a logger object for logging.
 
@@ -12,21 +12,18 @@ def logger_creator(script_name, variables, log_name, path=None):
 		script_name (str): The name of the script using the logger.
 		variables (object): An object containing relevant variables.
 		log_name (str): The name of the log file.
-		path (str, optional): The path to the log directory. Defaults to None.
+		path (str): The path to the log directory.
 
 	Returns:
 		logging.Logger: The configured logger object.
 	"""
-    log_creator = logging.getLogger(script_name)
-    log_creator.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s',
-                                  '%m-%d-%Y %H:%M:%S')
+	log_creator = logging.getLogger(script_name)
+	log_creator.setLevel(logging.INFO)
+	formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s',
+	                              '%m-%d-%Y %H:%M:%S')
 
-    if path is None:
-        file_handler_creator = logging.FileHandler(variables.log_path + '\\' + log_name)
-    else:
-        file_handler_creator = logging.FileHandler(path + '\\' + log_name)
-    file_handler_creator.setLevel(logging.DEBUG)
-    file_handler_creator.setFormatter(formatter)
-    log_creator.addHandler(file_handler_creator)
-    return log_creator
+	file_handler_creator = logging.FileHandler(path + '\\' + log_name)
+	file_handler_creator.setLevel(logging.DEBUG)
+	file_handler_creator.setFormatter(formatter)
+	log_creator.addHandler(file_handler_creator)
+	return log_creator

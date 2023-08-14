@@ -1,6 +1,8 @@
 import threading
 import time
+
 import serial.tools.list_ports
+
 from pyccapt.control.devices.edwards_tic import EdwardsAGC
 from pyccapt.control.devices.pfeiffer_gauges import TPG362
 
@@ -33,7 +35,9 @@ def command_cryovac(cmd, com_port_cryovac):
 	response = ''
 	while com_port_cryovac.in_waiting > 0:
 		response = com_port_cryovac.readline()
-	return response.decode("utf-8")
+	if isinstance(response, bytes):
+		response = response.decode("utf-8")
+	return response
 
 
 def command_edwards(conf, variables, cmd, E_AGC, status=None):
@@ -194,30 +198,30 @@ def state_update(conf, variables, emitter):
 					print(e)
 					print("cannot read the cryo temperature")
 					output = '0'
-				with variables.lock_statistics:
-					variables.temperature = float(output.split()[0].replace(',', ''))
+				# with variables.lock_statistics:
+				variables.temperature = float(output.split()[0].replace(',', ''))
 				emitter.temp.emit(variables.temperature)
 			if conf['COM_PORT_gauge_mc'] != "off":
 				value, _ = tpg.pressure_gauge(2)
-				with variables.lock_statistics:
-					variables.vacuum_main = '{}'.format(value)
+				# with variables.lock_statistics:
+				variables.vacuum_main = '{}'.format(value)
 				emitter.vacuum_main.emit(float(variables.vacuum_main))
 				value, _ = tpg.pressure_gauge(1)
-				with variables.lock_statistics:
-					variables.vacuum_buffer = '{}'.format(value)
+				# with variables.lock_statistics:
+				variables.vacuum_buffer = '{}'.format(value)
 				emitter.vacuum_buffer.emit(float(variables.vacuum_buffer))
 			if conf['COM_PORT_gauge_ll'] != "off" and conf['pump'] != "off":
 				response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_ll, status='load_lock')
-				with variables.lock_statistics:
-					variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
-					variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
+				# with variables.lock_statistics:
+				variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
+				variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
 				emitter.vacuum_load.emit(variables.vacuum_load_lock)
 				emitter.vacuum_load_back.emit(variables.vacuum_load_lock_backing)
 
 			if conf['COM_PORT_gauge_bc'] != "off":
 				response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_bc)
-				with variables.lock_statistics:
-					variables.vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
+				# with variables.lock_statistics:
+				variables.vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
 				emitter.vacuum_buffer_back.emit(variables.vacuum_buffer_backing)
 
 			threading.Event().wait(1)

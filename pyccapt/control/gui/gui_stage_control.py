@@ -179,7 +179,7 @@ class StageControlWindow(QtWidgets.QWidget):
 	"""
 	Widget for the Stage Control window.
 	"""
-
+	closed = QtCore.pyqtSignal()  # Define a custom closed signal
 	def __init__(self, gui_stage_control, *args, **kwargs):
 		"""
 		Constructor for the StageControlWindow class.
@@ -200,6 +200,7 @@ class StageControlWindow(QtWidgets.QWidget):
 			event: Close event.
 		"""
 		self.gui_stage_control.stop()  # Call the stop method to stop any background activity
+		self.closed.emit()  # Emit the custom closed signal
 		# Additional cleanup code here if needed
 		super().closeEvent(event)
 

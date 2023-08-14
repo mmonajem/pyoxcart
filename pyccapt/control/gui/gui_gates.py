@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+
 import nidaqmx
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer
@@ -213,53 +214,53 @@ class Ui_Gates(object):
 					print('The gates control is off')
 
 		# Main gate
-		with self.variables.lock_statistics:
-			if not self.variables.start_flag and gate_num == 1 and not self.variables.flag_load_gate \
-					and not self.variables.flag_cryo_gate and self.variables.flag_pump_load_lock:
-				if not self.variables.flag_main_gate:  # Open the main gate
-					switch_gate(0)
-					self.led_main_chamber.setPixmap(self.led_green)
-					self.diagram.setPixmap(self.diagram_main_open)
-					self.variables.flag_main_gate = True
-				elif self.variables.flag_main_gate:  # Close the main gate
-					switch_gate(1)
-					self.led_main_chamber.setPixmap(self.led_red)
-					self.diagram.setPixmap(self.diagram_close_all)
-					self.variables.flag_main_gate = False
-			# Buffer gate
-			elif not self.variables.start_flag and gate_num == 2 and not self.variables.flag_main_gate \
-					and not self.variables.flag_cryo_gate and self.variables.flag_pump_load_lock:
-				if not self.variables.flag_load_gate:  # Open the main gate
-					switch_gate(2)
-					self.led_load_lock.setPixmap(self.led_green)
-					self.diagram.setPixmap(self.diagram_load_open)
-					self.variables.flag_load_gate = True
-				elif self.variables.flag_load_gate:  # Close the main gate
-					switch_gate(3)
-					self.led_load_lock.setPixmap(self.led_red)
-					self.diagram.setPixmap(self.diagram_close_all)
-					self.variables.flag_load_gate = False
-			# Cryo gate
-			elif not self.variables.start_flag and gate_num == 3 and not self.variables.flag_main_gate \
-					and not self.variables.flag_load_gate and self.variables.flag_pump_load_lock:
-				if not self.variables.flag_cryo_gate:  # Open the main gate
-					switch_gate(4)
-					self.led_cryo.setPixmap(self.led_green)
-					self.diagram.setPixmap(self.diagram_cryo_open)
-					self.variables.flag_cryo_gate = True
-				elif self.variables.flag_cryo_gate:  # Close the main gate
-					switch_gate(5)
-					self.led_cryo.setPixmap(self.led_red)
-					self.diagram.setPixmap(self.diagram_close_all)
-					self.variables.flag_cryo_gate = False
-			# Show the error message in the GUI
+		# with self.variables.lock_statistics:
+		if not self.variables.start_flag and gate_num == 1 and not self.variables.flag_load_gate \
+				and not self.variables.flag_cryo_gate and self.variables.flag_pump_load_lock:
+			if not self.variables.flag_main_gate:  # Open the main gate
+				switch_gate(0)
+				self.led_main_chamber.setPixmap(self.led_green)
+				self.diagram.setPixmap(self.diagram_main_open)
+				self.variables.flag_main_gate = True
+			elif self.variables.flag_main_gate:  # Close the main gate
+				switch_gate(1)
+				self.led_main_chamber.setPixmap(self.led_red)
+				self.diagram.setPixmap(self.diagram_close_all)
+				self.variables.flag_main_gate = False
+		# Buffer gate
+		elif not self.variables.start_flag and gate_num == 2 and not self.variables.flag_main_gate \
+				and not self.variables.flag_cryo_gate and self.variables.flag_pump_load_lock:
+			if not self.variables.flag_load_gate:  # Open the main gate
+				switch_gate(2)
+				self.led_load_lock.setPixmap(self.led_green)
+				self.diagram.setPixmap(self.diagram_load_open)
+				self.variables.flag_load_gate = True
+			elif self.variables.flag_load_gate:  # Close the main gate
+				switch_gate(3)
+				self.led_load_lock.setPixmap(self.led_red)
+				self.diagram.setPixmap(self.diagram_close_all)
+				self.variables.flag_load_gate = False
+		# Cryo gate
+		elif not self.variables.start_flag and gate_num == 3 and not self.variables.flag_main_gate \
+				and not self.variables.flag_load_gate and self.variables.flag_pump_load_lock:
+			if not self.variables.flag_cryo_gate:  # Open the main gate
+				switch_gate(4)
+				self.led_cryo.setPixmap(self.led_green)
+				self.diagram.setPixmap(self.diagram_cryo_open)
+				self.variables.flag_cryo_gate = True
+			elif self.variables.flag_cryo_gate:  # Close the main gate
+				switch_gate(5)
+				self.led_cryo.setPixmap(self.led_red)
+				self.diagram.setPixmap(self.diagram_close_all)
+				self.variables.flag_cryo_gate = False
+		# Show the error message in the GUI
+		else:
+			if self.variables.start_flag:
+				self.error_message("!!! An experiment is running !!!")
 			else:
-				if not self.variables.start_flag:
-					self.error_message("!!! An experiment is running !!!")
-				else:
-					self.error_message("!!! Close the previous opened gate first !!!")
+				self.error_message("!!! Close the previous opened gate first !!!")
 
-				self.timer.start(8000)
+			self.timer.start(8000)
 
 	def error_message(self, message):
 		"""
@@ -309,6 +310,7 @@ class Ui_Gates(object):
 
 
 class GatesWindow(QtWidgets.QWidget):
+	closed = QtCore.pyqtSignal()  # Define a custom closed signal
 	def __init__(self, gui_gates, *args, **kwargs):
 		"""
 		Initialize the GatesWindow class.
@@ -329,6 +331,7 @@ class GatesWindow(QtWidgets.QWidget):
 		"""
 		self.gui_gates.stop()  # Call the stop method to stop any background activity
 		# Additional cleanup code here if needed
+		self.closed.emit()  # Emit the custom closed signal
 		super().closeEvent(event)
 
 

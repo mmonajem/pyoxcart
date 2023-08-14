@@ -364,8 +364,8 @@ class Ui_Pumps_Vacuum(object):
 			None
 		"""
 		# Connect the bool_flag_while_loop signal to a slot in this function
-		with self.variables.lock_statistics:
-			self.variables.bool_flag_while_loop_gages = value
+		# with self.variables.lock_statistics:
+		self.variables.bool_flag_while_loop_gages = value
 
 	def hideMessage(self):
 		"""
@@ -393,33 +393,33 @@ class Ui_Pumps_Vacuum(object):
 		Return:
 			None
 		"""
-		with self.variables.lock_statistics:
-			try:
-				if not self.variables.start_flag and not self.variables.flag_main_gate \
-						and not self.variables.flag_cryo_gate and not self.variables.flag_load_gate:
-					if self.variables.flag_pump_load_lock:
-						self.variables.flag_pump_load_lock_click = True
-						self.led_pump_load_lock.setPixmap(self.led_red)
-						self.pump_load_lock_switch.setEnabled(False)
-						time.sleep(1)
-						self.pump_load_lock_switch.setEnabled(True)
-					elif not variables.flag_pump_load_lock:
-						self.variables.flag_pump_load_lock_click = True
-						self.led_pump_load_lock.setPixmap(self.led_green)
-						self.pump_load_lock_switch.setEnabled(False)
-						time.sleep(1)
-						self.pump_load_lock_switch.setEnabled(True)
-				else:  # SHow error message in the GUI
-					if not self.variables.start_flag:
-						self.error_message("!!! An experiment is running !!!")
-					else:
-						self.error_message("!!! First Close all the Gates !!!")
+		# with self.variables.lock_statistics:
+		try:
+			if not self.variables.start_flag and not self.variables.flag_main_gate \
+					and not self.variables.flag_cryo_gate and not self.variables.flag_load_gate:
+				if self.variables.flag_pump_load_lock:
+					self.variables.flag_pump_load_lock_click = True
+					self.led_pump_load_lock.setPixmap(self.led_red)
+					self.pump_load_lock_switch.setEnabled(False)
+					time.sleep(1)
+					self.pump_load_lock_switch.setEnabled(True)
+				elif not self.variables.flag_pump_load_lock:
+					self.variables.flag_pump_load_lock_click = True
+					self.led_pump_load_lock.setPixmap(self.led_green)
+					self.pump_load_lock_switch.setEnabled(False)
+					time.sleep(1)
+					self.pump_load_lock_switch.setEnabled(True)
+			else:  # SHow error message in the GUI
+				if self.variables.start_flag:
+					self.error_message("!!! An experiment is running !!!")
+				else:
+					self.error_message("!!! First Close all the Gates !!!")
 
-					self.timer.start(8000)
-			except Exception as e:
-				print('Error in pump_switch function')
-				print(e)
-				pass
+				self.timer.start(8000)
+		except Exception as e:
+			print('Error in pump_switch function')
+			print(e)
+			pass
 
 	def error_message(self, message):
 		"""
@@ -467,7 +467,7 @@ class PumpsVacuumWindow(QtWidgets.QWidget):
 	"""
 	Widget for Pumps and Vacuum control window.
 	"""
-
+	closed = QtCore.pyqtSignal()  # Define a custom closed signal
 	def __init__(self, gui_pumps_vacuum, signal_emitter, *args, **kwargs):
 		"""
 		Constructor for the PumpsVacuumWindow class.
@@ -490,9 +490,11 @@ class PumpsVacuumWindow(QtWidgets.QWidget):
 			event: Close event.
 		"""
 		self.gui_pumps_vacuum.stop()  # Call the stop method to stop any background activity
-		# Additional cleanup code here if needed
-		super().closeEvent(event)
 		self.signal_emitter.bool_flag_while_loop.emit(False)
+		time.sleep(1)
+		# Additional cleanup code here if needed
+		self.closed.emit()  # Emit the custom closed signal
+		super().closeEvent(event)
 
 
 if __name__ == "__main__":

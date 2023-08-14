@@ -23,6 +23,8 @@ class Variables:
         self.COM_PORT_signal_generator = conf["COM_PORT_signal_generator"]
         self.COM_PORT_thorlab_motor = conf["COM_PORT_thorlab_motor"]
 
+        self.save_meta_interval = conf['save_meta_interval']
+
         ### Setup parameters
         self.lock_setup_parameters = threading.Lock()
         self.counter_source = 'pulse_counter'
@@ -125,6 +127,7 @@ class Variables:
         self.main_v_dc_plot = []
         self.x_plot = []
         self.y_plot = []
+        self.t_plot = []
         ### Data for saving
         self.lock_data = threading.Lock()
         self.x = []

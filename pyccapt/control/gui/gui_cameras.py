@@ -1,11 +1,12 @@
 import os
 import sys
 import threading
+
 import numpy as np
 import pyqtgraph as pg
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import pyqtSignal, QObject
-from PyQt6.QtGui import QPixmap, QImage
+from PyQt6.QtGui import QPixmap
 from pypylon import pylon
 
 # Local module and scripts
@@ -80,7 +81,14 @@ class Ui_Cameras_Alignment(object):
 		# self.cam_s_o.setText("")
 		self.cam_s_o.setObjectName("cam_s_o")
 		self.gridLayout.addWidget(self.cam_s_o, 2, 0, 1, 4)
-		self.cam_s_d = QtWidgets.QLabel(parent=Cameras_Alignment)
+		###
+		# self.cam_s_d = QtWidgets.QLabel(parent=Cameras_alignment)
+		self.cam_s_d = pg.ImageView(parent=Cameras_Alignment)
+		self.cam_s_d.adjustSize()
+		self.cam_s_d.ui.histogram.hide()
+		self.cam_s_d.ui.roiBtn.hide()
+		self.cam_s_d.ui.menuBtn.hide()
+		###
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,
 		                                   QtWidgets.QSizePolicy.Policy.Expanding)
 		sizePolicy.setHorizontalStretch(2)
@@ -92,7 +100,7 @@ class Ui_Cameras_Alignment(object):
 		self.cam_s_d.setStyleSheet("QWidget{\n"
 		                           "border: 2px solid gray;\n"
 		                           "}")
-		self.cam_s_d.setText("")
+		# self.cam_s_d.setText("")
 		self.cam_s_d.setObjectName("cam_s_d")
 		self.gridLayout.addWidget(self.cam_s_d, 2, 4, 1, 1)
 		self.label_205 = QtWidgets.QLabel(parent=Cameras_Alignment)
@@ -129,7 +137,14 @@ class Ui_Cameras_Alignment(object):
 		# self.cam_b_o.setText("")
 		self.cam_b_o.setObjectName("cam_b_o")
 		self.gridLayout.addWidget(self.cam_b_o, 5, 0, 1, 4)
-		self.cam_b_d = QtWidgets.QLabel(parent=Cameras_Alignment)
+		###
+		# self.cam_b_d = QtWidgets.QLabel(parent=Cameras_alignment)
+		self.cam_b_d = pg.ImageView(parent=Cameras_Alignment)
+		self.cam_b_d.adjustSize()
+		self.cam_b_d.ui.histogram.hide()
+		self.cam_b_d.ui.roiBtn.hide()
+		self.cam_b_d.ui.menuBtn.hide()
+		###
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,
 		                                   QtWidgets.QSizePolicy.Policy.Expanding)
 		sizePolicy.setHorizontalStretch(2)
@@ -141,7 +156,7 @@ class Ui_Cameras_Alignment(object):
 		self.cam_b_d.setStyleSheet("QWidget{\n"
 		                           "border: 2px solid gray;\n"
 		                           "}")
-		self.cam_b_d.setText("")
+		# self.cam_b_d.setText("")
 		self.cam_b_d.setObjectName("cam_b_d")
 		self.gridLayout.addWidget(self.cam_b_d, 5, 4, 1, 1)
 		self.label_204 = QtWidgets.QLabel(parent=Cameras_Alignment)
@@ -199,19 +214,21 @@ class Ui_Cameras_Alignment(object):
 		self.led_light.setPixmap(self.led_red)
 
 		# bottom camera (x, y)
-		arrow1 = pg.ArrowItem(pos=(650, 670), angle=-90)
-		# arrow2 = pg.ArrowItem(pos=(100, 2100), angle=90)
-		arrow3 = pg.ArrowItem(pos=(940, 770), angle=0)
+		arrow1 = pg.ArrowItem(pos=(940, 770), angle=0)
 		self.cam_b_o.addItem(arrow1)
-		# self.cam_b_o.addItem(arrow2)
-		self.cam_b_o.addItem(arrow3)
 		# Side camera (x, y)
 		arrow1 = pg.ArrowItem(pos=(450, 550), angle=-90)
 		arrow2 = pg.ArrowItem(pos=(450, 1500), angle=90)
-		# arrow3 = pg.ArrowItem(pos=(890, 1100), angle=0)
+		arrow3 = pg.ArrowItem(pos=(890, 1100), angle=0)
 		self.cam_s_o.addItem(arrow1)
 		self.cam_s_o.addItem(arrow2)
-		# self.cam_s_o.addItem(arrow3)
+		self.cam_s_o.addItem(arrow3)
+		# side camera zoom (x, y)
+		arrow1 = pg.ArrowItem(pos=(265, 57), angle=90, brush='r')
+		self.cam_s_d.addItem(arrow1)
+		# bottom camera zoom (x, y)
+		arrow1 = pg.ArrowItem(pos=(260, 50), angle=90, brush='r')
+		self.cam_b_d.addItem(arrow1)
 		###
 		self.light.clicked.connect(self.light_switch)
 		self.win_alignment.clicked.connect(self.win_alignment_switch)
@@ -260,17 +277,13 @@ class Ui_Cameras_Alignment(object):
 		self.cam_s_o.setImage(img, autoRange=False)
 
 	def update_cam_s_d(self, img):
-		camera0_zoom = QImage(img, 1200, 500, QImage.Format.Format_RGB888)
-		camera0_zoom = QtGui.QPixmap(camera0_zoom)
-		self.cam_s_d.setPixmap(camera0_zoom)
+		self.cam_s_d.setImage(img, autoRange=False)
 
 	def update_cam_b_o(self, img):
 		self.cam_b_o.setImage(img, autoRange=False)
 
 	def update_cam_b_d(self, img):
-		camera1_zoom = QImage(img, 1200, 500, QImage.Format.Format_RGB888)
-		camera1_zoom = QtGui.QPixmap(camera1_zoom)
-		self.cam_b_d.setPixmap(camera1_zoom)
+		self.cam_b_d.setImage(img, autoRange=False)
 
 	def light_switch(self):
 		"""
@@ -285,17 +298,17 @@ class Ui_Cameras_Alignment(object):
 		if not self.variables.light:
 			self.led_light.setPixmap(self.led_green)
 			self.camera.light_switch()
-			with self.variables.lock_setup_parameters:
-				self.variables.light = True
+			# with self.variables.lock_setup_parameters:
+			self.variables.light = True
 
 			self.variables.light_switch = True
 
 		elif self.variables.light:
 			self.led_light.setPixmap(self.led_red)
 			self.camera.light_switch()
-			with self.variables.lock_setup_parameters:
-				self.variables.light = False
-				self.variables.light_switch = False
+			# with self.variables.lock_setup_parameters:
+			self.variables.light = False
+			self.variables.light_switch = False
 
 	def win_alignment_switch(self):
 		"""
@@ -308,14 +321,14 @@ class Ui_Cameras_Alignment(object):
 			None
 		"""
 		if not self.variables.alignment_window:
-			with self.variables.lock_setup_parameters:
-				self.variables.alignment_window = True
+			# with self.variables.lock_setup_parameters:
+			self.variables.alignment_window = True
 			self.win_alignment.setStyleSheet("QPushButton{\n"
 			                                 "background: rgb(0, 255, 26)\n"
 			                                 "}")
 		elif self.variables.alignment_window:
-			with self.variables.lock_setup_parameters:
-				self.variables.alignment_window = False
+			# with self.variables.lock_setup_parameters:
+			self.variables.alignment_window = False
 			self.win_alignment.setStyleSheet("QPushButton{\n"
 			                                 "background: rgb(193, 193, 193)\n"
 			                                 "}")
@@ -366,8 +379,8 @@ class Ui_Cameras_Alignment(object):
 				# Thread for reading cameras
 				self.camera_thread = threading.Thread(target=self.camera.update_cameras)
 				self.camera_thread.setDaemon(True)
-				with self.variables.lock_setup_parameters:
-					self.variables.flag_camera_grab = True
+				# with self.variables.lock_setup_parameters:
+				self.variables.flag_camera_grab = True
 				self.camera_thread.start()
 
 			except Exception as e:
@@ -385,8 +398,8 @@ class Ui_Cameras_Alignment(object):
 			None
 		"""
 		# Add any additional cleanup code here
-		with self.variables.lock_setup_parameters:
-			self.variables.flag_camera_grab = False
+		# with self.variables.lock_setup_parameters:
+		self.variables.flag_camera_grab = False
 		self.camera_thread.join()
 
 
@@ -398,6 +411,7 @@ class SignalEmitter(QObject):
 
 
 class CamerasAlignmentWindow(QtWidgets.QWidget):
+	closed = QtCore.pyqtSignal()  # Define a custom closed signal
 	def __init__(self, gui_cameras_alignment, *args, **kwargs):
 		"""
 		Initialize the CamerasAlignmentWindow class.
@@ -418,6 +432,7 @@ class CamerasAlignmentWindow(QtWidgets.QWidget):
 		    event: The close event.
 		"""
 		self.gui_cameras_alignment.stop()  # Call the stop method to stop any background activity
+		self.closed.emit()  # Emit the custom closed signal
 		# Additional cleanup code here if needed
 		super().closeEvent(event)
 

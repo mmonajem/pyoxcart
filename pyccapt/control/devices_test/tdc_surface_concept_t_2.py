@@ -53,7 +53,7 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
 		return True
 
 
-def test4():
+def run():
 	device = scTDC.Device(autoinit=False)
 
 	retcode, errmsg = device.initialize()
@@ -117,4 +117,4 @@ def test4():
 
 
 if __name__ == "__main__":
-	test4()
+	run()

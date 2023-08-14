@@ -49,8 +49,7 @@ class Camera:
 
 		self.cameras.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
 		start_time = time.time()
-		save_interval = 300  # 5 minutes in seconds
-		while self.cameras.IsGrabbing() and self.variables.flag_camera_grab:
+		while self.cameras.IsGrabbing():
 			current_time = time.time()
 			elapsed_time = current_time - start_time
 
@@ -66,46 +65,40 @@ class Camera:
 			# Original size is 2048 * 2448
 			# Resize the original to the required size. Utilize the openCV tool.
 			self.img0_orig = img0
-			self.img0_zoom = cv2.resize(img0[750:1150, 1650:2250], dsize=(1200, 500),
-			                            interpolation=cv2.INTER_CUBIC).astype(
-				np.int32)
+			# Define the region to crop: (x, y, width, height)
+			crop_region = (1640, 900, 300, 100)
+			# Crop the image
+			self.img0_zoom = self.img0_orig[crop_region[1]:crop_region[1] + crop_region[3],
+			                 crop_region[0]:crop_region[0] + crop_region[2]]
 
-			# img1_orig = cv2.resize(img1, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
 			self.img1_orig = img1
-			self.img1_zoom = cv2.resize(img1[900:1250, 1800:2350], dsize=(1200, 500),
-			                            interpolation=cv2.INTER_CUBIC).astype(
-				np.int32)
-
-			# The function cv::drawMarker draws a marker on a given position in the image.
-			# first is x direction
-			# second is y direction
-			self.img0_zoom_marker = cv2.drawMarker(self.img0_zoom, (490, 280), (0, 0, 255),
-			                                       markerType=cv2.MARKER_TRIANGLE_UP, markerSize=40,
-			                                       thickness=2, line_type=cv2.LINE_AA)
-			self.img1_zoom_marker = cv2.drawMarker(self.img1_zoom, (435, 300), (0, 0, 255),
-			                                       markerType=cv2.MARKER_TRIANGLE_UP, markerSize=40, thickness=2,
-			                                       line_type=cv2.LINE_AA)
+			# Define the region to crop: (x, y, width, height)
+			crop_region = (2050, 1000, 300, 100)
+			# Crop the image
+			self.img1_zoom = self.img1_orig[crop_region[1]:crop_region[1] + crop_region[3],
+			                 crop_region[0]:crop_region[0] + crop_region[2]]
 
 			# Acquire the lock and releases after process using context manager
 			# To ensure that the marked array is a C-contiguous array
 
-			self.emitter.img0_zoom.emit(np.require(self.img0_zoom_marker, np.uint8, 'C'))
-			self.emitter.img1_zoom.emit(np.require(self.img1_zoom_marker, np.uint8, 'C'))
+			self.emitter.img0_zoom.emit(np.swapaxes(self.img0_zoom, 0, 1))
+			self.emitter.img1_zoom.emit(np.swapaxes(self.img1_zoom, 0, 1))
 
 			# Interchange two axes of an array.
 			self.emitter.img0_orig.emit(np.swapaxes(self.img0_orig, 0, 1))
 			self.emitter.img1_orig.emit(np.swapaxes(self.img1_orig, 0, 1))
 
 			# Store the captured processed image at a desired location.
-			with self.variables.lock_statistics:
-				if elapsed_time >= save_interval and self.variables.start_flag:
-					start_time = current_time  # Update the start time
-					cv2.imwrite(self.variables.path_meta + "/side_%s.png" % self.index_save_image, self.img0_orig)
-					cv2.imwrite(self.variables.path_meta + "/side_zoom_%s.png" % self.index_save_image, self.img0_zoom)
-					cv2.imwrite(self.variables.path_meta + '/bottom_%s.png' % self.index_save_image, self.img1_orig)
-					cv2.imwrite(self.variables.path_meta + '/bottom_zoom_%s.png' % self.index_save_image,
-					            self.img1_zoom)
-					self.index_save_image += 1
+			# with self.variables.lock_statistics:
+			if elapsed_time >= self.variables.save_meta_interval and self.variables.start_flag:
+				start_time = current_time  # Update the start time
+				cv2.imwrite(self.variables.path_meta + "/side_%s.png" % self.index_save_image, self.img0_orig)
+				cv2.imwrite(self.variables.path_meta + "/side_zoom_%s.png" % self.index_save_image, self.img0_zoom)
+				cv2.imwrite(self.variables.path_meta + '/bottom_%s.png' % self.index_save_image, self.img1_orig)
+				cv2.imwrite(self.variables.path_meta + '/bottom_zoom_%s.png' % self.index_save_image,
+				            self.img1_zoom)
+				self.index_save_image += 1
+				start_time = time.time()
 
 			grabResult0.Release()
 			grabResult1.Release()
@@ -115,24 +108,28 @@ class Camera:
 			else:
 				time.sleep(0.1)
 
+			# with self.variables.lock_setup_parameters:
+			if not self.variables.flag_camera_grab:
+				break
+
 	def light_switch(self):
 		"""
 		This class method sets the Exposure time based on a flag.
 		"""
 
-		with self.variables.lock_setup_parameters:
-			if not self.variables.light:
-				self.cameras[0].Open()
-				self.cameras[0].ExposureTime.SetValue(400)
-				self.cameras[1].Open()
-				self.cameras[1].ExposureTime.SetValue(2000)
-				self.variables.light = True
-			elif self.variables.light:
-				self.cameras[0].Open()
-				self.cameras[0].ExposureTime.SetValue(800000)
-				self.cameras[1].Open()
-				self.cameras[1].ExposureTime.SetValue(100000)
-				self.variables.light = False
+		# with self.variables.lock_setup_parameters:
+		if not self.variables.light:
+			self.cameras[0].Open()
+			self.cameras[0].ExposureTime.SetValue(400)
+			self.cameras[1].Open()
+			self.cameras[1].ExposureTime.SetValue(2000)
+			self.variables.light = True
+		elif self.variables.light:
+			self.cameras[0].Open()
+			self.cameras[0].ExposureTime.SetValue(800000)
+			self.cameras[1].Open()
+			self.cameras[1].ExposureTime.SetValue(100000)
+			self.variables.light = False
 
 	def camera_s_d(self, ):
 		"""
@@ -142,7 +139,7 @@ class Camera:
 
 		windowName = 'Sample Alignment'
 
-		while self.variables.flag_camera_grab:
+		while True:
 			if self.variables.alignment_window:
 
 				img0_zoom = cv2.resize(self.img0_orig[850:1050, 1550:1950], dsize=(2448, 1000),
@@ -172,3 +169,5 @@ class Camera:
 				cv2.destroyAllWindows()
 				time.sleep(1)
 				pass
+			if not self.variables.flag_camera_grab:
+				break
