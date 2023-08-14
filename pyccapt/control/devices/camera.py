@@ -13,21 +13,46 @@ from pypylon import pylon
 # Local module and scripts
 
 
-class Camera:
+class Cameras:
 	"""
 	This class is used to control the BASLER Cameras.
 	"""
 
-	def __init__(self, devices, tlFactory, cameras, converter, variables, emitter):
+	def __init__(self, variables, emitter):
 		"""
 		Constructor function which initializes and setups all variables
 		and parameters for the class.
 		"""
+		try:
+			# Limits the amount of cameras used for grabbing.
+			# The bandwidth used by a FireWire camera device can be limited by adjusting the packet size.
+			maxCamerasToUse = 2
+			# The exit code of the sample application.
+			exitCode = 0
+			# Get the transport layer factory.
+			self.tlFactory = pylon.TlFactory.GetInstance()
+			# Get all attached devices and exit application if no device is found.
+			self.devices = self.tlFactory.EnumerateDevices()
 
-		self.devices = devices
-		self.tlFactory = tlFactory
-		self.cameras = cameras
-		self.converter = converter
+			if len(self.devices) == 0:
+				raise pylon.RuntimeException("No camera present.")
+
+			# Create an array of instant cameras for the found devices and avoid exceeding a maximum number of
+			# devices.
+			self.cameras = pylon.InstantCameraArray(min(len(self.devices), maxCamerasToUse))
+
+			# Create and attach all Pylon Devices.
+			for i, cam in enumerate(self.cameras):
+				cam.Attach(self.tlFactory.CreateDevice(self.devices[i]))
+			self.converter = pylon.ImageFormatConverter()
+
+			# converting to opencv bgr format
+			self.converter.OutputPixelFormat = pylon.PixelType_BGR8packed
+			self.converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
+		except Exception as e:
+			print('Error in initializing the camera class')
+			print(e)
+
 		self.variables = variables
 		self.emitter = emitter
 		self.cameras[0].Open()
@@ -171,3 +196,17 @@ class Camera:
 				pass
 			if not self.variables.flag_camera_grab:
 				break
+
+
+def cameras_run(variable, emmiter):
+	"""
+	This function is used to run the cameras.
+
+		Args:
+			variable: The class object of the Variables class.
+			emmiter: The class object of the Emitter class.
+		Return:
+			None
+	"""
+	camera = Cameras(variable, emmiter)
+	camera.update_cameras()

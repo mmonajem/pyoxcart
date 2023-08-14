@@ -12,15 +12,15 @@ from pyccapt.calibration.mc import tof_tools
 
 
 def read_hdf5(filename: "type: string - Path to hdf5(.h5) file") -> "type: dataframe":
-	"""
-	This function differs from read_hdf5_through_pandas as it does not assume that
-	the contents of the HDF5 file as argument was created using pandas. It could have been
-	created using other tools like h5py/MATLAB.
-	"""
+    """
+    This function differs from read_hdf5_through_pandas as it does not assume that
+    the contents of the HDF5 file as argument was created using pandas. It could have been
+    created using other tools like h5py/MATLAB.
+    """
 
-	try:
-		dataframeStorage = {}
-		groupDict = {}
+    try:
+        dataframeStorage = {}
+        groupDict = {}
 
         with h5py.File(filename, 'r') as hdf:
             groups = list(hdf.keys())

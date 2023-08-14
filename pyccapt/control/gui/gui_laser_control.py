@@ -226,24 +226,24 @@ class Ui_Laser_Control(object):
         self.laser_stop.setText(_translate("Laser_Control", "40"))
 
     def setup_parameters_changes(self):
-	    """
-		the function that is run if any of the setup parameters are changed
-		Args:
-			None
+        """
+        the function that is run if any of the setup parameters are changed
+        Args:
+            None
 
-		Return:
-			None
-		"""
-	    # with self.variables.lock_setup_parameters:
-	    if self.criteria_laser.isChecked():
-		    self.variables.criteria_laser = True
-	    elif not self.criteria_laser.isChecked():
-		    self.variables.criteria_laser = False
-	    self.variables.fixed_laser = int(float(self.fixed_laser.text()))
-	    self.variables.laser_num_ions_per_step = int(float(self.laser_num_ions_per_step.text()))
-	    self.variables.laser_increase_per_step = int(float(self.laser_increase_per_step.text()))
-	    self.variables.laser_start = int(float(self.laser_start.text()))
-	    self.variables.laser_stop = int(float(self.laser_stop.text()))
+        Return:
+            None
+        """
+        # with self.variables.lock_setup_parameters:
+        if self.criteria_laser.isChecked():
+            self.variables.criteria_laser = True
+        elif not self.criteria_laser.isChecked():
+            self.variables.criteria_laser = False
+        self.variables.fixed_laser = int(float(self.fixed_laser.text()))
+        self.variables.laser_num_ions_per_step = int(float(self.laser_num_ions_per_step.text()))
+        self.variables.laser_increase_per_step = int(float(self.laser_increase_per_step.text()))
+        self.variables.laser_start = int(float(self.laser_start.text()))
+        self.variables.laser_stop = int(float(self.laser_stop.text()))
 
     def make_motor_home(self):
         """
@@ -308,7 +308,7 @@ class Ui_Laser_Control(object):
 
 
 class LaserControlWindow(QtWidgets.QWidget):
-	closed = QtCore.pyqtSignal()  # Define a custom closed signal
+    closed = QtCore.pyqtSignal()  # Define a custom closed signal
     def __init__(self, gui_laser_control, *args, **kwargs):
         """
         Initialize the LaserControlWindow class.

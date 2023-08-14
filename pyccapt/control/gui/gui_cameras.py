@@ -7,11 +7,10 @@ import pyqtgraph as pg
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import pyqtSignal, QObject
 from PyQt6.QtGui import QPixmap
-from pypylon import pylon
 
 # Local module and scripts
 from pyccapt.control.control_tools import share_variables, read_files
-from pyccapt.control.devices.camera import Camera
+from pyccapt.control.devices import camera
 
 
 class Ui_Cameras_Alignment(object):
@@ -347,45 +346,13 @@ class Ui_Cameras_Alignment(object):
 			print('The cameras is off')
 		else:
 			# Create cameras thread
-			try:
-				# Limits the amount of cameras used for grabbing.
-				# The bandwidth used by a FireWire camera device can be limited by adjusting the packet size.
-				maxCamerasToUse = 2
-				# The exit code of the sample application.
-				exitCode = 0
-				# Get the transport layer factory.
-				tlFactory = pylon.TlFactory.GetInstance()
-				# Get all attached devices and exit application if no device is found.
-				devices = tlFactory.EnumerateDevices()
+			# Thread for reading cameras
+			self.camera_thread = threading.Thread(target=camera.cameras_run, args=(self.variables, self.emitter))
+			self.camera_thread.setDaemon(True)
+			# with self.variables.lock_setup_parameters:
+			self.variables.flag_camera_grab = True
+			self.camera_thread.start()
 
-				if len(devices) == 0:
-					raise pylon.RuntimeException("No camera present.")
-
-				# Create an array of instant cameras for the found devices and avoid exceeding a maximum number of
-				# devices.
-				cameras = pylon.InstantCameraArray(min(len(devices), maxCamerasToUse))
-
-				# Create and attach all Pylon Devices.
-				for i, cam in enumerate(cameras):
-					cam.Attach(tlFactory.CreateDevice(devices[i]))
-				converter = pylon.ImageFormatConverter()
-
-				# converting to opencv bgr format
-				converter.OutputPixelFormat = pylon.PixelType_BGR8packed
-				converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
-
-				self.camera = Camera(devices, tlFactory, cameras, converter, self.variables, self.emitter)
-
-				# Thread for reading cameras
-				self.camera_thread = threading.Thread(target=self.camera.update_cameras)
-				self.camera_thread.setDaemon(True)
-				# with self.variables.lock_setup_parameters:
-				self.variables.flag_camera_grab = True
-				self.camera_thread.start()
-
-			except Exception as e:
-				print('Can not initialize the Cameras')
-				print(e)
 
 	def stop(self):
 		"""
