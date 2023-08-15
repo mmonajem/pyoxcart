@@ -1386,9 +1386,7 @@ class Ui_PyCCAPT(object):
 			self.Cameras_alignment.raise_()
 			self.Cameras_alignment.activateWindow()
 		else:
-			self.SignalEmitter_Cameras = gui_cameras.SignalEmitter()
-			self.gui_cameras_alignment = gui_cameras.Ui_Cameras_Alignment(self.variables, self.conf,
-			                                                              self.SignalEmitter_Cameras)
+			self.gui_cameras_alignment = gui_cameras.Ui_Cameras_Alignment(self.variables, self.conf)
 			self.Cameras_alignment = gui_cameras.CamerasAlignmentWindow(self.gui_cameras_alignment,
 			                                                            flags=QtCore.Qt.WindowType.Tool)
 			self.gui_cameras_alignment.setupUi(self.Cameras_alignment)

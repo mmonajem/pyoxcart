@@ -18,7 +18,8 @@ class Cameras:
 	This class is used to control the BASLER Cameras.
 	"""
 
-	def __init__(self, variables, emitter):
+	def __init__(self, queue_img0_orig, queue_img0_zoom, queue_img1_orig, queue_img1_zoom,
+	             start_flag, flaf_light, flag_light_change, flag_camera_grab, flag_alignment_window):
 		"""
 		Constructor function which initializes and setups all variables
 		and parameters for the class.
@@ -53,8 +54,15 @@ class Cameras:
 			print('Error in initializing the camera class')
 			print(e)
 
-		self.variables = variables
-		self.emitter = emitter
+		self.queue_img0_orig = queue_img0_orig
+		self.queue_img0_zoom = queue_img0_zoom
+		self.queue_img1_orig = queue_img1_orig
+		self.queue_img1_zoom = queue_img1_zoom
+		self.start_flag = start_flag
+		self.flag_light = flaf_light
+		self.flag_light_change = flag_light_change
+		self.flag_camera_grab = flag_camera_grab
+		self.flag_alignment_window = flag_alignment_window
 		self.cameras[0].Open()
 		self.cameras[0].ExposureAuto.SetValue('Off')
 		self.cameras[0].ExposureTime.SetValue(800000)
@@ -106,35 +114,36 @@ class Cameras:
 			# Acquire the lock and releases after process using context manager
 			# To ensure that the marked array is a C-contiguous array
 
-			self.emitter.img0_zoom.emit(np.swapaxes(self.img0_zoom, 0, 1))
-			self.emitter.img1_zoom.emit(np.swapaxes(self.img1_zoom, 0, 1))
-
-			# Interchange two axes of an array.
-			self.emitter.img0_orig.emit(np.swapaxes(self.img0_orig, 0, 1))
-			self.emitter.img1_orig.emit(np.swapaxes(self.img1_orig, 0, 1))
+			self.queue_img0_orig.put(np.swapaxes(self.img0_orig, 0, 1))
+			self.queue_img1_orig.put(np.swapaxes(self.img1_orig, 0, 1))
+			self.queue_img0_zoom.put(np.swapaxes(self.img0_zoom, 0, 1))
+			self.queue_img1_zoom.put(np.swapaxes(self.img1_zoom, 0, 1))
 
 			# Store the captured processed image at a desired location.
 			# with self.variables.lock_statistics:
-			if elapsed_time >= self.variables.save_meta_interval and self.variables.start_flag:
-				start_time = current_time  # Update the start time
-				cv2.imwrite(self.variables.path_meta + "/side_%s.png" % self.index_save_image, self.img0_orig)
-				cv2.imwrite(self.variables.path_meta + "/side_zoom_%s.png" % self.index_save_image, self.img0_zoom)
-				cv2.imwrite(self.variables.path_meta + '/bottom_%s.png' % self.index_save_image, self.img1_orig)
-				cv2.imwrite(self.variables.path_meta + '/bottom_zoom_%s.png' % self.index_save_image,
-				            self.img1_zoom)
-				self.index_save_image += 1
-				start_time = time.time()
+			# if elapsed_time >= self.variables.save_meta_interval and self.variables.start_flag:
+			# 	start_time = current_time  # Update the start time
+			# 	cv2.imwrite(self.variables.path_meta + "/side_%s.png" % self.index_save_image, self.img0_orig)
+			# 	cv2.imwrite(self.variables.path_meta + "/side_zoom_%s.png" % self.index_save_image, self.img0_zoom)
+			# 	cv2.imwrite(self.variables.path_meta + '/bottom_%s.png' % self.index_save_image, self.img1_orig)
+			# 	cv2.imwrite(self.variables.path_meta + '/bottom_zoom_%s.png' % self.index_save_image,
+			# 	            self.img1_zoom)
+			# 	self.index_save_image += 1
+			# 	start_time = time.time()
 
 			grabResult0.Release()
 			grabResult1.Release()
 
-			if self.variables.start_flag:
+			if self.start_flag.value:
 				time.sleep(0.5)
 			else:
 				time.sleep(0.1)
 
+			if self.flag_light_change.value:
+				self.flag_light_change.value = False
+				self.light_switch()
 			# with self.variables.lock_setup_parameters:
-			if not self.variables.flag_camera_grab:
+			if not self.flag_camera_grab.value:
 				break
 
 	def light_switch(self):
@@ -143,18 +152,24 @@ class Cameras:
 		"""
 
 		# with self.variables.lock_setup_parameters:
-		if not self.variables.light:
+		if not self.flag_light.value:
 			self.cameras[0].Open()
 			self.cameras[0].ExposureTime.SetValue(400)
 			self.cameras[1].Open()
 			self.cameras[1].ExposureTime.SetValue(2000)
-			self.variables.light = True
-		elif self.variables.light:
+		elif self.flag_light.value:
 			self.cameras[0].Open()
 			self.cameras[0].ExposureTime.SetValue(800000)
 			self.cameras[1].Open()
 			self.cameras[1].ExposureTime.SetValue(100000)
-			self.variables.light = False
+
+	def close_cameras(self):
+		# Stop grabbing
+		self.cameras.StopGrabbing()
+
+		# Close camera resources
+		for cam in self.cameras:
+			cam.Close()
 
 	def camera_s_d(self, ):
 		"""
@@ -165,7 +180,7 @@ class Cameras:
 		windowName = 'Sample Alignment'
 
 		while True:
-			if self.variables.alignment_window:
+			if self.flag_alignment_window.value:
 
 				img0_zoom = cv2.resize(self.img0_orig[850:1050, 1550:1950], dsize=(2448, 1000),
 				                       interpolation=cv2.INTER_CUBIC)
@@ -194,19 +209,30 @@ class Cameras:
 				cv2.destroyAllWindows()
 				time.sleep(1)
 				pass
-			if not self.variables.flag_camera_grab:
+			if not self.flag_camera_grab.value:
 				break
 
 
-def cameras_run(variable, emmiter):
+def cameras_run(queue_img0_orig, queue_img0_zoom, queue_img1_orig, queue_img1_zoom,
+                start_flag, flaf_light, flag_light_change, flag_camera_grab, flag_alignment_window):
 	"""
 	This function is used to run the cameras.
 
 		Args:
-			variable: The class object of the Variables class.
-			emmiter: The class object of the Emitter class.
+			queue_img0_orig: Queue to store the original image from camera 0
+			queue_img0_zoom: Queue to store the zoomed image from camera 0
+			queue_img1_orig: Queue to store the original image from camera 1
+			queue_img1_zoom: Queue to store the zoomed image from camera 1
+			start_flag: Flag to start the cameras
+			flaf_light: Flag to switch the light
+			flag_camera_grab: Flag to grab the images from the cameras
+			flag_alignment_window: Flag to display the alignment window
 		Return:
 			None
 	"""
-	camera = Cameras(variable, emmiter)
-	camera.update_cameras()
+	try:
+		camera = Cameras(queue_img0_orig, queue_img0_zoom, queue_img1_orig, queue_img1_zoom,
+		                 start_flag, flaf_light, flag_light_change, flag_camera_grab, flag_alignment_window)
+		camera.update_cameras()
+	finally:
+		camera.close_cameras()

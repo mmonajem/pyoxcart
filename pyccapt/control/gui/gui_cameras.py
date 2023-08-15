@@ -1,11 +1,9 @@
 import os
 import sys
-import threading
+from multiprocessing import Process, Queue, Value
 
-import numpy as np
 import pyqtgraph as pg
 from PyQt6 import QtCore, QtGui, QtWidgets
-from PyQt6.QtCore import pyqtSignal, QObject
 from PyQt6.QtGui import QPixmap
 
 # Local module and scripts
@@ -14,18 +12,17 @@ from pyccapt.control.devices import camera
 
 
 class Ui_Cameras_Alignment(object):
-	def __init__(self, variables, conf, SignalEmitter):
+	def __init__(self, variables, conf):
 		"""
 		Initialize the UiCamerasAlignment class.
 
 		Args:
 		    variables: Global experiment variables.
 		    conf: Configuration data.
-		    SignalEmitter: Signal emitter for communication.
 		"""
 		self.conf = conf
-		self.emitter = SignalEmitter
 		self.variables = variables
+		self.parent = None
 
 	def setupUi(self, Cameras_Alignment):
 		"""
@@ -232,11 +229,13 @@ class Ui_Cameras_Alignment(object):
 		self.light.clicked.connect(self.light_switch)
 		self.win_alignment.clicked.connect(self.win_alignment_switch)
 
-		self.emitter.img0_orig.connect(self.update_cam_s_o)
-		self.emitter.img0_zoom.connect(self.update_cam_s_d)
-		self.emitter.img1_orig.connect(self.update_cam_b_o)
-		self.emitter.img1_zoom.connect(self.update_cam_b_d)
-		self.initialize_camera_thread()
+		self.initialize_camera_process()
+		self.timer = QtCore.QTimer()
+		self.timer.timeout.connect(self.update_cameras)
+		if self.variables.start_flag:
+			self.timer.start(100)
+		elif not self.variables.start_flag:
+			self.timer.start(500)
 
 	def retranslateUi(self, Cameras_alignment):
 		"""
@@ -272,17 +271,17 @@ class Ui_Cameras_Alignment(object):
 		self.led_light.setText(_translate("Cameras_alignment", "TextLabel"))
 		self.win_alignment.setText(_translate("Cameras_alignment", "Alignment window"))
 
-	def update_cam_s_o(self, img):
-		self.cam_s_o.setImage(img, autoRange=False)
+	def update_cameras(self):
 
-	def update_cam_s_d(self, img):
-		self.cam_s_d.setImage(img, autoRange=False)
+		if self.variables.start_flag:
+			self.timer.start(100)
+		elif not self.variables.start_flag:
+			self.timer.start(500)
 
-	def update_cam_b_o(self, img):
-		self.cam_b_o.setImage(img, autoRange=False)
-
-	def update_cam_b_d(self, img):
-		self.cam_b_d.setImage(img, autoRange=False)
+		self.cam_s_o.setImage(self.queue_img0_orig.get(), autoRange=False)
+		self.cam_s_d.setImage(self.queue_img0_zoom.get(), autoRange=False)
+		self.cam_b_o.setImage(self.queue_img1_orig.get(), autoRange=False)
+		self.cam_b_d.setImage(self.queue_img1_zoom.get(), autoRange=False)
 
 	def light_switch(self):
 		"""
@@ -294,19 +293,18 @@ class Ui_Cameras_Alignment(object):
 		Return:
 			None
 		"""
-		if not self.variables.light:
+		if not self.variables.light_switch:
 			self.led_light.setPixmap(self.led_green)
-			self.camera.light_switch()
 			# with self.variables.lock_setup_parameters:
-			self.variables.light = True
-
+			self.flag_light_change.value = True
+			self.flag_light.value = True
 			self.variables.light_switch = True
 
-		elif self.variables.light:
+		elif self.variables.light_switch:
 			self.led_light.setPixmap(self.led_red)
-			self.camera.light_switch()
 			# with self.variables.lock_setup_parameters:
-			self.variables.light = False
+			self.flag_light_change.value = True
+			self.flag_light.value = False
 			self.variables.light_switch = False
 
 	def win_alignment_switch(self):
@@ -332,9 +330,9 @@ class Ui_Cameras_Alignment(object):
 			                                 "background: rgb(193, 193, 193)\n"
 			                                 "}")
 
-	def initialize_camera_thread(self):
+	def initialize_camera_process(self):
 		"""
-		Initialize camera thread
+		Initialize camera process
 
 		Args:
 			None
@@ -345,14 +343,28 @@ class Ui_Cameras_Alignment(object):
 		if self.conf['camera'] == "off":
 			print('The cameras is off')
 		else:
-			# Create cameras thread
-			# Thread for reading cameras
-			self.camera_thread = threading.Thread(target=camera.cameras_run, args=(self.variables, self.emitter))
-			self.camera_thread.setDaemon(True)
+			# Create cameras process
+			self.start_flag = Value('b', False)
+			self.flag_light = Value('b', False)
+			self.flag_light_change = Value('b', False)
+			self.flag_camera_grab = Value('b', True)
+			self.flag_alignment_window = Value('b', False)
+
+			self.queue_img0_orig = Queue()
+			self.queue_img0_zoom = Queue()
+			self.queue_img1_orig = Queue()
+			self.queue_img1_zoom = Queue()
+
+			self.camera_process = Process(target=camera.cameras_run, args=(self.queue_img0_orig, self.queue_img0_zoom,
+			                                                               self.queue_img1_orig, self.queue_img1_zoom,
+			                                                               self.start_flag, self.flag_light,
+			                                                               self.flag_light_change,
+			                                                               self.flag_camera_grab,
+			                                                               self.flag_alignment_window))
 			# with self.variables.lock_setup_parameters:
 			self.variables.flag_camera_grab = True
-			self.camera_thread.start()
-
+			self.camera_process.daemon = True  # Set the process as a daemon
+			self.camera_process.start()
 
 	def stop(self):
 		"""
@@ -366,19 +378,19 @@ class Ui_Cameras_Alignment(object):
 		"""
 		# Add any additional cleanup code here
 		# with self.variables.lock_setup_parameters:
-		self.variables.flag_camera_grab = False
-		self.camera_thread.join()
+		self.flag_camera_grab.value = False
+		self.camera_process.join(3)
+		if self.camera_process.is_alive():
+			self.camera_process.terminate()
+			self.camera_process.join(1)
+			# Release all the resources of the TDC process
+			self.camera_process.close()
 
-
-class SignalEmitter(QObject):
-	img0_orig = pyqtSignal(np.ndarray)
-	img0_zoom = pyqtSignal(np.ndarray)
-	img1_orig = pyqtSignal(np.ndarray)
-	img1_zoom = pyqtSignal(np.ndarray)
 
 
 class CamerasAlignmentWindow(QtWidgets.QWidget):
 	closed = QtCore.pyqtSignal()  # Define a custom closed signal
+
 	def __init__(self, gui_cameras_alignment, *args, **kwargs):
 		"""
 		Initialize the CamerasAlignmentWindow class.
@@ -422,8 +434,7 @@ if __name__ == "__main__":
 
 	app = QtWidgets.QApplication(sys.argv)
 	Cameras_Alignment = QtWidgets.QWidget()
-	signal_emitter = SignalEmitter()
-	ui = Ui_Cameras_Alignment(variables, conf, signal_emitter)
+	ui = Ui_Cameras_Alignment(variables, conf)
 	ui.setupUi(Cameras_Alignment)
 	Cameras_Alignment.show()
 	sys.exit(app.exec())

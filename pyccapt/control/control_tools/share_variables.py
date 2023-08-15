@@ -50,7 +50,6 @@ class Variables:
         self.flag_cryo_gate = False
         self.hit_display = 0
         self.email = ''
-        self.light = False
         self.alignment_window = False
         self.light_switch = False
         self.vdc_hold = False
