@@ -1,6 +1,6 @@
+import datetime
 import smtplib
 import ssl
-import datetime
 
 
 def send_email(email, subject, message):
@@ -20,7 +20,7 @@ def send_email(email, subject, message):
 	sender_email = "oxcart.ap@gmail.com"
 	date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
-	with open('../../files/email_pass.txt') as f:  # Open file with email password
+	with open('./files/email_pass.txt') as f:  # Open file with email password
 		password = str(f.readline().strip())
 	receiver_email = email
 

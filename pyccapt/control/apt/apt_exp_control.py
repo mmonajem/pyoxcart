@@ -592,7 +592,7 @@ class APT_Exp_Control:
         counts_target = ((self.variables.detection_rate / 100) *
                          self.variables.pulse_frequency) / self.variables.pulse_frequency
         init_detection_rate = self.variables.detection_rate
-        last_save_time = time.time()
+        # last_save_time = time.time()
         # Main loop of experiment
         while steps < total_steps:
             # Only for initializing every thing at firs iteration
@@ -720,14 +720,14 @@ class APT_Exp_Control:
             # Stop the TDC process
             try:
                 if self.variables.counter_source == 'TDC':
-                    self.tdc_process.join(3)
+                    self.tdc_process.join(1)
                     if self.tdc_process.is_alive():
                         self.tdc_process.terminate()
                         self.tdc_process.join(1)
                         # Release all the resources of the TDC process
                         self.tdc_process.close()
                 elif self.variables.counter_source == 'DRS':
-                    self.drs_process.join(3)
+                    self.drs_process.join(1)
                     if self.drs_process.is_alive():
                         self.drs_process.terminate()
                         self.drs_process.join(1)

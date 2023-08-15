@@ -1,6 +1,3 @@
-import threading
-
-
 class Variables:
     """
     Global variables class for experiment setup, statistics, and data.
@@ -26,7 +23,7 @@ class Variables:
         self.save_meta_interval = conf['save_meta_interval']
 
         ### Setup parameters
-        self.lock_setup_parameters = threading.Lock()
+        # self.lock_setup_parameters = threading.Lock()
         self.counter_source = 'pulse_counter'
         self.counter = 0
         self.ex_time = 0
@@ -50,6 +47,7 @@ class Variables:
         self.flag_cryo_gate = False
         self.hit_display = 0
         self.email = ''
+        self.light = False
         self.alignment_window = False
         self.light_switch = False
         self.vdc_hold = False
@@ -76,7 +74,7 @@ class Variables:
         self.laser_stop = 0
 
         ### Run statistics
-        self.lock_statistics = threading.Lock()
+        # self.lock_statistics = threading.Lock()
         self.elapsed_time = 0.0
         self.start_time = ''
         self.end_time = ''
@@ -112,7 +110,7 @@ class Variables:
         self.vacuum_load_lock_backing = 0
 
         ### Experiment variables
-        self.lock_experiment_variables = threading.Lock()
+        # self.lock_experiment_variables = threading.Lock()
         self.main_v_dc = []
         self.main_v_p = []
         self.main_counter = []
@@ -122,13 +120,13 @@ class Variables:
         self.laser_degree = []
 
         ### Data for plotting
-        self.lock_data_plot = threading.Lock()
+        # self.lock_data_plot = threading.Lock()
         self.main_v_dc_plot = []
         self.x_plot = []
         self.y_plot = []
         self.t_plot = []
         ### Data for saving
-        self.lock_data = threading.Lock()
+        # self.lock_data = threading.Lock()
         self.x = []
         self.y = []
         self.t = []
@@ -167,4 +165,3 @@ class Variables:
         self.ch5 = []
         self.ch6 = []
         self.ch7 = []
-

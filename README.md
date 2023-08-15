@@ -85,7 +85,7 @@ After installing the project locally or via pip command enter the following comm
 Edite the GUI with Qt-Designer and run command below to create your own GUI
 UI in the GUI module.
 
-    pyuic6 -x gui_simple_layout.ui -o gui_simple_layout.py 
+    pyuic6 -x gui_main.ui -o gui_main.py 
 
 You should then merge the created file with the targeted 
 
