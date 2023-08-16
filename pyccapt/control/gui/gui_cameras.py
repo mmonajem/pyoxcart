@@ -1,4 +1,4 @@
-import copy
+import multiprocessing
 import os
 import sys
 import threading
@@ -250,6 +250,7 @@ class Ui_Cameras_Alignment(object):
 		# Cameras_alignment.setWindowTitle(_translate("Cameras_alignment", "Form"))
 		Cameras_Alignment.setWindowTitle(_translate("Cameras_alignment", "PyCCAPT Cameras"))
 		Cameras_Alignment.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+		self.Cameras_Alignment = Cameras_Alignment
 		###
 		self.label_202.setText(_translate("Cameras_Alignment", "Camera Side"))
 		self.label_203.setText(_translate("Cameras_Alignment", "Overview"))
@@ -260,6 +261,10 @@ class Ui_Cameras_Alignment(object):
 		self.light.setText(_translate("Cameras_Alignment", "Light"))
 		self.led_light.setText(_translate("Cameras_Alignment", "TextLabel"))
 
+		###
+		self.timer = QtCore.QTimer()
+		self.timer.timeout.connect(self.cameras_screenshot)
+		self.timer.start(2000)  # Check every 2000 milliseconds (1 second)
 	def update_cam_s_o(self, img):
 		self.cam_s_o.setImage(img, autoRange=False)
 
@@ -330,7 +335,11 @@ class Ui_Cameras_Alignment(object):
 		self.variables.flag_camera_grab = False
 		self.camera_thread.join()
 
-
+	def cameras_screenshot(self):
+		if self.variables.flag_cameras_take_screenshot:
+			screenshot = QtWidgets.QApplication.primaryScreen().grabWindow(self.Cameras_Alignment.winId())
+			# with self.variables.lock_setup_parameters:
+			screenshot.save(self.variables.path_meta + '\screenshot_camera.png', 'png')
 class SignalEmitter(QObject):
 	img0_orig = pyqtSignal(np.ndarray)
 	img0_zoom = pyqtSignal(np.ndarray)
@@ -356,7 +365,7 @@ class CamerasAlignmentWindow(QtWidgets.QWidget):
 		self.camera_win_front = camera_win_front
 
 		self.timer = QtCore.QTimer(self)
-		self.timer.timeout.connect(self.check_if_should_raise)
+		self.timer.timeout.connect(self.check_if_should)
 		self.timer.start(1000)  # Check every 1000 milliseconds (1 second)
 
 	def closeEvent(self, event):
@@ -373,11 +382,12 @@ class CamerasAlignmentWindow(QtWidgets.QWidget):
 		# Additional cleanup code here if needed
 		super().closeEvent(event)
 
-	def check_if_should_raise(self):
+	def check_if_should(self):
 		if self.camera_win_front.is_set():
 			self.raise_()
 			self.activateWindow()
 			self.camera_win_front.clear()  # Reset the flag
+
 
 
 def run_camera_window(variables, conf, camera_closed_event, camera_win_front):
@@ -392,10 +402,10 @@ def run_camera_window(variables, conf, camera_closed_event, camera_win_front):
 	app = QtWidgets.QApplication(sys.argv)  # <-- Create a new QApplication instance
 
 	SignalEmitter_Cameras = SignalEmitter()
-	variables_copy = copy.deepcopy(variables)
-	conf_copy = copy.deepcopy(conf)
+	# variables = copy.deepcopy(variables)
+	# conf = copy.deepcopy(conf)
 
-	gui_cameras_alignment = Ui_Cameras_Alignment(variables_copy, conf_copy, SignalEmitter_Cameras)
+	gui_cameras_alignment = Ui_Cameras_Alignment(variables, conf, SignalEmitter_Cameras)
 	Cameras_alignment = CamerasAlignmentWindow(gui_cameras_alignment, camera_closed_event, camera_win_front)
 	gui_cameras_alignment.setupUi(Cameras_alignment)
 	Cameras_alignment.show()
@@ -416,23 +426,16 @@ if __name__ == "__main__":
 		sys.exit()
 
 	# Initialize global experiment variables
-	variables = share_variables.Variables(conf)
+	manager = multiprocessing.Manager()
+	lock = manager.Lock()
+	ns = manager.Namespace()
+	variables = share_variables.Variables(conf, ns, lock)
 	variables.log_path = p
 
 	app = QtWidgets.QApplication(sys.argv)
 	Cameras_Alignment = QtWidgets.QWidget()
 	signal_emitter = SignalEmitter()
 	ui = Ui_Cameras_Alignment(variables, conf, signal_emitter)
-	ui.setupUi(Cameras_Alignment)
-	Cameras_Alignment.show()
-	sys.exit(app.exec())
-
-if __name__ == "__main__":
-	import sys
-
-	app = QtWidgets.QApplication(sys.argv)
-	Cameras_Alignment = QtWidgets.QWidget()
-	ui = Ui_Cameras_Alignment()
 	ui.setupUi(Cameras_Alignment)
 	Cameras_Alignment.show()
 	sys.exit(app.exec())

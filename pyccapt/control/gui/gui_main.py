@@ -1,7 +1,8 @@
+import multiprocessing
 import os
 import re
 import sys
-from multiprocessing import Process, Event
+import time
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
@@ -20,31 +21,22 @@ from pyccapt.control.gui import gui_visualization
 
 class Ui_PyCCAPT(object):
 
-    def __init__(self, variables, conf, SignalEmitter, parent=None):
+    def __init__(self, variables, conf, parent=None):
         """
         Constructor for the PyCCAPT UI class.
 
         Args:
             variables (object): Global experiment variables.
             conf (dict): Configuration settings.
-            SignalEmitter (object): Emitter for signals.
             parent: Parent widget (optional).
-
-        Attributes:
-            conf: Configuration settings.
-            variables: Global experiment variables.
-            emitter: Emitter for signals.
-            parent: Parent widget.
         """
         self.conf = conf
         self.variables = variables
-        self.emitter = SignalEmitter
         self.parent = parent
-        self.camera_closed_event = Event()
-        self.camera_win_front = Event()
-        self.camera_close_check_timer = QtCore.QTimer()
-        self.camera_close_check_timer.timeout.connect(self.check_camera_closed)
-        QtWidgets.QApplication.instance().aboutToQuit.connect(self.cleanup)
+        self.emitter = SignalEmitter()
+        self.experimetn_finished_event = multiprocessing.Event()
+        self.camera_closed_event = multiprocessing.Event()
+        self.camera_win_front = multiprocessing.Event()
 
     def setupUi(self, PyCCAPT):
         """
@@ -893,6 +885,11 @@ class Ui_PyCCAPT(object):
         # Create a QTimer to hide the warning message after 8 seconds
         self.timer = QtCore.QTimer(self.parent)
         self.timer.timeout.connect(self.hideMessage)
+        self.camera_close_check_timer = QtCore.QTimer()
+        self.camera_close_check_timer.timeout.connect(self.check_closed_events)
+        QtWidgets.QApplication.instance().aboutToQuit.connect(self.cleanup)
+        self.statistics_timer = QtCore.QTimer()
+        self.statistics_timer.timeout.connect(self.statistics_update)
 
         ###
         self.setup_parameters_changes()
@@ -938,6 +935,9 @@ class Ui_PyCCAPT(object):
         self.emitter.detection_rate.connect(self.update_detection_rate)
 
         self.result_list = []
+
+        self.camera_close_check_timer.start(500)  # check every 500 ms
+        self.statistics_timer.start(333)  # check every 333 ms
 
     def retranslateUi(self, PyCCAPT):
         """
@@ -1277,6 +1277,22 @@ class Ui_PyCCAPT(object):
         self.parameters_source.setEnabled(False)  # Disable the parameters source
         self.start_experiment_worker()
 
+    def statistics_update(self):
+        """
+            Update the statistics
+
+            Args:
+                None
+
+            Return:
+                None
+        """
+        self.emitter.elapsed_time.emit(self.variables.elapsed_time)
+        self.emitter.total_ions.emit(self.variables.total_ions)
+        self.emitter.speciemen_voltage.emit(self.variables.specimen_voltage)
+        self.emitter.pulse_voltage.emit(self.variables.pulse_voltage)
+        self.emitter.detection_rate.emit(self.variables.detection_rate_current)
+
     def stop_experiment_clicked(self):
         """
         Stop the experiment worker thread
@@ -1287,10 +1303,12 @@ class Ui_PyCCAPT(object):
         Return:
             None
         """
-        # with self.variables.lock_statistics:
+        self.statistics_timer.stop()
         if self.variables.start_flag:
             self.variables.stop_flag = True  # Set the STOP flag
-            self.stop_button.setEnabled(False)  # Disable the stop button
+        self.stop_button.setEnabled(False)  # Disable the stop button
+        time.sleep(8)
+        self.on_stop_experiment_worker()
 
     def start_experiment_worker(self):
         """
@@ -1302,15 +1320,11 @@ class Ui_PyCCAPT(object):
         Return:
             None
         """
-        apt_exp_con = apt_exp_control.APT_Exp_Control(self.variables, self.conf, self.emitter)
-        self.exp_worker = ExperimentWorker(apt_exp_con)
-        self.exp_worker.finished.connect(self.on_stop_experiment_worker)
-        self.emitter.elapsed_time.emit(0.0)
-        self.emitter.total_ions.emit(0)
-        self.emitter.speciemen_voltage.emit(0.0)
-        self.emitter.pulse_voltage.emit(0.0)
-        self.emitter.detection_rate.emit(0.0)
-        self.exp_worker.start()
+        self.experiment_process = multiprocessing.Process(target=apt_exp_control.run_experiment,
+                                                          args=(self.variables, self.conf,
+                                                                self.experimetn_finished_event))
+        self.experiment_process.start()
+        self.statistics_timer.start()
 
     def on_stop_experiment_worker(self):
         """
@@ -1328,12 +1342,17 @@ class Ui_PyCCAPT(object):
         self.pulse_mode.setEnabled(True)  # Enable the pulse mode
         self.parameters_source.setEnabled(True)  # Enable the parameters source
 
+        self.experiment_process.terminate()
+        self.experiment_process.join(1)
+
         # for getting screenshot of GUI
         screen = QtWidgets.QApplication.primaryScreen()
         w = self.centralwidget
         screenshot = screen.grabWindow(w.winId())
         # with self.variables.lock_setup_parameters:
         screenshot.save(self.variables.path + '\screenshot.png', 'png')
+
+        self.variables.flag_cameras_take_screenshot = True
 
         # with self.variables.lock_statistics:
         if self.variables.index_experiment_in_text_line < len(
@@ -1394,22 +1413,24 @@ class Ui_PyCCAPT(object):
             return
 
         else:
-            self.camera_process = Process(target=gui_cameras.run_camera_window, args=(self.variables, self.conf,
-                                                                                      self.camera_closed_event,
-                                                                                      self.camera_win_front))
+            self.camera_process = multiprocessing.Process(target=gui_cameras.run_camera_window,
+                                                          args=(self.variables, self.conf,
+                                                                self.camera_closed_event,
+                                                                self.camera_win_front))
             self.camera_process.daemon = True
             self.camera_process.start()
             self.camears.setStyleSheet("background-color: green")
             # Start the QTimer to check whether the camera window is closed
-            self.camera_close_check_timer.start(500)  # check every 500 ms
 
-    def check_camera_closed(self):
+    def check_closed_events(self):
         if self.camera_closed_event.is_set():
-            self.camera_close_check_timer.stop()
             # Change the color of the push button when the camera window is closed
             self.reset_button_color(self.camears)
             self.camera_closed_event.clear()
             self.camera_process.terminate()
+        if self.experimetn_finished_event.is_set():
+            self.experimetn_finished_event.clear()
+            self.on_stop_experiment_worker()
 
     def open_gates_win(self):
         """
@@ -1616,41 +1637,6 @@ class SignalEmitter(QtCore.QObject):
     pulse_voltage = QtCore.pyqtSignal(float)
     detection_rate = QtCore.pyqtSignal(float)
 
-
-class ExperimentWorker(QtCore.QThread):
-    """
-    A class for creating the main_thread.
-    The run method creates a thread for the main function in the voltage atom probe script.
-    """
-    finished = QtCore.pyqtSignal()
-
-    def __init__(self, apt_experiment_control):
-        """
-        Initialize the class
-
-            Args:
-                apt_experiment_control:
-
-            Return:
-                None
-        """
-        QtCore.QThread.__init__(self)
-        self.apt_experiment_control = apt_experiment_control
-
-    def run(self):
-        """
-        Run the main function in the voltage atom probe script
-
-        Args:
-            None
-
-        Return:
-            None
-        """
-        self.apt_experiment_control.run_experiment()
-        self.finished.emit()
-
-
 if __name__ == "__main__":
     try:
         # Load the JSON file
@@ -1664,13 +1650,17 @@ if __name__ == "__main__":
         sys.exit()
 
     # Initialize global experiment variables
-    variables = share_variables.Variables(conf)
+    manager = multiprocessing.Manager()
+    lock = manager.Lock()
+    ns = manager.Namespace()
+    variables = share_variables.Variables(conf, ns, lock)
+
+    # variables = share_variables.Variables(conf)
     variables.log_path = p
 
     app = QtWidgets.QApplication(sys.argv)
     PyCCAPT = QtWidgets.QMainWindow()
-    signal_emitter = SignalEmitter()
-    ui = Ui_PyCCAPT(variables, conf, signal_emitter)
+    ui = Ui_PyCCAPT(variables, conf)
     ui.setupUi(PyCCAPT)
     PyCCAPT.show()
     sys.exit(app.exec())

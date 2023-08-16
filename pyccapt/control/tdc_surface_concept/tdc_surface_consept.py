@@ -91,6 +91,12 @@ def experiment_measure(queue_x,
 	Returns:
 		int: Return code.
 	"""
+	# surface concept tdc specific binning and factors
+	TOFFACTOR = 27.432 / (1000 * 4)  # 27.432 ps/bin, tof in ns, data is TDC time sum
+	DETBINS = 4900
+	BINNINGFAC = 2
+	XYFACTOR = 80 / DETBINS * BINNINGFAC  # XXX mm/bin
+	XYBINSHIFT = DETBINS / BINNINGFAC / 2  # to center detector
 
 	device = scTDC.Device(autoinit=False)
 	retcode, errmsg = device.initialize()

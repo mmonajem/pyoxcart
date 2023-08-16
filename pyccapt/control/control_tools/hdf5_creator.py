@@ -1,7 +1,7 @@
 import h5py
 
 
-def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
+def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h, temporarily=False):
 	"""
 	Save experiment data to an HDF5 file.
 
@@ -12,13 +12,18 @@ def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
 		time_ex_s (list): A list of seconds for experiment time.
 		time_ex_m (list): A list of minutes for experiment time.
 		time_ex_h (list): A list of hours for experiment time.
+		temporarily  (bool): A boolean value to indicate whether the data is saved temporarily.
 
 	Returns:
 		None
 	"""
+	if temporarily:
+		path = variables.path + '\\meta_data\\data.h5'
+	else:
+		path = variables.path + '\\data_%s.h5' % variables.exp_name
 	# Save HDF5 file
 	# with variables.lock_data and variables.lock_experiment_variables:
-	with h5py.File(variables.path + '\\data_%s.h5' % variables.exp_name, "w") as f:
+	with h5py.File(path, "w") as f:
 		f.create_dataset("apt/high_voltage", data=variables.main_v_dc, dtype='f')
 		f.create_dataset("apt/pulse", data=variables.main_v_p, dtype='f')
 		f.create_dataset("apt/num_events", data=variables.main_counter, dtype='i')

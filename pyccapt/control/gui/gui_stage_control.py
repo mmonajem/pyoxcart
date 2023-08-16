@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import sys
 
@@ -217,8 +218,10 @@ if __name__ == "__main__":
 		print(e)
 		sys.exit()
 	# Initialize global experiment variables
-	variables = share_variables.Variables(conf)
-	variables.log_path = p
+	manager = multiprocessing.Manager()
+	lock = manager.Lock()
+	ns = manager.Namespace()
+	variables = share_variables.Variables(conf, ns, lock)
 
 	app = QtWidgets.QApplication(sys.argv)
 	stage_control = QtWidgets.QWidget()

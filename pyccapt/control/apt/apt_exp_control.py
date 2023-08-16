@@ -23,10 +23,10 @@ class APT_Exp_Control:
     This class is responsible for controlling the experiment.
     """
 
-    def __init__(self, variables, conf, emitter):
+    def __init__(self, variables, conf, experiment_finished_event):
         self.variables = variables
         self.conf = conf
-        self.emitter = emitter
+        self.experiment_finished_event = experiment_finished_event
         self.com_port_v_p = None
 
         self.log_apt = None
@@ -68,7 +68,6 @@ class APT_Exp_Control:
                                                              self.queue_tdc_start_counter,
                                                              self.queue_stop_measurement))
 
-            self.tdc_process.daemon = True
             self.tdc_process.start()
 
             self.read_tdc_surface_concept = threading.Thread(target=self.reader_queue_surface_concept)
@@ -248,20 +247,22 @@ class APT_Exp_Control:
                 t_data = t_data * TOFFACTOR  # in ns
 
                 # with self.variables.lock_data:
-                self.variables.x.extend(x_data.tolist())
-                self.variables.y.extend(y_data.tolist())
-                self.variables.t.extend(t_data.tolist())
-                self.variables.dld_start_counter.extend(dld_start_counter_data.tolist())
+                self.variables.extend_to('x', x_data.tolist())
+                self.variables.extend_to('y', y_data.tolist())
+                self.variables.extend_to('t', t_data.tolist())
+                self.variables.extend_to('dld_start_counter', dld_start_counter_data.tolist())
 
                 voltage_data = np.tile(self.variables.specimen_voltage, len(x_data))
-                self.variables.main_v_dc_dld_surface_concept.extend(voltage_data.tolist())
+                self.variables.extend_to('main_v_dc_dld_surface_concept', voltage_data.tolist())
+                self.variables.extend_to('main_p_dld_surface_concept',
+                                         np.tile(self.variables.pulse_voltage, len(x_data)).tolist())
+                # with self.variables.lock_data_plot:
+                self.variables.extend_to('main_v_dc_plot', voltage_data.tolist())
+                self.variables.extend_to('x_plot', x_data.tolist())
+                self.variables.extend_to('y_plot', y_data.tolist())
+                self.variables.extend_to('t_plot', t_data.tolist())
                 self.variables.main_p_dld_surface_concept.extend(
                     np.tile(self.variables.pulse_voltage, len(x_data)).tolist())
-                # with self.variables.lock_data_plot:
-                self.variables.main_v_dc_plot.extend(voltage_data.tolist())
-                self.variables.x_plot.extend(x_data.tolist())
-                self.variables.y_plot.extend(y_data.tolist())
-                self.variables.t_plot.extend(t_data.tolist())
 
             while not self.queue_channel.empty() and not self.queue_time_data.empty() \
                     and not self.queue_tdc_start_counter.empty():
@@ -270,14 +271,14 @@ class APT_Exp_Control:
                 tdc_start_counter_data = self.queue_tdc_start_counter.get()
 
                 # with self.variables.lock_data:
-                self.variables.channel.extend(channel_data.tolist())
-                self.variables.time_data.extend(time_data.tolist())
-                self.variables.tdc_start_counter.extend(tdc_start_counter_data.tolist())
+                self.variables.extend_to('channel', channel_data.tolist())
+                self.variables.extend_to('time_data', time_data.tolist())
+                self.variables.extend_to('tdc_start_counter', tdc_start_counter_data.tolist())
 
                 voltage_data = np.tile(self.variables.specimen_voltage, len(channel_data))
-                self.variables.main_v_dc_tdc_surface_concept.extend(voltage_data.tolist())
-                self.variables.main_p_tdc_surface_concept.extend(
-                    np.tile(self.variables.pulse_voltage, len(channel_data)).tolist())
+                self.variables.extend_to('main_v_dc_tdc_surface_concept', voltage_data.tolist())
+                self.variables.extend_to('main_p_tdc_surface_concept',
+                                         np.tile(self.variables.pulse_voltage, len(channel_data)).tolist())
             time.sleep(self.sleep_time)
 
     def reader_queue_roentdek(self):
@@ -315,26 +316,26 @@ class APT_Exp_Control:
                 main_p_tdc_roentdek = np.tile(self.variables.laser_degree, len(x_list))
 
                 # with self.variables.lock_data:
-                self.variables.x.extend(x_list.tolist())
-                self.variables.y.extend(y_list.tolist())
-                self.variables.t.extend(t_list.tolist())
-                self.variables.time_stamp.extend(time_stamp_list.tolist())
-                self.variables.ch0.extend(ch0_list.tolist())
-                self.variables.ch1.extend(ch1_list.tolist())
-                self.variables.ch2.extend(ch2_list.tolist())
-                self.variables.ch3.extend(ch3_list.tolist())
-                self.variables.ch4.extend(ch4_list.tolist())
-                self.variables.ch5.extend(ch5_list.tolist())
-                self.variables.ch6.extend(ch6_list.tolist())
-                self.variables.ch7.extend(ch7_list.tolist())
-                self.variables.main_v_dc_tdc_roentdek.extend(main_v_dc_dld_list.tolist())
-                self.variables.main_p_tdc_roentdek.extend(main_p_tdc_roentdek.tolist())
+                self.variables.extend_to('x', x_list.tolist())
+                self.variables.extend_to('y', y_list.tolist())
+                self.variables.extend_to('t', t_list.tolist())
+                self.variables.extend_to('time_stamp', time_stamp_list.tolist())
+                self.variables.extend_to('ch0', ch0_list.tolist())
+                self.variables.extend_to('ch1', ch1_list.tolist())
+                self.variables.extend_to('ch2', ch2_list.tolist())
+                self.variables.extend_to('ch3', ch3_list.tolist())
+                self.variables.extend_to('ch4', ch4_list.tolist())
+                self.variables.extend_to('ch5', ch5_list.tolist())
+                self.variables.extend_to('ch6', ch6_list.tolist())
+                self.variables.extend_to('ch7', ch7_list.tolist())
+                self.variables.extend_to('main_v_dc_tdc_roentdek', main_v_dc_dld_list.tolist())
+                self.variables.extend_to('main_p_tdc_roentdek', main_p_tdc_roentdek.tolist())
 
                 # with self.variables.lock_data_plot:
-                self.variables.main_v_dc_plot.extend(main_v_dc_dld_list.tolist())
-                self.variables.x_plot.extend(x_list.tolist())
-                self.variables.y_plot.extend(y_list.tolist())
-                self.variables.t_plot.extend(t_list.tolist())
+                self.variables.extend_to('main_v_dc_plot', main_v_dc_dld_list.tolist())
+                self.variables.extend_to('x_plot', x_list.tolist())
+                self.variables.extend_to('y_plot', y_list.tolist())
+                self.variables.extend_to('t_plot', t_list.tolist())
             time.sleep(self.sleep_time)
 
     def reader_queue_drs(self):
@@ -365,25 +366,27 @@ class APT_Exp_Control:
                 ch3_wave = self.queue_ch3_wave.get()
 
                 # with self.variables.lock_data:
-                self.variables.ch0_time.extend(ch0_time)
-                self.variables.ch0_wave.extend(ch0_wave)
-                self.variables.ch1_time.extend(ch1_time)
-                self.variables.ch1_wave.extend(ch1_wave)
-                self.variables.ch2_time.extend(ch2_time)
-                self.variables.ch2_wave.extend(ch2_wave)
-                self.variables.ch3_time.extend(ch3_time)
-                self.variables.ch3_wave.extend(ch3_wave)
+                self.variables.extend_to('ch0_time', ch0_time.tolist())
+                self.variables.extend_to('ch0_wave', ch0_wave.tolist())
+                self.variables.extend_to('ch1_time', ch1_time.tolist())
+                self.variables.extend_to('ch1_wave', ch1_wave.tolist())
+                self.variables.extend_to('ch2_time', ch2_time.tolist())
+                self.variables.extend_to('ch2_wave', ch2_wave.tolist())
+                self.variables.extend_to('ch3_time', ch3_time.tolist())
+                self.variables.extend_to('ch3_wave', ch3_wave.tolist())
+
                 voltage_data = np.tile(self.variables.specimen_voltage, len(ch0_time))
-                self.variables.main_v_dc_drs.extend(voltage_data.tolist())
-                self.variables.main_p_drs.extend(
-                    np.tile(self.variables.pulse_voltage, len(ch0_time)).tolist())
+                self.variables.extend_to('main_v_dc_drs', voltage_data.tolist())
+                self.variables.extend_to('main_p_drs',
+                                         np.tile(self.variables.pulse_voltage, len(ch0_time)).tolist())
 
                 # with self.variables.lock_data_plot:
-                self.variables.main_v_dc_plot.extend(voltage_data.tolist())
+                self.variables.extend_to('main_v_dc_plot', voltage_data.tolist())
                 # we have to calculate x and y from the wave data here
-                self.variables.x_plot.extend(ch0_time.tolist())
-                self.variables.y_plot.extend(ch0_time.tolist())
-                self.variables.t_plot.extend(ch0_time.tolist())
+                self.variables.extend_to('x_plot', ch0_time.tolist())
+                self.variables.extend_to('y_plot', ch0_time.tolist())
+                self.variables.extend_to('t_plot', ch0_time.tolist())
+
             time.sleep(self.sleep_time)
 
     def main_ex_loop(self, counts_target):
@@ -418,18 +421,14 @@ class APT_Exp_Control:
 
         # saving the values of high dc voltage, pulse, and current iteration ions
         # with self.variables.lock_experiment_variables:
-        self.variables.main_v_dc.append(self.variables.specimen_voltage)
-        self.variables.main_v_p.append(self.variables.pulse_voltage)
-        self.variables.main_counter.append(self.variables.count_temp)
+        self.variables.extend_to('main_v_dc', [self.variables.specimen_voltage])
+        self.variables.extend_to('main_v_p', [self.variables.pulse_voltage])
+        self.variables.extend_to('main_counter', [self.variables.count_temp])
         # averaging count rate of N_averg counts
-        self.variables.avg_n_count = self.variables.ex_freq * (
-                sum(self.variables.main_counter[-self.variables.ex_freq:]) / self.variables.ex_freq)
+
+        self.variables.avg_n_count = np.sum(self.variables.main_counter[-self.variables.ex_freq:])
 
         counts_measured = self.variables.avg_n_count / (1 + self.variables.pulse_frequency * 1000)
-
-        # variables.avg_n_count = np.sum(variables.main_counter[-variables.ex_freq:])
-        #
-        # counts_measured = variables.avg_n_count / (1 + variables.pulse_frequency * 1000)
 
         counts_error = counts_target - counts_measured  # deviation from setpoint
 
@@ -467,8 +466,9 @@ class APT_Exp_Control:
                 self.variables.specimen_voltage = specimen_voltage_temp
 
         # with self.variables.lock_statistics:
-        self.variables.main_temperature.append(self.variables.temperature)
-        self.variables.main_chamber_vacuum.append(float(self.variables.vacuum_main))
+
+        self.variables.extend_to('main_temperature', [self.variables.temperature])
+        self.variables.extend_to('main_chamber_vacuum', [float(self.variables.vacuum_main)])
 
     def precise_sleep(self, seconds):
         """
@@ -584,7 +584,6 @@ class APT_Exp_Control:
 
         desired_rate = 3  # Hz statistic rate update in the main GUI
         iterations_per_desired_rate = self.variables.ex_freq / desired_rate
-        counter_statistic = 0
 
         desired_rate = self.variables.ex_freq  # Hz
         desired_period = 1.0 / desired_rate  # seconds
@@ -592,7 +591,7 @@ class APT_Exp_Control:
         counts_target = ((self.variables.detection_rate / 100) *
                          self.variables.pulse_frequency) / self.variables.pulse_frequency
         init_detection_rate = self.variables.detection_rate
-        # last_save_time = time.time()
+        last_save_time = time.time()
         # Main loop of experiment
         while steps < total_steps:
             # Only for initializing every thing at firs iteration
@@ -621,7 +620,17 @@ class APT_Exp_Control:
             # with self.variables.lock_statistics:
             self.variables.detection_rate_current = (self.variables.avg_n_count * 100) / (
                     1 + self.variables.pulse_frequency * 1000)
-
+            if self.variables.vdc_max <= self.variables.specimen_voltage:
+                if self.conf['v_dc'] != "off":
+                    self.command_v_dc(">S0 %s" % self.variables.vdc_max)
+                self.variables.specimen_voltage = self.variables.vdc_max
+                # update pulse voltage v_p
+                new_vp = self.variables.specimen_voltage * self.variables.pulse_fraction * \
+                         (1 / self.variables.pulse_amp_per_supply_voltage)
+                if self.variables.pulse_voltage_max > new_vp > self.variables.pulse_voltage_min:
+                    if self.conf['v_p'] != "off":
+                        self.com_port_v_p.write('VOLT %s' % new_vp)
+                    self.variables.pulse_voltage = new_vp * self.variables.pulse_amp_per_supply_voltage
             # main loop function
             self.main_ex_loop(counts_target)
 
@@ -670,16 +679,8 @@ class APT_Exp_Control:
             if not self.variables.criteria_time and steps + 1 == total_steps:
                 total_steps += 1
 
-            counter_statistic += 1
-            if counter_statistic >= iterations_per_desired_rate:
-                counter_statistic = 0
-                self.emitter.elapsed_time.emit(self.variables.elapsed_time)
-                self.emitter.total_ions.emit(self.variables.total_ions)
-                self.emitter.speciemen_voltage.emit(self.variables.specimen_voltage)
-                self.emitter.pulse_voltage.emit(self.variables.pulse_voltage)
-                self.emitter.detection_rate.emit(self.variables.detection_rate_current)
-            # Measure time
 
+            # Measure time
             end = datetime.datetime.now()
             time_ex_s.append(int(end.strftime("%S")))
             time_ex_m.append(int(end.strftime("%M")))
@@ -694,13 +695,12 @@ class APT_Exp_Control:
 
             # current_time = time.time()
             # if current_time - last_save_time >= 60:  # 10 minutes in seconds
+            #     print('temperately save data')
             #     # Start a new thread to save the data
-            #     save_process = multiprocessing.Process(target=hdf5_creator.hdf_creator, args=(copy.copy(self.variables),
-            #                                 dict(self.conf), time_counter.copy(), time_ex_s.copy(),
-            #                                                                           time_ex_m.copy(),
-            #                                                                           time_ex_h.copy()))
+            #     save_process = multiprocessing.Process(target=hdf5_creator.hdf_creator, args=(self.variables,
+            #                                             self.conf, time_counter.copy(), time_ex_s.copy(),
+            #                                             time_ex_m.copy(), time_ex_h.copy()), temporarily=True)
             #     save_process.start()
-            #     print('save data')
             #     last_save_time = current_time
 
             if remaining_time > 0:
@@ -814,6 +814,7 @@ class APT_Exp_Control:
         # save setup parameters and run statistics in a txt file
         experiment_statistics.save_statistics_apt(self.variables)
 
+        self.experiment_finished_event.set()
         # Clear up all the variables and deinitialize devices
         self.clear_up()
         self.log_apt.info('Variables and devices are cleared and deinitialized')
@@ -846,35 +847,53 @@ class APT_Exp_Control:
             self.variables.index_plot_save = 0
             self.variables.index_plot = 0
 
-            self.variables.x = []
-            self.variables.y = []
-            self.variables.t = []
-            self.variables.dld_start_counter = []
+            self.variables.clear_to('x')
+            self.variables.clear_to('y')
+            self.variables.clear_to('t')
 
-            self.variables.channel = []
-            self.variables.time_data = []
-            self.variables.tdc_start_counter = []
+            self.variables.clear_to('channel')
+            self.variables.clear_to('time_data')
+            self.variables.clear_to('tdc_start_counter')
+            self.variables.clear_to('dld_start_counter')
 
-            self.variables.ch0_time = []
-            self.variables.ch0_wave = []
-            self.variables.ch1_time = []
-            self.variables.ch1_wave = []
-            self.variables.ch2_time = []
-            self.variables.ch2_wave = []
-            self.variables.ch3_time = []
-            self.variables.ch3_wave = []
+            self.variables.clear_to('time_stamp')
+            self.variables.clear_to('ch0')
+            self.variables.clear_to('ch1')
+            self.variables.clear_to('ch2')
+            self.variables.clear_to('ch3')
+            self.variables.clear_to('ch4')
+            self.variables.clear_to('ch5')
+            self.variables.clear_to('ch6')
+            self.variables.clear_to('ch7')
+            self.variables.clear_to('laser_intensity')
 
-            self.variables.main_v_dc = []
-            self.variables.main_v_p = []
-            self.variables.main_counter = []
-            self.variables.main_temperature = []
-            self.variables.main_chamber_vacuum = []
-            self.variables.main_v_dc_dld_surface_concept = []
-            self.variables.main_p_dld_surface_concept = []
-            self.variables.main_v_dc_tdc_surface_concept = []
-            self.variables.main_p_tdc_surface_concept = []
-            self.variables.main_v_dc_tdc_roentdek = []
-            self.variables.main_p_tdc_roentdek = []
+            self.variables.clear_to('ch0_time')
+            self.variables.clear_to('ch0_wave')
+            self.variables.clear_to('ch1_time')
+            self.variables.clear_to('ch1_wave')
+            self.variables.clear_to('ch2_time')
+            self.variables.clear_to('ch2_wave')
+            self.variables.clear_to('ch3_time')
+            self.variables.clear_to('ch3_wave')
+
+            self.variables.clear_to('main_v_dc')
+            self.variables.clear_to('main_v_p')
+            self.variables.clear_to('main_counter')
+            self.variables.clear_to('main_temperature')
+            self.variables.clear_to('main_chamber_vacuum')
+            self.variables.clear_to('main_v_dc_dld_surface_concept')
+            self.variables.clear_to('main_p_dld_surface_concept')
+            self.variables.clear_to('main_v_dc_tdc_surface_concept')
+            self.variables.clear_to('main_p_tdc_surface_concept')
+            self.variables.clear_to('main_v_dc_tdc_roentdek')
+            self.variables.clear_to('main_p_tdc_roentdek')
+            self.variables.clear_to('main_v_dc_drs')
+            self.variables.clear_to('main_v_p_drs')
+
+            self.variables.clear_to('main_v_dc_plot')
+            self.variables.clear_to('x_plot')
+            self.variables.clear_to('y_plot')
+            self.variables.clear_to('t_plot')
 
         self.log_apt.info('Starting cleanup')
 
@@ -896,3 +915,11 @@ class APT_Exp_Control:
         # Reset variables
         cleanup_variables()
         self.log_apt.info('Cleanup is finished')
+
+
+def run_experiment(variables, conf, experiment_finished_event):
+    """
+        Run the main experiment.
+
+    """
+    APT_Exp_Control(variables, conf, experiment_finished_event).run_experiment()

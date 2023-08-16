@@ -1,5 +1,6 @@
 import time
 
+import cv2
 import numpy as np
 from pypylon import pylon
 
@@ -74,10 +75,10 @@ class Cameras:
 		"""
 
 		self.cameras.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
-		# start_time = time.time()
+		start_time = time.time()
 		while self.cameras.IsGrabbing():
-			# current_time = time.time()
-			# elapsed_time = current_time - start_time
+			current_time = time.time()
+			elapsed_time = current_time - start_time
 
 			# Fetch the raw images from camera
 			grabResult0 = self.cameras[0].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
@@ -87,7 +88,7 @@ class Cameras:
 			img0 = image0.GetArray()
 			image1 = self.converter.Convert(grabResult1)
 			img1 = image1.GetArray()
-
+			# self.variables.x.append(1)
 			# Original size is 2048 * 2448
 			# Resize the original to the required size. Utilize the openCV tool.
 			self.img0_orig = img0
@@ -116,15 +117,15 @@ class Cameras:
 
 			# Store the captured processed image at a desired location.
 			# with self.variables.lock_statistics:
-			# if elapsed_time >= self.variables.save_meta_interval and self.variables.start_flag:
-			# 	start_time = current_time  # Update the start time
-			# 	cv2.imwrite(self.variables.path_meta + "/side_%s.png" % self.index_save_image, self.img0_orig)
-			# 	cv2.imwrite(self.variables.path_meta + "/side_zoom_%s.png" % self.index_save_image, self.img0_zoom)
-			# 	cv2.imwrite(self.variables.path_meta + '/bottom_%s.png' % self.index_save_image, self.img1_orig)
-			# 	cv2.imwrite(self.variables.path_meta + '/bottom_zoom_%s.png' % self.index_save_image,
-			# 	            self.img1_zoom)
-			# 	self.index_save_image += 1
-			# 	start_time = time.time()
+			if elapsed_time >= self.variables.save_meta_interval and self.variables.start_flag:
+				start_time = current_time  # Update the start time
+				cv2.imwrite(self.variables.path_meta + "/side_%s.png" % self.index_save_image, self.img0_orig)
+				cv2.imwrite(self.variables.path_meta + "/side_zoom_%s.png" % self.index_save_image, self.img0_zoom)
+				cv2.imwrite(self.variables.path_meta + '/bottom_%s.png' % self.index_save_image, self.img1_orig)
+				cv2.imwrite(self.variables.path_meta + '/bottom_zoom_%s.png' % self.index_save_image,
+				            self.img1_zoom)
+				self.index_save_image += 1
+				start_time = time.time()
 
 			grabResult0.Release()
 			grabResult1.Release()
