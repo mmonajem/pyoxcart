@@ -1,5 +1,6 @@
 import ctypes
 import os
+
 import numpy as np
 from numpy.ctypeslib import ndpointer
 
@@ -63,44 +64,52 @@ class DRS:
         """
         self.drs_lib.Drs_delete_drs_ox(self.obj)
 
-def experiment_measure(queue_ch0_time, queue_ch0_wave,
-                       queue_ch1_time, queue_ch1_wave,
-                       queue_ch2_time, queue_ch2_wave,
-                       queue_ch3_time, queue_ch3_wave,
-                       queue_stop_measurement, log, log_path):
-    """
-    Continuously reads the DRS data and puts it into the queues.
+def experiment_measure(variables):
+	"""
+	Continuously reads the DRS data and puts it into the queues.
 
-    Args:
-        queue_ch0_time (Queue): Queue for channel 0 time data.
-        queue_ch0_wave (Queue): Queue for channel 0 wave data.
-        queue_ch1_time (Queue): Queue for channel 1 time data.
-        queue_ch1_wave (Queue): Queue for channel 1 wave data.
-        queue_ch2_time (Queue): Queue for channel 2 time data.
-        queue_ch2_wave (Queue): Queue for channel 2 wave data.
-        queue_ch3_time (Queue): Queue for channel 3 time data.
-        queue_ch3_wave (Queue): Queue for channel 3 wave data.
-        queue_stop_measurement (Queue): Queue to stop measurement.
-        log (bool): Enable logging.
-        log_path (str): Path for logging.
-    """
-    drs_ox = DRS(trigger=0, test=1, delay=0, sample_frequency=2, log=log, log_path=log_path)
+	Args:
+		variables: Variables object
+	"""
+	drs_ox = DRS(trigger=0, test=1, delay=0, sample_frequency=2, log=log, log_path=log_path)
 
-    while True:
-        if queue_stop_measurement.empty():
-            returnVale = np.array(drs_ox.reader())
-            data = returnVale.reshape(8, 1024)
-            queue_ch0_time.put(data[0, :])
-            queue_ch0_wave.put(data[1, :])
-            queue_ch1_time.put(data[2, :])
-            queue_ch1_wave.put(data[3, :])
-            queue_ch2_time.put(data[4, :])
-            queue_ch2_wave.put(data[5, :])
-            queue_ch3_time.put(data[6, :])
-            queue_ch3_wave.put(data[7, :])
-        else:
-            print('DRS loop is break in child process')
-            break
+	while True:
+		returnVale = np.array(drs_ox.reader())
+		data = returnVale.reshape(8, 1024)
+		# with self.variables.lock_data:
+		ch0_time = data[0, :]
+		ch0_wave = data[1, :]
+		ch1_time = data[2, :]
+		ch1_wave = data[3, :]
+		ch2_time = data[4, :]
+		ch2_wave = data[5, :]
+		ch3_time = data[6, :]
+		ch3_wave = data[7, :]
+
+		variables.extend_to('ch0_time', ch0_time.tolist())
+		variables.extend_to('ch0_wave', ch0_wave.tolist())
+		variables.extend_to('ch1_time', ch1_time.tolist())
+		variables.extend_to('ch1_wave', ch1_wave.tolist())
+		variables.extend_to('ch2_time', ch2_time.tolist())
+		variables.extend_to('ch2_wave', ch2_wave.tolist())
+		variables.extend_to('ch3_time', ch3_time.tolist())
+		variables.extend_to('ch3_wave', ch3_wave.tolist())
+
+		voltage_data = np.tile(variables.specimen_voltage, len(ch0_time))
+		pulse_data = np.tile(variables.pulse_voltage, len(ch0_time))
+		variables.extend_to('main_v_dc_drs', voltage_data.tolist())
+		variables.extend_to('main_p_drs', pulse_data.tolist())
+
+		# with self.variables.lock_data_plot:
+		variables.extend_to('main_v_dc_plot', voltage_data.tolist())
+		# we have to calculate x and y from the wave data here
+		variables.extend_to('x_plot', ch0_time.tolist())
+		variables.extend_to('y_plot', ch0_time.tolist())
+		variables.extend_to('t_plot', ch0_time.tolist())
+
+		if variables.flag_stop_tdc:
+			print('DRS loop is break in child process')
+			break
 
     drs_ox.delete_drs_ox()
 

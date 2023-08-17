@@ -63,6 +63,7 @@ class Variables:
         self.ns.flag_pump_load_lock_click = False
         self.ns.flag_pump_load_lock_led = None
         self.ns.flag_camera_grab = False
+        self.ns.flag_camera_win_show = False
         self.ns.criteria_time = True
         self.ns.criteria_ions = True
         self.ns.criteria_vdc = True
@@ -99,6 +100,7 @@ class Variables:
         self.ns.stop_flag = False
         self.ns.end_experiment = False
         self.ns.start_flag = False
+        self.ns.flag_stop_tdc = False
         self.ns.plot_clear_flag = False
         self.ns.hitmap_plot_size = 1.0
         self.ns.number_of_experiment_in_text_line = 0
@@ -170,8 +172,17 @@ class Variables:
         self.ns.ch7 = []
 
     def extend_to(self, variable_name, value):
+        # Check that variable_name is an attribute of self.ns
+        if not hasattr(self.ns, variable_name):
+            raise ValueError(f"{variable_name} is not an attribute of the namespace.")
+
+        current_variable = getattr(self.ns, variable_name)
+
+        # Check that current_variable is a list
+        if not isinstance(current_variable, list):
+            raise TypeError(f"{variable_name} is not a list.")
+
         with self.lock:
-            current_variable = getattr(self.ns, variable_name)
             current_variable.extend(value)
             setattr(self.ns, variable_name, current_variable)
 
@@ -185,7 +196,8 @@ class Variables:
 
     @COM_PORT_cryo.setter
     def COM_PORT_cryo(self, value):
-        self.ns.COM_PORT_cryo = value
+        with self.lock:
+            self.ns.COM_PORT_cryo = value
 
     @property
     def COM_PORT_V_dc(self):
@@ -193,7 +205,8 @@ class Variables:
 
     @COM_PORT_V_dc.setter
     def COM_PORT_V_dc(self, value):
-        self.ns.COM_PORT_V_dc = value
+        with self.lock:
+            self.ns.COM_PORT_V_dc = value
 
     @property
     def COM_PORT_V_p(self):
@@ -201,7 +214,8 @@ class Variables:
 
     @COM_PORT_V_p.setter
     def COM_PORT_V_p(self, value):
-        self.ns.COM_PORT_V_p = value
+        with self.lock:
+            self.ns.COM_PORT_V_p = value
 
     @property
     def COM_PORT_gauge_mc(self):
@@ -209,7 +223,8 @@ class Variables:
 
     @COM_PORT_gauge_mc.setter
     def COM_PORT_gauge_mc(self, value):
-        self.ns.COM_PORT_gauge_mc = value
+        with self.lock:
+            self.ns.COM_PORT_gauge_mc = value
 
     @property
     def COM_PORT_gauge_bc(self):
@@ -217,7 +232,8 @@ class Variables:
 
     @COM_PORT_gauge_bc.setter
     def COM_PORT_gauge_bc(self, value):
-        self.ns.COM_PORT_gauge_bc = value
+        with self.lock:
+            self.ns.COM_PORT_gauge_bc = value
 
     @property
     def COM_PORT_gauge_ll(self):
@@ -225,7 +241,8 @@ class Variables:
 
     @COM_PORT_gauge_ll.setter
     def COM_PORT_gauge_ll(self, value):
-        self.ns.COM_PORT_gauge_ll = value
+        with self.lock:
+            self.ns.COM_PORT_gauge_ll = value
 
     @property
     def COM_PORT_signal_generator(self):
@@ -233,7 +250,8 @@ class Variables:
 
     @COM_PORT_signal_generator.setter
     def COM_PORT_signal_generator(self, value):
-        self.ns.COM_PORT_signal_generator = value
+        with self.lock:
+            self.ns.COM_PORT_signal_generator = value
 
     @property
     def COM_PORT_thorlab_motor(self):
@@ -241,7 +259,8 @@ class Variables:
 
     @COM_PORT_thorlab_motor.setter
     def COM_PORT_thorlab_motor(self, value):
-        self.ns.COM_PORT_thorlab_motor = value
+        with self.lock:
+            self.ns.COM_PORT_thorlab_motor = value
 
     @property
     def save_meta_interval(self):
@@ -249,7 +268,8 @@ class Variables:
 
     @save_meta_interval.setter
     def save_meta_interval(self, value):
-        self.ns.save_meta_interval = value
+        with self.lock:
+            self.ns.save_meta_interval = value
 
     @property
     def counter_source(self):
@@ -257,7 +277,8 @@ class Variables:
 
     @counter_source.setter
     def counter_source(self, value):
-        self.ns.counter_source = value
+        with self.lock:
+            self.ns.counter_source = value
 
     @property
     def counter(self):
@@ -265,7 +286,8 @@ class Variables:
 
     @counter.setter
     def counter(self, value):
-        self.ns.counter = value
+        with self.lock:
+            self.ns.counter = value
 
     @property
     def ex_time(self):
@@ -273,7 +295,8 @@ class Variables:
 
     @ex_time.setter
     def ex_time(self, value):
-        self.ns.ex_time = value
+        with self.lock:
+            self.ns.ex_time = value
 
     @property
     def max_ions(self):
@@ -281,7 +304,8 @@ class Variables:
 
     @max_ions.setter
     def max_ions(self, value):
-        self.ns.max_ions = value
+        with self.lock:
+            self.ns.max_ions = value
 
     @property
     def ex_freq(self):
@@ -289,7 +313,8 @@ class Variables:
 
     @ex_freq.setter
     def ex_freq(self, value):
-        self.ns.ex_freq = value
+        with self.lock:
+            self.ns.ex_freq = value
 
     @property
     def user_name(self):
@@ -297,7 +322,8 @@ class Variables:
 
     @user_name.setter
     def user_name(self, value):
-        self.ns.user_name = value
+        with self.lock:
+            self.ns.user_name = value
 
     @property
     def vdc_min(self):
@@ -305,7 +331,8 @@ class Variables:
 
     @vdc_min.setter
     def vdc_min(self, value):
-        self.ns.vdc_min = value
+        with self.lock:
+            self.ns.vdc_min = value
 
     @property
     def vdc_max(self):
@@ -313,7 +340,8 @@ class Variables:
 
     @vdc_max.setter
     def vdc_max(self, value):
-        self.ns.vdc_max = value
+        with self.lock:
+            self.ns.vdc_max = value
 
     @property
     def vdc_step_up(self):
@@ -321,7 +349,8 @@ class Variables:
 
     @vdc_step_up.setter
     def vdc_step_up(self, value):
-        self.ns.vdc_step_up = value
+        with self.lock:
+            self.ns.vdc_step_up = value
 
     @property
     def vdc_step_down(self):
@@ -329,7 +358,8 @@ class Variables:
 
     @vdc_step_down.setter
     def vdc_step_down(self, value):
-        self.ns.vdc_step_down = value
+        with self.lock:
+            self.ns.vdc_step_down = value
 
     @property
     def v_p_min(self):
@@ -337,7 +367,8 @@ class Variables:
 
     @v_p_min.setter
     def v_p_min(self, value):
-        self.ns.v_p_min = value
+        with self.lock:
+            self.ns.v_p_min = value
 
     @property
     def v_p_max(self):
@@ -345,7 +376,8 @@ class Variables:
 
     @v_p_max.setter
     def v_p_max(self, value):
-        self.ns.v_p_max = value
+        with self.lock:
+            self.ns.v_p_max = value
 
     @property
     def pulse_fraction(self):
@@ -353,7 +385,8 @@ class Variables:
 
     @pulse_fraction.setter
     def pulse_fraction(self, value):
-        self.ns.pulse_fraction = value
+        with self.lock:
+            self.ns.pulse_fraction = value
 
     @property
     def pulse_frequency(self):
@@ -361,7 +394,8 @@ class Variables:
 
     @pulse_frequency.setter
     def pulse_frequency(self, value):
-        self.ns.pulse_frequency = value
+        with self.lock:
+            self.ns.pulse_frequency = value
 
     @property
     def pulse_amp_per_supply_voltage(self):
@@ -369,7 +403,8 @@ class Variables:
 
     @pulse_amp_per_supply_voltage.setter
     def pulse_amp_per_supply_voltage(self, value):
-        self.ns.pulse_amp_per_supply_voltage = value
+        with self.lock:
+            self.ns.pulse_amp_per_supply_voltage = value
 
     @property
     def hdf5_path(self):
@@ -377,7 +412,8 @@ class Variables:
 
     @hdf5_path.setter
     def hdf5_path(self, value):
-        self.ns.hdf5_path = value
+        with self.lock:
+            self.ns.hdf5_path = value
 
     @property
     def flag_main_gate(self):
@@ -385,7 +421,8 @@ class Variables:
 
     @flag_main_gate.setter
     def flag_main_gate(self, value):
-        self.ns.flag_main_gate = value
+        with self.lock:
+            self.ns.flag_main_gate = value
 
     @property
     def flag_load_gate(self):
@@ -393,7 +430,8 @@ class Variables:
 
     @flag_load_gate.setter
     def flag_load_gate(self, value):
-        self.ns.flag_load_gate = value
+        with self.lock:
+            self.ns.flag_load_gate = value
 
     @property
     def flag_cryo_gate(self):
@@ -401,7 +439,8 @@ class Variables:
 
     @flag_cryo_gate.setter
     def flag_cryo_gate(self, value):
-        self.ns.flag_cryo_gate = value
+        with self.lock:
+            self.ns.flag_cryo_gate = value
 
     @property
     def hit_display(self):
@@ -409,7 +448,8 @@ class Variables:
 
     @hit_display.setter
     def hit_display(self, value):
-        self.ns.hit_display = value
+        with self.lock:
+            self.ns.hit_display = value
 
     @property
     def email(self):
@@ -417,7 +457,8 @@ class Variables:
 
     @email.setter
     def email(self, value):
-        self.ns.email = value
+        with self.lock:
+            self.ns.email = value
 
     @property
     def light(self):
@@ -425,7 +466,8 @@ class Variables:
 
     @light.setter
     def light(self, value):
-        self.ns.light = value
+        with self.lock:
+            self.ns.light = value
 
     @property
     def alignment_window(self):
@@ -433,7 +475,8 @@ class Variables:
 
     @alignment_window.setter
     def alignment_window(self, value):
-        self.ns.alignment_window = value
+        with self.lock:
+            self.ns.alignment_window = value
 
     @property
     def light_switch(self):
@@ -441,7 +484,8 @@ class Variables:
 
     @light_switch.setter
     def light_switch(self, value):
-        self.ns.light_switch = value
+        with self.lock:
+            self.ns.light_switch = value
 
     @property
     def vdc_hold(self):
@@ -449,7 +493,8 @@ class Variables:
 
     @vdc_hold.setter
     def vdc_hold(self, value):
-        self.ns.vdc_hold = value
+        with self.lock:
+            self.ns.vdc_hold = value
 
     @property
     def reset_heatmap(self):
@@ -457,7 +502,8 @@ class Variables:
 
     @reset_heatmap.setter
     def reset_heatmap(self, value):
-        self.ns.reset_heatmap = value
+        with self.lock:
+            self.ns.reset_heatmap = value
 
     @property
     def camera_0_ExposureTime(self):
@@ -465,7 +511,8 @@ class Variables:
 
     @camera_0_ExposureTime.setter
     def camera_0_ExposureTime(self, value):
-        self.ns.camera_0_ExposureTime = value
+        with self.lock:
+            self.ns.camera_0_ExposureTime = value
 
     @property
     def camera_1_ExposureTime(self):
@@ -473,7 +520,8 @@ class Variables:
 
     @camera_1_ExposureTime.setter
     def camera_1_ExposureTime(self, value):
-        self.ns.camera_1_ExposureTime = value
+        with self.lock:
+            self.ns.camera_1_ExposureTime = value
 
     @property
     def path(self):
@@ -481,7 +529,8 @@ class Variables:
 
     @path.setter
     def path(self, value):
-        self.ns.path = value
+        with self.lock:
+            self.ns.path = value
 
     @property
     def path_meta(self):
@@ -489,7 +538,8 @@ class Variables:
 
     @path_meta.setter
     def path_meta(self, value):
-        self.ns.path_meta = value
+        with self.lock:
+            self.ns.path_meta = value
 
     @property
     def index_save_image(self):
@@ -497,7 +547,8 @@ class Variables:
 
     @index_save_image.setter
     def index_save_image(self, value):
-        self.ns.index_save_image = value
+        with self.lock:
+            self.ns.index_save_image = value
 
     @property
     def flag_pump_load_lock(self):
@@ -505,7 +556,8 @@ class Variables:
 
     @flag_pump_load_lock.setter
     def flag_pump_load_lock(self, value):
-        self.ns.flag_pump_load_lock = value
+        with self.lock:
+            self.ns.flag_pump_load_lock = value
 
     @property
     def flag_pump_load_lock_click(self):
@@ -513,7 +565,8 @@ class Variables:
 
     @flag_pump_load_lock_click.setter
     def flag_pump_load_lock_click(self, value):
-        self.ns.flag_pump_load_lock_click = value
+        with self.lock:
+            self.ns.flag_pump_load_lock_click = value
 
     @property
     def flag_pump_load_lock_led(self):
@@ -521,7 +574,8 @@ class Variables:
 
     @flag_pump_load_lock_led.setter
     def flag_pump_load_lock_led(self, value):
-        self.ns.flag_pump_load_lock_led = value
+        with self.lock:
+            self.ns.flag_pump_load_lock_led = value
 
     @property
     def flag_camera_grab(self):
@@ -529,7 +583,17 @@ class Variables:
 
     @flag_camera_grab.setter
     def flag_camera_grab(self, value):
-        self.ns.flag_camera_grab = value
+        with self.lock:
+            self.ns.flag_camera_grab = value
+
+    @property
+    def flag_camera_win_show(self):
+        return self.ns.flag_camera_win_show
+
+    @flag_camera_win_show.setter
+    def flag_camera_win_show(self, value):
+        with self.lock:
+            self.ns.flag_camera_win_show = value
 
     @property
     def criteria_time(self):
@@ -537,7 +601,8 @@ class Variables:
 
     @criteria_time.setter
     def criteria_time(self, value):
-        self.ns.criteria_time = value
+        with self.lock:
+            self.ns.criteria_time = value
 
     @property
     def criteria_ions(self):
@@ -545,7 +610,8 @@ class Variables:
 
     @criteria_ions.setter
     def criteria_ions(self, value):
-        self.ns.criteria_ions = value
+        with self.lock:
+            self.ns.criteria_ions = value
 
     @property
     def criteria_vdc(self):
@@ -553,7 +619,8 @@ class Variables:
 
     @criteria_vdc.setter
     def criteria_vdc(self, value):
-        self.ns.criteria_vdc = value
+        with self.lock:
+            self.ns.criteria_vdc = value
 
     @property
     def criteria_laser(self):
@@ -561,7 +628,8 @@ class Variables:
 
     @criteria_laser.setter
     def criteria_laser(self, value):
-        self.ns.criteria_laser = value
+        with self.lock:
+            self.ns.criteria_laser = value
 
     @property
     def exp_name(self):
@@ -569,7 +637,8 @@ class Variables:
 
     @exp_name.setter
     def exp_name(self, value):
-        self.ns.exp_name = value
+        with self.lock:
+            self.ns.exp_name = value
 
     @property
     def log_path(self):
@@ -577,7 +646,8 @@ class Variables:
 
     @log_path.setter
     def log_path(self, value):
-        self.ns.log_path = value
+        with self.lock:
+            self.ns.log_path = value
 
     @property
     def fixed_laser(self):
@@ -585,7 +655,8 @@ class Variables:
 
     @fixed_laser.setter
     def fixed_laser(self, value):
-        self.ns.fixed_laser = value
+        with self.lock:
+            self.ns.fixed_laser = value
 
     @property
     def laser_num_ions_per_step(self):
@@ -593,7 +664,8 @@ class Variables:
 
     @laser_num_ions_per_step.setter
     def laser_num_ions_per_step(self, value):
-        self.ns.laser_num_ions_per_step = value
+        with self.lock:
+            self.ns.laser_num_ions_per_step = value
 
     @property
     def laser_increase_per_step(self):
@@ -601,7 +673,8 @@ class Variables:
 
     @laser_increase_per_step.setter
     def laser_increase_per_step(self, value):
-        self.ns.laser_increase_per_step = value
+        with self.lock:
+            self.ns.laser_increase_per_step = value
 
     @property
     def laser_start(self):
@@ -609,7 +682,8 @@ class Variables:
 
     @laser_start.setter
     def laser_start(self, value):
-        self.ns.laser_start = value
+        with self.lock:
+            self.ns.laser_start = value
 
     @property
     def laser_stop(self):
@@ -617,7 +691,8 @@ class Variables:
 
     @laser_stop.setter
     def laser_stop(self, value):
-        self.ns.laser_stop = value
+        with self.lock:
+            self.ns.laser_stop = value
 
     @property
     def elapsed_time(self):
@@ -625,7 +700,8 @@ class Variables:
 
     @elapsed_time.setter
     def elapsed_time(self, value):
-        self.ns.elapsed_time = value
+        with self.lock:
+            self.ns.elapsed_time = value
 
     @property
     def start_time(self):
@@ -633,7 +709,8 @@ class Variables:
 
     @start_time.setter
     def start_time(self, value):
-        self.ns.start_time = value
+        with self.lock:
+            self.ns.start_time = value
 
     @property
     def end_time(self):
@@ -641,7 +718,8 @@ class Variables:
 
     @end_time.setter
     def end_time(self, value):
-        self.ns.end_time = value
+        with self.lock:
+            self.ns.end_time = value
 
     @property
     def total_ions(self):
@@ -649,7 +727,8 @@ class Variables:
 
     @total_ions.setter
     def total_ions(self, value):
-        self.ns.total_ions = value
+        with self.lock:
+            self.ns.total_ions = value
 
     @property
     def specimen_voltage(self):
@@ -657,7 +736,8 @@ class Variables:
 
     @specimen_voltage.setter
     def specimen_voltage(self, value):
-        self.ns.specimen_voltage = value
+        with self.lock:
+            self.ns.specimen_voltage = value
 
     @property
     def detection_rate(self):
@@ -665,7 +745,8 @@ class Variables:
 
     @detection_rate.setter
     def detection_rate(self, value):
-        self.ns.detection_rate = value
+        with self.lock:
+            self.ns.detection_rate = value
 
     @property
     def detection_rate_current(self):
@@ -673,7 +754,8 @@ class Variables:
 
     @detection_rate_current.setter
     def detection_rate_current(self, value):
-        self.ns.detection_rate_current = value
+        with self.lock:
+            self.ns.detection_rate_current = value
 
     @property
     def pulse_voltage(self):
@@ -681,7 +763,8 @@ class Variables:
 
     @pulse_voltage.setter
     def pulse_voltage(self, value):
-        self.ns.pulse_voltage = value
+        with self.lock:
+            self.ns.pulse_voltage = value
 
     @property
     def pulse_voltage_min(self):
@@ -689,7 +772,8 @@ class Variables:
 
     @pulse_voltage_min.setter
     def pulse_voltage_min(self, value):
-        self.ns.pulse_voltage_min = value
+        with self.lock:
+            self.ns.pulse_voltage_min = value
 
     @property
     def pulse_voltage_max(self):
@@ -697,7 +781,8 @@ class Variables:
 
     @pulse_voltage_max.setter
     def pulse_voltage_max(self, value):
-        self.ns.pulse_voltage_max = value
+        with self.lock:
+            self.ns.pulse_voltage_max = value
 
     @property
     def count_last(self):
@@ -705,7 +790,8 @@ class Variables:
 
     @count_last.setter
     def count_last(self, value):
-        self.ns.count_last = value
+        with self.lock:
+            self.ns.count_last = value
 
     @property
     def count_temp(self):
@@ -713,7 +799,8 @@ class Variables:
 
     @count_temp.setter
     def count_temp(self, value):
-        self.ns.count_temp = value
+        with self.lock:
+            self.ns.count_temp = value
 
     @property
     def avg_n_count(self):
@@ -729,7 +816,8 @@ class Variables:
 
     @index_plot.setter
     def index_plot(self, value):
-        self.ns.index_plot = value
+        with self.lock:
+            self.ns.index_plot = value
 
     @property
     def index_plot_save(self):
@@ -737,7 +825,8 @@ class Variables:
 
     @index_plot_save.setter
     def index_plot_save(self, value):
-        self.ns.index_plot_save = value
+        with self.lock:
+            self.ns.index_plot_save = value
 
     @property
     def index_wait_on_plot_start(self):
@@ -745,7 +834,8 @@ class Variables:
 
     @index_wait_on_plot_start.setter
     def index_wait_on_plot_start(self, value):
-        self.ns.index_wait_on_plot_start = value
+        with self.lock:
+            self.ns.index_wait_on_plot_start = value
 
     @property
     def index_warning_message(self):
@@ -753,7 +843,8 @@ class Variables:
 
     @index_warning_message.setter
     def index_warning_message(self, value):
-        self.ns.index_warning_message = value
+        with self.lock:
+            self.ns.index_warning_message = value
 
     @property
     def index_auto_scale_graph(self):
@@ -761,7 +852,8 @@ class Variables:
 
     @index_auto_scale_graph.setter
     def index_auto_scale_graph(self, value):
-        self.ns.index_auto_scale_graph = value
+        with self.lock:
+            self.ns.index_auto_scale_graph = value
 
     @property
     def index_line(self):
@@ -769,7 +861,8 @@ class Variables:
 
     @index_line.setter
     def index_line(self, value):
-        self.ns.index_line = value
+        with self.lock:
+            self.ns.index_line = value
 
     @property
     def stop_flag(self):
@@ -777,7 +870,8 @@ class Variables:
 
     @stop_flag.setter
     def stop_flag(self, value):
-        self.ns.stop_flag = value
+        with self.lock:
+            self.ns.stop_flag = value
 
     @property
     def end_experiment(self):
@@ -785,7 +879,8 @@ class Variables:
 
     @end_experiment.setter
     def end_experiment(self, value):
-        self.ns.end_experiment = value
+        with self.lock:
+            self.ns.end_experiment = value
 
     @property
     def start_flag(self):
@@ -793,7 +888,17 @@ class Variables:
 
     @start_flag.setter
     def start_flag(self, value):
-        self.ns.start_flag = value
+        with self.lock:
+            self.ns.start_flag = value
+
+    @property
+    def flag_stop_tdc(self):
+        return self.ns.flag_stop_tdc
+
+    @flag_stop_tdc.setter
+    def flag_stop_tdc(self, value):
+        with self.lock:
+            self.ns.flag_stop_tdc = value
 
     @property
     def plot_clear_flag(self):
@@ -801,7 +906,8 @@ class Variables:
 
     @plot_clear_flag.setter
     def plot_clear_flag(self, value):
-        self.ns.plot_clear_flag = value
+        with self.lock:
+            self.ns.plot_clear_flag = value
 
     @property
     def hitmap_plot_size(self):
@@ -809,7 +915,8 @@ class Variables:
 
     @hitmap_plot_size.setter
     def hitmap_plot_size(self, value):
-        self.ns.hitmap_plot_size = value
+        with self.lock:
+            self.ns.hitmap_plot_size = value
 
     @property
     def number_of_experiment_in_text_line(self):
@@ -817,7 +924,8 @@ class Variables:
 
     @number_of_experiment_in_text_line.setter
     def number_of_experiment_in_text_line(self, value):
-        self.ns.number_of_experiment_in_text_line = value
+        with self.lock:
+            self.ns.number_of_experiment_in_text_line = value
 
     @property
     def index_experiment_in_text_line(self):
@@ -825,7 +933,8 @@ class Variables:
 
     @index_experiment_in_text_line.setter
     def index_experiment_in_text_line(self, value):
-        self.ns.index_experiment_in_text_line = value
+        with self.lock:
+            self.ns.index_experiment_in_text_line = value
 
     @property
     def bool_flag_while_loop_gages(self):
@@ -833,7 +942,8 @@ class Variables:
 
     @bool_flag_while_loop_gages.setter
     def bool_flag_while_loop_gages(self, value):
-        self.ns.bool_flag_while_loop_gages = value
+        with self.lock:
+            self.ns.bool_flag_while_loop_gages = value
 
     @property
     def flag_cameras_take_screenshot(self):
@@ -841,7 +951,8 @@ class Variables:
 
     @flag_cameras_take_screenshot.setter
     def flag_cameras_take_screenshot(self, value):
-        self.ns.flag_cameras_take_screenshot = value
+        with self.lock:
+            self.ns.flag_cameras_take_screenshot = value
 
     @property
     def temperature(self):
@@ -849,7 +960,8 @@ class Variables:
 
     @temperature.setter
     def temperature(self, value):
-        self.ns.temperature = value
+        with self.lock:
+            self.ns.temperature = value
 
     @property
     def vacuum_main(self):
@@ -857,7 +969,8 @@ class Variables:
 
     @vacuum_main.setter
     def vacuum_main(self, value):
-        self.ns.vacuum_main = value
+        with self.lock:
+            self.ns.vacuum_main = value
 
     @property
     def vacuum_buffer(self):
@@ -865,7 +978,8 @@ class Variables:
 
     @vacuum_buffer.setter
     def vacuum_buffer(self, value):
-        self.ns.vacuum_buffer = value
+        with self.lock:
+            self.ns.vacuum_buffer = value
 
     @property
     def vacuum_buffer_backing(self):
@@ -873,7 +987,8 @@ class Variables:
 
     @vacuum_buffer_backing.setter
     def vacuum_buffer_backing(self, value):
-        self.ns.vacuum_buffer_backing = value
+        with self.lock:
+            self.ns.vacuum_buffer_backing = value
 
     @property
     def vacuum_load_lock(self):
@@ -881,7 +996,8 @@ class Variables:
 
     @vacuum_load_lock.setter
     def vacuum_load_lock(self, value):
-        self.ns.vacuum_load_lock = value
+        with self.lock:
+            self.ns.vacuum_load_lock = value
 
     @property
     def vacuum_load_lock_backing(self):
@@ -889,7 +1005,8 @@ class Variables:
 
     @vacuum_load_lock_backing.setter
     def vacuum_load_lock_backing(self, value):
-        self.ns.vacuum_load_lock_backing = value
+        with self.lock:
+            self.ns.vacuum_load_lock_backing = value
 
     @property
     def main_v_dc(self):
@@ -897,7 +1014,8 @@ class Variables:
 
     @main_v_dc.setter
     def main_v_dc(self, value):
-        self.ns.main_v_dc = value
+        with self.lock:
+            self.ns.main_v_dc = value
 
     @property
     def main_v_p(self):
@@ -905,7 +1023,8 @@ class Variables:
 
     @main_v_p.setter
     def main_v_p(self, value):
-        self.ns.main_v_p = value
+        with self.lock:
+            self.ns.main_v_p = value
 
     @property
     def main_counter(self):
@@ -913,7 +1032,8 @@ class Variables:
 
     @main_counter.setter
     def main_counter(self, value):
-        self.ns.main_counter = value
+        with self.lock:
+            self.ns.main_counter = value
 
     @property
     def main_temperature(self):
@@ -921,7 +1041,8 @@ class Variables:
 
     @main_temperature.setter
     def main_temperature(self, value):
-        self.ns.main_temperature = value
+        with self.lock:
+            self.ns.main_temperature = value
 
     @property
     def main_chamber_vacuum(self):
@@ -929,7 +1050,8 @@ class Variables:
 
     @main_chamber_vacuum.setter
     def main_chamber_vacuum(self, value):
-        self.ns.main_chamber_vacuum = value
+        with self.lock:
+            self.ns.main_chamber_vacuum = value
 
     @property
     def main_v_p_drs(self):
@@ -937,7 +1059,8 @@ class Variables:
 
     @main_v_p_drs.setter
     def main_v_p_drs(self, value):
-        self.ns.main_v_p_drs = value
+        with self.lock:
+            self.ns.main_v_p_drs = value
 
     @property
     def laser_degree(self):
@@ -945,7 +1068,8 @@ class Variables:
 
     @laser_degree.setter
     def laser_degree(self, value):
-        self.ns.laser_degree = value
+        with self.lock:
+            self.ns.laser_degree = value
 
     @property
     def main_v_dc_plot(self):
@@ -953,7 +1077,8 @@ class Variables:
 
     @main_v_dc_plot.setter
     def main_v_dc_plot(self, value):
-        self.ns.main_v_dc_plot = value
+        with self.lock:
+            self.ns.main_v_dc_plot = value
 
     @property
     def x_plot(self):
@@ -961,7 +1086,8 @@ class Variables:
 
     @x_plot.setter
     def x_plot(self, value):
-        self.ns.x_plot = value
+        with self.lock:
+            self.ns.x_plot = value
 
     @property
     def y_plot(self):
@@ -969,7 +1095,8 @@ class Variables:
 
     @y_plot.setter
     def y_plot(self, value):
-        self.ns.y_plot = value
+        with self.lock:
+            self.ns.y_plot = value
 
     @property
     def t_plot(self):
@@ -977,7 +1104,8 @@ class Variables:
 
     @t_plot.setter
     def t_plot(self, value):
-        self.ns.t_plot = value
+        with self.lock:
+            self.ns.t_plot = value
 
     @property
     def x(self):
@@ -985,7 +1113,8 @@ class Variables:
 
     @x.setter
     def x(self, value):
-        self.ns.x = value
+        with self.lock:
+            self.ns.x = value
 
     @property
     def y(self):
@@ -993,7 +1122,8 @@ class Variables:
 
     @y.setter
     def y(self, value):
-        self.ns.y = value
+        with self.lock:
+            self.ns.y = value
 
     @property
     def t(self):
@@ -1001,7 +1131,8 @@ class Variables:
 
     @t.setter
     def t(self, value):
-        self.ns.t = value
+        with self.lock:
+            self.ns.t = value
 
     @property
     def dld_start_counter(self):
@@ -1009,7 +1140,8 @@ class Variables:
 
     @dld_start_counter.setter
     def dld_start_counter(self, value):
-        self.ns.dld_start_counter = value
+        with self.lock:
+            self.ns.dld_start_counter = value
 
     @property
     def time_stamp(self):
@@ -1017,7 +1149,8 @@ class Variables:
 
     @time_stamp.setter
     def time_stamp(self, value):
-        self.ns.time_stamp = value
+        with self.lock:
+            self.ns.time_stamp = value
 
     @property
     def laser_intensity(self):
@@ -1025,7 +1158,8 @@ class Variables:
 
     @laser_intensity.setter
     def laser_intensity(self, value):
-        self.ns.laser_intensity = value
+        with self.lock:
+            self.ns.laser_intensity = value
 
     @property
     def main_v_dc_dld_surface_concept(self):
@@ -1033,7 +1167,8 @@ class Variables:
 
     @main_v_dc_dld_surface_concept.setter
     def main_v_dc_dld_surface_concept(self, value):
-        self.ns.main_v_dc_dld_surface_concept = value
+        with self.lock:
+            self.ns.main_v_dc_dld_surface_concept = value
 
     @property
     def main_p_dld_surface_concept(self):
@@ -1041,7 +1176,8 @@ class Variables:
 
     @main_p_dld_surface_concept.setter
     def main_p_dld_surface_concept(self, value):
-        self.ns.main_p_dld_surface_concept = value
+        with self.lock:
+            self.ns.main_p_dld_surface_concept = value
 
     @property
     def main_v_dc_tdc_surface_concept(self):
@@ -1049,7 +1185,8 @@ class Variables:
 
     @main_v_dc_tdc_surface_concept.setter
     def main_v_dc_tdc_surface_concept(self, value):
-        self.ns.main_v_dc_tdc_surface_concept = value
+        with self.lock:
+            self.ns.main_v_dc_tdc_surface_concept = value
 
     @property
     def main_p_tdc_surface_concept(self):
@@ -1057,7 +1194,8 @@ class Variables:
 
     @main_p_tdc_surface_concept.setter
     def main_p_tdc_surface_concept(self, value):
-        self.ns.main_p_tdc_surface_concept = value
+        with self.lock:
+            self.ns.main_p_tdc_surface_concept = value
 
     @property
     def main_v_dc_drs(self):
@@ -1065,7 +1203,8 @@ class Variables:
 
     @main_v_dc_drs.setter
     def main_v_dc_drs(self, value):
-        self.ns.main_v_dc_drs = value
+        with self.lock:
+            self.ns.main_v_dc_drs = value
 
     @property
     def main_p_drs(self):
@@ -1073,7 +1212,8 @@ class Variables:
 
     @main_p_drs.setter
     def main_p_drs(self, value):
-        self.ns.main_p_drs = value
+        with self.lock:
+            self.ns.main_p_drs = value
 
     @property
     def main_v_dc_tdc_roentdek(self):
@@ -1081,7 +1221,8 @@ class Variables:
 
     @main_v_dc_tdc_roentdek.setter
     def main_v_dc_tdc_roentdek(self, value):
-        self.ns.main_v_dc_tdc_roentdek = value
+        with self.lock:
+            self.ns.main_v_dc_tdc_roentdek = value
 
     @property
     def main_p_tdc_roentdek(self):
@@ -1089,7 +1230,8 @@ class Variables:
 
     @main_p_tdc_roentdek.setter
     def main_p_tdc_roentdek(self, value):
-        self.ns.main_p_tdc_roentdek = value
+        with self.lock:
+            self.ns.main_p_tdc_roentdek = value
 
     @property
     def channel(self):
@@ -1097,7 +1239,8 @@ class Variables:
 
     @channel.setter
     def channel(self, value):
-        self.ns.channel = value
+        with self.lock:
+            self.ns.channel = value
 
     @property
     def time_data(self):
@@ -1105,7 +1248,8 @@ class Variables:
 
     @time_data.setter
     def time_data(self, value):
-        self.ns.time_data = value
+        with self.lock:
+            self.ns.time_data = value
 
     @property
     def tdc_start_counter(self):
@@ -1113,7 +1257,8 @@ class Variables:
 
     @tdc_start_counter.setter
     def tdc_start_counter(self, value):
-        self.ns.tdc_start_counter = value
+        with self.lock:
+            self.ns.tdc_start_counter = value
 
     @property
     def ch0_time(self):
@@ -1121,7 +1266,8 @@ class Variables:
 
     @ch0_time.setter
     def ch0_time(self, value):
-        self.ns.ch0_time = value
+        with self.lock:
+            self.ns.ch0_time = value
 
     @property
     def ch0_wave(self):
@@ -1129,7 +1275,8 @@ class Variables:
 
     @ch0_wave.setter
     def ch0_wave(self, value):
-        self.ns.ch0_wave = value
+        with self.lock:
+            self.ns.ch0_wave = value
 
     @property
     def ch1_time(self):
@@ -1137,7 +1284,8 @@ class Variables:
 
     @ch1_time.setter
     def ch1_time(self, value):
-        self.ns.ch1_time = value
+        with self.lock:
+            self.ns.ch1_time = value
 
     @property
     def ch1_wave(self):
@@ -1145,7 +1293,8 @@ class Variables:
 
     @ch1_wave.setter
     def ch1_wave(self, value):
-        self.ns.ch1_wave = value
+        with self.lock:
+            self.ns.ch1_wave = value
 
     @property
     def ch2_time(self):
@@ -1153,7 +1302,8 @@ class Variables:
 
     @ch2_time.setter
     def ch2_time(self, value):
-        self.ns.ch2_time = value
+        with self.lock:
+            self.ns.ch2_time = value
 
     @property
     def ch2_wave(self):
@@ -1161,7 +1311,8 @@ class Variables:
 
     @ch2_wave.setter
     def ch2_wave(self, value):
-        self.ns.ch2_wave = value
+        with self.lock:
+            self.ns.ch2_wave = value
 
     @property
     def ch3_time(self):
@@ -1169,7 +1320,8 @@ class Variables:
 
     @ch3_time.setter
     def ch3_time(self, value):
-        self.ns.ch3_time = value
+        with self.lock:
+            self.ns.ch3_time = value
 
     @property
     def ch3_wave(self):
@@ -1177,7 +1329,8 @@ class Variables:
 
     @ch3_wave.setter
     def ch3_wave(self, value):
-        self.ns.ch3_wave = value
+        with self.lock:
+            self.ns.ch3_wave = value
 
     @property
     def ch0(self):
@@ -1185,7 +1338,8 @@ class Variables:
 
     @ch0.setter
     def ch0(self, value):
-        self.ns.ch0 = value
+        with self.lock:
+            self.ns.ch0 = value
 
     @property
     def ch1(self):
@@ -1193,7 +1347,8 @@ class Variables:
 
     @ch1.setter
     def ch1(self, value):
-        self.ns.ch1 = value
+        with self.lock:
+            self.ns.ch1 = value
 
     @property
     def ch2(self):
@@ -1201,7 +1356,8 @@ class Variables:
 
     @ch2.setter
     def ch2(self, value):
-        self.ns.ch2 = value
+        with self.lock:
+            self.ns.ch2 = value
 
     @property
     def ch3(self):
@@ -1209,7 +1365,8 @@ class Variables:
 
     @ch3.setter
     def ch3(self, value):
-        self.ns.ch3 = value
+        with self.lock:
+            self.ns.ch3 = value
 
     @property
     def ch4(self):
@@ -1217,7 +1374,8 @@ class Variables:
 
     @ch4.setter
     def ch4(self, value):
-        self.ns.ch4 = value
+        with self.lock:
+            self.ns.ch4 = value
 
     @property
     def ch5(self):
@@ -1225,7 +1383,8 @@ class Variables:
 
     @ch5.setter
     def ch5(self, value):
-        self.ns.ch5 = value
+        with self.lock:
+            self.ns.ch5 = value
 
     @property
     def ch6(self):
@@ -1233,7 +1392,8 @@ class Variables:
 
     @ch6.setter
     def ch6(self, value):
-        self.ns.ch6 = value
+        with self.lock:
+            self.ns.ch6 = value
 
     @property
     def ch7(self):
@@ -1241,4 +1401,5 @@ class Variables:
 
     @ch7.setter
     def ch7(self, value):
-        self.ns.ch7 = value
+        with self.lock:
+            self.ns.ch7 = value

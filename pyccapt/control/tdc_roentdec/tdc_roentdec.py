@@ -69,27 +69,12 @@ class TDC:
 		data = self.tdc_lib.get_data_tdc_buf(self.obj)
 		return data
 
-def experiment_measure(queue_x, queue_y, queue_t, queue_AbsoluteTimeStamp,
-                       queue_ch0, queue_ch1, queue_ch2, queue_ch3,
-                       queue_ch4, queue_ch5, queue_ch6, queue_ch7,
-                       queue_stop_measurement):
+def experiment_measure(variables):
 	"""
 	Measurement function: This function is called in a process to read data from the queue.
 
 	Args:
-		queue_x (multiprocessing.Queue): Queue for x data.
-		queue_y (multiprocessing.Queue): Queue for y data.
-		queue_t (multiprocessing.Queue): Queue for t data.
-		queue_AbsoluteTimeStamp (multiprocessing.Queue): Queue for AbsoluteTimeStamp data.
-		queue_ch0 (multiprocessing.Queue): Queue for ch0 data.
-		queue_ch1 (multiprocessing.Queue): Queue for ch1 data.
-		queue_ch2 (multiprocessing.Queue): Queue for ch2 data.
-		queue_ch3 (multiprocessing.Queue): Queue for ch3 data.
-		queue_ch4 (multiprocessing.Queue): Queue for ch4 data.
-		queue_ch5 (multiprocessing.Queue): Queue for ch5 data.
-		queue_ch6 (multiprocessing.Queue): Queue for ch6 data.
-		queue_ch7 (multiprocessing.Queue): Queue for ch7 data.
-		queue_stop_measurement (multiprocessing.Queue): Queue to stop measurement.
+		variables: Variables object
 
 	Returns:
 		int: Return code.
@@ -103,7 +88,7 @@ def experiment_measure(queue_x, queue_y, queue_t, queue_AbsoluteTimeStamp,
 		print("TDC DLL was not found")
 		print(e)
 
-	tdc = TDC(tdc_lib, buf_size=30000, time_out=300)
+	tdc = TDC(tdc_lib, buf_size=30000, time_out=100)
 
 	ret_code = tdc.init_tdc()
 
@@ -114,16 +99,33 @@ def experiment_measure(queue_x, queue_y, queue_t, queue_AbsoluteTimeStamp,
 		buffer_length = int(returnVale[0])
 		returnVale_tmp = np.copy(returnVale[1:buffer_length * 12 + 1].reshape(buffer_length, 12))
 
-		for i in range(8):
-			queue_ch = globals()[f'queue_ch{i}']
-			queue_ch.put(returnVale_tmp[:, i])
+		xx = returnVale_tmp[:, 8]
+		yy = returnVale_tmp[:, 9]
+		tt = returnVale_tmp[:, 10]
+		variables.extend_to('x', xx.tolist())
+		variables.extend_to('y', yy.tolist())
+		variables.extend_to('t', tt.tolist())
+		variables.extend_to('time_stamp', returnVale_tmp[:, 11].tolist())
+		variables.extend_to('ch0', returnVale_tmp[:, 0].tolist())
+		variables.extend_to('ch1', returnVale_tmp[:, 1].tolist())
+		variables.extend_to('ch2', returnVale_tmp[:, 2].tolist())
+		variables.extend_to('ch3', returnVale_tmp[:, 3].tolist())
+		variables.extend_to('ch4', returnVale_tmp[:, 4].tolist())
+		variables.extend_to('ch5', returnVale_tmp[:, 5].tolist())
+		variables.extend_to('ch6', returnVale_tmp[:, 6].tolist())
+		variables.extend_to('ch7', returnVale_tmp[:, 7].tolist())
+		main_v_dc_dld_list = np.tile(variables.specimen_voltage, len(xx))
+		pulse_data = np.tile(variables.pulse_voltage, len(xx))
+		variables.extend_to('main_v_dc_tdc_roentdek', main_v_dc_dld_list.tolist())
+		variables.extend_to('main_p_tdc_roentdek', pulse_data.tolist())
 
-		queue_x.put(returnVale_tmp[:, 8])
-		queue_y.put(returnVale_tmp[:, 9])
-		queue_t.put(returnVale_tmp[:, 10])
-		queue_AbsoluteTimeStamp.put(returnVale_tmp[:, 11])
+		# with self.variables.lock_data_plot:
+		variables.extend_to('main_v_dc_plot', main_v_dc_dld_list.tolist())
+		variables.extend_to('x_plot', xx.tolist())
+		variables.extend_to('y_plot', yy.tolist())
+		variables.extend_to('t_plot', tt.tolist())
 
-		if not queue_stop_measurement.empty():
+		if variables.flag_stop_tdc:
 			break
 
 	tdc.stop_tdc()

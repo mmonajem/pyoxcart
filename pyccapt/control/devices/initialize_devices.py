@@ -1,5 +1,7 @@
+import csv
 import threading
 import time
+from datetime import datetime
 
 import serial.tools.list_ports
 
@@ -173,7 +175,6 @@ def state_update(conf, variables, emitter):
 
 	if conf['cryo'] == "off":
 		print('The cryo temperature monitoring is off')
-		com_port_cryovac = None
 	else:
 		try:
 			com_ports = list(serial.tools.list_ports.comports())
@@ -190,6 +191,7 @@ def state_update(conf, variables, emitter):
 			print('Can not initialize the cryovac')
 			print(e)
 
+		start_time = time.time()
 		while variables.bool_flag_while_loop_gages:
 			if conf['cryo'] == "on":
 				try:
@@ -224,4 +226,40 @@ def state_update(conf, variables, emitter):
 				variables.vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
 				emitter.vacuum_buffer_back.emit(variables.vacuum_buffer_backing)
 
+			elapsed_time = time.time() - start_time
+			if elapsed_time > 30 * 60:
+				start_time = time.time()
+				log_vacuum_levels(variables.vacuum_main,
+				                  variables.vacuum_buffer, variables.vacuum_buffer_backing,
+				                  variables.vacuum_load_lock, variables.vacuum_load_lock_backing, )
 			threading.Event().wait(1)
+
+
+def log_vacuum_levels(main_chamber, buffer_chamber, buffer_chamber_backing_pump, load_lock, load_lock_backing):
+	"""
+		Log vacuum levels to a text file and a CSV file.
+
+		Args:
+			main_chamber (float): Vacuum level of the main chamber.
+			buffer_chamber (float): Vacuum level of the buffer chamber.
+			buffer_chamber_backing_pump (float): Vacuum level of the buffer chamber backing pump.
+			load_lock (float): Vacuum level of the load lock.
+			load_lock_backing (float): Vacuum level of the load lock backing pump.
+
+		Returns:
+			None
+
+	"""
+
+	timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+	with open("./files/vacuum_log.txt", "a") as log_file:
+		log_file.write(f"{timestamp}: Main Chamber={main_chamber}, Buffer Chamber={buffer_chamber}, "
+		               f"Buffer Chamber Backing Pump={buffer_chamber_backing_pump}, Load Lock={load_lock}, "
+		               f"Load Lock Backing={load_lock_backing}\n")
+
+	row = [timestamp, main_chamber, buffer_chamber, buffer_chamber_backing_pump, load_lock, load_lock_backing]
+
+	# Write to CSV file
+	with open("./files/vacuum_log.csv", "a", newline='') as log_file:
+		csv_writer = csv.writer(log_file)
+		csv_writer.writerow(row)

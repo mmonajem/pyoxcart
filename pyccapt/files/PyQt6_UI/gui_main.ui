@@ -178,6 +178,193 @@
                                 </item>
                             </layout>
                         </item>
+                        <item row="1" column="1">
+                            <widget class="QTextEdit" name="text_line">
+                                <property name="sizePolicy">
+                                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                                        <horstretch>0</horstretch>
+                                        <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                </property>
+                                <property name="minimumSize">
+                                    <size>
+                                        <width>0</width>
+                                        <height>100</height>
+                                    </size>
+                                </property>
+                                <property name="styleSheet">
+                                    <string notr="true">QWidget{
+                                        border: 2px solid gray;
+                                        border-radius: 10px;
+                                        padding: 0 8px;
+                                        background: rgb(223,223,233)
+                                        }
+                                    </string>
+                                </property>
+                                <property name="html">
+                                    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+                                        &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot;
+                                        /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+                                        p, li { white-space: pre-wrap; }
+                                        &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI';
+                                        font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;{ex_user=user1;&lt;/span&gt;&lt;span
+                                        style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;ex_name=test1;&lt;/span&gt;
+                                        &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;ex_time=90;max_ions=2000;ex_freq=10;&lt;/span&gt;
+                                        &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;vdc_min=500;vdc_max=4000;vdc_steps_up=100;&lt;/span&gt;
+                                        &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;vdc_steps_down=100;&lt;/span&gt;&lt;span
+                                        style=&quot; font-family:'JetBrains Mono,monospace'; font-size:8pt;
+                                        color:#000000;&quot;&gt;control_algorithm=PID;&lt;/span&gt;&lt;span style=&quot;
+                                        font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;vp_min=328;&lt;/span&gt;
+                                        &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;vp_max=3281;pulse_fraction=20;pulse_frequency=200;&lt;/span&gt;
+                                        &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;detection_rate_init=1;hit_displayed=20000;email=;counter_source=TDC&lt;/span&gt;&lt;span
+                                        style=&quot; font-family:'JetBrains Mono,monospace'; font-size:8pt;
+                                        color:#000000;&quot;&gt;;&lt;/span&gt; &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;criteria_time=True;criteria_ions=False;&lt;/span&gt;
+                                        &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;criteria_vdc=False}&lt;/span&gt;
+                                        &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;{ex_user=user2;ex_name=test2;ex_time=100;&lt;/span&gt;
+                                        &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;max_ions=3000;ex_freq=5;vdc_min=1000;&lt;/span&gt;
+                                        &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;vdc_max=3000;vdc_steps_up=50;vdc_steps_down=50;&lt;/span&gt;
+                                        &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;control_algorithm=proportional;vp_min=400;vp_max=2000;&lt;/span&gt;
+                                        &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;pulse_fraction=15;pulse_frequency=200;detection_rate_init=2;&lt;/span&gt;
+                                        &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;hit_displayed=40000;email=;counter_source=DRS;&lt;/span&gt;
+                                        &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;criteria_time=False;criteria_ions=False;criteria_vdc=True}&lt;/span&gt;
+                                        &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                                    </string>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="2" column="0" colspan="2">
+                            <layout class="QGridLayout" name="gridLayout_3">
+                                <item row="0" column="0" rowspan="2">
+                                    <layout class="QGridLayout" name="gridLayout_2">
+                                        <item row="0" column="0" colspan="2">
+                                            <widget class="QLabel" name="Error">
+                                                <property name="minimumSize">
+                                                    <size>
+                                                        <width>800</width>
+                                                        <height>30</height>
+                                                    </size>
+                                                </property>
+                                                <property name="font">
+                                                    <font>
+                                                        <pointsize>13</pointsize>
+                                                        <bold>true</bold>
+                                                        <strikeout>false</strikeout>
+                                                    </font>
+                                                </property>
+                                                <property name="text">
+                                                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                                                </property>
+                                                <property name="alignment">
+                                                    <set>Qt::AlignCenter</set>
+                                                </property>
+                                                <property name="textInteractionFlags">
+                                                    <set>Qt::LinksAccessibleByMouse</set>
+                                                </property>
+                                            </widget>
+                                        </item>
+                                    </layout>
+                                </item>
+                                <item row="0" column="1">
+                                    <widget class="QPushButton" name="start_button">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>25</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QPushButton{
+                                                background: rgb(193, 193, 193)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string>Start</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="1" column="1">
+                                    <widget class="QPushButton" name="stop_button">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>25</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QPushButton{
+                                                background: rgb(193, 193, 193)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string>Stop</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                            </layout>
+                        </item>
                         <item row="1" column="0">
                             <layout class="QGridLayout" name="gridLayout">
                                 <item row="23" column="0">
@@ -398,7 +585,7 @@
                                             </sizepolicy>
                                         </property>
                                         <property name="text">
-                                            <string>Specimen Start Voltage (V)</string>
+                                            <string>DC Min. Voltage (V)</string>
                                         </property>
                                     </widget>
                                 </item>
@@ -743,36 +930,6 @@
                                         </item>
                                     </widget>
                                 </item>
-                                <item row="7" column="3">
-                                    <widget class="QCheckBox" name="criteria_vdc">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="font">
-                                            <font>
-                                                <italic>false</italic>
-                                            </font>
-                                        </property>
-                                        <property name="mouseTracking">
-                                            <bool>true</bool>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QCheckBox{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string/>
-                                        </property>
-                                        <property name="checked">
-                                            <bool>true</bool>
-                                        </property>
-                                    </widget>
-                                </item>
                                 <item row="7" column="0" colspan="3">
                                     <widget class="QLabel" name="label_180">
                                         <property name="sizePolicy">
@@ -782,37 +939,7 @@
                                             </sizepolicy>
                                         </property>
                                         <property name="text">
-                                            <string>Specimen Stop Voltage (V)</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="3" column="3">
-                                    <widget class="QCheckBox" name="criteria_time">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="font">
-                                            <font>
-                                                <italic>false</italic>
-                                            </font>
-                                        </property>
-                                        <property name="mouseTracking">
-                                            <bool>true</bool>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QCheckBox{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string/>
-                                        </property>
-                                        <property name="checked">
-                                            <bool>true</bool>
+                                            <string>DC Max. Voltage (V)</string>
                                         </property>
                                     </widget>
                                 </item>
@@ -851,36 +978,6 @@
                                         </property>
                                         <property name="text">
                                             <string/>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="4" column="3">
-                                    <widget class="QCheckBox" name="criteria_ions">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="font">
-                                            <font>
-                                                <italic>false</italic>
-                                            </font>
-                                        </property>
-                                        <property name="mouseTracking">
-                                            <bool>true</bool>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QCheckBox{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string/>
-                                        </property>
-                                        <property name="checked">
-                                            <bool>true</bool>
                                         </property>
                                     </widget>
                                 </item>
@@ -999,7 +1096,7 @@
                                             </string>
                                         </property>
                                         <property name="text">
-                                            <string>4000</string>
+                                            <string>40000</string>
                                         </property>
                                     </widget>
                                 </item>
@@ -1313,188 +1410,114 @@
                                         </item>
                                     </widget>
                                 </item>
-                            </layout>
-                        </item>
-                        <item row="1" column="1">
-                            <widget class="QTextEdit" name="text_line">
-                                <property name="sizePolicy">
-                                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                    </sizepolicy>
-                                </property>
-                                <property name="minimumSize">
-                                    <size>
-                                        <width>0</width>
-                                        <height>100</height>
-                                    </size>
-                                </property>
-                                <property name="styleSheet">
-                                    <string notr="true">QWidget{
-                                        border: 2px solid gray;
-                                        border-radius: 10px;
-                                        padding: 0 8px;
-                                        background: rgb(223,223,233)
-                                        }
-                                    </string>
-                                </property>
-                                <property name="html">
-                                    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-                                        &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot;
-                                        /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-                                        p, li { white-space: pre-wrap; }
-                                        &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI';
-                                        font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;{ex_user=user1;&lt;/span&gt;&lt;span
-                                        style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;ex_name=test1;&lt;/span&gt;
-                                        &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;ex_time=90;max_ions=2000;ex_freq=10;&lt;/span&gt;
-                                        &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;vdc_min=500;vdc_max=4000;vdc_steps_up=100;&lt;/span&gt;
-                                        &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;vdc_steps_down=100;&lt;/span&gt;&lt;span
-                                        style=&quot; font-family:'JetBrains Mono,monospace'; font-size:8pt;
-                                        color:#000000;&quot;&gt;control_algorithm=PID;&lt;/span&gt;&lt;span style=&quot;
-                                        font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;vp_min=328;&lt;/span&gt;
-                                        &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;vp_max=3281;pulse_fraction=20;pulse_frequency=200;&lt;/span&gt;
-                                        &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;detection_rate_init=1;hit_displayed=20000;email=;counter_source=TDC&lt;/span&gt;&lt;span
-                                        style=&quot; font-family:'JetBrains Mono,monospace'; font-size:8pt;
-                                        color:#000000;&quot;&gt;;&lt;/span&gt; &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;criteria_time=True;criteria_ions=False;&lt;/span&gt;
-                                        &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;criteria_vdc=False}&lt;/span&gt;
-                                        &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;{ex_user=user2;ex_name=test2;ex_time=100;&lt;/span&gt;
-                                        &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;max_ions=3000;ex_freq=5;vdc_min=1000;&lt;/span&gt;
-                                        &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;vdc_max=3000;vdc_steps_up=50;vdc_steps_down=50;&lt;/span&gt;
-                                        &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;control_algorithm=proportional;vp_min=400;vp_max=2000;&lt;/span&gt;
-                                        &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;pulse_fraction=15;pulse_frequency=200;detection_rate_init=2;&lt;/span&gt;
-                                        &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;hit_displayed=40000;email=;counter_source=DRS;&lt;/span&gt;
-                                        &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
-                                        font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;criteria_time=False;criteria_ions=False;criteria_vdc=True}&lt;/span&gt;
-                                        &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
-                                    </string>
-                                </property>
-                            </widget>
-                        </item>
-                        <item row="2" column="0" colspan="2">
-                            <layout class="QGridLayout" name="gridLayout_3">
-                                <item row="0" column="0" rowspan="2">
-                                    <layout class="QGridLayout" name="gridLayout_2">
-                                        <item row="0" column="0" colspan="2">
-                                            <widget class="QLabel" name="Error">
-                                                <property name="minimumSize">
-                                                    <size>
-                                                        <width>800</width>
-                                                        <height>30</height>
-                                                    </size>
-                                                </property>
-                                                <property name="font">
-                                                    <font>
-                                                        <pointsize>13</pointsize>
-                                                        <bold>true</bold>
-                                                        <strikeout>false</strikeout>
-                                                    </font>
-                                                </property>
-                                                <property name="text">
-                                                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                                                </property>
-                                                <property name="alignment">
-                                                    <set>Qt::AlignCenter</set>
-                                                </property>
-                                                <property name="textInteractionFlags">
-                                                    <set>Qt::LinksAccessibleByMouse</set>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                    </layout>
-                                </item>
-                                <item row="0" column="1">
-                                    <widget class="QPushButton" name="start_button">
+                                <item row="4" column="5">
+                                    <widget class="QCheckBox" name="criteria_ions">
                                         <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                                                 <horstretch>0</horstretch>
                                                 <verstretch>0</verstretch>
                                             </sizepolicy>
                                         </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>25</height>
-                                            </size>
+                                        <property name="font">
+                                            <font>
+                                                <italic>false</italic>
+                                            </font>
+                                        </property>
+                                        <property name="mouseTracking">
+                                            <bool>true</bool>
                                         </property>
                                         <property name="styleSheet">
-                                            <string notr="true">QPushButton{
-                                                background: rgb(193, 193, 193)
+                                            <string notr="true">QCheckBox{
+                                                background: rgb(223,223,233)
                                                 }
                                             </string>
                                         </property>
                                         <property name="text">
-                                            <string>Start</string>
+                                            <string/>
+                                        </property>
+                                        <property name="checked">
+                                            <bool>true</bool>
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="1" column="1">
-                                    <widget class="QPushButton" name="stop_button">
+                                <item row="7" column="5">
+                                    <widget class="QCheckBox" name="criteria_vdc">
                                         <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                                                 <horstretch>0</horstretch>
                                                 <verstretch>0</verstretch>
                                             </sizepolicy>
                                         </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>25</height>
-                                            </size>
+                                        <property name="font">
+                                            <font>
+                                                <italic>false</italic>
+                                            </font>
+                                        </property>
+                                        <property name="mouseTracking">
+                                            <bool>true</bool>
                                         </property>
                                         <property name="styleSheet">
-                                            <string notr="true">QPushButton{
-                                                background: rgb(193, 193, 193)
+                                            <string notr="true">QCheckBox{
+                                                background: rgb(223,223,233)
                                                 }
                                             </string>
                                         </property>
                                         <property name="text">
-                                            <string>Stop</string>
+                                            <string/>
+                                        </property>
+                                        <property name="checked">
+                                            <bool>true</bool>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="3" column="5">
+                                    <widget class="QCheckBox" name="criteria_time">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="font">
+                                            <font>
+                                                <italic>false</italic>
+                                            </font>
+                                        </property>
+                                        <property name="mouseTracking">
+                                            <bool>true</bool>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QCheckBox{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string/>
+                                        </property>
+                                        <property name="checked">
+                                            <bool>true</bool>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="3" column="4">
+                                    <widget class="QLabel" name="label">
+                                        <property name="text">
+                                            <string>Stop at:</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="4" column="4">
+                                    <widget class="QLabel" name="label_2">
+                                        <property name="text">
+                                            <string>Stop at:</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="7" column="4">
+                                    <widget class="QLabel" name="label_3">
+                                        <property name="text">
+                                            <string>Stop at:</string>
                                         </property>
                                     </widget>
                                 </item>
@@ -1568,13 +1591,10 @@
         <tabstop>parameters_source</tabstop>
         <tabstop>ex_user</tabstop>
         <tabstop>ex_name</tabstop>
-        <tabstop>criteria_time</tabstop>
         <tabstop>ex_time</tabstop>
-        <tabstop>criteria_ions</tabstop>
         <tabstop>max_ions</tabstop>
         <tabstop>ex_freq</tabstop>
         <tabstop>vdc_min</tabstop>
-        <tabstop>criteria_vdc</tabstop>
         <tabstop>vdc_max</tabstop>
         <tabstop>vdc_steps_up</tabstop>
         <tabstop>vdc_steps_down</tabstop>

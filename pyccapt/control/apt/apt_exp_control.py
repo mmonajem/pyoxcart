@@ -1,9 +1,7 @@
 import datetime
 import multiprocessing
 import os
-import threading
 import time
-from multiprocessing.queues import Queue
 
 import numpy as np
 import pyvisa as visa
@@ -47,89 +45,31 @@ class APT_Exp_Control:
         """
         if self.conf['tdc'] == "on" and self.conf['tdc_model'] == 'Surface_Consept' \
                 and self.variables.counter_source == 'TDC':
-            # Create and start the TDC process and related queues
-            self.queue_x = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_y = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_t = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_dld_start_counter = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_channel = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_time_data = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_tdc_start_counter = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
 
             # Initialize and initiate a process(Refer to imported file 'tdc_new' for process function declaration )
             # Module used: multiprocessing
             self.tdc_process = multiprocessing.Process(target=tdc_surface_consept.experiment_measure,
-                                                       args=(self.queue_x,
-                                                             self.queue_y, self.queue_t,
-                                                             self.queue_dld_start_counter,
-                                                             self.queue_channel,
-                                                             self.queue_time_data,
-                                                             self.queue_tdc_start_counter,
-                                                             self.queue_stop_measurement))
+                                                       args=(self.variables,))
 
             self.tdc_process.start()
 
-            self.read_tdc_surface_concept = threading.Thread(target=self.reader_queue_surface_concept)
-            self.read_tdc_surface_concept.setDaemon(True)
-            self.read_tdc_surface_concept.start()
         elif self.conf['tdc'] == "on" and self.conf[
             'tdc_model'] == 'RoentDek' and self.variables.counter_source == 'TDC':
-            self.queue_x = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_y = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_tof = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_AbsoluteTimeStamp = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch0 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch1 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch2 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch3 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch4 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch5 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch6 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch7 = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
+
 
             self.tdc_process = multiprocessing.Process(target=tdc_roentdec.experiment_measure,
-                                                       args=(self.queue_x, self.queue_y, self.queue_tof,
-                                                             self.queue_AbsoluteTimeStamp,
-                                                             self.queue_ch0, self.queue_ch1, self.queue_ch2,
-                                                             self.queue_ch3,
-                                                             self.queue_ch4, self.queue_ch5, self.queue_ch6,
-                                                             self.queue_ch7,
-                                                             self.queue_stop_measurement))
-
+                                                       args=(self.variables,))
             self.tdc_process.daemon = True
             self.tdc_process.start()
 
-            self.read_tdc_roentdek = threading.Thread(target=self.reader_queue_roentdek)
-            self.read_tdc_roentdek.setDaemon(True)
-            self.read_roentdek.start()
         elif self.conf['tdc'] == "on" and self.conf['tdc_model'] == 'DRS' and self.variables.counter_source == 'DRS':
-            self.queue_ch0_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch0_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch1_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch1_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch2_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch2_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch3_time = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_ch3_wave = Queue(maxsize=-1, ctx=multiprocessing.get_context())
-            self.queue_stop_measurement = Queue(maxsize=1, ctx=multiprocessing.get_context())
 
             # Initialize and initiate a process(Refer to imported file 'drs' for process function declaration)
             # Module used: multiprocessing
             self.drs_process = multiprocessing.Process(target=drs.experiment_measure,
-                                                       args=(self.queue_ch0_time, self.queue_ch0_wave,
-                                                             self.queue_ch1_time, self.queue_ch1_wave,
-                                                             self.queue_ch2_time, self.queue_ch2_wave,
-                                                             self.queue_ch3_time, self.queue_ch3_wave,
-                                                             self.queue_stop_measurement,
-                                                             ))
+                                                       args=(self.variables,))
             self.drs_process.daemon = True
             self.drs_process.start()
-
-            self.read_drs = threading.Thread(target=self.reader_queue_drs)
-            self.read_drs.setDaemon(True)
-            self.read_drs.start()
 
         else:
             print("No counter source selected")
@@ -214,180 +154,6 @@ class APT_Exp_Control:
 
         return response
 
-    def reader_queue_surface_concept(self):
-        """
-        Read data from Surface Concept TDC queues.
-
-        This method continuously reads data from the queues for Surface Concept TDC and updates the corresponding
-        variables in the imported "variables" file.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        # surface concept tdc specific binning and factors
-        TOFFACTOR = 27.432 / (1000 * 4)  # 27.432 ps/bin, tof in ns, data is TDC time sum
-        DETBINS = 4900
-        BINNINGFAC = 2
-        XYFACTOR = 80 / DETBINS * BINNINGFAC  # XXX mm/bin
-        XYBINSHIFT = DETBINS / BINNINGFAC / 2  # to center detector
-
-        while self.variables.start_flag and not self.variables.end_experiment:
-            while not self.queue_x.empty() and not self.queue_y.empty() and not self.queue_t.empty() \
-                    and not self.queue_dld_start_counter.empty():
-                x_data = self.queue_x.get()
-                y_data = self.queue_y.get()
-                t_data = self.queue_t.get()
-                dld_start_counter_data = self.queue_dld_start_counter.get()
-                # correct for binning of surface concept
-                x_data = ((x_data - XYBINSHIFT) * XYFACTOR) / 10  # from mm to in cm by dividing by 10
-                y_data = ((y_data - XYBINSHIFT) * XYFACTOR) / 10  # from mm to in cm by dividing by 10
-                t_data = t_data * TOFFACTOR  # in ns
-
-                # with self.variables.lock_data:
-                self.variables.extend_to('x', x_data.tolist())
-                self.variables.extend_to('y', y_data.tolist())
-                self.variables.extend_to('t', t_data.tolist())
-                self.variables.extend_to('dld_start_counter', dld_start_counter_data.tolist())
-
-                voltage_data = np.tile(self.variables.specimen_voltage, len(x_data))
-                self.variables.extend_to('main_v_dc_dld_surface_concept', voltage_data.tolist())
-                self.variables.extend_to('main_p_dld_surface_concept',
-                                         np.tile(self.variables.pulse_voltage, len(x_data)).tolist())
-                # with self.variables.lock_data_plot:
-                self.variables.extend_to('main_v_dc_plot', voltage_data.tolist())
-                self.variables.extend_to('x_plot', x_data.tolist())
-                self.variables.extend_to('y_plot', y_data.tolist())
-                self.variables.extend_to('t_plot', t_data.tolist())
-                self.variables.main_p_dld_surface_concept.extend(
-                    np.tile(self.variables.pulse_voltage, len(x_data)).tolist())
-
-            while not self.queue_channel.empty() and not self.queue_time_data.empty() \
-                    and not self.queue_tdc_start_counter.empty():
-                channel_data = self.queue_channel.get()
-                time_data = self.queue_time_data.get()
-                tdc_start_counter_data = self.queue_tdc_start_counter.get()
-
-                # with self.variables.lock_data:
-                self.variables.extend_to('channel', channel_data.tolist())
-                self.variables.extend_to('time_data', time_data.tolist())
-                self.variables.extend_to('tdc_start_counter', tdc_start_counter_data.tolist())
-
-                voltage_data = np.tile(self.variables.specimen_voltage, len(channel_data))
-                self.variables.extend_to('main_v_dc_tdc_surface_concept', voltage_data.tolist())
-                self.variables.extend_to('main_p_tdc_surface_concept',
-                                         np.tile(self.variables.pulse_voltage, len(channel_data)).tolist())
-            time.sleep(self.sleep_time)
-
-    def reader_queue_roentdek(self):
-        """
-        Read data from RoentDek TDC queues.
-
-        This method continuously reads data from the queues for RoentDek TDC and updates the corresponding
-        variables in the imported "variables" file.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        while self.variables.start_flag and not self.variables.end_experiment:
-            while not self.queue_x.empty() or not self.queue_y.empty() or not self.queue_tof.empty() \
-                    or not self.queue_AbsoluteTimeStamp.empty() or not self.queue_ch0.empty() \
-                    or not self.queue_ch1.empty() or not self.queue_ch2.empty() or not self.queue_ch3.empty() \
-                    or not self.queue_ch4.empty() or not self.queue_ch5.empty() or not self.queue_ch6.empty() \
-                    or not self.queue_ch7.empty():
-                x_list = self.queue_x.get()
-                y_list = self.queue_y.get()
-                t_list = self.queue_tof.get()
-                time_stamp_list = self.queue_AbsoluteTimeStamp.get()
-                ch0_list = self.queue_ch0.get()
-                ch1_list = self.queue_ch1.get()
-                ch2_list = self.queue_ch2.get()
-                ch3_list = self.queue_ch3.get()
-                ch4_list = self.queue_ch4.get()
-                ch5_list = self.queue_ch5.get()
-                ch6_list = self.queue_ch6.get()
-                ch7_list = self.queue_ch7.get()
-                main_v_dc_dld_list = np.tile(self.variables.specimen_voltage, len(x_list))
-                main_p_tdc_roentdek = np.tile(self.variables.laser_degree, len(x_list))
-
-                # with self.variables.lock_data:
-                self.variables.extend_to('x', x_list.tolist())
-                self.variables.extend_to('y', y_list.tolist())
-                self.variables.extend_to('t', t_list.tolist())
-                self.variables.extend_to('time_stamp', time_stamp_list.tolist())
-                self.variables.extend_to('ch0', ch0_list.tolist())
-                self.variables.extend_to('ch1', ch1_list.tolist())
-                self.variables.extend_to('ch2', ch2_list.tolist())
-                self.variables.extend_to('ch3', ch3_list.tolist())
-                self.variables.extend_to('ch4', ch4_list.tolist())
-                self.variables.extend_to('ch5', ch5_list.tolist())
-                self.variables.extend_to('ch6', ch6_list.tolist())
-                self.variables.extend_to('ch7', ch7_list.tolist())
-                self.variables.extend_to('main_v_dc_tdc_roentdek', main_v_dc_dld_list.tolist())
-                self.variables.extend_to('main_p_tdc_roentdek', main_p_tdc_roentdek.tolist())
-
-                # with self.variables.lock_data_plot:
-                self.variables.extend_to('main_v_dc_plot', main_v_dc_dld_list.tolist())
-                self.variables.extend_to('x_plot', x_list.tolist())
-                self.variables.extend_to('y_plot', y_list.tolist())
-                self.variables.extend_to('t_plot', t_list.tolist())
-            time.sleep(self.sleep_time)
-
-    def reader_queue_drs(self):
-        """
-        Read data from DRS queues.
-
-        This method continuously reads data from the queues for DRS and updates the corresponding variables in
-        the imported "variables" file.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        while self.variables.start_flag and not self.variables.end_experiment:
-            while not self.queue_ch0_time.empty() or not self.queue_ch0_wave.empty() \
-                    or not self.queue_ch1_time.empty() or not self.queue_ch1_wave.empty() \
-                    or not self.queue_ch2_time.empty() or not self.queue_ch2_wave.empty() \
-                    or not self.queue_ch3_time.empty() or not self.queue_ch3_wave.empty():
-                ch0_time = self.queue_ch0_time.get()
-                ch0_wave = self.queue_ch0_wave.get()
-                ch1_time = self.queue_ch1_time.get()
-                ch1_wave = self.queue_ch1_wave.get()
-                ch2_time = self.queue_ch2_time.get()
-                ch2_wave = self.queue_ch2_wave.get()
-                ch3_time = self.queue_ch3_time.get()
-                ch3_wave = self.queue_ch3_wave.get()
-
-                # with self.variables.lock_data:
-                self.variables.extend_to('ch0_time', ch0_time.tolist())
-                self.variables.extend_to('ch0_wave', ch0_wave.tolist())
-                self.variables.extend_to('ch1_time', ch1_time.tolist())
-                self.variables.extend_to('ch1_wave', ch1_wave.tolist())
-                self.variables.extend_to('ch2_time', ch2_time.tolist())
-                self.variables.extend_to('ch2_wave', ch2_wave.tolist())
-                self.variables.extend_to('ch3_time', ch3_time.tolist())
-                self.variables.extend_to('ch3_wave', ch3_wave.tolist())
-
-                voltage_data = np.tile(self.variables.specimen_voltage, len(ch0_time))
-                self.variables.extend_to('main_v_dc_drs', voltage_data.tolist())
-                self.variables.extend_to('main_p_drs',
-                                         np.tile(self.variables.pulse_voltage, len(ch0_time)).tolist())
-
-                # with self.variables.lock_data_plot:
-                self.variables.extend_to('main_v_dc_plot', voltage_data.tolist())
-                # we have to calculate x and y from the wave data here
-                self.variables.extend_to('x_plot', ch0_time.tolist())
-                self.variables.extend_to('y_plot', ch0_time.tolist())
-                self.variables.extend_to('t_plot', ch0_time.tolist())
-
-            time.sleep(self.sleep_time)
 
     def main_ex_loop(self, counts_target):
         """
@@ -432,12 +198,13 @@ class APT_Exp_Control:
 
         counts_error = counts_target - counts_measured  # deviation from setpoint
 
-        # simple proportional control with averaging
+
         # rate = ((variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000))
         # if rate < 0.01 and variables.specimen_voltage < 5000:
         #     ramp_speed_factor = 2.5
         # else:
         ramp_speed_factor = 1
+        # simple proportional control with averaging
         if counts_error > 0:
             voltage_step = counts_error * self.variables.vdc_step_up * ramp_speed_factor
         elif counts_error <= 0:
@@ -447,23 +214,23 @@ class APT_Exp_Control:
 
         # update v_dc
         if not self.variables.vdc_hold and voltage_step != 0:
-            # if self.variables.specimen_voltage < self.variables.vdc_max:
-            if self.variables.specimen_voltage >= self.variables.vdc_min - 50:
-                specimen_voltage_temp = self.variables.specimen_voltage + voltage_step
-                if specimen_voltage_temp != self.variables.specimen_voltage:
-                    # sending VDC via serial
-                    if self.conf['v_dc'] != "off":
-                        self.command_v_dc(">S0 %s" % specimen_voltage_temp)
+            if self.variables.specimen_voltage < self.variables.vdc_max:
+                if self.variables.specimen_voltage >= self.variables.vdc_min - 50:
+                    specimen_voltage_temp = self.variables.specimen_voltage + voltage_step
+                    if specimen_voltage_temp != self.variables.specimen_voltage:
+                        # sending VDC via serial
+                        if self.conf['v_dc'] != "off":
+                            self.command_v_dc(">S0 %s" % specimen_voltage_temp)
 
-                    # update pulse voltage v_p
-                    new_vp = self.variables.specimen_voltage * self.variables.pulse_fraction * \
-                             (1 / self.variables.pulse_amp_per_supply_voltage)
-                    if self.variables.pulse_voltage_max > new_vp > self.variables.pulse_voltage_min:
-                        if self.conf['v_p'] != "off":
-                            self.com_port_v_p.write('VOLT %s' % new_vp)
-                        self.variables.pulse_voltage = new_vp * self.variables.pulse_amp_per_supply_voltage
+                        # update pulse voltage v_p
+                        new_vp = self.variables.specimen_voltage * self.variables.pulse_fraction * \
+                                 (1 / self.variables.pulse_amp_per_supply_voltage)
+                        if self.variables.pulse_voltage_max > new_vp > self.variables.pulse_voltage_min:
+                            if self.conf['v_p'] != "off":
+                                self.com_port_v_p.write('VOLT %s' % new_vp)
+                            self.variables.pulse_voltage = new_vp * self.variables.pulse_amp_per_supply_voltage
 
-                self.variables.specimen_voltage = specimen_voltage_temp
+                    self.variables.specimen_voltage = specimen_voltage_temp
 
         # with self.variables.lock_statistics:
 
@@ -583,7 +350,6 @@ class APT_Exp_Control:
         ex_time_temp = self.variables.ex_time
 
         desired_rate = 3  # Hz statistic rate update in the main GUI
-        iterations_per_desired_rate = self.variables.ex_freq / desired_rate
 
         desired_rate = self.variables.ex_freq  # Hz
         desired_period = 1.0 / desired_rate  # seconds
@@ -599,10 +365,10 @@ class APT_Exp_Control:
                 # Turn on the v_dc and v_p
                 if self.conf['v_p'] == "on":
                     self.com_port_v_p.write('OUTPut ON')
-                    time.sleep(0.5)
+                    time.sleep(0.2)
                 if self.conf['v_dc'] == "on":
                     self.command_v_dc("F1")
-                    time.sleep(0.5)
+                    time.sleep(0.2)
 
                 self.variables.start_flag = True
                 # Wait for 8 second to all devices get ready
@@ -613,17 +379,19 @@ class APT_Exp_Control:
                 self.log_apt.info('Experiment is started')
             start_time = time.perf_counter()
             if self.variables.detection_rate != init_detection_rate:
-                counts_target = ((self.variables.detection_rate / 100) *
-                                 self.variables.pulse_frequency) / self.variables.pulse_frequency
+                counts_target = (self.variables.detection_rate / 100) * self.variables.pulse_frequency
                 init_detection_rate = self.variables.detection_rate
 
             # with self.variables.lock_statistics:
             self.variables.detection_rate_current = (self.variables.avg_n_count * 100) / (
                     1 + self.variables.pulse_frequency * 1000)
-            if self.variables.vdc_max <= self.variables.specimen_voltage:
-                if self.conf['v_dc'] != "off":
-                    self.command_v_dc(">S0 %s" % self.variables.vdc_max)
-                self.variables.specimen_voltage = self.variables.vdc_max
+            if self.variables.vdc_max <= self.variables.specimen_voltage - 50 and self.variables.vdc_hold:
+                decrement_vol = (self.variables.specimen_voltage - self.variables.vdc_max) / 10
+                for step in range(10):
+                    self.variables.specimen_voltage -= decrement_vol
+                    if self.conf['v_dc'] != "off":
+                        self.command_v_dc(">S0 %s" % self.variables.specimen_voltage)
+                    time.sleep(0.3)
                 # update pulse voltage v_p
                 new_vp = self.variables.specimen_voltage * self.variables.pulse_fraction * \
                          (1 / self.variables.pulse_amp_per_supply_voltage)
@@ -636,12 +404,12 @@ class APT_Exp_Control:
 
             # Counter of iteration
             time_counter.append(steps)
-            steps += 1
+
             if self.variables.stop_flag:
                 self.log_apt.info('Experiment is stopped by user')
                 if self.conf['tdc'] != "off":
                     if self.variables.counter_source == 'TDC':
-                        self.queue_stop_measurement.put(True)
+                        self.variables.flag_stop_tdc = True
                 time.sleep(1)
                 break
 
@@ -650,7 +418,7 @@ class APT_Exp_Control:
                     self.log_apt.info('Total number of Ions is achieved')
                     if self.conf['tdc'] == "on":
                         if self.variables.counter_source == 'TDC':
-                            self.queue_stop_measurement.put(True)
+                            self.variables.flag_stop_tdc = True
                     time.sleep(1)
                     break
             if self.variables.criteria_vdc:
@@ -659,7 +427,7 @@ class APT_Exp_Control:
                         self.log_apt.info('High Voltage Max. is achieved')
                         if self.conf['tdc'] != "off":
                             if self.variables.counter_source == 'TDC':
-                                self.queue_stop_measurement.put(True)
+                                self.variables.flag_stop_tdc = True
                         time.sleep(1)
                         break
                     flag_achieved_high_voltage += 1
@@ -668,7 +436,7 @@ class APT_Exp_Control:
                     self.log_apt.info('Experiment time Max. is achieved')
                     if self.conf['tdc'] == "on":
                         if self.variables.counter_source == 'TDC':
-                            self.queue_stop_measurement.put(True)
+                            self.variables.flag_stop_tdc = True
                     time.sleep(1)
                     break
             if self.variables.ex_time != ex_time_temp:
@@ -709,12 +477,14 @@ class APT_Exp_Control:
                 print(
                     f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop takes longer than %s Millisecond{initialize_devices.bcolors.ENDC}" % (
                         int(1000 / self.variables.ex_freq)))
-                self.log_apt.error(
-                    'Experiment loop takes longer than %s (ms). It was %s (ms)' % (int(1000 / self.variables.ex_freq),
-                                                                                   elapsed_time * 1000))
+                self.log_apt.warning(
+                    '%s - Experiment loop number %s takes longer than %s (ms). It was %s (ms)' % (index_time, steps,
+                                                                                                  int(1000 / self.variables.ex_freq),
+                                                                                                  elapsed_time * 1000))
 
-                print('%s- The iteration time (ms):' % index_time, elapsed_time * 1000)
+                print('%s - %s- The iteration time (ms):' % (index_time, steps), elapsed_time * 1000)
                 index_time += 1
+            steps += 1
 
         if self.conf['tdc'] == "on":
             # Stop the TDC process

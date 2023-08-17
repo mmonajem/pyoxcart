@@ -350,7 +350,8 @@ class SignalEmitter(QObject):
 class CamerasAlignmentWindow(QtWidgets.QWidget):
 	closed = QtCore.pyqtSignal()  # Define a custom closed signal
 
-	def __init__(self, gui_cameras_alignment, camera_closed_event, camera_win_front, *args, **kwargs):
+	def __init__(self, variables, gui_cameras_alignment, close_event,
+	             camera_win_front, *args, **kwargs):
 		"""
 		Initialize the CamerasAlignmentWindow class.
 
@@ -360,33 +361,34 @@ class CamerasAlignmentWindow(QtWidgets.QWidget):
 			**kwargs: Arbitrary keyword arguments.
 		"""
 		super().__init__(*args, **kwargs)
+		self.variables = variables
 		self.gui_cameras_alignment = gui_cameras_alignment
-		self.camera_closed_event = camera_closed_event
 		self.camera_win_front = camera_win_front
+		self.close_event = close_event
 
 		self.timer = QtCore.QTimer(self)
 		self.timer.timeout.connect(self.check_if_should)
-		self.timer.start(1000)  # Check every 1000 milliseconds (1 second)
+		self.timer.start(500)  # Check every 1000 milliseconds (1 second)
 
 	def closeEvent(self, event):
 		"""
-		Override the close event to stop any background activity and perform additional cleanup if needed.
+			Not close only hide the window
 
-		Args:
-			event: The close event.
+			Args:
+				event: The close event.
 		"""
-		self.gui_cameras_alignment.stop()  # Call the stop method to stop any background activity
-		self.closed.emit()  # Emit the custom closed signal
-		# Signal that the camera window was closed
-		self.camera_closed_event.set()
-		# Additional cleanup code here if needed
-		super().closeEvent(event)
+		event.ignore()
+		self.hide()
+		self.close_event.set()
 
 	def check_if_should(self):
 		if self.camera_win_front.is_set():
 			self.raise_()
 			self.activateWindow()
 			self.camera_win_front.clear()  # Reset the flag
+		if self.variables.flag_camera_win_show:
+			self.show()
+			self.variables.flag_camera_win_show = False
 
 
 
@@ -406,9 +408,10 @@ def run_camera_window(variables, conf, camera_closed_event, camera_win_front):
 	# conf = copy.deepcopy(conf)
 
 	gui_cameras_alignment = Ui_Cameras_Alignment(variables, conf, SignalEmitter_Cameras)
-	Cameras_alignment = CamerasAlignmentWindow(gui_cameras_alignment, camera_closed_event, camera_win_front)
+	Cameras_alignment = CamerasAlignmentWindow(variables, gui_cameras_alignment, camera_closed_event, camera_win_front,
+	                                           flags=QtCore.Qt.WindowType.Tool)
 	gui_cameras_alignment.setupUi(Cameras_alignment)
-	Cameras_alignment.show()
+	# Cameras_alignment.show()
 
 	sys.exit(app.exec())  # <-- Start the event loop for this QApplication instance
 

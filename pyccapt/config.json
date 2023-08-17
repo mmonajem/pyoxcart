@@ -6,6 +6,7 @@
 	"bin_size": 0.1,
 	"save_meta_interval": 300,
 	"visualization": "mc",
+	"baking_mode": "off",
 	"tdc": "on",
 	"tdc_model": "Surface_Consept",
 	"camera": "on",

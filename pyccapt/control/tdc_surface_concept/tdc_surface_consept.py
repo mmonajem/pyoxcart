@@ -68,25 +68,12 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
 		return True
 
 
-def experiment_measure(queue_x,
-                       queue_y, queue_t,
-                       queue_dld_start_counter,
-                       queue_channel,
-                       queue_time_data,
-                       queue_tdc_start_counter,
-                       queue_stop_measurement):
+def experiment_measure(variables):
 	"""
 	Measurement function: This function is called in a process to read data from the queue.
 
 	Args:
-		queue_x (multiprocessing.Queue): Queue for x data.
-		queue_y (multiprocessing.Queue): Queue for y data.
-		queue_t (multiprocessing.Queue): Queue for t data.
-		queue_dld_start_counter (multiprocessing.Queue): Queue for DLD start counter data.
-		queue_channel (multiprocessing.Queue): Queue for channel data.
-		queue_time_data (multiprocessing.Queue): Queue for time data.
-		queue_tdc_start_counter (multiprocessing.Queue): Queue for TDC start counter data.
-		queue_stop_measurement (multiprocessing.Queue): Queue to stop measurement.
+		variables:
 
 	Returns:
 		int: Return code.
@@ -138,7 +125,7 @@ def experiment_measure(queue_x,
 		else:
 			return 0
 
-	retcode = bufdatacb.start_measurement(300)
+	retcode = bufdatacb.start_measurement(100)
 	if errorcheck(retcode) < 0:
 		return -1
 
@@ -147,16 +134,38 @@ def experiment_measure(queue_x,
 		eventtype_raw, data_raw = bufdatacb_raw.queue.get()
 
 		if eventtype == QUEUE_DATA:
-			queue_x.put(data["dif1"])
-			queue_y.put(data["dif2"])
-			queue_t.put(data["time"])
-			queue_dld_start_counter.put(data["start_counter"])
-			queue_channel.put(data_raw["channel"])
-			queue_time_data.put(data_raw["time"])
-			queue_tdc_start_counter.put(data_raw["start_counter"])
+			# correct for binning of surface concept
+			xx = (((data["dif1"] - XYBINSHIFT) * XYFACTOR) / 10).tolist()  # from mm to in cm by dividing by 10
+			yy = (((data["dif2"] - XYBINSHIFT) * XYFACTOR) / 10).tolist()  # from mm to in cm by dividing by 10
+			tt = (data["time"] * TOFFACTOR).tolist()  # in ns
+			variables.extend_to('x', xx)
+			variables.extend_to('y', yy)
+			variables.extend_to('t', tt)
+			variables.extend_to('dld_start_counter', data["start_counter"].tolist())
+
+			voltage_data = np.tile(variables.specimen_voltage, len(xx))
+			pulse_data = np.tile(variables.pulse_voltage, len(xx))
+			variables.extend_to('main_v_dc_dld_surface_concept', voltage_data.tolist())
+			variables.extend_to('main_p_dld_surface_concept', pulse_data.tolist())
+			# with self.variables.lock_data_plot:
+			variables.extend_to('main_v_dc_plot', voltage_data.tolist())
+			variables.extend_to('x_plot', xx)
+			variables.extend_to('y_plot', yy)
+			variables.extend_to('t_plot', tt)
+			variables.main_p_dld_surface_concept.extend(
+				np.tile(variables.pulse_voltage, len(xx)).tolist())
+
+			channel_data = data_raw["channel"].tolist()
+			variables.extend_to('channel', channel_data)
+			variables.extend_to('time_data', data_raw["time"].tolist())
+			variables.extend_to('tdc_start_counter', data_raw["start_counter"].tolist())
+			voltage_data = np.tile(variables.specimen_voltage, len(channel_data))
+			variables.extend_to('main_v_dc_tdc_surface_concept', voltage_data.tolist())
+			variables.extend_to('main_p_tdc_surface_concept',
+			                    np.tile(variables.pulse_voltage, len(channel_data)).tolist())
 		elif eventtype == QUEUE_ENDOFMEAS:
-			if queue_stop_measurement.empty():
-				retcode = bufdatacb.start_measurement(300)
+			if not variables.flag_stop_tdc:
+				retcode = bufdatacb.start_measurement(100)
 				if errorcheck(retcode) < 0:
 					return -1
 			else:
