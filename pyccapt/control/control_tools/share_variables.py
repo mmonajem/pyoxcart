@@ -3,7 +3,7 @@ class Variables:
     Global variables class for experiment setup, statistics, and data.
     """
 
-    def __init__(self, conf, namespace, lock):
+    def __init__(self, conf, namespace, lock, lock_lists):
         """
         Initialize the global variables.
 
@@ -12,6 +12,7 @@ class Variables:
         """
         self.ns = namespace
         self.lock = lock
+        self.lock_lists = lock_lists
         ### Device Ports
         self.ns.COM_PORT_cryo = conf['COM_PORT_cryo']
         self.ns.COM_PORT_V_dc = conf['COM_PORT_V_dc']
@@ -182,12 +183,12 @@ class Variables:
         if not isinstance(current_variable, list):
             raise TypeError(f"{variable_name} is not a list.")
 
-        with self.lock:
+        with self.lock_lists:
             current_variable.extend(value)
             setattr(self.ns, variable_name, current_variable)
 
     def clear_to(self, variable_name):
-        with self.lock:
+        with self.lock_lists:
             setattr(self.ns, variable_name, [])
 
     @property
@@ -1014,7 +1015,7 @@ class Variables:
 
     @main_v_dc.setter
     def main_v_dc(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_v_dc = value
 
     @property
@@ -1023,7 +1024,7 @@ class Variables:
 
     @main_v_p.setter
     def main_v_p(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_v_p = value
 
     @property
@@ -1032,7 +1033,7 @@ class Variables:
 
     @main_counter.setter
     def main_counter(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_counter = value
 
     @property
@@ -1041,7 +1042,7 @@ class Variables:
 
     @main_temperature.setter
     def main_temperature(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_temperature = value
 
     @property
@@ -1050,7 +1051,7 @@ class Variables:
 
     @main_chamber_vacuum.setter
     def main_chamber_vacuum(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_chamber_vacuum = value
 
     @property
@@ -1059,7 +1060,7 @@ class Variables:
 
     @main_v_p_drs.setter
     def main_v_p_drs(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_v_p_drs = value
 
     @property
@@ -1068,7 +1069,7 @@ class Variables:
 
     @laser_degree.setter
     def laser_degree(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.laser_degree = value
 
     @property
@@ -1077,7 +1078,7 @@ class Variables:
 
     @main_v_dc_plot.setter
     def main_v_dc_plot(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_v_dc_plot = value
 
     @property
@@ -1086,7 +1087,7 @@ class Variables:
 
     @x_plot.setter
     def x_plot(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.x_plot = value
 
     @property
@@ -1095,7 +1096,7 @@ class Variables:
 
     @y_plot.setter
     def y_plot(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.y_plot = value
 
     @property
@@ -1104,7 +1105,7 @@ class Variables:
 
     @t_plot.setter
     def t_plot(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.t_plot = value
 
     @property
@@ -1113,7 +1114,7 @@ class Variables:
 
     @x.setter
     def x(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.x = value
 
     @property
@@ -1122,7 +1123,7 @@ class Variables:
 
     @y.setter
     def y(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.y = value
 
     @property
@@ -1131,7 +1132,7 @@ class Variables:
 
     @t.setter
     def t(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.t = value
 
     @property
@@ -1140,7 +1141,7 @@ class Variables:
 
     @dld_start_counter.setter
     def dld_start_counter(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.dld_start_counter = value
 
     @property
@@ -1149,7 +1150,7 @@ class Variables:
 
     @time_stamp.setter
     def time_stamp(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.time_stamp = value
 
     @property
@@ -1158,7 +1159,7 @@ class Variables:
 
     @laser_intensity.setter
     def laser_intensity(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.laser_intensity = value
 
     @property
@@ -1167,7 +1168,7 @@ class Variables:
 
     @main_v_dc_dld_surface_concept.setter
     def main_v_dc_dld_surface_concept(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_v_dc_dld_surface_concept = value
 
     @property
@@ -1176,7 +1177,7 @@ class Variables:
 
     @main_p_dld_surface_concept.setter
     def main_p_dld_surface_concept(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_p_dld_surface_concept = value
 
     @property
@@ -1185,7 +1186,7 @@ class Variables:
 
     @main_v_dc_tdc_surface_concept.setter
     def main_v_dc_tdc_surface_concept(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_v_dc_tdc_surface_concept = value
 
     @property
@@ -1194,7 +1195,7 @@ class Variables:
 
     @main_p_tdc_surface_concept.setter
     def main_p_tdc_surface_concept(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_p_tdc_surface_concept = value
 
     @property
@@ -1203,7 +1204,7 @@ class Variables:
 
     @main_v_dc_drs.setter
     def main_v_dc_drs(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_v_dc_drs = value
 
     @property
@@ -1212,7 +1213,7 @@ class Variables:
 
     @main_p_drs.setter
     def main_p_drs(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_p_drs = value
 
     @property
@@ -1221,7 +1222,7 @@ class Variables:
 
     @main_v_dc_tdc_roentdek.setter
     def main_v_dc_tdc_roentdek(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_v_dc_tdc_roentdek = value
 
     @property
@@ -1230,7 +1231,7 @@ class Variables:
 
     @main_p_tdc_roentdek.setter
     def main_p_tdc_roentdek(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.main_p_tdc_roentdek = value
 
     @property
@@ -1239,7 +1240,7 @@ class Variables:
 
     @channel.setter
     def channel(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.channel = value
 
     @property
@@ -1248,7 +1249,7 @@ class Variables:
 
     @time_data.setter
     def time_data(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.time_data = value
 
     @property
@@ -1257,7 +1258,7 @@ class Variables:
 
     @tdc_start_counter.setter
     def tdc_start_counter(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.tdc_start_counter = value
 
     @property
@@ -1266,7 +1267,7 @@ class Variables:
 
     @ch0_time.setter
     def ch0_time(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch0_time = value
 
     @property
@@ -1275,7 +1276,7 @@ class Variables:
 
     @ch0_wave.setter
     def ch0_wave(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch0_wave = value
 
     @property
@@ -1284,7 +1285,7 @@ class Variables:
 
     @ch1_time.setter
     def ch1_time(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch1_time = value
 
     @property
@@ -1293,7 +1294,7 @@ class Variables:
 
     @ch1_wave.setter
     def ch1_wave(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch1_wave = value
 
     @property
@@ -1302,7 +1303,7 @@ class Variables:
 
     @ch2_time.setter
     def ch2_time(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch2_time = value
 
     @property
@@ -1311,7 +1312,7 @@ class Variables:
 
     @ch2_wave.setter
     def ch2_wave(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch2_wave = value
 
     @property
@@ -1320,7 +1321,7 @@ class Variables:
 
     @ch3_time.setter
     def ch3_time(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch3_time = value
 
     @property
@@ -1329,7 +1330,7 @@ class Variables:
 
     @ch3_wave.setter
     def ch3_wave(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch3_wave = value
 
     @property
@@ -1338,7 +1339,7 @@ class Variables:
 
     @ch0.setter
     def ch0(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch0 = value
 
     @property
@@ -1347,7 +1348,7 @@ class Variables:
 
     @ch1.setter
     def ch1(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch1 = value
 
     @property
@@ -1356,7 +1357,7 @@ class Variables:
 
     @ch2.setter
     def ch2(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch2 = value
 
     @property
@@ -1365,7 +1366,7 @@ class Variables:
 
     @ch3.setter
     def ch3(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch3 = value
 
     @property
@@ -1374,7 +1375,7 @@ class Variables:
 
     @ch4.setter
     def ch4(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch4 = value
 
     @property
@@ -1383,7 +1384,7 @@ class Variables:
 
     @ch5.setter
     def ch5(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch5 = value
 
     @property
@@ -1392,7 +1393,7 @@ class Variables:
 
     @ch6.setter
     def ch6(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch6 = value
 
     @property
@@ -1401,5 +1402,5 @@ class Variables:
 
     @ch7.setter
     def ch7(self, value):
-        with self.lock:
+        with self.lock_lists:
             self.ns.ch7 = value

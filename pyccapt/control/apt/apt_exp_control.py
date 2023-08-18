@@ -68,7 +68,6 @@ class APT_Exp_Control:
             # Module used: multiprocessing
             self.drs_process = multiprocessing.Process(target=drs.experiment_measure,
                                                        args=(self.variables,))
-            self.drs_process.daemon = True
             self.drs_process.start()
 
         else:
@@ -217,6 +216,8 @@ class APT_Exp_Control:
             if self.variables.specimen_voltage < self.variables.vdc_max:
                 if self.variables.specimen_voltage >= self.variables.vdc_min - 50:
                     specimen_voltage_temp = self.variables.specimen_voltage + voltage_step
+                    if specimen_voltage_temp > self.variables.vdc_max:
+                        specimen_voltage_temp = self.variables.vdc_max
                     if specimen_voltage_temp != self.variables.specimen_voltage:
                         # sending VDC via serial
                         if self.conf['v_dc'] != "off":
@@ -250,6 +251,7 @@ class APT_Exp_Control:
         start_time = time.perf_counter()
         while time.perf_counter() - start_time < seconds:
             pass
+
 
     def run_experiment(self):
         """
@@ -474,15 +476,6 @@ class APT_Exp_Control:
             if remaining_time > 0:
                 self.precise_sleep(remaining_time)
             elif remaining_time < 0:
-                print(
-                    f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop takes longer than %s Millisecond{initialize_devices.bcolors.ENDC}" % (
-                        int(1000 / self.variables.ex_freq)))
-                self.log_apt.warning(
-                    '%s - Experiment loop number %s takes longer than %s (ms). It was %s (ms)' % (index_time, steps,
-                                                                                                  int(1000 / self.variables.ex_freq),
-                                                                                                  elapsed_time * 1000))
-
-                print('%s - %s- The iteration time (ms):' % (index_time, steps), elapsed_time * 1000)
                 index_time += 1
             steps += 1
 
@@ -510,25 +503,42 @@ class APT_Exp_Control:
 
         self.variables.end_experiment = True
         time.sleep(1)
-        if self.conf['tdc'] == "on":
-            # Stop the TDC and DLD thread
-            if self.variables.counter_source == 'TDC':
-                try:
-                    self.read_tdc_surface_concept.join(1)
-                    self.read_tdc_roentdek.join(1)
-                except Exception as e:
-                    pass
-        elif self.variables.counter_source == 'DRS':
-            self.read_drs.join(1)
+        self.log_apt.info('Experiment is finished')
+        print(
+            f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop took longer than %s Millisecond for"
+            f" %s times{initialize_devices.bcolors.ENDC}" % (
+                int(1000 / self.variables.ex_freq), index_time))
+        self.log_apt.warning(
+            'Experiment loop took longer than %s (ms) for %s times.' % (int(1000 / self.variables.ex_freq), index_time))
+        time.sleep(1)
+        if self.conf['tdc'] != "off":
+            # Stop the TDC process
+            try:
+                if self.variables.counter_source == 'TDC':
+                    self.tdc_process.join(3)
+                    if self.tdc_process.is_alive():
+                        self.tdc_process.terminate()
+                        self.tdc_process.join(1)
+                        # Release all the resources of the TDC process
+                        self.tdc_process.close()
+                elif self.variables.counter_source == 'DRS':
+                    self.drs_process.join(3)
+                    if self.drs_process.is_alive():
+                        self.drs_process.terminate()
+                        self.drs_process.join(1)
+                        # Release all the resources of the TDC process
+                        self.drs_process.close()
+            except Exception as e:
+                print(
+                    f"{initialize_devices.bcolors.WARNING}Warning: The TDC or DRS process cannot be terminated "
+                    f"properly{initialize_devices.bcolors.ENDC}")
+                print(e)
 
         if self.conf['tdc'] == "off":
             if self.variables.counter_source == 'TDC':
                 self.variables.total_ions = len(self.variables.x)
         elif self.variables.counter_source == 'DRS':
             pass
-
-        time.sleep(1)
-        self.log_apt.info('Experiment is finished')
 
         # Check the length of arrays to be equal
         if self.variables.counter_source == 'TDC':
@@ -607,6 +617,7 @@ class APT_Exp_Control:
             self.variables.stop_flag = False
             self.variables.end_experiment = False
             self.variables.start_flag = False
+            self.variables.flag_stop_tdc = False
             self.variables.detection_rate_current = 0.0
             self.variables.count = 0
             self.variables.count_temp = 0
@@ -692,4 +703,19 @@ def run_experiment(variables, conf, experiment_finished_event):
         Run the main experiment.
 
     """
-    APT_Exp_Control(variables, conf, experiment_finished_event).run_experiment()
+
+    from line_profiler import LineProfiler
+
+    lp1 = LineProfiler()
+
+    # Run the experiment
+    apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event)
+
+    lp1.add_function(apt_exp_control.run_experiment)
+
+    lp1.add_function(apt_exp_control.main_ex_loop)
+
+    # Run the profiler
+    lp1(apt_exp_control.run_experiment)()
+    # Save the profiling result to a file
+    lp1.dump_stats('run_experiment.lprof')

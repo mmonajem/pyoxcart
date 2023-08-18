@@ -1295,6 +1295,12 @@ class Ui_PyCCAPT(object):
 		self.parameters_source.setEnabled(False)  # Disable the parameters source
 		self.start_experiment_worker()
 
+		self.variables.elapsed_time = 0.0
+		self.variables.total_ions = 0
+		self.variables.specimen_voltage = 0.0
+		self.variables.pulse_voltage = 0.0
+		self.variables.detection_rate_current = 0.0
+
 	def statistics_update(self):
 		"""
             Update the statistics
@@ -1689,8 +1695,9 @@ if __name__ == "__main__":
 	# Initialize global experiment variables
 	manager = multiprocessing.Manager()
 	lock = manager.Lock()
+	lock_lists = manager.Lock()
 	ns = manager.Namespace()
-	variables = share_variables.Variables(conf, ns, lock)
+	variables = share_variables.Variables(conf, ns, lock, lock_lists)
 
 	# variables = share_variables.Variables(conf)
 	variables.log_path = p

@@ -69,6 +69,19 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
 
 
 def experiment_measure(variables):
+	from line_profiler import LineProfiler
+
+	lp1 = LineProfiler()
+
+	lp1.add_function(experiment_measure_2)
+
+	# Run the profiler
+	lp1(experiment_measure_2)(variables)
+	# Save the profiling result to a file
+	lp1.dump_stats('experiment_measure.lprof')
+
+
+def experiment_measure_2(variables):
 	"""
 	Measurement function: This function is called in a process to read data from the queue.
 
@@ -78,6 +91,7 @@ def experiment_measure(variables):
 	Returns:
 		int: Return code.
 	"""
+
 	# surface concept tdc specific binning and factors
 	TOFFACTOR = 27.432 / (1000 * 4)  # 27.432 ps/bin, tof in ns, data is TDC time sum
 	DETBINS = 4900
@@ -171,6 +185,8 @@ def experiment_measure(variables):
 			else:
 				break
 		else:  # unknown event
+			break
+		if variables.flag_stop_tdc:
 			break
 
 	time.sleep(0.1)

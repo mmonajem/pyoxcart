@@ -509,11 +509,12 @@ if __name__ == "__main__":
 		print('Can not load the configuration file')
 		print(e)
 		sys.exit()
-	# Initialize global experiment class variables
+	# Initialize global experiment variables
 	manager = multiprocessing.Manager()
 	lock = manager.Lock()
+	lock_lists = manager.Lock()
 	ns = manager.Namespace()
-	variables = share_variables.Variables(conf, ns, lock)
+	variables = share_variables.Variables(conf, ns, lock, lock_lists)
 
 	app = QtWidgets.QApplication(sys.argv)
 	Pumps_vacuum = QtWidgets.QWidget()

@@ -258,8 +258,22 @@ def log_vacuum_levels(main_chamber, buffer_chamber, buffer_chamber_backing_pump,
 		               f"Load Lock Backing={load_lock_backing}\n")
 
 	row = [timestamp, main_chamber, buffer_chamber, buffer_chamber_backing_pump, load_lock, load_lock_backing]
+	header = ["Timestamp", "Main Chamber", "Buffer Chamber", "Buffer Chamber Backing Pump", "Load Lock",
+	          "Load Lock Backing"]
+
+	try:
+		with open("./files/vacuum_log.csv", 'r') as log_file:
+			file_empty = not log_file.readline()
+	except FileNotFoundError:
+		file_empty = True
 
 	# Write to CSV file
 	with open("./files/vacuum_log.csv", "a", newline='') as log_file:
 		csv_writer = csv.writer(log_file)
+
+		# Write the header if the file is empty
+		if file_empty:
+			csv_writer.writerow(header)
+
+		# Write the data row
 		csv_writer.writerow(row)

@@ -35,8 +35,9 @@ def load_gui():
     # Initialize global experiment variables
     manager = multiprocessing.Manager()
     lock = manager.Lock()
+    lock_lists = manager.Lock()
     ns = manager.Namespace()
-    variables = share_variables.Variables(conf, ns, lock)
+    variables = share_variables.Variables(conf, ns, lock, lock_lists)
 
     app = QtWidgets.QApplication(sys.argv)
     pyccapt_window = QtWidgets.QMainWindow()

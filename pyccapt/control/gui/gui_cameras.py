@@ -383,8 +383,9 @@ class CamerasAlignmentWindow(QtWidgets.QWidget):
 
 	def check_if_should(self):
 		if self.camera_win_front.is_set():
-			self.raise_()
-			self.activateWindow()
+			self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
+			self.show()
+			self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowType.WindowStaysOnTopHint)
 			self.camera_win_front.clear()  # Reset the flag
 		if self.variables.flag_camera_win_show:
 			self.show()
@@ -396,13 +397,8 @@ def run_camera_window(variables, conf, camera_closed_event, camera_win_front):
 	"""
 	Run the Cameras window in a separate process.
 	"""
-	# if hasattr(self, 'Cameras_alignment') and self.Cameras_alignment.isVisible():
-	# 	self.Cameras_alignment.raise_()
-	# 	self.Cameras_alignment.activateWindow()
-	# else:
 
 	app = QtWidgets.QApplication(sys.argv)  # <-- Create a new QApplication instance
-
 	SignalEmitter_Cameras = SignalEmitter()
 	# variables = copy.deepcopy(variables)
 	# conf = copy.deepcopy(conf)
@@ -431,9 +427,9 @@ if __name__ == "__main__":
 	# Initialize global experiment variables
 	manager = multiprocessing.Manager()
 	lock = manager.Lock()
+	lock_lists = manager.Lock()
 	ns = manager.Namespace()
-	variables = share_variables.Variables(conf, ns, lock)
-	variables.log_path = p
+	variables = share_variables.Variables(conf, ns, lock, lock_lists)
 
 	app = QtWidgets.QApplication(sys.argv)
 	Cameras_Alignment = QtWidgets.QWidget()
