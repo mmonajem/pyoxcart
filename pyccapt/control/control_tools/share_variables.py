@@ -65,6 +65,7 @@ class Variables:
         self.ns.flag_pump_load_lock_led = None
         self.ns.flag_camera_grab = False
         self.ns.flag_camera_win_show = False
+        self.ns.flag_end_experiment = False
         self.ns.criteria_time = True
         self.ns.criteria_ions = True
         self.ns.criteria_vdc = True
@@ -89,24 +90,21 @@ class Variables:
         self.ns.pulse_voltage = 0.0
         self.ns.pulse_voltage_min = 0.0
         self.ns.pulse_voltage_max = 0.0
+        self.ns.control_algorithm = 'proportional'
         self.ns.count_last = 0
         self.ns.count_temp = 0
         self.ns.avg_n_count = 0
-        self.ns.index_plot = 0
-        self.ns.index_plot_save = 0
-        self.ns.index_wait_on_plot_start = 0
         self.ns.index_warning_message = 0
-        self.ns.index_auto_scale_graph = 0
         self.ns.index_line = 0
         self.ns.stop_flag = False
         self.ns.end_experiment = False
         self.ns.start_flag = False
         self.ns.flag_stop_tdc = False
+        self.ns.flag_finished_tdc = False
         self.ns.plot_clear_flag = False
         self.ns.hitmap_plot_size = 1.0
         self.ns.number_of_experiment_in_text_line = 0
         self.ns.index_experiment_in_text_line = 0
-        self.ns.bool_flag_while_loop_gages = False
         self.ns.flag_cameras_take_screenshot = False
         self.ns.temperature = 0
         self.ns.vacuum_main = 0
@@ -122,7 +120,7 @@ class Variables:
         self.ns.main_counter = []
         self.ns.main_temperature = []
         self.ns.main_chamber_vacuum = []
-        self.ns.main_v_p_drs = []
+        self.ns.main_v_p_hsd = []
         self.ns.laser_degree = []
 
         ### Data for plotting
@@ -145,8 +143,8 @@ class Variables:
         self.ns.main_p_dld_surface_concept = []
         self.ns.main_v_dc_tdc_surface_concept = []
         self.ns.main_p_tdc_surface_concept = []
-        self.ns.main_v_dc_drs = []
-        self.ns.main_p_drs = []
+        self.ns.main_v_dc_hsd = []
+        self.ns.main_p_hsd = []
         self.ns.main_v_dc_tdc_roentdek = []
         self.ns.main_p_tdc_roentdek = []
 
@@ -597,6 +595,15 @@ class Variables:
             self.ns.flag_camera_win_show = value
 
     @property
+    def flag_end_experiment(self):
+        return self.ns.flag_end_experiment
+
+    @flag_end_experiment.setter
+    def flag_end_experiment(self, value):
+        with self.lock:
+            self.ns.flag_end_experiment = value
+
+    @property
     def criteria_time(self):
         return self.ns.criteria_time
 
@@ -786,6 +793,15 @@ class Variables:
             self.ns.pulse_voltage_max = value
 
     @property
+    def control_algorithm(self):
+        return self.ns.control_algorithm
+
+    @control_algorithm.setter
+    def control_algorithm(self, value):
+        with self.lock:
+            self.ns.control_algorithm = value
+
+    @property
     def count_last(self):
         return self.ns.count_last
 
@@ -811,32 +827,6 @@ class Variables:
     def avg_n_count(self, value):
         self.ns.avg_n_count = value
 
-    @property
-    def index_plot(self):
-        return self.ns.index_plot
-
-    @index_plot.setter
-    def index_plot(self, value):
-        with self.lock:
-            self.ns.index_plot = value
-
-    @property
-    def index_plot_save(self):
-        return self.ns.index_plot_save
-
-    @index_plot_save.setter
-    def index_plot_save(self, value):
-        with self.lock:
-            self.ns.index_plot_save = value
-
-    @property
-    def index_wait_on_plot_start(self):
-        return self.ns.index_wait_on_plot_start
-
-    @index_wait_on_plot_start.setter
-    def index_wait_on_plot_start(self, value):
-        with self.lock:
-            self.ns.index_wait_on_plot_start = value
 
     @property
     def index_warning_message(self):
@@ -846,15 +836,6 @@ class Variables:
     def index_warning_message(self, value):
         with self.lock:
             self.ns.index_warning_message = value
-
-    @property
-    def index_auto_scale_graph(self):
-        return self.ns.index_auto_scale_graph
-
-    @index_auto_scale_graph.setter
-    def index_auto_scale_graph(self, value):
-        with self.lock:
-            self.ns.index_auto_scale_graph = value
 
     @property
     def index_line(self):
@@ -902,6 +883,15 @@ class Variables:
             self.ns.flag_stop_tdc = value
 
     @property
+    def flag_finished_tdc(self):
+        return self.ns.flag_finished_tdc
+
+    @flag_finished_tdc.setter
+    def flag_finished_tdc(self, value):
+        with self.lock:
+            self.ns.flag_finished_tdc = value
+
+    @property
     def plot_clear_flag(self):
         return self.ns.plot_clear_flag
 
@@ -937,14 +927,6 @@ class Variables:
         with self.lock:
             self.ns.index_experiment_in_text_line = value
 
-    @property
-    def bool_flag_while_loop_gages(self):
-        return self.ns.bool_flag_while_loop_gages
-
-    @bool_flag_while_loop_gages.setter
-    def bool_flag_while_loop_gages(self, value):
-        with self.lock:
-            self.ns.bool_flag_while_loop_gages = value
 
     @property
     def flag_cameras_take_screenshot(self):
@@ -1055,13 +1037,13 @@ class Variables:
             self.ns.main_chamber_vacuum = value
 
     @property
-    def main_v_p_drs(self):
-        return self.ns.main_v_p_drs
+    def main_v_p_hsd(self):
+        return self.ns.main_v_p_hsd
 
-    @main_v_p_drs.setter
-    def main_v_p_drs(self, value):
+    @main_v_p_hsd.setter
+    def main_v_p_hsd(self, value):
         with self.lock_lists:
-            self.ns.main_v_p_drs = value
+            self.ns.main_v_p_hsd = value
 
     @property
     def laser_degree(self):
@@ -1199,22 +1181,22 @@ class Variables:
             self.ns.main_p_tdc_surface_concept = value
 
     @property
-    def main_v_dc_drs(self):
-        return self.ns.main_v_dc_drs
+    def main_v_dc_hsd(self):
+        return self.ns.main_v_dc_hsd
 
-    @main_v_dc_drs.setter
-    def main_v_dc_drs(self, value):
+    @main_v_dc_hsd.setter
+    def main_v_dc_hsd(self, value):
         with self.lock_lists:
-            self.ns.main_v_dc_drs = value
+            self.ns.main_v_dc_hsd = value
 
     @property
-    def main_p_drs(self):
-        return self.ns.main_p_drs
+    def main_p_hsd(self):
+        return self.ns.main_p_hsd
 
-    @main_p_drs.setter
-    def main_p_drs(self, value):
+    @main_p_hsd.setter
+    def main_p_hsd(self, value):
         with self.lock_lists:
-            self.ns.main_p_drs = value
+            self.ns.main_p_hsd = value
 
     @property
     def main_v_dc_tdc_roentdek(self):

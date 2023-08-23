@@ -1,5 +1,4 @@
 import csv
-import threading
 import time
 from datetime import datetime
 
@@ -192,7 +191,7 @@ def state_update(conf, variables, emitter):
 			print(e)
 
 		start_time = time.time()
-		while variables.bool_flag_while_loop_gages:
+		while emitter.bool_flag_while_loop:
 			if conf['cryo'] == "on":
 				try:
 					output = command_cryovac('getOutput', com_port_cryovac)
@@ -201,38 +200,45 @@ def state_update(conf, variables, emitter):
 					print("cannot read the cryo temperature")
 					output = '0'
 				# with variables.lock_statistics:
-				variables.temperature = float(output.split()[0].replace(',', ''))
-				emitter.temp.emit(variables.temperature)
+				temperature = float(output.split()[0].replace(',', ''))
+				variables.temperature = temperature
+				emitter.temp.emit(temperature)
 			if conf['COM_PORT_gauge_mc'] != "off":
 				value, _ = tpg.pressure_gauge(2)
 				# with variables.lock_statistics:
-				variables.vacuum_main = '{}'.format(value)
-				emitter.vacuum_main.emit(float(variables.vacuum_main))
+				vacuum_main = '{}'.format(value)
+				variables.vacuum_main = vacuum_main
+				emitter.vacuum_main.emit(float(vacuum_main))
 				value, _ = tpg.pressure_gauge(1)
-				# with variables.lock_statistics:
-				variables.vacuum_buffer = '{}'.format(value)
-				emitter.vacuum_buffer.emit(float(variables.vacuum_buffer))
+				vacuum_buffer = '{}'.format(value)
+				variables.vacuum_buffer = vacuum_buffer
+				emitter.vacuum_buffer.emit(float(vacuum_buffer))
 			if conf['COM_PORT_gauge_ll'] != "off" and conf['pump'] != "off":
 				response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_ll, status='load_lock')
 				# with variables.lock_statistics:
-				variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
-				variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
-				emitter.vacuum_load.emit(variables.vacuum_load_lock)
-				emitter.vacuum_load_back.emit(variables.vacuum_load_lock_backing)
+				vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
+				vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
+				variables.vacuum_load_lock = vacuum_load_lock
+				variables.vacuum_load_lock_backing = vacuum_load_lock_backing
+				emitter.vacuum_load.emit(vacuum_load_lock)
+				emitter.vacuum_load_back.emit(vacuum_load_lock_backing)
 
 			if conf['COM_PORT_gauge_bc'] != "off":
 				response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_bc)
-				# with variables.lock_statistics:
-				variables.vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
-				emitter.vacuum_buffer_back.emit(variables.vacuum_buffer_backing)
+				vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
+				variables.vacuum_buffer_backing = vacuum_buffer_backing
+				emitter.vacuum_buffer_back.emit(vacuum_buffer_backing)
 
 			elapsed_time = time.time() - start_time
 			if elapsed_time > 30 * 60:
 				start_time = time.time()
-				log_vacuum_levels(variables.vacuum_main,
-				                  variables.vacuum_buffer, variables.vacuum_buffer_backing,
-				                  variables.vacuum_load_lock, variables.vacuum_load_lock_backing, )
-			threading.Event().wait(1)
+				try:
+					log_vacuum_levels(vacuum_main, vacuum_buffer, vacuum_buffer_backing, vacuum_load_lock,
+					                  vacuum_load_lock_backing, )
+				except Exception as e:
+					print(e)
+					print("cannot log the vacuum levels")
+			time.sleep(1)
 
 
 def log_vacuum_levels(main_chamber, buffer_chamber, buffer_chamber_backing_pump, load_lock, load_lock_backing):

@@ -45,7 +45,7 @@ class Ui_Stage_Control(object):
 		self.forward = QtWidgets.QPushButton(parent=Stage_Control)
 		self.forward.setStyleSheet("QPushButton {\n"
 		                           "                border: none;\n"
-		                           "                background-image: url(\'arrow.png\');\n"
+		                           "                background-image: url(\'./files/arrow.png\');\n"
 		                           "                background-repeat: no-repeat;\n"
 		                           "                background-position: center;\n"
 		                           "                background-color: transparent;\n"
@@ -57,7 +57,7 @@ class Ui_Stage_Control(object):
 		self.left = QtWidgets.QPushButton(parent=Stage_Control)
 		self.left.setStyleSheet("QPushButton {\n"
 		                        "                border: none;\n"
-		                        "                background-image: url(\'arrow.png\');\n"
+		                        "                background-image: url(\'./files/arrow.png\');\n"
 		                        "                background-repeat: no-repeat;\n"
 		                        "                background-position: center;\n"
 		                        "                background-color: transparent;\n"
@@ -69,7 +69,7 @@ class Ui_Stage_Control(object):
 		self.up = QtWidgets.QPushButton(parent=Stage_Control)
 		self.up.setStyleSheet("QPushButton {\n"
 		                      "                border: none;\n"
-		                      "                background-image: url(\'arrow.png\');\n"
+		                      "                background-image: url(\'./files/arrow.png\');\n"
 		                      "                background-repeat: no-repeat;\n"
 		                      "                background-position: center;\n"
 		                      "                background-color: transparent;\n"
@@ -81,7 +81,7 @@ class Ui_Stage_Control(object):
 		self.back = QtWidgets.QPushButton(parent=Stage_Control)
 		self.back.setStyleSheet("QPushButton {\n"
 		                        "                border: none;\n"
-		                        "                background-image: url(\'arrow.png\');\n"
+		                        "                background-image: url(\'./files/arrow.png\');\n"
 		                        "                background-repeat: no-repeat;\n"
 		                        "                background-position: center;\n"
 		                        "                background-color: transparent;\n"
@@ -93,7 +93,7 @@ class Ui_Stage_Control(object):
 		self.right = QtWidgets.QPushButton(parent=Stage_Control)
 		self.right.setStyleSheet("QPushButton {\n"
 		                         "                border: none;\n"
-		                         "                background-image: url(\'arrow.png\');\n"
+		                         "                background-image: url(\'./files/arrow.png\');\n"
 		                         "                background-repeat: no-repeat;\n"
 		                         "                background-position: center;\n"
 		                         "                background-color: transparent;\n"
@@ -105,7 +105,7 @@ class Ui_Stage_Control(object):
 		self.down = QtWidgets.QPushButton(parent=Stage_Control)
 		self.down.setStyleSheet("QPushButton {\n"
 		                        "                border: none;\n"
-		                        "                background-image: url(\'arrow.png\');\n"
+		                        "                background-image: url(\'./files/arrow.png\');\n"
 		                        "                background-repeat: no-repeat;\n"
 		                        "                background-position: center;\n"
 		                        "                background-color: transparent;\n"
@@ -205,6 +205,10 @@ class StageControlWindow(QtWidgets.QWidget):
 		# Additional cleanup code here if needed
 		super().closeEvent(event)
 
+	def setWindowStyleFusion(self):
+		# Set the Fusion style
+		QtWidgets.QApplication.setStyle("Fusion")
+
 
 if __name__ == "__main__":
 	try:
@@ -225,6 +229,7 @@ if __name__ == "__main__":
 	variables = share_variables.Variables(conf, ns, lock, lock_lists)
 
 	app = QtWidgets.QApplication(sys.argv)
+	app.setStyle('Fusion')
 	stage_control = QtWidgets.QWidget()
 	ui = Ui_Stage_Control(variables, conf)
 	ui.setupUi(stage_control)

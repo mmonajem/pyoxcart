@@ -758,10 +758,6 @@ class Ui_PyCCAPT(object):
 		font.setItalic(False)
 		self.criteria_ions.setFont(font)
 		self.criteria_ions.setMouseTracking(True)
-		self.criteria_ions.setStyleSheet("QCheckBox{\n"
-		                                 "                                                background: rgb(223,223,233)\n"
-		                                 "                                                }\n"
-		                                 "                                            ")
 		self.criteria_ions.setText("")
 		self.criteria_ions.setChecked(True)
 		self.criteria_ions.setObjectName("criteria_ions")
@@ -776,10 +772,6 @@ class Ui_PyCCAPT(object):
 		font.setItalic(False)
 		self.criteria_vdc.setFont(font)
 		self.criteria_vdc.setMouseTracking(True)
-		self.criteria_vdc.setStyleSheet("QCheckBox{\n"
-		                                "                                                background: rgb(223,223,233)\n"
-		                                "                                                }\n"
-		                                "                                            ")
 		self.criteria_vdc.setText("")
 		self.criteria_vdc.setChecked(True)
 		self.criteria_vdc.setObjectName("criteria_vdc")
@@ -794,10 +786,6 @@ class Ui_PyCCAPT(object):
 		font.setItalic(False)
 		self.criteria_time.setFont(font)
 		self.criteria_time.setMouseTracking(True)
-		self.criteria_time.setStyleSheet("QCheckBox{\n"
-		                                 "                                                background: rgb(223,223,233)\n"
-		                                 "                                                }\n"
-		                                 "                                            ")
 		self.criteria_time.setText("")
 		self.criteria_time.setChecked(True)
 		self.criteria_time.setObjectName("criteria_time")
@@ -900,6 +888,10 @@ class Ui_PyCCAPT(object):
 		self.statistics_timer = QtCore.QTimer()
 		self.statistics_timer.timeout.connect(self.statistics_update)
 
+		# Create a QTimer to run the stop actions after the specified time
+		self.timer_stop_exp = QtCore.QTimer()
+		self.timer_stop_exp.timeout.connect(self.on_stop_experiment_worker)
+
 		###
 		self.setup_parameters_changes()
 		self.parameters_source.currentIndexChanged.connect(self.setup_parameters_changes)
@@ -932,6 +924,7 @@ class Ui_PyCCAPT(object):
 		self.stop_button.clicked.connect(self.stop_experiment_clicked)
 		self.reset_heatmap.clicked.connect(self.reset_heatmap_clicked)
 		self.dc_hold.clicked.connect(self.dc_hold_clicked)
+		self.original_botton_style = self.dc_hold.styleSheet()
 
 		self.hitmap_plot_size.setValue(1.0)
 		self.hitmap_plot_size.setSingleStep(0.1)
@@ -946,7 +939,7 @@ class Ui_PyCCAPT(object):
 		self.result_list = []
 
 		self.camera_close_check_timer.start(500)  # check every 500 ms
-		self.statistics_timer.start(333)  # check every 333 ms
+		self.statistics_timer.start(500)  # check every 500 ms
 
 		# initialize the wins
 		if self.conf['baking_mode'] != 'on':
@@ -1041,7 +1034,7 @@ class Ui_PyCCAPT(object):
 		self.max_ions.setText(_translate("PyCCAPT", "40000"))
 		self.label_185.setText(_translate("PyCCAPT", "Pulse Max. Voltage (V)"))
 		self.vp_max.setText(_translate("PyCCAPT", "3281"))
-		self.ex_freq.setText(_translate("PyCCAPT", "10"))
+		self.ex_freq.setText(_translate("PyCCAPT", "5"))
 		self.label_181.setText(_translate("PyCCAPT", "K_p Upwards"))
 		self.reset_heatmap.setText(_translate("PyCCAPT", "Reset"))
 		self.ex_time.setText(_translate("PyCCAPT", "900"))
@@ -1052,9 +1045,9 @@ class Ui_PyCCAPT(object):
 		self.label_199.setText(_translate("PyCCAPT", "Pulse Mode"))
 		self.pulse_mode.setItemText(0, _translate("PyCCAPT", "Voltage"))
 		self.pulse_mode.setItemText(1, _translate("PyCCAPT", "Laser"))
-		self.label.setText(_translate("PyCCAPT", "Stop at:"))
-		self.label_2.setText(_translate("PyCCAPT", "Stop at:"))
-		self.label_3.setText(_translate("PyCCAPT", "Stop at:"))
+		self.label.setText(_translate("PyCCAPT", "Stop at"))
+		self.label_2.setText(_translate("PyCCAPT", "Stop at"))
+		self.label_3.setText(_translate("PyCCAPT", "Stop at"))
 		self.menuFile.setTitle(_translate("PyCCAPT", "File"))
 		self.menuEdit.setTitle(_translate("PyCCAPT", "Edit"))
 		self.menuHelp.setTitle(_translate("PyCCAPT", "Help"))
@@ -1259,7 +1252,7 @@ class Ui_PyCCAPT(object):
 			if int(float(self.vdc_max.text())) > self.conf['max_vdc']:
 				self.error_message("Maximum possible number is " + str(self.conf['max_vdc']))
 				_translate = QtCore.QCoreApplication.translate
-				self.vdc_max.setText(_translate("PyCCAPT", str(self.variables.vdc_max)))
+				self.vdc_max.setText(_translate("PyCCAPT", str(self.conf['max_vdc'])))
 			else:
 				self.variables.vdc_max = int(float(self.vdc_max.text()))
 
@@ -1288,11 +1281,16 @@ class Ui_PyCCAPT(object):
         """
 		# with self.variables.lock_statistics:
 		self.variables.start_flag = True  # Set the start flag
+		self.variables.stop_flag = False  # Set the stop flag
 		self.variables.plot_clear_flag = True  # Change the flag to clear the plots in GUI
 		self.start_button.setEnabled(False)  # Disable the star button
 		self.counter_source.setEnabled(False)  # Disable the counter source
 		self.pulse_mode.setEnabled(False)  # Disable the pulse mode
 		self.parameters_source.setEnabled(False)  # Disable the parameters source
+		self.pulse_fraction.setEnabled(False)  # Disable the pulse fraction
+		self.pulse_frequency.setEnabled(False)  # Disable the pulse frequency
+		self.ex_freq.setEnabled(False)
+		self.ex_name.setEnabled(False)
 		self.start_experiment_worker()
 
 		self.variables.elapsed_time = 0.0
@@ -1317,22 +1315,23 @@ class Ui_PyCCAPT(object):
 		self.emitter.pulse_voltage.emit(self.variables.pulse_voltage)
 		self.emitter.detection_rate.emit(self.variables.detection_rate_current)
 
+		if not self.variables.start_flag and self.variables.stop_flag:
+			self.stop_experiment_clicked()
+
 	def stop_experiment_clicked(self):
 		"""
-        Stop the experiment worker thread
+			Stop the experiment worker thread
 
-        Args:
-            None
+            Args:
+                None
 
-        Return:
-            None
+            Return:
+                None
         """
 		self.statistics_timer.stop()
-		if self.variables.start_flag:
-			self.variables.stop_flag = True  # Set the STOP flag
+		self.variables.stop_flag = True  # Set the STOP flag
 		self.stop_button.setEnabled(False)  # Disable the stop button
-		time.sleep(8)
-		self.on_stop_experiment_worker()
+		self.timer_stop_exp.start(1000)  # Start the timer to run stop actions after 8 seconds
 
 	def start_experiment_worker(self):
 		"""
@@ -1360,33 +1359,42 @@ class Ui_PyCCAPT(object):
         Return:
             None
         """
-		self.start_button.setEnabled(True)
-		self.stop_button.setEnabled(True)
-		self.counter_source.setEnabled(True)  # Enable the counter source
-		self.pulse_mode.setEnabled(True)  # Enable the pulse mode
-		self.parameters_source.setEnabled(True)  # Enable the parameters source
-		self.variables.vdc_hold = False
-		self.reset_button_color(self.dc_hold)
+		if self.variables.flag_end_experiment:
+			self.start_button.setEnabled(True)
+			self.stop_button.setEnabled(True)
+			self.counter_source.setEnabled(True)  # Enable the counter source
+			self.pulse_mode.setEnabled(True)  # Enable the pulse mode
+			self.parameters_source.setEnabled(True)  # Enable the parameters source
+			self.pulse_fraction.setEnabled(True)  # Enable the pulse fraction
+			self.pulse_frequency.setEnabled(True)  # Enable the pulse frequency
+			self.ex_freq.setEnabled(True)
+			self.variables.vdc_hold = False
+			self.ex_name.setEnabled(True)
+			self.dc_hold.setStyleSheet(self.original_botton_style)
 
-		self.experiment_process.terminate()
-		self.experiment_process.join(1)
+			self.experiment_process.join(1)
+			print('experiment_process joined')
 
-		# for getting screenshot of GUI
-		screen = QtWidgets.QApplication.primaryScreen()
-		w = self.centralwidget
-		screenshot = screen.grabWindow(w.winId())
-		# with self.variables.lock_setup_parameters:
-		screenshot.save(self.variables.path + '\screenshot.png', 'png')
+			# for getting screenshot of GUI
+			screen = QtWidgets.QApplication.primaryScreen()
+			w = self.centralwidget
+			screenshot = screen.grabWindow(w.winId())
+			# with self.variables.lock_setup_parameters:
+			screenshot.save(self.variables.path + '\screenshot.png', 'png')
 
-		self.variables.flag_cameras_take_screenshot = True
+			self.variables.flag_cameras_take_screenshot = True
 
-		# with self.variables.lock_statistics:
-		if self.variables.index_experiment_in_text_line < len(
-				self.result_list):  # Do next experiment in case of TextLine
-			self.variables.index_experiment_in_text_line += 1
-			self.start_experiment_worker()
-		else:
-			self.variables.index_line = 0
+			# with self.variables.lock_statistics:
+			if self.variables.index_experiment_in_text_line < len(
+					self.result_list):  # Do next experiment in case of TextLine
+				self.variables.index_experiment_in_text_line += 1
+				self.start_experiment_worker()
+			else:
+				self.variables.index_line = 0
+
+			self.variables.flag_end_experiment = False
+			self.variables.flag_stop_tdc = False
+			self.timer_stop_exp.stop()
 
 	def reset_heatmap_clicked(self):
 		"""
@@ -1419,9 +1427,7 @@ class Ui_PyCCAPT(object):
 			                           "}")
 		elif self.variables.vdc_hold:
 			self.variables.vdc_hold = False
-			self.dc_hold.setStyleSheet("QPushButton{\n"
-			                           "background: rgb(193, 193, 193)\n"
-			                           "}")
+			self.dc_hold.setStyleSheet(self.original_botton_style)
 
 	def wins_init(self):
 		# GUI Cameras
@@ -1434,6 +1440,7 @@ class Ui_PyCCAPT(object):
 		# GUI gate
 		self.gui_gates = gui_gates.Ui_Gates(self.variables, self.conf)
 		self.Gates = gui_gates.GatesWindow(self.gui_gates, flags=QtCore.Qt.WindowType.Tool)
+		self.Gates.setWindowStyleFusion()
 		self.gui_gates.setupUi(self.Gates)
 		# GUI Pumps and Vacuum
 		self.SignalEmitter_Pumps_Vacuum = gui_pumps_vacuum.SignalEmitter()
@@ -1442,6 +1449,7 @@ class Ui_PyCCAPT(object):
 		self.Pumps_vacuum = gui_pumps_vacuum.PumpsVacuumWindow(self.gui_pumps_vacuum,
 		                                                       self.SignalEmitter_Pumps_Vacuum,
 		                                                       flags=Qt.WindowType.Tool)
+		self.Pumps_vacuum.setWindowStyleFusion()
 		self.gui_pumps_vacuum.setupUi(self.Pumps_vacuum)
 
 		# GUI Laser Control
@@ -1454,12 +1462,14 @@ class Ui_PyCCAPT(object):
 		self.gui_stage_control = gui_stage_control.Ui_Stage_Control(self.variables, self.conf)
 		self.Stage_control = gui_stage_control.StageControlWindow(self.gui_stage_control,
 		                                                          flags=Qt.WindowType.Tool)
+		self.Stage_control.setWindowStyleFusion()
 		self.gui_stage_control.setupUi(self.Stage_control)
 
 		# GUI Visualization
 		self.gui_visualization = gui_visualization.Ui_Visualization(self.variables, self.conf)
 		self.Visualization = gui_visualization.VisualizationWindow(self.gui_visualization,
 		                                                           flags=Qt.WindowType.Tool)
+		self.Visualization.setWindowStyleFusion()
 		self.gui_visualization.setupUi(self.Visualization)
 
 	def open_cameras_win(self):
@@ -1658,7 +1668,7 @@ class Ui_PyCCAPT(object):
 
 		self.timer.stop()
 
-	def cleanup(self):
+	def cleanup(self, ):
 		"""
 			Cleanup function to terminate the camera process
 
@@ -1670,6 +1680,8 @@ class Ui_PyCCAPT(object):
         """
 		if hasattr(self, 'camera_process') and self.camera_process.is_alive():
 			self.camera_process.terminate()
+			time.sleep(1)
+			self.gui_pumps_vacuum.gauges_thread.join(1)
 
 
 class SignalEmitter(QtCore.QObject):
@@ -1678,6 +1690,7 @@ class SignalEmitter(QtCore.QObject):
 	speciemen_voltage = QtCore.pyqtSignal(float)
 	pulse_voltage = QtCore.pyqtSignal(float)
 	detection_rate = QtCore.pyqtSignal(float)
+
 
 
 if __name__ == "__main__":
@@ -1703,6 +1716,7 @@ if __name__ == "__main__":
 	variables.log_path = p
 
 	app = QtWidgets.QApplication(sys.argv)
+	app.setStyle('Fusion')
 	PyCCAPT = QtWidgets.QMainWindow()
 	ui = Ui_PyCCAPT(variables, conf)
 	ui.setupUi(PyCCAPT)

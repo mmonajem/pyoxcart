@@ -31,6 +31,28 @@ class APT_Exp_Control:
         self.variables.start_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
         self.sleep_time = 1 / self.variables.ex_freq
 
+        self.avg_n_count = 0
+        self.specimen_voltage = 0
+        self.pulse_voltage = 0
+        self.count_last = 0
+        self.counts_target = 0
+        self.vdc_max = 0
+        self.pulse_frequency = 0
+        self.pulse_fraction = 0
+        self.pulse_amp_per_supply_voltage = 0
+        self.pulse_voltage_max = 0
+        self.pulse_voltage_min = 0
+        self.total_ions = 0
+        self.ex_freq = 0
+        self.flage_update_temp_vacuum = 0
+
+        self.main_v_dc = []
+        self.main_v_p = []
+        self.main_counter = []
+        self.main_temperature = []
+        self.main_chamber_vacuum = []
+
+        self.initialization_error = False
     def initialize_detector_process(self):
         """
         Initialize the detector process based on the configured settings.
@@ -59,16 +81,15 @@ class APT_Exp_Control:
 
             self.tdc_process = multiprocessing.Process(target=tdc_roentdec.experiment_measure,
                                                        args=(self.variables,))
-            self.tdc_process.daemon = True
             self.tdc_process.start()
 
-        elif self.conf['tdc'] == "on" and self.conf['tdc_model'] == 'DRS' and self.variables.counter_source == 'DRS':
+        elif self.conf['tdc'] == "on" and self.conf['tdc_model'] == 'HSD' and self.variables.counter_source == 'HSD':
 
             # Initialize and initiate a process(Refer to imported file 'drs' for process function declaration)
             # Module used: multiprocessing
-            self.drs_process = multiprocessing.Process(target=drs.experiment_measure,
+            self.hsd_process = multiprocessing.Process(target=drs.experiment_measure,
                                                        args=(self.variables,))
-            self.drs_process.start()
+            self.hsd_process.start()
 
         else:
             print("No counter source selected")
@@ -140,21 +161,19 @@ class APT_Exp_Control:
             str: The response received from the device.
         """
         self.com_port_v_dc.write((cmd + '\r\n').encode())
-        time.sleep(0.005)
-        response = ''
-        try:
-            while self.com_port_v_dc.in_waiting > 0:
-                response = self.com_port_v_dc.readline()
-        except Exception as error:
-            print(error)
+        # response = ''
+        # try:
+        #     while self.com_port_v_dc.in_waiting > 0:
+        #         response = self.com_port_v_dc.readline()
+        # except Exception as error:
+        #     print(error)
+        #
+        # if isinstance(response, bytes):
+        #     response = response.decode("utf-8")
 
-        if isinstance(response, bytes):
-            response = response.decode("utf-8")
+        # return response
 
-        return response
-
-
-    def main_ex_loop(self, counts_target):
+    def main_ex_loop(self, ):
         """
         Execute main experiment loop.
 
@@ -175,28 +194,21 @@ class APT_Exp_Control:
         # Update v_dc and v_p...
         # Update other experiment variables...
 
-        if self.variables.counter_source == 'TDC':
-            self.variables.total_ions = len(self.variables.x)
-        elif self.variables.counter_source == 'DRS':
-            pass
-
         # with self.variables.lock_statistics:
-        self.variables.count_temp = self.variables.total_ions - self.variables.count_last
-        self.variables.count_last = self.variables.total_ions
+        count_temp = self.total_ions - self.count_last
+        self.count_last = self.total_ions
 
         # saving the values of high dc voltage, pulse, and current iteration ions
         # with self.variables.lock_experiment_variables:
-        self.variables.extend_to('main_v_dc', [self.variables.specimen_voltage])
-        self.variables.extend_to('main_v_p', [self.variables.pulse_voltage])
-        self.variables.extend_to('main_counter', [self.variables.count_temp])
+        self.main_v_dc.append(self.specimen_voltage)
+        self.main_v_p.append(self.pulse_voltage)
+        self.main_counter.append(count_temp)
         # averaging count rate of N_averg counts
+        self.avg_n_count = np.sum(self.main_counter[-self.ex_freq:])
 
-        self.variables.avg_n_count = np.sum(self.variables.main_counter[-self.variables.ex_freq:])
+        counts_measured = self.avg_n_count / (1 + self.pulse_frequency * 1000)
 
-        counts_measured = self.variables.avg_n_count / (1 + self.variables.pulse_frequency * 1000)
-
-        counts_error = counts_target - counts_measured  # deviation from setpoint
-
+        counts_error = self.counts_target - counts_measured  # deviation from setpoint
 
         # rate = ((variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000))
         # if rate < 0.01 and variables.specimen_voltage < 5000:
@@ -211,32 +223,40 @@ class APT_Exp_Control:
         else:
             voltage_step = 0
 
+        if voltage_step > 20:
+            print('voltage step is too high: %s' % voltage_step)
+            voltage_step = 20
+
         # update v_dc
         if not self.variables.vdc_hold and voltage_step != 0:
-            if self.variables.specimen_voltage < self.variables.vdc_max:
-                if self.variables.specimen_voltage >= self.variables.vdc_min - 50:
-                    specimen_voltage_temp = self.variables.specimen_voltage + voltage_step
-                    if specimen_voltage_temp > self.variables.vdc_max:
-                        specimen_voltage_temp = self.variables.vdc_max
-                    if specimen_voltage_temp != self.variables.specimen_voltage:
+            if self.specimen_voltage < self.vdc_max:
+                if self.specimen_voltage >= self.variables.vdc_min - 50:
+                    specimen_voltage_temp = self.specimen_voltage + voltage_step
+                    if specimen_voltage_temp > self.vdc_max:
+                        specimen_voltage_temp = self.vdc_max
+                    if specimen_voltage_temp != self.specimen_voltage:
                         # sending VDC via serial
                         if self.conf['v_dc'] != "off":
                             self.command_v_dc(">S0 %s" % specimen_voltage_temp)
+                            self.specimen_voltage = specimen_voltage_temp
 
                         # update pulse voltage v_p
-                        new_vp = self.variables.specimen_voltage * self.variables.pulse_fraction * \
-                                 (1 / self.variables.pulse_amp_per_supply_voltage)
-                        if self.variables.pulse_voltage_max > new_vp > self.variables.pulse_voltage_min:
+                        new_vp = self.specimen_voltage * self.pulse_fraction * \
+                                 (1 / self.pulse_amp_per_supply_voltage)
+                        if self.pulse_voltage_max > new_vp > self.pulse_voltage_min:
                             if self.conf['v_p'] != "off":
                                 self.com_port_v_p.write('VOLT %s' % new_vp)
-                            self.variables.pulse_voltage = new_vp * self.variables.pulse_amp_per_supply_voltage
+                            self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
 
-                    self.variables.specimen_voltage = specimen_voltage_temp
+                    self.variables.specimen_voltage = self.specimen_voltage
+                    self.variables.pulse_voltage = self.pulse_voltage
 
         # with self.variables.lock_statistics:
 
-        self.variables.extend_to('main_temperature', [self.variables.temperature])
-        self.variables.extend_to('main_chamber_vacuum', [float(self.variables.vacuum_main)])
+        if self.flage_update_temp_vacuum == self.ex_freq:
+            self.main_temperature.extend([self.variables.temperature])
+            self.main_chamber_vacuum.extend([float(self.variables.vacuum_main)])
+            self.flage_update_temp_vacuum = 0
 
     def precise_sleep(self, seconds):
         """
@@ -275,6 +295,8 @@ class APT_Exp_Control:
         # Save setup parameters and statistics in a txt file...
         # Clear up variables and deinitialize devices...
         # Log completion...
+        # Total experiment time variable
+        start_main_ex = time.time()
 
         if os.path.exists("./files/counter_experiments.txt"):
             # Read the experiment counter
@@ -298,6 +320,9 @@ class APT_Exp_Control:
         if not os.path.isdir(self.variables.path_meta):
             os.makedirs(self.variables.path_meta, mode=0o777, exist_ok=True)
 
+        if self.conf['tdc'] == 'on':
+            self.initialize_detector_process()
+
         self.log_apt = loggi.logger_creator('apt', self.variables, 'apt.log', path=self.variables.log_path)
         if self.conf['signal_generator'] == 'on':
             # Initialize the signal generator
@@ -305,10 +330,13 @@ class APT_Exp_Control:
                 signal_generator.initialize_signal_generator(self.variables, self.variables.pulse_frequency)
                 self.log_apt.info('Signal generator is initialized')
             except Exception as e:
+                self.log_apt.info('Signal generator is not initialized')
                 print('Can not initialize the signal generator')
                 print('Make the signal_generator off in the config file or fix the error below')
                 print(e)
-                raise
+                self.variables.stop_flag = True
+                self.initialization_error = True
+                self.log_apt.info('Experiment is terminated')
 
         if self.conf['v_dc'] == 'on':
             try:
@@ -316,10 +344,13 @@ class APT_Exp_Control:
                 self.initialize_v_dc()
                 self.log_apt.info('High voltage is initialized')
             except Exception as e:
+                self.log_apt.info('High voltage is  not initialized')
                 print('Can not initialize the high voltage')
                 print('Make the v_dc off in the config file or fix the error below')
                 print(e)
-                raise
+                self.variables.stop_flag = True
+                self.initialization_error = True
+                self.log_apt.info('Experiment is terminated')
 
         if self.conf['v_p'] == 'on':
             try:
@@ -327,14 +358,14 @@ class APT_Exp_Control:
                 self.initialize_v_p()
                 self.log_apt.info('Pulser is initialized')
             except Exception as e:
+                self.log_apt.info('Pulser is not initialized')
                 print('Can not initialize the pulser')
                 print('Make the v_p off in the config file or fix the error below')
                 print(e)
-                raise
+                self.variables.stop_flag = True
+                self.initialization_error = True
+                self.log_apt.info('Experiment is terminated')
 
-        if self.conf['tdc'] == 'on':
-            self.initialize_detector_process()
-        # start the timer for main experiment
         self.variables.specimen_voltage = self.variables.vdc_min
         self.variables.pulse_voltage_min = self.variables.v_p_min * (1 / self.variables.pulse_amp_per_supply_voltage)
         self.variables.pulse_voltage_max = self.variables.v_p_max * (1 / self.variables.pulse_amp_per_supply_voltage)
@@ -345,171 +376,188 @@ class APT_Exp_Control:
         time_ex_h = []
         time_counter = []
 
-        total_steps = self.variables.ex_time * self.variables.ex_freq
         steps = 0
         flag_achieved_high_voltage = 0
         index_time = 0
-        ex_time_temp = self.variables.ex_time
-
-        desired_rate = 3  # Hz statistic rate update in the main GUI
 
         desired_rate = self.variables.ex_freq  # Hz
         desired_period = 1.0 / desired_rate  # seconds
 
-        counts_target = ((self.variables.detection_rate / 100) *
-                         self.variables.pulse_frequency) / self.variables.pulse_frequency
+        self.counts_target = ((self.variables.detection_rate / 100) *
+                              self.variables.pulse_frequency) / self.variables.pulse_frequency
         init_detection_rate = self.variables.detection_rate
-        last_save_time = time.time()
+        # Turn on the v_dc and v_p
+        if not self.initialization_error:
+            if self.conf['v_p'] == "on":
+                self.com_port_v_p.write('OUTPut ON')
+                time.sleep(0.2)
+            if self.conf['v_dc'] == "on":
+                self.command_v_dc("F1")
+                time.sleep(0.2)
+
+        self.main_temperature.extend([self.variables.temperature])
+        self.main_chamber_vacuum.extend([float(self.variables.vacuum_main)])
+        self.pulse_frequency = self.variables.pulse_frequency
+        self.pulse_fraction = self.variables.pulse_fraction
+        self.pulse_amp_per_supply_voltage = self.variables.pulse_amp_per_supply_voltage
+        self.specimen_voltage = self.variables.specimen_voltage
+        self.pulse_voltage = self.variables.pulse_voltage
+        counter_source = self.variables.counter_source
+        self.ex_freq = self.variables.ex_freq
+
+        # Wait for 8 second to all devices get ready specially tdc
+        time.sleep(8)
+        self.log_apt.info('Experiment is started')
         # Main loop of experiment
-        while steps < total_steps:
-            # Only for initializing every thing at firs iteration
-            if steps == 0:
-                # Turn on the v_dc and v_p
-                if self.conf['v_p'] == "on":
-                    self.com_port_v_p.write('OUTPut ON')
-                    time.sleep(0.2)
-                if self.conf['v_dc'] == "on":
-                    self.command_v_dc("F1")
-                    time.sleep(0.2)
+        remaining_time_list = []
 
-                self.variables.start_flag = True
-                # Wait for 8 second to all devices get ready
-                time.sleep(8)
-                # Total experiment time variable
-                start_main_ex = time.time()
+        if self.initialization_error:
+            pass
+        else:
+            while True:
+                start_time = time.perf_counter()
+                self.vdc_max = self.variables.vdc_max
+                self.pulse_voltage_min = self.variables.v_p_min * (
+                        1 / self.pulse_amp_per_supply_voltage)
+                self.pulse_voltage_max = self.variables.v_p_max * (
+                        1 / self.pulse_amp_per_supply_voltage)
+                detection_rate_new = self.variables.detection_rate
+                # Update the detection rate
 
-                self.log_apt.info('Experiment is started')
-            start_time = time.perf_counter()
-            if self.variables.detection_rate != init_detection_rate:
-                counts_target = (self.variables.detection_rate / 100) * self.variables.pulse_frequency
-                init_detection_rate = self.variables.detection_rate
+                if detection_rate_new != init_detection_rate:
+                    self.counts_target = (detection_rate_new / 100) * self.pulse_frequency
+                    init_detection_rate = detection_rate_new
 
-            # with self.variables.lock_statistics:
-            self.variables.detection_rate_current = (self.variables.avg_n_count * 100) / (
-                    1 + self.variables.pulse_frequency * 1000)
-            if self.variables.vdc_max <= self.variables.specimen_voltage - 50 and self.variables.vdc_hold:
-                decrement_vol = (self.variables.specimen_voltage - self.variables.vdc_max) / 10
-                for step in range(10):
-                    self.variables.specimen_voltage -= decrement_vol
-                    if self.conf['v_dc'] != "off":
-                        self.command_v_dc(">S0 %s" % self.variables.specimen_voltage)
-                    time.sleep(0.3)
-                # update pulse voltage v_p
-                new_vp = self.variables.specimen_voltage * self.variables.pulse_fraction * \
-                         (1 / self.variables.pulse_amp_per_supply_voltage)
-                if self.variables.pulse_voltage_max > new_vp > self.variables.pulse_voltage_min:
-                    if self.conf['v_p'] != "off":
-                        self.com_port_v_p.write('VOLT %s' % new_vp)
-                    self.variables.pulse_voltage = new_vp * self.variables.pulse_amp_per_supply_voltage
-            # main loop function
-            self.main_ex_loop(counts_target)
+                self.variables.detection_rate_current = (self.avg_n_count * 100) / (
+                        1 + self.pulse_frequency * 1000)
+                if self.vdc_max <= self.specimen_voltage - 50 and self.variables.vdc_hold:
+                    decrement_vol = (self.specimen_voltage - self.vdc_max) / 10
+                    for step in range(10):
+                        self.specimen_voltage -= decrement_vol
+                        if self.conf['v_dc'] != "off":
+                            self.command_v_dc(">S0 %s" % self.specimen_voltage)
+                        time.sleep(0.3)
+                    # update pulse voltage v_p
+                    new_vp = self.specimen_voltage * self.pulse_fraction * \
+                             (1 / self.pulse_amp_per_supply_voltage)
+                    if self.pulse_voltage_max > new_vp > self.pulse_voltage_min:
+                        if self.conf['v_p'] != "off":
+                            self.com_port_v_p.write('VOLT %s' % new_vp)
+                        self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
+                    self.variables.specimen_voltage = self.specimen_voltage
+                    self.variables.pulse_voltage = self.pulse_voltage
 
-            # Counter of iteration
-            time_counter.append(steps)
+                if counter_source == 'TDC':
+                    self.total_ions = len(self.variables.x_plot)
+                    self.variables.total_ions = self.total_ions
+                elif counter_source == 'HSD':
+                    pass
+                # main loop function
+                self.main_ex_loop()
 
-            if self.variables.stop_flag:
-                self.log_apt.info('Experiment is stopped by user')
-                if self.conf['tdc'] != "off":
-                    if self.variables.counter_source == 'TDC':
-                        self.variables.flag_stop_tdc = True
-                time.sleep(1)
-                break
+                # Counter of iteration
+                time_counter.append(steps)
 
-            if self.variables.criteria_ions:
-                if self.variables.max_ions <= self.variables.total_ions:
-                    self.log_apt.info('Total number of Ions is achieved')
-                    if self.conf['tdc'] == "on":
+                if self.variables.stop_flag:
+                    self.log_apt.info('Experiment is stopped')
+                    if self.conf['tdc'] != "off":
                         if self.variables.counter_source == 'TDC':
                             self.variables.flag_stop_tdc = True
                     time.sleep(1)
                     break
-            if self.variables.criteria_vdc:
-                if self.variables.vdc_max <= self.variables.specimen_voltage:
-                    if flag_achieved_high_voltage > self.variables.ex_freq * 10:
-                        self.log_apt.info('High Voltage Max. is achieved')
-                        if self.conf['tdc'] != "off":
+
+                if self.variables.criteria_ions:
+                    if self.variables.max_ions <= self.total_ions:
+                        self.log_apt.info('Experiment is stopped because total number of ions is achieved')
+                        if self.conf['tdc'] == "on":
                             if self.variables.counter_source == 'TDC':
                                 self.variables.flag_stop_tdc = True
+                                self.variables.stop_flag = True  # Set the STOP flag
                         time.sleep(1)
                         break
-                    flag_achieved_high_voltage += 1
-            if self.variables.criteria_time:
-                if steps + 1 == total_steps:
-                    self.log_apt.info('Experiment time Max. is achieved')
-                    if self.conf['tdc'] == "on":
-                        if self.variables.counter_source == 'TDC':
-                            self.variables.flag_stop_tdc = True
-                    time.sleep(1)
-                    break
-            if self.variables.ex_time != ex_time_temp:
-                total_steps = self.variables.ex_time * self.variables.ex_freq - steps
-                ex_time_temp = self.variables.ex_time
+                if self.variables.criteria_vdc:
+                    if self.vdc_max <= self.specimen_voltage:
+                        if flag_achieved_high_voltage > self.ex_freq * 10:
+                            self.log_apt.info('Experiment is stopped because dc voltage Max. is achieved')
+                            if self.conf['tdc'] != "off":
+                                if self.variables.counter_source == 'TDC':
+                                    self.variables.flag_stop_tdc = True
+                                    self.variables.stop_flag = True  # Set the STOP flag
+                            time.sleep(1)
+                            break
+                        flag_achieved_high_voltage += 1
+                # Measure time
+                end = datetime.datetime.now()
+                time_ex_s.append(int(end.strftime("%S")))
+                time_ex_m.append(int(end.strftime("%M")))
+                time_ex_h.append(int(end.strftime("%H")))
+                end_main_ex_loop = time.time()
+                elapsed_time_exp = end_main_ex_loop - start_main_ex
+                self.variables.elapsed_time = elapsed_time_exp
 
-            # Because experiment time is not a stop criteria, increase total_steps
-            if not self.variables.criteria_time and steps + 1 == total_steps:
-                total_steps += 1
+                if self.variables.criteria_time:
+                    if elapsed_time_exp >= self.variables.ex_time:
+                        self.log_apt.info('Experiment is stopped because experiment time Max. is achieved')
+                        if self.conf['tdc'] == "on":
+                            if self.variables.counter_source == 'TDC':
+                                self.variables.flag_stop_tdc = True
+                                self.variables.stop_flag = True
 
+                end_time = time.perf_counter()
+                elapsed_time = end_time - start_time
+                remaining_time = desired_period - elapsed_time
 
-            # Measure time
-            end = datetime.datetime.now()
-            time_ex_s.append(int(end.strftime("%S")))
-            time_ex_m.append(int(end.strftime("%M")))
-            time_ex_h.append(int(end.strftime("%H")))
-            end_main_ex_loop = time.time()
-            # with self.variables.lock_statistics:
-            self.variables.elapsed_time = end_main_ex_loop - start_main_ex
+                if remaining_time > 0:
+                    self.precise_sleep(remaining_time)
+                elif remaining_time < 0:
+                    index_time += 1
+                    remaining_time_list.append(elapsed_time)
 
-            end_time = time.perf_counter()
-            elapsed_time = end_time - start_time
-            remaining_time = desired_period - elapsed_time
+                steps += 1
 
-            # current_time = time.time()
-            # if current_time - last_save_time >= 60:  # 10 minutes in seconds
-            #     print('temperately save data')
-            #     # Start a new thread to save the data
-            #     save_process = multiprocessing.Process(target=hdf5_creator.hdf_creator, args=(self.variables,
-            #                                             self.conf, time_counter.copy(), time_ex_s.copy(),
-            #                                             time_ex_m.copy(), time_ex_h.copy()), temporarily=True)
-            #     save_process.start()
-            #     last_save_time = current_time
+        self.variables.start_flag = False  # Set the START flag
+        time.sleep(1)
 
-            if remaining_time > 0:
-                self.precise_sleep(remaining_time)
-            elif remaining_time < 0:
-                index_time += 1
-            steps += 1
+        self.log_apt.info('Experiment is finished')
+        print(
+            f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop took longer than %s Millisecond for"
+            f" %s times out of %s iteration{initialize_devices.bcolors.ENDC}" % (
+                int(1000 / self.variables.ex_freq), index_time, steps))
+        self.log_apt.warning(
+            'Experiment loop took longer than %s (ms) for %s times out of %s iteration.'
+            % (int(1000 / self.variables.ex_freq), index_time, steps))
+
+        print('Waiting for TDC process to be finished for maximum 30 seconds...')
+        for i in range(30):
+            if self.variables.flag_finished_tdc:
+                print('TDC process is finished')
+                break
+            print(i)
+            time.sleep(1)
 
         if self.conf['tdc'] == "on":
             # Stop the TDC process
             try:
                 if self.variables.counter_source == 'TDC':
-                    self.tdc_process.join(1)
+                    self.tdc_process.join(2)
                     if self.tdc_process.is_alive():
-                        self.tdc_process.terminate()
                         self.tdc_process.join(1)
-                        # Release all the resources of the TDC process
-                        self.tdc_process.close()
-                elif self.variables.counter_source == 'DRS':
-                    self.drs_process.join(1)
-                    if self.drs_process.is_alive():
-                        self.drs_process.terminate()
-                        self.drs_process.join(1)
-                        # Release all the resources of the TDC process
-                        self.drs_process.close()
+                elif self.variables.counter_source == 'HSD':
+                    self.hsd_process.join(2)
+                    if self.hsd_process.is_alive():
+                        self.hsd_process.join(1)
+
             except Exception as e:
                 print(
-                    f"{initialize_devices.bcolors.WARNING}Warning: The TDC or DRS process cannot be terminated properly{initialize_devices.bcolors.ENDC}")
+                    f"{initialize_devices.bcolors.WARNING}Warning: The TDC or HSD process cannot be terminated properly{initialize_devices.bcolors.ENDC}")
                 print(e)
 
-        self.variables.end_experiment = True
-        time.sleep(1)
-        self.log_apt.info('Experiment is finished')
-        print(
-            f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop took longer than %s Millisecond for"
-            f" %s times{initialize_devices.bcolors.ENDC}" % (
-                int(1000 / self.variables.ex_freq), index_time))
-        self.log_apt.warning(
-            'Experiment loop took longer than %s (ms) for %s times.' % (int(1000 / self.variables.ex_freq), index_time))
+        self.variables.extend_to('main_v_dc', self.main_v_dc)
+        self.variables.extend_to('main_v_p', self.main_v_p)
+        self.variables.extend_to('main_counter', self.main_counter)
+        self.variables.extend_to('main_temperature', self.main_temperature)
+        self.variables.extend_to('main_chamber_vacuum', self.main_chamber_vacuum)
+
         time.sleep(1)
         if self.conf['tdc'] != "off":
             # Stop the TDC process
@@ -517,27 +565,24 @@ class APT_Exp_Control:
                 if self.variables.counter_source == 'TDC':
                     self.tdc_process.join(3)
                     if self.tdc_process.is_alive():
-                        self.tdc_process.terminate()
-                        self.tdc_process.join(1)
+                        self.tdc_process.join(2)
                         # Release all the resources of the TDC process
-                        self.tdc_process.close()
-                elif self.variables.counter_source == 'DRS':
-                    self.drs_process.join(3)
-                    if self.drs_process.is_alive():
-                        self.drs_process.terminate()
-                        self.drs_process.join(1)
+                elif self.variables.counter_source == 'HSD':
+                    self.hsd_process.join(3)
+                    if self.hsd_process.is_alive():
+                        self.hsd_process.join(2)
                         # Release all the resources of the TDC process
-                        self.drs_process.close()
+                print('TDC process is joined')
             except Exception as e:
                 print(
-                    f"{initialize_devices.bcolors.WARNING}Warning: The TDC or DRS process cannot be terminated "
+                    f"{initialize_devices.bcolors.WARNING}Warning: The TDC or HSD process cannot be terminated "
                     f"properly{initialize_devices.bcolors.ENDC}")
                 print(e)
 
         if self.conf['tdc'] == "off":
             if self.variables.counter_source == 'TDC':
                 self.variables.total_ions = len(self.variables.x)
-        elif self.variables.counter_source == 'DRS':
+        elif self.variables.counter_source == 'HSD':
             pass
 
         # Check the length of arrays to be equal
@@ -562,8 +607,12 @@ class APT_Exp_Control:
                     self.variables.main_v_dc_drs, self.variables.main_v_p_drs]):
                 self.log_apt.warning('tdc data have not same length')
 
-        self.log_apt.info('HDF5 file is created')
         self.variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
+        # save data in hdf5 file
+        hdf5_creator.hdf_creator(self.variables, self.conf, time_counter, time_ex_s, time_ex_m, time_ex_h)
+        # Adding results of the experiment to the log file
+        self.log_apt.info('Total number of Ions is: %s' % self.variables.total_ions)
+        self.log_apt.info('HDF5 file is created')
 
         # Save new value of experiment counter
         if os.path.exists("./files/counter_experiments.txt"):
@@ -571,33 +620,62 @@ class APT_Exp_Control:
                 f.write(str(self.variables.counter + 1))
                 self.log_apt.info('Experiment counter is increased')
 
-        # Adding results of the experiment to the log file
-        self.log_apt.info('Total number of Ions is: %s' % self.variables.total_ions)
-
-        # send an email
-        subject = 'Experiment {} Report'.format(self.variables.hdf5_data_name)
-        elapsed_time_temp = float("{:.3f}".format(self.variables.elapsed_time))
-        message = 'The experiment was started at: {}\n' \
-                  'The experiment was ended at: {}\n' \
-                  'Experiment duration: {}\n' \
-                  'Total number of ions: {}\n'.format(self.variables.start_time,
-                                                      self.variables.end_time, elapsed_time_temp,
-                                                      self.variables.total_ions)
-
-        if len(self.variables.email) > 3:
-            self.log_apt.info('Email is sent')
-            email_send.send_email(self.variables.email, subject, message)
-
-        # save data in hdf5 file
-        hdf5_creator.hdf_creator(self.variables, self.conf, time_counter, time_ex_s, time_ex_m, time_ex_h)
-
         # save setup parameters and run statistics in a txt file
         experiment_statistics.save_statistics_apt(self.variables)
+
+        # send an email
+        if len(self.variables.email) > 3:
+            subject = 'Experiment {} Report on {}'.format(self.variables.hdf5_data_name, self.variables.start_time)
+            elapsed_time_temp = float("{:.3f}".format(self.variables.elapsed_time))
+            message = 'The experiment was started at: {}\n' \
+                      'The experiment was ended at: {}\n' \
+                      'Experiment duration: {}\n' \
+                      'Total number of ions: {}\n\n'.format(self.variables.start_time,
+                                                            self.variables.end_time, elapsed_time_temp,
+                                                            self.variables.total_ions)
+
+            additional_info = 'Username: {}\n'.format(self.variables.user_name)
+            additional_info += 'Experiment Name: {}\n'.format(self.variables.ex_name)
+            additional_info += 'Detection Rate (%): {}\n'.format(self.variables.detection_rate)
+            additional_info += 'Maximum Number of Ions: {}\n'.format(self.variables.max_ions)
+            additional_info += 'Counter source: {}\n'.format(self.variables.counter_source)
+            additional_info += 'Pulse Fraction (%): {}\n'.format(self.variables.pulse_fraction)
+            additional_info += 'Pulse Frequency (kHz): {}\n'.format(self.variables.pulse_frequency)
+            additional_info += 'Control Algorithm: {}\n'.format(self.variables.control_algorithm)
+            additional_info += 'pulse_mode: {}\n'.format(self.variables.pulse_mode)
+            additional_info += 'Experiment Control Refresh freq. (Hz): {}\n'.format(self.variables.ex_freq)
+            additional_info += 'K_p Upwards: {}\n'.format(self.variables.vdc_step_up)
+            additional_info += 'K_p Downwards: {}\n'.format(self.variables.vdc_step_down)
+            additional_info += 'Specimen start Voltage (V): {}\n'.format(self.variables.vdc_min)
+            additional_info += 'Specimen Stop Voltage (V): {}\n'.format(self.variables.vdc_max)
+            additional_info += 'Temperature (C): {}\n'.format(self.variables.temperature)
+            additional_info += 'Vacuum (mbar): {}\n'.format(self.variables.vacuum_main)
+
+            if self.variables.pulse_mode == 'Voltage':
+                additional_info += 'Pulse start Voltage (V): {}\n'.format(self.variables.v_p_min)
+                additional_info += 'Pulse Stop Voltage (V): {}\n'.format(self.variables.v_p_max)
+                additional_info += 'Specimen Max Achieved Pulse Voltage (V): {:.3f}\n\n'.format(
+                    self.variables.pulse_voltage)
+
+            additional_info += 'Specimen Max Achieved dc Voltage (V): {:.3f}\n'.format(self.variables.specimen_voltage)
+            additional_info += 'Experiment Elapsed Time (Sec): {:.3f}\n'.format(self.variables.elapsed_time)
+            additional_info += 'Experiment Total Ions: {}\n\n'.format(self.variables.total_ions)
+
+            additional_info += 'Email: {}\n'.format(self.variables.email)
+
+            additional_info += 'The experiment was conducted using PyCCAPT software.'
+
+            message += additional_info
+            email_send.send_email(self.variables.email, subject, message)
+            self.log_apt.info('Email is sent')
+
+
 
         self.experiment_finished_event.set()
         # Clear up all the variables and deinitialize devices
         self.clear_up()
         self.log_apt.info('Variables and devices are cleared and deinitialized')
+        self.variables.flag_end_experiment = True
 
     def clear_up(self):
         """
@@ -614,14 +692,10 @@ class APT_Exp_Control:
             """
             Reset all the global variables.
             """
-            self.variables.stop_flag = False
-            self.variables.end_experiment = False
-            self.variables.start_flag = False
-            self.variables.flag_stop_tdc = False
+            self.variables.vdc_hold = False
+            self.variables.flag_finished_tdc = False
             self.variables.detection_rate_current = 0.0
             self.variables.count = 0
-            self.variables.count_temp = 0
-            self.variables.count_last = 0
             self.variables.index_plot = 0
             self.variables.index_save_image = 0
             self.variables.index_wait_on_plot_start = 0
@@ -678,20 +752,30 @@ class APT_Exp_Control:
 
         self.log_apt.info('Starting cleanup')
 
-        if self.conf['v_dc'] != "off":
-            # Turn off the v_dc
-            self.command_v_dc('F0')
-            self.com_port_v_dc.close()
+        try:
+            if self.conf['v_dc'] != "off":
+                # Turn off the v_dc
+                self.command_v_dc('F0')
+                self.com_port_v_dc.close()
+        except:
+            pass
 
-        if self.conf['v_p'] != "off":
-            # Turn off the v_p
-            self.com_port_v_p.write('VOLT 0')
-            self.com_port_v_p.write('OUTPut OFF')
-            self.com_port_v_p.close()
+        try:
+            if self.conf['v_p'] != "off":
+                # Turn off the v_p
+                self.com_port_v_p.write('VOLT 0')
+                self.com_port_v_p.write('OUTPut OFF')
+                self.com_port_v_p.close()
+        except:
+            pass
 
-        if self.conf['signal_generator'] != "off":
-            # Turn off the signal generator
-            signal_generator.turn_off_signal_generator()
+        try:
+            if self.conf['signal_generator'] != "off":
+                # Turn off the signal generator
+                signal_generator.turn_off_signal_generator()
+
+        except:
+            pass
 
         # Reset variables
         cleanup_variables()
@@ -704,18 +788,22 @@ def run_experiment(variables, conf, experiment_finished_event):
 
     """
 
-    from line_profiler import LineProfiler
+    # from line_profiler import LineProfiler
+    #
+    # lp1 = LineProfiler()
+    #
+    # # Run the experiment
+    # apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event)
+    #
+    # lp1.add_function(apt_exp_control.run_experiment)
+    #
+    # lp1.add_function(apt_exp_control.main_ex_loop)
+    #
+    # # Run the profiler
+    # lp1(apt_exp_control.run_experiment)()
+    # # Save the profiling result to a file
+    # lp1.dump_stats('run_experiment.lprof')
 
-    lp1 = LineProfiler()
-
-    # Run the experiment
     apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event)
 
-    lp1.add_function(apt_exp_control.run_experiment)
-
-    lp1.add_function(apt_exp_control.main_ex_loop)
-
-    # Run the profiler
-    lp1(apt_exp_control.run_experiment)()
-    # Save the profiling result to a file
-    lp1.dump_stats('run_experiment.lprof')
+    apt_exp_control.run_experiment()

@@ -30,6 +30,11 @@ class Ui_Visualization(object):
 			conf: Configuration settings.
 			update_timer (QTimer): QTimer for updating graphs.
 		"""
+		self.counter_source = ''
+		self.index_plot_save = 0
+		self.index_plot = 0
+		self.index_wait_on_plot_start = 0
+		self.index_auto_scale_graph = 0
 		self.variables = variables
 		self.conf = conf
 		self.update_timer = QTimer()  # Create a QTimer for updating graphs
@@ -163,16 +168,16 @@ class Ui_Visualization(object):
 		Visualization.setTabOrder(self.detector_heatmap, self.histogram)
 
 		###
-		# Start the update timer with a 333 ms interval (3 times per second)
-		self.update_timer.start(333)
+		# Start the update timer with a 500 ms interval (2 times per second)
+		self.update_timer.start(500)
 
 		# High Voltage visualization ################
-		self.x_vdc = np.arange(1000)  # 1000 time points
-		self.y_vdc = np.zeros(1000)  # 1000 data points
-		self.y_vdc[:] = np.nan
+		self.x_vdc = [i * 0.5 for i in range(200)]  # 100 time points
+		self.y_vdc = [0.0] * 200  # 200 data points, all initialized to 0.0
+		self.y_vdc[:] = [np.nan] * len(self.y_vdc)
 		pen_vdc = pg.mkPen(color=(255, 0, 0), width=6)
 		self.data_line_vdc = self.vdc_time.plot(self.x_vdc, self.y_vdc, pen=pen_vdc)
-
+		self.vdc_time.plotItem.setMouseEnabled(x=False)  # Only allow zoom in Y-axis
 		# Add Axis Labels
 		styles = {"color": "#f00", "font-size": "12px"}
 		self.vdc_time.setLabel("left", "High Voltage", units='V', **styles)
@@ -180,13 +185,13 @@ class Ui_Visualization(object):
 		# Add grid
 		self.vdc_time.showGrid(x=True, y=True)
 		# Add Range
-		self.vdc_time.setXRange(0, 1000)
+		self.vdc_time.setXRange(0, 100)
 		self.vdc_time.setYRange(0, 15000)
 
 		# Detection Visualization #########################
-		self.x_dtec = np.arange(1000)  # 1000 time points
-		self.y_dtec = np.zeros(1000)  # 1000 data points
-		self.y_dtec[:] = np.nan
+		self.x_dtec = [i * 0.5 for i in range(200)]  # 100 time points
+		self.y_dtec = [0.0] * 200  # 200 data points, all initialized to 0.0
+		self.y_dtec[:] = [np.nan] * len(self.y_vdc)
 		pen_dtec = pg.mkPen(color=(255, 0, 0), width=6)
 		self.data_line_dtec = self.detection_rate_viz.plot(self.x_dtec, self.y_dtec, pen=pen_dtec)
 
@@ -197,8 +202,9 @@ class Ui_Visualization(object):
 
 		# Add grid
 		self.detection_rate_viz.showGrid(x=True, y=True)
+		self.detection_rate_viz.plotItem.setMouseEnabled(x=False)  # Only allow zoom in Y-axis
 		# Add Range
-		self.detection_rate_viz.setXRange(0, 1000)
+		self.detection_rate_viz.setXRange(0, 100)
 		self.detection_rate_viz.setYRange(0, 100)
 
 		# detector heatmep #####################
@@ -269,30 +275,29 @@ class Ui_Visualization(object):
 		Return:
 			None
 		"""
-		if self.variables.index_auto_scale_graph == 30:
+		if self.index_auto_scale_graph == 30:
 			self.vdc_time.enableAutoRange(axis='x')
 			self.histogram.enableAutoRange(axis='y')
 			self.detection_rate_viz.enableAutoRange(axis='x')
 			self.detection_rate_viz.enableAutoRange(axis='y')
 			self.detector_heatmap.enableAutoRange(axis='x')
 			self.detector_heatmap.enableAutoRange(axis='y')
-			# with self.variables.lock_statistics:
-			self.variables.index_auto_scale_graph = 0
-		# with self.variables.lock_statistics:
-		self.variables.index_auto_scale_graph += 1
+			self.index_auto_scale_graph = 0
+
+		self.index_auto_scale_graph += 1
 
 		if self.variables.plot_clear_flag:
-			self.x_vdc = np.arange(1000)  # 1000 time points
-			self.y_vdc = np.zeros(1000)  # 1000 data points
-			self.y_vdc[:] = np.nan
+			self.x_vdc = [i * 0.5 for i in range(200)]  # 100 time points
+			self.y_vdc = [0.0] * 200  # 200 data points, all initialized to 0.0
+			self.y_vdc[:] = [np.nan] * len(self.y_vdc)
 
 			self.vdc_time.clear()
 			pen_vdc = pg.mkPen(color=(255, 0, 0), width=6)
 			self.data_line_vdc = self.vdc_time.plot(self.x_vdc, self.y_vdc, pen=pen_vdc)
 
-			self.x_dtec = np.arange(1000)
-			self.y_dtec = np.zeros(1000)
-			self.y_dtec[:] = np.nan
+			self.x_dtec = [i * 0.5 for i in range(200)]  # 100 time points
+			self.y_dtec = [0.0] * 200  # 200 data points, all initialized to 0.0
+			self.y_dtec[:] = [np.nan] * len(self.y_vdc)
 
 			self.detection_rate_viz.clear()
 			pen_dtec = pg.mkPen(color=(255, 0, 0), width=6)
@@ -308,65 +313,59 @@ class Ui_Visualization(object):
 		# with self.variables.lock_statistics and self.variables.lock_setup_parameters:
 		if self.variables.start_flag:
 			# with self.variables.lock_statistics:
-			if self.variables.index_wait_on_plot_start <= 16:
-				self.variables.index_wait_on_plot_start += 1
+			if self.index_wait_on_plot_start <= 16:
+				if self.index_wait_on_plot_start == 0:
+					self.counter_source = self.variables.counter_source
+				self.index_wait_on_plot_start += 1
 
-			if self.variables.index_wait_on_plot_start >= 8:
+			if self.index_wait_on_plot_start >= 8:
 				# V_dc and V_p
-				if self.variables.index_plot <= 999:
-					# with self.variables.lock_statistics:
-					self.y_vdc[self.variables.index_plot] = int(
-						self.variables.specimen_voltage)  # Add a new value.
+				if self.index_plot < len(self.y_vdc):
+					self.y_vdc[self.index_plot] = int(self.variables.specimen_voltage)  # Add a new value.
 
 				else:
-					self.x_vdc = np.append(self.x_vdc,
-					                       self.x_vdc[
-						                       -1] + 1)  # Add a new value 1 higher than the last.
-					# with self.variables.lock_statistics:
-					self.y_vdc = np.append(self.y_vdc,
-					                       int(self.variables.specimen_voltage))  # Add a new value.
+					x_vdc_last = self.x_vdc[-1]
+					self.x_vdc.append(x_vdc_last + 0.5)  # Add a new value 1 higher than the last.
+					self.y_vdc.append(int(self.variables.specimen_voltage))
 
 				self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
 
 				# Detection Rate Visualization
 				# with self.variables.lock_statistics:
-				if self.variables.index_plot <= 999:
-					self.y_dtec[
-						self.variables.index_plot] = self.variables.detection_rate_current  # Add a new value.
+				if self.index_plot < len(self.y_dtec):
+					self.y_dtec[self.index_plot] = self.variables.detection_rate_current  # Add a new value.
 				else:
-					self.x_dtec = self.x_dtec[1:]  # Remove the first element.
-					self.x_dtec = np.append(self.x_dtec,
-					                        self.x_dtec[
-						                        -1] + 1)  # Add a new value 1 higher than the last.
-					self.y_dtec = self.y_dtec[1:]
-					self.y_dtec = np.append(self.y_dtec, self.variables.detection_rate_current)
+					# self.x_dtec = self.x_dtec[1:]  # Remove the first element.
+					x_dtec_last = self.x_dtec[-1]
+					self.x_dtec.append(x_dtec_last + 0.5)  # Add a new value 1 higher than the last.
+					self.y_dtec.append(self.variables.detection_rate_current)
 
+				# self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 				self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 				# Increase the index
 				# with self.variables.lock_statistics:
-				self.variables.index_plot += 1
+				self.index_plot += 1
 			# mass spectrum
 
-			if self.variables.counter_source == 'TDC' and self.variables.total_ions > 0 and \
-					self.variables.index_wait_on_plot_start > 16:
-				# with self.variables.lock_data_plot:
+			if self.counter_source == 'TDC' and self.variables.total_ions > 0 and \
+					self.index_wait_on_plot_start > 16:
+
 				xx = np.array(self.variables.x_plot)
 				yy = np.array(self.variables.y_plot)
 				tt = np.array(self.variables.t_plot)
 				main_v_dc_dld = np.array(self.variables.main_v_dc_plot)
 				try:
 					if self.conf["visualization"] == "tof":
-						viz = tt[tt < 5000]
+						viz = tt[tt < self.conf["max_tof"]]
 					elif self.conf["visualization"] == "mc":
-						max_lenght = min(len(xx), len(yy),
-						                 len(tt), len(main_v_dc_dld))
-						viz = tof2mc_simple.tof_2_mc(tt[:max_lenght], 0,
+						max_lenght = min(len(xx), len(yy), len(tt), len(main_v_dc_dld))
+						viz = tof2mc_simple.tof_2_mc(tt[:max_lenght], self.conf["t_0"],
 						                             main_v_dc_dld[
 						                             :max_lenght],
 						                             xx[:max_lenght],
 						                             yy[:max_lenght],
 						                             flightPathLength=self.conf["flight_path_length"])
-						viz = viz[viz < 400]
+						viz = viz[viz < self.conf["max_mass"]]
 					# bin size of 0.1
 					bin_size = self.conf["bin_size"]
 					bins = np.linspace(np.min(viz), np.max(viz), round(np.max(viz) / bin_size))
@@ -374,17 +373,15 @@ class Ui_Visualization(object):
 					# put 1 instead of zero to fix problem of log(0) = -inf
 					y_tof_mc[y_tof_mc == 0] = 1
 					self.histogram.clear()
-					# self.histogram.addItem(
-					#     pg.BarGraphItem(x=x_tof_mc[:-1], height=y_tof_mc, width=np.diff(bins), brush='black'))
-					# self.histogram.plot(x_tof_mc, y_tof_mc, stepMode="center", fillLevel=0, fillOutline=False,
-					#                     brush=(0, 0, 0, 150), name="num ions: %s" % self.variables.total_ions)
-					# Create y-values for the steps by repeating the values in hist
-					y_tof_mc = np.repeat(y_tof_mc, 2)
-					# Create x-values for the steps by using the bin edges
-					x_tof_mc = x_tof_mc.repeat(2)[1:-1]
-					x_tof_mc = np.append(x_tof_mc, x_tof_mc[-1])
-					self.histogram.plot(x_tof_mc, y_tof_mc, stepMode=True, fillLevel=0, fillOutline=False,
-					                    brush=(0, 0, 0, 150), name="num ions: %s" % self.variables.total_ions)
+					self.histogram.plot(x_tof_mc, y_tof_mc, stepMode="center", fillLevel=0, fillOutline=True,
+					                    brush='black', name="num ions: %s" % self.variables.total_ions)
+				# Create y-values for the steps by repeating the values in hist
+				# y_tof_mc = np.repeat(y_tof_mc, 2)
+				# # Create x-values for the steps by using the bin edges
+				# x_tof_mc = x_tof_mc.repeat(2)[1:-1]
+				# x_tof_mc = np.append(x_tof_mc, x_tof_mc[-1])
+				# self.histogram.plot(x_tof_mc, y_tof_mc, stepMode=True, fillLevel=0, fillOutline=False,
+				#                     brush=(0, 0, 0, 150), name="num ions: %s" % self.variables.total_ions)
 
 				except Exception as e:
 					print(
@@ -393,17 +390,14 @@ class Ui_Visualization(object):
 				# Visualization
 				try:
 					# adding points to the scatter plot
-					# with self.variables.lock_statistics:
-					self.scatter.setSize(self.variables.hitmap_plot_size)
-					# with self.variables.lock_setup_parameters:
-					hit_display = self.variables.hit_display
-					# with self.variables.lock_data_plot:
-					x = np.array(self.variables.x_plot)
-					y = np.array(self.variables.y_plot)
 
-					min_length = min(len(x), len(y))
-					x = x[-min_length:] * 10
-					y = y[-min_length:] * 10
+					self.scatter.setSize(self.variables.hitmap_plot_size)
+
+					hit_display = self.variables.hit_display
+
+					min_length = min(len(xx), len(yy))
+					x = xx[-min_length:] * 10
+					y = yy[-min_length:] * 10
 
 					if self.variables.reset_heatmap:
 						self.index_plot_heatmap = len(x)
@@ -427,10 +421,10 @@ class Ui_Visualization(object):
 						f"{initialize_devices.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
 					print(e)
 			# save plots to the file
-			if self.variables.index_plot_save % 100 == 0 and self.variables.index_plot_save != 0:
+			if self.index_plot_save % 100 == 0 and self.index_plot_save != 0:
 				# with self.variables.lock_setup_parameters:
 				path_meta = self.variables.path_meta
-				index_plot_save = int(self.variables.index_plot_save / 100)
+				index_plot_save = int(self.index_plot_save / 100)
 				exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
 				exporter.params['width'] = 1000  # Set the width of the image
 				exporter.params['height'] = 800  # Set the height of the image
@@ -449,11 +443,10 @@ class Ui_Visualization(object):
 				exporter.export(path_meta + '/tof_%s.png' % index_plot_save)
 
 				screenshot = QtWidgets.QApplication.primaryScreen().grabWindow(self.visualization_window.winId())
-				# with self.variables.lock_setup_parameters:
 				screenshot.save(path_meta + '\screenshot_%s.png' % index_plot_save, 'png')
 
 			# Increase the index
-			self.variables.index_plot_save += 1
+			self.index_plot_save += 1
 
 	def stop(self):
 		"""
@@ -498,6 +491,10 @@ class VisualizationWindow(QtWidgets.QWidget):
 		# Additional cleanup code here if needed
 		super().closeEvent(event)
 
+	def setWindowStyleFusion(self):
+		# Set the Fusion style
+		QtWidgets.QApplication.setStyle("Fusion")
+
 
 if __name__ == "__main__":
 	try:
@@ -510,7 +507,6 @@ if __name__ == "__main__":
 		print('Can not load the configuration file')
 		print(e)
 		sys.exit()
-	# Initialize global experiment variables
 	manager = multiprocessing.Manager()
 	lock = manager.Lock()
 	lock_lists = manager.Lock()
@@ -518,6 +514,7 @@ if __name__ == "__main__":
 	variables = share_variables.Variables(conf, ns, lock, lock_lists)
 
 	app = QtWidgets.QApplication(sys.argv)
+	app.setStyle('Fusion')
 	Visualization = QtWidgets.QWidget()
 	ui = Ui_Visualization(variables, conf)
 	ui.setupUi(Visualization)

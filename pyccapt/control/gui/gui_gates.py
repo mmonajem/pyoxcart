@@ -312,6 +312,7 @@ class Ui_Gates(object):
 
 class GatesWindow(QtWidgets.QWidget):
 	closed = QtCore.pyqtSignal()  # Define a custom closed signal
+
 	def __init__(self, gui_gates, *args, **kwargs):
 		"""
 		Initialize the GatesWindow class.
@@ -335,6 +336,10 @@ class GatesWindow(QtWidgets.QWidget):
 		self.closed.emit()  # Emit the custom closed signal
 		super().closeEvent(event)
 
+	def setWindowStyleFusion(self):
+		# Set the Fusion style
+		QtWidgets.QApplication.setStyle("Fusion")
+
 
 if __name__ == "__main__":
 	try:
@@ -355,6 +360,7 @@ if __name__ == "__main__":
 	variables = share_variables.Variables(conf, ns, lock, lock_lists)
 
 	app = QtWidgets.QApplication(sys.argv)
+	app.setStyle('Fusion')
 	Gates = QtWidgets.QWidget()
 	ui = Ui_Gates(variables, conf)
 	ui.setupUi(Gates)

@@ -332,15 +332,19 @@ class LaserControlWindow(QtWidgets.QWidget):
         # Additional cleanup code here if needed
         super().closeEvent(event)
 
+    def setWindowStyleFusion(self):
+	    # Set the Fusion style
+	    QtWidgets.QApplication.setStyle("Fusion")
+
 
 if __name__ == "__main__":
-    try:
-        # Load the Json file
-        configFile = 'config.json'
-        p = os.path.abspath(os.path.join(__file__, "../../.."))
-        os.chdir(p)
-        conf = read_files.read_json_file(configFile)
-    except Exception as e:
+	try:
+		# Load the Json file
+		configFile = 'config.json'
+		p = os.path.abspath(os.path.join(__file__, "../../.."))
+		os.chdir(p)
+		conf = read_files.read_json_file(configFile)
+	except Exception as e:
         print('Can not load the configuration file')
         print(e)
         sys.exit()
@@ -352,6 +356,7 @@ if __name__ == "__main__":
     variables = share_variables.Variables(conf, ns, lock, lock_lists)
 
     app = QtWidgets.QApplication(sys.argv)
+	app.setStyle('Fusion')
     Laser_Control = QtWidgets.QWidget()
     ui = Ui_Laser_Control(variables, conf)
     ui.setupUi(Laser_Control)

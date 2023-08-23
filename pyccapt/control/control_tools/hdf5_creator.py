@@ -1,7 +1,7 @@
 import h5py
 
 
-def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h, temporarily=False):
+def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
 	"""
 	Save experiment data to an HDF5 file.
 
@@ -12,15 +12,12 @@ def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h, 
 		time_ex_s (list): A list of seconds for experiment time.
 		time_ex_m (list): A list of minutes for experiment time.
 		time_ex_h (list): A list of hours for experiment time.
-		temporarily  (bool): A boolean value to indicate whether the data is saved temporarily.
 
 	Returns:
 		None
 	"""
-	if temporarily:
-		path = variables.path + '\\meta_data\\data.h5'
-	else:
-		path = variables.path + '\\data_%s.h5' % variables.exp_name
+
+	path = variables.path + '\\data_%s.h5' % variables.exp_name
 	# Save HDF5 file
 	# with variables.lock_data and variables.lock_experiment_variables:
 	with h5py.File(path, "w") as f:
@@ -66,14 +63,14 @@ def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h, 
 			f.create_dataset("tdc/ch5", data=variables.ch5, dtype='i')
 			f.create_dataset("tdc/ch6", data=variables.ch6, dtype='i')
 			f.create_dataset("tdc/ch7", data=variables.ch6, dtype='i')
-		elif conf['tdc'] == "on" and conf['tdc_model'] == 'DRS' and variables.counter_source == 'DRS':
-			f.create_dataset("drs/ch0_time", data=variables.ch0_time, dtype='f')
-			f.create_dataset("drs/ch0_wave", data=variables.ch0_wave, dtype='f')
-			f.create_dataset("drs/ch1_time", data=variables.ch1_time, dtype='f')
-			f.create_dataset("drs/ch1_wave", data=variables.ch1_wave, dtype='f')
-			f.create_dataset("drs/ch2_time", data=variables.ch2_time, dtype='f')
-			f.create_dataset("drs/ch2_wave", data=variables.ch2_wave, dtype='f')
-			f.create_dataset("drs/ch3_time", data=variables.ch3_time, dtype='f')
-			f.create_dataset("drs/ch3_wave", data=variables.ch3_wave, dtype='f')
-			f.create_dataset("drs/high_voltage", data=variables.main_v_dc_drs, dtype='f')
-			f.create_dataset("drs/pulse", data=variables.main_v_p_drs, dtype='f')
+		elif conf['tdc'] == "on" and conf['tdc_model'] == 'HSD' and variables.counter_source == 'HSD':
+			f.create_dataset("hsd/ch0_time", data=variables.ch0_time, dtype='f')
+			f.create_dataset("hsd/ch0_wave", data=variables.ch0_wave, dtype='f')
+			f.create_dataset("hsd/ch1_time", data=variables.ch1_time, dtype='f')
+			f.create_dataset("hsd/ch1_wave", data=variables.ch1_wave, dtype='f')
+			f.create_dataset("hsd/ch2_time", data=variables.ch2_time, dtype='f')
+			f.create_dataset("hsd/ch2_wave", data=variables.ch2_wave, dtype='f')
+			f.create_dataset("hsd/ch3_time", data=variables.ch3_time, dtype='f')
+			f.create_dataset("hsd/ch3_wave", data=variables.ch3_wave, dtype='f')
+			f.create_dataset("hsd/high_voltage", data=variables.main_v_dc_drs, dtype='f')
+			f.create_dataset("hsd/pulse", data=variables.main_v_p_drs, dtype='f')

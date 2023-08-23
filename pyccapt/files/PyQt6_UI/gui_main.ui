@@ -209,10 +209,6 @@
                                         &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI';
                                         font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
                                         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
-                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
                                         margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
                                         font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;{ex_user=user1;&lt;/span&gt;&lt;span
                                         style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;ex_name=test1;&lt;/span&gt;
@@ -376,7 +372,7 @@
                                             </sizepolicy>
                                         </property>
                                         <property name="text">
-                                            <string>Specimen Voltage (V)</string>
+                                            <string>DC Voltage (V)</string>
                                         </property>
                                     </widget>
                                 </item>
@@ -855,7 +851,7 @@
                                             </sizepolicy>
                                         </property>
                                         <property name="text">
-                                            <string>Elapsed Time (S):</string>
+                                            <string>Elapsed Time (s)</string>
                                         </property>
                                     </widget>
                                 </item>
@@ -1203,7 +1199,7 @@
                                             </string>
                                         </property>
                                         <property name="text">
-                                            <string>10</string>
+                                            <string>5</string>
                                         </property>
                                     </widget>
                                 </item>
@@ -1427,10 +1423,7 @@
                                             <bool>true</bool>
                                         </property>
                                         <property name="styleSheet">
-                                            <string notr="true">QCheckBox{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
+                                            <string notr="true"/>
                                         </property>
                                         <property name="text">
                                             <string/>
@@ -1457,10 +1450,7 @@
                                             <bool>true</bool>
                                         </property>
                                         <property name="styleSheet">
-                                            <string notr="true">QCheckBox{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
+                                            <string notr="true"/>
                                         </property>
                                         <property name="text">
                                             <string/>
@@ -1487,10 +1477,7 @@
                                             <bool>true</bool>
                                         </property>
                                         <property name="styleSheet">
-                                            <string notr="true">QCheckBox{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
+                                            <string notr="true"/>
                                         </property>
                                         <property name="text">
                                             <string/>
@@ -1503,21 +1490,21 @@
                                 <item row="3" column="4">
                                     <widget class="QLabel" name="label">
                                         <property name="text">
-                                            <string>Stop at:</string>
+                                            <string>Stop at</string>
                                         </property>
                                     </widget>
                                 </item>
                                 <item row="4" column="4">
                                     <widget class="QLabel" name="label_2">
                                         <property name="text">
-                                            <string>Stop at:</string>
+                                            <string>Stop at</string>
                                         </property>
                                     </widget>
                                 </item>
                                 <item row="7" column="4">
                                     <widget class="QLabel" name="label_3">
                                         <property name="text">
-                                            <string>Stop at:</string>
+                                            <string>Stop at</string>
                                         </property>
                                     </widget>
                                 </item>
@@ -1588,17 +1575,30 @@
         </action>
     </widget>
     <tabstops>
+        <tabstop>gates_control</tabstop>
+        <tabstop>pumps_vaccum</tabstop>
+        <tabstop>camears</tabstop>
+        <tabstop>laser_control</tabstop>
+        <tabstop>stage_control</tabstop>
+        <tabstop>visualization</tabstop>
+        <tabstop>baking</tabstop>
+        <tabstop>start_button</tabstop>
+        <tabstop>stop_button</tabstop>
         <tabstop>parameters_source</tabstop>
         <tabstop>ex_user</tabstop>
         <tabstop>ex_name</tabstop>
         <tabstop>ex_time</tabstop>
+        <tabstop>criteria_time</tabstop>
         <tabstop>max_ions</tabstop>
+        <tabstop>criteria_ions</tabstop>
         <tabstop>ex_freq</tabstop>
         <tabstop>vdc_min</tabstop>
         <tabstop>vdc_max</tabstop>
+        <tabstop>criteria_vdc</tabstop>
         <tabstop>vdc_steps_up</tabstop>
         <tabstop>vdc_steps_down</tabstop>
         <tabstop>control_algorithm</tabstop>
+        <tabstop>pulse_mode</tabstop>
         <tabstop>vp_min</tabstop>
         <tabstop>vp_max</tabstop>
         <tabstop>pulse_fraction</tabstop>
@@ -1610,13 +1610,6 @@
         <tabstop>email</tabstop>
         <tabstop>counter_source</tabstop>
         <tabstop>text_line</tabstop>
-        <tabstop>start_button</tabstop>
-        <tabstop>stop_button</tabstop>
-        <tabstop>gates_control</tabstop>
-        <tabstop>pumps_vaccum</tabstop>
-        <tabstop>camears</tabstop>
-        <tabstop>laser_control</tabstop>
-        <tabstop>visualization</tabstop>
         <tabstop>dc_hold</tabstop>
         <tabstop>elapsed_time</tabstop>
         <tabstop>total_ions</tabstop>

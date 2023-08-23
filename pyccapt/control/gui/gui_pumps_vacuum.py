@@ -249,16 +249,15 @@ class Ui_Pumps_Vacuum(object):
 		self.emitter.vacuum_load_back.connect(self.update_vacuum_load_back)
 		self.emitter.vacuum_load.connect(self.update_vacuum_load)
 		# Connect the bool_flag_while_loop signal to a slot
-		self.emitter.bool_flag_while_loop.connect(self.update_bool_flag_while_loop_gauges)
 		self.emitter.bool_flag_while_loop.emit(True)
 
 		# Thread for reading gauges
 		if self.conf['gauges'] == "on":
 			# Thread for reading gauges
-			gauges_thread = threading.Thread(target=initialize_devices.state_update,
-			                                 args=(self.conf, self.variables, self.emitter,))
-			gauges_thread.setDaemon(True)
-			gauges_thread.start()
+			self.gauges_thread = threading.Thread(target=initialize_devices.state_update,
+			                                      args=(self.conf, self.variables, self.emitter,))
+			self.gauges_thread.setDaemon(True)
+			self.gauges_thread.start()
 
 		# Create a QTimer to hide the warning message after 8 seconds
 		self.timer = QTimer(self.parent)
@@ -355,18 +354,6 @@ class Ui_Pumps_Vacuum(object):
 		"""
 		self.vacuum_load_lock_back.display('{:.2e}'.format(value))
 
-	def update_bool_flag_while_loop_gauges(self, value):
-		"""
-		Update the vacuum value in the GUI
-		Args:
-			value: the temperature value
-
-		Return:
-			None
-		"""
-		# Connect the bool_flag_while_loop signal to a slot in this function
-		# with self.variables.lock_statistics:
-		self.variables.bool_flag_while_loop_gages = value
 
 	def hideMessage(self):
 		"""
@@ -485,17 +472,21 @@ class PumpsVacuumWindow(QtWidgets.QWidget):
 
 	def closeEvent(self, event):
 		"""
-		Close event for the window.
+			Close event for the window.
 
-		Args:
-			event: Close event.
+			Args:
+				event: Close event.
 		"""
 		self.gui_pumps_vacuum.stop()  # Call the stop method to stop any background activity
 		self.signal_emitter.bool_flag_while_loop.emit(False)
-		time.sleep(1)
+		self.gui_pumps_vacuum.gauges_thread.join(1)
 		# Additional cleanup code here if needed
 		self.closed.emit()  # Emit the custom closed signal
 		super().closeEvent(event)
+
+	def setWindowStyleFusion(self):
+		# Set the Fusion style
+		QtWidgets.QApplication.setStyle("Fusion")
 
 
 if __name__ == "__main__":
@@ -517,6 +508,7 @@ if __name__ == "__main__":
 	variables = share_variables.Variables(conf, ns, lock, lock_lists)
 
 	app = QtWidgets.QApplication(sys.argv)
+	app.setStyle('Fusion')
 	Pumps_vacuum = QtWidgets.QWidget()
 	signal_emitter = SignalEmitter()
 	ui = Ui_Pumps_Vacuum(variables, conf, signal_emitter)

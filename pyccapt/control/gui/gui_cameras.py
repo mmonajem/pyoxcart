@@ -289,13 +289,13 @@ class Ui_Cameras_Alignment(object):
 		"""
 		if not self.variables.light:
 			self.led_light.setPixmap(self.led_green)
-			# with self.variables.lock_setup_parameters:
+
 			self.variables.light = True
 			self.variables.light_switch = True
 
 		elif self.variables.light:
 			self.led_light.setPixmap(self.led_red)
-			# with self.variables.lock_setup_parameters:
+
 			self.variables.light = False
 			self.variables.light_switch = True
 
@@ -316,7 +316,6 @@ class Ui_Cameras_Alignment(object):
 			# Thread for reading cameras
 			self.camera_thread = threading.Thread(target=camera.cameras_run, args=(self.variables, self.emitter))
 			self.camera_thread.setDaemon(True)
-			# with self.variables.lock_setup_parameters:
 			self.variables.flag_camera_grab = True
 			self.camera_thread.start()
 
@@ -338,7 +337,6 @@ class Ui_Cameras_Alignment(object):
 	def cameras_screenshot(self):
 		if self.variables.flag_cameras_take_screenshot:
 			screenshot = QtWidgets.QApplication.primaryScreen().grabWindow(self.Cameras_Alignment.winId())
-			# with self.variables.lock_setup_parameters:
 			screenshot.save(self.variables.path_meta + '\screenshot_camera.png', 'png')
 class SignalEmitter(QObject):
 	img0_orig = pyqtSignal(np.ndarray)
@@ -391,6 +389,9 @@ class CamerasAlignmentWindow(QtWidgets.QWidget):
 			self.show()
 			self.variables.flag_camera_win_show = False
 
+	def setWindowStyleFusion(self):
+		# Set the Fusion style
+		QtWidgets.QApplication.setStyle("Fusion")
 
 
 def run_camera_window(variables, conf, camera_closed_event, camera_win_front):
@@ -399,9 +400,8 @@ def run_camera_window(variables, conf, camera_closed_event, camera_win_front):
 	"""
 
 	app = QtWidgets.QApplication(sys.argv)  # <-- Create a new QApplication instance
+	app.setStyle('Fusion')
 	SignalEmitter_Cameras = SignalEmitter()
-	# variables = copy.deepcopy(variables)
-	# conf = copy.deepcopy(conf)
 
 	gui_cameras_alignment = Ui_Cameras_Alignment(variables, conf, SignalEmitter_Cameras)
 	Cameras_alignment = CamerasAlignmentWindow(variables, gui_cameras_alignment, camera_closed_event, camera_win_front,
@@ -432,6 +432,7 @@ if __name__ == "__main__":
 	variables = share_variables.Variables(conf, ns, lock, lock_lists)
 
 	app = QtWidgets.QApplication(sys.argv)
+	app.setStyle('Fusion')
 	Cameras_Alignment = QtWidgets.QWidget()
 	signal_emitter = SignalEmitter()
 	ui = Ui_Cameras_Alignment(variables, conf, signal_emitter)

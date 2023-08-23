@@ -88,7 +88,7 @@ class Cameras:
 			img0 = image0.GetArray()
 			image1 = self.converter.Convert(grabResult1)
 			img1 = image1.GetArray()
-			# self.variables.x.append(1)
+
 			# Original size is 2048 * 2448
 			# Resize the original to the required size. Utilize the openCV tool.
 			self.img0_orig = img0
@@ -100,7 +100,7 @@ class Cameras:
 
 			self.img1_orig = img1
 			# Define the region to crop: (x, y, width, height)
-			crop_region = (2050, 1000, 300, 100)
+			crop_region = (2050, 1050, 300, 100)
 			# Crop the image
 			self.img1_zoom = self.img1_orig[crop_region[1]:crop_region[1] + crop_region[3],
 			                 crop_region[0]:crop_region[0] + crop_region[2]]
@@ -116,16 +116,14 @@ class Cameras:
 			self.emitter.img1_orig.emit(np.swapaxes(self.img1_orig, 0, 1))
 
 			# Store the captured processed image at a desired location.
-			# with self.variables.lock_statistics:
 			if elapsed_time >= self.variables.save_meta_interval and self.variables.start_flag:
-				start_time = current_time  # Update the start time
-				cv2.imwrite(self.variables.path_meta + "/side_%s.png" % self.index_save_image, self.img0_orig)
-				cv2.imwrite(self.variables.path_meta + "/side_zoom_%s.png" % self.index_save_image, self.img0_zoom)
-				cv2.imwrite(self.variables.path_meta + '/bottom_%s.png' % self.index_save_image, self.img1_orig)
-				cv2.imwrite(self.variables.path_meta + '/bottom_zoom_%s.png' % self.index_save_image,
-				            self.img1_zoom)
+				start_time = time.time()  # Update the start time
+				path_meta = self.variables.path_meta
+				cv2.imwrite(path_meta + "/side_%s.png" % self.index_save_image, self.img0_orig)
+				cv2.imwrite(path_meta + "/side_zoom_%s.png" % self.index_save_image, self.img0_zoom)
+				cv2.imwrite(path_meta + '/bottom_%s.png' % self.index_save_image, self.img1_orig)
+				cv2.imwrite(path_meta + '/bottom_zoom_%s.png' % self.index_save_image, self.img1_zoom)
 				self.index_save_image += 1
-				start_time = time.time()
 
 			grabResult0.Release()
 			grabResult1.Release()

@@ -47,8 +47,6 @@ class DRS:
             data: Read DRS values.
         """
         data = self.drs_lib.Drs_reader(self.obj)
-        if self.log:
-            self.log_drs.info("Function - reader | response - > {} | type -> {}".format(data, type(data)))
         return data
 
     def delete_drs_ox(self):

@@ -69,16 +69,18 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
 
 
 def experiment_measure(variables):
-	from line_profiler import LineProfiler
+	# from line_profiler import LineProfiler
+	#
+	# lp1 = LineProfiler()
+	#
+	# lp1.add_function(experiment_measure_2)
+	#
+	# # Run the profiler
+	# lp1(experiment_measure_2)(variables)
+	# # Save the profiling result to a file
+	# lp1.dump_stats('./../../experiment_measure.lprof')
 
-	lp1 = LineProfiler()
-
-	lp1.add_function(experiment_measure_2)
-
-	# Run the profiler
-	lp1(experiment_measure_2)(variables)
-	# Save the profiling result to a file
-	lp1.dump_stats('experiment_measure.lprof')
+	experiment_measure_2(variables)
 
 
 def experiment_measure_2(variables):
@@ -139,58 +141,113 @@ def experiment_measure_2(variables):
 		else:
 			return 0
 
+	xx_list = []
+	yy_list = []
+	tt_list = []
+	xx = []
+	yy = []
+	tt = []
+	voltage_data = []
+	pulse_data = []
+	start_counter = []
+
+	channel_data = []
+	time_data = []
+	tdc_start_counter = []
+	voltage_data_tdc = []
+	pulse_data_tdc = []
+
 	retcode = bufdatacb.start_measurement(100)
 	if errorcheck(retcode) < 0:
 		return -1
-
-	while True:
+	save_data_plot = 0
+	events_detected = 0
+	start_time = time.time()
+	pulse_frequency = variables.pulse_frequency
+	while not variables.flag_stop_tdc:
 		eventtype, data = bufdatacb.queue.get()
 		eventtype_raw, data_raw = bufdatacb_raw.queue.get()
-
+		specimen_voltage = variables.specimen_voltage
+		pulse_voltage = variables.pulse_voltage
 		if eventtype == QUEUE_DATA:
 			# correct for binning of surface concept
-			xx = (((data["dif1"] - XYBINSHIFT) * XYFACTOR) / 10).tolist()  # from mm to in cm by dividing by 10
-			yy = (((data["dif2"] - XYBINSHIFT) * XYFACTOR) / 10).tolist()  # from mm to in cm by dividing by 10
-			tt = (data["time"] * TOFFACTOR).tolist()  # in ns
-			variables.extend_to('x', xx)
-			variables.extend_to('y', yy)
-			variables.extend_to('t', tt)
-			variables.extend_to('dld_start_counter', data["start_counter"].tolist())
+			xx_dif = data["dif1"]
+			yy_dif = data["dif2"]
+			tt_dif = data["time"]
+			start_counter.extend(data["start_counter"].tolist())
+			xx_tmp = (((xx_dif - XYBINSHIFT) * XYFACTOR) * 0.1).tolist()  # from mm to in cm by dividing by 10
+			yy_tmp = (((yy_dif - XYBINSHIFT) * XYFACTOR) * 0.1).tolist()  # from mm to in cm by dividing by 10
+			tt_tmp = (tt_dif * TOFFACTOR).tolist()  # in ns
+			xx_list.extend(xx_dif)
+			yy_list.extend(yy_dif)
+			tt_list.extend(tt_dif)
+			xx.extend(xx_tmp)
+			yy.extend(yy_tmp)
+			tt.extend(tt_tmp)
+			dc_voltage = np.tile(specimen_voltage, len(xx)).tolist()
+			voltage_data.extend(dc_voltage)
+			pulse_data.extend((np.tile(pulse_voltage, len(xx))).tolist())
+			if save_data_plot == 3:
+				variables.extend_to('main_v_dc_plot', dc_voltage)
+				variables.extend_to('x_plot', xx_tmp)
+				variables.extend_to('y_plot', yy_tmp)
+				variables.extend_to('t_plot', tt_tmp)
+				save_data_plot = 0
+			save_data_plot += 1
 
-			voltage_data = np.tile(variables.specimen_voltage, len(xx))
-			pulse_data = np.tile(variables.pulse_voltage, len(xx))
-			variables.extend_to('main_v_dc_dld_surface_concept', voltage_data.tolist())
-			variables.extend_to('main_p_dld_surface_concept', pulse_data.tolist())
-			# with self.variables.lock_data_plot:
-			variables.extend_to('main_v_dc_plot', voltage_data.tolist())
-			variables.extend_to('x_plot', xx)
-			variables.extend_to('y_plot', yy)
-			variables.extend_to('t_plot', tt)
-			variables.main_p_dld_surface_concept.extend(
-				np.tile(variables.pulse_voltage, len(xx)).tolist())
+		if eventtype_raw == QUEUE_DATA:
+			channel_data_tmp = data_raw["channel"].tolist()
+			tdc_start_counter.extend(data_raw["start_counter"].tolist())
+			time_data.extend(data_raw["time"].tolist())
+			# raw data
+			channel_data.extend(channel_data_tmp)
+			voltage_data_tdc.extend((np.tile(specimen_voltage, len(channel_data_tmp))).tolist())
+			pulse_data_tdc.extend((np.tile(pulse_voltage, len(channel_data_tmp))).tolist())
 
-			channel_data = data_raw["channel"].tolist()
-			variables.extend_to('channel', channel_data)
-			variables.extend_to('time_data', data_raw["time"].tolist())
-			variables.extend_to('tdc_start_counter', data_raw["start_counter"].tolist())
-			voltage_data = np.tile(variables.specimen_voltage, len(channel_data))
-			variables.extend_to('main_v_dc_tdc_surface_concept', voltage_data.tolist())
-			variables.extend_to('main_p_tdc_surface_concept',
-			                    np.tile(variables.pulse_voltage, len(channel_data)).tolist())
 		elif eventtype == QUEUE_ENDOFMEAS:
-			if not variables.flag_stop_tdc:
-				retcode = bufdatacb.start_measurement(100)
-				if errorcheck(retcode) < 0:
-					return -1
-			else:
-				break
+			retcode = bufdatacb.start_measurement(100)
+			if errorcheck(retcode) < 0:
+				return -1
 		else:  # unknown event
 			break
-		if variables.flag_stop_tdc:
-			break
+		# Update the counter
+		events_detected += len(xx_dif)
+		# Calculate the detection rate
+		# Check if the detection rate interval has passed
+		current_time = time.time()
+		if current_time - start_time >= 1.0:
+			elapsed_time = current_time - start_time
+			detection_rate = events_detected / pulse_frequency
+			print("Detection Rate:", detection_rate, "events per second", '---loop_iteration_time', elapsed_time,
+			      '---events_detected', events_detected)
+			# Reset the counter and timer
+			events_detected = 0
+			start_time = current_time
 
+	print("TDC Measurement stopped")
+	np.save(variables.path + "/x_data.npy", np.array(xx_list))
+	np.save(variables.path + "/y_data.npy", np.array(yy_list))
+	np.save(variables.path + "/t_data.npy", np.array(tt_list))
+	np.save(variables.path + "/voltage_data.npy", np.array(voltage_data))
+	np.save(variables.path + "/pulse_data.npy", np.array(pulse_data))
+
+	variables.extend_to('x', xx)
+	variables.extend_to('y', yy)
+	variables.extend_to('t', tt)
+	variables.extend_to('dld_start_counter', start_counter)
+	variables.extend_to('main_v_dc_dld_surface_concept', voltage_data)
+	variables.extend_to('main_p_dld_surface_concept', pulse_data)
+
+	variables.extend_to('channel', channel_data)
+	variables.extend_to('time_data', time_data)
+	variables.extend_to('tdc_start_counter', tdc_start_counter)
+	variables.extend_to('main_v_dc_tdc_surface_concept', voltage_data_tdc)
+	variables.extend_to('main_p_tdc_surface_concept', pulse_data_tdc)
+	print("data save in share variables")
 	time.sleep(0.1)
 	bufdatacb.close()
 	device.deinitialize()
+
+	variables.flag_finished_tdc = True
 
 	return 0

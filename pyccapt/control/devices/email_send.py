@@ -1,6 +1,9 @@
 import datetime
 import smtplib
 import ssl
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 
 def send_email(email, subject, message):
@@ -24,9 +27,34 @@ def send_email(email, subject, message):
 		password = str(f.readline().strip())
 	receiver_email = email
 
-	msg = "From: %s\nTo: %s\nSubject: %s\nDate: %s\n\n%s" % (sender_email, email, subject, date, message)
+	# Create a MIME multipart message
+	msg = MIMEMultipart()
+	msg['From'] = sender_email
+	msg['To'] = email
+	msg['Subject'] = subject
+	msg['Date'] = date
 
+	# Introduction text
+	intro_text = "Dear recipient,\n\n"
+	intro_text += "Below is the experiment information:\n\n"
+
+	# Attach the logo image
+	logo_path = './files/logo3.png'  # Path to your logo image
+	with open(logo_path, 'rb') as f:
+		logo_data = f.read()
+	logo_image = MIMEImage(logo_data, name='logo.png')
+	msg.attach(logo_image)
+
+	# Attach the introduction text
+	intro = MIMEText(intro_text, 'plain')
+	msg.attach(intro)
+
+	# Attach the main message
+	main_msg = MIMEText(message, 'plain')
+	msg.attach(main_msg)
+
+	# Send the email
 	context = ssl.create_default_context()
 	with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
 		server.login(sender_email, password)
-		server.sendmail(sender_email, receiver_email, msg)
+		server.sendmail(sender_email, receiver_email, msg.as_string())

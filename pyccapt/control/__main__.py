@@ -40,6 +40,7 @@ def load_gui():
     variables = share_variables.Variables(conf, ns, lock, lock_lists)
 
     app = QtWidgets.QApplication(sys.argv)
+    app.setStyle('Fusion')
     pyccapt_window = QtWidgets.QMainWindow()
     signal_emitter = gui_main.SignalEmitter()
     ui = gui_main.Ui_PyCCAPT(variables, conf, signal_emitter)
