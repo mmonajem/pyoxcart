@@ -1,79 +1,68 @@
-"""
-This is the script for testing Edwaards guges.
-"""
-
 import serial
 
 
-class EdwardsAGC(object):
-    """ Primitive driver for Edwards Active Gauge Controler
-    Complete manual found at
-    http://www.idealvac.com/files/brochures/Edwards_AGC_D386-52-880_IssueM.pdf """
+class EdwardsAGC:
+	"""Primitive driver for Edwards Active Gauge Controller.
 
-    def __init__(self, port='COM1'):
-        self.serial = serial.Serial(port, baudrate=9600, timeout=0.5)
+	Complete manual can be found at:
+	http://www.idealvac.com/files/brochures/Edwards_AGC_D386-52-880_IssueM.pdf
+	"""
 
-    def comm(self, command):
-        """ Implements basic communication """
-        comm = command + "\r\n"
-        # for _ in range(0, 10):  # Seems you no to query several times to get correct reply
-        #     self.serial.write(comm.encode())
-        #     complete_string = self.serial.readline().decode()
-        #     print(complete_string)
-        self.serial.write(comm.encode())
-        complete_string = self.serial.readline().decode()
-        complete_string = complete_string.strip()
-        return complete_string
+	def __init__(self, port='COM1'):
+		self.serial = serial.Serial(port, baudrate=9600, timeout=0.5)
 
-    def gauge_type(self, gauge_number):
-        """ Return the type of gauge """
-        types = {0: 'Not Fitted', 1: '590 CM capacitance manometer',
-                 15: 'Active strain gauge', 5: 'Pirani L low pressure',
-                 20: 'Wide range gauge'}  # Feel free to fill in....
+	def comm(self, command):
+		"""Implements basic communication."""
+		comm = command + "\r\n"
+		self.serial.write(comm.encode())
+		complete_string = self.serial.readline().decode().strip()
+		return complete_string
 
-        type_number = int(self.comm('?GV ' + str(gauge_number)))
-        gauge_type = types[type_number]
-        return gauge_type
+	def gauge_type(self, gauge_number):
+		"""Return the type of gauge."""
+		types = {0: 'Not Fitted', 1: '590 CM capacitance manometer',
+		         15: 'Active strain gauge', 5: 'Pirani L low pressure',
+		         20: 'Wide range gauge'}
 
-    def read_pressure(self, gauge_number):
-        """ Read the pressure of a gauge """
-        pressure_string = self.comm('?V ' + str(gauge_number))
-        pressure_value = float(pressure_string)
-        return pressure_value
+		type_number = int(self.comm('?GV ' + str(gauge_number)))
+		gauge_type = types.get(type_number, 'Unknown Type')
+		return gauge_type
 
-    def pressure_unit(self, gauge_number):
-        """ Read the unit of a gauge """
-        units = {0: 'mbar', 1: 'torr'}
-        unit_string = self.comm('?NU ' + str(gauge_number))
-        unit_number = int(unit_string)
-        unit = units[unit_number]
-        return unit
+	def read_pressure(self, gauge_number):
+		"""Read the pressure of a gauge."""
+		pressure_string = self.comm('?V ' + str(gauge_number))
+		pressure_value = float(pressure_string)
+		return pressure_value
 
-    def current_error(self):
-        """ Read the current error code """
-        error_code = self.comm('?SY')
-        return error_code
+	def pressure_unit(self, gauge_number):
+		"""Read the unit of a gauge."""
+		units = {0: 'mbar', 1: 'torr'}
+		unit_string = self.comm('?NU ' + str(gauge_number))
+		unit_number = int(unit_string)
+		unit = units.get(unit_number, 'Unknown Unit')
+		return unit
 
-    def my_commands(self):
-        """ Return the software version of the controller """
-        # Presures
-        return self.comm('?V940')
-        # return self.comm('?V911') # Backing speed
-        # Turbo pump On and Off
-        # return self.comm('!C933 1')
+	def current_error(self):
+		"""Read the current error code."""
+		error_code = self.comm('?SY')
+		return error_code
 
-        # return self.comm('!C904 1')
-        # return self.comm('!C910 1')
+	def my_commands(self):
+		"""Return the software version of the controller."""
+		return self.comm('?V940')
+	# Other commands can be added here
 
 
 if __name__ == '__main__':
-    E_AGC = EdwardsAGC('COM2')
-    # print(E_AGC.gauge_type(4))
-    # print(E_AGC.my_commands())
-    print(E_AGC.my_commands())
-    # print(E_AGC.read_pressure(1))
-    # print(E_AGC.read_pressure(2))
-    # print(E_AGC.read_pressure(3))
-    # print(E_AGC.read_pressure(4))
-    # print(E_AGC.pressure_unit(1))
-    # print(E_AGC.current_error())
+	E_AGC = EdwardsAGC('COM2')
+	# Example usage of the methods
+	print(E_AGC.my_commands())
+
+	# print(E_AGC.gauge_type(4))
+	# print(E_AGC.my_commands())
+	# print(E_AGC.read_pressure(1))
+	# print(E_AGC.read_pressure(2))
+	# print(E_AGC.read_pressure(3))
+	# print(E_AGC.read_pressure(4))
+	# print(E_AGC.pressure_unit(1))
+	# print(E_AGC.current_error())

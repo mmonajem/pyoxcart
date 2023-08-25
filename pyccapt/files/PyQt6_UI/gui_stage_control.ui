@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>Stage_Control</class>
+    <widget class="QWidget" name="Stage_Control">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>226</width>
+                <height>166</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>Form</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_4">
+            <item row="0" column="0">
+                <layout class="QGridLayout" name="gridLayout_3">
+                    <item row="0" column="0">
+                        <layout class="QGridLayout" name="gridLayout_2">
+                            <item row="0" column="0">
+                                <widget class="QPushButton" name="forward">
+                                    <property name="styleSheet">
+                                        <string notr="true">QPushButton {
+                                            border: none;
+                                            background-image: url('arrow.png');
+                                            background-repeat: no-repeat;
+                                            background-position: center;
+                                            background-color: transparent;
+                                            width: 40px;
+                                            height: 40px;
+                                            }
+                                        </string>
+                                    </property>
+                                    <property name="text">
+                                        <string>Forward</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item row="0" column="1">
+                                <widget class="QPushButton" name="left">
+                                    <property name="styleSheet">
+                                        <string notr="true">QPushButton {
+                                            border: none;
+                                            background-image: url('arrow.png');
+                                            background-repeat: no-repeat;
+                                            background-position: center;
+                                            background-color: transparent;
+                                            width: 40px;
+                                            height: 40px;
+                                            }
+                                        </string>
+                                    </property>
+                                    <property name="text">
+                                        <string>Left</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item row="0" column="2">
+                                <widget class="QPushButton" name="up">
+                                    <property name="styleSheet">
+                                        <string notr="true">QPushButton {
+                                            border: none;
+                                            background-image: url('arrow.png');
+                                            background-repeat: no-repeat;
+                                            background-position: center;
+                                            background-color: transparent;
+                                            width: 40px;
+                                            height: 40px;
+                                            }
+                                        </string>
+                                    </property>
+                                    <property name="text">
+                                        <string>Up</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item row="1" column="0">
+                                <widget class="QPushButton" name="back">
+                                    <property name="styleSheet">
+                                        <string notr="true">QPushButton {
+                                            border: none;
+                                            background-image: url('arrow.png');
+                                            background-repeat: no-repeat;
+                                            background-position: center;
+                                            background-color: transparent;
+                                            width: 40px;
+                                            height: 40px;
+                                            }
+                                        </string>
+                                    </property>
+                                    <property name="text">
+                                        <string>Back</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item row="1" column="1">
+                                <widget class="QPushButton" name="right">
+                                    <property name="styleSheet">
+                                        <string notr="true">QPushButton {
+                                            border: none;
+                                            background-image: url('arrow.png');
+                                            background-repeat: no-repeat;
+                                            background-position: center;
+                                            background-color: transparent;
+                                            width: 40px;
+                                            height: 40px;
+                                            }
+                                        </string>
+                                    </property>
+                                    <property name="text">
+                                        <string>Right</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item row="1" column="2">
+                                <widget class="QPushButton" name="down">
+                                    <property name="styleSheet">
+                                        <string notr="true">QPushButton {
+                                            border: none;
+                                            background-image: url('arrow.png');
+                                            background-repeat: no-repeat;
+                                            background-position: center;
+                                            background-color: transparent;
+                                            width: 40px;
+                                            height: 40px;
+                                            }
+                                        </string>
+                                    </property>
+                                    <property name="text">
+                                        <string>Down</string>
+                                    </property>
+                                </widget>
+                            </item>
+                        </layout>
+                    </item>
+                    <item row="1" column="0">
+                        <layout class="QGridLayout" name="gridLayout">
+                            <item row="0" column="0">
+                                <widget class="QLCDNumber" name="x_cord"/>
+                            </item>
+                            <item row="0" column="1">
+                                <widget class="QLCDNumber" name="y_cord"/>
+                            </item>
+                            <item row="0" column="2">
+                                <widget class="QLCDNumber" name="z_cord"/>
+                            </item>
+                            <item row="1" column="0">
+                                <widget class="QSpinBox" name="x_speed"/>
+                            </item>
+                            <item row="1" column="1">
+                                <widget class="QSpinBox" name="y_speed"/>
+                            </item>
+                            <item row="1" column="2">
+                                <widget class="QSpinBox" name="z_speed"/>
+                            </item>
+                        </layout>
+                    </item>
+                </layout>
+            </item>
+        </layout>
+    </widget>
+    <resources/>
+    <connections/>
+</ui>
