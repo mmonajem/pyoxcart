@@ -13,6 +13,12 @@
 This package aims to provide open-source software for controlling atom probe systems and calibrating data.
 The package is modular and adaptable for a wide range of devices in atom probe instrument. So far it is
 capable of collecting data from Surface consept and ReoenDek TDC systems. The package is developed in Python 3.9.
+Additionally, the package encompasses a comprehensive calibration module that encompasses various functionalities,
+including t<sub>0</sub> and flight path calculation, region of interest (ROI) selection, voltage and bowl calibration,
+as well as
+3D reconstruction techniques.
+This module enhances the capabilities of PyCCAPT by providing essential tools for accurate data interpretation and
+analysis.
 
 ----------
 
@@ -46,13 +52,13 @@ visualization, and data acquisition. The following images provide an overview of
    conda create -n apt_env python=3.9
     ```
 
-2- Activate the virtual environment:
+2. Activate the virtual environment:
 
    ```bash
    conda activate apt_env
    ```
 
-3- Install the package:
+3. Install the package:
 
 Clone or download this repository, unzip it, and in the project directory run:
 
