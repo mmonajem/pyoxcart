@@ -37,11 +37,18 @@ def load_gui():
     ns = manager.Namespace()
     variables = share_variables.Variables(conf, ns)
 
+    array_size = conf['maximum_size_plot_arrays']
+    x_plot = multiprocessing.Array('d', array_size)
+    y_plot = multiprocessing.Array('d', array_size)
+    t_plot = multiprocessing.Array('d', array_size)
+    main_v_dc_plot = multiprocessing.Array('d', array_size)
+    counter_plot = multiprocessing.Value('i', 0)
+    lock = multiprocessing.Lock()  # Lock for synchronization
+
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
     pyccapt_window = QtWidgets.QMainWindow()
-    signal_emitter = gui_main.SignalEmitter()
-    ui = gui_main.Ui_PyCCAPT(variables, conf, signal_emitter)
+    ui = gui_main.Ui_PyCCAPT(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
     ui.setupUi(pyccapt_window)
     pyccapt_window.show()
     sys.exit(app.exec())

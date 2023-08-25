@@ -2,7 +2,6 @@ import multiprocessing
 import os
 import re
 import sys
-import time
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
@@ -21,7 +20,7 @@ from pyccapt.control.gui import gui_visualization
 
 class Ui_PyCCAPT(object):
 
-	def __init__(self, variables, conf, parent=None):
+	def __init__(self, variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
 		"""
 				Constructor for the PyCCAPT UI class.
 
@@ -35,8 +34,14 @@ class Ui_PyCCAPT(object):
 		"""
 		self.conf = conf
 		self.variables = variables
-		self.parent = parent
 		self.emitter = SignalEmitter()
+		self.x_plot = x_plot
+		self.y_plot = y_plot
+		self.t_plot = t_plot
+		self.main_v_dc_plot = main_v_dc_plot
+		self.counter_plot = counter_plot
+		self.lock = lock
+		self.experiment_running = False
 		self.experimetn_finished_event = multiprocessing.Event()
 		self.camera_closed_event = multiprocessing.Event()
 		self.visualization_closed_event = multiprocessing.Event()
@@ -887,7 +892,7 @@ class Ui_PyCCAPT(object):
 		self.visualization.clicked.connect(self.open_visualization_win)
 		self.baking.clicked.connect(self.open_baking_win)
 		# Create a QTimer to hide the warning message after 8 seconds
-		self.timer = QtCore.QTimer(self.parent)
+		self.timer = QtCore.QTimer()
 		self.timer.timeout.connect(self.hideMessage)
 		self.camera_close_check_timer = QtCore.QTimer()
 		self.camera_close_check_timer.timeout.connect(self.check_closed_events)
@@ -1053,7 +1058,7 @@ class Ui_PyCCAPT(object):
 		self.label_178.setText(_translate("PyCCAPT", "Control refresh Freq.(Hz)"))
 		self.detection_rate_init.setText(_translate("PyCCAPT", "1"))
 		self.label_195.setText(_translate("PyCCAPT", "Total Ions"))
-		self.set_min_voltage.setText(_translate("PyCCAPT", "Set"))
+		self.set_min_voltage.setText(_translate("PyCCAPT", "Set Volatge"))
 		self.menuFile.setTitle(_translate("PyCCAPT", "File"))
 		self.menuEdit.setTitle(_translate("PyCCAPT", "Edit"))
 		self.menuHelp.setTitle(_translate("PyCCAPT", "Help"))
@@ -1351,7 +1356,9 @@ class Ui_PyCCAPT(object):
         """
 		self.experiment_process = multiprocessing.Process(target=apt_exp_control.run_experiment,
 		                                                  args=(self.variables, self.conf,
-		                                                        self.experimetn_finished_event))
+		                                                        self.experimetn_finished_event, self.x_plot,
+		                                                        self.y_plot, self.t_plot, self.main_v_dc_plot,
+		                                                        self.counter_plot, self.lock))
 		self.experiment_process.start()
 		self.statistics_timer.start()
 
@@ -1365,6 +1372,7 @@ class Ui_PyCCAPT(object):
 			Return:
 				None
 		"""
+		self.emitter.total_ions.emit(self.variables.total_ions)  # Update the total ions
 		if self.variables.flag_end_experiment:
 			self.start_button.setEnabled(True)
 			self.stop_button.setEnabled(True)
@@ -1457,7 +1465,6 @@ class Ui_PyCCAPT(object):
 		                                              args=(self.variables, self.conf,
 		                                                    self.camera_closed_event,
 		                                                    self.camera_win_front))
-		self.camera_process.daemon = True
 		self.camera_process.start()
 		# GUI gate
 		self.gui_gates = gui_gates.Ui_Gates(self.variables, self.conf)
@@ -1491,8 +1498,10 @@ class Ui_PyCCAPT(object):
 		self.visualization_process = multiprocessing.Process(target=gui_visualization.run_visualization_window,
 		                                                     args=(self.variables, self.conf,
 		                                                           self.visualization_closed_event,
-		                                                           self.visualization_win_front))
-		self.visualization_process.daemon = True
+		                                                           self.visualization_win_front, self.x_plot,
+		                                                           self.y_plot,
+		                                                           self.t_plot, self.main_v_dc_plot, self.counter_plot,
+		                                                           self.lock,))
 		self.visualization_process.start()
 
 	def open_cameras_win(self):
@@ -1702,7 +1711,7 @@ class Ui_PyCCAPT(object):
         """
 		if hasattr(self, 'camera_process') and self.camera_process.is_alive():
 			self.camera_process.terminate()
-			time.sleep(1)
+			self.visualization_process.terminate()
 			self.gui_pumps_vacuum.gauges_thread.join(1)
 
 
@@ -1730,6 +1739,13 @@ if __name__ == "__main__":
 	manager = multiprocessing.Manager()
 	ns = manager.Namespace()
 	variables = share_variables.Variables(conf, ns)
+	array_size = conf['maximum_size_plot_arrays']
+	x_plot = multiprocessing.Array('d', array_size)
+	y_plot = multiprocessing.Array('d', array_size)
+	t_plot = multiprocessing.Array('d', array_size)
+	main_v_dc_plot = multiprocessing.Array('d', array_size)
+	counter_plot = multiprocessing.Value('i', 0)
+	lock = multiprocessing.Lock()  # Lock for synchronization
 
 	# variables = share_variables.Variables(conf)
 	variables.log_path = p
@@ -1737,7 +1753,7 @@ if __name__ == "__main__":
 	app = QtWidgets.QApplication(sys.argv)
 	app.setStyle('Fusion')
 	PyCCAPT = QtWidgets.QMainWindow()
-	ui = Ui_PyCCAPT(variables, conf)
+	ui = Ui_PyCCAPT(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
 	ui.setupUi(PyCCAPT)
 	PyCCAPT.show()
 	sys.exit(app.exec())

@@ -78,7 +78,6 @@ class Cameras:
 		start_time = time.time()
 		while self.cameras.IsGrabbing():
 			current_time = time.time()
-			elapsed_time = current_time - start_time
 
 			# Fetch the raw images from camera
 			grabResult0 = self.cameras[0].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
@@ -116,7 +115,7 @@ class Cameras:
 			self.emitter.img1_orig.emit(np.swapaxes(self.img1_orig, 0, 1))
 
 			# Store the captured processed image at a desired location.
-			if elapsed_time >= self.variables.save_meta_interval and self.variables.start_flag:
+			if current_time - start_time >= self.variables.save_meta_interval_camera and self.variables.start_flag:
 				start_time = time.time()  # Update the start time
 				path_meta = self.variables.path_meta
 				cv2.imwrite(path_meta + "/side_%s.png" % self.index_save_image, self.img0_orig)

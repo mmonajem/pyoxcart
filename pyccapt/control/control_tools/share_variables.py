@@ -29,7 +29,8 @@ class Variables:
         self.ns.COM_PORT_signal_generator = conf["COM_PORT_signal_generator"]
         self.ns.COM_PORT_thorlab_motor = conf["COM_PORT_thorlab_motor"]
 
-        self.ns.save_meta_interval = conf['save_meta_interval']
+        self.ns.save_meta_interval_camera = conf['save_meta_interval_camera']
+        self.ns.save_meta_interval_visualization = conf['save_meta_interval_visualization']
 
         ### Setup parameters
         # self.lock_setup_parameters = threading.Lock()
@@ -74,6 +75,7 @@ class Variables:
         self.ns.flag_visualization_win_show = False
         self.ns.flag_end_experiment = False
         self.ns.flag_new_min_voltage = False
+        self.ns.flag_visualization_start = False
         self.ns.criteria_time = True
         self.ns.criteria_ions = True
         self.ns.criteria_vdc = True
@@ -93,8 +95,10 @@ class Variables:
         self.ns.end_time = ''
         self.ns.total_ions = 0
         self.ns.specimen_voltage = 0.0
+        self.ns.specimen_voltage_plot = 0.0
         self.ns.detection_rate = 0.0
         self.ns.detection_rate_current = 0.0
+        self.ns.detection_rate_current_plot = 0.0
         self.ns.pulse_voltage = 0.0
         self.ns.pulse_voltage_min = 0.0
         self.ns.pulse_voltage_max = 0.0
@@ -131,14 +135,7 @@ class Variables:
         self.ns.main_v_p_hsd = []
         self.ns.laser_degree = []
 
-        ### Data for plotting
-        # self.lock_data_plot = threading.Lock()
-        self.ns.main_v_dc_plot = []
-        self.ns.x_plot = []
-        self.ns.y_plot = []
-        self.ns.t_plot = []
         ### Data for saving
-        # self.lock_data = threading.Lock()
         self.ns.x = []
         self.ns.y = []
         self.ns.t = []
@@ -270,13 +267,22 @@ class Variables:
             self.ns.COM_PORT_thorlab_motor = value
 
     @property
-    def save_meta_interval(self):
-        return self.ns.save_meta_interval
+    def save_meta_interval_camera(self):
+        return self.ns.save_meta_interval_camera
 
-    @save_meta_interval.setter
-    def save_meta_interval(self, value):
+    @save_meta_interval_camera.setter
+    def save_meta_interval_camera(self, value):
         with self.lock:
-            self.ns.save_meta_interval = value
+            self.ns.save_meta_interval_camera = value
+
+    @property
+    def save_meta_interval_visualization(self):
+        return self.ns.save_meta_interval_visualization
+
+    @save_meta_interval_visualization.setter
+    def save_meta_interval_visualization(self, value):
+        with self.lock:
+            self.ns.save_meta_interval_visualization = value
 
     @property
     def counter_source(self):
@@ -630,6 +636,15 @@ class Variables:
             self.ns.flag_new_min_voltage = value
 
     @property
+    def flag_visualization_start(self):
+        return self.ns.flag_visualization_start
+
+    @flag_visualization_start.setter
+    def flag_visualization_start(self, value):
+        with self.lock:
+            self.ns.flag_visualization_start = value
+
+    @property
     def criteria_time(self):
         return self.ns.criteria_time
 
@@ -774,6 +789,15 @@ class Variables:
             self.ns.specimen_voltage = value
 
     @property
+    def specimen_voltage_plot(self):
+        return self.ns.specimen_voltage_plot
+
+    @specimen_voltage_plot.setter
+    def specimen_voltage_plot(self, value):
+        with self.lock_data_plot:
+            self.ns.specimen_voltage_plot = value
+
+    @property
     def detection_rate(self):
         return self.ns.detection_rate
 
@@ -790,6 +814,15 @@ class Variables:
     def detection_rate_current(self, value):
         with self.lock_exp:
             self.ns.detection_rate_current = value
+
+    @property
+    def detection_rate_current_plot(self):
+        return self.ns.detection_rate_current_plot
+
+    @detection_rate_current_plot.setter
+    def detection_rate_current_plot(self, value):
+        with self.lock_data_plot:
+            self.ns.detection_rate_current_plot = value
 
     @property
     def pulse_voltage(self):
@@ -1087,45 +1120,6 @@ class Variables:
         with self.lock_lists:
             self.ns.laser_degree = value
 
-    @property
-    def main_v_dc_plot(self):
-        with self.lock_data_plot:
-            return self.ns.main_v_dc_plot
-
-    @main_v_dc_plot.setter
-    def main_v_dc_plot(self, value):
-        with self.lock_data_plot:
-            self.ns.main_v_dc_plot = value
-
-    @property
-    def x_plot(self):
-        with self.lock_data_plot:
-            return self.ns.x_plot
-
-    @x_plot.setter
-    def x_plot(self, value):
-        with self.lock_data_plot:
-            self.ns.x_plot = value
-
-    @property
-    def y_plot(self):
-        with self.lock_data_plot:
-            return self.ns.y_plot
-
-    @y_plot.setter
-    def y_plot(self, value):
-        with self.lock_data_plot:
-            self.ns.y_plot = value
-
-    @property
-    def t_plot(self):
-        with self.lock_data_plot:
-            return self.ns.t_plot
-
-    @t_plot.setter
-    def t_plot(self, value):
-        with self.lock_data_plot:
-            self.ns.t_plot = value
 
     @property
     def x(self):
