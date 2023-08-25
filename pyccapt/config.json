@@ -1,6 +1,6 @@
 {
   "flight_path_length": 110,
-  "max_vdc": 12000,
+  "max_vdc": 10000,
   "max_vp": 3281,
   "t_0": 0,
   "bin_size": 0.1,

@@ -23,15 +23,15 @@ class Ui_PyCCAPT(object):
 
 	def __init__(self, variables, conf, parent=None):
 		"""
-			Constructor for the PyCCAPT UI class.
+				Constructor for the PyCCAPT UI class.
 
-			Args:
-				variables (object): Global experiment variables.
-				conf (dict): Configuration settings.
-				parent: Parent widget (optional).
+				Args:
+						variables (object): Global experiment variables.
+						conf (dict): Configuration settings.
+						parent: Parent widget (optional).
 
-			Returns:
-				None
+				Returns:
+						None
 		"""
 		self.conf = conf
 		self.variables = variables
@@ -39,20 +39,14 @@ class Ui_PyCCAPT(object):
 		self.emitter = SignalEmitter()
 		self.experimetn_finished_event = multiprocessing.Event()
 		self.camera_closed_event = multiprocessing.Event()
+		self.visualization_closed_event = multiprocessing.Event()
 		self.camera_win_front = multiprocessing.Event()
+		self.visualization_win_front = multiprocessing.Event()
 
 	def setupUi(self, PyCCAPT):
-		"""
-
-				Args:
-					PyCCAPT: The main window of the GUI.
-
-				Return:
-					None
-		"""
 		PyCCAPT.setObjectName("PyCCAPT")
-		PyCCAPT.resize(905, 870)
-		self.centralwidget = QtWidgets.QWidget(parent=PyCCAPT)
+		PyCCAPT.resize(905, 873)
+		self.centralwidget = QtWidgets.QWidget(PyCCAPT)
 		self.centralwidget.setObjectName("centralwidget")
 		self.gridLayout_5 = QtWidgets.QGridLayout(self.centralwidget)
 		self.gridLayout_5.setObjectName("gridLayout_5")
@@ -60,7 +54,7 @@ class Ui_PyCCAPT(object):
 		self.gridLayout_4.setObjectName("gridLayout_4")
 		self.horizontalLayout = QtWidgets.QHBoxLayout()
 		self.horizontalLayout.setObjectName("horizontalLayout")
-		self.gates_control = QtWidgets.QPushButton(parent=self.centralwidget)
+		self.gates_control = QtWidgets.QPushButton(self.centralwidget)
 		self.gates_control.setMinimumSize(QtCore.QSize(0, 40))
 		self.gates_control.setStyleSheet("QPushButton{\n"
 		                                 "                                                background: rgb(85, 170, 255)\n"
@@ -68,7 +62,7 @@ class Ui_PyCCAPT(object):
 		                                 "                                            ")
 		self.gates_control.setObjectName("gates_control")
 		self.horizontalLayout.addWidget(self.gates_control)
-		self.pumps_vaccum = QtWidgets.QPushButton(parent=self.centralwidget)
+		self.pumps_vaccum = QtWidgets.QPushButton(self.centralwidget)
 		self.pumps_vaccum.setMinimumSize(QtCore.QSize(0, 40))
 		self.pumps_vaccum.setStyleSheet("QPushButton{\n"
 		                                "                                                background: rgb(85, 170, 255)\n"
@@ -76,7 +70,7 @@ class Ui_PyCCAPT(object):
 		                                "                                            ")
 		self.pumps_vaccum.setObjectName("pumps_vaccum")
 		self.horizontalLayout.addWidget(self.pumps_vaccum)
-		self.camears = QtWidgets.QPushButton(parent=self.centralwidget)
+		self.camears = QtWidgets.QPushButton(self.centralwidget)
 		self.camears.setMinimumSize(QtCore.QSize(0, 40))
 		self.camears.setStyleSheet("QPushButton{\n"
 		                           "                                                background: rgb(85, 170, 255)\n"
@@ -84,7 +78,7 @@ class Ui_PyCCAPT(object):
 		                           "                                            ")
 		self.camears.setObjectName("camears")
 		self.horizontalLayout.addWidget(self.camears)
-		self.laser_control = QtWidgets.QPushButton(parent=self.centralwidget)
+		self.laser_control = QtWidgets.QPushButton(self.centralwidget)
 		self.laser_control.setMinimumSize(QtCore.QSize(0, 40))
 		self.laser_control.setSizeIncrement(QtCore.QSize(0, 0))
 		self.laser_control.setStyleSheet("QPushButton{\n"
@@ -93,7 +87,7 @@ class Ui_PyCCAPT(object):
 		                                 "                                            ")
 		self.laser_control.setObjectName("laser_control")
 		self.horizontalLayout.addWidget(self.laser_control)
-		self.stage_control = QtWidgets.QPushButton(parent=self.centralwidget)
+		self.stage_control = QtWidgets.QPushButton(self.centralwidget)
 		self.stage_control.setMinimumSize(QtCore.QSize(0, 40))
 		self.stage_control.setSizeIncrement(QtCore.QSize(0, 0))
 		self.stage_control.setStyleSheet("QPushButton{\n"
@@ -102,7 +96,7 @@ class Ui_PyCCAPT(object):
 		                                 "                                            ")
 		self.stage_control.setObjectName("stage_control")
 		self.horizontalLayout.addWidget(self.stage_control)
-		self.visualization = QtWidgets.QPushButton(parent=self.centralwidget)
+		self.visualization = QtWidgets.QPushButton(self.centralwidget)
 		self.visualization.setMinimumSize(QtCore.QSize(0, 40))
 		self.visualization.setSizeIncrement(QtCore.QSize(0, 0))
 		self.visualization.setStyleSheet("QPushButton{\n"
@@ -111,7 +105,7 @@ class Ui_PyCCAPT(object):
 		                                 "                                            ")
 		self.visualization.setObjectName("visualization")
 		self.horizontalLayout.addWidget(self.visualization)
-		self.baking = QtWidgets.QPushButton(parent=self.centralwidget)
+		self.baking = QtWidgets.QPushButton(self.centralwidget)
 		self.baking.setMinimumSize(QtCore.QSize(0, 40))
 		self.baking.setSizeIncrement(QtCore.QSize(0, 0))
 		self.baking.setStyleSheet("QPushButton{\n"
@@ -121,7 +115,7 @@ class Ui_PyCCAPT(object):
 		self.baking.setObjectName("baking")
 		self.horizontalLayout.addWidget(self.baking)
 		self.gridLayout_4.addLayout(self.horizontalLayout, 0, 0, 1, 2)
-		self.text_line = QtWidgets.QTextEdit(parent=self.centralwidget)
+		self.text_line = QtWidgets.QTextEdit(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
 		                                   QtWidgets.QSizePolicy.Policy.Preferred)
 		sizePolicy.setHorizontalStretch(0)
@@ -142,7 +136,7 @@ class Ui_PyCCAPT(object):
 		self.gridLayout_3.setObjectName("gridLayout_3")
 		self.gridLayout_2 = QtWidgets.QGridLayout()
 		self.gridLayout_2.setObjectName("gridLayout_2")
-		self.Error = QtWidgets.QLabel(parent=self.centralwidget)
+		self.Error = QtWidgets.QLabel(self.centralwidget)
 		self.Error.setMinimumSize(QtCore.QSize(800, 30))
 		font = QtGui.QFont()
 		font.setPointSize(13)
@@ -154,7 +148,7 @@ class Ui_PyCCAPT(object):
 		self.Error.setObjectName("Error")
 		self.gridLayout_2.addWidget(self.Error, 0, 0, 1, 2)
 		self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 2, 1)
-		self.start_button = QtWidgets.QPushButton(parent=self.centralwidget)
+		self.start_button = QtWidgets.QPushButton(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
@@ -167,7 +161,7 @@ class Ui_PyCCAPT(object):
 		                                "                                            ")
 		self.start_button.setObjectName("start_button")
 		self.gridLayout_3.addWidget(self.start_button, 0, 1, 1, 1)
-		self.stop_button = QtWidgets.QPushButton(parent=self.centralwidget)
+		self.stop_button = QtWidgets.QPushButton(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
@@ -183,44 +177,93 @@ class Ui_PyCCAPT(object):
 		self.gridLayout_4.addLayout(self.gridLayout_3, 2, 0, 1, 2)
 		self.gridLayout = QtWidgets.QGridLayout()
 		self.gridLayout.setObjectName("gridLayout")
-		self.label_196 = QtWidgets.QLabel(parent=self.centralwidget)
+		self.detection_rate = QtWidgets.QLineEdit(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_196.sizePolicy().hasHeightForWidth())
-		self.label_196.setSizePolicy(sizePolicy)
-		self.label_196.setObjectName("label_196")
-		self.gridLayout.addWidget(self.label_196, 23, 0, 1, 1)
-		self.detection_rate_init = QtWidgets.QLineEdit(parent=self.centralwidget)
+		sizePolicy.setHeightForWidth(self.detection_rate.sizePolicy().hasHeightForWidth())
+		self.detection_rate.setSizePolicy(sizePolicy)
+		self.detection_rate.setMinimumSize(QtCore.QSize(0, 20))
+		self.detection_rate.setStyleSheet("QLineEdit{\n"
+		                                  "                                                background: rgb(223,223,233)\n"
+		                                  "                                                }\n"
+		                                  "                                            ")
+		self.detection_rate.setText("")
+		self.detection_rate.setObjectName("detection_rate")
+		self.gridLayout.addWidget(self.detection_rate, 25, 5, 1, 2)
+		self.criteria_time = QtWidgets.QCheckBox(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.detection_rate_init.sizePolicy().hasHeightForWidth())
-		self.detection_rate_init.setSizePolicy(sizePolicy)
-		self.detection_rate_init.setMinimumSize(QtCore.QSize(0, 20))
-		self.detection_rate_init.setStyleSheet("QLineEdit{\n"
-		                                       "                                                background: rgb(223,223,233)\n"
-		                                       "                                                }\n"
-		                                       "                                            ")
-		self.detection_rate_init.setObjectName("detection_rate_init")
-		self.gridLayout.addWidget(self.detection_rate_init, 16, 6, 1, 1)
-		self.label_176 = QtWidgets.QLabel(parent=self.centralwidget)
+		sizePolicy.setHeightForWidth(self.criteria_time.sizePolicy().hasHeightForWidth())
+		self.criteria_time.setSizePolicy(sizePolicy)
+		font = QtGui.QFont()
+		font.setItalic(False)
+		self.criteria_time.setFont(font)
+		self.criteria_time.setMouseTracking(True)
+		self.criteria_time.setStyleSheet("")
+		self.criteria_time.setText("")
+		self.criteria_time.setChecked(True)
+		self.criteria_time.setObjectName("criteria_time")
+		self.gridLayout.addWidget(self.criteria_time, 3, 5, 1, 1)
+		self.vp_max = QtWidgets.QLineEdit(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_176.sizePolicy().hasHeightForWidth())
-		self.label_176.setSizePolicy(sizePolicy)
-		self.label_176.setObjectName("label_176")
-		self.gridLayout.addWidget(self.label_176, 3, 0, 1, 2)
-		self.label_188 = QtWidgets.QLabel(parent=self.centralwidget)
+		sizePolicy.setHeightForWidth(self.vp_max.sizePolicy().hasHeightForWidth())
+		self.vp_max.setSizePolicy(sizePolicy)
+		self.vp_max.setMinimumSize(QtCore.QSize(0, 20))
+		self.vp_max.setStyleSheet("QLineEdit{\n"
+		                          "                                                background: rgb(223,223,233)\n"
+		                          "                                                }\n"
+		                          "                                            ")
+		self.vp_max.setObjectName("vp_max")
+		self.gridLayout.addWidget(self.vp_max, 13, 6, 1, 1)
+		self.label_179 = QtWidgets.QLabel(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_188.sizePolicy().hasHeightForWidth())
-		self.label_188.setSizePolicy(sizePolicy)
-		self.label_188.setObjectName("label_188")
-		self.gridLayout.addWidget(self.label_188, 16, 0, 1, 1)
-		self.label_193 = QtWidgets.QLabel(parent=self.centralwidget)
+		sizePolicy.setHeightForWidth(self.label_179.sizePolicy().hasHeightForWidth())
+		self.label_179.setSizePolicy(sizePolicy)
+		self.label_179.setObjectName("label_179")
+		self.gridLayout.addWidget(self.label_179, 6, 0, 1, 3)
+		self.label_189 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_189.sizePolicy().hasHeightForWidth())
+		self.label_189.setSizePolicy(sizePolicy)
+		self.label_189.setObjectName("label_189")
+		self.gridLayout.addWidget(self.label_189, 17, 0, 1, 1)
+		self.label_181 = QtWidgets.QLabel(self.centralwidget)
+		self.label_181.setObjectName("label_181")
+		self.gridLayout.addWidget(self.label_181, 8, 0, 1, 1)
+		self.vdc_min = QtWidgets.QLineEdit(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.vdc_min.sizePolicy().hasHeightForWidth())
+		self.vdc_min.setSizePolicy(sizePolicy)
+		self.vdc_min.setMinimumSize(QtCore.QSize(0, 20))
+		self.vdc_min.setStyleSheet("QLineEdit{\n"
+		                           "                                                background: rgb(223,223,233)\n"
+		                           "                                                }\n"
+		                           "                                            ")
+		self.vdc_min.setObjectName("vdc_min")
+		self.gridLayout.addWidget(self.vdc_min, 6, 6, 1, 1)
+		self.label_180 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_180.sizePolicy().hasHeightForWidth())
+		self.label_180.setSizePolicy(sizePolicy)
+		self.label_180.setObjectName("label_180")
+		self.gridLayout.addWidget(self.label_180, 7, 0, 1, 3)
+		self.dc_hold = QtWidgets.QPushButton(self.centralwidget)
+		self.dc_hold.setMinimumSize(QtCore.QSize(0, 20))
+		self.dc_hold.setObjectName("dc_hold")
+		self.gridLayout.addWidget(self.dc_hold, 23, 2, 1, 3)
+		self.label_193 = QtWidgets.QLabel(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
@@ -231,45 +274,20 @@ class Ui_PyCCAPT(object):
 		self.label_193.setFont(font)
 		self.label_193.setObjectName("label_193")
 		self.gridLayout.addWidget(self.label_193, 20, 0, 1, 1)
-		self.label_198 = QtWidgets.QLabel(parent=self.centralwidget)
+		self.hit_displayed = QtWidgets.QLineEdit(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_198.sizePolicy().hasHeightForWidth())
-		self.label_198.setSizePolicy(sizePolicy)
-		self.label_198.setObjectName("label_198")
-		self.gridLayout.addWidget(self.label_198, 25, 0, 1, 1)
-		self.ex_name = QtWidgets.QLineEdit(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.ex_name.sizePolicy().hasHeightForWidth())
-		self.ex_name.setSizePolicy(sizePolicy)
-		self.ex_name.setMinimumSize(QtCore.QSize(0, 20))
-		self.ex_name.setMaximumSize(QtCore.QSize(16777215, 100))
-		self.ex_name.setStyleSheet("QLineEdit{\n"
-		                           "                                                background: rgb(223,223,233)\n"
-		                           "                                                }\n"
-		                           "                                            ")
-		self.ex_name.setObjectName("ex_name")
-		self.gridLayout.addWidget(self.ex_name, 2, 6, 1, 1)
-		self.label_177 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_177.sizePolicy().hasHeightForWidth())
-		self.label_177.setSizePolicy(sizePolicy)
-		self.label_177.setObjectName("label_177")
-		self.gridLayout.addWidget(self.label_177, 4, 0, 1, 1)
-		self.label_192 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_192.sizePolicy().hasHeightForWidth())
-		self.label_192.setSizePolicy(sizePolicy)
-		self.label_192.setObjectName("label_192")
-		self.gridLayout.addWidget(self.label_192, 19, 0, 1, 1)
-		self.control_algorithm = QtWidgets.QComboBox(parent=self.centralwidget)
+		sizePolicy.setHeightForWidth(self.hit_displayed.sizePolicy().hasHeightForWidth())
+		self.hit_displayed.setSizePolicy(sizePolicy)
+		self.hit_displayed.setMinimumSize(QtCore.QSize(0, 20))
+		self.hit_displayed.setStyleSheet("QLineEdit{\n"
+		                                 "                                                background: rgb(223,223,233)\n"
+		                                 "                                                }\n"
+		                                 "                                            ")
+		self.hit_displayed.setObjectName("hit_displayed")
+		self.gridLayout.addWidget(self.hit_displayed, 17, 6, 1, 1)
+		self.control_algorithm = QtWidgets.QComboBox(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
@@ -284,36 +302,101 @@ class Ui_PyCCAPT(object):
 		self.control_algorithm.addItem("")
 		self.control_algorithm.addItem("")
 		self.gridLayout.addWidget(self.control_algorithm, 10, 6, 1, 1)
-		self.hit_displayed = QtWidgets.QLineEdit(parent=self.centralwidget)
+		self.pulse_voltage = QtWidgets.QLineEdit(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.hit_displayed.sizePolicy().hasHeightForWidth())
-		self.hit_displayed.setSizePolicy(sizePolicy)
-		self.hit_displayed.setMinimumSize(QtCore.QSize(0, 20))
-		self.hit_displayed.setStyleSheet("QLineEdit{\n"
+		sizePolicy.setHeightForWidth(self.pulse_voltage.sizePolicy().hasHeightForWidth())
+		self.pulse_voltage.setSizePolicy(sizePolicy)
+		self.pulse_voltage.setMinimumSize(QtCore.QSize(0, 20))
+		self.pulse_voltage.setStyleSheet("QLineEdit{\n"
 		                                 "                                                background: rgb(223,223,233)\n"
 		                                 "                                                }\n"
 		                                 "                                            ")
-		self.hit_displayed.setObjectName("hit_displayed")
-		self.gridLayout.addWidget(self.hit_displayed, 17, 6, 1, 1)
-		self.label_179 = QtWidgets.QLabel(parent=self.centralwidget)
+		self.pulse_voltage.setText("")
+		self.pulse_voltage.setObjectName("pulse_voltage")
+		self.gridLayout.addWidget(self.pulse_voltage, 24, 5, 1, 2)
+		self.label_196 = QtWidgets.QLabel(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_179.sizePolicy().hasHeightForWidth())
-		self.label_179.setSizePolicy(sizePolicy)
-		self.label_179.setObjectName("label_179")
-		self.gridLayout.addWidget(self.label_179, 6, 0, 1, 3)
-		self.label_195 = QtWidgets.QLabel(parent=self.centralwidget)
+		sizePolicy.setHeightForWidth(self.label_196.sizePolicy().hasHeightForWidth())
+		self.label_196.setSizePolicy(sizePolicy)
+		self.label_196.setObjectName("label_196")
+		self.gridLayout.addWidget(self.label_196, 23, 0, 1, 1)
+		self.ex_name = QtWidgets.QLineEdit(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_195.sizePolicy().hasHeightForWidth())
-		self.label_195.setSizePolicy(sizePolicy)
-		self.label_195.setObjectName("label_195")
-		self.gridLayout.addWidget(self.label_195, 22, 0, 1, 1)
-		self.elapsed_time = QtWidgets.QLineEdit(parent=self.centralwidget)
+		sizePolicy.setHeightForWidth(self.ex_name.sizePolicy().hasHeightForWidth())
+		self.ex_name.setSizePolicy(sizePolicy)
+		self.ex_name.setMinimumSize(QtCore.QSize(0, 20))
+		self.ex_name.setMaximumSize(QtCore.QSize(16777215, 100))
+		self.ex_name.setStyleSheet("QLineEdit{\n"
+		                           "                                                background: rgb(223,223,233)\n"
+		                           "                                                }\n"
+		                           "                                            ")
+		self.ex_name.setObjectName("ex_name")
+		self.gridLayout.addWidget(self.ex_name, 2, 6, 1, 1)
+		self.email = QtWidgets.QLineEdit(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.email.sizePolicy().hasHeightForWidth())
+		self.email.setSizePolicy(sizePolicy)
+		self.email.setMinimumSize(QtCore.QSize(0, 20))
+		self.email.setStyleSheet("QLineEdit{\n"
+		                         "                                                background: rgb(223,223,233)\n"
+		                         "                                                }\n"
+		                         "                                            ")
+		self.email.setText("")
+		self.email.setObjectName("email")
+		self.gridLayout.addWidget(self.email, 18, 6, 1, 1)
+		self.label_190 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_190.sizePolicy().hasHeightForWidth())
+		self.label_190.setSizePolicy(sizePolicy)
+		self.label_190.setObjectName("label_190")
+		self.gridLayout.addWidget(self.label_190, 18, 0, 1, 1)
+		self.vp_min = QtWidgets.QLineEdit(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.vp_min.sizePolicy().hasHeightForWidth())
+		self.vp_min.setSizePolicy(sizePolicy)
+		self.vp_min.setMinimumSize(QtCore.QSize(0, 20))
+		self.vp_min.setStyleSheet("QLineEdit{\n"
+		                          "                                                background: rgb(223,223,233)\n"
+		                          "                                                }\n"
+		                          "                                            ")
+		self.vp_min.setObjectName("vp_min")
+		self.gridLayout.addWidget(self.vp_min, 12, 6, 1, 1)
+		self.criteria_vdc = QtWidgets.QCheckBox(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.criteria_vdc.sizePolicy().hasHeightForWidth())
+		self.criteria_vdc.setSizePolicy(sizePolicy)
+		font = QtGui.QFont()
+		font.setItalic(False)
+		self.criteria_vdc.setFont(font)
+		self.criteria_vdc.setMouseTracking(True)
+		self.criteria_vdc.setStyleSheet("")
+		self.criteria_vdc.setText("")
+		self.criteria_vdc.setChecked(True)
+		self.criteria_vdc.setObjectName("criteria_vdc")
+		self.gridLayout.addWidget(self.criteria_vdc, 7, 5, 1, 1)
+		self.label_199 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_199.sizePolicy().hasHeightForWidth())
+		self.label_199.setSizePolicy(sizePolicy)
+		self.label_199.setObjectName("label_199")
+		self.gridLayout.addWidget(self.label_199, 11, 0, 1, 1)
+		self.elapsed_time = QtWidgets.QLineEdit(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
@@ -327,28 +410,15 @@ class Ui_PyCCAPT(object):
 		self.elapsed_time.setText("")
 		self.elapsed_time.setObjectName("elapsed_time")
 		self.gridLayout.addWidget(self.elapsed_time, 21, 5, 1, 2)
-		self.ex_user = QtWidgets.QLineEdit(parent=self.centralwidget)
+		self.label_186 = QtWidgets.QLabel(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.ex_user.sizePolicy().hasHeightForWidth())
-		self.ex_user.setSizePolicy(sizePolicy)
-		self.ex_user.setMinimumSize(QtCore.QSize(0, 20))
-		self.ex_user.setStyleSheet("QLineEdit{\n"
-		                           "                                                background: rgb(223,223,233)\n"
-		                           "                                                }\n"
-		                           "                                            ")
-		self.ex_user.setObjectName("ex_user")
-		self.gridLayout.addWidget(self.ex_user, 1, 6, 1, 1)
-		self.label_174 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_174.sizePolicy().hasHeightForWidth())
-		self.label_174.setSizePolicy(sizePolicy)
-		self.label_174.setObjectName("label_174")
-		self.gridLayout.addWidget(self.label_174, 1, 0, 1, 1)
-		self.pulse_fraction = QtWidgets.QLineEdit(parent=self.centralwidget)
+		sizePolicy.setHeightForWidth(self.label_186.sizePolicy().hasHeightForWidth())
+		self.label_186.setSizePolicy(sizePolicy)
+		self.label_186.setObjectName("label_186")
+		self.gridLayout.addWidget(self.label_186, 14, 0, 1, 1)
+		self.pulse_fraction = QtWidgets.QLineEdit(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
@@ -361,7 +431,60 @@ class Ui_PyCCAPT(object):
 		                                  "                                            ")
 		self.pulse_fraction.setObjectName("pulse_fraction")
 		self.gridLayout.addWidget(self.pulse_fraction, 14, 6, 1, 1)
-		self.counter_source = QtWidgets.QComboBox(parent=self.centralwidget)
+		self.label_177 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_177.sizePolicy().hasHeightForWidth())
+		self.label_177.setSizePolicy(sizePolicy)
+		self.label_177.setObjectName("label_177")
+		self.gridLayout.addWidget(self.label_177, 4, 0, 1, 1)
+		self.pulse_frequency = QtWidgets.QLineEdit(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.pulse_frequency.sizePolicy().hasHeightForWidth())
+		self.pulse_frequency.setSizePolicy(sizePolicy)
+		self.pulse_frequency.setMinimumSize(QtCore.QSize(0, 20))
+		self.pulse_frequency.setStyleSheet("QLineEdit{\n"
+		                                   "                                                background: rgb(223,223,233)\n"
+		                                   "                                                }\n"
+		                                   "                                            ")
+		self.pulse_frequency.setObjectName("pulse_frequency")
+		self.gridLayout.addWidget(self.pulse_frequency, 15, 6, 1, 1)
+		self.vdc_steps_down = QtWidgets.QLineEdit(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.vdc_steps_down.sizePolicy().hasHeightForWidth())
+		self.vdc_steps_down.setSizePolicy(sizePolicy)
+		self.vdc_steps_down.setMinimumSize(QtCore.QSize(0, 20))
+		self.vdc_steps_down.setStyleSheet("QLineEdit{\n"
+		                                  "                                                background: rgb(223,223,233)\n"
+		                                  "                                                }\n"
+		                                  "                                            ")
+		self.vdc_steps_down.setObjectName("vdc_steps_down")
+		self.gridLayout.addWidget(self.vdc_steps_down, 9, 6, 1, 1)
+		self.label_2 = QtWidgets.QLabel(self.centralwidget)
+		self.label_2.setObjectName("label_2")
+		self.gridLayout.addWidget(self.label_2, 4, 4, 1, 1)
+		self.label_184 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_184.sizePolicy().hasHeightForWidth())
+		self.label_184.setSizePolicy(sizePolicy)
+		self.label_184.setObjectName("label_184")
+		self.gridLayout.addWidget(self.label_184, 12, 0, 1, 1)
+		self.label_174 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_174.sizePolicy().hasHeightForWidth())
+		self.label_174.setSizePolicy(sizePolicy)
+		self.label_174.setObjectName("label_174")
+		self.gridLayout.addWidget(self.label_174, 1, 0, 1, 1)
+		self.counter_source = QtWidgets.QComboBox(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
@@ -376,138 +499,7 @@ class Ui_PyCCAPT(object):
 		self.counter_source.addItem("")
 		self.counter_source.addItem("")
 		self.gridLayout.addWidget(self.counter_source, 19, 6, 1, 1)
-		self.label_182 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_182.sizePolicy().hasHeightForWidth())
-		self.label_182.setSizePolicy(sizePolicy)
-		self.label_182.setObjectName("label_182")
-		self.gridLayout.addWidget(self.label_182, 9, 0, 1, 1)
-		self.label_189 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_189.sizePolicy().hasHeightForWidth())
-		self.label_189.setSizePolicy(sizePolicy)
-		self.label_189.setObjectName("label_189")
-		self.gridLayout.addWidget(self.label_189, 17, 0, 1, 1)
-		self.label_184 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_184.sizePolicy().hasHeightForWidth())
-		self.label_184.setSizePolicy(sizePolicy)
-		self.label_184.setObjectName("label_184")
-		self.gridLayout.addWidget(self.label_184, 12, 0, 1, 1)
-		self.pulse_frequency = QtWidgets.QLineEdit(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.pulse_frequency.sizePolicy().hasHeightForWidth())
-		self.pulse_frequency.setSizePolicy(sizePolicy)
-		self.pulse_frequency.setMinimumSize(QtCore.QSize(0, 20))
-		self.pulse_frequency.setStyleSheet("QLineEdit{\n"
-		                                   "                                                background: rgb(223,223,233)\n"
-		                                   "                                                }\n"
-		                                   "                                            ")
-		self.pulse_frequency.setObjectName("pulse_frequency")
-		self.gridLayout.addWidget(self.pulse_frequency, 15, 6, 1, 1)
-		self.email = QtWidgets.QLineEdit(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.email.sizePolicy().hasHeightForWidth())
-		self.email.setSizePolicy(sizePolicy)
-		self.email.setMinimumSize(QtCore.QSize(0, 20))
-		self.email.setStyleSheet("QLineEdit{\n"
-		                         "                                                background: rgb(223,223,233)\n"
-		                         "                                                }\n"
-		                         "                                            ")
-		self.email.setText("")
-		self.email.setObjectName("email")
-		self.gridLayout.addWidget(self.email, 18, 6, 1, 1)
-		self.label_190 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_190.sizePolicy().hasHeightForWidth())
-		self.label_190.setSizePolicy(sizePolicy)
-		self.label_190.setObjectName("label_190")
-		self.gridLayout.addWidget(self.label_190, 18, 0, 1, 1)
-		self.hitmap_plot_size = QtWidgets.QDoubleSpinBox(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.hitmap_plot_size.sizePolicy().hasHeightForWidth())
-		self.hitmap_plot_size.setSizePolicy(sizePolicy)
-		self.hitmap_plot_size.setMinimumSize(QtCore.QSize(0, 20))
-		self.hitmap_plot_size.setStyleSheet("QDoubleSpinBox{\n"
-		                                    "                                                background: rgb(223,223,233)\n"
-		                                    "                                                }\n"
-		                                    "                                            ")
-		self.hitmap_plot_size.setObjectName("hitmap_plot_size")
-		self.gridLayout.addWidget(self.hitmap_plot_size, 17, 1, 1, 3)
-		self.label_194 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_194.sizePolicy().hasHeightForWidth())
-		self.label_194.setSizePolicy(sizePolicy)
-		self.label_194.setObjectName("label_194")
-		self.gridLayout.addWidget(self.label_194, 21, 0, 1, 1)
-		self.dc_hold = QtWidgets.QPushButton(parent=self.centralwidget)
-		self.dc_hold.setMinimumSize(QtCore.QSize(0, 20))
-		self.dc_hold.setObjectName("dc_hold")
-		self.gridLayout.addWidget(self.dc_hold, 23, 2, 1, 3)
-		self.label_175 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_175.sizePolicy().hasHeightForWidth())
-		self.label_175.setSizePolicy(sizePolicy)
-		self.label_175.setObjectName("label_175")
-		self.gridLayout.addWidget(self.label_175, 2, 0, 1, 1)
-		self.label_178 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_178.sizePolicy().hasHeightForWidth())
-		self.label_178.setSizePolicy(sizePolicy)
-		self.label_178.setObjectName("label_178")
-		self.gridLayout.addWidget(self.label_178, 5, 0, 1, 2)
-		self.parameters_source = QtWidgets.QComboBox(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.parameters_source.sizePolicy().hasHeightForWidth())
-		self.parameters_source.setSizePolicy(sizePolicy)
-		self.parameters_source.setMinimumSize(QtCore.QSize(0, 20))
-		self.parameters_source.setStyleSheet("QComboBox{\n"
-		                                     "                                                background: rgb(223,223,233)\n"
-		                                     "                                                }\n"
-		                                     "                                            ")
-		self.parameters_source.setObjectName("parameters_source")
-		self.parameters_source.addItem("")
-		self.parameters_source.addItem("")
-		self.gridLayout.addWidget(self.parameters_source, 0, 6, 1, 1)
-		self.label_180 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_180.sizePolicy().hasHeightForWidth())
-		self.label_180.setSizePolicy(sizePolicy)
-		self.label_180.setObjectName("label_180")
-		self.gridLayout.addWidget(self.label_180, 7, 0, 1, 3)
-		self.label_186 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_186.sizePolicy().hasHeightForWidth())
-		self.label_186.setSizePolicy(sizePolicy)
-		self.label_186.setObjectName("label_186")
-		self.gridLayout.addWidget(self.label_186, 14, 0, 1, 1)
-		self.speciemen_voltage = QtWidgets.QLineEdit(parent=self.centralwidget)
+		self.speciemen_voltage = QtWidgets.QLineEdit(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
@@ -521,52 +513,7 @@ class Ui_PyCCAPT(object):
 		self.speciemen_voltage.setText("")
 		self.speciemen_voltage.setObjectName("speciemen_voltage")
 		self.gridLayout.addWidget(self.speciemen_voltage, 23, 5, 1, 2)
-		self.label_173 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_173.sizePolicy().hasHeightForWidth())
-		self.label_173.setSizePolicy(sizePolicy)
-		font = QtGui.QFont()
-		font.setBold(True)
-		self.label_173.setFont(font)
-		self.label_173.setObjectName("label_173")
-		self.gridLayout.addWidget(self.label_173, 0, 0, 1, 1)
-		self.label_191 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_191.sizePolicy().hasHeightForWidth())
-		self.label_191.setSizePolicy(sizePolicy)
-		self.label_191.setObjectName("label_191")
-		self.gridLayout.addWidget(self.label_191, 10, 0, 1, 1)
-		self.vdc_steps_down = QtWidgets.QLineEdit(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.vdc_steps_down.sizePolicy().hasHeightForWidth())
-		self.vdc_steps_down.setSizePolicy(sizePolicy)
-		self.vdc_steps_down.setMinimumSize(QtCore.QSize(0, 20))
-		self.vdc_steps_down.setStyleSheet("QLineEdit{\n"
-		                                  "                                                background: rgb(223,223,233)\n"
-		                                  "                                                }\n"
-		                                  "                                            ")
-		self.vdc_steps_down.setObjectName("vdc_steps_down")
-		self.gridLayout.addWidget(self.vdc_steps_down, 9, 6, 1, 1)
-		self.vp_min = QtWidgets.QLineEdit(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.vp_min.sizePolicy().hasHeightForWidth())
-		self.vp_min.setSizePolicy(sizePolicy)
-		self.vp_min.setMinimumSize(QtCore.QSize(0, 20))
-		self.vp_min.setStyleSheet("QLineEdit{\n"
-		                          "                                                background: rgb(223,223,233)\n"
-		                          "                                                }\n"
-		                          "                                            ")
-		self.vp_min.setObjectName("vp_min")
-		self.gridLayout.addWidget(self.vp_min, 12, 6, 1, 1)
-		self.label_187 = QtWidgets.QLabel(parent=self.centralwidget)
+		self.label_187 = QtWidgets.QLabel(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
@@ -574,84 +521,7 @@ class Ui_PyCCAPT(object):
 		self.label_187.setSizePolicy(sizePolicy)
 		self.label_187.setObjectName("label_187")
 		self.gridLayout.addWidget(self.label_187, 15, 0, 1, 1)
-		self.max_ions = QtWidgets.QLineEdit(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.max_ions.sizePolicy().hasHeightForWidth())
-		self.max_ions.setSizePolicy(sizePolicy)
-		self.max_ions.setMinimumSize(QtCore.QSize(0, 20))
-		self.max_ions.setStyleSheet("QLineEdit{\n"
-		                            "                                                background: rgb(223,223,233)\n"
-		                            "                                                }\n"
-		                            "                                            ")
-		self.max_ions.setObjectName("max_ions")
-		self.gridLayout.addWidget(self.max_ions, 4, 6, 1, 1)
-		self.label_185 = QtWidgets.QLabel(parent=self.centralwidget)
-		self.label_185.setObjectName("label_185")
-		self.gridLayout.addWidget(self.label_185, 13, 0, 1, 2)
-		self.vp_max = QtWidgets.QLineEdit(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.vp_max.sizePolicy().hasHeightForWidth())
-		self.vp_max.setSizePolicy(sizePolicy)
-		self.vp_max.setMinimumSize(QtCore.QSize(0, 20))
-		self.vp_max.setStyleSheet("QLineEdit{\n"
-		                          "                                                background: rgb(223,223,233)\n"
-		                          "                                                }\n"
-		                          "                                            ")
-		self.vp_max.setObjectName("vp_max")
-		self.gridLayout.addWidget(self.vp_max, 13, 6, 1, 1)
-		self.pulse_voltage = QtWidgets.QLineEdit(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.pulse_voltage.sizePolicy().hasHeightForWidth())
-		self.pulse_voltage.setSizePolicy(sizePolicy)
-		self.pulse_voltage.setMinimumSize(QtCore.QSize(0, 20))
-		self.pulse_voltage.setStyleSheet("QLineEdit{\n"
-		                                 "                                                background: rgb(223,223,233)\n"
-		                                 "                                                }\n"
-		                                 "                                            ")
-		self.pulse_voltage.setText("")
-		self.pulse_voltage.setObjectName("pulse_voltage")
-		self.gridLayout.addWidget(self.pulse_voltage, 24, 5, 1, 2)
-		self.detection_rate = QtWidgets.QLineEdit(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.detection_rate.sizePolicy().hasHeightForWidth())
-		self.detection_rate.setSizePolicy(sizePolicy)
-		self.detection_rate.setMinimumSize(QtCore.QSize(0, 20))
-		self.detection_rate.setStyleSheet("QLineEdit{\n"
-		                                  "                                                background: rgb(223,223,233)\n"
-		                                  "                                                }\n"
-		                                  "                                            ")
-		self.detection_rate.setText("")
-		self.detection_rate.setObjectName("detection_rate")
-		self.gridLayout.addWidget(self.detection_rate, 25, 5, 1, 2)
-		self.ex_freq = QtWidgets.QLineEdit(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.ex_freq.sizePolicy().hasHeightForWidth())
-		self.ex_freq.setSizePolicy(sizePolicy)
-		self.ex_freq.setMinimumSize(QtCore.QSize(0, 20))
-		self.ex_freq.setStyleSheet("QLineEdit{\n"
-		                           "                                                background: rgb(223,223,233)\n"
-		                           "                                                }\n"
-		                           "                                            ")
-		self.ex_freq.setObjectName("ex_freq")
-		self.gridLayout.addWidget(self.ex_freq, 5, 6, 1, 1)
-		self.label_181 = QtWidgets.QLabel(parent=self.centralwidget)
-		self.label_181.setObjectName("label_181")
-		self.gridLayout.addWidget(self.label_181, 8, 0, 1, 1)
-		self.reset_heatmap = QtWidgets.QPushButton(parent=self.centralwidget)
-		self.reset_heatmap.setMinimumSize(QtCore.QSize(0, 20))
-		self.reset_heatmap.setObjectName("reset_heatmap")
-		self.gridLayout.addWidget(self.reset_heatmap, 17, 4, 1, 2)
-		self.ex_time = QtWidgets.QLineEdit(parent=self.centralwidget)
+		self.ex_time = QtWidgets.QLineEdit(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
@@ -664,46 +534,7 @@ class Ui_PyCCAPT(object):
 		                           "                                            ")
 		self.ex_time.setObjectName("ex_time")
 		self.gridLayout.addWidget(self.ex_time, 3, 6, 1, 1)
-		self.vdc_max = QtWidgets.QLineEdit(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.vdc_max.sizePolicy().hasHeightForWidth())
-		self.vdc_max.setSizePolicy(sizePolicy)
-		self.vdc_max.setMinimumSize(QtCore.QSize(0, 20))
-		self.vdc_max.setStyleSheet("QLineEdit{\n"
-		                           "                                                background: rgb(223,223,233)\n"
-		                           "                                                }\n"
-		                           "                                            ")
-		self.vdc_max.setObjectName("vdc_max")
-		self.gridLayout.addWidget(self.vdc_max, 7, 6, 1, 1)
-		self.vdc_min = QtWidgets.QLineEdit(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.vdc_min.sizePolicy().hasHeightForWidth())
-		self.vdc_min.setSizePolicy(sizePolicy)
-		self.vdc_min.setMinimumSize(QtCore.QSize(0, 20))
-		self.vdc_min.setStyleSheet("QLineEdit{\n"
-		                           "                                                background: rgb(223,223,233)\n"
-		                           "                                                }\n"
-		                           "                                            ")
-		self.vdc_min.setObjectName("vdc_min")
-		self.gridLayout.addWidget(self.vdc_min, 6, 6, 1, 1)
-		self.vdc_steps_up = QtWidgets.QLineEdit(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.vdc_steps_up.sizePolicy().hasHeightForWidth())
-		self.vdc_steps_up.setSizePolicy(sizePolicy)
-		self.vdc_steps_up.setMinimumSize(QtCore.QSize(0, 20))
-		self.vdc_steps_up.setStyleSheet("QLineEdit{\n"
-		                                "                                                background: rgb(223,223,233)\n"
-		                                "                                                }\n"
-		                                "                                            ")
-		self.vdc_steps_up.setObjectName("vdc_steps_up")
-		self.gridLayout.addWidget(self.vdc_steps_up, 8, 6, 1, 1)
-		self.total_ions = QtWidgets.QLineEdit(parent=self.centralwidget)
+		self.total_ions = QtWidgets.QLineEdit(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
@@ -717,23 +548,7 @@ class Ui_PyCCAPT(object):
 		self.total_ions.setText("")
 		self.total_ions.setObjectName("total_ions")
 		self.gridLayout.addWidget(self.total_ions, 22, 5, 1, 2)
-		self.label_197 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_197.sizePolicy().hasHeightForWidth())
-		self.label_197.setSizePolicy(sizePolicy)
-		self.label_197.setObjectName("label_197")
-		self.gridLayout.addWidget(self.label_197, 24, 0, 1, 1)
-		self.label_199 = QtWidgets.QLabel(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.label_199.sizePolicy().hasHeightForWidth())
-		self.label_199.setSizePolicy(sizePolicy)
-		self.label_199.setObjectName("label_199")
-		self.gridLayout.addWidget(self.label_199, 11, 0, 1, 1)
-		self.pulse_mode = QtWidgets.QComboBox(parent=self.centralwidget)
+		self.pulse_mode = QtWidgets.QComboBox(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
@@ -748,7 +563,28 @@ class Ui_PyCCAPT(object):
 		self.pulse_mode.addItem("")
 		self.pulse_mode.addItem("")
 		self.gridLayout.addWidget(self.pulse_mode, 11, 6, 1, 1)
-		self.criteria_ions = QtWidgets.QCheckBox(parent=self.centralwidget)
+		self.ex_freq = QtWidgets.QLineEdit(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.ex_freq.sizePolicy().hasHeightForWidth())
+		self.ex_freq.setSizePolicy(sizePolicy)
+		self.ex_freq.setMinimumSize(QtCore.QSize(0, 20))
+		self.ex_freq.setStyleSheet("QLineEdit{\n"
+		                           "                                                background: rgb(223,223,233)\n"
+		                           "                                                }\n"
+		                           "                                            ")
+		self.ex_freq.setObjectName("ex_freq")
+		self.gridLayout.addWidget(self.ex_freq, 5, 6, 1, 1)
+		self.label_194 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_194.sizePolicy().hasHeightForWidth())
+		self.label_194.setSizePolicy(sizePolicy)
+		self.label_194.setObjectName("label_194")
+		self.gridLayout.addWidget(self.label_194, 21, 0, 1, 1)
+		self.criteria_ions = QtWidgets.QCheckBox(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
@@ -758,72 +594,237 @@ class Ui_PyCCAPT(object):
 		font.setItalic(False)
 		self.criteria_ions.setFont(font)
 		self.criteria_ions.setMouseTracking(True)
+		self.criteria_ions.setStyleSheet("")
 		self.criteria_ions.setText("")
 		self.criteria_ions.setChecked(True)
 		self.criteria_ions.setObjectName("criteria_ions")
 		self.gridLayout.addWidget(self.criteria_ions, 4, 5, 1, 1)
-		self.criteria_vdc = QtWidgets.QCheckBox(parent=self.centralwidget)
+		self.label_176 = QtWidgets.QLabel(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 		sizePolicy.setHorizontalStretch(0)
 		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.criteria_vdc.sizePolicy().hasHeightForWidth())
-		self.criteria_vdc.setSizePolicy(sizePolicy)
-		font = QtGui.QFont()
-		font.setItalic(False)
-		self.criteria_vdc.setFont(font)
-		self.criteria_vdc.setMouseTracking(True)
-		self.criteria_vdc.setText("")
-		self.criteria_vdc.setChecked(True)
-		self.criteria_vdc.setObjectName("criteria_vdc")
-		self.gridLayout.addWidget(self.criteria_vdc, 7, 5, 1, 1)
-		self.criteria_time = QtWidgets.QCheckBox(parent=self.centralwidget)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.criteria_time.sizePolicy().hasHeightForWidth())
-		self.criteria_time.setSizePolicy(sizePolicy)
-		font = QtGui.QFont()
-		font.setItalic(False)
-		self.criteria_time.setFont(font)
-		self.criteria_time.setMouseTracking(True)
-		self.criteria_time.setText("")
-		self.criteria_time.setChecked(True)
-		self.criteria_time.setObjectName("criteria_time")
-		self.gridLayout.addWidget(self.criteria_time, 3, 5, 1, 1)
-		self.label = QtWidgets.QLabel(parent=self.centralwidget)
-		self.label.setObjectName("label")
-		self.gridLayout.addWidget(self.label, 3, 4, 1, 1)
-		self.label_2 = QtWidgets.QLabel(parent=self.centralwidget)
-		self.label_2.setObjectName("label_2")
-		self.gridLayout.addWidget(self.label_2, 4, 4, 1, 1)
-		self.label_3 = QtWidgets.QLabel(parent=self.centralwidget)
+		sizePolicy.setHeightForWidth(self.label_176.sizePolicy().hasHeightForWidth())
+		self.label_176.setSizePolicy(sizePolicy)
+		self.label_176.setObjectName("label_176")
+		self.gridLayout.addWidget(self.label_176, 3, 0, 1, 2)
+		self.label_3 = QtWidgets.QLabel(self.centralwidget)
 		self.label_3.setObjectName("label_3")
 		self.gridLayout.addWidget(self.label_3, 7, 4, 1, 1)
+		self.hitmap_plot_size = QtWidgets.QDoubleSpinBox(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.hitmap_plot_size.sizePolicy().hasHeightForWidth())
+		self.hitmap_plot_size.setSizePolicy(sizePolicy)
+		self.hitmap_plot_size.setMinimumSize(QtCore.QSize(0, 20))
+		self.hitmap_plot_size.setStyleSheet("QDoubleSpinBox{\n"
+		                                    "                                                background: rgb(223,223,233)\n"
+		                                    "                                                }\n"
+		                                    "                                            ")
+		self.hitmap_plot_size.setObjectName("hitmap_plot_size")
+		self.gridLayout.addWidget(self.hitmap_plot_size, 17, 1, 1, 3)
+		self.label_188 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_188.sizePolicy().hasHeightForWidth())
+		self.label_188.setSizePolicy(sizePolicy)
+		self.label_188.setObjectName("label_188")
+		self.gridLayout.addWidget(self.label_188, 16, 0, 1, 1)
+		self.label_185 = QtWidgets.QLabel(self.centralwidget)
+		self.label_185.setObjectName("label_185")
+		self.gridLayout.addWidget(self.label_185, 13, 0, 1, 2)
+		self.ex_user = QtWidgets.QLineEdit(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.ex_user.sizePolicy().hasHeightForWidth())
+		self.ex_user.setSizePolicy(sizePolicy)
+		self.ex_user.setMinimumSize(QtCore.QSize(0, 20))
+		self.ex_user.setStyleSheet("QLineEdit{\n"
+		                           "                                                background: rgb(223,223,233)\n"
+		                           "                                                }\n"
+		                           "                                            ")
+		self.ex_user.setObjectName("ex_user")
+		self.gridLayout.addWidget(self.ex_user, 1, 6, 1, 1)
+		self.reset_heatmap = QtWidgets.QPushButton(self.centralwidget)
+		self.reset_heatmap.setMinimumSize(QtCore.QSize(0, 20))
+		self.reset_heatmap.setObjectName("reset_heatmap")
+		self.gridLayout.addWidget(self.reset_heatmap, 17, 4, 1, 2)
+		self.label_192 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_192.sizePolicy().hasHeightForWidth())
+		self.label_192.setSizePolicy(sizePolicy)
+		self.label_192.setObjectName("label_192")
+		self.gridLayout.addWidget(self.label_192, 19, 0, 1, 1)
+		self.label_173 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_173.sizePolicy().hasHeightForWidth())
+		self.label_173.setSizePolicy(sizePolicy)
+		font = QtGui.QFont()
+		font.setBold(True)
+		self.label_173.setFont(font)
+		self.label_173.setObjectName("label_173")
+		self.gridLayout.addWidget(self.label_173, 0, 0, 1, 1)
+		self.label_191 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_191.sizePolicy().hasHeightForWidth())
+		self.label_191.setSizePolicy(sizePolicy)
+		self.label_191.setObjectName("label_191")
+		self.gridLayout.addWidget(self.label_191, 10, 0, 1, 1)
+		self.label_175 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_175.sizePolicy().hasHeightForWidth())
+		self.label_175.setSizePolicy(sizePolicy)
+		self.label_175.setObjectName("label_175")
+		self.gridLayout.addWidget(self.label_175, 2, 0, 1, 1)
+		self.label = QtWidgets.QLabel(self.centralwidget)
+		self.label.setObjectName("label")
+		self.gridLayout.addWidget(self.label, 3, 4, 1, 1)
+		self.parameters_source = QtWidgets.QComboBox(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.parameters_source.sizePolicy().hasHeightForWidth())
+		self.parameters_source.setSizePolicy(sizePolicy)
+		self.parameters_source.setMinimumSize(QtCore.QSize(0, 20))
+		self.parameters_source.setStyleSheet("QComboBox{\n"
+		                                     "                                                background: rgb(223,223,233)\n"
+		                                     "                                                }\n"
+		                                     "                                            ")
+		self.parameters_source.setObjectName("parameters_source")
+		self.parameters_source.addItem("")
+		self.parameters_source.addItem("")
+		self.gridLayout.addWidget(self.parameters_source, 0, 6, 1, 1)
+		self.max_ions = QtWidgets.QLineEdit(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.max_ions.sizePolicy().hasHeightForWidth())
+		self.max_ions.setSizePolicy(sizePolicy)
+		self.max_ions.setMinimumSize(QtCore.QSize(0, 20))
+		self.max_ions.setStyleSheet("QLineEdit{\n"
+		                            "                                                background: rgb(223,223,233)\n"
+		                            "                                                }\n"
+		                            "                                            ")
+		self.max_ions.setObjectName("max_ions")
+		self.gridLayout.addWidget(self.max_ions, 4, 6, 1, 1)
+		self.vdc_max = QtWidgets.QLineEdit(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.vdc_max.sizePolicy().hasHeightForWidth())
+		self.vdc_max.setSizePolicy(sizePolicy)
+		self.vdc_max.setMinimumSize(QtCore.QSize(0, 20))
+		self.vdc_max.setStyleSheet("QLineEdit{\n"
+		                           "                                                background: rgb(223,223,233)\n"
+		                           "                                                }\n"
+		                           "                                            ")
+		self.vdc_max.setObjectName("vdc_max")
+		self.gridLayout.addWidget(self.vdc_max, 7, 6, 1, 1)
+		self.label_198 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_198.sizePolicy().hasHeightForWidth())
+		self.label_198.setSizePolicy(sizePolicy)
+		self.label_198.setObjectName("label_198")
+		self.gridLayout.addWidget(self.label_198, 25, 0, 1, 1)
+		self.label_182 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_182.sizePolicy().hasHeightForWidth())
+		self.label_182.setSizePolicy(sizePolicy)
+		self.label_182.setObjectName("label_182")
+		self.gridLayout.addWidget(self.label_182, 9, 0, 1, 1)
+		self.vdc_steps_up = QtWidgets.QLineEdit(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.vdc_steps_up.sizePolicy().hasHeightForWidth())
+		self.vdc_steps_up.setSizePolicy(sizePolicy)
+		self.vdc_steps_up.setMinimumSize(QtCore.QSize(0, 20))
+		self.vdc_steps_up.setStyleSheet("QLineEdit{\n"
+		                                "                                                background: rgb(223,223,233)\n"
+		                                "                                                }\n"
+		                                "                                            ")
+		self.vdc_steps_up.setObjectName("vdc_steps_up")
+		self.gridLayout.addWidget(self.vdc_steps_up, 8, 6, 1, 1)
+		self.label_197 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_197.sizePolicy().hasHeightForWidth())
+		self.label_197.setSizePolicy(sizePolicy)
+		self.label_197.setObjectName("label_197")
+		self.gridLayout.addWidget(self.label_197, 24, 0, 1, 1)
+		self.label_178 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_178.sizePolicy().hasHeightForWidth())
+		self.label_178.setSizePolicy(sizePolicy)
+		self.label_178.setObjectName("label_178")
+		self.gridLayout.addWidget(self.label_178, 5, 0, 1, 2)
+		self.detection_rate_init = QtWidgets.QLineEdit(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.detection_rate_init.sizePolicy().hasHeightForWidth())
+		self.detection_rate_init.setSizePolicy(sizePolicy)
+		self.detection_rate_init.setMinimumSize(QtCore.QSize(0, 20))
+		self.detection_rate_init.setStyleSheet("QLineEdit{\n"
+		                                       "                                                background: rgb(223,223,233)\n"
+		                                       "                                                }\n"
+		                                       "                                            ")
+		self.detection_rate_init.setObjectName("detection_rate_init")
+		self.gridLayout.addWidget(self.detection_rate_init, 16, 6, 1, 1)
+		self.label_195 = QtWidgets.QLabel(self.centralwidget)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.label_195.sizePolicy().hasHeightForWidth())
+		self.label_195.setSizePolicy(sizePolicy)
+		self.label_195.setObjectName("label_195")
+		self.gridLayout.addWidget(self.label_195, 22, 0, 1, 1)
+		self.set_min_voltage = QtWidgets.QPushButton(self.centralwidget)
+		self.set_min_voltage.setMinimumSize(QtCore.QSize(0, 20))
+		self.set_min_voltage.setObjectName("set_min_voltage")
+		self.gridLayout.addWidget(self.set_min_voltage, 6, 3, 1, 1)
 		self.gridLayout_4.addLayout(self.gridLayout, 1, 0, 1, 1)
 		self.gridLayout_5.addLayout(self.gridLayout_4, 0, 0, 1, 1)
 		PyCCAPT.setCentralWidget(self.centralwidget)
-		self.menubar = QtWidgets.QMenuBar(parent=PyCCAPT)
+		self.menubar = QtWidgets.QMenuBar(PyCCAPT)
 		self.menubar.setGeometry(QtCore.QRect(0, 0, 905, 22))
 		self.menubar.setObjectName("menubar")
-		self.menuFile = QtWidgets.QMenu(parent=self.menubar)
+		self.menuFile = QtWidgets.QMenu(self.menubar)
 		self.menuFile.setObjectName("menuFile")
-		self.menuEdit = QtWidgets.QMenu(parent=self.menubar)
+		self.menuEdit = QtWidgets.QMenu(self.menubar)
 		self.menuEdit.setObjectName("menuEdit")
-		self.menuHelp = QtWidgets.QMenu(parent=self.menubar)
+		self.menuHelp = QtWidgets.QMenu(self.menubar)
 		self.menuHelp.setObjectName("menuHelp")
-		self.menuSettings = QtWidgets.QMenu(parent=self.menubar)
+		self.menuSettings = QtWidgets.QMenu(self.menubar)
 		self.menuSettings.setObjectName("menuSettings")
-		self.menuView = QtWidgets.QMenu(parent=self.menubar)
+		self.menuView = QtWidgets.QMenu(self.menubar)
 		self.menuView.setObjectName("menuView")
 		PyCCAPT.setMenuBar(self.menubar)
-		self.statusbar = QtWidgets.QStatusBar(parent=PyCCAPT)
+		self.statusbar = QtWidgets.QStatusBar(PyCCAPT)
 		self.statusbar.setObjectName("statusbar")
 		PyCCAPT.setStatusBar(self.statusbar)
-		self.actionExit = QtGui.QAction(parent=PyCCAPT)
+		self.actionExit = QtGui.QAction(PyCCAPT)
 		self.actionExit.setObjectName("actionExit")
-		self.actiontake_sceernshot = QtGui.QAction(parent=PyCCAPT)
+		self.actiontake_sceernshot = QtGui.QAction(PyCCAPT)
 		self.actiontake_sceernshot.setObjectName("actiontake_sceernshot")
-		self.actionAbout = QtGui.QAction(parent=PyCCAPT)
+		self.actionAbout = QtGui.QAction(PyCCAPT)
 		self.actionAbout.setObjectName("actionAbout")
 		self.menuFile.addAction(self.actionExit)
 		self.menuEdit.addAction(self.actiontake_sceernshot)
@@ -836,17 +837,30 @@ class Ui_PyCCAPT(object):
 
 		self.retranslateUi(PyCCAPT)
 		QtCore.QMetaObject.connectSlotsByName(PyCCAPT)
+		PyCCAPT.setTabOrder(self.gates_control, self.pumps_vaccum)
+		PyCCAPT.setTabOrder(self.pumps_vaccum, self.camears)
+		PyCCAPT.setTabOrder(self.camears, self.laser_control)
+		PyCCAPT.setTabOrder(self.laser_control, self.stage_control)
+		PyCCAPT.setTabOrder(self.stage_control, self.visualization)
+		PyCCAPT.setTabOrder(self.visualization, self.baking)
+		PyCCAPT.setTabOrder(self.baking, self.start_button)
+		PyCCAPT.setTabOrder(self.start_button, self.stop_button)
+		PyCCAPT.setTabOrder(self.stop_button, self.parameters_source)
 		PyCCAPT.setTabOrder(self.parameters_source, self.ex_user)
 		PyCCAPT.setTabOrder(self.ex_user, self.ex_name)
 		PyCCAPT.setTabOrder(self.ex_name, self.ex_time)
-		PyCCAPT.setTabOrder(self.ex_time, self.max_ions)
-		PyCCAPT.setTabOrder(self.max_ions, self.ex_freq)
+		PyCCAPT.setTabOrder(self.ex_time, self.criteria_time)
+		PyCCAPT.setTabOrder(self.criteria_time, self.max_ions)
+		PyCCAPT.setTabOrder(self.max_ions, self.criteria_ions)
+		PyCCAPT.setTabOrder(self.criteria_ions, self.ex_freq)
 		PyCCAPT.setTabOrder(self.ex_freq, self.vdc_min)
 		PyCCAPT.setTabOrder(self.vdc_min, self.vdc_max)
-		PyCCAPT.setTabOrder(self.vdc_max, self.vdc_steps_up)
+		PyCCAPT.setTabOrder(self.vdc_max, self.criteria_vdc)
+		PyCCAPT.setTabOrder(self.criteria_vdc, self.vdc_steps_up)
 		PyCCAPT.setTabOrder(self.vdc_steps_up, self.vdc_steps_down)
 		PyCCAPT.setTabOrder(self.vdc_steps_down, self.control_algorithm)
-		PyCCAPT.setTabOrder(self.control_algorithm, self.vp_min)
+		PyCCAPT.setTabOrder(self.control_algorithm, self.pulse_mode)
+		PyCCAPT.setTabOrder(self.pulse_mode, self.vp_min)
 		PyCCAPT.setTabOrder(self.vp_min, self.vp_max)
 		PyCCAPT.setTabOrder(self.vp_max, self.pulse_fraction)
 		PyCCAPT.setTabOrder(self.pulse_fraction, self.pulse_frequency)
@@ -857,14 +871,7 @@ class Ui_PyCCAPT(object):
 		PyCCAPT.setTabOrder(self.hit_displayed, self.email)
 		PyCCAPT.setTabOrder(self.email, self.counter_source)
 		PyCCAPT.setTabOrder(self.counter_source, self.text_line)
-		PyCCAPT.setTabOrder(self.text_line, self.start_button)
-		PyCCAPT.setTabOrder(self.start_button, self.stop_button)
-		PyCCAPT.setTabOrder(self.stop_button, self.gates_control)
-		PyCCAPT.setTabOrder(self.gates_control, self.pumps_vaccum)
-		PyCCAPT.setTabOrder(self.pumps_vaccum, self.camears)
-		PyCCAPT.setTabOrder(self.camears, self.laser_control)
-		PyCCAPT.setTabOrder(self.laser_control, self.visualization)
-		PyCCAPT.setTabOrder(self.visualization, self.dc_hold)
+		PyCCAPT.setTabOrder(self.text_line, self.dc_hold)
 		PyCCAPT.setTabOrder(self.dc_hold, self.elapsed_time)
 		PyCCAPT.setTabOrder(self.elapsed_time, self.total_ions)
 		PyCCAPT.setTabOrder(self.total_ions, self.speciemen_voltage)
@@ -887,10 +894,8 @@ class Ui_PyCCAPT(object):
 		QtWidgets.QApplication.instance().aboutToQuit.connect(self.cleanup)
 		self.statistics_timer = QtCore.QTimer()
 		self.statistics_timer.timeout.connect(self.statistics_update)
-
-		# Create a QTimer to run the stop actions after the specified time
 		self.timer_stop_exp = QtCore.QTimer()
-		self.timer_stop_exp.timeout.connect(self.on_stop_experiment_worker)
+		self.timer_stop_exp.timeout.connect(self.on_stop_experiment_worker)  # timer to stop the experiment
 
 		###
 		self.setup_parameters_changes()
@@ -924,7 +929,7 @@ class Ui_PyCCAPT(object):
 		self.stop_button.clicked.connect(self.stop_experiment_clicked)
 		self.reset_heatmap.clicked.connect(self.reset_heatmap_clicked)
 		self.dc_hold.clicked.connect(self.dc_hold_clicked)
-		self.original_botton_style = self.dc_hold.styleSheet()
+		self.set_min_voltage.clicked.connect(self.set_min_voltage_clicked)
 
 		self.hitmap_plot_size.setValue(1.0)
 		self.hitmap_plot_size.setSingleStep(0.1)
@@ -939,22 +944,24 @@ class Ui_PyCCAPT(object):
 		self.result_list = []
 
 		self.camera_close_check_timer.start(500)  # check every 500 ms
-		self.statistics_timer.start(500)  # check every 500 ms
+		self.statistics_timer.start(333)  # check every 333 ms
 
 		# initialize the wins
 		if self.conf['baking_mode'] != 'on':
 			self.wins_init()
 
+		self.original_button_style = self.dc_hold.styleSheet()
+
 	def retranslateUi(self, PyCCAPT):
 		"""
-			Retranslate the UI with the selected language
+				Retranslate the UI with the selected language
 
-			Args:
-				PyCCAPT: Main window
+				Args:
+					PyCCAPT: Main window
 
-			Return:
-				None
-		"""
+				Return:
+					None
+			"""
 		_translate = QtCore.QCoreApplication.translate
 		###
 		# PyCCAPT.setWindowTitle(_translate("PyCCAPT", "OXCART"))
@@ -974,19 +981,17 @@ class Ui_PyCCAPT(object):
 		                                  "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
 		                                  "p, li { white-space: pre-wrap; }\n"
 		                                  "</style></head><body style=\" font-family:\'Segoe UI\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">                                        </p>\n"
-		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">                                         </p>\n"
 		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">{ex_user=user1;</span><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">ex_name=test1;</span>                                                                                </p>\n"
 		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">ex_time=90;max_ions=2000;ex_freq=10;</span>                                                                                </p>\n"
-		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vdc_min=500;vdc_max=4000;vdc_steps_up=100;</span>                                                                                </p>\n"
-		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vdc_steps_down=100;</span><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">control_algorithm=PID;</span><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vp_min=328;</span>                                                                                </p>\n"
+		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vdc_min=500;vdc_max=4000;vdc_steps_up=1;</span>                                                                                </p>\n"
+		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vdc_steps_down=1;</span><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">control_algorithm=PID;</span><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vp_min=328;</span>                                                                                </p>\n"
 		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">vp_max=3281;pulse_fraction=20;pulse_frequency=200;</span>                                                                                </p>\n"
 		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\">detection_rate_init=1;hit_displayed=20000;email=;counter_source=TDC</span><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">;</span>                                         </p>\n"
 		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">criteria_time=True;criteria_ions=False;</span>                                                                                </p>\n"
 		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">criteria_vdc=False}</span>                                                                                </p>\n"
 		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">{ex_user=user2;ex_name=test2;ex_time=100;</span>                                                                                </p>\n"
 		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">max_ions=3000;ex_freq=5;vdc_min=1000;</span>                                                                                </p>\n"
-		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">vdc_max=3000;vdc_steps_up=50;vdc_steps_down=50;</span>                                                                                </p>\n"
+		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">vdc_max=3000;vdc_steps_up=0.5;vdc_steps_down=0.5;</span>                                                                                </p>\n"
 		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">control_algorithm=proportional;vp_min=400;vp_max=2000;</span>                                                                                </p>\n"
 		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">pulse_fraction=15;pulse_frequency=200;detection_rate_init=2;</span>                                                                                </p>\n"
 		                                  "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'JetBrains Mono,monospace\'; font-size:8pt; color:#000000;\">hit_displayed=40000;email=;counter_source=DRS;</span>                                                                                </p>\n"
@@ -994,60 +999,61 @@ class Ui_PyCCAPT(object):
 		self.Error.setText(_translate("PyCCAPT", "<html><head/><body><p><br/></p></body></html>"))
 		self.start_button.setText(_translate("PyCCAPT", "Start"))
 		self.stop_button.setText(_translate("PyCCAPT", "Stop"))
-		self.label_196.setText(_translate("PyCCAPT", "Specimen Voltage (V)"))
-		self.detection_rate_init.setText(_translate("PyCCAPT", "1"))
-		self.label_176.setText(_translate("PyCCAPT", "Max. Experiment Time (S)"))
-		self.label_188.setText(_translate("PyCCAPT", "Detection Rate (%)"))
+		self.vp_max.setText(_translate("PyCCAPT", "3281"))
+		self.label_179.setText(_translate("PyCCAPT", "DC Min. Voltage (V)"))
+		self.label_189.setText(_translate("PyCCAPT", "# Hits Displayed"))
+		self.label_181.setText(_translate("PyCCAPT", "K_p Upwards"))
+		self.vdc_min.setText(_translate("PyCCAPT", "500"))
+		self.label_180.setText(_translate("PyCCAPT", "DC Max. Voltage (V)"))
+		self.dc_hold.setText(_translate("PyCCAPT", "Hold"))
 		self.label_193.setText(_translate("PyCCAPT", "Run Statistics"))
-		self.label_198.setText(_translate("PyCCAPT", "Detection Rate (%)"))
-		self.ex_name.setText(_translate("PyCCAPT", "test"))
-		self.label_177.setText(_translate("PyCCAPT", "Max. Number of Ions"))
-		self.label_192.setText(_translate("PyCCAPT", "Detection Mode"))
+		self.hit_displayed.setText(_translate("PyCCAPT", "20000"))
 		self.control_algorithm.setItemText(0, _translate("PyCCAPT", "Proportional"))
 		self.control_algorithm.setItemText(1, _translate("PyCCAPT", "PID"))
-		self.hit_displayed.setText(_translate("PyCCAPT", "20000"))
-		self.label_179.setText(_translate("PyCCAPT", "DC Min. Voltage (V)"))
-		self.label_195.setText(_translate("PyCCAPT", "Total Ions"))
-		self.ex_user.setText(_translate("PyCCAPT", "user"))
-		self.label_174.setText(_translate("PyCCAPT", "Experiment User"))
+		self.label_196.setText(_translate("PyCCAPT", "DC Voltage (V)"))
+		self.ex_name.setText(_translate("PyCCAPT", "test"))
+		self.label_190.setText(_translate("PyCCAPT", "Email"))
+		self.vp_min.setText(_translate("PyCCAPT", "328"))
+		self.label_199.setText(_translate("PyCCAPT", "Pulse Mode"))
+		self.label_186.setText(_translate("PyCCAPT", "Pulse Fraction (%)"))
 		self.pulse_fraction.setText(_translate("PyCCAPT", "20"))
+		self.label_177.setText(_translate("PyCCAPT", "Max. Number of Ions"))
+		self.pulse_frequency.setText(_translate("PyCCAPT", "200"))
+		self.vdc_steps_down.setText(_translate("PyCCAPT", "1"))
+		self.label_2.setText(_translate("PyCCAPT", "Stop at"))
+		self.label_184.setText(_translate("PyCCAPT", "Pulse Min. Voltage (V)"))
+		self.label_174.setText(_translate("PyCCAPT", "Experiment User"))
 		self.counter_source.setItemText(0, _translate("PyCCAPT", "TDC"))
 		self.counter_source.setItemText(1, _translate("PyCCAPT", "Digitizer"))
-		self.label_182.setText(_translate("PyCCAPT", "K_p Downwards"))
-		self.label_189.setText(_translate("PyCCAPT", "# Hits Displayed"))
-		self.label_184.setText(_translate("PyCCAPT", "Pulse Min. Voltage (V)"))
-		self.pulse_frequency.setText(_translate("PyCCAPT", "200"))
-		self.label_190.setText(_translate("PyCCAPT", "Email"))
-		self.label_194.setText(_translate("PyCCAPT", "Elapsed Time (S):"))
-		self.dc_hold.setText(_translate("PyCCAPT", "Hold"))
-		self.label_175.setText(_translate("PyCCAPT", "Experiment Name"))
-		self.label_178.setText(_translate("PyCCAPT", "Control refresh Freq.(Hz)"))
-		self.parameters_source.setItemText(0, _translate("PyCCAPT", "TextBox"))
-		self.parameters_source.setItemText(1, _translate("PyCCAPT", "TextLine"))
-		self.label_180.setText(_translate("PyCCAPT", "DC Max. Voltage (V)"))
-		self.label_186.setText(_translate("PyCCAPT", "Pulse Fraction (%)"))
-		self.label_173.setText(_translate("PyCCAPT", "Setup Parameters"))
-		self.label_191.setText(_translate("PyCCAPT", "Control Algorithm"))
-		self.vdc_steps_down.setText(_translate("PyCCAPT", "100"))
-		self.vp_min.setText(_translate("PyCCAPT", "328"))
 		self.label_187.setText(_translate("PyCCAPT", "Pulse Frequency (KHz)"))
-		self.max_ions.setText(_translate("PyCCAPT", "40000"))
-		self.label_185.setText(_translate("PyCCAPT", "Pulse Max. Voltage (V)"))
-		self.vp_max.setText(_translate("PyCCAPT", "3281"))
-		self.ex_freq.setText(_translate("PyCCAPT", "5"))
-		self.label_181.setText(_translate("PyCCAPT", "K_p Upwards"))
-		self.reset_heatmap.setText(_translate("PyCCAPT", "Reset"))
 		self.ex_time.setText(_translate("PyCCAPT", "900"))
-		self.vdc_max.setText(_translate("PyCCAPT", "4000"))
-		self.vdc_min.setText(_translate("PyCCAPT", "500"))
-		self.vdc_steps_up.setText(_translate("PyCCAPT", "100"))
-		self.label_197.setText(_translate("PyCCAPT", "Pulse Voltage (V)"))
-		self.label_199.setText(_translate("PyCCAPT", "Pulse Mode"))
 		self.pulse_mode.setItemText(0, _translate("PyCCAPT", "Voltage"))
 		self.pulse_mode.setItemText(1, _translate("PyCCAPT", "Laser"))
-		self.label.setText(_translate("PyCCAPT", "Stop at"))
-		self.label_2.setText(_translate("PyCCAPT", "Stop at"))
+		self.ex_freq.setText(_translate("PyCCAPT", "5"))
+		self.label_194.setText(_translate("PyCCAPT", "Elapsed Time (s)"))
+		self.label_176.setText(_translate("PyCCAPT", "Max. Experiment Time (S)"))
 		self.label_3.setText(_translate("PyCCAPT", "Stop at"))
+		self.label_188.setText(_translate("PyCCAPT", "Detection Rate (%)"))
+		self.label_185.setText(_translate("PyCCAPT", "Pulse Max. Voltage (V)"))
+		self.ex_user.setText(_translate("PyCCAPT", "user"))
+		self.reset_heatmap.setText(_translate("PyCCAPT", "Reset"))
+		self.label_192.setText(_translate("PyCCAPT", "Detection Mode"))
+		self.label_173.setText(_translate("PyCCAPT", "Setup Parameters"))
+		self.label_191.setText(_translate("PyCCAPT", "Control Algorithm"))
+		self.label_175.setText(_translate("PyCCAPT", "Experiment Name"))
+		self.label.setText(_translate("PyCCAPT", "Stop at"))
+		self.parameters_source.setItemText(0, _translate("PyCCAPT", "TextBox"))
+		self.parameters_source.setItemText(1, _translate("PyCCAPT", "TextLine"))
+		self.max_ions.setText(_translate("PyCCAPT", "40000"))
+		self.vdc_max.setText(_translate("PyCCAPT", "4000"))
+		self.label_198.setText(_translate("PyCCAPT", "Detection Rate (%)"))
+		self.label_182.setText(_translate("PyCCAPT", "K_p Downwards"))
+		self.vdc_steps_up.setText(_translate("PyCCAPT", "1"))
+		self.label_197.setText(_translate("PyCCAPT", "Pulse Voltage (V)"))
+		self.label_178.setText(_translate("PyCCAPT", "Control refresh Freq.(Hz)"))
+		self.detection_rate_init.setText(_translate("PyCCAPT", "1"))
+		self.label_195.setText(_translate("PyCCAPT", "Total Ions"))
+		self.set_min_voltage.setText(_translate("PyCCAPT", "Set"))
 		self.menuFile.setTitle(_translate("PyCCAPT", "File"))
 		self.menuEdit.setTitle(_translate("PyCCAPT", "Edit"))
 		self.menuHelp.setTitle(_translate("PyCCAPT", "Help"))
@@ -1233,8 +1239,8 @@ class Ui_PyCCAPT(object):
 			self.variables.pulse_frequency = float(self.pulse_frequency.text())
 			self.variables.hdf5_data_name = self.ex_name.text()
 			self.variables.email = self.email.text()
-			self.variables.vdc_step_up = int(float(self.vdc_steps_up.text()))
-			self.variables.vdc_step_down = int(float(self.vdc_steps_down.text()))
+			self.variables.vdc_step_up = float(self.vdc_steps_up.text())
+			self.variables.vdc_step_down = float(self.vdc_steps_down.text())
 			self.variables.control_algorithm = str(self.control_algorithm.currentText())
 			self.variables.pulse_mode = str(self.pulse_mode.currentText())
 			self.variables.v_p_min = int(float(self.vp_min.text()))
@@ -1335,13 +1341,13 @@ class Ui_PyCCAPT(object):
 
 	def start_experiment_worker(self):
 		"""
-        Start the experiment worker thread
+			Start the experiment worker thread
 
-        Args:
-            None
+			Args:
+				None
 
-        Return:
-            None
+			Return:
+                None
         """
 		self.experiment_process = multiprocessing.Process(target=apt_exp_control.run_experiment,
 		                                                  args=(self.variables, self.conf,
@@ -1351,14 +1357,14 @@ class Ui_PyCCAPT(object):
 
 	def on_stop_experiment_worker(self):
 		"""
-        Enable the start and stop buttons after experiment is finished
+			Enable the start and stop buttons after experiment is finished
 
-        Args:
-            None
+			Args:
+				None
 
-        Return:
-            None
-        """
+			Return:
+				None
+		"""
 		if self.variables.flag_end_experiment:
 			self.start_button.setEnabled(True)
 			self.stop_button.setEnabled(True)
@@ -1370,7 +1376,7 @@ class Ui_PyCCAPT(object):
 			self.ex_freq.setEnabled(True)
 			self.variables.vdc_hold = False
 			self.ex_name.setEnabled(True)
-			self.dc_hold.setStyleSheet(self.original_botton_style)
+			self.dc_hold.setStyleSheet(self.original_button_style)
 
 			self.experiment_process.join(1)
 			print('experiment_process joined')
@@ -1427,7 +1433,23 @@ class Ui_PyCCAPT(object):
 			                           "}")
 		elif self.variables.vdc_hold:
 			self.variables.vdc_hold = False
-			self.dc_hold.setStyleSheet(self.original_botton_style)
+			self.dc_hold.setStyleSheet(self.original_button_style)
+
+	def set_min_voltage_clicked(self):
+		"""
+			Set the minimum voltage
+
+			Args:
+				None
+
+			Return:
+				None
+		"""
+
+		if self.variables.vdc_hold:
+			self.variables.flag_new_min_voltage = True
+		else:
+			self.error_message("Hold the DC voltage first")
 
 	def wins_init(self):
 		# GUI Cameras
@@ -1466,11 +1488,12 @@ class Ui_PyCCAPT(object):
 		self.gui_stage_control.setupUi(self.Stage_control)
 
 		# GUI Visualization
-		self.gui_visualization = gui_visualization.Ui_Visualization(self.variables, self.conf)
-		self.Visualization = gui_visualization.VisualizationWindow(self.gui_visualization,
-		                                                           flags=Qt.WindowType.Tool)
-		self.Visualization.setWindowStyleFusion()
-		self.gui_visualization.setupUi(self.Visualization)
+		self.visualization_process = multiprocessing.Process(target=gui_visualization.run_visualization_window,
+		                                                     args=(self.variables, self.conf,
+		                                                           self.visualization_closed_event,
+		                                                           self.visualization_win_front))
+		self.visualization_process.daemon = True
+		self.visualization_process.start()
 
 	def open_cameras_win(self):
 		"""
@@ -1497,6 +1520,10 @@ class Ui_PyCCAPT(object):
 		if self.experimetn_finished_event.is_set():
 			self.experimetn_finished_event.clear()
 			self.on_stop_experiment_worker()
+		if self.visualization_closed_event.is_set():
+			# Change the color of the push button when the camera window is closed
+			self.reset_button_color(self.visualization)
+			self.visualization_closed_event.clear()
 
 	def open_gates_win(self):
 		"""
@@ -1550,7 +1577,7 @@ class Ui_PyCCAPT(object):
         Return:
             None
         """
-		if hasattr(self, 'Laser_Control') and self.Laser_control.isVisible():
+		if hasattr(self, 'Laser_control') and self.Laser_control.isVisible():
 			self.Laser_control.raise_()
 			self.Laser_control.activateWindow()
 		else:
@@ -1571,8 +1598,7 @@ class Ui_PyCCAPT(object):
         Return:
             None
         """
-
-		if hasattr(self, 'Stage_Control') and self.Stage_control.isVisible():
+		if hasattr(self, 'Stage_control') and self.Stage_control.isVisible():
 			self.Stage_control.raise_()
 			self.Stage_control.activateWindow()
 		else:
@@ -1593,16 +1619,12 @@ class Ui_PyCCAPT(object):
         Return:
             None
         """
-		if hasattr(self, 'Visualization') and self.Visualization.isVisible():
-			self.Visualization.raise_()
-			self.Visualization.activateWindow()
+		if self.conf['baking_mode'] != 'on':
+			self.variables.flag_visualization_win_show = True
+			self.visualization_win_front.set()
+			self.visualization.setStyleSheet("background-color: green")
 		else:
-			if self.conf['baking_mode'] != 'on':
-				self.Visualization.show()
-				self.visualization.setStyleSheet("background-color: green")
-				self.Visualization.closed.connect(lambda: self.reset_button_color(self.visualization))
-			else:
-				self.error_message("Set baking mode is on in config.json")
+			self.error_message("Set baking mode is on in config.json")
 
 	def open_baking_win(self):
 		"""
@@ -1692,7 +1714,6 @@ class SignalEmitter(QtCore.QObject):
 	detection_rate = QtCore.pyqtSignal(float)
 
 
-
 if __name__ == "__main__":
 	try:
 		# Load the JSON file
@@ -1707,10 +1728,8 @@ if __name__ == "__main__":
 
 	# Initialize global experiment variables
 	manager = multiprocessing.Manager()
-	lock = manager.Lock()
-	lock_lists = manager.Lock()
 	ns = manager.Namespace()
-	variables = share_variables.Variables(conf, ns, lock, lock_lists)
+	variables = share_variables.Variables(conf, ns)
 
 	# variables = share_variables.Variables(conf)
 	variables.log_path = p

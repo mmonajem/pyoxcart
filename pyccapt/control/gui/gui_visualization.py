@@ -309,6 +309,7 @@ class Ui_Visualization(object):
 			self.detector_heatmap.clear()
 			self.detector_heatmap.addItem(self.detector_circle)
 			self.variables.plot_clear_flag = False
+			self.index_plot = 0
 
 		# with self.variables.lock_statistics and self.variables.lock_setup_parameters:
 		if self.variables.start_flag:
@@ -421,7 +422,7 @@ class Ui_Visualization(object):
 						f"{initialize_devices.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
 					print(e)
 			# save plots to the file
-			if self.index_plot_save % 100 == 0 and self.index_plot_save != 0:
+			if self.index_plot_save % 50 == 0 and self.index_plot_save != 0:
 				# with self.variables.lock_setup_parameters:
 				path_meta = self.variables.path_meta
 				index_plot_save = int(self.index_plot_save / 100)
@@ -467,7 +468,8 @@ class VisualizationWindow(QtWidgets.QWidget):
 	"""
 	closed = QtCore.pyqtSignal()  # Define a custom closed signal
 
-	def __init__(self, gui_visualization, *args, **kwargs):
+	def __init__(self, variables, gui_visualization, visualization_close_event,
+	             visualization_win_front, *args, **kwargs):
 		"""
 			Constructor for the VisualizationWindow class.
 
@@ -478,7 +480,13 @@ class VisualizationWindow(QtWidgets.QWidget):
 		"""
 		super().__init__(*args, **kwargs)
 		self.gui_visualization = gui_visualization
+		self.variables = variables
+		self.visualization_win_front = visualization_win_front
+		self.visualization_close_event = visualization_close_event
 
+		self.timer = QtCore.QTimer(self)
+		self.timer.timeout.connect(self.check_if_should)
+		self.timer.start(500)  # Check every 1000 milliseconds (1 second)
 	def closeEvent(self, event):
 		"""
 			Close event for the window.
@@ -486,14 +494,39 @@ class VisualizationWindow(QtWidgets.QWidget):
 			Args:
 				event: Close event.
 		"""
-		self.gui_visualization.stop()  # Call the stop method to stop any background activity
-		self.closed.emit()  # Emit the custom closed signal
-		# Additional cleanup code here if needed
-		super().closeEvent(event)
+		event.ignore()
+		self.hide()
+		self.visualization_close_event.set()
+
+	def check_if_should(self):
+		if self.visualization_win_front.is_set():
+			self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
+			self.show()
+			self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowType.WindowStaysOnTopHint)
+			self.visualization_win_front.clear()  # Reset the flag
+		if self.variables.flag_visualization_win_show:
+			self.show()
+			self.variables.flag_visualization_win_show = False
 
 	def setWindowStyleFusion(self):
 		# Set the Fusion style
 		QtWidgets.QApplication.setStyle("Fusion")
+
+
+def run_visualization_window(variables, conf, visualization_closed_event, visualization_win_front):
+	"""
+	Run the Cameras window in a separate process.
+	"""
+
+	app = QtWidgets.QApplication(sys.argv)  # <-- Create a new QApplication instance
+	app.setStyle('Fusion')
+
+	gui_visualization = Ui_Visualization(variables, conf)
+	Cameras_alignment = VisualizationWindow(variables, gui_visualization, visualization_closed_event,
+	                                        visualization_win_front,
+	                                        flags=QtCore.Qt.WindowType.Tool)
+	gui_visualization.setupUi(Cameras_alignment)
+	sys.exit(app.exec())  # <-- Start the event loop for this QApplication instance
 
 
 if __name__ == "__main__":
@@ -508,10 +541,8 @@ if __name__ == "__main__":
 		print(e)
 		sys.exit()
 	manager = multiprocessing.Manager()
-	lock = manager.Lock()
-	lock_lists = manager.Lock()
 	ns = manager.Namespace()
-	variables = share_variables.Variables(conf, ns, lock, lock_lists)
+	variables = share_variables.Variables(conf, ns)
 
 	app = QtWidgets.QApplication(sys.argv)
 	app.setStyle('Fusion')

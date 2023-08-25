@@ -223,10 +223,8 @@ if __name__ == "__main__":
 		sys.exit()
 	# Initialize global experiment variables
 	manager = multiprocessing.Manager()
-	lock = manager.Lock()
-	lock_lists = manager.Lock()
 	ns = manager.Namespace()
-	variables = share_variables.Variables(conf, ns, lock, lock_lists)
+	variables = share_variables.Variables(conf, ns)
 
 	app = QtWidgets.QApplication(sys.argv)
 	app.setStyle('Fusion')

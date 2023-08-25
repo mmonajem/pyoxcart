@@ -3,7 +3,6 @@ import multiprocessing
 import os
 import time
 
-import numpy as np
 import pyvisa as visa
 import serial.tools.list_ports
 
@@ -22,6 +21,7 @@ class APT_Exp_Control:
     """
 
     def __init__(self, variables, conf, experiment_finished_event):
+
         self.variables = variables
         self.conf = conf
         self.experiment_finished_event = experiment_finished_event
@@ -31,11 +31,10 @@ class APT_Exp_Control:
         self.variables.start_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
         self.sleep_time = 1 / self.variables.ex_freq
 
-        self.avg_n_count = 0
+        self.detection_rate = 0
         self.specimen_voltage = 0
         self.pulse_voltage = 0
         self.count_last = 0
-        self.counts_target = 0
         self.vdc_max = 0
         self.pulse_frequency = 0
         self.pulse_fraction = 0
@@ -203,53 +202,42 @@ class APT_Exp_Control:
         self.main_v_dc.append(self.specimen_voltage)
         self.main_v_p.append(self.pulse_voltage)
         self.main_counter.append(count_temp)
-        # averaging count rate of N_averg counts
-        self.avg_n_count = np.sum(self.main_counter[-self.ex_freq:])
 
-        counts_measured = self.avg_n_count / (1 + self.pulse_frequency * 1000)
-
-        counts_error = self.counts_target - counts_measured  # deviation from setpoint
-
-        # rate = ((variables.avg_n_count * 100) / (1 + variables.pulse_frequency * 1000))
-        # if rate < 0.01 and variables.specimen_voltage < 5000:
-        #     ramp_speed_factor = 2.5
-        # else:
-        ramp_speed_factor = 1
+        error = self.variables.detection_rate - self.variables.detection_rate_current
         # simple proportional control with averaging
-        if counts_error > 0:
-            voltage_step = counts_error * self.variables.vdc_step_up * ramp_speed_factor
-        elif counts_error <= 0:
-            voltage_step = counts_error * self.variables.vdc_step_down * ramp_speed_factor
+        if error > 0.05:
+            voltage_step = error * self.variables.vdc_step_up * 10
+        elif error < -0.05:
+            voltage_step = error * self.variables.vdc_step_down * 10
         else:
             voltage_step = 0
 
-        if voltage_step > 20:
+        if voltage_step > 40:
             print('voltage step is too high: %s' % voltage_step)
-            voltage_step = 20
+            voltage_step = 40
 
         # update v_dc
         if not self.variables.vdc_hold and voltage_step != 0:
             if self.specimen_voltage < self.vdc_max:
-                if self.specimen_voltage >= self.variables.vdc_min - 50:
-                    specimen_voltage_temp = self.specimen_voltage + voltage_step
-                    if specimen_voltage_temp > self.vdc_max:
-                        specimen_voltage_temp = self.vdc_max
-                    if specimen_voltage_temp != self.specimen_voltage:
-                        # sending VDC via serial
-                        if self.conf['v_dc'] != "off":
-                            self.command_v_dc(">S0 %s" % specimen_voltage_temp)
-                            self.specimen_voltage = specimen_voltage_temp
+                specimen_voltage_temp = self.specimen_voltage + voltage_step
+                if specimen_voltage_temp > self.vdc_max:
+                    specimen_voltage_temp = self.vdc_max
+                if specimen_voltage_temp != self.specimen_voltage:
+                    # sending VDC via serial
+                    if self.conf['v_dc'] != "off":
+                        self.command_v_dc(">S0 %s" % specimen_voltage_temp)
+                        self.specimen_voltage = specimen_voltage_temp
 
-                        # update pulse voltage v_p
-                        new_vp = self.specimen_voltage * self.pulse_fraction * \
-                                 (1 / self.pulse_amp_per_supply_voltage)
-                        if self.pulse_voltage_max > new_vp > self.pulse_voltage_min:
-                            if self.conf['v_p'] != "off":
-                                self.com_port_v_p.write('VOLT %s' % new_vp)
-                            self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
+                    # update pulse voltage v_p
+                    new_vp = self.specimen_voltage * self.pulse_fraction * \
+                             (1 / self.pulse_amp_per_supply_voltage)
+                    if self.pulse_voltage_max > new_vp > self.pulse_voltage_min:
+                        if self.conf['v_p'] != "off":
+                            self.com_port_v_p.write('VOLT %s' % new_vp)
+                        self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
 
-                    self.variables.specimen_voltage = self.specimen_voltage
-                    self.variables.pulse_voltage = self.pulse_voltage
+                self.variables.specimen_voltage = self.specimen_voltage
+                self.variables.pulse_voltage = self.pulse_voltage
 
         # with self.variables.lock_statistics:
 
@@ -382,10 +370,8 @@ class APT_Exp_Control:
 
         desired_rate = self.variables.ex_freq  # Hz
         desired_period = 1.0 / desired_rate  # seconds
+        self.counts_target = self.variables.pulse_frequency * 1000 * self.variables.detection_rate / 100
 
-        self.counts_target = ((self.variables.detection_rate / 100) *
-                              self.variables.pulse_frequency) / self.variables.pulse_frequency
-        init_detection_rate = self.variables.detection_rate
         # Turn on the v_dc and v_p
         if not self.initialization_error:
             if self.conf['v_p'] == "on":
@@ -397,7 +383,7 @@ class APT_Exp_Control:
 
         self.main_temperature.extend([self.variables.temperature])
         self.main_chamber_vacuum.extend([float(self.variables.vacuum_main)])
-        self.pulse_frequency = self.variables.pulse_frequency
+        self.pulse_frequency = self.variables.pulse_frequency * 1000
         self.pulse_fraction = self.variables.pulse_fraction
         self.pulse_amp_per_supply_voltage = self.variables.pulse_amp_per_supply_voltage
         self.specimen_voltage = self.variables.specimen_voltage
@@ -417,41 +403,28 @@ class APT_Exp_Control:
             while True:
                 start_time = time.perf_counter()
                 self.vdc_max = self.variables.vdc_max
-                self.pulse_voltage_min = self.variables.v_p_min * (
-                        1 / self.pulse_amp_per_supply_voltage)
-                self.pulse_voltage_max = self.variables.v_p_max * (
-                        1 / self.pulse_amp_per_supply_voltage)
-                detection_rate_new = self.variables.detection_rate
-                # Update the detection rate
+                self.vdc_min = self.variables.vdc_min
+                self.pulse_voltage_min = self.variables.v_p_min / self.pulse_amp_per_supply_voltage
+                self.pulse_voltage_max = self.variables.v_p_max / self.pulse_amp_per_supply_voltage
+                self.total_ions = self.variables.total_ions
+                self.detection_rate = self.variables.detection_rate
 
-                if detection_rate_new != init_detection_rate:
-                    self.counts_target = (detection_rate_new / 100) * self.pulse_frequency
-                    init_detection_rate = detection_rate_new
-
-                self.variables.detection_rate_current = (self.avg_n_count * 100) / (
-                        1 + self.pulse_frequency * 1000)
-                if self.vdc_max <= self.specimen_voltage - 50 and self.variables.vdc_hold:
-                    decrement_vol = (self.specimen_voltage - self.vdc_max) / 10
+                if self.variables.flag_new_min_voltage and self.variables.vdc_hold:
+                    decrement_vol = (self.specimen_voltage - self.vdc_min) / 10
                     for step in range(10):
                         self.specimen_voltage -= decrement_vol
                         if self.conf['v_dc'] != "off":
                             self.command_v_dc(">S0 %s" % self.specimen_voltage)
                         time.sleep(0.3)
                     # update pulse voltage v_p
-                    new_vp = self.specimen_voltage * self.pulse_fraction * \
-                             (1 / self.pulse_amp_per_supply_voltage)
+                    new_vp = self.specimen_voltage * self.pulse_fraction / self.pulse_amp_per_supply_voltage
                     if self.pulse_voltage_max > new_vp > self.pulse_voltage_min:
                         if self.conf['v_p'] != "off":
                             self.com_port_v_p.write('VOLT %s' % new_vp)
                         self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
                     self.variables.specimen_voltage = self.specimen_voltage
                     self.variables.pulse_voltage = self.pulse_voltage
-
-                if counter_source == 'TDC':
-                    self.total_ions = len(self.variables.x_plot)
-                    self.variables.total_ions = self.total_ions
-                elif counter_source == 'HSD':
-                    pass
+                    self.variables.flag_new_min_voltage = False
                 # main loop function
                 self.main_ex_loop()
 
@@ -527,8 +500,8 @@ class APT_Exp_Control:
             'Experiment loop took longer than %s (ms) for %s times out of %s iteration.'
             % (int(1000 / self.variables.ex_freq), index_time, steps))
 
-        print('Waiting for TDC process to be finished for maximum 30 seconds...')
-        for i in range(30):
+        print('Waiting for TDC process to be finished for maximum 60 seconds...')
+        for i in range(60):
             if self.variables.flag_finished_tdc:
                 print('TDC process is finished')
                 break
@@ -788,22 +761,22 @@ def run_experiment(variables, conf, experiment_finished_event):
 
     """
 
-    # from line_profiler import LineProfiler
-    #
-    # lp1 = LineProfiler()
-    #
-    # # Run the experiment
-    # apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event)
-    #
-    # lp1.add_function(apt_exp_control.run_experiment)
-    #
-    # lp1.add_function(apt_exp_control.main_ex_loop)
-    #
-    # # Run the profiler
-    # lp1(apt_exp_control.run_experiment)()
-    # # Save the profiling result to a file
-    # lp1.dump_stats('run_experiment.lprof')
+    from line_profiler import LineProfiler
 
+    lp1 = LineProfiler()
+
+    # Run the experiment
     apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event)
 
-    apt_exp_control.run_experiment()
+    lp1.add_function(apt_exp_control.run_experiment)
+
+    lp1.add_function(apt_exp_control.main_ex_loop)
+
+    # Run the profiler
+    lp1(apt_exp_control.run_experiment)()
+    # Save the profiling result to a file
+    lp1.dump_stats('run_experiment.lprof')
+
+    # apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event)
+    #
+    # apt_exp_control.run_experiment()

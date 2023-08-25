@@ -1,9 +1,12 @@
+import multiprocessing
+
+
 class Variables:
     """
     Global variables class for experiment setup, statistics, and data.
     """
 
-    def __init__(self, conf, namespace, lock, lock_lists):
+    def __init__(self, conf, namespace):
         """
         Initialize the global variables.
 
@@ -11,8 +14,11 @@ class Variables:
             conf (dict): Configuration dictionary containing various settings.
         """
         self.ns = namespace
-        self.lock = lock
-        self.lock_lists = lock_lists
+        self.lock = multiprocessing.Lock()
+        self.lock_lists = multiprocessing.Lock()
+        self.lock_data_plot = multiprocessing.Lock()
+        self.lock_exp = multiprocessing.Lock()
+        self.lock_vacuum_tmp = multiprocessing.Lock()
         ### Device Ports
         self.ns.COM_PORT_cryo = conf['COM_PORT_cryo']
         self.ns.COM_PORT_V_dc = conf['COM_PORT_V_dc']
@@ -65,7 +71,9 @@ class Variables:
         self.ns.flag_pump_load_lock_led = None
         self.ns.flag_camera_grab = False
         self.ns.flag_camera_win_show = False
+        self.ns.flag_visualization_win_show = False
         self.ns.flag_end_experiment = False
+        self.ns.flag_new_min_voltage = False
         self.ns.criteria_time = True
         self.ns.criteria_ions = True
         self.ns.criteria_vdc = True
@@ -595,6 +603,15 @@ class Variables:
             self.ns.flag_camera_win_show = value
 
     @property
+    def flag_visualization_win_show(self):
+        return self.ns.flag_visualization_win_show
+
+    @flag_visualization_win_show.setter
+    def flag_visualization_win_show(self, value):
+        with self.lock:
+            self.ns.flag_visualization_win_show = value
+
+    @property
     def flag_end_experiment(self):
         return self.ns.flag_end_experiment
 
@@ -602,6 +619,15 @@ class Variables:
     def flag_end_experiment(self, value):
         with self.lock:
             self.ns.flag_end_experiment = value
+
+    @property
+    def flag_new_min_voltage(self):
+        return self.ns.flag_new_min_voltage
+
+    @flag_new_min_voltage.setter
+    def flag_new_min_voltage(self, value):
+        with self.lock:
+            self.ns.flag_new_min_voltage = value
 
     @property
     def criteria_time(self):
@@ -708,7 +734,7 @@ class Variables:
 
     @elapsed_time.setter
     def elapsed_time(self, value):
-        with self.lock:
+        with self.lock_exp:
             self.ns.elapsed_time = value
 
     @property
@@ -735,7 +761,7 @@ class Variables:
 
     @total_ions.setter
     def total_ions(self, value):
-        with self.lock:
+        with self.lock_exp:
             self.ns.total_ions = value
 
     @property
@@ -744,7 +770,7 @@ class Variables:
 
     @specimen_voltage.setter
     def specimen_voltage(self, value):
-        with self.lock:
+        with self.lock_exp:
             self.ns.specimen_voltage = value
 
     @property
@@ -762,7 +788,7 @@ class Variables:
 
     @detection_rate_current.setter
     def detection_rate_current(self, value):
-        with self.lock:
+        with self.lock_exp:
             self.ns.detection_rate_current = value
 
     @property
@@ -771,7 +797,7 @@ class Variables:
 
     @pulse_voltage.setter
     def pulse_voltage(self, value):
-        with self.lock:
+        with self.lock_exp:
             self.ns.pulse_voltage = value
 
     @property
@@ -943,7 +969,7 @@ class Variables:
 
     @temperature.setter
     def temperature(self, value):
-        with self.lock:
+        with self.lock_vacuum_tmp:
             self.ns.temperature = value
 
     @property
@@ -952,7 +978,7 @@ class Variables:
 
     @vacuum_main.setter
     def vacuum_main(self, value):
-        with self.lock:
+        with self.lock_vacuum_tmp:
             self.ns.vacuum_main = value
 
     @property
@@ -961,7 +987,7 @@ class Variables:
 
     @vacuum_buffer.setter
     def vacuum_buffer(self, value):
-        with self.lock:
+        with self.lock_vacuum_tmp:
             self.ns.vacuum_buffer = value
 
     @property
@@ -970,7 +996,7 @@ class Variables:
 
     @vacuum_buffer_backing.setter
     def vacuum_buffer_backing(self, value):
-        with self.lock:
+        with self.lock_vacuum_tmp:
             self.ns.vacuum_buffer_backing = value
 
     @property
@@ -979,7 +1005,7 @@ class Variables:
 
     @vacuum_load_lock.setter
     def vacuum_load_lock(self, value):
-        with self.lock:
+        with self.lock_vacuum_tmp:
             self.ns.vacuum_load_lock = value
 
     @property
@@ -988,12 +1014,13 @@ class Variables:
 
     @vacuum_load_lock_backing.setter
     def vacuum_load_lock_backing(self, value):
-        with self.lock:
+        with self.lock_vacuum_tmp:
             self.ns.vacuum_load_lock_backing = value
 
     @property
     def main_v_dc(self):
-        return self.ns.main_v_dc
+        with self.lock_lists:
+            return self.ns.main_v_dc
 
     @main_v_dc.setter
     def main_v_dc(self, value):
@@ -1002,7 +1029,8 @@ class Variables:
 
     @property
     def main_v_p(self):
-        return self.ns.main_v_p
+        with self.lock_lists:
+            return self.ns.main_v_p
 
     @main_v_p.setter
     def main_v_p(self, value):
@@ -1011,7 +1039,8 @@ class Variables:
 
     @property
     def main_counter(self):
-        return self.ns.main_counter
+        with self.lock_lists:
+            return self.ns.main_counter
 
     @main_counter.setter
     def main_counter(self, value):
@@ -1020,7 +1049,8 @@ class Variables:
 
     @property
     def main_temperature(self):
-        return self.ns.main_temperature
+        with self.lock_lists:
+            return self.ns.main_temperature
 
     @main_temperature.setter
     def main_temperature(self, value):
@@ -1029,7 +1059,8 @@ class Variables:
 
     @property
     def main_chamber_vacuum(self):
-        return self.ns.main_chamber_vacuum
+        with self.lock_lists:
+            return self.ns.main_chamber_vacuum
 
     @main_chamber_vacuum.setter
     def main_chamber_vacuum(self, value):
@@ -1038,7 +1069,8 @@ class Variables:
 
     @property
     def main_v_p_hsd(self):
-        return self.ns.main_v_p_hsd
+        with self.lock_lists:
+            return self.ns.main_v_p_hsd
 
     @main_v_p_hsd.setter
     def main_v_p_hsd(self, value):
@@ -1047,7 +1079,8 @@ class Variables:
 
     @property
     def laser_degree(self):
-        return self.ns.laser_degree
+        with self.lock_lists:
+            return self.ns.laser_degree
 
     @laser_degree.setter
     def laser_degree(self, value):
@@ -1056,43 +1089,48 @@ class Variables:
 
     @property
     def main_v_dc_plot(self):
-        return self.ns.main_v_dc_plot
+        with self.lock_data_plot:
+            return self.ns.main_v_dc_plot
 
     @main_v_dc_plot.setter
     def main_v_dc_plot(self, value):
-        with self.lock_lists:
+        with self.lock_data_plot:
             self.ns.main_v_dc_plot = value
 
     @property
     def x_plot(self):
-        return self.ns.x_plot
+        with self.lock_data_plot:
+            return self.ns.x_plot
 
     @x_plot.setter
     def x_plot(self, value):
-        with self.lock_lists:
+        with self.lock_data_plot:
             self.ns.x_plot = value
 
     @property
     def y_plot(self):
-        return self.ns.y_plot
+        with self.lock_data_plot:
+            return self.ns.y_plot
 
     @y_plot.setter
     def y_plot(self, value):
-        with self.lock_lists:
+        with self.lock_data_plot:
             self.ns.y_plot = value
 
     @property
     def t_plot(self):
-        return self.ns.t_plot
+        with self.lock_data_plot:
+            return self.ns.t_plot
 
     @t_plot.setter
     def t_plot(self, value):
-        with self.lock_lists:
+        with self.lock_data_plot:
             self.ns.t_plot = value
 
     @property
     def x(self):
-        return self.ns.x
+        with self.lock_lists:
+            return self.ns.x
 
     @x.setter
     def x(self, value):
@@ -1101,7 +1139,8 @@ class Variables:
 
     @property
     def y(self):
-        return self.ns.y
+        with self.lock_lists:
+            return self.ns.y
 
     @y.setter
     def y(self, value):
@@ -1110,7 +1149,8 @@ class Variables:
 
     @property
     def t(self):
-        return self.ns.t
+        with self.lock_lists:
+            return self.ns.t
 
     @t.setter
     def t(self, value):
@@ -1119,7 +1159,8 @@ class Variables:
 
     @property
     def dld_start_counter(self):
-        return self.ns.dld_start_counter
+        with self.lock_lists:
+            return self.ns.dld_start_counter
 
     @dld_start_counter.setter
     def dld_start_counter(self, value):
@@ -1128,7 +1169,8 @@ class Variables:
 
     @property
     def time_stamp(self):
-        return self.ns.time_stamp
+        with self.lock_lists:
+            return self.ns.time_stamp
 
     @time_stamp.setter
     def time_stamp(self, value):
@@ -1137,7 +1179,8 @@ class Variables:
 
     @property
     def laser_intensity(self):
-        return self.ns.laser_intensity
+        with self.lock_lists:
+            return self.ns.laser_intensity
 
     @laser_intensity.setter
     def laser_intensity(self, value):
@@ -1146,7 +1189,8 @@ class Variables:
 
     @property
     def main_v_dc_dld_surface_concept(self):
-        return self.ns.main_v_dc_dld_surface_concept
+        with self.lock_lists:
+            return self.ns.main_v_dc_dld_surface_concept
 
     @main_v_dc_dld_surface_concept.setter
     def main_v_dc_dld_surface_concept(self, value):
@@ -1155,7 +1199,8 @@ class Variables:
 
     @property
     def main_p_dld_surface_concept(self):
-        return self.ns.main_p_dld_surface_concept
+        with self.lock_lists:
+            return self.ns.main_p_dld_surface_concept
 
     @main_p_dld_surface_concept.setter
     def main_p_dld_surface_concept(self, value):
@@ -1164,7 +1209,8 @@ class Variables:
 
     @property
     def main_v_dc_tdc_surface_concept(self):
-        return self.ns.main_v_dc_tdc_surface_concept
+        with self.lock_lists:
+            return self.ns.main_v_dc_tdc_surface_concept
 
     @main_v_dc_tdc_surface_concept.setter
     def main_v_dc_tdc_surface_concept(self, value):
@@ -1173,7 +1219,8 @@ class Variables:
 
     @property
     def main_p_tdc_surface_concept(self):
-        return self.ns.main_p_tdc_surface_concept
+        with self.lock_lists:
+            return self.ns.main_p_tdc_surface_concept
 
     @main_p_tdc_surface_concept.setter
     def main_p_tdc_surface_concept(self, value):
@@ -1182,7 +1229,8 @@ class Variables:
 
     @property
     def main_v_dc_hsd(self):
-        return self.ns.main_v_dc_hsd
+        with self.lock_lists:
+            return self.ns.main_v_dc_hsd
 
     @main_v_dc_hsd.setter
     def main_v_dc_hsd(self, value):
@@ -1191,7 +1239,8 @@ class Variables:
 
     @property
     def main_p_hsd(self):
-        return self.ns.main_p_hsd
+        with self.lock_lists:
+            return self.ns.main_p_hsd
 
     @main_p_hsd.setter
     def main_p_hsd(self, value):
@@ -1200,7 +1249,8 @@ class Variables:
 
     @property
     def main_v_dc_tdc_roentdek(self):
-        return self.ns.main_v_dc_tdc_roentdek
+        with self.lock_lists:
+            return self.ns.main_v_dc_tdc_roentdek
 
     @main_v_dc_tdc_roentdek.setter
     def main_v_dc_tdc_roentdek(self, value):
@@ -1209,7 +1259,8 @@ class Variables:
 
     @property
     def main_p_tdc_roentdek(self):
-        return self.ns.main_p_tdc_roentdek
+        with self.lock_lists:
+            return self.ns.main_p_tdc_roentdek
 
     @main_p_tdc_roentdek.setter
     def main_p_tdc_roentdek(self, value):
@@ -1218,7 +1269,8 @@ class Variables:
 
     @property
     def channel(self):
-        return self.ns.channel
+        with self.lock_lists:
+            return self.ns.channel
 
     @channel.setter
     def channel(self, value):
@@ -1227,7 +1279,8 @@ class Variables:
 
     @property
     def time_data(self):
-        return self.ns.time_data
+        with self.lock_lists:
+            return self.ns.time_data
 
     @time_data.setter
     def time_data(self, value):
@@ -1236,7 +1289,8 @@ class Variables:
 
     @property
     def tdc_start_counter(self):
-        return self.ns.tdc_start_counter
+        with self.lock_lists:
+            return self.ns.tdc_start_counter
 
     @tdc_start_counter.setter
     def tdc_start_counter(self, value):
@@ -1245,7 +1299,8 @@ class Variables:
 
     @property
     def ch0_time(self):
-        return self.ns.ch0_time
+        with self.lock_lists:
+            return self.ns.ch0_time
 
     @ch0_time.setter
     def ch0_time(self, value):
@@ -1254,7 +1309,8 @@ class Variables:
 
     @property
     def ch0_wave(self):
-        return self.ns.ch0_wave
+        with self.lock_lists:
+            return self.ns.ch0_wave
 
     @ch0_wave.setter
     def ch0_wave(self, value):
@@ -1263,7 +1319,8 @@ class Variables:
 
     @property
     def ch1_time(self):
-        return self.ns.ch1_time
+        with self.lock_lists:
+            return self.ns.ch1_time
 
     @ch1_time.setter
     def ch1_time(self, value):
@@ -1272,7 +1329,8 @@ class Variables:
 
     @property
     def ch1_wave(self):
-        return self.ns.ch1_wave
+        with self.lock_lists:
+            return self.ns.ch1_wave
 
     @ch1_wave.setter
     def ch1_wave(self, value):
@@ -1281,7 +1339,8 @@ class Variables:
 
     @property
     def ch2_time(self):
-        return self.ns.ch2_time
+        with self.lock_lists:
+            return self.ns.ch2_time
 
     @ch2_time.setter
     def ch2_time(self, value):
@@ -1290,7 +1349,8 @@ class Variables:
 
     @property
     def ch2_wave(self):
-        return self.ns.ch2_wave
+        with self.lock_lists:
+            return self.ns.ch2_wave
 
     @ch2_wave.setter
     def ch2_wave(self, value):
@@ -1299,7 +1359,8 @@ class Variables:
 
     @property
     def ch3_time(self):
-        return self.ns.ch3_time
+        with self.lock_lists:
+            return self.ns.ch3_time
 
     @ch3_time.setter
     def ch3_time(self, value):
@@ -1308,7 +1369,8 @@ class Variables:
 
     @property
     def ch3_wave(self):
-        return self.ns.ch3_wave
+        with self.lock_lists:
+            return self.ns.ch3_wave
 
     @ch3_wave.setter
     def ch3_wave(self, value):
@@ -1317,7 +1379,8 @@ class Variables:
 
     @property
     def ch0(self):
-        return self.ns.ch0
+        with self.lock_lists:
+            return self.ns.ch0
 
     @ch0.setter
     def ch0(self, value):
@@ -1326,7 +1389,8 @@ class Variables:
 
     @property
     def ch1(self):
-        return self.ns.ch1
+        with self.lock_lists:
+            return self.ns.ch1
 
     @ch1.setter
     def ch1(self, value):
@@ -1335,7 +1399,8 @@ class Variables:
 
     @property
     def ch2(self):
-        return self.ns.ch2
+        with self.lock_lists:
+            return self.ns.ch2
 
     @ch2.setter
     def ch2(self, value):
@@ -1344,7 +1409,8 @@ class Variables:
 
     @property
     def ch3(self):
-        return self.ns.ch3
+        with self.lock_lists:
+            return self.ns.ch3
 
     @ch3.setter
     def ch3(self, value):
@@ -1353,7 +1419,8 @@ class Variables:
 
     @property
     def ch4(self):
-        return self.ns.ch4
+        with self.lock_lists:
+            return self.ns.ch4
 
     @ch4.setter
     def ch4(self, value):
@@ -1362,7 +1429,8 @@ class Variables:
 
     @property
     def ch5(self):
-        return self.ns.ch5
+        with self.lock_lists:
+            return self.ns.ch5
 
     @ch5.setter
     def ch5(self, value):
@@ -1371,7 +1439,8 @@ class Variables:
 
     @property
     def ch6(self):
-        return self.ns.ch6
+        with self.lock_lists:
+            return self.ns.ch6
 
     @ch6.setter
     def ch6(self, value):
@@ -1380,7 +1449,8 @@ class Variables:
 
     @property
     def ch7(self):
-        return self.ns.ch7
+        with self.lock_lists:
+            return self.ns.ch7
 
     @ch7.setter
     def ch7(self, value):
