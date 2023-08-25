@@ -2,14 +2,14 @@
 
 # A modular, FAIR open-source python atom probe tomography software package for experiment control and data calibration
 
-<img style="float: right;" src="pyccapt/files/logo.png">
+
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7588996.svg)](https://doi.org/10.5281/zenodo.7588996)
 [![Documentation Status](https://readthedocs.org/projects/pyccapt/badge/?version=latest)](https://pyccapt.readthedocs.io/en/latest/?badge=latest)
 <!--[![coverage report](https://gitlab.com/jesseds/apav/badges/master/coverage.svg)](https://gitlab.com/jesseds/apav/commits/master)
 [![pipeline status](https://gitlab.com/jesseds/apav/badges/master/pipeline.svg)](https://gitlab.com/jesseds/apav/-/commits/master)-->
 
-
+<img style="float: right;" src="pyccapt/files/logo.png">
 This package aims to provide open-source software for controlling atom probe systems and calibrating data.
 The package is modular and adaptable for a wide range of devices in atom probe instrument. So far it is
 capable of collecting data from Surface consept and ReoenDek TDC systems. The package is developed in Python 3.9.
