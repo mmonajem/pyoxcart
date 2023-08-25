@@ -137,22 +137,31 @@ class SharedData:
                 return True
         return False
 
-    def save_data_to_variables_share(self):
+    def save_data_to_variables_share(self, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
 
         while True:
             with self.lock:
-                self.variables.extend_to('main_v_dc_plot', self.main_v_dc_plot)
-                self.variables.extend_to('x_plot', self.x_plot.copy())
-                self.variables.extend_to('y_plot', self.y_plot.copy())
-                self.variables.extend_to('t_plot', self.t_plot.copy())
+                x_plot_tmp = self.x_plot.copy()
+                y_plot_tmp = self.y_plot.copy()
+                t_plot_tmp = self.t_plot.copy()
+                main_v_dc_plot_tmp = self.main_v_dc_plot.copy()
                 self.x_plot.clear()
                 self.y_plot.clear()
                 self.t_plot.clear()
                 self.main_v_dc_plot.clear()
+            with lock:
+                length = len(x_plot_tmp)
+                counter = counter_plot.value
+                x_plot[counter:counter + length] = x_plot_tmp
+                y_plot[counter:counter + length] = y_plot_tmp
+                t_plot[counter:counter + length] = t_plot_tmp
+                main_v_dc_plot[counter:counter + length] = main_v_dc_plot_tmp
+                counter_plot.value += length
+
             time.sleep(0.5)
 
 
-def run_experiment_measure(variables):
+def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
     """
         Measurement function: This function is called in a process to read data from the queue.
 
@@ -215,7 +224,9 @@ def run_experiment_measure(variables):
     main_v_dc_plot_tm = []
 
     # Create and start the data saving thread
-    saving_thread = threading.Thread(target=share_data.save_data_to_variables_share)
+    saving_thread = threading.Thread(target=share_data.save_data_to_variables_share, args=(x_plot, y_plot, t_plot,
+                                                                                           main_v_dc_plot, counter_plot,
+                                                                                           lock,))
     saving_thread.daemon = True  # Set as daemon thread to exit when main thread exits
     saving_thread.start()
 
@@ -250,15 +261,17 @@ def run_experiment_measure(variables):
                 xx_tmp = (((xx_dif - XYBINSHIFT) * XYFACTOR) * 0.1).tolist()  # from mm to in cm by dividing by 10
                 yy_tmp = (((yy_dif - XYBINSHIFT) * XYFACTOR) * 0.1).tolist()  # from mm to in cm by dividing by 10
                 tt_tmp = (tt_dif * TOFFACTOR).tolist()  # in ns
+
                 xx_list.extend(xx_dif.tolist())
                 yy_list.extend(yy_dif.tolist())
                 tt_list.extend(tt_dif.tolist())
+
                 xx.extend(xx_tmp)
                 yy.extend(yy_tmp)
                 tt.extend(tt_tmp)
-                dc_voltage = np.tile(specimen_voltage, len(xx)).tolist()
+                dc_voltage = np.tile(specimen_voltage, len(xx_tmp)).tolist()
                 voltage_data.extend(dc_voltage)
-                pulse_data.extend((np.tile(pulse_voltage, len(xx))).tolist())
+                pulse_data.extend((np.tile(pulse_voltage, len(xx_tmp))).tolist())
 
                 x_plot_tmp.extend(xx_tmp)
                 y_plot_tm.extend(yy_tmp)
@@ -299,15 +312,16 @@ def run_experiment_measure(variables):
         if current_time - start_time >= 0.5:
             detection_rate = events_detected_tmp * 100 / pulse_frequency
             variables.detection_rate_current = detection_rate * 2  # to get the rate per second
+            variables.detection_rate_current_plot = detection_rate * 2  # to get the rate per second
             variables.total_ions = events_detected
             # Reset the counter and timer
             events_detected_tmp = 0
             start_time = current_time
 
-        if time.time() - start_time_loop > 0.5:
+        if time.time() - start_time_loop > 0.2:
             loop_time += 1
 
-    print("for %s times loop time took longer than 0.5 second" % loop_time)
+    print("for %s times loop time took longer than 0.2 second" % loop_time)
     variables.total_ions = events_detected
     print("TDC Measurement stopped")
     np.save(variables.path + "/x_data.npy", np.array(xx_list))
@@ -339,7 +353,7 @@ def run_experiment_measure(variables):
     return 0
 
 
-def experiment_measure(variables):
+def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
     from line_profiler import LineProfiler
 
     lp1 = LineProfiler()
@@ -347,7 +361,7 @@ def experiment_measure(variables):
     lp1.add_function(run_experiment_measure)
 
     # Run the profiler
-    lp1(run_experiment_measure)(variables)
+    lp1(run_experiment_measure)(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
     # Save the profiling result to a file
     lp1.dump_stats('./../../experiment_measure.lprof')
 

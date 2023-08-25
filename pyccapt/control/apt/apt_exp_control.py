@@ -3,6 +3,7 @@ import multiprocessing
 import os
 import time
 
+import numpy as np
 import pyvisa as visa
 import serial.tools.list_ports
 
@@ -20,13 +21,20 @@ class APT_Exp_Control:
     This class is responsible for controlling the experiment.
     """
 
-    def __init__(self, variables, conf, experiment_finished_event):
+    def __init__(self, variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot,
+                 counter_plot, lock):
 
         self.variables = variables
         self.conf = conf
         self.experiment_finished_event = experiment_finished_event
-        self.com_port_v_p = None
+        self.x_plot = x_plot
+        self.y_plot = y_plot
+        self.t_plot = t_plot
+        self.main_v_dc_plot = main_v_dc_plot
+        self.counter_plot = counter_plot
+        self.lock = lock
 
+        self.com_port_v_p = None
         self.log_apt = None
         self.variables.start_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
         self.sleep_time = 1 / self.variables.ex_freq
@@ -70,7 +78,8 @@ class APT_Exp_Control:
             # Initialize and initiate a process(Refer to imported file 'tdc_new' for process function declaration )
             # Module used: multiprocessing
             self.tdc_process = multiprocessing.Process(target=tdc_surface_consept.experiment_measure,
-                                                       args=(self.variables,))
+                                                       args=(self.variables, self.x_plot, self.y_plot, self.t_plot,
+                                                             self.main_v_dc_plot, self.counter_plot, self.lock,))
 
             self.tdc_process.start()
 
@@ -237,6 +246,7 @@ class APT_Exp_Control:
                         self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
 
                 self.variables.specimen_voltage = self.specimen_voltage
+                self.variables.specimen_voltage_plot = self.specimen_voltage
                 self.variables.pulse_voltage = self.pulse_voltage
 
         # with self.variables.lock_statistics:
@@ -284,7 +294,7 @@ class APT_Exp_Control:
         # Clear up variables and deinitialize devices...
         # Log completion...
         # Total experiment time variable
-        start_main_ex = time.time()
+        self.variables.flag_visualization_start = True
 
         if os.path.exists("./files/counter_experiments.txt"):
             # Read the experiment counter
@@ -423,6 +433,7 @@ class APT_Exp_Control:
                             self.com_port_v_p.write('VOLT %s' % new_vp)
                         self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
                     self.variables.specimen_voltage = self.specimen_voltage
+                    self.variables.specimen_voltage_plot = self.specimen_voltage
                     self.variables.pulse_voltage = self.pulse_voltage
                     self.variables.flag_new_min_voltage = False
                 # main loop function
@@ -464,12 +475,9 @@ class APT_Exp_Control:
                 time_ex_s.append(int(end.strftime("%S")))
                 time_ex_m.append(int(end.strftime("%M")))
                 time_ex_h.append(int(end.strftime("%H")))
-                end_main_ex_loop = time.time()
-                elapsed_time_exp = end_main_ex_loop - start_main_ex
-                self.variables.elapsed_time = elapsed_time_exp
 
                 if self.variables.criteria_time:
-                    if elapsed_time_exp >= self.variables.ex_time:
+                    if self.variables.elapsed_time >= self.variables.ex_time:
                         self.log_apt.info('Experiment is stopped because experiment time Max. is achieved')
                         if self.conf['tdc'] == "on":
                             if self.variables.counter_source == 'TDC':
@@ -492,10 +500,8 @@ class APT_Exp_Control:
         time.sleep(1)
 
         self.log_apt.info('Experiment is finished')
-        print(
-            f"{initialize_devices.bcolors.WARNING}Warning: Experiment loop took longer than %s Millisecond for"
-            f" %s times out of %s iteration{initialize_devices.bcolors.ENDC}" % (
-                int(1000 / self.variables.ex_freq), index_time, steps))
+        print("Experiment loop took longer than %s Millisecond for %s times out of %s "
+              "iteration{initialize_devices.bcolors.ENDC}" % (int(1000 / self.variables.ex_freq), index_time, steps))
         self.log_apt.warning(
             'Experiment loop took longer than %s (ms) for %s times out of %s iteration.'
             % (int(1000 / self.variables.ex_freq), index_time, steps))
@@ -674,6 +680,16 @@ class APT_Exp_Control:
             self.variables.index_wait_on_plot_start = 0
             self.variables.index_plot_save = 0
             self.variables.index_plot = 0
+            self.variables.specimen_voltage = 0
+            self.variables.specimen_voltage_plot = 0
+            self.variables.pulse_voltage = 0
+            self.variables.detection_rate_current = 0
+            with self.lock:
+                self.x_plot[:] = np.zeros(self.conf['maximum_size_plot_arrays'])
+                self.y_plot[:] = np.zeros(self.conf['maximum_size_plot_arrays'])
+                self.t_plot[:] = np.zeros(self.conf['maximum_size_plot_arrays'])
+                self.main_v_dc_plot[:] = np.zeros(self.conf['maximum_size_plot_arrays'])
+                self.counter_plot.value = 0
 
             self.variables.clear_to('x')
             self.variables.clear_to('y')
@@ -718,10 +734,6 @@ class APT_Exp_Control:
             self.variables.clear_to('main_v_dc_drs')
             self.variables.clear_to('main_v_p_drs')
 
-            self.variables.clear_to('main_v_dc_plot')
-            self.variables.clear_to('x_plot')
-            self.variables.clear_to('y_plot')
-            self.variables.clear_to('t_plot')
 
         self.log_apt.info('Starting cleanup')
 
@@ -755,7 +767,8 @@ class APT_Exp_Control:
         self.log_apt.info('Cleanup is finished')
 
 
-def run_experiment(variables, conf, experiment_finished_event):
+def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot,
+                   lock):
     """
         Run the main experiment.
 
@@ -766,7 +779,8 @@ def run_experiment(variables, conf, experiment_finished_event):
     lp1 = LineProfiler()
 
     # Run the experiment
-    apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event)
+    apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot,
+                                      main_v_dc_plot, counter_plot, lock)
 
     lp1.add_function(apt_exp_control.run_experiment)
 

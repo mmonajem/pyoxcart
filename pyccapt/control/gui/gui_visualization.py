@@ -1,6 +1,7 @@
 import multiprocessing
 import os
 import sys
+import time
 
 import numpy as np
 import pyqtgraph as pg
@@ -16,7 +17,7 @@ from pyccapt.control.devices import initialize_devices
 
 class Ui_Visualization(object):
 
-	def __init__(self, variables, conf):
+	def __init__(self, variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
 
 		"""
 		Constructor for the Visualization UI class.
@@ -30,13 +31,22 @@ class Ui_Visualization(object):
 			conf: Configuration settings.
 			update_timer (QTimer): QTimer for updating graphs.
 		"""
+		self.start_main_exp = 0
+		self.index_plot_start = 0
+		self.variables = variables
+		self.conf = conf
+		self.x_plot = x_plot
+		self.y_plot = y_plot
+		self.t_plot = t_plot
+		self.main_v_dc_plot = main_v_dc_plot
+		self.counter_plot = counter_plot
+		self.lock = lock
 		self.counter_source = ''
 		self.index_plot_save = 0
 		self.index_plot = 0
 		self.index_wait_on_plot_start = 0
 		self.index_auto_scale_graph = 0
-		self.variables = variables
-		self.conf = conf
+
 		self.update_timer = QTimer()  # Create a QTimer for updating graphs
 		self.update_timer.timeout.connect(self.update_graphs)  # Connect it to the update_graphs slot
 		self.index_plot_heatmap = 0  # Index for the heatmap plot
@@ -310,51 +320,60 @@ class Ui_Visualization(object):
 			self.detector_heatmap.addItem(self.detector_circle)
 			self.variables.plot_clear_flag = False
 			self.index_plot = 0
+			self.index_plot_start = 0
+			self.index_plot_save = 0
 
 		# with self.variables.lock_statistics and self.variables.lock_setup_parameters:
-		if self.variables.start_flag:
+		if self.variables.start_flag and self.variables.flag_visualization_start:
+			if self.index_plot_start == 0:
+				self.start_main_exp = time.time()
+				self.start_time = time.time()
+				self.index_plot_start += 1
+			self.variables.elapsed_time = time.time() - self.start_time
 			# with self.variables.lock_statistics:
 			if self.index_wait_on_plot_start <= 16:
 				if self.index_wait_on_plot_start == 0:
 					self.counter_source = self.variables.counter_source
 				self.index_wait_on_plot_start += 1
 
-			if self.index_wait_on_plot_start >= 8:
-				# V_dc and V_p
-				if self.index_plot < len(self.y_vdc):
-					self.y_vdc[self.index_plot] = int(self.variables.specimen_voltage)  # Add a new value.
+			# V_dc and V_p
+			if self.index_plot < len(self.y_vdc):
+				self.y_vdc[self.index_plot] = int(self.variables.specimen_voltage_plot)  # Add a new value.
 
-				else:
-					x_vdc_last = self.x_vdc[-1]
-					self.x_vdc.append(x_vdc_last + 0.5)  # Add a new value 1 higher than the last.
-					self.y_vdc.append(int(self.variables.specimen_voltage))
+			else:
+				x_vdc_last = self.x_vdc[-1]
+				self.x_vdc.append(x_vdc_last + 0.5)  # Add a new value 1 higher than the last.
+				self.y_vdc.append(int(self.variables.specimen_voltage_plot))
 
-				self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
+			self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
 
-				# Detection Rate Visualization
-				# with self.variables.lock_statistics:
-				if self.index_plot < len(self.y_dtec):
-					self.y_dtec[self.index_plot] = self.variables.detection_rate_current  # Add a new value.
-				else:
-					# self.x_dtec = self.x_dtec[1:]  # Remove the first element.
-					x_dtec_last = self.x_dtec[-1]
-					self.x_dtec.append(x_dtec_last + 0.5)  # Add a new value 1 higher than the last.
-					self.y_dtec.append(self.variables.detection_rate_current)
+			# Detection Rate Visualization
+			# with self.variables.lock_statistics:
+			if self.index_plot < len(self.y_dtec):
+				self.y_dtec[self.index_plot] = self.variables.detection_rate_current_plot  # Add a new value.
+			else:
+				# self.x_dtec = self.x_dtec[1:]  # Remove the first element.
+				x_dtec_last = self.x_dtec[-1]
+				self.x_dtec.append(x_dtec_last + 0.5)  # Add a new value 1 higher than the last.
+				self.y_dtec.append(self.variables.detection_rate_current_plot)
 
-				# self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
-				self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
-				# Increase the index
-				# with self.variables.lock_statistics:
-				self.index_plot += 1
+			# self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+			self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+			# Increase the index
+			# with self.variables.lock_statistics:
+			self.index_plot += 1
 			# mass spectrum
 
 			if self.counter_source == 'TDC' and self.variables.total_ions > 0 and \
 					self.index_wait_on_plot_start > 16:
 
-				xx = np.array(self.variables.x_plot)
-				yy = np.array(self.variables.y_plot)
-				tt = np.array(self.variables.t_plot)
-				main_v_dc_dld = np.array(self.variables.main_v_dc_plot)
+				with self.lock:
+					data_length = self.counter_plot.value
+					xx = np.array(self.x_plot[:data_length])
+					yy = np.array(self.y_plot[:data_length])
+					tt = np.array(self.t_plot[:data_length])
+					main_v_dc_dld = np.array(self.main_v_dc_plot[:data_length])
+
 				try:
 					if self.conf["visualization"] == "tof":
 						viz = tt[tt < self.conf["max_tof"]]
@@ -375,7 +394,7 @@ class Ui_Visualization(object):
 					y_tof_mc[y_tof_mc == 0] = 1
 					self.histogram.clear()
 					self.histogram.plot(x_tof_mc, y_tof_mc, stepMode="center", fillLevel=0, fillOutline=True,
-					                    brush='black', name="num ions: %s" % self.variables.total_ions)
+					                    brush='black', name="num ions: %s" % len(xx))
 				# Create y-values for the steps by repeating the values in hist
 				# y_tof_mc = np.repeat(y_tof_mc, 2)
 				# # Create x-values for the steps by using the bin edges
@@ -399,7 +418,6 @@ class Ui_Visualization(object):
 					min_length = min(len(xx), len(yy))
 					x = xx[-min_length:] * 10
 					y = yy[-min_length:] * 10
-
 					if self.variables.reset_heatmap:
 						self.index_plot_heatmap = len(x)
 						self.variables.reset_heatmap = False
@@ -419,10 +437,10 @@ class Ui_Visualization(object):
 					self.detector_heatmap.addItem(self.detector_circle)
 				except Exception as e:
 					print(
-						f"{initialize_devices.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
+						f"{initialize_devices.bcolors.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
 					print(e)
 			# save plots to the file
-			if self.index_plot_save % 50 == 0 and self.index_plot_save != 0:
+			if self.start_time - time.time() >= self.variables.save_meta_interval_camera:
 				# with self.variables.lock_setup_parameters:
 				path_meta = self.variables.path_meta
 				index_plot_save = int(self.index_plot_save / 100)
@@ -445,9 +463,9 @@ class Ui_Visualization(object):
 
 				screenshot = QtWidgets.QApplication.primaryScreen().grabWindow(self.visualization_window.winId())
 				screenshot.save(path_meta + '\screenshot_%s.png' % index_plot_save, 'png')
-
-			# Increase the index
-			self.index_plot_save += 1
+				self.start_time = time.time()
+				# Increase the index
+				self.index_plot_save += 1
 
 	def stop(self):
 		"""
@@ -513,7 +531,8 @@ class VisualizationWindow(QtWidgets.QWidget):
 		QtWidgets.QApplication.setStyle("Fusion")
 
 
-def run_visualization_window(variables, conf, visualization_closed_event, visualization_win_front):
+def run_visualization_window(variables, conf, visualization_closed_event, visualization_win_front,
+                             x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
 	"""
 	Run the Cameras window in a separate process.
 	"""
@@ -521,7 +540,7 @@ def run_visualization_window(variables, conf, visualization_closed_event, visual
 	app = QtWidgets.QApplication(sys.argv)  # <-- Create a new QApplication instance
 	app.setStyle('Fusion')
 
-	gui_visualization = Ui_Visualization(variables, conf)
+	gui_visualization = Ui_Visualization(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
 	Cameras_alignment = VisualizationWindow(variables, gui_visualization, visualization_closed_event,
 	                                        visualization_win_front,
 	                                        flags=QtCore.Qt.WindowType.Tool)
