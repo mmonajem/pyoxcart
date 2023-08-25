@@ -6,32 +6,29 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7588996.svg)](https://doi.org/10.5281/zenodo.7588996)
 [![Documentation Status](https://readthedocs.org/projects/pyccapt/badge/?version=latest)](https://pyccapt.readthedocs.io/en/latest/?badge=latest)
-[![PyPi version](https://badgen.net/pypi/v/pyccapt/)](https://pypi.org/project/pyccapt)
 <!--[![coverage report](https://gitlab.com/jesseds/apav/badges/master/coverage.svg)](https://gitlab.com/jesseds/apav/commits/master)
 [![pipeline status](https://gitlab.com/jesseds/apav/badges/master/pipeline.svg)](https://gitlab.com/jesseds/apav/-/commits/master)-->
 
 
-This package aims to provide an open-source software for controlind atom probe systems and calibrate
-the data. The package is modular and can be used in a wide range of applications.
+This package aims to provide open-source software for controlling atom probe systems and calibrating data.
+The package is modular and adaptable for a wide range of devices in atom probe instrument. So far it is
+capable of collecting data from Surface consept and ReoenDek TDC systems. The package is developed in Python 3.9.
 
 ----------
 
 # Presentation
 
-Atom probe instruments are predominantly commercial systems with proprietary software.
-This limits the accessibility and customization of experiments requiring low-level control and data analysis.
-PyCCAPT addresses this limitation by providing an open-source software package that can control atom probe systems and
-perform data calibration.
-
-PyCCAPT was initially developed and tested on the OXCART atom probe, an in-house atom probe system. The OXCART atom
-probe features a measuring chamber made of titanium, which enables a particularly low-hydrogen vacuum. It is equipped
-with a highly efficient detector (~80% detection efficiency). The PyCCAPT package can also be used to control other atom
-probe systems.
-
-The package is modular and adaptable to a wide range of instrument, such as Pfeifer gauges, Fug power supply and Siglent
-signal generator. So far it is capable of collecting data from Surface consept and ReoenDek TDC systems.
-
+PyCCAPT was initially developed and rigorously tested on the OXCART atom probe, an in-house atom probe system situated
+within the Department of Materials Science & Engineering at the University of Erlangen-Nürnberg. Distinguished by its
+unique attributes, the OXCART atom probe boasts a titanium-based measuring chamber that facilitates an exceptional
+low-hydrogen vacuum environment. This system also features a state-of-the-art detector with a remarkable detection
+efficiency of approximately 80%. While tailor-made for the OXCART, the PyCCAPT package offers versatility, extending its
+capabilities to effectively manage diverse atom probe systems.
 ![plot](pyccapt/files/oxcart.jpg)
+The package is designed with modularity in mind, making it highly adaptable to a diverse array of instruments. This
+adaptability extends to instruments like Pfeifer gauges, Fug power supplies, and Siglent signal generators. Notably, the
+PyCCAPT package has already demonstrated its proficiency in collecting data from Surface Concept and ReoenDek TDC
+systems, showcasing its versatility across various setups and applications.
 
 The PyCCAPT package forms the foundation of a fully FAIR atom probe data collection and processing chain. This
 repository includes the graphical user interface (GUI) and control program, which enable experiment control,
@@ -43,20 +40,25 @@ visualization, and data acquisition. The following images provide an overview of
 
 # Installation
 
-1- create the virtual environment via Anaconda:
+1. Create a virtual environment using Anaconda:
 
-    conda create -n apt_env python=3.9
+   ```bash
+   conda create -n apt_env python=3.9
+    ```
 
 2- Activate the virtual environment:
 
-    conda activate apt_env
+   ```bash
+   conda activate apt_env
+   ```
 
 3- Install the package:
 
-Clone or download this repository and unzip it. In the project directory, run the following command:
+Clone or download this repository, unzip it, and in the project directory run:
 
-
-    pip install -e .
+   ```bash
+   pip install -e .
+   ```
 
 
 
@@ -64,54 +66,52 @@ Clone or download this repository and unzip it. In the project directory, run th
 --------------
 # Documentation
 
-The latest versions of the documentation can be accessed on our
-[ReadTheDocs](https://pyccapt.readthedocs.io/en/latest/?#) page. It contains descriptions of
-Crappy's features, tutorials, and other useful information.
+The latest documentation is available on
+[ReadTheDocs](https://pyccapt.readthedocs.io/en/latest/?#) page. It provides feature descriptions, tutorials, and
+valuable information.
 
 --------------------
 ## Running PyCCAPT control GUI
 
 After installing the project locally or via pip command enter the following command in the console:
 
+   ```bash
+   python pyccapt
+   ```
 
-    python pyccapt
-
-
-
---------------------
-
-# Edite GUI 
-
-Edite the GUI with Qt-Designer and run command below to create your own GUI
-UI in the GUI module.
-
-    pyuic6 -x gui_main.ui -o gui_main.py 
-
-You should then merge the created file with the targeted 
 
 ---------------------
 # Using PyCCAPT
 
-For control part of the package you can follow the steps on [documentation](https://pyccapt.readthedocs.io/en/latest/configuration.html).
+For control part of the package you can follow the steps
+on [documentation](https://pyccapt.readthedocs.io/en/latest/configuration.html).
 
-For the calibration you should go through the [tutorial](https://pyccapt.readthedocs.io/en/latest/tutorials.html) first to understand how is it possible 
-to use the features of the package.
+For calibration, review the [tutorial](https://pyccapt.readthedocs.io/en/latest/tutorials.html) to understand package
+features.
 
 ------------------
 # Bug reports
 
-Please report bugs, issues, ask for help or give feedback in the [github section](https://github.com/mmonajem/pyccapt/issues).
+Report bugs, issues, ask for help, or provide feedback on
+the [github section](https://github.com/mmonajem/pyccapt/issues).
 
 Qestions/comments:
   - Mehrpad Monajem, mehrpad.monajem@fau.de
 
+-----------
+
+# Citing
 
 -----------
-# Citing 
 
------------
-# Contributing 
+# Contributing
 
-Contributions to PyCCAPT are always welcome, and they are greatly appreciated! Our contribution 
+Contributions to PyCCAPT are always welcome, and they are greatly appreciated! Our contribution
 policy can be found [here](https://github.com/mmonajem/pyccapt/blob/main/CONTRIBUTING.md).
 
+------------
+
+# License
+
+This project is licensed under the GNU General Public License v3.0. See
+the [LICENSE](https://github.com/mmonajem/pyccapt/blob/main/LICENSE) file for details.

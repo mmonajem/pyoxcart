@@ -1,81 +1,60 @@
-# Contributing
+# Contributing to PyCCAPT
 
-Contributions to PyCCAPT are always welcome, and they are greatly appreciated!
-A list of open problems can be found [here](https://github.com/mmonajem/pyccapt/issues).
-Of course, it is also always appreciated bringing own ideas and problems to the community!
-
-
-Please submit all contributions to the official [Github repository](https://github.com/mmonajem/pyccapt) in the form of a Merge Request. Please do not submit git diffs or files containing the changes.
-
-`PyCCAPT` is an open-source python package under the license of [GPLv3](https://github.com/mmonajem/pyccapt/blob/main/LICENSE). Thus we consider the act of contributing to the code by submitting a Merge Request as the "Sign off" or agreement to the GPLv3 license.
-
-You can contribute in many ways:
+Welcome to the PyCCAPT contribution guide! We appreciate your interest in making our project better. There are several
+ways you can contribute to PyCCAPT's development.
 
 ## Types of Contributions
 
-### Report Bugs
+### Reporting Bugs
 
-Report bugs at https://github.com/mmonajem/pyccapt/issues.
+If you encounter any bugs or issues with PyCCAPT, please report them by opening
+an [issue on GitHub](https://github.com/mmonajem/pyccapt/issues). Be sure to provide a detailed description of the
+problem, steps to reproduce it, and any relevant information.
 
-### Fix Issues
+### Fixing Issues
 
-Look through the GitHub issues. Different tags are indicating the status of the issues.
-The "bug" tag indicates problems with PyCCAPT, while the "enhancement" tag shows ideas that should be added in the future.
+Browse our GitHub issues to find bugs and enhancements that need attention. If you'd like to fix an issue, fork the
+repository, make your changes, and submit a pull request. Make sure to reference the issue number in your pull request.
 
-### Write Documentation
+### Writing Documentation
 
-The documentation of PyCCAPT can be found [here](https://github.com/mmonajem/pyccapt/tree/main/docs).
-It is always appreciated if new document notebooks are provided
-since this helps others a lot.
+Well-documented projects are easier to understand and use. If you're knowledgeable about certain features or have useful
+tips, consider contributing to our documentation. Documentation files can be found in
+the [`docs`](https://github.com/mmonajem/pyccapt/tree/main/docs) directory.
 
-## Get Started!
+## Getting Started
 
-Ready to contribute? Here is how to set up `pyccapt` for local development.
+Follow these steps to set up your local development environment:
 
-1. Fork the `pyccapt` repo on GitHub.
-2. Clone your fork locally:
-```bash
-    $ git clone https://github.com/mmonajem/pyccapt.git
-```
-3. Install your local copy into a virtualenv. It is also recommended to use anaconda or miniconda to manage the python environments.
-```bash
-    $ mkvirtualenv pyccapt
-    $ cd pyccapt/
+1. Fork the [pyccapt repository](https://github.com/mmonajem/pyccapt) on GitHub.
+2. Clone your forked repository locally:
+   ```bash
+   $ git clone https://github.com/YourUsername/pyccapt.git
+   $ cd pyccapt
+    ```
+
+3. Install your local copy into a virtual environment:
+   bash
+    ```bash
+    $ conda create -n apt_env python=3.9
+    $ conda activate apt_env
     $ pip install -e .
-```
-4. Create a branch for local development:
-```bash
-    $ git checkout -b name-of-your-bugfix-or-feature
-```
-   Now you can make your changes locally.
+    ```
 
-5. When you're done making changes, check that your changes pass flake8 and the
-   tests
-```bash
-    $ python setup.py test" .
-```
+4. Create a new branch for your development work:
+    ```bash
+    $ git checkout -b my-new-feature
+    ```
+5. Make your changes and commit them:
+    ```bash
+   $ git add .
+   $ git commit -m "Detailed description of your changes."
+   $ git push origin name-of-your-branch
+    ```
 
-   To get all packages needed for development, a requirements list can be found [here](https://github.com/mmonajem/pyccapt/blob/main/setup.py).
+6. Submit a Merge Request on GitHub.
 
-6. Commit your changes and push your branch to GitHub::
-```bash
-    $ git add .
-    $ git commit -m "Your detailed description of your changes."
-    $ git push origin name-of-your-bugfix-or-feature
-```
-7. Submit a Merge Request on Github.
+Thank you for your contributions to PyCCAPT. Your efforts help improve the project for everyone!
+I appreciate your patience, and I hope this properly formatted Markdown text meets your requirements.
 
-## Merge Request Guidelines
 
-Before you submit a Merge Request, check that it meets these guidelines:
-
-1. All functionality that is implemented through this Merge Request should be covered by unit tests. These are implemented in `pyccapt`. It would be necessary to add your unit test if the new implementation has some features that are not covered by our unit tests.
-2. If the Merge Request adds functionality, the docs should be updated. Put your new functionality into a function with a docstring.
-3. If you have a maintainer status for `pyccapt`, you can merge Merge Requests to the master branch. However, every Merge Request needs to be reviewed by another developer. Thus, it is not allowed to merge a Merge Request, which is submitted by oneself.
-
-## Tips
-
-To run a subset of tests:
-```bash
-$ python setup.py test
-```
