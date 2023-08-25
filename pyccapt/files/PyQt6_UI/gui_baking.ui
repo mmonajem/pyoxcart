@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>Baking</class>
+    <widget class="QWidget" name="Baking">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>820</width>
+                <height>757</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>Form</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="0">
+                <layout class="QGridLayout" name="gridLayout">
+                    <item row="0" column="0">
+                        <widget class="QGraphicsView" name="tempretures">
+                            <property name="minimumSize">
+                                <size>
+                                    <width>800</width>
+                                    <height>500</height>
+                                </size>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="2" column="0">
+                        <widget class="QPushButton" name="save_data">
+                            <property name="minimumSize">
+                                <size>
+                                    <width>0</width>
+                                    <height>25</height>
+                                </size>
+                            </property>
+                            <property name="styleSheet">
+                                <string notr="true">QPushButton{
+                                    background: rgb(193, 193, 193)
+                                    }
+                                </string>
+                            </property>
+                            <property name="text">
+                                <string>Save CSV</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="1" column="0">
+                        <widget class="QGraphicsView" name="presures">
+                            <property name="minimumSize">
+                                <size>
+                                    <width>800</width>
+                                    <height>200</height>
+                                </size>
+                            </property>
+                        </widget>
+                    </item>
+                </layout>
+            </item>
+        </layout>
+    </widget>
+    <resources/>
+    <connections/>
+</ui>

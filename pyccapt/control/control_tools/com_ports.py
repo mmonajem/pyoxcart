@@ -1,11 +1,14 @@
-"""
-This is the script that print all the com port of the system.
-It is useful to find the com port of the device.
-"""
-
 import serial.tools.list_ports
 
-# get available COM ports and store as list
-com_ports = list(serial.tools.list_ports.comports())
 
-print(*com_ports, sep="\n")
+def list_com_ports():
+	"""
+    List all available COM ports on the system.
+
+    Args:
+    	None
+    Returns:
+        list: A list of available COM ports.
+    """
+	com_ports = list(serial.tools.list_ports.comports())
+	return com_ports

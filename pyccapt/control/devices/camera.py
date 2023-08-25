@@ -1,189 +1,174 @@
-"""
-This is the main script for controlling the BASLER Cameras.
-"""
-
 import time
+
 import cv2
 import numpy as np
 from pypylon import pylon
-from threading import Thread
-import pyqtgraph as pg
-from pyqtgraph.Qt import QtGui
-from PyQt6 import QtWidgets
-from pyqtgraph import PlotWidget, plot
-import pyqtgraph as pg
-import sys
-
-# Local module and scripts
-from pyccapt.control.control_tools import variables
 
 
-class Camera:
-    """
-        This camera modules is designed to setup and initiate the camera in the installation.
-        This camera module allows user to capture images using the installed cameras,
-        process the image and display as per desired window size.
-    """
+class Cameras:
+	"""
+	This class is used to control the BASLER Cameras.
+	"""
 
-    def __init__(self, devices, tlFactory, cameras, converter):
-        """
-        Constructor function which intializes and setups all variables
-        and parameter for the class.
-        """
+	def __init__(self, variables, emitter):
+		"""
+			Constructor function which initializes and setups all variables
+			and parameters for the class.
 
-        self.devices = devices
-        self.tlFactory = tlFactory
-        self.cameras = cameras
-        self.converter = converter
-        self.cameras[0].Open()
-        self.cameras[0].ExposureAuto.SetValue('Off')
-        self.cameras[0].ExposureTime.SetValue(800000)
-        self.cameras[1].Open()
-        self.cameras[1].ExposureAuto.SetValue('Off')
-        self.cameras[1].ExposureTime.SetValue(100000)
+			Args:
+				variables: The class object of the Variables class.
+				emitter: The class object of the Emitter class.
 
-        self.thread_read = Thread(target=self.camera_s_d)
-        self.thread_read.daemon = True
+			Return:
+				None
+		"""
+		try:
+			# Limits the amount of cameras used for grabbing.
+			# The bandwidth used by a FireWire camera device can be limited by adjusting the packet size.
+			maxCamerasToUse = 2
+			# The exit code of the sample application.
+			exitCode = 0
+			# Get the transport layer factory.
+			self.tlFactory = pylon.TlFactory.GetInstance()
+			# Get all attached devices and exit application if no device is found.
+			self.devices = self.tlFactory.EnumerateDevices()
 
-    def update_cameras(self, lock):
-        """
-        Note : Changed function to break it down into simpler functions
+			if len(self.devices) == 0:
+				raise pylon.RuntimeException("No camera present.")
 
-        This class method setup the cameras to capture the required images. It initiates
-        image capture for all cameras attached starting with index 0.The grabbing
-        set up for free-running continuous acquisition.
+			# Create an array of instant cameras for the found devices and avoid exceeding a maximum number of
+			# devices.
+			self.cameras = pylon.InstantCameraArray(min(len(self.devices), maxCamerasToUse))
 
-        Attributes:
-            lock: object to acquire and release locks.
-        Returns:
-            Does not return anything.
-        """
-        self.thread_read.start()
+			# Create and attach all Pylon Devices.
+			for i, cam in enumerate(self.cameras):
+				cam.Attach(self.tlFactory.CreateDevice(self.devices[i]))
+			self.converter = pylon.ImageFormatConverter()
 
-        self.cameras.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
-        while self.cameras.IsGrabbing():
+			# converting to opencv bgr format
+			self.converter.OutputPixelFormat = pylon.PixelType_BGR8packed
+			self.converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
+		except Exception as e:
+			print('Error in initializing the camera class')
+			print(e)
 
-            # Fetch the raw images from camera
-            grabResult0 = self.cameras[0].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
-            grabResult1 = self.cameras[1].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
+		self.variables = variables
+		self.emitter = emitter
+		self.cameras[0].Open()
+		self.cameras[0].ExposureAuto.SetValue('Off')
+		self.cameras[0].ExposureTime.SetValue(800000)
+		self.cameras[1].Open()
+		self.cameras[1].ExposureAuto.SetValue('Off')
+		self.cameras[1].ExposureTime.SetValue(100000)
 
-            image0 = self.converter.Convert(grabResult0)
-            img0 = image0.GetArray()
-            image1 = self.converter.Convert(grabResult1)
-            img1 = image1.GetArray()
+		self.index_save_image = 0
 
-            # Original size is 2048 * 2448
-            # Resize the original to the required size. Utilize the openCV tool.
-            # img0_orig = cv2.resize(img0, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            self.img0_orig = img0
-            # img0[y, x] - the first range is for y-axis and second range is for x-axis
-            self.img0_zoom = cv2.resize(img0[750:1150, 1650:2250], dsize=(1200, 500),
-                                        interpolation=cv2.INTER_CUBIC).astype(
-                np.int32)
+	def update_cameras(self):
+		"""
+			This class method sets up the cameras to capture the required images.
 
-            # img1_orig = cv2.resize(img1, dsize=(2048, 2048), interpolation=cv2.INTER_CUBIC).astype(np.int32)
-            self.img1_orig = img1
-            self.img1_zoom = cv2.resize(img1[600:1000, 1600:2200], dsize=(1200, 500),
-                                        interpolation=cv2.INTER_CUBIC).astype(
-                np.int32)
+			Args:
+				None
 
-            # The function cv::drawMarker draws a marker on a given position in the image.
-            self.img0_zoom_marker = cv2.drawMarker(self.img0_zoom, (1050, 310), (0, 0, 255),
-                                                   markerType=cv2.MARKER_TRIANGLE_UP,
-                                                   markerSize=40, thickness=2, line_type=cv2.LINE_AA)
-            self.img1_zoom_marker = cv2.drawMarker(self.img1_zoom, (1100, 285), (0, 0, 255),
-                                                   markerType=cv2.MARKER_TRIANGLE_UP,
-                                                   markerSize=40, thickness=2, line_type=cv2.LINE_AA)
+			Return:
+				None
+		"""
 
-            # Acquire the lock and releases after process using context manager
-            # To ensure that the marked array is a C-contiguous array
-            with lock:
-                variables.img0_zoom = np.require(self.img0_zoom_marker, np.uint8, 'C')
-                variables.img1_zoom = np.require(self.img1_zoom_marker, np.uint8, 'C')
+		self.cameras.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
+		start_time = time.time()
+		while self.cameras.IsGrabbing():
+			current_time = time.time()
 
-                # Interchange two axes of an array.
-                variables.img0_orig = np.swapaxes(self.img0_orig, 0, 1)
-                variables.img1_orig = np.swapaxes(self.img1_orig, 0, 1)
-                variables.index_save_image += 1
+			# Fetch the raw images from camera
+			grabResult0 = self.cameras[0].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
+			grabResult1 = self.cameras[1].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
 
-            # Store the captured processed image at a desired location.
-            if variables.index_save_image % 100 == 0 and variables.start_flag:
-                cv2.imwrite(variables.path + "/side_%s.png" % variables.index_save_image, self.img0_orig)
-                cv2.imwrite(variables.path + "/side_zoom_%s.png" % variables.index_save_image, self.img0_zoom)
-                cv2.imwrite(variables.path + '/bottom_%s.png' % variables.index_save_image, self.img1_orig)
-                cv2.imwrite(variables.path + '/bottom_zoom_%s.png' % variables.index_save_image, self.img1_zoom)
+			image0 = self.converter.Convert(grabResult0)
+			img0 = image0.GetArray()
+			image1 = self.converter.Convert(grabResult1)
+			img1 = image1.GetArray()
 
-            grabResult0.Release()
-            grabResult1.Release()
+			# Original size is 2048 * 2448
+			# Resize the original to the required size. Utilize the openCV tool.
+			self.img0_orig = img0
+			# Define the region to crop: (x, y, width, height)
+			crop_region = (1640, 900, 300, 100)
+			# Crop the image
+			self.img0_zoom = self.img0_orig[crop_region[1]:crop_region[1] + crop_region[3],
+			                 crop_region[0]:crop_region[0] + crop_region[2]]
 
-    def light_switch(self, ):
-        """
-            This class method sets the Exposure time based on a flag.
-            It reads the flag from the imported "variables" file.
+			self.img1_orig = img1
+			# Define the region to crop: (x, y, width, height)
+			crop_region = (2050, 1050, 300, 100)
+			# Crop the image
+			self.img1_zoom = self.img1_orig[crop_region[1]:crop_region[1] + crop_region[3],
+			                 crop_region[0]:crop_region[0] + crop_region[2]]
 
-            Attributes:
-                Does not accept any arguments.
-            Return:
-                Does not return anything.
-        """
-        if not variables.light:
-            self.cameras[0].Open()
-            self.cameras[0].ExposureTime.SetValue(400)
-            self.cameras[1].Open()
-            self.cameras[1].ExposureTime.SetValue(2000)
-            variables.light = True
-        elif variables.light:
-            self.cameras[0].Open()
-            self.cameras[0].ExposureTime.SetValue(800000)
-            self.cameras[1].Open()
-            self.cameras[1].ExposureTime.SetValue(100000)
-            variables.light = False
+			# Acquire the lock and releases after process using context manager
+			# To ensure that the marked array is a C-contiguous array
 
-    def camera_s_d(self, ):
-        """
-        This class method captures the images through the cameras, processes it
-        and displays the processed image. Utilizes OpenCv module and Numpy modules
-        to process the captured image. Utilizes OpenCV module to display the captured
-        image in a window.
+			self.emitter.img0_zoom.emit(np.swapaxes(self.img0_zoom, 0, 1))
+			self.emitter.img1_zoom.emit(np.swapaxes(self.img1_zoom, 0, 1))
 
-        Attributes:
-            Does not accept any arguments
-        Return
-            Does not return anything.
-        """
+			# Interchange two axes of an array.
+			self.emitter.img0_orig.emit(np.swapaxes(self.img0_orig, 0, 1))
+			self.emitter.img1_orig.emit(np.swapaxes(self.img1_orig, 0, 1))
 
-        # # The exit code of the sample application.
-        windowName = 'Sample Alignment'
+			# Store the captured processed image at a desired location.
+			if current_time - start_time >= self.variables.save_meta_interval_camera and self.variables.start_flag:
+				start_time = time.time()  # Update the start time
+				path_meta = self.variables.path_meta
+				cv2.imwrite(path_meta + "/side_%s.png" % self.index_save_image, self.img0_orig)
+				cv2.imwrite(path_meta + "/side_zoom_%s.png" % self.index_save_image, self.img0_zoom)
+				cv2.imwrite(path_meta + '/bottom_%s.png' % self.index_save_image, self.img1_orig)
+				cv2.imwrite(path_meta + '/bottom_zoom_%s.png' % self.index_save_image, self.img1_zoom)
+				self.index_save_image += 1
 
-        while True:
-            if variables.alignment_window:
+			grabResult0.Release()
+			grabResult1.Release()
 
-                img0_zoom = cv2.resize(self.img0_orig[750:1150, 1650:2250], dsize=(2448, 1000),
-                                       interpolation=cv2.INTER_CUBIC)
-                img1_zoom = cv2.resize(self.img1_orig[600:1000, 1600:2200], dsize=(2448, 1000),
-                                       interpolation=cv2.INTER_CUBIC)
-                img0_zoom = cv2.drawMarker(img0_zoom, (2150, 620), (0, 0, 255),
-                                           markerType=cv2.MARKER_TRIANGLE_UP,
-                                           markerSize=80, thickness=2, line_type=cv2.LINE_AA)
-                img1_zoom = cv2.drawMarker(img1_zoom, (2100, 530), (0, 0, 255),
-                                           markerType=cv2.MARKER_TRIANGLE_UP,
-                                           markerSize=80, thickness=2, line_type=cv2.LINE_AA)
-                img0_f = np.concatenate((self.img0_orig, img0_zoom), axis=0)
-                img1_f = np.concatenate((self.img1_orig, img1_zoom), axis=0)
-                vis = np.concatenate((img0_f, img1_f), axis=1)  # Combine 2 images horizontally
-                # # Label the window
-                cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
-                # Resize the window
-                cv2.resizeWindow(windowName, 2500, 1200)
-                # displays image in specified window
-                cv2.imshow(windowName, vis)
-                k = cv2.waitKey(1)
-                if k == 27:
-                    break
+			if self.variables.light_switch:
+				self.light_switch()
+				self.variables.light_switch = False
 
-            else:
-                cv2.destroyAllWindows()
-                time.sleep(1)
-                pass
+			time.sleep(0.1)
+
+			# with self.variables.lock_setup_parameters:
+			if not self.variables.flag_camera_grab:
+				break
+
+	def light_switch(self):
+		"""
+			This class method sets the Exposure time based on a flag.
+
+			Args:
+				None
+
+			Return:
+				None
+		"""
+		# with self.variables.lock_setup_parameters:
+		if self.variables.light:
+			self.cameras[0].Open()
+			self.cameras[0].ExposureTime.SetValue(400)
+			self.cameras[1].Open()
+			self.cameras[1].ExposureTime.SetValue(2000)
+		elif not self.variables.light:
+			self.cameras[0].Open()
+			self.cameras[0].ExposureTime.SetValue(800000)
+			self.cameras[1].Open()
+			self.cameras[1].ExposureTime.SetValue(100000)
 
 
+def cameras_run(variable, emmiter):
+	"""
+	This function is used to run the cameras.
+
+		Args:
+			variable: The class object of the Variables class.
+			emmiter: The class object of the Emitter class.
+		Return:
+			None
+	"""
+	camera = Cameras(variable, emmiter)
+	camera.update_cameras()

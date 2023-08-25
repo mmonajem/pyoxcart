@@ -1,232 +1,285 @@
-"""
-This is the main script for initializing Edward and Pfeifer gauges.
-"""
-
+import csv
 import time
+from datetime import datetime
 
 import serial.tools.list_ports
 
-from pyccapt.control.control_tools import variables
 from pyccapt.control.devices.edwards_tic import EdwardsAGC
-# Local module and scripts
 from pyccapt.control.devices.pfeiffer_gauges import TPG362
-
-# get available COM ports and store as list
-com_ports = list(serial.tools.list_ports.comports())
 
 
 class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+	HEADER = '\033[95m'
+	OKBLUE = '\033[94m'
+	OKCYAN = '\033[96m'
+	OKGREEN = '\033[92m'
+	WARNING = '\033[93m'
+	FAIL = '\033[91m'
+	ENDC = '\033[0m'
+	BOLD = '\033[1m'
+	UNDERLINE = '\033[4m'
 
 
-# apply command to the Cryovac
 def command_cryovac(cmd, com_port_cryovac):
-    """
-    This fucnction executes(writes) command on cryovac through serial communication.
-    Waits and reads the response code after executing the command from the device.
-    Attributes:
-        com_port_cryovac: object for serial communication (Initilized in gui_oxcart.py)
-    Returns:
-        Returns the response code after executing the commands. [string]
-    """
+	"""
+	Execute a command on Cryovac through serial communication.
 
-    com_port_cryovac.write(
-        (cmd + '\r\n').encode())  # send cmd to device # might not work with older devices -> "LF" only needed!
-    time.sleep(0.1)  # small sleep for response
-    response = ''
-    # Wait for the complete response code.
-    while com_port_cryovac.in_waiting > 0:
-        response = com_port_cryovac.readline()  # all characters received, read line till '\r\n'
+	Args:
+		cmd: Command to be executed.
+		com_port_cryovac: Serial communication object.
 
-    return response.decode("utf-8")
-
-
-def command_edwards(conf, cmd, lock, E_AGC, status=None):
-    """
-    This function sets flags based on parameters in imported "variables" file.
-    Execute commands utilizing imported "edwards_tic" file (if command = pressure) to read value.
-    Returns response(Value read) after executing the command.
-    Attributes:
-        lock: Lock objects to acquire lock on variables' module to avoid concurrent changes.
-        E_AGC : Object of EdwardsAGC class from edwards_tic module which initializes and sets
-                serial communication parameters
-        status: [Default parameter] type of lock [Need a review]
-    Returns:
-        response: Returns the response code after the executing the command.
-    """
-
-    if conf['pump'] != "off":
-        if variables.flag_pump_load_lock_click and variables.flag_pump_load_lock and status == 'load_lock':
-            E_AGC.comm('!C910 0')  # Backing Pump off
-            E_AGC.comm('!C904 0')  # Turbo Pump off
-            with lock:
-                variables.flag_pump_load_lock_click = False
-                variables.flag_pump_load_lock = False
-                variables.flag_pump_load_lock_led = False
-                time.sleep(1)
-        elif variables.flag_pump_load_lock_click and not variables.flag_pump_load_lock and status == 'load_lock':
-            E_AGC.comm('!C910 1')  # Backing Pump on
-            E_AGC.comm('!C904 1')  # Turbo Pump on
-            with lock:
-                variables.flag_pump_load_lock_click = False
-                variables.flag_pump_load_lock = True
-                variables.flag_pump_load_lock_led = True
-                time.sleep(1)
-    if conf['COM_PORT_gauge_ll'] != "off":
-        if cmd == 'presure':
-            # Execute command utilizing  EdwardsAGC class from edwards_tic module as an interface to read value.
-            response_tmp = E_AGC.comm('?V911')
-
-            # Convert raw response  to sane value
-            response_tmp = float(response_tmp.replace(';', ' ').split()[1])
-
-            # Set the flags based on the acquired response
-            if response_tmp < 90 and status == 'load_lock':
-                variables.flag_pump_load_lock_led = False
-            elif response_tmp >= 90 and status == 'load_lock':
-                variables.flag_pump_load_lock_led = True
-            response = E_AGC.comm('?V940')
-        # No other cmd type allowed apart from pressure
-        else:
-            print('Unknown command for Edwards TIC Load Lock')
-
-    return response
+	Returns:
+		Response code after executing the command.
+	"""
+	com_port_cryovac.write((cmd + '\r\n').encode())
+	time.sleep(0.1)
+	response = ''
+	while com_port_cryovac.in_waiting > 0:
+		response = com_port_cryovac.readline()
+	if isinstance(response, bytes):
+		response = response.decode("utf-8")
+	return response
 
 
-def initialize_cryovac(com_port_cryovac):
-    """
-     This function sets the communication port of Cryovac.
-     Update the values in the imported "variables file"
-    Attributes:
-        com_port_cryovac: object for serial communication (Initialized in gui_oxcart.py)
-    Returns:
-        Does not return anything
-    """
+def command_edwards(conf, variables, cmd, E_AGC, status=None):
+	"""
+	Execute commands and set flags based on parameters.
 
-    # Setting the com port of Cryovac
-    output = command_cryovac('getOutput', com_port_cryovac)
-    # Storing the parameters in imported "variables" file.
-    variables.temperature = float(output.split()[0].replace(',', ''))
+	Args:
+		conf: Configuration parameters.
+		variables: Variables instance.
+		cmd: Command to be executed.
+		E_AGC: EdwardsAGC instance.
+		status: Status of the lock.
 
+	Returns:
+		Response code after executing the command.
+	"""
+	if conf['pump'] == "on":
+		if variables.flag_pump_load_lock_click and variables.flag_pump_load_lock and status == 'load_lock':
+			E_AGC.comm('!C910 0')
+			E_AGC.comm('!C904 0')
+			variables.flag_pump_load_lock_click = False
+			variables.flag_pump_load_lock = False
+			variables.flag_pump_load_lock_led = False
+			time.sleep(1)
+		elif variables.flag_pump_load_lock_click and not variables.flag_pump_load_lock and status == 'load_lock':
+			E_AGC.comm('!C910 1')
+			E_AGC.comm('!C904 1')
+			variables.flag_pump_load_lock_click = False
+			variables.flag_pump_load_lock = True
+			variables.flag_pump_load_lock_led = True
+			time.sleep(1)
 
-def initialize_edwards_tic_load_lock(conf):
-    """
-    This function initializes TIC load lock parameters.
-    It does so by executing command on the devices to read value
-    and utilizes the response to update the load lock parameters.
-    Attributes:
-        Does not accept any arguments
-    Returns:
-        Does not return anything
-    """
+	if conf['COM_PORT_gauge_ll'] != "off":
+		if cmd == 'pressure':
+			response_tmp = E_AGC.comm('?V911')
+			response_tmp = float(response_tmp.replace(';', ' ').split()[1])
 
-    E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll)
-    # Execute command to read value(response)
-    response = command_edwards(conf, 'presure', lock=None, E_AGC=E_AGC_ll)
-    # Update the load lock parameters
-    variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
-    variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
+			if response_tmp < 90 and status == 'load_lock':
+				variables.flag_pump_load_lock_led = False
+			elif response_tmp >= 90 and status == 'load_lock':
+				variables.flag_pump_load_lock_led = True
+			response = E_AGC.comm('?V940')
+		else:
+			print('Unknown command for Edwards TIC Load Lock')
 
-
-def initialize_edwards_tic_buffer_chamber(conf):
-    """
-    This function initializes TIC buffer chamber parameters.
-    It does so by executing command on the devices to read value
-    and utilizes the response to update the load lock parameters.
-    Attributes:
-        Does not accept any arguments
-    Returns:
-        Does not return anything
-    """
-
-    E_AGC_bc = EdwardsAGC(variables.COM_PORT_gauge_bc)
-    response = command_edwards(conf, 'presure', lock=None, E_AGC=E_AGC_bc)
-    variables.vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
+	return response
 
 
-def initialize_pfeiffer_gauges():
-    """
-    This function initializes Pfeiffer gauge parameters.
-    It does so by executing command on the devices to read value.
-    Utilizes the TPG362 class(inherits TPG26x) to execute command:
-    Responsible for driver for the TPG 261 and TPG 262 dual channel measurement and control unit.
-    Utilizes the response to update the load lock parameters.
-    Attributes:
-        Does not accept any arguments
+def initialize_cryovac(com_port_cryovac, variables):
+	"""
+	Initialize the communication port of Cryovac.
 
-    Returns:
-        Does not return anything
-    """
-    tpg = TPG362(port=variables.COM_PORT_gauge_mc)
-    value, _ = tpg.pressure_gauge(2)
-    # unit = tpg.pressure_unit()
-    variables.vacuum_main = '{}'.format(value)
-    value, _ = tpg.pressure_gauge(1)
-    # unit = tpg.pressure_unit()
-    variables.vacuum_buffer = '{}'.format(value)
+	Args:
+		com_port_cryovac: Serial communication object.
+		variables: Variables instance.
+
+	Returns:
+		None
+	"""
+	output = command_cryovac('getOutput', com_port_cryovac)
+	variables.temperature = float(output.split()[0].replace(',', ''))
 
 
-def state_update(conf, lock, com_port_cryovac):
-    """
-    This function is used for reading gauge parameters.
-    It does so by executing command on the devices to read value.
-    Interface Used:
-    Utilizes the TPG362 class(inherits TPG26x) to execute command:
-    Responsible for driver for the TPG 261 and TPG 262 dual channel measurement and control unit.
-    Utilizes EdwardsAGC : Primitive driver for Edwards Active Gauge Controller
-    Utilizes the response to update the load lock parameters.
-    Attributes:
-        com_port_cryovac: object for serial communication (Initialized in gui_oxcart.py)
+def initialize_edwards_tic_load_lock(conf, variables):
+	"""
+	Initialize TIC load lock parameters.
 
-    Returns:
-        Does not return anything
+	Args:
+		conf: Configuration parameters.
+		variables: Variables instance.
 
-    """
-    if conf['COM_PORT_gauge_mc'] != "off":
-        tpg = TPG362(port=variables.COM_PORT_gauge_mc)
-    if conf['COM_PORT_gauge_bc'] != "off":
-        E_AGC_bc = EdwardsAGC(variables.COM_PORT_gauge_bc)
-    if conf['COM_PORT_gauge_ll'] != "off":
-        E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll)
-    while True:
-        if conf['cryo'] != "off":
-            try:
-                #  Temperature update
-                output = command_cryovac('getOutput', com_port_cryovac)
-            except Exception as e:
-                print(e)
-                print("cannot read the cryo temperature")
-                output = '0'
-            with lock:
-                variables.temperature = float(output.split()[0].replace(',', ''))
-        if conf['COM_PORT_gauge_mc'] != "off":
-            # Pfeiffer gauges update
-            value, _ = tpg.pressure_gauge(2)
-            # unit = tpg.pressure_unit()
-            with lock:
-                variables.vacuum_main = '{}'.format(value)
-            value, _ = tpg.pressure_gauge(1)
-            # unit = tpg.pressure_unit()
-            with lock:
-                variables.vacuum_buffer = '{}'.format(value)
-        if conf['COM_PORT_gauge_ll'] != "off" and conf['pump'] != "off":
-            # Edwards Load Lock update
-            response = command_edwards(conf, 'presure', lock, E_AGC=E_AGC_ll, status='load_lock')
-            with lock:
-                variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
-                variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
+	Returns:
+		None
+	"""
+	E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll)
+	response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_ll)
+	variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
+	variables.vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
 
-        if conf['COM_PORT_gauge_bc'] != "off":
-            # Edwards Buffer Chamber update
-            response = command_edwards(conf, 'presure', lock, E_AGC=E_AGC_bc)
-            with lock:
-                variables.vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
-        time.sleep(1)
+
+def initialize_edwards_tic_buffer_chamber(conf, variables):
+	"""
+	Initialize TIC buffer chamber parameters.
+
+	Args:
+		conf: Configuration parameters.
+		variables: Variables instance.
+
+	Returns:
+		None
+	"""
+	E_AGC_bc = EdwardsAGC(variables.COM_PORT_gauge_bc)
+	response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_bc)
+	variables.vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
+
+
+def initialize_pfeiffer_gauges(variables):
+	"""
+	Initialize Pfeiffer gauge parameters.
+
+	Args:
+		variables: Variables instance.
+
+	Returns:
+		None
+	"""
+	tpg = TPG362(port=variables.COM_PORT_gauge_mc)
+	value, _ = tpg.pressure_gauge(2)
+	variables.vacuum_main = '{}'.format(value)
+	value, _ = tpg.pressure_gauge(1)
+	variables.vacuum_buffer = '{}'.format(value)
+
+
+def state_update(conf, variables, emitter):
+	"""
+	Read gauge parameters and update variables.
+
+	Args:
+		conf: Configuration parameters.
+		variables: Variables instance.
+		emitter: Emitter instance.
+
+	Returns:
+		None
+	"""
+	if conf['gauges'] == "on":
+		if conf['COM_PORT_gauge_mc'] != "off":
+			tpg = TPG362(port=variables.COM_PORT_gauge_mc)
+		if conf['COM_PORT_gauge_bc'] != "off":
+			E_AGC_bc = EdwardsAGC(variables.COM_PORT_gauge_bc, variables)
+		if conf['COM_PORT_gauge_ll'] != "off":
+			E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll, variables)
+
+	if conf['cryo'] == "off":
+		print('The cryo temperature monitoring is off')
+	else:
+		try:
+			com_ports = list(serial.tools.list_ports.comports())
+			com_port_cryovac = serial.Serial(
+				port=com_ports[variables.COM_PORT_cryo].device,
+				baudrate=9600,
+				bytesize=serial.EIGHTBITS,
+				parity=serial.PARITY_NONE,
+				stopbits=serial.STOPBITS_ONE
+			)
+			initialize_cryovac(com_port_cryovac, variables)
+		except Exception as e:
+			com_port_cryovac = None
+			print('Can not initialize the cryovac')
+			print(e)
+
+		start_time = time.time()
+		while emitter.bool_flag_while_loop:
+			if conf['cryo'] == "on":
+				try:
+					output = command_cryovac('getOutput', com_port_cryovac)
+				except Exception as e:
+					print(e)
+					print("cannot read the cryo temperature")
+					output = '0'
+				# with variables.lock_statistics:
+				temperature = float(output.split()[0].replace(',', ''))
+				variables.temperature = temperature
+				emitter.temp.emit(temperature)
+			if conf['COM_PORT_gauge_mc'] != "off":
+				value, _ = tpg.pressure_gauge(2)
+				# with variables.lock_statistics:
+				vacuum_main = '{}'.format(value)
+				variables.vacuum_main = vacuum_main
+				emitter.vacuum_main.emit(float(vacuum_main))
+				value, _ = tpg.pressure_gauge(1)
+				vacuum_buffer = '{}'.format(value)
+				variables.vacuum_buffer = vacuum_buffer
+				emitter.vacuum_buffer.emit(float(vacuum_buffer))
+			if conf['COM_PORT_gauge_ll'] != "off" and conf['pump'] != "off":
+				response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_ll, status='load_lock')
+				# with variables.lock_statistics:
+				vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
+				vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
+				variables.vacuum_load_lock = vacuum_load_lock
+				variables.vacuum_load_lock_backing = vacuum_load_lock_backing
+				emitter.vacuum_load.emit(vacuum_load_lock)
+				emitter.vacuum_load_back.emit(vacuum_load_lock_backing)
+
+			if conf['COM_PORT_gauge_bc'] != "off":
+				response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_bc)
+				vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
+				variables.vacuum_buffer_backing = vacuum_buffer_backing
+				emitter.vacuum_buffer_back.emit(vacuum_buffer_backing)
+
+			elapsed_time = time.time() - start_time
+			if elapsed_time > 30 * 60:
+				start_time = time.time()
+				try:
+					log_vacuum_levels(vacuum_main, vacuum_buffer, vacuum_buffer_backing, vacuum_load_lock,
+					                  vacuum_load_lock_backing, )
+				except Exception as e:
+					print(e)
+					print("cannot log the vacuum levels")
+			time.sleep(1)
+
+
+def log_vacuum_levels(main_chamber, buffer_chamber, buffer_chamber_backing_pump, load_lock, load_lock_backing):
+	"""
+		Log vacuum levels to a text file and a CSV file.
+
+		Args:
+			main_chamber (float): Vacuum level of the main chamber.
+			buffer_chamber (float): Vacuum level of the buffer chamber.
+			buffer_chamber_backing_pump (float): Vacuum level of the buffer chamber backing pump.
+			load_lock (float): Vacuum level of the load lock.
+			load_lock_backing (float): Vacuum level of the load lock backing pump.
+
+		Returns:
+			None
+
+	"""
+
+	timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+	with open("./files/vacuum_log.txt", "a") as log_file:
+		log_file.write(f"{timestamp}: Main Chamber={main_chamber}, Buffer Chamber={buffer_chamber}, "
+		               f"Buffer Chamber Backing Pump={buffer_chamber_backing_pump}, Load Lock={load_lock}, "
+		               f"Load Lock Backing={load_lock_backing}\n")
+
+	row = [timestamp, main_chamber, buffer_chamber, buffer_chamber_backing_pump, load_lock, load_lock_backing]
+	header = ["Timestamp", "Main Chamber", "Buffer Chamber", "Buffer Chamber Backing Pump", "Load Lock",
+	          "Load Lock Backing"]
+
+	try:
+		with open("./files/vacuum_log.csv", 'r') as log_file:
+			file_empty = not log_file.readline()
+	except FileNotFoundError:
+		file_empty = True
+
+	# Write to CSV file
+	with open("./files/vacuum_log.csv", "a", newline='') as log_file:
+		csv_writer = csv.writer(log_file)
+
+		# Write the header if the file is empty
+		if file_empty:
+			csv_writer.writerow(header)
+
+		# Write the data row
+		csv_writer.writerow(row)

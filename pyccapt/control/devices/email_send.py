@@ -1,38 +1,60 @@
-"""
-This is the main script for sending email.
-"""
-
-
+import datetime
 import smtplib
 import ssl
-import datetime
-
-port = 465  # For SSL
-smtp_server = "smtp.gmail.com"
-sender_email = "oxcart.ap@gmail.com"
-date = datetime.datetime.now().strftime( "%d/%m/%Y %H:%M" )
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 
 def send_email(email, subject, message):
-    """
-     This function is responsible to send email notification onto SMTP server.
+	"""
+	This function sends an email notification via the SMTP server.
 
-     Attributes:
-        subject: subject of the email which need to be sent
-        message: Main body of email.
-    Return:
-        Does not return anything
-    """
+	Args:
+		email (str): Recipient's email address.
+		subject (str): Subject of the email.
+		message (str): Main body of the email.
 
-    with open('../../files/email_pass.txt') as f: # Open file with email password
-        password = str(f.readlines()[0])
-    receiver_email = email
+	Returns:
+		None
+	"""
+	port = 465  # For SSL
+	smtp_server = "smtp.gmail.com"
+	sender_email = "oxcart.ap@gmail.com"
+	date = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
-    msg = "From: %s\nTo: %s\nSubject: %s\nDate: %s\n\n%s" % (sender_email, email, subject, date, message)
+	with open('./files/email_pass.txt') as f:  # Open file with email password
+		password = str(f.readline().strip())
+	receiver_email = email
 
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, msg)
+	# Create a MIME multipart message
+	msg = MIMEMultipart()
+	msg['From'] = sender_email
+	msg['To'] = email
+	msg['Subject'] = subject
+	msg['Date'] = date
 
+	# Introduction text
+	intro_text = "Dear recipient,\n\n"
+	intro_text += "Below is the experiment information:\n\n"
 
+	# Attach the logo image
+	logo_path = './files/logo3.png'  # Path to your logo image
+	with open(logo_path, 'rb') as f:
+		logo_data = f.read()
+	logo_image = MIMEImage(logo_data, name='logo.png')
+	msg.attach(logo_image)
+
+	# Attach the introduction text
+	intro = MIMEText(intro_text, 'plain')
+	msg.attach(intro)
+
+	# Attach the main message
+	main_msg = MIMEText(message, 'plain')
+	msg.attach(main_msg)
+
+	# Send the email
+	context = ssl.create_default_context()
+	with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+		server.login(sender_email, password)
+		server.sendmail(sender_email, receiver_email, msg.as_string())

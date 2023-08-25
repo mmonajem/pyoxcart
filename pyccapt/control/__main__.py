@@ -1,175 +1,58 @@
-"""
-This is the main script is load the GUI base on the configuration file.
-"""
-
+import multiprocessing
 import os
 import sys
-import threading
 
-import serial.tools.list_ports
 from PyQt6 import QtWidgets
-from pypylon import pylon
 
-# Local module and scripts
-from pyccapt.control.control_tools import variables, read_files
-from pyccapt.control.devices import initialize_devices
-from pyccapt.control.devices.camera import Camera
-from pyccapt.control.gui import gui_advance
-from pyccapt.control.gui import gui_simple
+from pyccapt.control.control_tools import share_variables, read_files
+from pyccapt.control.gui import gui_main
 
 
-def main():
+def load_gui():
+    """
+    Load the GUI based on the configuration file.
+
+    This function reads the configuration file, initializes global experiment variables, and
+    shows the GUI window.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     try:
-        # load the Json file
-        configFile = 'config.json'
+        # Load the JSON file
+        config_file = 'config.json'
         p = os.path.abspath(os.path.join(__file__, "../.."))
         os.chdir(p)
-        conf = read_files.read_json_file(configFile)
+        conf = read_files.read_json_file(config_file)
     except Exception as e:
-        print('Can not load the configuration file')
+        print('Cannot load the configuration file')
         print(e)
         sys.exit()
 
-    if conf['mode'] == 'advance':
-        # Initialize global experiment variables
-        variables.init(conf)
-        variables.log_path = p
-        if conf['log'] == 'on':
-            variables.log = True
-        # Config the port for cryo
-        if conf['cryo'] == "off":
-            print('The cryo temperature monitoring is off')
-            com_port_idx_cryovac = None
-        else:
-            # Cryovac initialized
-            try:
-                com_port_idx_cryovac = serial.Serial(
-                    port=initialize_devices.com_ports[variables.COM_PORT_cryo].device,  # chosen COM port
-                    baudrate=9600,  # 115200
-                    bytesize=serial.EIGHTBITS,  # 8
-                    parity=serial.PARITY_NONE,  # N
-                    stopbits=serial.STOPBITS_ONE  # 1
-                )
-                initialize_devices.initialize_cryovac(com_port_idx_cryovac)
-            except Exception as e:
-                com_port_idx_cryovac = None
-                print('Can not initialize the cryovac')
-                print(e)
+    # Initialize global experiment variables
+    manager = multiprocessing.Manager()
+    ns = manager.Namespace()
+    variables = share_variables.Variables(conf, ns)
 
+    array_size = conf['maximum_size_plot_arrays']
+    x_plot = multiprocessing.Array('d', array_size)
+    y_plot = multiprocessing.Array('d', array_size)
+    t_plot = multiprocessing.Array('d', array_size)
+    main_v_dc_plot = multiprocessing.Array('d', array_size)
+    counter_plot = multiprocessing.Value('i', 0)
+    lock = multiprocessing.Lock()  # Lock for synchronization
 
-        if conf['gauges'] != "off":
-            if conf['COM_PORT_gauge_mc'] == "off":
-                print('The main chamber gauge is off')
-            else:
-                # Config the port for Main and Buffer vacuum gauges
-                try:
-                    initialize_devices.initialize_pfeiffer_gauges()
-                except Exception as e:
-                    print('Can not initialize the Pfeiffer gauges')
-                    print(e)
-            if conf['COM_PORT_gauge_bc'] == "off":
-                print('The buffer chamber gauge is off')
-            else:
-                # Config the port for Buffer chamber vacuum gauges
-                try:
-                    initialize_devices.initialize_edwards_tic_buffer_chamber(conf)
-                except Exception as e:
-                    print('Can not initialize the buffer chamber gauges')
-                    print(e)
-            if conf['COM_PORT_gauge_ll'] == "off":
-                print('The load lock gauge is off')
-            else:
-                # Config the port for Load Lock vacuum gauges
-                try:
-                    initialize_devices.initialize_edwards_tic_load_lock(conf)
-                except Exception as e:
-                    print('Can not initialize the load lock gauges')
-                    print(e)
-        else:
-            print('Gauges are off')
-
-        if conf['camera'] == "off":
-            print('The cameras is off')
-        else:
-            # Create cameras thread
-            try:
-                # Limits the amount of cameras used for grabbing.
-                # The bandwidth used by a FireWire camera device can be limited by adjusting the packet size.
-                maxCamerasToUse = 2
-                # The exit code of the sample application.
-                exitCode = 0
-                # Get the transport layer factory.
-                tlFactory = pylon.TlFactory.GetInstance()
-                # Get all attached devices and exit application if no device is found.
-                devices = tlFactory.EnumerateDevices()
-
-                if len(devices) == 0:
-                    raise pylon.RuntimeException("No camera present.")
-
-                # Create an array of instant cameras for the found devices and avoid exceeding a maximum number of
-                # devices.
-                cameras = pylon.InstantCameraArray(min(len(devices), maxCamerasToUse))
-
-                # Create and attach all Pylon Devices.
-                for i, cam in enumerate(cameras):
-                    cam.Attach(tlFactory.CreateDevice(devices[i]))
-                converter = pylon.ImageFormatConverter()
-
-                # converting to opencv bgr format
-                converter.OutputPixelFormat = pylon.PixelType_BGR8packed
-                converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
-
-                camera = Camera(devices, tlFactory, cameras, converter)
-
-                # Thread for reading cameras
-                lock2 = threading.Lock()
-                camera_thread = threading.Thread(target=camera.update_cameras, args=(lock2,))
-                camera_thread.setDaemon(True)
-                camera_thread.start()
-
-            except Exception as e:
-                print('Can not initialize the Cameras')
-                print(e)
-
-        lock1 = threading.Lock()
-        if conf['gauges'] != "off":
-            # Thread for reading gauges
-            gauges_thread = threading.Thread(target=initialize_devices.state_update,
-                                             args=(conf, lock1, com_port_idx_cryovac))
-            gauges_thread.setDaemon(True)
-            gauges_thread.start()
-
-        app = QtWidgets.QApplication(sys.argv)
-        # get display resolution
-        APT = QtWidgets.QMainWindow()
-        lock = threading.Lock()
-        if conf['camera'] != "off":
-            try:
-                ui = gui_advance.UI_APT_A(camera, lock, app,
-                                          conf)
-            except Exception as e:
-                print('Can not initialize the cameras')
-                print(e)
-                conf['camera'] = "off"
-                ui = gui_advance.UI_APT_A(None, lock, app, conf)
-        else:
-            ui = gui_advance.UI_APT_A(None, lock, app, conf)
-
-    elif conf['mode'] == 'simple':
-        # Initialize global experiment variables
-        variables.init(conf)
-        variables.log_path = p
-        if conf['log'] == 'on':
-            variables.log = True
-        app = QtWidgets.QApplication(sys.argv)
-        APT = QtWidgets.QMainWindow()
-        lock = threading.Lock()
-        ui = gui_simple.UI_APT_S(lock, app, conf)
-
-    ui.setupUi(APT)
-    APT.show()
+    app = QtWidgets.QApplication(sys.argv)
+    app.setStyle('Fusion')
+    pyccapt_window = QtWidgets.QMainWindow()
+    ui = gui_main.Ui_PyCCAPT(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
+    ui.setupUi(pyccapt_window)
+    pyccapt_window.show()
     sys.exit(app.exec())
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    load_gui()
