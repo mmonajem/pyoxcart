@@ -113,6 +113,7 @@ class Variables:
         self.ns.start_flag = False
         self.ns.flag_stop_tdc = False
         self.ns.flag_finished_tdc = False
+        self.ns.flag_tdc_failure = False
         self.ns.plot_clear_flag = False
         self.ns.hitmap_plot_size = 1.0
         self.ns.number_of_experiment_in_text_line = 0
@@ -949,6 +950,15 @@ class Variables:
     def flag_finished_tdc(self, value):
         with self.lock:
             self.ns.flag_finished_tdc = value
+
+    @property
+    def flag_tdc_failure(self):
+        return self.ns.flag_tdc_failure
+
+    @flag_tdc_failure.setter
+    def flag_tdc_failure(self, value):
+        with self.lock:
+            self.ns.flag_tdc_failure = value
 
     @property
     def plot_clear_flag(self):

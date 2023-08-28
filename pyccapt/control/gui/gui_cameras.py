@@ -215,8 +215,8 @@ class Ui_Cameras_Alignment(object):
 		# arrow1 = pg.ArrowItem(pos=(925, 770), angle=0)
 		# self.cam_b_o.addItem(arrow1)
 		# Side camera (x, y)
-		arrow1 = pg.ArrowItem(pos=(520, 480), angle=-90)
-		arrow2 = pg.ArrowItem(pos=(560, 1530), angle=90)
+		arrow1 = pg.ArrowItem(pos=(540, 480), angle=-90)
+		arrow2 = pg.ArrowItem(pos=(570, 1530), angle=90)
 		# arrow3 = pg.ArrowItem(pos=(890, 1100), angle=0)
 		self.cam_s_o.addItem(arrow1)
 		self.cam_s_o.addItem(arrow2)
@@ -337,7 +337,7 @@ class Ui_Cameras_Alignment(object):
 	def cameras_screenshot(self):
 		if self.variables.flag_cameras_take_screenshot:
 			screenshot = QtWidgets.QApplication.primaryScreen().grabWindow(self.Cameras_Alignment.winId())
-			screenshot.save(self.variables.path_meta + '\screenshot_camera.png', 'png')
+			screenshot.save(self.variables.path_meta + '\cameras_screenshot.png', 'png')
 class SignalEmitter(QObject):
 	img0_orig = pyqtSignal(np.ndarray)
 	img0_zoom = pyqtSignal(np.ndarray)
@@ -363,7 +363,8 @@ class CamerasAlignmentWindow(QtWidgets.QWidget):
 		self.gui_cameras_alignment = gui_cameras_alignment
 		self.camera_win_front = camera_win_front
 		self.close_event = close_event
-
+		self.show()
+		self.showMinimized()
 		self.timer = QtCore.QTimer(self)
 		self.timer.timeout.connect(self.check_if_should)
 		self.timer.start(500)  # Check every 1000 milliseconds (1 second)
@@ -376,7 +377,7 @@ class CamerasAlignmentWindow(QtWidgets.QWidget):
 				event: The close event.
 		"""
 		event.ignore()
-		self.hide()
+		self.showMinimized()
 		self.close_event.set()
 
 	def check_if_should(self):

@@ -6,7 +6,7 @@
   "bin_size": 0.1,
   "max_mass": 200,
   "max_tof": 5000,
-  "save_meta_interval_visualization": 120,
+  "save_meta_interval_visualization": 60,
   "save_meta_interval_camera": 300,
   "maximum_size_plot_arrays": 20000000,
   "visualization": "mc",

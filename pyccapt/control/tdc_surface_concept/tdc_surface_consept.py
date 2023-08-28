@@ -232,7 +232,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
 
     retcode = bufdatacb.start_measurement(100)
     if errorcheck(device, bufdatacb, bufdatacb_raw, retcode) < 0:
-        print("Error during read:", retcode, errmsg)
+        print("Error during read:", retcode, device.lib.sc_get_err_msg(retcode))
         print(f"{initialize_devices.bcolors.FAIL}Error: Restart the TDC manually "
               f"(Turn it On and Off){initialize_devices.bcolors.ENDC}")
         return -1
@@ -297,13 +297,6 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
                 voltage_data_tdc.extend((np.tile(specimen_voltage, len(channel_data_tmp))).tolist())
                 pulse_data_tdc.extend((np.tile(pulse_voltage, len(channel_data_tmp))).tolist())
 
-        elif eventtype == QUEUE_ENDOFMEAS:
-            retcode = bufdatacb.start_measurement(100)
-            if errorcheck(device, bufdatacb, bufdatacb_raw, retcode) < 0:
-                return -1
-        else:  # unknown event
-            break
-
         # Update the counter
 
         # Calculate the detection rate
@@ -318,9 +311,21 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
             events_detected_tmp = 0
             start_time = current_time
 
+
+
+        elif eventtype == QUEUE_ENDOFMEAS:
+            retcode = bufdatacb.start_measurement(100, retries=10)  # retries is the number of times to retry
+            if retcode < 0:
+                print("Error during read (error code: %s - error msg: %s):" % (retcode,
+                                                                               device.lib.sc_get_err_msg(retcode)))
+                variables.flag_tdc_failure = True
+                break
+
+        # else:  # unknown event
+        #     break
+
         if time.time() - start_time_loop > 0.2:
             loop_time += 1
-
     print("for %s times loop time took longer than 0.2 second" % loop_time)
     variables.total_ions = events_detected
     print("TDC Measurement stopped")

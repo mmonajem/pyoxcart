@@ -31,6 +31,7 @@ class Ui_Visualization(object):
 			conf: Configuration settings.
 			update_timer (QTimer): QTimer for updating graphs.
 		"""
+		self.start_time_metadata = 0
 		self.start_main_exp = 0
 		self.index_plot_start = 0
 		self.variables = variables
@@ -322,12 +323,14 @@ class Ui_Visualization(object):
 			self.index_plot = 0
 			self.index_plot_start = 0
 			self.index_plot_save = 0
+			self.start_time_metadata = 0
 
 		# with self.variables.lock_statistics and self.variables.lock_setup_parameters:
 		if self.variables.start_flag and self.variables.flag_visualization_start:
 			if self.index_plot_start == 0:
 				self.start_main_exp = time.time()
 				self.start_time = time.time()
+				self.start_time_metadata = time.time()
 				self.index_plot_start += 1
 			self.variables.elapsed_time = time.time() - self.start_time
 			# with self.variables.lock_statistics:
@@ -440,30 +443,28 @@ class Ui_Visualization(object):
 						f"{initialize_devices.bcolors.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
 					print(e)
 			# save plots to the file
-			if self.start_time - time.time() >= self.variables.save_meta_interval_camera:
-				# with self.variables.lock_setup_parameters:
+			if time.time() - self.start_time_metadata >= self.variables.save_meta_interval_visualization:
 				path_meta = self.variables.path_meta
-				index_plot_save = int(self.index_plot_save / 100)
 				exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
 				exporter.params['width'] = 1000  # Set the width of the image
 				exporter.params['height'] = 800  # Set the height of the image
-				exporter.export(path_meta + '/v_dc_p_%s.png' % index_plot_save)
+				exporter.export(path_meta + '/visualization_v_dc_p_%s.png' % self.index_plot_save)
 				exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
 				exporter.params['width'] = 1000  # Set the width of the image
 				exporter.params['height'] = 800  # Set the height of the image
-				exporter.export(path_meta + '/detection_rate_%s.png' % index_plot_save)
+				exporter.export(path_meta + '/visualization_detection_rate_%s.png' % self.index_plot_save)
 				exporter = pg.exporters.ImageExporter(self.detector_heatmap.plotItem)
 				exporter.params['width'] = 1000  # Set the width of the image
 				exporter.params['height'] = 800  # Set the height of the image
-				exporter.export(path_meta + '/visualization_%s.png' % index_plot_save)
+				exporter.export(path_meta + '/visualization_detector_%s.png' % self.index_plot_save)
 				exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
 				exporter.params['width'] = 1000  # Set the width of the image
 				exporter.params['height'] = 800  # Set the height of the image
-				exporter.export(path_meta + '/tof_%s.png' % index_plot_save)
+				exporter.export(path_meta + '/visualization_mc_tof_%s.png' % self.index_plot_save)
 
 				screenshot = QtWidgets.QApplication.primaryScreen().grabWindow(self.visualization_window.winId())
-				screenshot.save(path_meta + '\screenshot_%s.png' % index_plot_save, 'png')
-				self.start_time = time.time()
+				screenshot.save(path_meta + '/visualization_screenshot_%s.png' % self.index_plot_save, 'png')
+				self.start_time_metadata = time.time()
 				# Increase the index
 				self.index_plot_save += 1
 
@@ -501,7 +502,8 @@ class VisualizationWindow(QtWidgets.QWidget):
 		self.variables = variables
 		self.visualization_win_front = visualization_win_front
 		self.visualization_close_event = visualization_close_event
-
+		self.show()
+		self.showMinimized()
 		self.timer = QtCore.QTimer(self)
 		self.timer.timeout.connect(self.check_if_should)
 		self.timer.start(500)  # Check every 1000 milliseconds (1 second)
@@ -513,7 +515,7 @@ class VisualizationWindow(QtWidgets.QWidget):
 				event: Close event.
 		"""
 		event.ignore()
-		self.hide()
+		self.showMinimized()
 		self.visualization_close_event.set()
 
 	def check_if_should(self):

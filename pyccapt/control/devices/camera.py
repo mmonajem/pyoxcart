@@ -118,10 +118,10 @@ class Cameras:
 			if current_time - start_time >= self.variables.save_meta_interval_camera and self.variables.start_flag:
 				start_time = time.time()  # Update the start time
 				path_meta = self.variables.path_meta
-				cv2.imwrite(path_meta + "/side_%s.png" % self.index_save_image, self.img0_orig)
-				cv2.imwrite(path_meta + "/side_zoom_%s.png" % self.index_save_image, self.img0_zoom)
-				cv2.imwrite(path_meta + '/bottom_%s.png' % self.index_save_image, self.img1_orig)
-				cv2.imwrite(path_meta + '/bottom_zoom_%s.png' % self.index_save_image, self.img1_zoom)
+				cv2.imwrite(path_meta + "/camera_side_%s.png" % self.index_save_image, self.img0_orig)
+				cv2.imwrite(path_meta + "/camera_side_zoom_%s.png" % self.index_save_image, self.img0_zoom)
+				cv2.imwrite(path_meta + '/camera_bottom_%s.png' % self.index_save_image, self.img1_orig)
+				cv2.imwrite(path_meta + '/camera_bottom_zoom_%s.png' % self.index_save_image, self.img1_zoom)
 				self.index_save_image += 1
 
 			grabResult0.Release()

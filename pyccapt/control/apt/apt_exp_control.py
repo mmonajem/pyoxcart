@@ -156,6 +156,22 @@ class APT_Exp_Control:
             self.com_port_v_p.write(
                 'VOLT %s' % (self.variables.v_p_min * (1 / self.variables.pulse_amp_per_supply_voltage)))
 
+    def command_v_p(self, cmd):
+        """
+        Send commands to the pulser.
+
+        This method sends commands to the pulser over the COM port and reads the response.
+
+        Args:
+            cmd (str): The command to send.
+
+        Returns:
+            str: The response received from the device.
+        """
+        self.com_port_v_p.write(cmd)
+        # response = self.com_port_v_p.read()
+        # return response
+
     def command_v_dc(self, cmd):
         """
         Send commands to the high voltage parameter: v_dc.
@@ -212,7 +228,7 @@ class APT_Exp_Control:
         self.main_v_p.append(self.pulse_voltage)
         self.main_counter.append(count_temp)
 
-        error = self.variables.detection_rate - self.variables.detection_rate_current
+        error = self.detection_rate - self.variables.detection_rate_current
         # simple proportional control with averaging
         if error > 0.05:
             voltage_step = error * self.variables.vdc_step_up * 10
@@ -227,23 +243,16 @@ class APT_Exp_Control:
 
         # update v_dc
         if not self.variables.vdc_hold and voltage_step != 0:
-            if self.specimen_voltage < self.vdc_max:
-                specimen_voltage_temp = self.specimen_voltage + voltage_step
-                if specimen_voltage_temp > self.vdc_max:
-                    specimen_voltage_temp = self.vdc_max
-                if specimen_voltage_temp != self.specimen_voltage:
-                    # sending VDC via serial
-                    if self.conf['v_dc'] != "off":
-                        self.command_v_dc(">S0 %s" % specimen_voltage_temp)
-                        self.specimen_voltage = specimen_voltage_temp
+            specimen_voltage_temp = min(self.specimen_voltage + voltage_step, self.vdc_max)
+            if specimen_voltage_temp != self.specimen_voltage:
+                if self.conf['v_dc'] != "off":
+                    self.command_v_dc(">S0 %s" % specimen_voltage_temp)
+                    self.specimen_voltage = specimen_voltage_temp
 
-                    # update pulse voltage v_p
-                    new_vp = self.specimen_voltage * self.pulse_fraction * \
-                             (1 / self.pulse_amp_per_supply_voltage)
-                    if self.pulse_voltage_max > new_vp > self.pulse_voltage_min:
-                        if self.conf['v_p'] != "off":
-                            self.com_port_v_p.write('VOLT %s' % new_vp)
-                        self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
+                new_vp = self.specimen_voltage * self.pulse_fraction * (1 / self.pulse_amp_per_supply_voltage)
+                if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
+                    self.command_v_p('VOLT %s' % new_vp)
+                    self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
 
                 self.variables.specimen_voltage = self.specimen_voltage
                 self.variables.specimen_voltage_plot = self.specimen_voltage
@@ -385,11 +394,11 @@ class APT_Exp_Control:
         # Turn on the v_dc and v_p
         if not self.initialization_error:
             if self.conf['v_p'] == "on":
-                self.com_port_v_p.write('OUTPut ON')
-                time.sleep(0.2)
+                self.command_v_p('OUTPut ON')
+                time.sleep(0.1)
             if self.conf['v_dc'] == "on":
                 self.command_v_dc("F1")
-                time.sleep(0.2)
+                time.sleep(0.1)
 
         self.main_temperature.extend([self.variables.temperature])
         self.main_chamber_vacuum.extend([float(self.variables.vacuum_main)])
@@ -419,23 +428,25 @@ class APT_Exp_Control:
                 self.total_ions = self.variables.total_ions
                 self.detection_rate = self.variables.detection_rate
 
-                if self.variables.flag_new_min_voltage and self.variables.vdc_hold:
-                    decrement_vol = (self.specimen_voltage - self.vdc_min) / 10
-                    for step in range(10):
-                        self.specimen_voltage -= decrement_vol
-                        if self.conf['v_dc'] != "off":
-                            self.command_v_dc(">S0 %s" % self.specimen_voltage)
-                        time.sleep(0.3)
-                    # update pulse voltage v_p
-                    new_vp = self.specimen_voltage * self.pulse_fraction / self.pulse_amp_per_supply_voltage
-                    if self.pulse_voltage_max > new_vp > self.pulse_voltage_min:
-                        if self.conf['v_p'] != "off":
-                            self.com_port_v_p.write('VOLT %s' % new_vp)
+                if self.variables.flag_new_min_voltage:
+                    if self.variables.vdc_hold:
+                        decrement_vol = (self.specimen_voltage - self.vdc_min) / 10
+                        for _ in range(10):
+                            self.specimen_voltage -= decrement_vol
+                            if self.conf['v_dc'] != "off":
+                                self.command_v_dc(">S0 %s" % self.specimen_voltage)
+                            time.sleep(0.3)
+
+                        new_vp = self.specimen_voltage * self.pulse_fraction / self.pulse_amp_per_supply_voltage
+                        if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
+                            self.command_v_p('VOLT %s' % new_vp)
                         self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
-                    self.variables.specimen_voltage = self.specimen_voltage
-                    self.variables.specimen_voltage_plot = self.specimen_voltage
-                    self.variables.pulse_voltage = self.pulse_voltage
-                    self.variables.flag_new_min_voltage = False
+
+                        self.variables.specimen_voltage = self.specimen_voltage
+                        self.variables.specimen_voltage_plot = self.specimen_voltage
+                        self.variables.pulse_voltage = self.pulse_voltage
+                        self.variables.flag_new_min_voltage = False
+
                 # main loop function
                 self.main_ex_loop()
 
@@ -447,6 +458,14 @@ class APT_Exp_Control:
                     if self.conf['tdc'] != "off":
                         if self.variables.counter_source == 'TDC':
                             self.variables.flag_stop_tdc = True
+                    time.sleep(1)
+                    break
+
+                if self.variables.flag_tdc_failure:
+                    self.log_apt.info('Experiment is stopped because of tdc failure')
+                    if self.conf['tdc'] == "on":
+                        if self.variables.counter_source == 'TDC':
+                            self.variables.stop_flag = True  # Set the STOP flag
                     time.sleep(1)
                     break
 
@@ -501,7 +520,7 @@ class APT_Exp_Control:
 
         self.log_apt.info('Experiment is finished')
         print("Experiment loop took longer than %s Millisecond for %s times out of %s "
-              "iteration{initialize_devices.bcolors.ENDC}" % (int(1000 / self.variables.ex_freq), index_time, steps))
+              "iteration" % (int(1000 / self.variables.ex_freq), index_time, steps))
         self.log_apt.warning(
             'Experiment loop took longer than %s (ms) for %s times out of %s iteration.'
             % (int(1000 / self.variables.ex_freq), index_time, steps))
@@ -683,7 +702,6 @@ class APT_Exp_Control:
             self.variables.specimen_voltage = 0
             self.variables.specimen_voltage_plot = 0
             self.variables.pulse_voltage = 0
-            self.variables.detection_rate_current = 0
             with self.lock:
                 self.x_plot[:] = np.zeros(self.conf['maximum_size_plot_arrays'])
                 self.y_plot[:] = np.zeros(self.conf['maximum_size_plot_arrays'])
@@ -748,8 +766,8 @@ class APT_Exp_Control:
         try:
             if self.conf['v_p'] != "off":
                 # Turn off the v_p
-                self.com_port_v_p.write('VOLT 0')
-                self.com_port_v_p.write('OUTPut OFF')
+                self.command_v_p('VOLT 0')
+                self.command_v_p('OUTPut OFF')
                 self.com_port_v_p.close()
         except:
             pass

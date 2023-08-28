@@ -1035,8 +1035,8 @@ class Ui_PyCCAPT(object):
 		self.pulse_mode.setItemText(0, _translate("PyCCAPT", "Voltage"))
 		self.pulse_mode.setItemText(1, _translate("PyCCAPT", "Laser"))
 		self.ex_freq.setText(_translate("PyCCAPT", "5"))
-		self.label_194.setText(_translate("PyCCAPT", "Elapsed Time (s)"))
-		self.label_176.setText(_translate("PyCCAPT", "Max. Experiment Time (S)"))
+		self.label_194.setText(_translate("PyCCAPT", "Elapsed Time (sec)"))
+		self.label_176.setText(_translate("PyCCAPT", "Max. Experiment Time (sec)"))
 		self.label_3.setText(_translate("PyCCAPT", "Stop at"))
 		self.label_188.setText(_translate("PyCCAPT", "Detection Rate (%)"))
 		self.label_185.setText(_translate("PyCCAPT", "Pulse Max. Voltage (V)"))
@@ -1712,8 +1712,7 @@ class Ui_PyCCAPT(object):
 		if hasattr(self, 'camera_process') and self.camera_process.is_alive():
 			self.camera_process.terminate()
 			self.visualization_process.terminate()
-			self.gui_pumps_vacuum.gauges_thread.join(1)
-
+			self.gui_pumps_vacuum.gauges_thread.join(2)
 
 class SignalEmitter(QtCore.QObject):
 	elapsed_time = QtCore.pyqtSignal(float)
