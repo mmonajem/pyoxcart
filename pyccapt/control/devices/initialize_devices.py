@@ -243,17 +243,17 @@ def state_update(conf, variables, emitter):
 
 def log_vacuum_levels(main_chamber, buffer_chamber, buffer_chamber_backing_pump, load_lock, load_lock_backing):
 	"""
-		Log vacuum levels to a text file and a CSV file.
+	Log vacuum levels to a text file and a CSV file.
 
-		Args:
-			main_chamber (float): Vacuum level of the main chamber.
-			buffer_chamber (float): Vacuum level of the buffer chamber.
-			buffer_chamber_backing_pump (float): Vacuum level of the buffer chamber backing pump.
-			load_lock (float): Vacuum level of the load lock.
-			load_lock_backing (float): Vacuum level of the load lock backing pump.
+	Args:
+		main_chamber (float): Vacuum level of the main chamber.
+		buffer_chamber (float): Vacuum level of the buffer chamber.
+		buffer_chamber_backing_pump (float): Vacuum level of the buffer chamber backing pump.
+		load_lock (float): Vacuum level of the load lock.
+		load_lock_backing (float): Vacuum level of the load lock backing pump.
 
-		Returns:
-			None
+	Returns:
+		None
 
 	"""
 

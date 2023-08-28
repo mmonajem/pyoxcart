@@ -71,16 +71,16 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
 
 def errorcheck(device, bufdatacb, bufdatacb_raw, retcode):
     """
-        This function checks return codes for errors and does cleanup.
+    This function checks return codes for errors and does cleanup.
 
-        Args:
-            retcode (int): Return code.
-            bufdatacb (BufDataCB4): A BufDataCB4 object.
-            bufdatacb_raw (BufDataCB4): A BufDataCB4 object.
-            device (scTDC.Device): A scTDC.Device object.
+    Args:
+        retcode (int): Return code.
+        bufdatacb (BufDataCB4): A BufDataCB4 object.
+        bufdatacb_raw (BufDataCB4): A BufDataCB4 object.
+        device (scTDC.Device): A scTDC.Device object.
 
-        Returns:
-            int: 0 if success return code or return code > 0, -1 if return code is error code or less than 0.
+    Returns:
+        int: 0 if success return code or return code > 0, -1 if return code is error code or less than 0.
     """
     if retcode < 0:
         print(device.lib.sc_get_err_msg(retcode))
@@ -94,6 +94,12 @@ def errorcheck(device, bufdatacb, bufdatacb_raw, retcode):
 
 class SharedData:
     def __init__(self, variables):
+        """
+        This class is used to share data between threads.
+
+        Args:
+            variables (share_variables.Variables): A share_variables.Variables object.
+        """
         self.variables = variables
         self.x_plot = []
         self.y_plot = []
@@ -102,6 +108,15 @@ class SharedData:
         self.lock = threading.Lock()
 
     def update_data_x(self, new_data):
+        """
+        This function updates the x_plot list.
+
+        Args:
+            new_data (list): A list of new data.
+
+        Returns:
+            bool: True if the lock is acquired, False otherwise.
+        """
         if self.lock.acquire():
             try:
                 self.x_plot.extend(new_data)
@@ -111,6 +126,15 @@ class SharedData:
         return False
 
     def update_data_y(self, new_data):
+        """
+        This function updates the y_plot list.
+
+        Args:
+            new_data (list): A list of new data.
+
+        Returns:
+            bool: True if the lock is acquired, False otherwise.
+        """
         if self.lock.acquire():
             try:
                 self.y_plot.extend(new_data)
@@ -120,6 +144,15 @@ class SharedData:
         return False
 
     def update_data_t(self, new_data):
+        """
+        This function updates the t_plot list.
+
+        Args:
+            new_data (list): A list of new data.
+
+        Returns:
+            bool: True if the lock is acquired, False otherwise.
+        """
         if self.lock.acquire():
             try:
                 self.t_plot.extend(new_data)
@@ -129,6 +162,15 @@ class SharedData:
         return False
 
     def update_data_main_v_dc(self, new_data):
+        """
+        This function updates the main_v_dc_plot list.
+
+        Args:
+            new_data (list): A list of new data.
+
+        Returns:
+            bool: True if the lock is acquired, False otherwise.
+        """
         if self.lock.acquire():
             try:
                 self.main_v_dc_plot.extend(new_data)
@@ -138,7 +180,20 @@ class SharedData:
         return False
 
     def save_data_to_variables_share(self, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
+        """
+        This function is called in a thread to save data to the shared variables.
 
+        Args:
+            x_plot (multiprocessing.Array): A multiprocessing.Array object.
+            y_plot (multiprocessing.Array): A multiprocessing.Array object.
+            t_plot (multiprocessing.Array): A multiprocessing.Array object.
+            main_v_dc_plot (multiprocessing.Array): A multiprocessing.Array object.
+            counter_plot (multiprocessing.Value): A multiprocessing.Value object.
+            lock (multiprocessing.Lock): A multiprocessing.Lock object.
+
+        Returns:
+            None
+        """
         while True:
             with self.lock:
                 x_plot_tmp = self.x_plot.copy()
@@ -163,13 +218,19 @@ class SharedData:
 
 def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
     """
-        Measurement function: This function is called in a process to read data from the queue.
+    Measurement function: This function is called in a process to read data from the queue.
 
-        Args:
-            variables:
+    Args:
+        variables (share_variables.Variables): A share_variables.Variables object.
+        x_plot (multiprocessing.Array): A multiprocessing.Array object.
+        y_plot (multiprocessing.Array): A multiprocessing.Array object.
+        t_plot (multiprocessing.Array): A multiprocessing.Array object.
+        main_v_dc_plot (multiprocessing.Array): A multiprocessing.Array object.
+        counter_plot (multiprocessing.Value): A multiprocessing.Value object.
+        lock (multiprocessing.Lock): A multiprocessing.Lock object.
 
-        Returns:
-            int: Return code.
+    Returns:
+        int: Return code.
     """
 
     # surface concept tdc specific binning and factors

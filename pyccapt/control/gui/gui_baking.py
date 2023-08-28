@@ -130,18 +130,23 @@ class Ui_Baking(object):
 		Returns:
 			None
 		"""
-		tpg = initialize_devices.TPG362(port='COM5')
-		unit = tpg.pressure_unit()
+		if not self.variables.flag_pumps_vacuum_start:
+			tpg = initialize_devices.TPG362(port='COM5')
 
 		index = 0
 		desired_period = 1.0
 		while self.running:
 			start_time = time.perf_counter()
 			# print('-----------', index, 'seconds', '--------------')
-			gauge_bc, _ = tpg.pressure_gauge(1)
+			if not self.variables.flag_pumps_vacuum_start:
+				gauge_bc, _ = tpg.pressure_gauge(1)
+			else:
+				gauge_bc = self.variables.vacuum_buffer
 			# print('pressure BC is {} {}'.format(gauge_bc, unit))
-
-			gauge_mc, _ = tpg.pressure_gauge(2)
+			if not self.variables.flag_pumps_vacuum_start:
+				gauge_mc, _ = tpg.pressure_gauge(2)
+			else:
+				gauge_mc = self.variables.vacuum_main
 			# print('pressure MC is {} {}'.format(gauge_mc, unit))
 
 			board_num = 0

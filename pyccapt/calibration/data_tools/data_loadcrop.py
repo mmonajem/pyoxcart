@@ -25,7 +25,7 @@ def fetch_dataset_from_dld_grp(filename: str, tdc: str) -> pd.DataFrame:
     """
     logger = logging_library.logger_creator('data_loadcrop')
     try:
-        hdf5Data = data_tools.read_hdf5(filename, tdc)
+        hdf5Data = data_tools.read_hdf5(filename)
         if hdf5Data is None:
             raise FileNotFoundError
         dld_highVoltage = hdf5Data['dld/high_voltage'].to_numpy()

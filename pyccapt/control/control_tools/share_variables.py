@@ -12,6 +12,9 @@ class Variables:
 
         Args:
             conf (dict): Configuration dictionary containing various settings.
+
+        Returns:
+            None
         """
         self.ns = namespace
         self.lock = multiprocessing.Lock()
@@ -76,6 +79,7 @@ class Variables:
         self.ns.flag_end_experiment = False
         self.ns.flag_new_min_voltage = False
         self.ns.flag_visualization_start = False
+        self.ns.flag_pumps_vacuum_start = False
         self.ns.criteria_time = True
         self.ns.criteria_ions = True
         self.ns.criteria_vdc = True
@@ -115,6 +119,7 @@ class Variables:
         self.ns.flag_finished_tdc = False
         self.ns.flag_tdc_failure = False
         self.ns.plot_clear_flag = False
+        self.ns.clear_index_save_image = False
         self.ns.hitmap_plot_size = 1.0
         self.ns.number_of_experiment_in_text_line = 0
         self.ns.index_experiment_in_text_line = 0
@@ -646,6 +651,15 @@ class Variables:
             self.ns.flag_visualization_start = value
 
     @property
+    def flag_pumps_vacuum_start(self):
+        return self.ns.flag_pumps_vacuum_start
+
+    @flag_pumps_vacuum_start.setter
+    def flag_pumps_vacuum_start(self, value):
+        with self.lock:
+            self.ns.flag_pumps_vacuum_start = value
+
+    @property
     def criteria_time(self):
         return self.ns.criteria_time
 
@@ -968,6 +982,15 @@ class Variables:
     def plot_clear_flag(self, value):
         with self.lock:
             self.ns.plot_clear_flag = value
+
+    @property
+    def clear_index_save_image(self):
+        return self.ns.clear_index_save_image
+
+    @clear_index_save_image.setter
+    def clear_index_save_image(self, value):
+        with self.lock:
+            self.ns.clear_index_save_image = value
 
     @property
     def hitmap_plot_size(self):

@@ -25,11 +25,13 @@ class Ui_Visualization(object):
 		Args:
 			variables (object): Global experiment variables.
 			conf (dict): Configuration settings.
+			x_plot (multiprocessing.Array): Array for storing the x-axis values of the mass spectrum.
+			y_plot (multiprocessing.Array): Array for storing the y-axis values of the mass spectrum.
+			t_plot (multiprocessing.Array): Array for storing the time values of the mass spectrum.
+			main_v_dc_plot (multiprocessing.Array): Array for storing the main voltage values of the mass spectrum.
+			counter_plot (multiprocessing.Value): Value for storing the number of data points in the mass spectrum.
+			lock (multiprocessing.Lock): Lock for synchronization.
 
-		Attributes:
-			variables: Global experiment variables.
-			conf: Configuration settings.
-			update_timer (QTimer): QTimer for updating graphs.
 		"""
 		self.start_time_metadata = 0
 		self.start_main_exp = 0
@@ -56,6 +58,7 @@ class Ui_Visualization(object):
 	def setupUi(self, Visualization):
 		"""
 		Setup the UI for the Visualization window.
+
 		Args:
 			Visualization (QMainWindow): Visualization window.
 
@@ -245,13 +248,13 @@ class Ui_Visualization(object):
 
 	def retranslateUi(self, Visualization):
 		"""
-				Set the text of the widgets
-				Args:
-				   Visualization: The main window
+		Set the text of the widgets
+		Args:
+		   Visualization: The main window
 
-				Return:
-				   None
-				"""
+		Return:
+		   None
+		"""
 		_translate = QtCore.QCoreApplication.translate
 		###
 		# Visualization.setWindowTitle(_translate("Visualization", "Form"))
@@ -470,12 +473,12 @@ class Ui_Visualization(object):
 
 	def stop(self):
 		"""
-			Stop any background activity
-			Args:
-				None
+		Stop any background activity
+		Args:
+			None
 
-			Return:
-				None
+		Return:
+			None
 			"""
 		# Add any additional cleanup code here
 		pass
@@ -483,19 +486,25 @@ class Ui_Visualization(object):
 
 class VisualizationWindow(QtWidgets.QWidget):
 	"""
-		Widget for the Visualization window.
+	Widget for the Visualization window.
 	"""
 	closed = QtCore.pyqtSignal()  # Define a custom closed signal
 
 	def __init__(self, variables, gui_visualization, visualization_close_event,
 	             visualization_win_front, *args, **kwargs):
 		"""
-			Constructor for the VisualizationWindow class.
+		Constructor for the VisualizationWindow class.
 
-			Args:
-				gui_visualization: Instance of the Visualization.
-				*args: Additional positional arguments.
-				**kwargs: Additional keyword arguments.
+		Args:
+			variables: Shared variables.
+			gui_visualization: Instance of the Visualization.
+			visualization_close_event: Event for the Visualization window closed.
+			visualization_win_front: Event for the Visualization window front.
+			*args: Additional positional arguments.
+			**kwargs: Additional keyword arguments.
+
+		Return:
+			None
 		"""
 		super().__init__(*args, **kwargs)
 		self.gui_visualization = gui_visualization
@@ -509,16 +518,28 @@ class VisualizationWindow(QtWidgets.QWidget):
 		self.timer.start(500)  # Check every 1000 milliseconds (1 second)
 	def closeEvent(self, event):
 		"""
-			Close event for the window.
+		Close event for the window.
 
-			Args:
-				event: Close event.
+		Args:
+			event: Close event.
+
+		Return:
+			None
 		"""
 		event.ignore()
 		self.showMinimized()
 		self.visualization_close_event.set()
 
 	def check_if_should(self):
+		"""
+		Check if the window should be shown.
+
+		Args:
+			None
+
+		Return:
+			None
+		"""
 		if self.visualization_win_front.is_set():
 			self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
 			self.show()
@@ -537,6 +558,21 @@ def run_visualization_window(variables, conf, visualization_closed_event, visual
                              x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
 	"""
 	Run the Cameras window in a separate process.
+
+	Args:
+		variables: Shared variables.
+		conf: Configuration dictionary.
+		visualization_closed_event: Event for the Visualization window closed.
+		visualization_win_front: Event for the Visualization window front.
+		x_plot: x plot
+		y_plot: y plot
+		t_plot: t plot
+		main_v_dc_plot: main v dc plot
+		counter_plot: counter plot
+		lock: lock
+
+	Return:
+		None
 	"""
 
 	app = QtWidgets.QApplication(sys.argv)  # <-- Create a new QApplication instance
@@ -544,8 +580,7 @@ def run_visualization_window(variables, conf, visualization_closed_event, visual
 
 	gui_visualization = Ui_Visualization(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
 	Cameras_alignment = VisualizationWindow(variables, gui_visualization, visualization_closed_event,
-	                                        visualization_win_front,
-	                                        flags=QtCore.Qt.WindowType.Tool)
+	                                        visualization_win_front, flags=QtCore.Qt.WindowType.Tool)
 	gui_visualization.setupUi(Cameras_alignment)
 	sys.exit(app.exec())  # <-- Start the event loop for this QApplication instance
 

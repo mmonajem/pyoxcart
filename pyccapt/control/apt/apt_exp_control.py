@@ -290,19 +290,6 @@ class APT_Exp_Control:
         Returns:
             None
         """
-        # Initialize devices...
-        # Start the main experiment loop...
-        # Monitor various criteria...
-        # Perform experiment loop...
-        # Stop TDC process...
-        # Handle experiment ending...
-        # Save experiment counter...
-        # Send email...
-        # Save data in hdf5 file...
-        # Save setup parameters and statistics in a txt file...
-        # Clear up variables and deinitialize devices...
-        # Log completion...
-        # Total experiment time variable
         self.variables.flag_visualization_start = True
 
         if os.path.exists("./files/counter_experiments.txt"):
@@ -661,7 +648,7 @@ class APT_Exp_Control:
 
             additional_info += 'Email: {}\n'.format(self.variables.email)
 
-            additional_info += 'The experiment was conducted using PyCCAPT software.'
+            additional_info += 'The experiment was conducted using PyCCAPT Python package.'
 
             message += additional_info
             email_send.send_email(self.variables.email, subject, message)
@@ -681,6 +668,9 @@ class APT_Exp_Control:
 
         This method performs the cleanup operations at the end of the experiment. It turns off the high voltage,
         pulser, and signal generator, resets global variables, and performs other cleanup tasks.
+
+        Args:
+            None
 
         Returns:
             None
@@ -788,7 +778,21 @@ class APT_Exp_Control:
 def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot,
                    lock):
     """
-        Run the main experiment.
+    Run the main experiment.
+
+    Args:
+        variables:                  Global variables
+        conf:                       Configuration dictionary
+        experiment_finished_event:  Event to signal the end of the experiment
+        x_plot:                     Array to store x data
+        y_plot:                     Array to store y data
+        t_plot:                     Array to store t data
+        main_v_dc_plot:             Array to store main_v_dc data
+        counter_plot:               Value to store the number of data points
+        lock:                       Lock to synchronize access to shared variables
+
+    Returns:
+        None
 
     """
 

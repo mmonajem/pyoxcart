@@ -12,15 +12,15 @@ class Cameras:
 
 	def __init__(self, variables, emitter):
 		"""
-			Constructor function which initializes and setups all variables
-			and parameters for the class.
+		Constructor function which initializes and setups all variables
+		and parameters for the class.
 
-			Args:
-				variables: The class object of the Variables class.
-				emitter: The class object of the Emitter class.
+		Args:
+			variables: The class object of the Variables class.
+			emitter: The class object of the Emitter class.
 
-			Return:
-				None
+		Return:
+			None
 		"""
 		try:
 			# Limits the amount of cameras used for grabbing.
@@ -65,13 +65,13 @@ class Cameras:
 
 	def update_cameras(self):
 		"""
-			This class method sets up the cameras to capture the required images.
+		This class method sets up the cameras to capture the required images.
 
-			Args:
-				None
+		Args:
+			None
 
-			Return:
-				None
+		Return:
+			None
 		"""
 
 		self.cameras.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
@@ -114,6 +114,9 @@ class Cameras:
 			self.emitter.img0_orig.emit(np.swapaxes(self.img0_orig, 0, 1))
 			self.emitter.img1_orig.emit(np.swapaxes(self.img1_orig, 0, 1))
 
+			if self.variables.clear_index_save_image:
+				self.variables.clear_index_save_image = False
+				self.index_save_image = 0
 			# Store the captured processed image at a desired location.
 			if current_time - start_time >= self.variables.save_meta_interval_camera and self.variables.start_flag:
 				start_time = time.time()  # Update the start time
@@ -123,6 +126,7 @@ class Cameras:
 				cv2.imwrite(path_meta + '/camera_bottom_%s.png' % self.index_save_image, self.img1_orig)
 				cv2.imwrite(path_meta + '/camera_bottom_zoom_%s.png' % self.index_save_image, self.img1_zoom)
 				self.index_save_image += 1
+				time.sleep(0.5)
 
 			grabResult0.Release()
 			grabResult1.Release()
@@ -139,13 +143,13 @@ class Cameras:
 
 	def light_switch(self):
 		"""
-			This class method sets the Exposure time based on a flag.
+		This class method sets the Exposure time based on a flag.
 
-			Args:
-				None
+		Args:
+			None
 
-			Return:
-				None
+		Return:
+			None
 		"""
 		# with self.variables.lock_setup_parameters:
 		if self.variables.light:
@@ -164,11 +168,11 @@ def cameras_run(variable, emmiter):
 	"""
 	This function is used to run the cameras.
 
-		Args:
-			variable: The class object of the Variables class.
-			emmiter: The class object of the Emitter class.
-		Return:
-			None
+	Args:
+		variable: The class object of the Variables class.
+		emmiter: The class object of the Emitter class.
+	Return:
+		None
 	"""
 	camera = Cameras(variable, emmiter)
 	camera.update_cameras()

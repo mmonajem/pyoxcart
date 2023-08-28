@@ -46,12 +46,9 @@ def send_email(email, subject, message):
 	msg.attach(logo_image)
 
 	# Attach the introduction text
-	intro = MIMEText(intro_text, 'plain')
+	intro = MIMEText(intro_text + message, 'plain')
 	msg.attach(intro)
 
-	# Attach the main message
-	main_msg = MIMEText(message, 'plain')
-	msg.attach(main_msg)
 
 	# Send the email
 	context = ssl.create_default_context()

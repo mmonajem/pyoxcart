@@ -22,15 +22,15 @@ class Ui_PyCCAPT(object):
 
 	def __init__(self, variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
 		"""
-				Constructor for the PyCCAPT UI class.
+		Constructor for the PyCCAPT UI class.
 
-				Args:
-						variables (object): Global experiment variables.
-						conf (dict): Configuration settings.
-						parent: Parent widget (optional).
+		Args:
+				variables (object): Global experiment variables.
+				conf (dict): Configuration settings.
+				parent: Parent widget (optional).
 
-				Returns:
-						None
+		Returns:
+				None
 		"""
 		self.conf = conf
 		self.variables = variables
@@ -1294,6 +1294,7 @@ class Ui_PyCCAPT(object):
 		self.variables.start_flag = True  # Set the start flag
 		self.variables.stop_flag = False  # Set the stop flag
 		self.variables.plot_clear_flag = True  # Change the flag to clear the plots in GUI
+		self.variables.clear_index_save_image = True
 		self.start_button.setEnabled(False)  # Disable the star button
 		self.counter_source.setEnabled(False)  # Disable the counter source
 		self.pulse_mode.setEnabled(False)  # Disable the pulse mode
@@ -1480,6 +1481,7 @@ class Ui_PyCCAPT(object):
 		                                                       flags=Qt.WindowType.Tool)
 		self.Pumps_vacuum.setWindowStyleFusion()
 		self.gui_pumps_vacuum.setupUi(self.Pumps_vacuum)
+		self.variables.flag_pumps_vacuum_start = True
 
 		# GUI Laser Control
 		self.gui_laser_control = gui_laser_control.Ui_Laser_Control(self.variables, self.conf)
@@ -1506,13 +1508,13 @@ class Ui_PyCCAPT(object):
 
 	def open_cameras_win(self):
 		"""
-            Open the Cameras window
+        Open the Cameras window
 
-            Args:
-                None
+        Args:
+            None
 
-            Return:
-                None
+        Return:
+            None
         """
 		if self.conf['baking_mode'] != 'on':
 			self.variables.flag_camera_win_show = True
@@ -1522,6 +1524,15 @@ class Ui_PyCCAPT(object):
 			self.error_message("Set baking mode is on in config.json")
 
 	def check_closed_events(self):
+		"""
+		Check if the camera window is closed
+
+		Args:
+		    None
+
+		Return:
+			None
+		"""
 		if self.camera_closed_event.is_set():
 			# Change the color of the push button when the camera window is closed
 			self.reset_button_color(self.camears)
@@ -1536,14 +1547,14 @@ class Ui_PyCCAPT(object):
 
 	def open_gates_win(self):
 		"""
-            Open the Gates window
+		Open the Gates window
 
-            Args:
-                None
+		Args:
+		    None
 
-            Return:
-                None
-        """
+		Return:
+		    None
+		"""
 		if hasattr(self, 'Gates') and self.Gates.isVisible():
 			self.Gates.raise_()
 			self.Gates.activateWindow()
@@ -1557,13 +1568,13 @@ class Ui_PyCCAPT(object):
 
 	def open_pumps_vacuum_win(self, ):
 		"""
-            Open the Pumps and Vacuum window
+		Open the Pumps and Vacuum window
 
-            Args:
-                None
+		Args:
+            None
 
-            Return:
-                None
+        Return:
+            None
         """
 		if hasattr(self, 'Pumps_vacuum') and self.Pumps_vacuum.isVisible():
 			self.Pumps_vacuum.raise_()
@@ -1578,7 +1589,7 @@ class Ui_PyCCAPT(object):
 
 	def open_laser_control_win(self):
 		"""
-        Open laser control window
+		Open laser control window
 
         Args:
             None
@@ -1599,7 +1610,7 @@ class Ui_PyCCAPT(object):
 
 	def open_stage_control_win(self):
 		"""
-        Open stage control window
+		Open stage control window
 
         Args:
             None
@@ -1620,7 +1631,7 @@ class Ui_PyCCAPT(object):
 
 	def open_visualization_win(self, ):
 		"""
-        Open visualization window
+		Open visualization window
 
         Args:
             None
@@ -1637,32 +1648,36 @@ class Ui_PyCCAPT(object):
 
 	def open_baking_win(self):
 		"""
-        Open baking window
+		Open baking window
 
-        Args:
+		Args:
             None
 
         Return:
             None
         """
 
-		if self.conf['baking_mode'] == 'on':
-			if hasattr(self, 'Baking') and self.Baking.isVisible():
-				self.Baking.raise_()
-				self.Baking.activateWindow()
-			else:
-				self.gui_baking = gui_baking.Ui_Baking(self.variables, self.conf)
-				self.Baking = gui_baking.BakingWindow(self.gui_baking, flags=Qt.WindowType.Tool)
-				self.gui_baking.setupUi(self.Baking)
-				self.Baking.show()
-				self.baking.setStyleSheet("background-color: green")
-				self.Baking.closed.connect(lambda: self.reset_button_color(self.baking))
-
-
+		if hasattr(self, 'Baking') and self.Baking.isVisible():
+			self.Baking.raise_()
+			self.Baking.activateWindow()
 		else:
-			self.error_message("Set baking mode to on in config.json")
+			self.gui_baking = gui_baking.Ui_Baking(self.variables, self.conf)
+			self.Baking = gui_baking.BakingWindow(self.gui_baking, flags=Qt.WindowType.Tool)
+			self.gui_baking.setupUi(self.Baking)
+			self.Baking.show()
+			self.baking.setStyleSheet("background-color: green")
+			self.Baking.closed.connect(lambda: self.reset_button_color(self.baking))
 
 	def reset_button_color(self, button):
+		"""
+		Reset the button color to the original color
+
+		Args:
+			button (QPushButton): The button to reset the color
+
+		Return:
+			None
+		"""
 		button.setStyleSheet("QPushButton{ background: rgb(85, 170, 255) }")
 
 	def error_message(self, message):
@@ -1682,9 +1697,9 @@ class Ui_PyCCAPT(object):
 
 		self.timer.start(8000)
 
-	def hideMessage(self):
+	def hideMessage(self, ):
 		"""
-        Hide the message and stop the timer
+		Hide the message and stop the timer
         Args:
             None
 
@@ -1701,14 +1716,14 @@ class Ui_PyCCAPT(object):
 
 	def cleanup(self, ):
 		"""
-			Cleanup function to terminate the camera process
+		Cleanup function to terminate the camera process
 
-			Args:
-				None
+		Args:
+			None
 
-			Return:
-				None
-        """
+		Return:
+			None
+		"""
 		if hasattr(self, 'camera_process') and self.camera_process.is_alive():
 			self.camera_process.terminate()
 			self.visualization_process.terminate()
