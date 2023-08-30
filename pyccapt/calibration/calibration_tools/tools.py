@@ -206,14 +206,16 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
             annotes = []
             texts = []
             if peaks_find_plot:
-                for i in range(len(peaks)):
-                    if ranging:
-                        ion = range_data['ion'].tolist()
-                        x_peak_loc = range_data['mc'].tolist()
-                        y_peak_loc = range_data['peak_count'].tolist()
+                if ranging:
+                    ion = range_data['ion'].tolist()
+                    x_peak_loc = range_data['mc'].tolist()
+                    y_peak_loc = range_data['peak_count'].tolist()
+                    for i in range(len(ion)):
                         texts.append(plt.text(x_peak_loc[i], y_peak_loc[i], r'%s' % ion[i], color='black', size=10,
                                               alpha=1))
-                    else:
+                        annotes.append(str(i + 1))
+                else:
+                    for i in range(len(peaks)):
                         if selector == 'range':
                             if i in variables.peaks_idx:
                                 texts.append(plt.text(x[peaks][i], y[peaks][i], '%s' % '{:.2f}'.format(x[peaks][i]),
@@ -224,10 +226,10 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
                                 plt.text(x[peaks][i], y[peaks][i], '%s' % '{:.2f}'.format(x[peaks][i]), color='black',
                                          size=10, alpha=1))
 
-                    if h_line:
-                        for i in range(len(variables.h_line_pos)):
-                            plt.axvline(x=variables.h_line_pos[i], color='b', linestyle='--', linewidth=2)
-                    annotes.append(str(i + 1))
+                        if h_line:
+                            for i in range(len(variables.h_line_pos)):
+                                plt.axvline(x=variables.h_line_pos[i], color='b', linestyle='--', linewidth=2)
+                        annotes.append(str(i + 1))
             if adjust_label:
                 adjust_text(texts, arrowprops=dict(arrowstyle='-', color='red', lw=0.5))
             if selector == 'rect':

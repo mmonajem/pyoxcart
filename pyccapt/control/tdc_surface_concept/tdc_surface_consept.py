@@ -93,38 +93,38 @@ def errorcheck(device, bufdatacb, bufdatacb_raw, retcode):
 
 
 def save_data_thread(variables, xx_list, yy_list, tt_list, voltage_data, pulse_data, flag_stop_data_thread):
-	"""
-	This function saves the data in a separate thread.
+    """
+    This function saves the data in a separate thread.
 
-	Args:
-		variables (share_variables.Variables): A share_variables.Variables object.
-		xx_list (list): A list of x coordinates.
-		yy_list (list): A list of y coordinates.
-		tt_list (list): A list of time coordinates.
-		voltage_data (list): A list of voltage values.
-		pulse_data (list): A list of pulse values.
-		flag_stop_data_thread (bool): A flag to stop the thread.
+    Args:
+        variables (share_variables.Variables): A share_variables.Variables object.
+        xx_list (list): A list of x coordinates.
+        yy_list (list): A list of y coordinates.
+        tt_list (list): A list of time coordinates.
+        voltage_data (list): A list of voltage values.
+        pulse_data (list): A list of pulse values.
+        flag_stop_data_thread (bool): A flag to stop the thread.
 
-	Returns:
-		None
-	"""
-	while not flag_stop_data_thread:
-		# Sleep for 5 minutes
-		time.sleep(300)
-		xx = xx_list.copy()
-		yy = yy_list.copy()
-		tt = tt_list.copy()
-		voltage = voltage_data.copy()
-		pulse = pulse_data.copy()
+    Returns:
+        None
+    """
+    while not flag_stop_data_thread:
+        # Sleep for 5 minutes
+        time.sleep(300)
+        xx = xx_list.copy()
+        yy = yy_list.copy()
+        tt = tt_list.copy()
+        voltage = voltage_data.copy()
+        pulse = pulse_data.copy()
 
-		# Acquire the lock before accessing the shared data
-		np.save(variables.path + "/x_data.npy", np.array(xx))
-		np.save(variables.path + "/y_data.npy", np.array(yy))
-		np.save(variables.path + "/t_data.npy", np.array(tt))
-		np.save(variables.path + "/voltage_data.npy", np.array(voltage))
-		np.save(variables.path + "/pulse_data.npy", np.array(pulse))
+        # Acquire the lock before accessing the shared data
+        np.save(variables.path + "/x_data.npy", np.array(xx))
+        np.save(variables.path + "/y_data.npy", np.array(yy))
+        np.save(variables.path + "/t_data.npy", np.array(tt))
+        np.save(variables.path + "/voltage_data.npy", np.array(voltage))
+        np.save(variables.path + "/pulse_data.npy", np.array(pulse))
 
-		print("Data saved.")
+        print("Data saved.")
 
 
 def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
@@ -191,10 +191,10 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
 
     retcode = bufdatacb.start_measurement(100)
     if errorcheck(device, bufdatacb, bufdatacb_raw, retcode) < 0:
-	    print("Error during read:", retcode, device.lib.sc_get_err_msg(retcode))
-	    print(f"{initialize_devices.bcolors.FAIL}Error: Restart the TDC manually "
-	          f"(Turn it On and Off){initialize_devices.bcolors.ENDC}")
-	    return -1
+        print("Error during read:", retcode, device.lib.sc_get_err_msg(retcode))
+        print(f"{initialize_devices.bcolors.FAIL}Error: Restart the TDC manually "
+              f"(Turn it On and Off){initialize_devices.bcolors.ENDC}")
+        return -1
 
     # Define a lock
     data_lock = threading.Lock()
@@ -213,9 +213,9 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
     pulse_frequency = variables.pulse_frequency * 1000
     loop_time = 0
     while not variables.flag_stop_tdc:
-	    start_time_loop = time.time()
-	    eventtype, data = bufdatacb.queue.get()
-	    eventtype_raw, data_raw = bufdatacb_raw.queue.get()
+        start_time_loop = time.time()
+        eventtype, data = bufdatacb.queue.get()
+        eventtype_raw, data_raw = bufdatacb_raw.queue.get()
         specimen_voltage = variables.specimen_voltage
         pulse_voltage = variables.pulse_voltage
         if eventtype == QUEUE_DATA:
@@ -239,11 +239,11 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
                 v_p_voltage_tmp = np.tile(pulse_voltage, len(xx_tmp)).tolist()
 
                 with data_lock:
-	                xx_list.extend(xx_dif.tolist())
-	                yy_list.extend(yy_dif.tolist())
-	                tt_list.extend(tt_dif.tolist())
-	                voltage_data.extend(dc_voltage_tmp)
-	                pulse_data.extend(v_p_voltage_tmp)
+                    xx_list.extend(xx_dif.tolist())
+                    yy_list.extend(yy_dif.tolist())
+                    tt_list.extend(tt_dif.tolist())
+                    voltage_data.extend(dc_voltage_tmp)
+                    pulse_data.extend(v_p_voltage_tmp)
 
                 length = len(xx_tmp)
                 counter = counter_plot.value
@@ -282,16 +282,16 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
         elif eventtype == QUEUE_ENDOFMEAS:
             retcode = bufdatacb.start_measurement(100, retries=10)  # retries is the number of times to retry
             if retcode < 0:
-	            print("Error during read (error code: %s - error msg: %s):" % (retcode,
-	                                                                           device.lib.sc_get_err_msg(retcode)))
-	            variables.flag_tdc_failure = True
-	            break
+                print("Error during read (error code: %s - error msg: %s):" % (retcode,
+                                                                               device.lib.sc_get_err_msg(retcode)))
+                variables.flag_tdc_failure = True
+                break
 
-	    # else:  # unknown event
-	    #     break
+        # else:  # unknown event
+        #     break
 
-	    if time.time() - start_time_loop > 0.2:
-		    loop_time += 1
+        if time.time() - start_time_loop > 0.2:
+            loop_time += 1
 
     flag_stop_data_thread = True
     print("for %s times loop time took longer than 0.2 second" % loop_time)
@@ -327,15 +327,15 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
 
 
 def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
-	# from line_profiler import LineProfiler
-	#
-	# lp1 = LineProfiler()
-	#
-	# lp1.add_function(run_experiment_measure)
-	#
-	# # Run the profiler
-	# lp1(run_experiment_measure)(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
-	# # Save the profiling result to a file
-	# lp1.dump_stats('./../../experiment_measure.lprof')
+    # from line_profiler import LineProfiler
+    #
+    # lp1 = LineProfiler()
+    #
+    # lp1.add_function(run_experiment_measure)
+    #
+    # # Run the profiler
+    # lp1(run_experiment_measure)(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
+    # # Save the profiling result to a file
+    # lp1.dump_stats('./../../experiment_measure.lprof')
 
-	run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
+    run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)

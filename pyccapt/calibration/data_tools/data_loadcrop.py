@@ -7,23 +7,22 @@ from matplotlib import colors
 from matplotlib.patches import Circle, Rectangle
 from matplotlib.widgets import RectangleSelector
 
-from pyccapt.calibration.calibration_tools import logging_library
 from pyccapt.calibration.data_tools import data_tools
 from pyccapt.calibration.data_tools import selectors_data
 
 
 def fetch_dataset_from_dld_grp(filename: str) -> pd.DataFrame:
-	"""
-	Fetches dataset from HDF5 file.
+    """
+    Fetches dataset from HDF5 file.
 
-	Args:
-		filename: Path to the HDF5 file.
-		tdc: Model of TDC.
+    Args:
+        filename: Path to the HDF5 file.
+        tdc: Model of TDC.
 
-	Returns:
-		DataFrame: Contains relevant information from the dld group.
-	"""
-    logger = logging_library.logger_creator('data_loadcrop')
+    Returns:
+        DataFrame: Contains relevant information from the dld group.
+    """
+
     try:
         hdf5Data = data_tools.read_hdf5(filename)
         if hdf5Data is None:
@@ -38,11 +37,11 @@ def fetch_dataset_from_dld_grp(filename: str) -> pd.DataFrame:
         dld_group_storage = create_pandas_dataframe(dldGroupStorage)
         return dld_group_storage
     except KeyError as error:
-        logger.info(error)
-        logger.critical("[*] Keys missing in the dataset")
+        print(error)
+        print("[*] Keys missing in the dataset")
     except FileNotFoundError as error:
-        logger.info(error)
-        logger.critical("[*] HDF5 file not found")
+        print(error)
+        print("[*] HDF5 file not found")
 
 
 def concatenate_dataframes_of_dld_grp(dataframeList: list) -> pd.DataFrame:
