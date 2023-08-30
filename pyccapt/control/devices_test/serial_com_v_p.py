@@ -1,31 +1,60 @@
 import time
-import pyvisa
+
+import serial
+
+
+def command(ser, cmd):
+	cmd = f'{cmd}\n'
+	ser.write(cmd.encode())
+
 
 if __name__ == '__main__':
-    # Initialize the pyvisa resource manager
-    resources = pyvisa.ResourceManager('@py')
-    print(resources.list_resources())
+	# Replace 'COM4' with the appropriate serial port identifier
+	serial_port = 'COM4'
 
-    # Open the communication with the instrument
-    v_p = resources.open_resource('ASRL4::INSTR')
+	# Establish a serial connection
+	ser = serial.Serial(serial_port, baudrate=115200, timeout=0.01)
 
-    # Return the Rigol's ID string to identify the instrument
-    print(v_p.query('*IDN?'))
-    print(v_p.query('SYST:LOCK:OWN?'))
+	# Query instrument identity
+	command(ser, '*IDN?')
+	# ser.write(b'*IDN?\n')
+	response = ser.readline().decode().strip()
+	print("Instrument Identity:", response)
 
-    v_p.write('VOLT 0')
-    print(v_p.query('VOLT?'))
+	# ser.write(b'OUTPut ON\n')
+	command(ser, 'OUTPut ON')
+	response = ser.readline().decode().strip()
+	print("Instrument Identity:", response)
+	# Query system ownership
+	ser.write(b'SYST:LOCK:OWN?\n')
+	response = ser.readline().decode().strip()
+	print("System Ownership:", response)
 
-    v_p.write('VOLT 15')
-    print(v_p.query('VOLT?'))
-    time.sleep(5)
+	# Set voltage to 0
+	ser.write(b'VOLT 0\n')
+	ser.write(b'VOLT?\n')
+	response = ser.readline().decode().strip()
+	print("Voltage:", response)
 
-    v_p.write('OUTPut ON')
-    time.sleep(5)
+	# Set voltage to 15
+	ser.write(b'VOLT 30\n')
+	ser.write(b'VOLT?\n')
+	response = ser.readline().decode().strip()
+	print("Voltage:", response)
+	time.sleep(1)
 
-    print(v_p.query('VOLT?'))
-    time.sleep(5)
+	# Turn output on
+	ser.write(b'OUTPut ON\n')
+	time.sleep(1)
 
-    v_p.write('OUTPut OFF')
+	# Query voltage after turning on output
+	ser.write(b'VOLT?\n')
+	response = ser.readline().decode().strip()
+	print("Voltage:", response)
+	time.sleep(5)
 
-    v_p.close()
+	# Turn output off
+	ser.write(b'OUTPut OFF\n')
+
+	# Close the serial connection
+	ser.close()

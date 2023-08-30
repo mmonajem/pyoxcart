@@ -66,16 +66,16 @@ def ccapt_to_epos(data, path=None, name=None):
 
 
 def pos_to_ccapt(data):
-    """
-    Convert POS data to CCAPT format.
+	"""
+	Convert POS data to CCAPT format.
 
-    Args:
-        data (bytes): POS data.
+	Args:
+		data: POS data.
 
-    Returns:
-        pandas.DataFrame: CCAPT data.
+	Returns:
+		pandas.DataFrame: CCAPT data.
 
-    """
+	"""
     pos = leap_tools.read_pos(data)
     length = len(pos['m/n (Da)'].to_numpy())
     ccapt = pd.DataFrame({'x (nm)': pos['x (nm)'].to_numpy(),
@@ -97,16 +97,16 @@ def pos_to_ccapt(data):
 
 
 def epos_to_ccapt(data):
-    """
-    Convert EPOS data to CCAPT format.
+	"""
+	Convert EPOS data to PyCCAPT format.
 
-    Args:
-        data (bytes): EPOS data.
+	Args:
+		data: EPOS data.
 
-    Returns:
-        pandas.DataFrame: CCAPT data.
+	Returns:
+		pandas.DataFrame: CCAPT data.
 
-    """
+	"""
     epos = leap_tools.read_epos(data)
     length = len(epos['m/n (Da)'].to_numpy())
     ccapt = pd.DataFrame({'x (nm)': epos['x (nm)'].to_numpy(),

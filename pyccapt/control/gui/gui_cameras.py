@@ -399,7 +399,6 @@ def run_camera_window(variables, conf, camera_closed_event, camera_win_front):
 	"""
 	Run the Cameras window in a separate process.
 	"""
-
 	app = QtWidgets.QApplication(sys.argv)  # <-- Create a new QApplication instance
 	app.setStyle('Fusion')
 	SignalEmitter_Cameras = SignalEmitter()

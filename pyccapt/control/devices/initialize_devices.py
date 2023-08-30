@@ -176,9 +176,8 @@ def state_update(conf, variables, emitter):
 		print('The cryo temperature monitoring is off')
 	else:
 		try:
-			com_ports = list(serial.tools.list_ports.comports())
 			com_port_cryovac = serial.Serial(
-				port=com_ports[variables.COM_PORT_cryo].device,
+				port=variables.COM_PORT_cryo,
 				baudrate=9600,
 				bytesize=serial.EIGHTBITS,
 				parity=serial.PARITY_NONE,

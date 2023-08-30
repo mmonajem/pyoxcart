@@ -952,8 +952,8 @@ class Ui_PyCCAPT(object):
 		self.statistics_timer.start(333)  # check every 333 ms
 
 		# initialize the wins
-		if self.conf['baking_mode'] != 'on':
-			self.wins_init()
+
+		self.wins_init()
 
 		self.original_button_style = self.dc_hold.styleSheet()
 
@@ -972,7 +972,7 @@ class Ui_PyCCAPT(object):
 		# PyCCAPT.setWindowTitle(_translate("PyCCAPT", "OXCART"))
 		_translate = QtCore.QCoreApplication.translate
 		PyCCAPT.setWindowTitle(_translate("PyCCAPT", "PyCCAPT APT Experiment Control"))
-		PyCCAPT.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+		PyCCAPT.setWindowIcon(QtGui.QIcon('./files/logo.png'))
 		###
 		self.gates_control.setText(_translate("PyCCAPT", "Gates Control"))
 		self.pumps_vaccum.setText(_translate("PyCCAPT", "Pumps & Vacuum"))
@@ -1516,12 +1516,9 @@ class Ui_PyCCAPT(object):
         Return:
             None
         """
-		if self.conf['baking_mode'] != 'on':
-			self.variables.flag_camera_win_show = True
-			self.camera_win_front.set()
-			self.camears.setStyleSheet("background-color: green")
-		else:
-			self.error_message("Set baking mode is on in config.json")
+		self.variables.flag_camera_win_show = True
+		self.camera_win_front.set()
+		self.camears.setStyleSheet("background-color: green")
 
 	def check_closed_events(self):
 		"""
@@ -1559,12 +1556,9 @@ class Ui_PyCCAPT(object):
 			self.Gates.raise_()
 			self.Gates.activateWindow()
 		else:
-			if self.conf['baking_mode'] != 'on':
-				self.Gates.show()
-				self.gates_control.setStyleSheet("background-color: green")
-				self.Gates.closed.connect(lambda: self.reset_button_color(self.gates_control))
-			else:
-				self.error_message("Set baking mode is on in config.json")
+			self.Gates.show()
+			self.gates_control.setStyleSheet("background-color: green")
+			self.Gates.closed.connect(lambda: self.reset_button_color(self.gates_control))
 
 	def open_pumps_vacuum_win(self, ):
 		"""
@@ -1580,12 +1574,9 @@ class Ui_PyCCAPT(object):
 			self.Pumps_vacuum.raise_()
 			self.Pumps_vacuum.activateWindow()
 		else:
-			if self.conf['baking_mode'] != 'on':
-				self.Pumps_vacuum.show()
-				self.pumps_vaccum.setStyleSheet("background-color: green")
-				self.Pumps_vacuum.closed.connect(lambda: self.reset_button_color(self.pumps_vaccum))
-			else:
-				self.error_message("Set baking mode is on in config.json")
+			self.Pumps_vacuum.show()
+			self.pumps_vaccum.setStyleSheet("background-color: green")
+			self.Pumps_vacuum.closed.connect(lambda: self.reset_button_color(self.pumps_vaccum))
 
 	def open_laser_control_win(self):
 		"""
@@ -1601,12 +1592,9 @@ class Ui_PyCCAPT(object):
 			self.Laser_control.raise_()
 			self.Laser_control.activateWindow()
 		else:
-			if self.conf['baking_mode'] != 'on':
-				self.Laser_control.show()
-				self.laser_control.setStyleSheet("background-color: green")
-				self.Laser_control.closed.connect(lambda: self.reset_button_color(self.laser_control))
-			else:
-				self.error_message("Set baking mode is on in config.json")
+			self.Laser_control.show()
+			self.laser_control.setStyleSheet("background-color: green")
+			self.Laser_control.closed.connect(lambda: self.reset_button_color(self.laser_control))
 
 	def open_stage_control_win(self):
 		"""
@@ -1622,12 +1610,9 @@ class Ui_PyCCAPT(object):
 			self.Stage_control.raise_()
 			self.Stage_control.activateWindow()
 		else:
-			if self.conf['baking_mode'] != 'on':
-				self.Stage_control.show()
-				self.stage_control.setStyleSheet("background-color: green")
-				self.Stage_control.closed.connect(lambda: self.reset_button_color(self.stage_control))
-			else:
-				self.error_message("Set baking mode is on in config.json")
+			self.Stage_control.show()
+			self.stage_control.setStyleSheet("background-color: green")
+			self.Stage_control.closed.connect(lambda: self.reset_button_color(self.stage_control))
 
 	def open_visualization_win(self, ):
 		"""
@@ -1639,13 +1624,9 @@ class Ui_PyCCAPT(object):
         Return:
             None
         """
-		if self.conf['baking_mode'] != 'on':
-			self.variables.flag_visualization_win_show = True
-			self.visualization_win_front.set()
-			self.visualization.setStyleSheet("background-color: green")
-		else:
-			self.error_message("Set baking mode is on in config.json")
-
+		self.variables.flag_visualization_win_show = True
+		self.visualization_win_front.set()
+		self.visualization.setStyleSheet("background-color: green")
 	def open_baking_win(self):
 		"""
 		Open baking window

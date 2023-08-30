@@ -4,7 +4,6 @@ import os
 import time
 
 import numpy as np
-import pyvisa as visa
 import serial.tools.list_ports
 
 from pyccapt.control.control_tools import experiment_statistics
@@ -115,9 +114,8 @@ class APT_Exp_Control:
         Returns:
             None
         """
-        com_ports = list(serial.tools.list_ports.comports())
         self.com_port_v_dc = serial.Serial(
-            port=com_ports[self.variables.COM_PORT_V_dc].device,
+            port=self.variables.COM_PORT_V_dc,
             baudrate=115200,
             bytesize=serial.EIGHTBITS,
             parity=serial.PARITY_NONE,
@@ -147,14 +145,9 @@ class APT_Exp_Control:
         Returns:
             None
         """
-        resources = visa.ResourceManager('@py')
-        self.com_port_v_p = resources.open_resource(self.variables.COM_PORT_V_p)
+        self.com_port_v_p = serial.Serial(self.variables.COM_PORT_V_p, baudrate=115200, timeout=0.01)
 
-        try:
-            self.com_port_v_p.query('*RST')
-        except:
-            self.com_port_v_p.write(
-                'VOLT %s' % (self.variables.v_p_min * (1 / self.variables.pulse_amp_per_supply_voltage)))
+        self.command_v_p('*RST')
 
     def command_v_p(self, cmd):
         """
@@ -168,8 +161,9 @@ class APT_Exp_Control:
         Returns:
             str: The response received from the device.
         """
-        self.com_port_v_p.write(cmd)
-        # response = self.com_port_v_p.read()
+        cmd = cmd + '\r\n'
+        self.com_port_v_p.write(cmd.encode())
+        # response = self.com_port_v_p.readline().decode().strip()
         # return response
 
     def command_v_dc(self, cmd):
@@ -382,6 +376,10 @@ class APT_Exp_Control:
         if not self.initialization_error:
             if self.conf['v_p'] == "on":
                 self.command_v_p('OUTPut ON')
+                vol = self.variables.v_p_min / self.variables.pulse_amp_per_supply_voltage
+                cmd = 'VOLT %s' % vol
+                self.command_v_p(cmd)
+                self.com_port_v_p.write(cmd.encode())
                 time.sleep(0.1)
             if self.conf['v_dc'] == "on":
                 self.command_v_dc("F1")
@@ -754,7 +752,7 @@ class APT_Exp_Control:
             pass
 
         try:
-            if self.conf['v_p'] != "off":
+            if self.conf['v_p'] == "on":
                 # Turn off the v_p
                 self.command_v_p('VOLT 0')
                 self.command_v_p('OUTPut OFF')
@@ -796,23 +794,24 @@ def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t
 
     """
 
-    from line_profiler import LineProfiler
+    # from line_profiler import LineProfiler
+    #
+    # lp1 = LineProfiler()
+    #
+    # # Run the experiment
+    # apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot,
+    #                                   main_v_dc_plot, counter_plot, lock)
+    #
+    # lp1.add_function(apt_exp_control.run_experiment)
+    #
+    # lp1.add_function(apt_exp_control.main_ex_loop)
+    #
+    # # Run the profiler
+    # lp1(apt_exp_control.run_experiment)()
+    # # Save the profiling result to a file
+    # lp1.dump_stats('run_experiment.lprof')
 
-    lp1 = LineProfiler()
-
-    # Run the experiment
     apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot,
                                       main_v_dc_plot, counter_plot, lock)
 
-    lp1.add_function(apt_exp_control.run_experiment)
-
-    lp1.add_function(apt_exp_control.main_ex_loop)
-
-    # Run the profiler
-    lp1(apt_exp_control.run_experiment)()
-    # Save the profiling result to a file
-    lp1.dump_stats('run_experiment.lprof')
-
-    # apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event)
-    #
-    # apt_exp_control.run_experiment()
+    apt_exp_control.run_experiment()

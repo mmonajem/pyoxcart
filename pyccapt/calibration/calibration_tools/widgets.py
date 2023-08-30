@@ -244,8 +244,8 @@ def dataset_instrument_specification_selection():
     )
 
     tdc = widgets.Dropdown(
-        options=['surface_concept', 'roentdec', 'leap_epos', 'leap_pos', 'ato_v6'],
-        value='surface_concept',
+        options=['PyCCAPT', 'leap_epos', 'leap_pos', 'ato_v6'],
+        value='PyCCAPT',
         description='Data mode:',
     )
 

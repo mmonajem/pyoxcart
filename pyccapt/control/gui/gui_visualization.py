@@ -327,6 +327,7 @@ class Ui_Visualization(object):
 			self.index_plot_start = 0
 			self.index_plot_save = 0
 			self.start_time_metadata = 0
+			self.variables.detection_rate_current_plot = 0
 
 		# with self.variables.lock_statistics and self.variables.lock_setup_parameters:
 		if self.variables.start_flag and self.variables.flag_visualization_start:
@@ -574,7 +575,6 @@ def run_visualization_window(variables, conf, visualization_closed_event, visual
 	Return:
 		None
 	"""
-
 	app = QtWidgets.QApplication(sys.argv)  # <-- Create a new QApplication instance
 	app.setStyle('Fusion')
 

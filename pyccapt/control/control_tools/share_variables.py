@@ -171,6 +171,10 @@ class Variables:
         self.ns.ch2_wave = []
         self.ns.ch3_time = []
         self.ns.ch3_wave = []
+        self.ns.ch4_time = []
+        self.ns.ch4_wave = []
+        self.ns.ch5_time = []
+        self.ns.ch5_wave = []
 
         self.ns.ch0 = []
         self.ns.ch1 = []
@@ -1403,6 +1407,46 @@ class Variables:
     def ch3_wave(self, value):
         with self.lock_lists:
             self.ns.ch3_wave = value
+
+    @property
+    def ch4_time(self):
+        with self.lock_lists:
+            return self.ns.ch4_time
+
+    @ch4_time.setter
+    def ch4_time(self, value):
+        with self.lock_lists:
+            self.ns.ch4_time = value
+
+    @property
+    def ch4_wave(self):
+        with self.lock_lists:
+            return self.ns.ch4_wave
+
+    @ch4_wave.setter
+    def ch4_wave(self, value):
+        with self.lock_lists:
+            self.ns.ch4_wave = value
+
+    @property
+    def ch5_time(self):
+        with self.lock_lists:
+            return self.ns.ch5_time
+
+    @ch5_time.setter
+    def ch5_time(self, value):
+        with self.lock_lists:
+            self.ns.ch5_time = value
+
+    @property
+    def ch5_wave(self):
+        with self.lock_lists:
+            return self.ns.ch5_wave
+
+    @ch5_wave.setter
+    def ch5_wave(self, value):
+        with self.lock_lists:
+            self.ns.ch5_wave = value
 
     @property
     def ch0(self):

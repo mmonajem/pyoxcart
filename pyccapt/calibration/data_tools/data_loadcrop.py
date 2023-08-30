@@ -12,17 +12,17 @@ from pyccapt.calibration.data_tools import data_tools
 from pyccapt.calibration.data_tools import selectors_data
 
 
-def fetch_dataset_from_dld_grp(filename: str, tdc: str) -> pd.DataFrame:
-    """
-    Fetches dataset from HDF5 file.
+def fetch_dataset_from_dld_grp(filename: str) -> pd.DataFrame:
+	"""
+	Fetches dataset from HDF5 file.
 
-    Args:
-        filename: Path to the HDF5 file.
-        tdc: Model of TDC.
+	Args:
+		filename: Path to the HDF5 file.
+		tdc: Model of TDC.
 
-    Returns:
-        DataFrame: Contains relevant information from the dld group.
-    """
+	Returns:
+		DataFrame: Contains relevant information from the dld group.
+	"""
     logger = logging_library.logger_creator('data_loadcrop')
     try:
         hdf5Data = data_tools.read_hdf5(filename)

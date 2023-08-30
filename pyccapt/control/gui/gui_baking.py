@@ -40,7 +40,7 @@ class Ui_Baking(object):
 			         'BC_Top', 'BC_Pump'])
 		now_time = self.now.strftime("%d-%m-%Y_%H-%M-%S")
 		folders_above = os.path.abspath(os.path.join(os.getcwd(), "../"))
-		self.save_path = folders_above + '/tests/data/baking_logging/%s/' % now_time
+		self.save_path = folders_above + '/pyccapt/files/baking_logging/%s/' % now_time
 		if not os.path.isdir(self.save_path):
 			os.makedirs(self.save_path, mode=0o777, exist_ok=True)
 		self.file_name = self.save_path + 'baking_logging_%s.csv' % now_time
@@ -97,12 +97,12 @@ class Ui_Baking(object):
 		self.tempretures.addLegend()
 		styles = {"color": "#f00", "font-size": "12px"}
 		self.tempretures.setLabel("left", "Temperature (C)", **styles)
-		self.tempretures.setLabel("bottom", "Time (s)", **styles)
+		self.tempretures.setLabel("bottom", "Time (sec)", **styles)
 
 		self.presures.addLegend()
 		styles = {"color": "#f00", "font-size": "12px"}
 		self.presures.setLabel("left", "Pressure (mBar)", **styles)
-		self.presures.setLabel("bottom", "Time (s)", **styles)
+		self.presures.setLabel("bottom", "Time (sec)", **styles)
 
 	def retranslateUi(self, Baking):
 		"""
@@ -141,13 +141,12 @@ class Ui_Baking(object):
 			if not self.variables.flag_pumps_vacuum_start:
 				gauge_bc, _ = tpg.pressure_gauge(1)
 			else:
-				gauge_bc = self.variables.vacuum_buffer
+				gauge_bc = float(self.variables.vacuum_buffer)
 			# print('pressure BC is {} {}'.format(gauge_bc, unit))
 			if not self.variables.flag_pumps_vacuum_start:
 				gauge_mc, _ = tpg.pressure_gauge(2)
 			else:
-				gauge_mc = self.variables.vacuum_main
-			# print('pressure MC is {} {}'.format(gauge_mc, unit))
+				gauge_mc = float(self.variables.vacuum_main)
 
 			board_num = 0
 			value_temperature = []

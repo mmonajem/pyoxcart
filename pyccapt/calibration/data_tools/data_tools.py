@@ -195,6 +195,7 @@ def load_data(dataset_path, tdc, mode='processed'):
     Args:
         dataset_path (string): path to the dataset.
         tdc (string): type of the dataset.
+        mode (string): mode of the dataset.
 
     Returns:
         data (pandas.DataFrame): DataFrame containing the data.
@@ -207,10 +208,10 @@ def load_data(dataset_path, tdc, mode='processed'):
             print('The file has to be epos. With pos information this tutorial cannot be run')
             data = ccapt_tools.pos_to_ccapt(dataset_path)
     elif tdc == 'ato_v6':
-        data = ato_tools.ato_to_ccapt(dataset_path, moed='pyccapt')
-    elif (tdc == 'surface_concept' or tdc == 'roentdec') and mode == 'raw':
-        data = data_loadcrop.fetch_dataset_from_dld_grp(dataset_path, tdc)
-    elif (tdc == 'surface_concept' or tdc == 'roentdec') and mode == 'processed':
+        data = ato_tools.ato_to_ccapt(dataset_path, moed='PyCCAPT')
+    elif tdc == 'PyCCAPT' and mode == 'raw':
+        data = data_loadcrop.fetch_dataset_from_dld_grp(dataset_path)
+    elif tdc == 'PyCCAPT' and mode == 'processed':
         data = data_tools.read_hdf5_through_pandas(dataset_path)
     return data
 

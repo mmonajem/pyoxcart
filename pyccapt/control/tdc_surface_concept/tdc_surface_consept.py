@@ -92,128 +92,39 @@ def errorcheck(device, bufdatacb, bufdatacb_raw, retcode):
         return 0
 
 
-class SharedData:
-    def __init__(self, variables):
-        """
-        This class is used to share data between threads.
+def save_data_thread(variables, xx_list, yy_list, tt_list, voltage_data, pulse_data, flag_stop_data_thread):
+	"""
+	This function saves the data in a separate thread.
 
-        Args:
-            variables (share_variables.Variables): A share_variables.Variables object.
-        """
-        self.variables = variables
-        self.x_plot = []
-        self.y_plot = []
-        self.t_plot = []
-        self.main_v_dc_plot = []
-        self.lock = threading.Lock()
+	Args:
+		variables (share_variables.Variables): A share_variables.Variables object.
+		xx_list (list): A list of x coordinates.
+		yy_list (list): A list of y coordinates.
+		tt_list (list): A list of time coordinates.
+		voltage_data (list): A list of voltage values.
+		pulse_data (list): A list of pulse values.
+		flag_stop_data_thread (bool): A flag to stop the thread.
 
-    def update_data_x(self, new_data):
-        """
-        This function updates the x_plot list.
+	Returns:
+		None
+	"""
+	while not flag_stop_data_thread:
+		# Sleep for 5 minutes
+		time.sleep(300)
+		xx = xx_list.copy()
+		yy = yy_list.copy()
+		tt = tt_list.copy()
+		voltage = voltage_data.copy()
+		pulse = pulse_data.copy()
 
-        Args:
-            new_data (list): A list of new data.
+		# Acquire the lock before accessing the shared data
+		np.save(variables.path + "/x_data.npy", np.array(xx))
+		np.save(variables.path + "/y_data.npy", np.array(yy))
+		np.save(variables.path + "/t_data.npy", np.array(tt))
+		np.save(variables.path + "/voltage_data.npy", np.array(voltage))
+		np.save(variables.path + "/pulse_data.npy", np.array(pulse))
 
-        Returns:
-            bool: True if the lock is acquired, False otherwise.
-        """
-        if self.lock.acquire():
-            try:
-                self.x_plot.extend(new_data)
-            finally:
-                self.lock.release()
-                return True
-        return False
-
-    def update_data_y(self, new_data):
-        """
-        This function updates the y_plot list.
-
-        Args:
-            new_data (list): A list of new data.
-
-        Returns:
-            bool: True if the lock is acquired, False otherwise.
-        """
-        if self.lock.acquire():
-            try:
-                self.y_plot.extend(new_data)
-            finally:
-                self.lock.release()
-                return True
-        return False
-
-    def update_data_t(self, new_data):
-        """
-        This function updates the t_plot list.
-
-        Args:
-            new_data (list): A list of new data.
-
-        Returns:
-            bool: True if the lock is acquired, False otherwise.
-        """
-        if self.lock.acquire():
-            try:
-                self.t_plot.extend(new_data)
-            finally:
-                self.lock.release()
-                return True
-        return False
-
-    def update_data_main_v_dc(self, new_data):
-        """
-        This function updates the main_v_dc_plot list.
-
-        Args:
-            new_data (list): A list of new data.
-
-        Returns:
-            bool: True if the lock is acquired, False otherwise.
-        """
-        if self.lock.acquire():
-            try:
-                self.main_v_dc_plot.extend(new_data)
-            finally:
-                self.lock.release()
-                return True
-        return False
-
-    def save_data_to_variables_share(self, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
-        """
-        This function is called in a thread to save data to the shared variables.
-
-        Args:
-            x_plot (multiprocessing.Array): A multiprocessing.Array object.
-            y_plot (multiprocessing.Array): A multiprocessing.Array object.
-            t_plot (multiprocessing.Array): A multiprocessing.Array object.
-            main_v_dc_plot (multiprocessing.Array): A multiprocessing.Array object.
-            counter_plot (multiprocessing.Value): A multiprocessing.Value object.
-            lock (multiprocessing.Lock): A multiprocessing.Lock object.
-
-        Returns:
-            None
-        """
-        while True:
-            with self.lock:
-                x_plot_tmp = self.x_plot.copy()
-                y_plot_tmp = self.y_plot.copy()
-                t_plot_tmp = self.t_plot.copy()
-                main_v_dc_plot_tmp = self.main_v_dc_plot.copy()
-                self.x_plot.clear()
-                self.y_plot.clear()
-                self.t_plot.clear()
-                self.main_v_dc_plot.clear()
-            with lock:
-                length = len(x_plot_tmp)
-                counter = counter_plot.value
-                x_plot[counter:counter + length] = x_plot_tmp
-                y_plot[counter:counter + length] = y_plot_tmp
-                t_plot[counter:counter + length] = t_plot_tmp
-                main_v_dc_plot[counter:counter + length] = main_v_dc_plot_tmp
-                counter_plot.value += length
-
-            time.sleep(0.5)
+		print("Data saved.")
 
 
 def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
@@ -278,25 +189,23 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
     voltage_data_tdc = []
     pulse_data_tdc = []
 
-    share_data = SharedData(variables)
-    x_plot_tmp = []
-    y_plot_tm = []
-    t_plot_tm = []
-    main_v_dc_plot_tm = []
-
-    # Create and start the data saving thread
-    saving_thread = threading.Thread(target=share_data.save_data_to_variables_share, args=(x_plot, y_plot, t_plot,
-                                                                                           main_v_dc_plot, counter_plot,
-                                                                                           lock,))
-    saving_thread.daemon = True  # Set as daemon thread to exit when main thread exits
-    saving_thread.start()
-
     retcode = bufdatacb.start_measurement(100)
     if errorcheck(device, bufdatacb, bufdatacb_raw, retcode) < 0:
-        print("Error during read:", retcode, device.lib.sc_get_err_msg(retcode))
-        print(f"{initialize_devices.bcolors.FAIL}Error: Restart the TDC manually "
-              f"(Turn it On and Off){initialize_devices.bcolors.ENDC}")
-        return -1
+	    print("Error during read:", retcode, device.lib.sc_get_err_msg(retcode))
+	    print(f"{initialize_devices.bcolors.FAIL}Error: Restart the TDC manually "
+	          f"(Turn it On and Off){initialize_devices.bcolors.ENDC}")
+	    return -1
+
+    # Define a lock
+    data_lock = threading.Lock()
+    flag_stop_data_thread = False
+    # Create a thread
+    data_thread = threading.Thread(target=save_data_thread, args=(variables, xx_list, yy_list, tt_list,
+                                                                  voltage_data, pulse_data, flag_stop_data_thread))
+    data_thread.daemon = True
+
+    # Start the thread
+    data_thread.start()
 
     events_detected = 0
     events_detected_tmp = 0
@@ -304,9 +213,9 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
     pulse_frequency = variables.pulse_frequency * 1000
     loop_time = 0
     while not variables.flag_stop_tdc:
-        start_time_loop = time.time()
-        eventtype, data = bufdatacb.queue.get()
-        eventtype_raw, data_raw = bufdatacb_raw.queue.get()
+	    start_time_loop = time.time()
+	    eventtype, data = bufdatacb.queue.get()
+	    eventtype_raw, data_raw = bufdatacb_raw.queue.get()
         specimen_voltage = variables.specimen_voltage
         pulse_voltage = variables.pulse_voltage
         if eventtype == QUEUE_DATA:
@@ -323,30 +232,26 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
                 yy_tmp = (((yy_dif - XYBINSHIFT) * XYFACTOR) * 0.1).tolist()  # from mm to in cm by dividing by 10
                 tt_tmp = (tt_dif * TOFFACTOR).tolist()  # in ns
 
-                xx_list.extend(xx_dif.tolist())
-                yy_list.extend(yy_dif.tolist())
-                tt_list.extend(tt_dif.tolist())
-
                 xx.extend(xx_tmp)
                 yy.extend(yy_tmp)
                 tt.extend(tt_tmp)
-                dc_voltage = np.tile(specimen_voltage, len(xx_tmp)).tolist()
-                voltage_data.extend(dc_voltage)
-                pulse_data.extend((np.tile(pulse_voltage, len(xx_tmp))).tolist())
+                dc_voltage_tmp = np.tile(specimen_voltage, len(xx_tmp)).tolist()
+                v_p_voltage_tmp = np.tile(pulse_voltage, len(xx_tmp)).tolist()
 
-                x_plot_tmp.extend(xx_tmp)
-                y_plot_tm.extend(yy_tmp)
-                t_plot_tm.extend(tt_tmp)
-                main_v_dc_plot_tm.extend(dc_voltage)
+                with data_lock:
+	                xx_list.extend(xx_dif.tolist())
+	                yy_list.extend(yy_dif.tolist())
+	                tt_list.extend(tt_dif.tolist())
+	                voltage_data.extend(dc_voltage_tmp)
+	                pulse_data.extend(v_p_voltage_tmp)
 
-                if share_data.update_data_x(x_plot_tmp):
-                    x_plot_tmp.clear()
-                if share_data.update_data_y(y_plot_tm):
-                    y_plot_tm.clear()
-                if share_data.update_data_t(t_plot_tm):
-                    t_plot_tm.clear()
-                if share_data.update_data_main_v_dc(main_v_dc_plot_tm):
-                    main_v_dc_plot_tm.clear()
+                length = len(xx_tmp)
+                counter = counter_plot.value
+                x_plot[counter:counter + length] = xx_tmp
+                y_plot[counter:counter + length] = yy_tmp
+                t_plot[counter:counter + length] = tt_tmp
+                main_v_dc_plot[counter:counter + length] = dc_voltage_tmp
+                counter_plot.value += length
 
         if eventtype_raw == QUEUE_DATA:
             channel_data_tmp = data_raw["channel"].tolist()
@@ -377,16 +282,18 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
         elif eventtype == QUEUE_ENDOFMEAS:
             retcode = bufdatacb.start_measurement(100, retries=10)  # retries is the number of times to retry
             if retcode < 0:
-                print("Error during read (error code: %s - error msg: %s):" % (retcode,
-                                                                               device.lib.sc_get_err_msg(retcode)))
-                variables.flag_tdc_failure = True
-                break
+	            print("Error during read (error code: %s - error msg: %s):" % (retcode,
+	                                                                           device.lib.sc_get_err_msg(retcode)))
+	            variables.flag_tdc_failure = True
+	            break
 
-        # else:  # unknown event
-        #     break
+	    # else:  # unknown event
+	    #     break
 
-        if time.time() - start_time_loop > 0.2:
-            loop_time += 1
+	    if time.time() - start_time_loop > 0.2:
+		    loop_time += 1
+
+    flag_stop_data_thread = True
     print("for %s times loop time took longer than 0.2 second" % loop_time)
     variables.total_ions = events_detected
     print("TDC Measurement stopped")
@@ -420,15 +327,15 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
 
 
 def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
-    from line_profiler import LineProfiler
+	# from line_profiler import LineProfiler
+	#
+	# lp1 = LineProfiler()
+	#
+	# lp1.add_function(run_experiment_measure)
+	#
+	# # Run the profiler
+	# lp1(run_experiment_measure)(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
+	# # Save the profiling result to a file
+	# lp1.dump_stats('./../../experiment_measure.lprof')
 
-    lp1 = LineProfiler()
-
-    lp1.add_function(run_experiment_measure)
-
-    # Run the profiler
-    lp1(run_experiment_measure)(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
-    # Save the profiling result to a file
-    lp1.dump_stats('./../../experiment_measure.lprof')
-
-    # run_experiment_measure(variables)
+	run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)

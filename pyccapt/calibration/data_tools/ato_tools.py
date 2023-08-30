@@ -72,17 +72,17 @@ def ato_to_ccapt(file_path: str, mode: str) -> pd.DataFrame:
                                    'mcp_amp': mcp_amp,
                                    'num_cluster': num_cluster,
                                    'cluster_id': cluster_id})
-        elif mode == 'pyccapt':
-            data_f = pd.DataFrame({
-                'x (nm)': np.zeros(len(dc_voltage)),
-                'y (nm)': np.zeros(len(dc_voltage)),
-                'z (nm)': np.zeros(len(dc_voltage)),
-                'mc_c (Da)': np.zeros(len(dc_voltage)),
-                'mc (Da)': np.zeros(len(dc_voltage)),
-                'high_voltage (V)': dc_voltage,
-                'pulse': np.zeros(len(dc_voltage)),
-                'start_counter': np.zeros(len(dc_voltage)),
-                't_c (ns)': np.zeros(len(dc_voltage)),
+        elif mode == 'PyCCAPT':
+	        data_f = pd.DataFrame({
+		        'x (nm)': np.zeros(len(dc_voltage)),
+		        'y (nm)': np.zeros(len(dc_voltage)),
+		        'z (nm)': np.zeros(len(dc_voltage)),
+		        'mc_c (Da)': np.zeros(len(dc_voltage)),
+		        'mc (Da)': np.zeros(len(dc_voltage)),
+		        'high_voltage (V)': dc_voltage,
+		        'pulse': np.zeros(len(dc_voltage)),
+		        'start_counter': np.zeros(len(dc_voltage)),
+		        't_c (ns)': np.zeros(len(dc_voltage)),
                 't (ns)': tof,
                 'mc (Da)': mc,
                 'x_det (mm)': x_det,

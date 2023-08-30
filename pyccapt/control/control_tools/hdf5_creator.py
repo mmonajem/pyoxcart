@@ -40,7 +40,7 @@ def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
 			f.create_dataset("dld/start_counter", data=variables.dld_start_counter, dtype='i')
 			f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld_surface_concept, dtype='f')
 			f.create_dataset("dld/pulse", data=variables.main_p_dld_surface_concept, dtype='f')
-
+			# raw data
 			f.create_dataset("tdc/start_counter", data=variables.tdc_start_counter, dtype='i')
 			f.create_dataset("tdc/channel", data=variables.channel, dtype='i')
 			f.create_dataset("tdc/time_data", data=variables.time_data, dtype='i')
@@ -51,10 +51,10 @@ def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
 			f.create_dataset("dld/x", data=variables.x, dtype='f')
 			f.create_dataset("dld/y", data=variables.y, dtype='f')
 			f.create_dataset("dld/t", data=variables.t, dtype='f')
-			f.create_dataset("dld/AbsoluteTimeStamp", data=variables.time_stamp, dtype='f')
+			f.create_dataset("dld/start_counter", data=variables.time_stamp, dtype='f')
 			f.create_dataset("dld/high_voltage", data=variables.main_v_dc_tdc_roentdek, dtype='f')
 			f.create_dataset("dld/pulse", data=variables.main_p_tdc_roentdek, dtype='f')
-
+			# raw data
 			f.create_dataset("tdc/ch0", data=variables.ch0, dtype='i')
 			f.create_dataset("tdc/ch1", data=variables.ch1, dtype='i')
 			f.create_dataset("tdc/ch2", data=variables.ch2, dtype='i')
@@ -72,5 +72,9 @@ def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
 			f.create_dataset("hsd/ch2_wave", data=variables.ch2_wave, dtype='f')
 			f.create_dataset("hsd/ch3_time", data=variables.ch3_time, dtype='f')
 			f.create_dataset("hsd/ch3_wave", data=variables.ch3_wave, dtype='f')
+			f.create_dataset("hsd/ch4_time", data=variables.ch4_time, dtype='f')
+			f.create_dataset("hsd/ch4_wave", data=variables.ch4_wave, dtype='f')
+			f.create_dataset("hsd/ch5_time", data=variables.ch5_time, dtype='f')
+			f.create_dataset("hsd/ch5_wave", data=variables.ch5_wave, dtype='f')
 			f.create_dataset("hsd/high_voltage", data=variables.main_v_dc_drs, dtype='f')
 			f.create_dataset("hsd/pulse", data=variables.main_v_p_drs, dtype='f')
