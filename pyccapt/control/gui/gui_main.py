@@ -9,18 +9,13 @@ from PyQt6.QtCore import Qt
 # Local module and scripts
 from pyccapt.control.apt import apt_exp_control
 from pyccapt.control.control_tools import share_variables, read_files
-from pyccapt.control.gui import gui_baking
-from pyccapt.control.gui import gui_cameras
-from pyccapt.control.gui import gui_gates
-from pyccapt.control.gui import gui_laser_control
-from pyccapt.control.gui import gui_pumps_vacuum
-from pyccapt.control.gui import gui_stage_control
-from pyccapt.control.gui import gui_visualization
+from pyccapt.control.gui import gui_baking, gui_cameras, gui_gates, gui_laser_control, gui_pumps_vacuum, \
+	gui_stage_control, gui_visualization
 
 
 class Ui_PyCCAPT(object):
 
-	def __init__(self, variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
+	def __init__(self, variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot):
 		"""
 		Constructor for the PyCCAPT UI class.
 
@@ -39,8 +34,6 @@ class Ui_PyCCAPT(object):
 		self.y_plot = y_plot
 		self.t_plot = t_plot
 		self.main_v_dc_plot = main_v_dc_plot
-		self.counter_plot = counter_plot
-		self.lock = lock
 		self.experiment_running = False
 		self.experimetn_finished_event = multiprocessing.Event()
 		self.camera_closed_event = multiprocessing.Event()
@@ -1358,8 +1351,7 @@ class Ui_PyCCAPT(object):
 		self.experiment_process = multiprocessing.Process(target=apt_exp_control.run_experiment,
 		                                                  args=(self.variables, self.conf,
 		                                                        self.experimetn_finished_event, self.x_plot,
-		                                                        self.y_plot, self.t_plot, self.main_v_dc_plot,
-		                                                        self.counter_plot, self.lock))
+		                                                        self.y_plot, self.t_plot, self.main_v_dc_plot,))
 		self.experiment_process.start()
 		self.statistics_timer.start()
 
@@ -1502,8 +1494,7 @@ class Ui_PyCCAPT(object):
 		                                                           self.visualization_closed_event,
 		                                                           self.visualization_win_front, self.x_plot,
 		                                                           self.y_plot,
-		                                                           self.t_plot, self.main_v_dc_plot, self.counter_plot,
-		                                                           self.lock,))
+		                                                           self.t_plot, self.main_v_dc_plot))
 		self.visualization_process.start()
 
 	def open_cameras_win(self):
@@ -1734,13 +1725,10 @@ if __name__ == "__main__":
 	manager = multiprocessing.Manager()
 	ns = manager.Namespace()
 	variables = share_variables.Variables(conf, ns)
-	array_size = conf['maximum_size_plot_arrays']
-	x_plot = multiprocessing.Array('d', array_size)
-	y_plot = multiprocessing.Array('d', array_size)
-	t_plot = multiprocessing.Array('d', array_size)
-	main_v_dc_plot = multiprocessing.Array('d', array_size)
-	counter_plot = multiprocessing.Value('i', 0)
-	lock = multiprocessing.Lock()  # Lock for synchronization
+	x_plot = multiprocessing.Queue()
+	y_plot = multiprocessing.Queue()
+	t_plot = multiprocessing.Queue()
+	main_v_dc_plot = multiprocessing.Queue()
 
 	# variables = share_variables.Variables(conf)
 	variables.log_path = p
@@ -1748,7 +1736,7 @@ if __name__ == "__main__":
 	app = QtWidgets.QApplication(sys.argv)
 	app.setStyle('Fusion')
 	PyCCAPT = QtWidgets.QMainWindow()
-	ui = Ui_PyCCAPT(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
+	ui = Ui_PyCCAPT(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot)
 	ui.setupUi(PyCCAPT)
 	PyCCAPT.show()
 	sys.exit(app.exec())

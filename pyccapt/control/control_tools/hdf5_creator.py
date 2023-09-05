@@ -19,7 +19,6 @@ def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
 
 	path = variables.path + '\\data_%s.h5' % variables.exp_name
 	# Save HDF5 file
-	# with variables.lock_data and variables.lock_experiment_variables:
 	with h5py.File(path, "w") as f:
 		f.create_dataset("apt/high_voltage", data=variables.main_v_dc, dtype='f')
 		f.create_dataset("apt/pulse", data=variables.main_v_p, dtype='f')

@@ -104,9 +104,6 @@ class Cameras:
 			self.img1_zoom = self.img1_orig[crop_region[1]:crop_region[1] + crop_region[3],
 			                 crop_region[0]:crop_region[0] + crop_region[2]]
 
-			# Acquire the lock and releases after process using context manager
-			# To ensure that the marked array is a C-contiguous array
-
 			self.emitter.img0_zoom.emit(np.swapaxes(self.img0_zoom, 0, 1))
 			self.emitter.img1_zoom.emit(np.swapaxes(self.img1_zoom, 0, 1))
 
@@ -137,7 +134,6 @@ class Cameras:
 
 			time.sleep(0.1)
 
-			# with self.variables.lock_setup_parameters:
 			if not self.variables.flag_camera_grab:
 				break
 
@@ -151,7 +147,6 @@ class Cameras:
 		Return:
 			None
 		"""
-		# with self.variables.lock_setup_parameters:
 		if self.variables.light:
 			self.cameras[0].Open()
 			self.cameras[0].ExposureTime.SetValue(400)

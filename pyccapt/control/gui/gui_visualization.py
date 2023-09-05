@@ -10,14 +10,13 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer
 
 # Local module and scripts
-from pyccapt.control.control_tools import share_variables, read_files
-from pyccapt.control.control_tools import tof2mc_simple
+from pyccapt.control.control_tools import share_variables, read_files, tof2mc_simple
 from pyccapt.control.devices import initialize_devices
 
 
 class Ui_Visualization(object):
 
-	def __init__(self, variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
+	def __init__(self, variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot):
 
 		"""
 		Constructor for the Visualization UI class.
@@ -29,8 +28,6 @@ class Ui_Visualization(object):
 			y_plot (multiprocessing.Array): Array for storing the y-axis values of the mass spectrum.
 			t_plot (multiprocessing.Array): Array for storing the time values of the mass spectrum.
 			main_v_dc_plot (multiprocessing.Array): Array for storing the main voltage values of the mass spectrum.
-			counter_plot (multiprocessing.Value): Value for storing the number of data points in the mass spectrum.
-			lock (multiprocessing.Lock): Lock for synchronization.
 
 		"""
 		self.start_time_metadata = 0
@@ -42,13 +39,16 @@ class Ui_Visualization(object):
 		self.y_plot = y_plot
 		self.t_plot = t_plot
 		self.main_v_dc_plot = main_v_dc_plot
-		self.counter_plot = counter_plot
-		self.lock = lock
 		self.counter_source = ''
 		self.index_plot_save = 0
 		self.index_plot = 0
 		self.index_wait_on_plot_start = 0
 		self.index_auto_scale_graph = 0
+
+		self.xx = []
+		self.yy = []
+		self.tt = []
+		self.main_v_dc_dld = []
 
 		self.update_timer = QTimer()  # Create a QTimer for updating graphs
 		self.update_timer.timeout.connect(self.update_graphs)  # Connect it to the update_graphs slot
@@ -329,6 +329,11 @@ class Ui_Visualization(object):
 			self.start_time_metadata = 0
 			self.variables.detection_rate_current_plot = 0
 
+			self.xx = []
+			self.yy = []
+			self.tt = []
+			self.main_v_dc_dld = []
+
 		# with self.variables.lock_statistics and self.variables.lock_setup_parameters:
 		if self.variables.start_flag and self.variables.flag_visualization_start:
 			if self.index_plot_start == 0:
@@ -374,13 +379,21 @@ class Ui_Visualization(object):
 			if self.counter_source == 'TDC' and self.variables.total_ions > 0 and \
 					self.index_wait_on_plot_start > 16:
 
-				with self.lock:
-					data_length = self.counter_plot.value
-					xx = np.array(self.x_plot[:data_length])
-					yy = np.array(self.y_plot[:data_length])
-					tt = np.array(self.t_plot[:data_length])
-					main_v_dc_dld = np.array(self.main_v_dc_plot[:data_length])
+				while not self.x_plot.empty() and not self.y_plot.empty() and not self.t_plot.empty() and \
+						not self.main_v_dc_plot.empty():
+					data = self.x_plot.get()
+					self.xx.extend(data)
+					data = self.y_plot.get()
+					self.yy.extend(data)
+					data = self.t_plot.get()
+					self.tt.extend(data)
+					data = self.main_v_dc_plot.get()
+					self.main_v_dc_dld.extend(data)
 
+				xx = np.array(self.xx)
+				yy = np.array(self.yy)
+				tt = np.array(self.tt)
+				main_v_dc_dld = np.array(self.main_v_dc_dld)
 				try:
 					if self.conf["visualization"] == "tof":
 						viz = tt[tt < self.conf["max_tof"]]
@@ -556,7 +569,7 @@ class VisualizationWindow(QtWidgets.QWidget):
 
 
 def run_visualization_window(variables, conf, visualization_closed_event, visualization_win_front,
-                             x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
+                             x_plot, y_plot, t_plot, main_v_dc_plot):
 	"""
 	Run the Cameras window in a separate process.
 
@@ -569,8 +582,6 @@ def run_visualization_window(variables, conf, visualization_closed_event, visual
 		y_plot: y plot
 		t_plot: t plot
 		main_v_dc_plot: main v dc plot
-		counter_plot: counter plot
-		lock: lock
 
 	Return:
 		None
@@ -578,7 +589,7 @@ def run_visualization_window(variables, conf, visualization_closed_event, visual
 	app = QtWidgets.QApplication(sys.argv)  # <-- Create a new QApplication instance
 	app.setStyle('Fusion')
 
-	gui_visualization = Ui_Visualization(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
+	gui_visualization = Ui_Visualization(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot)
 	Cameras_alignment = VisualizationWindow(variables, gui_visualization, visualization_closed_event,
 	                                        visualization_win_front, flags=QtCore.Qt.WindowType.Tool)
 	gui_visualization.setupUi(Cameras_alignment)

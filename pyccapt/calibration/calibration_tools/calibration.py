@@ -184,7 +184,6 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
         fitresult, _ = curve_fit(voltage_corr, np.array(high_voltage_mean_list), np.array(dld_t_peak_list))
 
         fit_result.append(fitresult)
-        plt.show()
         if plot:
             fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
             if calibration_mode == 'tof':
@@ -548,6 +547,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         mask_fv = np.ones_like(dld_x, dtype=bool)
     elif apply_local == 'temporal':
         mask_fv = mask_temporal
+
     f_bowl = bowl_corr_fit([dld_x[mask_fv], dld_y[mask_fv]], *parameters)
 
     calibration_mc_tof = np.copy(variables.dld_t_calib) if calibration_mode == 'tof' else np.copy(variables.mc_calib)
@@ -607,7 +607,10 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
 
         plt.show()
 
-    variables.dld_t_calib = calibration_mc_tof
+    if calibration_mode == 'tof':
+        variables.dld_t_calib = calibration_mc_tof
+    elif calibration_mode == 'mc':
+        variables.mc_calib = calibration_mc_tof
 
 
 def plot_fdm(x, y, variables, save, bins_s, index_fig, figure_size=(5, 4)):

@@ -9,7 +9,6 @@ def save_statistics_apt(variables):
 		None
 	"""
 	# Save setup parameters and run statistics in a text file
-	# with variables.lock_setup_parameters and variables.lock_statistics:
 	with open(variables.path + '\\parameters.txt', 'w') as f:
 		f.write('Username: ' + variables.user_name + '\n')
 		f.write('Experiment Name: ' + variables.hdf5_path + '\n')

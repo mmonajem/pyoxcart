@@ -7,8 +7,7 @@ from matplotlib import colors
 from matplotlib.patches import Circle, Rectangle
 from matplotlib.widgets import RectangleSelector
 
-from pyccapt.calibration.data_tools import data_tools
-from pyccapt.calibration.data_tools import selectors_data
+from pyccapt.calibration.data_tools import data_tools, selectors_data
 
 
 def fetch_dataset_from_dld_grp(filename: str) -> pd.DataFrame:
@@ -59,8 +58,8 @@ def concatenate_dataframes_of_dld_grp(dataframeList: list) -> pd.DataFrame:
 
 
 def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.0, bins=(1200, 800), figure_size=(7, 3),
-                                 draw_rect=False, data_crop=True, pulse=False, pulse_mode='voltage', save=True,
-                                 figname=''):
+                                 draw_rect=False, data_crop=True, pulse_plot=False, dc_plot=True, pulse_mode='voltage',
+                                 save=True, figname=''):
     """
     Plots the experiment history.
 
@@ -73,6 +72,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         draw_rect: Flag to draw  a rectangle over the slected area.
         pulse: Flag to choose whether to plot pulse.
         pulse_mode: Flag to choose whether to plot pulse voltage or pulse.
+        dc_plot: Flag to choose whether to plot dc voltage.
         save: Flag to choose whether to save the plot or not.
         figname: Name of the figure to be saved.
 
@@ -112,11 +112,14 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     pcm = ax1.pcolormesh(xedges, yedges, heatmap.T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
     fig1.colorbar(pcm, ax=ax1, pad=0)
 
-    # Plot high voltage curve
-    ax2 = ax1.twinx()
-    xaxis2 = np.arange(len(high_voltage))
-    ax2.plot(xaxis2, high_voltage, color='dodgerblue', linewidth=2)
-    ax2.set_ylabel("High Voltage [kV]", color="dodgerblue", fontsize=10)
+    plt.ticklabel_format(style='sci', axis='x', scilimits=(6, 6))
+
+    if dc_plot:
+        # Plot high voltage curve
+        ax2 = ax1.twinx()
+        xaxis2 = np.arange(len(high_voltage))
+        ax2.plot(xaxis2, high_voltage, color='red', linewidth=2)
+        ax2.set_ylabel("High Voltage [kV]", color="red", fontsize=10)
 
     if frac < 1:
         # extract tof
@@ -138,15 +141,15 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         rect = Rectangle((left, bottom), width, height, fill=True, alpha=0.3, color="r", linewidth=5)
         ax1.add_patch(rect)
 
-    if pulse:
+    if pulse_plot:
         fig1.subplots_adjust(right=0.75)
         ax3 = ax1.twinx()
-        ax3.plot(xaxis, dldGroupStorage['pulse'].to_numpy(), color='limegreen', linewidth=2)
+        ax3.plot(xaxis, dldGroupStorage['pulse'].to_numpy(), color='fuchsia', linewidth=2)
         ax3.spines.right.set_position(("axes", 1.15))
         if pulse_mode == 'laser':
-            ax3.set_ylabel("Laser Intensity (${pJ}/{\mu m^2}$)", color="limegreen", fontsize=10)
+            ax3.set_ylabel("Laser Intensity (${pJ}/{\mu m^2}$)", color="fuchsia", fontsize=10)
         elif pulse_mode == 'voltage':
-            ax3.set_ylabel("Pulse (V)", color="limegreen", fontsize=10)
+            ax3.set_ylabel("Pulse (V)", color="fuchsia", fontsize=10)
 
     if save:
         plt.savefig("%s.png" % (variables.result_path + figname), format="png", dpi=600)

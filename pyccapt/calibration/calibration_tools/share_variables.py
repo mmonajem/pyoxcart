@@ -46,6 +46,7 @@ class Variables:
         h_line_pos (list): List of horizontal line positions.
         range_data (data frame): List of range data.
         range_data_backup (data frame): Backup list of range data.
+        last_directory (str): The last directory.
     """
 
     def __init__(self):
@@ -98,6 +99,7 @@ class Variables:
         self.peak = []
         self.peak_y = []
         self.peak_width = []
+        self.last_directory = './'  # You can set a default directory here
 
         # Create an empty DataFrame with the specified columns
         self.range_data = pd.DataFrame(columns=['ion', 'mass', 'mc', 'mc_low', 'mc_up', 'color', 'peak_count', 'element'

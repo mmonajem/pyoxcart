@@ -83,9 +83,9 @@ def tof2mc(t: int, t0: int, V: float, xDet: int, yDet: int,
 
         flightPathLength = np.sqrt(xDet ** 2 + yDet ** 2 + flightPathLength ** 2)
 
-        if mode == 'dc_voltage':
+        if mode == 'laser':
             mc = 2 * V * e * (t / flightPathLength) ** 2
-        elif mode == 'dc_plus_p_voltage':
+        elif mode == 'voltage':
             mc = 2 * alpha * (V + beta * V_pulse) * e * (t / flightPathLength) ** 2
 
         mc = mc / amu  # conversion from kg/C to Da (6.022E23 g/mol, 1.6E-19C/ec)

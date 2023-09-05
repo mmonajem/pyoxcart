@@ -4,13 +4,10 @@ import pybaselines
 from adjustText import adjust_text
 from pybaselines import Baseline
 from scipy.optimize import curve_fit
-from scipy.signal import find_peaks
-from scipy.signal import peak_widths
+from scipy.signal import find_peaks, peak_widths
 
 from pyccapt.calibration.calibration_tools import intractive_point_identification
-from pyccapt.calibration.data_tools import data_loadcrop
-from pyccapt.calibration.data_tools import plot_vline_draw
-from pyccapt.calibration.data_tools import selectors_data
+from pyccapt.calibration.data_tools import data_loadcrop, plot_vline_draw, selectors_data
 
 
 def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False, ranging=False, hist_color_range=False,
@@ -350,7 +347,7 @@ def mc_hist_plot(variables, bin_size, mode, prominence, distance, percent, selec
     if peaks_ini is not None:
         index_max_ini = np.argmax(peaks_y_ini)
         mrp = (peaks_ini[index_max_ini] / (peak_widths_p_ini[index_max_ini][2] - peak_widths_p_ini[index_max_ini][1]))
-        print('Mass resolving power for the highest peak (MRP --> m/m_2-m_1):', mrp)
+        print('Mass resolving power for the highest peak at peak index %a (MRP --> m/m_2-m_1):' % index_max_ini, mrp)
         for i in range(len(peaks_ini)):
             print('Peaks ', i, 'is at location and height: ({:.2f}, {:.2f})'.format(peaks_ini[i], peaks_y_ini[i]),
                   'peak window sides ({:.1f}-maximum) are: ({:.2f}, {:.2f})'.format(percent, peak_widths_p_ini[i][1],

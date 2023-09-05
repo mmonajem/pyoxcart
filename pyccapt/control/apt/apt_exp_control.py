@@ -3,13 +3,10 @@ import multiprocessing
 import os
 import time
 
-import numpy as np
 import serial.tools.list_ports
 
-from pyccapt.control.control_tools import experiment_statistics
-from pyccapt.control.control_tools import hdf5_creator, loggi
-from pyccapt.control.devices import email_send
-from pyccapt.control.devices import initialize_devices, signal_generator
+from pyccapt.control.control_tools import experiment_statistics, hdf5_creator, loggi
+from pyccapt.control.devices import email_send, initialize_devices, signal_generator
 from pyccapt.control.drs import drs
 from pyccapt.control.tdc_roentdec import tdc_roentdec
 from pyccapt.control.tdc_surface_concept import tdc_surface_consept
@@ -20,8 +17,7 @@ class APT_Exp_Control:
     This class is responsible for controlling the experiment.
     """
 
-    def __init__(self, variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot,
-                 counter_plot, lock):
+    def __init__(self, variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot):
 
         self.variables = variables
         self.conf = conf
@@ -30,8 +26,6 @@ class APT_Exp_Control:
         self.y_plot = y_plot
         self.t_plot = t_plot
         self.main_v_dc_plot = main_v_dc_plot
-        self.counter_plot = counter_plot
-        self.lock = lock
 
         self.com_port_v_p = None
         self.log_apt = None
@@ -78,7 +72,7 @@ class APT_Exp_Control:
             # Module used: multiprocessing
             self.tdc_process = multiprocessing.Process(target=tdc_surface_consept.experiment_measure,
                                                        args=(self.variables, self.x_plot, self.y_plot, self.t_plot,
-                                                             self.main_v_dc_plot, self.counter_plot, self.lock,))
+                                                             self.main_v_dc_plot,))
 
             self.tdc_process.start()
 
@@ -690,12 +684,13 @@ class APT_Exp_Control:
             self.variables.specimen_voltage = 0
             self.variables.specimen_voltage_plot = 0
             self.variables.pulse_voltage = 0
-            with self.lock:
-                self.x_plot[:] = np.zeros(self.conf['maximum_size_plot_arrays'])
-                self.y_plot[:] = np.zeros(self.conf['maximum_size_plot_arrays'])
-                self.t_plot[:] = np.zeros(self.conf['maximum_size_plot_arrays'])
-                self.main_v_dc_plot[:] = np.zeros(self.conf['maximum_size_plot_arrays'])
-                self.counter_plot.value = 0
+
+            while not self.x_plot.empty() or not self.y_plot.empty() or not self.t_plot.empty() or \
+                    not self.main_v_dc_plot.empty():
+                dumy = self.x_plot.get()
+                dumy = self.y_plot.get()
+                dumy = self.t_plot.get()
+                dumy = self.main_v_dc_plot.get()
 
             self.variables.clear_to('x')
             self.variables.clear_to('y')
@@ -773,8 +768,7 @@ class APT_Exp_Control:
         self.log_apt.info('Cleanup is finished')
 
 
-def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot,
-                   lock):
+def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot):
     """
     Run the main experiment.
 
@@ -786,8 +780,6 @@ def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t
         y_plot:                     Array to store y data
         t_plot:                     Array to store t data
         main_v_dc_plot:             Array to store main_v_dc data
-        counter_plot:               Value to store the number of data points
-        lock:                       Lock to synchronize access to shared variables
 
     Returns:
         None
@@ -812,6 +804,6 @@ def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t
     # lp1.dump_stats('run_experiment.lprof')
 
     apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot,
-                                      main_v_dc_plot, counter_plot, lock)
+                                      main_v_dc_plot)
 
     apt_exp_control.run_experiment()

@@ -1,4 +1,3 @@
-import threading
 import time
 from queue import Queue
 
@@ -127,7 +126,7 @@ def save_data_thread(variables, xx_list, yy_list, tt_list, voltage_data, pulse_d
         print("Data saved.")
 
 
-def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
+def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
     """
     Measurement function: This function is called in a process to read data from the queue.
 
@@ -137,8 +136,6 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
         y_plot (multiprocessing.Array): A multiprocessing.Array object.
         t_plot (multiprocessing.Array): A multiprocessing.Array object.
         main_v_dc_plot (multiprocessing.Array): A multiprocessing.Array object.
-        counter_plot (multiprocessing.Value): A multiprocessing.Value object.
-        lock (multiprocessing.Lock): A multiprocessing.Lock object.
 
     Returns:
         int: Return code.
@@ -197,21 +194,22 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
         return -1
 
     # Define a lock
-    data_lock = threading.Lock()
+    # data_lock = threading.Lock()
     flag_stop_data_thread = False
     # Create a thread
-    data_thread = threading.Thread(target=save_data_thread, args=(variables, xx_list, yy_list, tt_list,
-                                                                  voltage_data, pulse_data, flag_stop_data_thread))
-    data_thread.daemon = True
-
-    # Start the thread
-    data_thread.start()
+    # data_thread = threading.Thread(target=save_data_thread, args=(variables, xx_list, yy_list, tt_list,
+    #                                                               voltage_data, pulse_data, flag_stop_data_thread))
+    # data_thread.daemon = True
+    #
+    # # Start the thread
+    # data_thread.start()
 
     events_detected = 0
     events_detected_tmp = 0
     start_time = time.time()
     pulse_frequency = variables.pulse_frequency * 1000
     loop_time = 0
+    save_data_time = time.time()
     while not variables.flag_stop_tdc:
         start_time_loop = time.time()
         eventtype, data = bufdatacb.queue.get()
@@ -238,20 +236,26 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
                 dc_voltage_tmp = np.tile(specimen_voltage, len(xx_tmp)).tolist()
                 v_p_voltage_tmp = np.tile(pulse_voltage, len(xx_tmp)).tolist()
 
-                with data_lock:
-                    xx_list.extend(xx_dif.tolist())
-                    yy_list.extend(yy_dif.tolist())
-                    tt_list.extend(tt_dif.tolist())
-                    voltage_data.extend(dc_voltage_tmp)
-                    pulse_data.extend(v_p_voltage_tmp)
+                # with data_lock:
+                xx_list.extend(xx_dif.tolist())
+                yy_list.extend(yy_dif.tolist())
+                tt_list.extend(tt_dif.tolist())
+                voltage_data.extend(dc_voltage_tmp)
+                pulse_data.extend(v_p_voltage_tmp)
 
-                length = len(xx_tmp)
-                counter = counter_plot.value
-                x_plot[counter:counter + length] = xx_tmp
-                y_plot[counter:counter + length] = yy_tmp
-                t_plot[counter:counter + length] = tt_tmp
-                main_v_dc_plot[counter:counter + length] = dc_voltage_tmp
-                counter_plot.value += length
+                if time.time() - save_data_time > 600:
+                    np.save(variables.path + "/x_data.npy", np.array(xx_list))
+                    np.save(variables.path + "/y_data.npy", np.array(yy_list))
+                    np.save(variables.path + "/t_data.npy", np.array(tt_list))
+                    np.save(variables.path + "/voltage_data.npy", np.array(voltage_data))
+                    np.save(variables.path + "/pulse_data.npy", np.array(pulse_data))
+                    save_data_time = time.time()
+                    print("Data saved.")
+
+                x_plot.put(xx_tmp)
+                y_plot.put(yy_tmp)
+                t_plot.put(tt_tmp)
+                main_v_dc_plot.put(dc_voltage_tmp)
 
         if eventtype_raw == QUEUE_DATA:
             channel_data_tmp = data_raw["channel"].tolist()
@@ -326,7 +330,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, co
     return 0
 
 
-def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock):
+def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
     # from line_profiler import LineProfiler
     #
     # lp1 = LineProfiler()
@@ -338,4 +342,4 @@ def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counte
     # # Save the profiling result to a file
     # lp1.dump_stats('./../../experiment_measure.lprof')
 
-    run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
+    run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot)
