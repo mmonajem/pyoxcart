@@ -1,11 +1,11 @@
 from copy import copy
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib import colors
 from matplotlib.patches import Circle, Rectangle
-from matplotlib.widgets import RectangleSelector
+from matplotlib.widgets import RectangleSelector, EllipseSelector
+
 
 from pyccapt.calibration.data_tools import data_tools, selectors_data
 
@@ -132,15 +132,6 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         ax2.set_xlim([0, len(high_voltage_lim)])
         ax2.set_ylim([min(high_voltage_lim), max(high_voltage_lim)])
 
-    if data_crop:
-        rectangle_box_selector(ax2, variables)
-        plt.connect('key_press_event', selectors_data.toggle_selector(variables))
-    if draw_rect:
-        left, bottom, width, height = (
-            variables.selected_x1, 0, variables.selected_x2 - variables.selected_x1, np.max(tof))
-        rect = Rectangle((left, bottom), width, height, fill=True, alpha=0.3, color="r", linewidth=5)
-        ax1.add_patch(rect)
-
     if pulse_plot:
         fig1.subplots_adjust(right=0.75)
         ax3 = ax1.twinx()
@@ -150,6 +141,16 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
             ax3.set_ylabel("Laser Intensity (${pJ}/{\mu m^2}$)", color="fuchsia", fontsize=10)
         elif pulse_mode == 'voltage':
             ax3.set_ylabel("Pulse (V)", color="fuchsia", fontsize=10)
+
+    if data_crop:
+        rectangle_box_selector(ax2, variables)
+        plt.connect('key_press_event', selectors_data.toggle_selector(variables))
+    if draw_rect:
+        left, bottom, width, height = (
+            variables.selected_x1, 0, variables.selected_x2 - variables.selected_x1, np.max(tof))
+        rect = Rectangle((left, bottom), width, height, fill=True, alpha=0.3, color="r", linewidth=5)
+        ax1.add_patch(rect)
+
 
     if save:
         plt.savefig("%s.png" % (variables.result_path + figname), format="png", dpi=600)
@@ -268,25 +269,29 @@ def elliptical_shape_selector(axisObject, figureObject, variables):
     Returns:
         None
     """
-    # selectors_data.toggle_selector.ES = EllipseSelector(axisObject,
-    #                                                     lambda eclick, erelease: selectors_data.onselect(eclick,
-    #                                                                                                      erelease,
-    #                                                                                                      variables),
-    #                                                     useblit=True,
-    #                                                     button=[1, 3],
-    #                                                     minspanx=1, minspany=1,
-    #                                                     spancoords='pixels',
-    #                                                     interactive=True)
-    selectors_data.toggle_selector.ES = selectors_data.CircleSelector(axisObject,
-                                                                      lambda eclick, erelease: selectors_data.onselect(
-                                                                          eclick,
-                                                                          erelease,
-                                                                          variables),
-                                                                      useblit=True,
-                                                                      button=[1, 3],
-                                                                      minspanx=1, minspany=1,
-                                                                      spancoords='pixels',
-                                                                      interactive=True)
+    try:
+        selectors_data.toggle_selector.ES = selectors_data.CircleSelector(axisObject,
+                                                                          lambda eclick,
+                                                                                 erelease: selectors_data.onselect(
+                                                                              eclick,
+                                                                              erelease,
+                                                                              variables),
+                                                                          useblit=True,
+                                                                          button=[1, 3],
+                                                                          minspanx=1, minspany=1,
+                                                                          spancoords='pixels',
+                                                                          interactive=True)
+    except AttributeError:
+        selectors_data.toggle_selector.ES = EllipseSelector(axisObject,
+                                                            lambda eclick, erelease: selectors_data.onselect(eclick,
+                                                                                                             erelease,
+                                                                                                             variables),
+                                                            useblit=True,
+                                                            button=[1, 3],
+                                                            minspanx=1, minspany=1,
+                                                            spancoords='pixels',
+                                                            interactive=True)
+
     figureObject.canvas.mpl_connect('key_press_event', selectors_data.toggle_selector)
 
 
