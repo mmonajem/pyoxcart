@@ -13,16 +13,16 @@ class VerticalLineManager:
 	    self.cid_press = self.fig.canvas.mpl_connect('button_press_event', self.on_press)
 	    self.cid_release = self.fig.canvas.mpl_connect('button_release_event', self.on_release)
 	    self.cid_motion = self.fig.canvas.mpl_connect('motion_notify_event', self.on_motion)
-        self.cid_key_press = self.fig.canvas.mpl_connect('key_press_event', self.on_key_press)
-        self.cid_scroll = self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
-        self.cid_key_release = self.fig.canvas.mpl_connect('key_release_event', self.on_key_release)
-        self.shift_is_pressed = False
-        self.ctrl_is_pressed = False
+	    self.cid_key_press = self.fig.canvas.mpl_connect('key_press_event', self.on_key_press)
+	    self.cid_scroll = self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
+	    self.cid_key_release = self.fig.canvas.mpl_connect('key_release_event', self.on_key_release)
+	    self.shift_is_pressed = False
+	    self.ctrl_is_pressed = False
 
-        self.is_zooming = False
-        self.zoom_factor = 1.1
-        if len(x) > 0:
-            self.ax.set_xlim(np.min(x), np.max(x))
+	    self.is_zooming = False
+	    self.zoom_factor = 1.1
+	    if len(x) > 0:
+		    self.ax.set_xlim(np.min(x), np.max(x))
         self.ax.set_yscale('log')
 
     def on_press(self, event):
