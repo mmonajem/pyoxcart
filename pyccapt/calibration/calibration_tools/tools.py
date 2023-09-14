@@ -149,11 +149,11 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
                 if background['patch']:
                     ax1.plot(bins[:-1][mask_2], y[mask_2], 'o', color='orange')[0]
         if peaks_find:
-            ax1.set_ylabel("Frequency [cts]", fontsize=10)
+            ax1.set_ylabel("Frequency [cts]", fontsize=14)
             if label == 'mc':
-                ax1.set_xlabel("Mass/Charge [Da]", fontsize=10)
+                ax1.set_xlabel("Mass/Charge [Da]", fontsize=14)
             elif label == 'tof':
-                ax1.set_xlabel("Time of Flight [ns]", fontsize=10)
+                ax1.set_xlabel("Time of Flight [ns]", fontsize=14)
             print("The peak index for MRP calculation is:", index_peak_max)
             if label == 'mc':
                 mrp = '{:.2f}'.format(x[peaks[index_peak_max]] / (x[int(peak_widths_p[3][index_peak_max])] -
@@ -225,7 +225,9 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
 
                         if h_line:
                             for i in range(len(variables.h_line_pos)):
-                                plt.axvline(x=variables.h_line_pos[i], color='b', linestyle='--', linewidth=2)
+                                if variables.h_line_pos[i] < np.max(mc_tof) + 10 and variables.h_line_pos[i] > np.max(
+                                        mc_tof) - 10:
+                                    plt.axvline(x=variables.h_line_pos[i], color='b', linestyle='--', linewidth=2)
                         annotes.append(str(i + 1))
             if adjust_label:
                 adjust_text(texts, arrowprops=dict(arrowstyle='-', color='red', lw=0.5))
@@ -237,16 +239,10 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
                 # connect peak selector
                 af = intractive_point_identification.AnnoteFinder(x[peaks], y[peaks], annotes, variables, ax=ax1)
                 fig1.canvas.mpl_connect('button_press_event', af)
+                zoom_manager = plot_vline_draw.HorizontalZoom(ax1)
             elif selector == 'range':
-                variables.h_line_pos = []
-                peak_widths_r = peak_widths(y, peaks, rel_height=(99 / 100), prominence_data=None)
-                peak_widths_r_v = []
-                for i in variables.peaks_idx:
-                    peak_widths_r_v.append(x[int(peak_widths_r[2][i])])
-                    peak_widths_r_v.append(x[int(peak_widths_r[3][i])])
                 # connect range selector
-                line_manager = plot_vline_draw.VerticalLineManager(variables, ax1, peak_widths_r_v, [], [])
-                # line_manager.add_vertical_lines()
+                line_manager = plot_vline_draw.VerticalLineManager(variables, ax1, [], [])
         plt.tight_layout()
         if fig_name is not None:
             if label == 'mc':

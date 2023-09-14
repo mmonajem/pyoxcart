@@ -209,6 +209,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
     start_time = time.time()
     pulse_frequency = variables.pulse_frequency * 1000
     loop_time = 0
+    loop_counter = 0
     save_data_time = time.time()
     while not variables.flag_stop_tdc:
         start_time_loop = time.time()
@@ -294,11 +295,11 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
         # else:  # unknown event
         #     break
 
-        if time.time() - start_time_loop > 0.2:
-            loop_time += 1
-
+        if time.time() - start_time_loop > 0.1:
+	        loop_time += 1
+        loop_counter += 1
     flag_stop_data_thread = True
-    print("for %s times loop time took longer than 0.2 second" % loop_time)
+    print("for %s times loop time took longer than 0.1 second" % loop_time, 'out of %s iteration' % loop_counter)
     variables.total_ions = events_detected
     print("TDC Measurement stopped")
     np.save(variables.path + "/x_data.npy", np.array(xx_list))

@@ -96,6 +96,7 @@ class Variables:
         self.mc_calib_backup = np.zeros(0)
         self.max_peak = 0
         self.max_tof = 0
+        self.peaks_index = 0
         self.peak = []
         self.peak_y = []
         self.peak_width = []

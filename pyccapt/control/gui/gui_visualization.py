@@ -319,13 +319,13 @@ class Ui_Visualization(object):
 
 			self.histogram.clear()
 
-			self.scatter.clear()
 			self.detector_heatmap.clear()
 			self.detector_heatmap.addItem(self.detector_circle)
 			self.variables.plot_clear_flag = False
 			self.index_plot = 0
 			self.index_plot_start = 0
 			self.index_plot_save = 0
+			self.index_plot_heatmap = 0
 			self.start_time_metadata = 0
 			self.variables.detection_rate_current_plot = 0
 
@@ -430,9 +430,7 @@ class Ui_Visualization(object):
 				# Visualization
 				try:
 					# adding points to the scatter plot
-
 					self.scatter.setSize(self.variables.hitmap_plot_size)
-
 					hit_display = self.variables.hit_display
 
 					min_length = min(len(xx), len(yy))

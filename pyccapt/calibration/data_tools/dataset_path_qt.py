@@ -42,5 +42,4 @@ if __name__ == "__main__":
     if chosen_file:
         # Update the last chosen directory with the directory of the chosen file
         last_chosen_directory = os.path.dirname(chosen_file)
-
     print(chosen_file)

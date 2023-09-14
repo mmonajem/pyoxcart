@@ -1,11 +1,12 @@
 from copy import copy
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib import colors
 from matplotlib.patches import Circle, Rectangle
 from matplotlib.widgets import RectangleSelector, EllipseSelector
-
+from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
 from pyccapt.calibration.data_tools import data_tools, selectors_data
 
@@ -57,7 +58,7 @@ def concatenate_dataframes_of_dld_grp(dataframeList: list) -> pd.DataFrame:
     return dld_masterDataframe
 
 
-def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.0, bins=(1200, 800), figure_size=(7, 3),
+def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.0, bins=(1200, 800), figure_size=(8, 3),
                                  draw_rect=False, data_crop=True, pulse_plot=False, dc_plot=True, pulse_mode='voltage',
                                  save=True, figname=''):
     """
@@ -110,16 +111,40 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     cmap = copy(plt.cm.plasma)
     cmap.set_bad(cmap(0))
     pcm = ax1.pcolormesh(xedges, yedges, heatmap.T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
-    fig1.colorbar(pcm, ax=ax1, pad=0)
-
+    # fig1.colorbar(pcm, ax=ax1, pad=0)
     plt.ticklabel_format(style='sci', axis='x', scilimits=(6, 6))
 
     if dc_plot:
-        # Plot high voltage curve
         ax2 = ax1.twinx()
+        ax2.spines.right.set_position(("axes", 1.1))
+        # Plot high voltage curve
         xaxis2 = np.arange(len(high_voltage))
-        ax2.plot(xaxis2, high_voltage, color='red', linewidth=2)
+        dc_curve, = ax2.plot(xaxis2, high_voltage, color='red', linewidth=2)
         ax2.set_ylabel("High Voltage [kV]", color="red", fontsize=10)
+
+    if pulse_plot:
+        ax3 = ax1.twinx()
+        if not dc_plot:
+            ax3.spines.right.set_position(("axes", 1.1))
+        else:
+            ax3.spines.right.set_position(("axes", 1.25))
+        pulse_curve, = ax3.plot(xaxis, dldGroupStorage['pulse'].to_numpy(), color='fuchsia', linewidth=2)
+        if pulse_mode == 'laser':
+            ax3.set_ylabel("Laser Intensity (${pJ}/{\mu m^2}$)", color="fuchsia", fontsize=10)
+        elif pulse_mode == 'voltage':
+            ax3.set_ylabel("Pulse (V)", color="fuchsia", fontsize=10)
+
+    # if pulse_plot:
+    #     pulse_curve.set_visible(False)
+    # if dc_plot:
+    #     dc_curve.set_visible(False)
+
+    if dc_plot or pulse_plot:
+        divider = make_axes_locatable(ax1)
+        cax = divider.append_axes("right", size="2.5%", pad="0%")
+        cbar = fig1.colorbar(pcm, cax=cax)
+    else:
+        cbar = fig1.colorbar(pcm, ax=ax1, pad=0)
 
     if frac < 1:
         # extract tof
@@ -132,16 +157,6 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         ax2.set_xlim([0, len(high_voltage_lim)])
         ax2.set_ylim([min(high_voltage_lim), max(high_voltage_lim)])
 
-    if pulse_plot:
-        fig1.subplots_adjust(right=0.75)
-        ax3 = ax1.twinx()
-        ax3.plot(xaxis, dldGroupStorage['pulse'].to_numpy(), color='fuchsia', linewidth=2)
-        ax3.spines.right.set_position(("axes", 1.15))
-        if pulse_mode == 'laser':
-            ax3.set_ylabel("Laser Intensity (${pJ}/{\mu m^2}$)", color="fuchsia", fontsize=10)
-        elif pulse_mode == 'voltage':
-            ax3.set_ylabel("Pulse (V)", color="fuchsia", fontsize=10)
-
     if data_crop:
         rectangle_box_selector(ax2, variables)
         plt.connect('key_press_event', selectors_data.toggle_selector(variables))
@@ -151,9 +166,8 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         rect = Rectangle((left, bottom), width, height, fill=True, alpha=0.3, color="r", linewidth=5)
         ax1.add_patch(rect)
 
-
     if save:
-        plt.savefig("%s.png" % (variables.result_path + figname), format="png", dpi=600)
+        plt.savefig("%s.png" % (variables.result_path + figname), format="png", dpi=600, bbox_inches='tight')
         plt.savefig("%s.svg" % (variables.result_path + figname), format="svg", dpi=600)
 
     plt.show()
