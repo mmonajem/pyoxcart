@@ -17,7 +17,7 @@ def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
 		None
 	"""
 
-	path = variables.path + '\\data_%s.h5' % variables.exp_name
+	path = variables.path + '\\%s.h5' % variables.exp_name
 	# Save HDF5 file
 	with h5py.File(path, "w") as f:
 		f.create_dataset("apt/high_voltage", data=variables.main_v_dc, dtype='f')
@@ -27,9 +27,9 @@ def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
 		f.create_dataset('apt/main_chamber_vacuum', data=variables.main_chamber_vacuum, dtype='f')
 		f.create_dataset("apt/time_counter", data=time_counter, dtype='i')
 
-		f.create_dataset("time/time_s", data=time_ex_s, dtype='i')
-		f.create_dataset("time/time_m", data=time_ex_m, dtype='i')
-		f.create_dataset("time/time_h", data=time_ex_h, dtype='i')
+		f.create_dataset("time/second", data=time_ex_s, dtype='i')
+		f.create_dataset("time/minute", data=time_ex_m, dtype='i')
+		f.create_dataset("time/hour", data=time_ex_h, dtype='i')
 
 		if conf['tdc'] == "on" and conf['tdc_model'] == 'Surface_Consept' \
 				and variables.counter_source == 'TDC':
@@ -37,22 +37,22 @@ def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
 			f.create_dataset("dld/y", data=variables.y, dtype='f')
 			f.create_dataset("dld/t", data=variables.t, dtype='f')
 			f.create_dataset("dld/start_counter", data=variables.dld_start_counter, dtype='i')
-			f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld_surface_concept, dtype='f')
-			f.create_dataset("dld/pulse", data=variables.main_p_dld_surface_concept, dtype='f')
+			f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld, dtype='f')
+			f.create_dataset("dld/pulse", data=variables.main_p_dld, dtype='f')
 			# raw data
 			f.create_dataset("tdc/start_counter", data=variables.tdc_start_counter, dtype='i')
 			f.create_dataset("tdc/channel", data=variables.channel, dtype='i')
 			f.create_dataset("tdc/time_data", data=variables.time_data, dtype='i')
-			f.create_dataset("tdc/high_voltage", data=variables.main_v_dc_tdc_surface_concept, dtype='f')
-			f.create_dataset("tdc/pulse", data=variables.main_p_tdc_surface_concept, dtype='f')
+			f.create_dataset("tdc/high_voltage", data=variables.main_v_dc_tdc, dtype='f')
+			f.create_dataset("tdc/pulse", data=variables.main_p_tdc, dtype='f')
 		elif conf['tdc'] == "on" and conf[
 			'tdc_model'] == 'RoentDek' and variables.counter_source == 'TDC':
 			f.create_dataset("dld/x", data=variables.x, dtype='f')
 			f.create_dataset("dld/y", data=variables.y, dtype='f')
 			f.create_dataset("dld/t", data=variables.t, dtype='f')
 			f.create_dataset("dld/start_counter", data=variables.time_stamp, dtype='f')
-			f.create_dataset("dld/high_voltage", data=variables.main_v_dc_tdc_roentdek, dtype='f')
-			f.create_dataset("dld/pulse", data=variables.main_p_tdc_roentdek, dtype='f')
+			f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld, dtype='f')
+			f.create_dataset("dld/pulse", data=variables.main_p_dld, dtype='f')
 			# raw data
 			f.create_dataset("tdc/ch0", data=variables.ch0, dtype='i')
 			f.create_dataset("tdc/ch1", data=variables.ch1, dtype='i')
@@ -62,6 +62,8 @@ def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
 			f.create_dataset("tdc/ch5", data=variables.ch5, dtype='i')
 			f.create_dataset("tdc/ch6", data=variables.ch6, dtype='i')
 			f.create_dataset("tdc/ch7", data=variables.ch6, dtype='i')
+			f.create_dataset("tdc/high_voltage", data=variables.main_v_dc_tdc, dtype='f')
+			f.create_dataset("tdc/pulse", data=variables.main_p_tdc, dtype='f')
 		elif conf['tdc'] == "on" and conf['tdc_model'] == 'HSD' and variables.counter_source == 'HSD':
 			f.create_dataset("hsd/ch0_time", data=variables.ch0_time, dtype='f')
 			f.create_dataset("hsd/ch0_wave", data=variables.ch0_wave, dtype='f')

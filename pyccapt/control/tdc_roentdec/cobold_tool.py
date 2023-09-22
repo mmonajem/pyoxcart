@@ -58,5 +58,7 @@ def cobold_txt_to_hdf5(txt_path):
 
 
 if __name__ == "__main__":
-	txt_path = 'LFIM14_DAn.txt'
-	cobold_txt_to_hdf5(txt_path)
+	txt_path = '../../../tests/data/data_130_Sep-19-2023_14-58_W_12fs/output_DAn.txt'
+	save_path = '../../../tests/data/data_130_Sep-19-2023_14-58_W_12fs.h5'
+	copy_xy_from_cobold_txt_to_hdf5(txt_path, save_path)
+	print('Done')

@@ -152,8 +152,8 @@ class Variables:
 
         self.ns.main_v_dc_dld_surface_concept = []
         self.ns.main_p_dld_surface_concept = []
-        self.ns.main_v_dc_tdc_surface_concept = []
-        self.ns.main_p_tdc_surface_concept = []
+        self.ns.main_v_dc_tdc = []
+        self.ns.main_p_tdc = []
         self.ns.main_v_dc_hsd = []
         self.ns.main_p_hsd = []
         self.ns.main_v_dc_tdc_roentdek = []
@@ -1239,24 +1239,24 @@ class Variables:
             self.ns.main_p_dld_surface_concept = value
 
     @property
-    def main_v_dc_tdc_surface_concept(self):
+    def main_v_dc_tdc(self):
         with self.lock_lists:
-            return self.ns.main_v_dc_tdc_surface_concept
+            return self.ns.main_v_dc_tdc
 
-    @main_v_dc_tdc_surface_concept.setter
-    def main_v_dc_tdc_surface_concept(self, value):
+    @main_v_dc_tdc.setter
+    def main_v_dc_tdc(self, value):
         with self.lock_lists:
-            self.ns.main_v_dc_tdc_surface_concept = value
+            self.ns.main_v_dc_tdc = value
 
     @property
-    def main_p_tdc_surface_concept(self):
+    def main_p_tdc(self):
         with self.lock_lists:
-            return self.ns.main_p_tdc_surface_concept
+            return self.ns.main_p_tdc
 
-    @main_p_tdc_surface_concept.setter
-    def main_p_tdc_surface_concept(self, value):
+    @main_p_tdc.setter
+    def main_p_tdc(self, value):
         with self.lock_lists:
-            self.ns.main_p_tdc_surface_concept = value
+            self.ns.main_p_tdc = value
 
     @property
     def main_v_dc_hsd(self):

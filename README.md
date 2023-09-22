@@ -7,12 +7,12 @@
 <!--[![coverage report](https://gitlab.com/jesseds/apav/badges/master/coverage.svg)](https://gitlab.com/jesseds/apav/commits/master)
 [![pipeline status](https://gitlab.com/jesseds/apav/badges/master/pipeline.svg)](https://gitlab.com/jesseds/apav/-/commits/master)-->
 
-<img align="right" src="pyccapt/files/logo.png">
+<img align="right" src="pyccapt/files/logo2.png">
 
 This package aims to provide open-source software for controlling atom probe systems and calibrating data.
 The package is modular and adaptable for a wide range of devices in atom probe instrument. So far it is
 capable of collecting data from Surface consept and ReoenDek TDC systems. The package is developed in Python 3.9.
-Additionally, the package encompasses a comprehensive calibration module that encompasses various functionalities,
+Additionally, the package encompasses a comprehensive calibration module that provides various functionalities,
 including t<sub>0</sub> and flight path calculation, region of interest (ROI) selection, voltage and bowl calibration,
 as well as
 3D reconstruction techniques.
@@ -25,8 +25,8 @@ analysis.
 
 PyCCAPT was initially developed and rigorously tested on the OXCART atom probe, an in-house atom probe system situated
 within the Department of Materials Science & Engineering at the University of Erlangen-Nürnberg. Distinguished by its
-unique attributes, the OXCART atom probe boasts a titanium-based measuring chamber that facilitates an exceptional
-low-hydrogen vacuum environment. This system also features a state-of-the-art detector with a remarkable detection
+unique attribute, the OXCART atom probe boasts a titanium-based measuring chamber that facilitates an ultra-low hydrogen 
+vacuum environment. This system also features a state-of-the-art detector with a high detection
 efficiency of approximately 80%. While tailor-made for the OXCART, the PyCCAPT package offers versatility, extending its
 capabilities to effectively manage diverse atom probe systems.
 ![plot](pyccapt/files/oxcart.jpg)

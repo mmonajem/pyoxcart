@@ -128,9 +128,9 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
             ax3.spines.right.set_position(("axes", 1.1))
         else:
             ax3.spines.right.set_position(("axes", 1.25))
-        pulse_curve, = ax3.plot(xaxis, dldGroupStorage['pulse'].to_numpy(), color='fuchsia', linewidth=2)
+        pulse_curve, = ax3.plot(xaxis, dldGroupStorage['pulse'].to_numpy()/1e12, color='fuchsia', linewidth=2)
         if pulse_mode == 'laser':
-            ax3.set_ylabel("Laser Intensity (${pJ}/{\mu m^2}$)", color="fuchsia", fontsize=10)
+            ax3.set_ylabel("Laser Intensity (${TW}/{cm^2}$)", color="fuchsia", fontsize=10)
         elif pulse_mode == 'voltage':
             ax3.set_ylabel("Pulse (V)", color="fuchsia", fontsize=10)
 

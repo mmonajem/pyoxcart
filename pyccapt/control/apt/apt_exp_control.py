@@ -572,8 +572,8 @@ class APT_Exp_Control:
 
             if all(len(lst) == len(self.variables.channel) for lst in [self.variables.channel, self.variables.time_data,
                                                                        self.variables.tdc_start_counter,
-                                                                       self.variables.main_v_dc_tdc_surface_concept,
-                                                                       self.variables.main_p_tdc_surface_concept]):
+                                                                       self.variables.main_v_dc_tdc,
+                                                                       self.variables.main_p_tdc]):
                 self.log_apt.warning('tdc data have not same length')
         elif self.variables.counter_source == 'DRS':
             if all(len(lst) == len(self.variables.ch0_time) for lst in
@@ -728,10 +728,8 @@ class APT_Exp_Control:
             self.variables.clear_to('main_chamber_vacuum')
             self.variables.clear_to('main_v_dc_dld_surface_concept')
             self.variables.clear_to('main_p_dld_surface_concept')
-            self.variables.clear_to('main_v_dc_tdc_surface_concept')
-            self.variables.clear_to('main_p_tdc_surface_concept')
-            self.variables.clear_to('main_v_dc_tdc_roentdek')
-            self.variables.clear_to('main_p_tdc_roentdek')
+            self.variables.clear_to('main_v_dc_tdc')
+            self.variables.clear_to('main_p_tdc')
             self.variables.clear_to('main_v_dc_drs')
             self.variables.clear_to('main_v_p_drs')
 

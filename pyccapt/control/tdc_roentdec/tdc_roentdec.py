@@ -116,7 +116,7 @@ def experiment_measure(variables):
 		variables.extend_to('ch7', returnVale_tmp[:, 7].tolist())
 		main_v_dc_dld_list = np.tile(variables.specimen_voltage, len(xx))
 		pulse_data = np.tile(variables.pulse_voltage, len(xx))
-		variables.extend_to('main_v_dc_tdc_roentdek', main_v_dc_dld_list.tolist())
+		variables.extend_to('main_v_dc_tdc', main_v_dc_dld_list.tolist())
 		variables.extend_to('main_p_tdc_roentdek', pulse_data.tolist())
 
 		# with self.variables.lock_data_plot:
