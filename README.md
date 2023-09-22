@@ -112,11 +112,11 @@ Qestions/comments:
 # Contributing
 
 Contributions to PyCCAPT are always welcome, and they are greatly appreciated! Our contribution
-policy can be found [here](https://github.com/mmonajem/pyccapt/blob/main/CONTRIBUTING.md).
+policy can be found [here](CONTRIBUTING.md).
 
 ------------
 
 # License
 
 This project is licensed under the GNU General Public License v3.0. See
-the [LICENSE](https://github.com/mmonajem/pyccapt/blob/main/LICENSE) file for details.
+the [LICENSE](LICENSE) file for details.
