@@ -94,6 +94,12 @@ on [documentation](https://pyccapt.readthedocs.io/en/latest/configuration.html).
 For calibration, review the [tutorial](https://pyccapt.readthedocs.io/en/latest/tutorials.html) to understand package
 features.
 
+---------------------
+# Data structure
+
+For checking the data structure of the control module you can check [here](pyccapt/control/DATA_STRUCTURE.md). For the 
+calibration module, you can check [here](pyccapt/calibration/DATA_STRUCTURE.md).
+
 ------------------
 # Bug reports
 

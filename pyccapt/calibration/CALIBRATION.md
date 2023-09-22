@@ -41,11 +41,11 @@ The PyCCAPT Calibration Sub-Module provides essential tools and workflows for ca
 
 ## Data structures
 
-For the data structure you can  check the data [structure file](https://github.com/mmonajem/pyccapt/blob/main/pyccat/calibration/data_structure.md).
+For the data structure you can  check the data [structure file](DATA_STRUCTURE.md).
 
 ## Additional Features
 
-In addition to the core functionalities mentioned above, the calibration sub-module of PyCCAPT offers various advanced features and capabilities. For detailed information on these features, consult the PyCCAPT documentation.
+In addition to the core functionalities mentioned above, the calibration module of PyCCAPT offers various advanced features and capabilities. For detailed information on these features, consult the PyCCAPT documentation.
 
 ## Documentation
 
