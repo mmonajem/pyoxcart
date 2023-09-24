@@ -57,9 +57,7 @@ visualization, and data acquisition. The following images provide an overview of
    conda activate apt_env
    ```
 
-3. Install the package:
-
-Clone or download this repository, unzip it, and in the project directory run:
+3. Clone or download this repository, unzip it, and in the project directory run:
 
    ```bash
    pip install -e .
