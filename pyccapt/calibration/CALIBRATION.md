@@ -46,7 +46,9 @@ further analysis.
 
 ## Data structures
 
-For the data structure you can check the [data structure](DATA_STRUCTURE.md) file.
+For the data structure you can check the [data structure](DATA_STRUCTURE.md) file. There is also possibility to convert
+the PyCCAPT HDF5 file data to EPOS, POS, ATO, and CSV file. You can find the
+example code in the [tutorial](tutorials/jupyter_files)  section.
 
 ## Additional Features
 
@@ -60,5 +62,5 @@ For comprehensive documentation, including detailed instructions, usage examples
 - Online Documentation (URL to your online documentation)
 
 For specific usage examples and code snippets, explore the Jupyter notebooks provided in
-the `tutorials` [directory](tutorials/jupyter_files) of the PyCCAPT package.
+the `tutorials` [directory](tutorials/jupyter_files) of the PyCCAPT package. 
 

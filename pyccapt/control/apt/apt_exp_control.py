@@ -44,7 +44,6 @@ class APT_Exp_Control:
         self.pulse_voltage_min = 0
         self.total_ions = 0
         self.ex_freq = 0
-        self.flage_update_temp_vacuum = 0
 
         self.main_v_dc = []
         self.main_v_p = []
@@ -212,9 +211,11 @@ class APT_Exp_Control:
 
         # saving the values of high dc voltage, pulse, and current iteration ions
         # with self.variables.lock_experiment_variables:
-        self.main_v_dc.append(self.specimen_voltage)
-        self.main_v_p.append(self.pulse_voltage)
-        self.main_counter.append(count_temp)
+        self.main_v_dc.extend([self.specimen_voltage])
+        self.main_v_p.extend([self.pulse_voltage])
+        self.main_counter.extend([count_temp])
+        self.main_temperature.extend([self.variables.temperature])
+        self.main_chamber_vacuum.extend([self.variables.vacuum_main])
 
         error = self.detection_rate - self.variables.detection_rate_current
         # simple proportional control with averaging
@@ -245,13 +246,6 @@ class APT_Exp_Control:
                 self.variables.specimen_voltage = self.specimen_voltage
                 self.variables.specimen_voltage_plot = self.specimen_voltage
                 self.variables.pulse_voltage = self.pulse_voltage
-
-        # with self.variables.lock_statistics:
-
-        if self.flage_update_temp_vacuum == self.ex_freq:
-            self.main_temperature.extend([self.variables.temperature])
-            self.main_chamber_vacuum.extend([float(self.variables.vacuum_main)])
-            self.flage_update_temp_vacuum = 0
 
     def precise_sleep(self, seconds):
         """
@@ -379,8 +373,6 @@ class APT_Exp_Control:
                 self.command_v_dc("F1")
                 time.sleep(0.1)
 
-        self.main_temperature.extend([self.variables.temperature])
-        self.main_chamber_vacuum.extend([float(self.variables.vacuum_main)])
         self.pulse_frequency = self.variables.pulse_frequency * 1000
         self.pulse_fraction = self.variables.pulse_fraction
         self.pulse_amp_per_supply_voltage = self.variables.pulse_amp_per_supply_voltage
@@ -432,6 +424,12 @@ class APT_Exp_Control:
                 # Counter of iteration
                 time_counter.append(steps)
 
+                # Measure time
+                end = datetime.datetime.now()
+                time_ex_s.append(int(end.strftime("%S")))
+                time_ex_m.append(int(end.strftime("%M")))
+                time_ex_h.append(int(end.strftime("%H")))
+
                 if self.variables.stop_flag:
                     self.log_apt.info('Experiment is stopped')
                     if self.conf['tdc'] != "off":
@@ -468,11 +466,6 @@ class APT_Exp_Control:
                             time.sleep(1)
                             break
                         flag_achieved_high_voltage += 1
-                # Measure time
-                end = datetime.datetime.now()
-                time_ex_s.append(int(end.strftime("%S")))
-                time_ex_m.append(int(end.strftime("%M")))
-                time_ex_h.append(int(end.strftime("%H")))
 
                 if self.variables.criteria_time:
                     if self.variables.elapsed_time >= self.variables.ex_time:
@@ -566,8 +559,8 @@ class APT_Exp_Control:
         if self.variables.counter_source == 'TDC':
             if all(len(lst) == len(self.variables.x) for lst in [self.variables.x, self.variables.y,
                                                                  self.variables.t, self.variables.dld_start_counter,
-                                                                 self.variables.main_v_dc_dld_surface_concept,
-                                                                 self.variables.main_p_dld_surface_concept]):
+                                                                 self.variables.main_v_dc_dld,
+                                                                 self.variables.main_p_dld]):
                 self.log_apt.warning('dld data have not same length')
 
             if all(len(lst) == len(self.variables.channel) for lst in [self.variables.channel, self.variables.time_data,
@@ -726,8 +719,8 @@ class APT_Exp_Control:
             self.variables.clear_to('main_counter')
             self.variables.clear_to('main_temperature')
             self.variables.clear_to('main_chamber_vacuum')
-            self.variables.clear_to('main_v_dc_dld_surface_concept')
-            self.variables.clear_to('main_p_dld_surface_concept')
+            self.variables.clear_to('main_v_dc_dld')
+            self.variables.clear_to('main_p_dld')
             self.variables.clear_to('main_v_dc_tdc')
             self.variables.clear_to('main_p_tdc')
             self.variables.clear_to('main_v_dc_drs')

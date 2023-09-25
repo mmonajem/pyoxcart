@@ -312,8 +312,8 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
     variables.extend_to('y', yy)
     variables.extend_to('t', tt)
     variables.extend_to('dld_start_counter', start_counter)
-    variables.extend_to('main_v_dc_dld_surface_concept', voltage_data)
-    variables.extend_to('main_p_dld_surface_concept', pulse_data)
+    variables.extend_to('main_v_dc_dld', voltage_data)
+    variables.extend_to('main_p_dld', pulse_data)
 
     variables.extend_to('channel', channel_data)
     variables.extend_to('time_data', time_data)

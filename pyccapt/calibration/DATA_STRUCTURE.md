@@ -19,3 +19,6 @@ This HDF5 file in PyCCAPT contains data with the following columns:
 - `y_det (cm)`: Detector y hit position of ions (float64).
 - `pulse_pi`: Pulse since the last detected event pulse (integer).
 - `ion_pp`: Detected ions for each pulse (integer).
+
+There is also possibility to convert the PyCCAPT HDF5 file data to EPOS, POS, ATO, and CSV file. You can find the
+example code in the tutorial section.

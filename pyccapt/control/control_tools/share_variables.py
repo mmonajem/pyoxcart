@@ -150,14 +150,12 @@ class Variables:
         self.ns.time_stamp = []
         self.ns.laser_intensity = []
 
-        self.ns.main_v_dc_dld_surface_concept = []
-        self.ns.main_p_dld_surface_concept = []
+        self.ns.main_v_dc_dld = []
+        self.ns.main_p_dld = []
         self.ns.main_v_dc_tdc = []
         self.ns.main_p_tdc = []
         self.ns.main_v_dc_hsd = []
         self.ns.main_p_hsd = []
-        self.ns.main_v_dc_tdc_roentdek = []
-        self.ns.main_p_tdc_roentdek = []
 
         self.ns.channel = []
         self.ns.time_data = []
@@ -1219,24 +1217,24 @@ class Variables:
             self.ns.laser_intensity = value
 
     @property
-    def main_v_dc_dld_surface_concept(self):
+    def main_v_dc_dld(self):
         with self.lock_lists:
-            return self.ns.main_v_dc_dld_surface_concept
+            return self.ns.main_v_dc_dld
 
-    @main_v_dc_dld_surface_concept.setter
-    def main_v_dc_dld_surface_concept(self, value):
+    @main_v_dc_dld.setter
+    def main_v_dc_dld(self, value):
         with self.lock_lists:
-            self.ns.main_v_dc_dld_surface_concept = value
+            self.ns.main_v_dc_dld = value
 
     @property
-    def main_p_dld_surface_concept(self):
+    def main_p_dld(self):
         with self.lock_lists:
-            return self.ns.main_p_dld_surface_concept
+            return self.ns.main_p_dld
 
-    @main_p_dld_surface_concept.setter
-    def main_p_dld_surface_concept(self, value):
+    @main_p_dld.setter
+    def main_p_dld(self, value):
         with self.lock_lists:
-            self.ns.main_p_dld_surface_concept = value
+            self.ns.main_p_dld = value
 
     @property
     def main_v_dc_tdc(self):
@@ -1278,25 +1276,6 @@ class Variables:
         with self.lock_lists:
             self.ns.main_p_hsd = value
 
-    @property
-    def main_v_dc_tdc_roentdek(self):
-        with self.lock_lists:
-            return self.ns.main_v_dc_tdc_roentdek
-
-    @main_v_dc_tdc_roentdek.setter
-    def main_v_dc_tdc_roentdek(self, value):
-        with self.lock_lists:
-            self.ns.main_v_dc_tdc_roentdek = value
-
-    @property
-    def main_p_tdc_roentdek(self):
-        with self.lock_lists:
-            return self.ns.main_p_tdc_roentdek
-
-    @main_p_tdc_roentdek.setter
-    def main_p_tdc_roentdek(self, value):
-        with self.lock_lists:
-            self.ns.main_p_tdc_roentdek = value
 
     @property
     def channel(self):
