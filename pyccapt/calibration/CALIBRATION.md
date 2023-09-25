@@ -1,12 +1,17 @@
 # PyCCAPT Calibration Module
 
-The PyCCAPT Calibration Sub-Module provides essential tools and workflows for calibrating and processing atom probe tomography (APT) data. This module is designed to assist researchers in preparing and enhancing their APT data for further analysis.
+The PyCCAPT Calibration Sub-Module provides essential tools and workflows for calibrating and processing atom probe
+tomography (APT) data. This module is designed to assist researchers in preparing and enhancing their APT data for
+further analysis.
+
+<img align="right" src="../files/logo2.png" alt="Alt Text" width="100" height="100">
 
 ## Jupyter Workflows
 
 ### 1. Data Cropping
 
-- *Description*: Allows you to crop atom probe data, whether it's originally collected using PyCCAPT or in various other formats such as EPOS, POS, ATO, and CSV.
+- *Description*: Allows you to crop atom probe data, whether it's originally collected using PyCCAPT or in various other
+  formats such as EPOS, POS, ATO, and CSV.
 - *Usage*: Define the region of interest (ROI) to focus on specific areas of the dataset.
 
 ### 2. Time of Flight Calibration
@@ -54,5 +59,6 @@ For comprehensive documentation, including detailed instructions, usage examples
 - Local Documentation (within your PyCCAPT installation)
 - Online Documentation (URL to your online documentation)
 
-For specific usage examples and code snippets, explore the Jupyter notebooks provided in the `tutorials` directory of the PyCCAPT package.
+For specific usage examples and code snippets, explore the Jupyter notebooks provided in
+the `tutorials` [directory](tutorials/jupyter_files) of the PyCCAPT package.
 

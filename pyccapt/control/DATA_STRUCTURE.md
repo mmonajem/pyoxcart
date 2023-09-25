@@ -1,22 +1,25 @@
 # HDF5 Data Structure of PyCCAPT Control Module
 
-This document provides an overview of the data structure within the HDF5 file.
+This document provides an overview of the data structure within the HDF5 file of the control software of the PyCCAPT.
 
 ## Groups
 
 ### Group: `apt`
 
-- `high_voltage`: Description of high voltage data.
-- `pulse`: Description of pulse data.
-- `num_event`: Description of the number of events data.
-- `temperature`: Description of temperature data.
-- `main_chamber_vacuum`: Description of main chamber vacuum data.
-- `time_counter`: Description of time counter data.
+- `high_voltage`: Applied DC voltage in the current iteration.
+- `pulse`: Applied pulse voltage or laser power in the current iteration.
+- `num_event`: Number of detected ions since last control loop iteration.
+- `temperature`: Temperature level in each control loop iteration.
+- `main_chamber_vacuum`: Vacuum level in each control loop iteration.
+- `time_counter`: Experiment time counter of the PyCCAPT control software.
+- `second`: Time at which the data was recorded in each iteration.
+- `minute`: Time at which the data was recorded in each iteration.
+- `hour`: Time at which the data was recorded in each iteration.
 
 ### Group: `dld`
 
-- `high_voltage`: Description of high voltage data.
-- `pulse`: Description of pulse data.
+- `high_voltage`: Applied DC voltage for dld events.
+- `pulse`: Applied pulse voltage or laser power for dld events.
 - `start_counter`: Description of start counter data.
 - `t`: Description of t data.
 - `x`: Description of x data.
@@ -29,29 +32,23 @@ Raw data from the TDC system. Te data structure depends on the TDC system used.
 #### Surface Concept TDC:
 
 - `channel`: Description of channel data.
-- `high_voltage`: Description of high voltage data.
-- `pulse_voltage`: Description of pulse voltage data.
-- `start_counter`: Description of start counter data.
+- `high_voltage`: Applied DC voltage for tdc events.
+- `pulse_voltage`: Applied pulse voltage or laser power for tdc events.
+- `start_counter`: Start counter of tdc.
 - `time_data`: Description of time data.
 
 
 #### RoentDek TDC:
 
-- `ch0`: Description of channel 0 data.
-- `ch1`: Description of channel 1 data.
-- `ch2`: Description of channel 2 data.
-- `ch3`: Description of channel 3 data.
-- `ch4`: Description of channel 4 data.
-- `ch5`: Description of channel 5 data.
-- `ch6`: Description of channel 6 data.
-- `ch7`: Description of channel 7 data.
-- `high_voltage`: Description of high voltage data.
-- `pulse`: Description of pulse data.
+- `ch0`: Time counter at channel 0 for tdc events (dld 1).
+- `ch1`: Time counter at channel 1 for tdc events (dld 1).
+- `ch2`: Time counter at channel 2 for tdc events (dld 2).
+- `ch3`: Time counter at channel 3 for tdc events (dld 2).
+- `ch4`: Time counter at channel 4 for tdc events (dld 3).
+- `ch5`: Time counter at channel 5 for tdc events (dld 3).
+- `ch6`: Time counter at channel 6 for tdc events (pulse trigger).
+- `ch7`: Time counter at channel 7 for tdc events.
+- `high_voltage`: Applied DC voltage for tdc events.
+- `pulse`: Applied pulse voltage or laser power for tdc events.
 
 
-
-### Group: `time`
-
-- `second`: Description of second data.
-- `minute`: Description of minute data.
-- `hour`: Description of hour data.
