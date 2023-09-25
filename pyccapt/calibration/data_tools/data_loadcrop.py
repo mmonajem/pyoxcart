@@ -116,7 +116,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
 
     if dc_plot:
         ax2 = ax1.twinx()
-        ax2.spines.right.set_position(("axes", 1.1))
+        ax2.spines.right.set_position(("axes", 1.25))
         # Plot high voltage curve
         xaxis2 = np.arange(len(high_voltage))
         dc_curve, = ax2.plot(xaxis2, high_voltage, color='red', linewidth=2)
@@ -127,7 +127,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         if not dc_plot:
             ax3.spines.right.set_position(("axes", 1.1))
         else:
-            ax3.spines.right.set_position(("axes", 1.25))
+            ax3.spines.right.set_position(("axes", 1.1))
         pulse_curve, = ax3.plot(xaxis, dldGroupStorage['pulse'].to_numpy()/1e12, color='fuchsia', linewidth=2)
         if pulse_mode == 'laser':
             ax3.set_ylabel("Laser Intensity (${TW}/{cm^2}$)", color="fuchsia", fontsize=10)
