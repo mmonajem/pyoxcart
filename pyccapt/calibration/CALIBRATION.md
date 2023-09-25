@@ -46,7 +46,7 @@ further analysis.
 
 ## Data structures
 
-For the data structure you can  check the data [structure file](DATA_STRUCTURE.md).
+For the data structure you can check the [data structure](DATA_STRUCTURE.md) file.
 
 ## Additional Features
 

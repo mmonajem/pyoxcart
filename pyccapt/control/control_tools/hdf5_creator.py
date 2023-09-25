@@ -26,10 +26,9 @@ def hdf_creator(variables, conf, time_counter, time_ex_s, time_ex_m, time_ex_h):
 		f.create_dataset('apt/temperature', data=variables.main_temperature, dtype='f')
 		f.create_dataset('apt/main_chamber_vacuum', data=variables.main_chamber_vacuum, dtype='f')
 		f.create_dataset("apt/time_counter", data=time_counter, dtype='i')
-
-		f.create_dataset("time/second", data=time_ex_s, dtype='i')
-		f.create_dataset("time/minute", data=time_ex_m, dtype='i')
-		f.create_dataset("time/hour", data=time_ex_h, dtype='i')
+		f.create_dataset("apt/second", data=time_ex_s, dtype='i')
+		f.create_dataset("apt/minute", data=time_ex_m, dtype='i')
+		f.create_dataset("apt/hour", data=time_ex_h, dtype='i')
 
 		if conf['tdc'] == "on" and conf['tdc_model'] == 'Surface_Consept' \
 				and variables.counter_source == 'TDC':
