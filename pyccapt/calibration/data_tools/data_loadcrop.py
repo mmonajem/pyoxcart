@@ -97,6 +97,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     tof = dldGroupStorage['t (ns)'].to_numpy()
     high_voltage = data['high_voltage (V)'].to_numpy()
     high_voltage = high_voltage / 1000  # change to kV
+    pulse = dldGroupStorage['pulse'].to_numpy()
 
     xaxis = np.arange(len(tof))
 
@@ -116,23 +117,26 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
 
     if dc_plot:
         ax2 = ax1.twinx()
-        ax2.spines.right.set_position(("axes", 1.25))
+        if not pulse_plot:
+            ax2.spines.right.set_position(("axes", 1.1))
+        else:
+            ax2.spines.right.set_position(("axes", 1.25))
         # Plot high voltage curve
         xaxis2 = np.arange(len(high_voltage))
         dc_curve, = ax2.plot(xaxis2, high_voltage, color='red', linewidth=2)
         ax2.set_ylabel("High Voltage [kV]", color="red", fontsize=10)
+        ax2.set_ylim([min(high_voltage), max(high_voltage) + 0.5])
 
     if pulse_plot:
         ax3 = ax1.twinx()
-        if not dc_plot:
-            ax3.spines.right.set_position(("axes", 1.1))
-        else:
-            ax3.spines.right.set_position(("axes", 1.1))
-        pulse_curve, = ax3.plot(xaxis, dldGroupStorage['pulse'].to_numpy()/1e12, color='fuchsia', linewidth=2)
+        ax3.spines.right.set_position(("axes", 1.1))
+        pulse_curve, = ax3.plot(xaxis, pulse / 1e12, color='fuchsia', linewidth=2)
         if pulse_mode == 'laser':
             ax3.set_ylabel("Laser Intensity (${TW}/{cm^2}$)", color="fuchsia", fontsize=10)
         elif pulse_mode == 'voltage':
             ax3.set_ylabel("Pulse (V)", color="fuchsia", fontsize=10)
+        range = max(pulse / 1e12) - min(pulse / 1e12)
+        ax3.set_ylim([min(pulse / 1e12) - range * 0.1, max(pulse / 1e12) + range * 0.1])
 
     # if pulse_plot:
     #     pulse_curve.set_visible(False)
@@ -147,18 +151,26 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         cbar = fig1.colorbar(pcm, ax=ax1, pad=0)
 
     if frac < 1:
-        # extract tof
-        tof_lim = data['t (ns)'].to_numpy()
-        high_voltage_lim = data['high_voltage (V)'].to_numpy()
-        high_voltage_lim = high_voltage_lim / 1000  # change to kV
         # set axis limits based on entire data
         ax1.set_xlim([0, len(tof)])
-        ax1.set_ylim([min(tof_lim), max(tof_lim)])
-        ax2.set_xlim([0, len(high_voltage_lim)])
-        ax2.set_ylim([min(high_voltage_lim), max(high_voltage_lim)])
+        ax1.set_ylim([min(tof), max(tof)])
+        if dc_plot:
+            ax2.set_xlim([0, len(high_voltage)])
+            ax2.set_ylim([min(high_voltage), max(high_voltage) + 0.5])
+        if pulse_plot:
+            ax3.set_xlim([0, len(pulse)])
+            range = max(pulse / 1e12) - min(pulse / 1e12)
+            ax3.set_ylim([min(pulse / 1e12) - range * 0.1, max(pulse / 1e12) + range * 0.1])
 
     if data_crop:
-        rectangle_box_selector(ax2, variables)
+        if dc_plot and pulse_plot:
+            rectangle_box_selector(ax3, variables)
+        elif dc_plot and not pulse_plot:
+            rectangle_box_selector(ax2, variables)
+        elif not dc_plot and pulse_plot:
+            rectangle_box_selector(ax3, variables)
+        elif not pulse_plot and not dc_plot:
+            rectangle_box_selector(ax1, variables)
         plt.connect('key_press_event', selectors_data.toggle_selector(variables))
     if draw_rect:
         left, bottom, width, height = (
