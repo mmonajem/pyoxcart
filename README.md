@@ -128,6 +128,16 @@ features.
 For checking the data structure of the control module you can check [here](pyccapt/control/DATA_STRUCTURE.md). For the 
 calibration module, you can check [here](pyccapt/calibration/DATA_STRUCTURE.md).
 
+---------------------
+# Test data
+
+For start using the calibration package, you can use the test data (pure Aluminium) provided in the following link. The
+link conrains the raw dataset that is collected from the OXCART atom probe from a pure Aluminium sample. It also contains
+the output file from the calibration module, which contains the calibrated data as well as the reconstructed data. The
+link also contain the range file (HDF5) that is calculated by the calibration module.
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8380630.svg)](https://doi.org/10.5281/zenodo.8380630). 
+
 ------------------
 # Bug reports
 
