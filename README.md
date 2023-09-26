@@ -52,9 +52,11 @@ pyccapt/
 │   ├── calibration/
 │   │   ├── __init__.py
 │   │   └── module_folders   
-│   └── control/
-│       ├── __init__.py
-│       └── module_folders
+│   ├── control/
+│   │   ├── __init__.py
+│   │   └── module_folders
+│   └── files/
+├── docs/
 ├── setup.py
 ├── README.md
 ├── CONTRIBUTION.md
@@ -88,15 +90,6 @@ pyccapt/
    pip install -e .
    ```
    
-   if you need to install the control or calibration module separately, you can run:
-   
-   ```bash
-    pip install -e .[control]
-    ```
-   or
-    ```bash
-     pip install -e .[calibration]
-     ```
 
 After installation, you can run the control GUI by entering the following command in the console:
 
