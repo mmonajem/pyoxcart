@@ -1,14 +1,17 @@
 import time
 from datetime import datetime
 from threading import Thread
-
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib import style
-from mcculw import ul
-from mcculw.enums import InfoType, BoardInfo, TcType, TempScale, TInOptions
+try:
+	from mcculw import ul
+	from mcculw.enums import InfoType, BoardInfo, TcType, TempScale, TInOptions
+except Exception as e:
+	print('Cannot import mcculw library')
+	print(e)
 
 # local imports
 from pyccapt.control.devices.pfeiffer_gauges import TPG362

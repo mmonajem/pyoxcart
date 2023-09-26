@@ -48,6 +48,7 @@ visualization, and data acquisition. The following images provide an overview of
 pyccapt/
 ├── pyccapt/
 │   ├── __init__.py
+│   ├── config.json   
 │   ├── calibration/
 │   │   ├── __init__.py
 │   │   └── module_folders   
@@ -55,7 +56,6 @@ pyccapt/
 │       ├── __init__.py
 │       └── module_folders
 ├── setup.py
-├── setup.cfg
 ├── README.md
 ├── CONTRIBUTION.md
 ├── MANIFEST.in

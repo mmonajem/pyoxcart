@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 # to not update the congiguration files
-*.json
+config.json
 *.txt

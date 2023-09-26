@@ -1,4 +1,11 @@
-import thorlabs_apt.core as apt
+
+try:
+	import thorlabs_apt.core as apt
+except Exception as e:
+	print('Thorlabs APT library could not be imported')
+	print(e)
+
+
 
 def thorlab(conf, degree, step_increase=False, initialize=False):
 	"""

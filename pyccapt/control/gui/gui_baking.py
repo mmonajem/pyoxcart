@@ -4,14 +4,17 @@ import sys
 import threading
 import time
 from datetime import datetime
-
 import numpy as np
 import pandas as pd
 import pyqtgraph as pg
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer
-from mcculw import ul
-from mcculw.enums import TempScale, TInOptions
+try:
+	from mcculw import ul
+	from mcculw.enums import TempScale, TInOptions
+except Exception as e:
+	print('Cannot import mcculw library')
+	print(e)
 
 # Local module and scripts
 from pyccapt.control.control_tools import share_variables, read_files
