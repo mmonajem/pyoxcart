@@ -43,6 +43,31 @@ visualization, and data acquisition. The following images provide an overview of
 
  ---------------------
 
+# Directory structure
+```
+pyccapt/
+├── pyccapt/
+│   ├── __init__.py
+│   ├── calibration/
+│   │   ├── __init__.py
+│   │   └── module_folders   
+│   └── control/
+│       ├── __init__.py
+│       └── module_folders
+├── setup.py
+├── setup.cfg
+├── README.md
+├── CONTRIBUTION.md
+├── MANIFEST.in
+├── Licence
+└── tox.ini
+└── tests/
+    ├── __init__.py
+    ├── data/
+    └── tests
+```
+ ---------------------
+
 # Installation
 
 1. Create a virtual environment using Anaconda:
@@ -62,9 +87,30 @@ visualization, and data acquisition. The following images provide an overview of
    ```bash
    pip install -e .
    ```
+   
+   if you need to install the control or calibration module separately, you can run:
+   
+   ```bash
+    pip install -e .[control]
+    ```
+   or
+    ```bash
+     pip install -e .[calibration]
+     ```
 
+After installation, you can run the control GUI by entering the following command in the console:
 
+   ```bash
+   python pyccapt
+   ```
 
+After running the above commands, you can now import and use them in your main project or any 
+other Python scripts within your project. For example:
+
+   ```bash
+  from pyccapt.calibration.data_tools import data_loadcrop
+  from pyccapt.control.devices import edwards_tic
+   ```
 
 --------------
 # Documentation
@@ -72,15 +118,6 @@ visualization, and data acquisition. The following images provide an overview of
 The latest documentation is available on
 [ReadTheDocs](https://pyccapt.readthedocs.io/en/latest/?#) page. It provides feature descriptions, tutorials, and
 valuable information.
-
---------------------
-## Running PyCCAPT control GUI
-
-After installing the project locally or via pip command enter the following command in the console:
-
-   ```bash
-   python pyccapt
-   ```
 
 
 ---------------------

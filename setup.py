@@ -1,27 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from os.path import exists
-from setuptools import  setup, find_packages
-
-
-author = u"Mehrpad Monajem"
-# authors in alphabetical order
-description = 'A package for controlling APT experiment and calibrating the APT data'
-name = 'PyCCAPT'
-year = "2022"
-
-
-# sys.path.insert(0, realpath(dirname(__file__))+"/"+name)
+from setuptools import setup, find_packages
 
 try:
     from pyccapt import version
 except BaseException:
-    version = "0.0.32"
+    version = "0.0.34"
 
 
 setup(
-    name=name,
-    author=author,
+    name='pyccapt',
+    author=u"Mehrpad Monajem",
     author_email='mehrpad.monajem@fau.de',
     url='https://github.com/mmonajem/pyccapt',
     version=version,
@@ -32,10 +22,8 @@ setup(
     },
     data_files=[('my_data', ['./tests/data'])],
     packages=find_packages(),
-    package_dir={name: name},
-    include_package_data=True,
     license="GPL v3",
-    description=description,
+    description='A package for controlling APT experiment and calibrating the APT data',
     long_description=open('README.md').read() if exists('README.md') else '',
     long_description_content_type="text/markdown",
     install_requires=[
