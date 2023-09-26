@@ -11,7 +11,7 @@
   "visualization": "mc",
   "tdc": "off",
   "tdc_model": "Surface_Consept",
-  "camera": "off",
+  "camera": "on",
   "pump": "off",
   "gates": "off",
   "v_dc": "off",
