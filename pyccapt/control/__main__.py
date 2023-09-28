@@ -1,6 +1,7 @@
 import multiprocessing
 import os
 import sys
+
 from PyQt6 import QtWidgets
 
 from pyccapt.control.control_tools import share_variables, read_files

@@ -12,6 +12,7 @@ from PyQt6.QtGui import QPixmap
 # Local module and scripts
 from pyccapt.control.control_tools import share_variables, read_files
 from pyccapt.control.devices import camera
+from pyccapt.control.usb_switch import usb_switch
 
 
 class Ui_Cameras_Alignment(object):
@@ -236,6 +237,9 @@ class Ui_Cameras_Alignment(object):
 		self.emitter.img1_zoom.connect(self.update_cam_b_d)
 		self.initialize_camera_thread()
 
+		if self.conf['usb_lamp_switch'] == 'on':
+			self.usb_lamp_switch = usb_switch.USBSwitch("./control/usb_switch/USBaccessX64.dll")  # 32 bit w/o X64
+
 	def retranslateUi(self, Cameras_Alignment):
 		"""
 
@@ -289,13 +293,13 @@ class Ui_Cameras_Alignment(object):
 		"""
 		if not self.variables.light:
 			self.led_light.setPixmap(self.led_green)
-
+			self.usb_lamp_switch.switch_on(16)
 			self.variables.light = True
 			self.variables.light_switch = True
 
 		elif self.variables.light:
 			self.led_light.setPixmap(self.led_red)
-
+			self.usb_lamp_switch.switch_off(16)
 			self.variables.light = False
 			self.variables.light_switch = True
 

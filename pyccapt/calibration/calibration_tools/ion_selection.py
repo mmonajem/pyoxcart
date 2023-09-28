@@ -8,25 +8,6 @@ from faker import Factory
 from pyccapt.calibration.data_tools import data_tools
 
 
-def find_nearest(a, a0, num):
-    """
-    Find the indices of the num closest elements in array a to the scalar value a0.
-
-    Args:
-        a (numpy.ndarray): Input array.
-        a0 (float): Target scalar value.
-        num (int): Number of closest values to find.
-
-    Returns:
-        list: Indices of the num closest elements.
-    """
-    idx = []
-    for i in range(num):
-        idx.append(np.abs(a - a0).argmin())
-        a[idx] = -200  # some dummy negative value
-    return idx
-
-
 def fix_parentheses(c):
     """
     Fix parentheses in a given string by expanding the elements inside them.
@@ -121,83 +102,80 @@ def chunks(lst, n):
         yield lst[i:i + n]
 
 
-def find_close_element(target_elem, num_c, abundance_threshold=0.0, charge=4, variables=None):
+def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, charge=4,
+                          data_table='../../../files/isotopeTable.h5', variables=None):
     """
     Find the closest elements to a target element.
 
     Args:
         target_elem (float): Target element.
-        num_c (int): Number of closest elements to find.
-        abundance_threshold (float): Abundance threshold for filtering elements.
+        num_elements (int): Number of closest elements to find.
+        abundance_threshold (float): Abundance threshold for filtering elements (as a percentage).
         charge (int): Charge value.
-        variables (object): object containing the variables.
+        data_table (str): Path to the data table (HDF5 file).
+        variables (object): Object containing the variables.
 
     Returns:
-        pandas.DataFrame: DataFrame containing closest elements and their properties.
+        pd.DataFrame: DataFrame containing closest elements and their properties.
     """
-    data_table = '../../../files/isotopeTable.h5'
-    dataframe = data_tools.read_hdf5_through_pandas(data_table)
+    # Read data from the HDF5 file
+    dataframe = pd.read_hdf(data_table)
 
+    # Expand elements based on charge
     elements = dataframe['element'].to_numpy()
     isotope_number = dataframe['isotope'].to_numpy()
+    weight = dataframe['weight'].to_numpy()
     abundance = dataframe['abundance'].to_numpy()
-    element_abundance = np.repeat(abundance, charge)
 
-    element_weights = np.zeros((len(elements), charge))
-    elements_w = dataframe['weight'].to_numpy()
-    for i in range(charge):
-        element_weights[:, i] = elements_w / (i + 1)
-    element_weights = element_weights.flatten()
+    elements = np.repeat(elements, charge)
+    isotope_number = np.repeat(isotope_number, charge)
+    weights = np.repeat(weight, charge)
+    abundance = np.repeat(abundance, charge)
+    charge_list = np.array([i % charge + 1 for i in range(len(weights))])
 
-    elem = np.core.defchararray.add(elements.astype('U'), isotope_number.astype('U'))
-    element_list = np.zeros(len(elem) * charge).astype('U')
-    for i in range(len(elem)):
-        for j in range(charge):
-            element_list[i + j + ((charge - 1) * i)] = elem[i] + '+' * (j + 1)
+    weights = weights / charge_list
 
-    idxs = find_nearest(np.copy(element_weights), target_elem, num_c)
+    # Filter elements by abundance threshold
+    abundance_threshold *= 100
+    mask_abundanc = (abundance > abundance_threshold)
+    elements = elements[mask_abundanc]
+    isotope_number = isotope_number[mask_abundanc]
+    weights = weights[mask_abundanc]
+    abundance = abundance[mask_abundanc]
 
-    element_c = element_list[idxs]
+    # Find closest elements
+    idxs = np.argsort(np.abs(weights - target_elem))[:num_elements]
 
-    element_weights_c = element_weights[idxs]
-    abundance_c = element_abundance[idxs]
+    selected_elements = elements[idxs]
+    selected_isotope_number = isotope_number[idxs]
+    selected_weights = weights[idxs]
+    selected_abundance = abundance[idxs]
+    selected_charge_list = charge_list[idxs]
+    # Create LaTeX formatted element symbols
+    element_symbols = []
+    for i in range(len(idxs)):
+        element_symbols.append(
+            r"${}^{%s}%s_{%s}$" % (selected_isotope_number[i], selected_elements[i], selected_charge_list[i]))
 
-    index_sort = np.argsort(abundance_c)
-    index_sort = np.flip(index_sort)
+    # Create DataFrame
+    df = pd.DataFrame({
+        'ion': element_symbols,
+        'mass': selected_weights,
+        'element': selected_elements,
+        'complex': np.ones(len(idxs), dtype=int),
+        'isotope': selected_isotope_number,
+        'charge': selected_charge_list,
+        'abundance': selected_abundance,
+    })
 
-    element_weights_c = element_weights_c[index_sort]
-    abundance_c = abundance_c[index_sort]
-    isotope_number_c = []
-    element_simbol_c = []
-    charge_c = []
-    num_c = []
-
-    # Make the formula in LaTeX format
-    for i in range(len(element_c)):
-        num_plus = element_c[i].count('+')
-        cc = re.findall('(\d+|[A-Za-z]+)', element_c[i])
-        if num_plus == 1:
-            cc.append('+')
-        else:
-            cc.append('%s+' % num_plus)
-        for j in range(len(cc)):
-            if cc[j].isnumeric():
-                cc[j] = int(cc[j])
-        element_c[i] = '${}^{%s}%s^{%s}$' % (cc[1], cc[0], cc[2])
-        isotope_number_c.append(cc[1])
-        element_simbol_c.append(cc[0])
-        charge_c.append(cc[2])
-        num_c.append(1)
-    df = pd.DataFrame({'ion': element_c, 'mass': element_weights_c, 'element': element_simbol_c,
-                       'complex': num_c, 'isotope': isotope_number_c, 'charge': charge_c, 'abundance': abundance_c, })
-    # Filter the DataFrame based on the "abundance" column
-    abundance_threshold = abundance_threshold * 100
-    df = df[df['abundance'] > abundance_threshold]
-    df = df.sort_values(by=['mass', 'abundance'], ascending=[False, True])
-    # Accessing the index of the sorted DataFrame
+    # Sort DataFrame
+    df = df.sort_values(by=['abundance', 'mass'], ascending=[False, True])
     df.reset_index(drop=True, inplace=True)
+
+    # Backup data if variables provided
     if variables is not None:
         variables.range_data_backup = df.copy()
+
     return df
 
 
@@ -361,6 +339,7 @@ def ranging_dataset_create(variables, row_index, mass_unknown):
         Arg:
             variables (class): The class of the variables
             row_index (int): The index of the selected row
+            mass_unknown (float): The mass of the unknown element
 
         Returns:
             None
@@ -386,7 +365,7 @@ def ranging_dataset_create(variables, row_index, mass_unknown):
     mass = selected_row[1]
     if not variables.h_line_pos:
         print('The h_line_pos is empty')
-        print('first do the ranging')
+        print('first do the ranging then add the selected ion to the ranging dataset')
         range = [0, 0]
     else:
         range = sorted(variables.h_line_pos, key=lambda x: abs(x - mass))[:2]

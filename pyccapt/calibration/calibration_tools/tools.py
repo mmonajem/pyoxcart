@@ -243,6 +243,18 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
             elif selector == 'range':
                 # connect range selector
                 line_manager = plot_vline_draw.VerticalLineManager(variables, ax1, [], [])
+
+        else:
+            if selector == 'range':
+                # connect range selector
+                line_manager = plot_vline_draw.VerticalLineManager(variables, ax1, [], [])
+                texts = []
+                for i in range(len(variables.peak)):
+                    if i in variables.peaks_idx:
+                        texts.append(
+                            plt.text(variables.peak[i], variables.peak_y[i], '%s' % '{:.2f}'.format(variables.peak[i]),
+                                     color='black',
+                                     size=10, alpha=1))
         plt.tight_layout()
         if fig_name is not None:
             if label == 'mc':
