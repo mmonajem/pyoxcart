@@ -1,3 +1,4 @@
+import itertools
 import re
 
 import matplotlib
@@ -154,8 +155,16 @@ def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, ch
     # Create LaTeX formatted element symbols
     element_symbols = []
     for i in range(len(idxs)):
-        element_symbols.append(
-            r"${}^{%s}%s_{%s}$" % (selected_isotope_number[i], selected_elements[i], selected_charge_list[i]))
+        formula = ''
+        formula += '{}^'
+        formula += '{%s}' % selected_isotope_number[i]
+        formula += '%s' % selected_elements[i]
+
+        if selected_charge_list[i] > 1:
+            formula = r'$' + formula + '^{%s+}$' % selected_charge_list[i]
+        else:
+            formula = r'$' + formula + '^{+}$'
+        element_symbols.append(formula)
 
     # Create DataFrame
     df = pd.DataFrame({
@@ -169,7 +178,7 @@ def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, ch
     })
 
     # Sort DataFrame
-    df = df.sort_values(by=['abundance', 'mass'], ascending=[False, True])
+    df = df.sort_values(by=['mass'], ascending=[True])
     df.reset_index(drop=True, inplace=True)
 
     # Backup data if variables provided
@@ -213,11 +222,11 @@ def molecule_manual(target_element, charge, latex=True, variables=None):
     complexity_list = [int(match[1]) for match in re.findall(r'([A-Z][a-z]*)(\d+)', target_element)]
 
     total_weight = 0
-    abundance_c = 0
+    abundance_c = 1
     for i, isotop in enumerate(isotope_list):
         index = np.where(isotope_number == isotop)
         total_weight += weight[index] * complexity_list[i]
-        abundance_c *= abundance[index] ** complexity_list[i]
+        abundance_c *= (abundance[index] / 100) ** complexity_list[i]
 
     total_weight = total_weight / charge
     if latex:
@@ -235,103 +244,158 @@ def molecule_manual(target_element, charge, latex=True, variables=None):
         if charge > 1:
             formula = r'$(' + formula + ')^{%s+}$' % charge
         else:
-            formula = r'$' + formula + '$'
+            formula = r'$' + formula + ')^{+}$'
     else:
         formula = target_element
 
-    df = pd.DataFrame({'ion': [formula], 'mass': [total_weight], 'element': [element_list],
-                       'complex': [complexity_list], 'isotope': [isotope_list], 'charge': [charge],
-                       'abundance': [abundance_c], })
+    if len(isotope_list) > 1:
+        element_list = [element_list]
+        total_weight = [total_weight]
+        complexity_list = [complexity_list]
+        isotope_list = [isotope_list]
+    df = pd.DataFrame({'ion': [formula], 'mass': total_weight, 'element': element_list,
+                       'complex': complexity_list, 'isotope': isotope_list, 'charge': [charge],
+                       'abundance': abundance_c, })
 
     if variables is not None:
         variables.range_data_backup = df.copy()
     return df
-    # molecule_formula = re.findall('(\d+|[A-Za-z]+)', target_element)
-    # molecule_formula = [re.split('(?<=.)(?=[A-Z])', item) for item in molecule_formula]
-    # molecule_formula = list(itertools.chain(*molecule_formula))
-    #
-    # elem_weights = []
-    # elem_abundance = []
-    # elem_compo = []
-    #
-    # for i in range(len(molecule_formula)):
-    #     if not molecule_formula[i].isnumeric():
-    #         idx_element = np.where(elements == molecule_formula[i])
-    #         elem_compo_temp = []
-    #         elem_weights_tmp = []
-    #         elem_abundance_tmp = []
-    #         for j in range(len(idx_element[0])):
-    #             if i + 1 < len(molecule_formula):
-    #                 if molecule_formula[i + 1].isnumeric():
-    #                     number_of_elem = int(molecule_formula[i + 1])
-    #                     elem_compo_temp.append(
-    #                         elements[idx_element[0][j]] + '(' + str(isotope_number[idx_element[0][j]]) + ')' + str(
-    #                             number_of_elem))
-    #                 else:
-    #                     number_of_elem = 1
-    #                     elem_compo_temp.append(
-    #                         elements[idx_element[0][j]] + '(' + str(isotope_number[idx_element[0][j]]) + ')')
-    #             else:
-    #                 number_of_elem = 1
-    #                 elem_compo_temp.append(
-    #                     elements[idx_element[0][j]] + '(' + str(isotope_number[idx_element[0][j]]) + ')')
-    #
-    #             elem_weights_tmp.append(weight[idx_element[0][j]] * number_of_elem)
-    #
-    #             abundance_i = abundance[idx_element[0][j]] / 100
-    #             if number_of_elem > 1:
-    #                 abundance_i = abundance_i ** number_of_elem
-    #
-    #             elem_abundance_tmp.append(abundance_i)
-    #         elem_compo.append(elem_compo_temp)
-    #         elem_weights.append(elem_weights_tmp)
-    #         elem_abundance.append(elem_abundance_tmp)
-    #
-    # list_elem_compo = list(itertools.product(*elem_compo))
-    # list_elem_weights = list(itertools.product(*elem_weights))
-    # list_elem_abundance = list(itertools.product(*elem_abundance))
-    #
-    # list_elem_compo = [''.join(item) for item in list_elem_compo]
-    # num_element = len(list_elem_compo)
-    #
-    # list_elem_weights = [sum(item) for item in list_elem_weights]
-    # list_elem_abundance = [math.prod(item) for item in list_elem_abundance]
-    # list_elem_abundance = [item * 100 for item in list_elem_abundance]
-    #
-    # # duplicate the list base on the charge
-    # list_elem_compo = [item for item in list_elem_compo for _ in range(charge)]
-    # list_elem_weights = [val / (charge / x) for val in list_elem_weights for x in range(charge, 0, -1)]
-    # list_elem_abundance = [item for item in list_elem_abundance for _ in range(charge)]
-    # list_elem_charge = [x for x in range(1, charge + 1)] * num_element
-    # if latex:
-    #     for i in range(len(list_elem_compo)):
-    #         list_elem_compo[i] = create_formula_latex(list_elem_compo[i], list_elem_charge[i])
-    #
-    # df = pd.DataFrame({'molecule': list_elem_compo, 'weight': list_elem_weights, 'abundance': list_elem_abundance})
-    # # df = pd.DataFrame({'ion': element_c, 'mass': element_weights_c, 'element': element_simbol_c,
-    # #                    'complex': num_c, 'isotope': isotope_number_c, 'charge': charge_c, 'abundance': abundance_c,})
-    # # Filter the DataFrame based on the "abundance" column
-    # abundance_threshold = abundance_threshold * 100
-    # df = df[df['abundance'] > abundance_threshold]
-    # df = df.sort_values(by=['weight', 'abundance'], ascending=[False, True])
-    # # Accessing the index of the sorted DataFrame
-    # df.reset_index(drop=True, inplace=True)
-    # if variables is not None:
-    #     variables.range_data_backup = df.copy()
-    # return df
 
 
-def molecule_create(element_list, complexity, charge, latex=True):
+def transform_combination_and_isotopes(combination, isotopes):
+    new_combination = []
+    new_isotopes = []
+    complexity = []
+
+    for element, isotope in zip(combination, isotopes):
+        if element not in new_combination:
+            new_combination.append(element)
+            new_isotopes.append(isotope)
+            complexity.append(1)
+        else:
+            index = new_combination.index(element)
+            if isotope != new_isotopes[index]:
+                new_combination.append(element)
+                new_isotopes.append(isotope)
+                complexity.append(1)
+            else:
+                complexity[index] += 1
+
+    return new_combination, new_isotopes, complexity
+
+
+def molecule_create(element_list, max_complexity, charge, abundance_threshold, variables=None, latex=True):
     isotopeTableFile = '../../../files/isotopeTable.h5'
     dataframe = data_tools.read_hdf5_through_pandas(isotopeTableFile)
     elements = dataframe['element'].to_numpy()
     isotope_number = dataframe['isotope'].to_numpy()
     abundance = dataframe['abundance'].to_numpy()
     weight = dataframe['weight'].to_numpy()
+    element_list = element_list.split(',')
+    element_list = [s.replace(' ', '') for s in element_list]
+    indices_elements = np.where(np.isin(elements, [element_list]))
+    selected_elements = elements[indices_elements[0]]
+    selected_isotope_number = isotope_number[indices_elements[0]]
+    selected_weights = weight[indices_elements[0]]
+    selected_abundance = abundance[indices_elements[0]]
 
-    indices_elements = [np.where(elements == element)[0] for element in element_list]
+    # Create a list of elements with their respective isotope numbers, weights, and abundances
+    element_data = [{'element': elem, 'isotope': iso, 'weight': w, 'abundance': ab}
+                    for elem, iso, w, ab in zip(selected_elements, selected_isotope_number, selected_weights,
+                                                selected_abundance)]
+    # Initialize lists to store results
+    combinations = []
+    combinations_list = []
+    combination_weights = []
+    combination_isotopes = []
+    combination_abundances = []
+    combination_charge = []
+    combination_complexity = []
+    combination_formula = []
+    # Generate all possible combinations with complexity 3
+    for combo in itertools.product(element_data, repeat=max_complexity):
+        combo_elements = [elem['element'] for elem in combo]
+        combo_weights = [elem['weight'] for elem in combo]
+        combo_abundances = [elem['abundance'] for elem in combo]
 
+        combo_weight = sum(combo_weights)
+        combo_abundance = 1.0
 
+        for ab in combo_abundances:
+            combo_abundance *= ab / 100
+        for i in range(charge):
+            combinations.append(combo_elements)
+            combinations_list.append(combo_elements)
+            combination_weights.append(combo_weight / (i + 1))
+            combination_isotopes.append([elem['isotope'] for elem in combo])
+            combination_abundances.append(combo_abundance)
+            combination_charge.append(i + 1)
+
+    for i in range(len(combinations)):
+        new_combination, new_isotopes, complexity = transform_combination_and_isotopes(combinations[i],
+                                                                                       combination_isotopes[i])
+        combinations[i] = new_combination
+        combination_isotopes[i] = new_isotopes
+        combination_complexity.append(complexity)
+        charge = combination_charge[i]
+        if latex:
+            formula = ''
+            for i in range(len(new_isotopes)):
+                isotope = new_isotopes[i]
+                element = new_combination[i]
+                comp = complexity[i]
+
+                formula += '{}^'
+                formula += '{%s}' % isotope
+                formula += '%s' % element
+                if comp != 1:
+                    formula += '_{%s}' % comp
+            if charge > 1:
+                formula = r'$(' + formula + ')^{%s+}$' % charge
+            else:
+                formula = r'$' + formula + '$'
+        else:
+            element_counts = {}
+            chemical_formula = ''
+
+            for element in element_list:
+                if element in element_counts:
+                    element_counts[element] += 1
+                else:
+                    element_counts[element] = 1
+
+            for element, count in element_counts.items():
+                chemical_formula += element
+                if count > 1:
+                    chemical_formula += str(count)
+            formula = chemical_formula
+        combination_formula.append(formula)
+
+    # Create DataFrame
+    df = pd.DataFrame({
+        'ion': combination_formula,
+        'mass': combination_weights,
+        'element': combinations,
+        'complex': combination_complexity,
+        'isotope': combination_isotopes,
+        'charge': combination_charge,
+        'abundance': combination_abundances,
+    })
+
+    df = df[df['abundance'] > abundance_threshold]
+
+    # Reset the index
+    df = df.reset_index(drop=True)
+
+    # Sort DataFrame
+    df = df.sort_values(by=['mass'], ascending=[True])
+    df.reset_index(drop=True, inplace=True)
+
+    # Backup data if variables provided
+    if variables is not None:
+        variables.range_data_backup = df.copy()
+
+    return df
 def ranging_dataset_create(variables, row_index, mass_unknown):
     """
     This function is used to create the ranging dataset
@@ -361,7 +425,6 @@ def ranging_dataset_create(variables, row_index, mass_unknown):
         print('The element is not color list')
         color = fake.hex_color()
 
-    print(selected_row)
     mass = selected_row[1]
     if not variables.h_line_pos:
         print('The h_line_pos is empty')
@@ -372,6 +435,8 @@ def ranging_dataset_create(variables, row_index, mass_unknown):
         mc = sorted(variables.peak, key=lambda x: abs(x - mass))[:1]
         index_mc = [index for index, value in enumerate(variables.peak) if value == mc]
         mc_peak_height = variables.peak_y[index_mc[0]]
+
+    print(mc_peak_height)
     selected_row.insert(2, mc[0])
     selected_row.insert(3, range[0])
     selected_row.insert(4, range[1])

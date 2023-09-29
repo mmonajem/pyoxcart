@@ -89,7 +89,6 @@ pyccapt/
    ```bash
    pip install -e .
    ```
-   
 
 After installation, you can run the control GUI by entering the following command in the console:
 
@@ -97,15 +96,20 @@ After installation, you can run the control GUI by entering the following comman
    python pyccapt
    ```
 
-After running the above commands, you can now import and use them in your main project or any 
-other Python scripts within your project. For example:
+To start the tutorial, please follow these steps:
+
+1- Open your terminal.
+
+2- Navigate to the project folder using the cd command.
+
+3- Once you're inside the project folder, go to the tutorial folder by running the following command:
 
    ```bash
-  from pyccapt.calibration.data_tools import data_loadcrop
-  from pyccapt.control.devices import edwards_tic
+   Jupyter lab
    ```
 
 --------------
+
 # Documentation
 
 The latest documentation is available on
