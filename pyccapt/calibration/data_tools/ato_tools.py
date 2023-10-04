@@ -1,5 +1,4 @@
 import struct
-from itertools import chain
 
 import numpy as np
 import pandas as pd
@@ -72,17 +71,17 @@ def ato_to_ccapt(file_path: str, mode: str) -> pd.DataFrame:
                                    'mcp_amp': mcp_amp,
                                    'num_cluster': num_cluster,
                                    'cluster_id': cluster_id})
-        elif mode == 'PyCCAPT':
-	        data_f = pd.DataFrame({
-		        'x (nm)': np.zeros(len(dc_voltage)),
-		        'y (nm)': np.zeros(len(dc_voltage)),
-		        'z (nm)': np.zeros(len(dc_voltage)),
-		        'mc_c (Da)': np.zeros(len(dc_voltage)),
-		        'mc (Da)': np.zeros(len(dc_voltage)),
-		        'high_voltage (V)': dc_voltage,
-		        'pulse': np.zeros(len(dc_voltage)),
-		        'start_counter': np.zeros(len(dc_voltage)),
-		        't_c (ns)': np.zeros(len(dc_voltage)),
+        elif mode == 'pyccapt':
+            data_f = pd.DataFrame({
+                'x (nm)': np.zeros(len(dc_voltage)),
+                'y (nm)': np.zeros(len(dc_voltage)),
+                'z (nm)': np.zeros(len(dc_voltage)),
+                'mc_c (Da)': np.zeros(len(dc_voltage)),
+                'mc (Da)': np.zeros(len(dc_voltage)),
+                'high_voltage (V)': dc_voltage,
+                'pulse': np.zeros(len(dc_voltage)),
+                'start_counter': np.zeros(len(dc_voltage)),
+                't_c (ns)': np.zeros(len(dc_voltage)),
                 't (ns)': tof,
                 'mc (Da)': mc,
                 'x_det (mm)': x_det,
@@ -92,36 +91,59 @@ def ato_to_ccapt(file_path: str, mode: str) -> pd.DataFrame:
     return data_f
 
 
-def ccapt_to_ato(data, path=None, name=None):
+def ccapt_to_ato(file_path: str, data_frame: pd.DataFrame, mode: str):
     """
-    Converts CCAPT data to ATO file format.
-        Args:
-        data (pd.DataFrame): Input data containing the columns:
-            'x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)', 't (ns)', 'high_voltage (V)', 'pulse (V)', 'x_det (cm)',
-            'y_det (cm)', 'pulse_pi', 'ion_pp'.
-        path (str): Optional path to save the ATO file. If not provided, the file will not be saved.
-        name (str): Optional name for the ATO file. If not provided, the file will not be named.
+    Convert a pyccapt data frame to an .ato binary format file.
+
+    Args:
+        file_path: Path to save the .ato file
+        data_frame: Pandas DataFrame containing pyccapt data
+        mode: Type of mode (oxcart/ato)
 
     Returns:
-        bytes: ATO file data.
-
+        None
     """
-    # TODO: correct it for ato files
-    dd = data[
-        ['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)', 't (ns)', 'high_voltage (V)', 'pulse', 'x_det (cm)',
-         'y_det (cm)',
-         'pulse_pi', 'ion_pp']]
+    with open(file_path, 'wb') as f:
+        num_atoms = len(data_frame)
 
-    dd = dd.astype(np.single)
-    dd = dd.astype({'pulse_pi': np.uintc})
-    dd = dd.astype({'ion_pp': np.uintc})
+        # Write zero, version, and num_atoms
+        f.write(struct.pack('i', 0))
+        f.write(struct.pack('i', 6))  # Version 6
+        f.write(struct.pack('i', num_atoms))
 
-    records = dd.to_records(index=False)
-    list_records = list(records)
-    d = tuple(chain(*list_records))
-    ato = struct.pack('>' + 'IihhfffhhHHb' * len(dd), *d)
-    if name is not None:
-        with open(path + name, 'w+b') as f:
-            f.write(ato)
+        for i in range(num_atoms):
+            atom_id = data_frame['atom_id'].iloc[i]
+            pulse_pi = data_frame['pulse_pi'].iloc[i]
+            x = int(data_frame['x (nm)'].iloc[i])
+            y = int(data_frame['y (nm)'].iloc[i])
+            z = int(data_frame['z (nm)'].iloc[i] * 10)
+            mc = data_frame['mc (Da)'].iloc[i]
+            tof = int(data_frame['tof (ns)'].iloc[i] / 1000)
+            x_det = int(data_frame['x_det (mm)'].iloc[i] * 100)
+            y_det = int(data_frame['y_det (mm)'].iloc[i] * 100)
+            dc_voltage = int(data_frame['dc_voltage (V)'].iloc[i] * 2)
+            mcp_amp = int(data_frame['mcp_amp'].iloc[i])
+            num_cluster = data_frame['num_cluster'].iloc[i]
+            cluster_id = data_frame['cluster_id'].iloc[i]
 
-    return ato
+            # Write atom data
+            f.write(struct.pack('I', atom_id))
+            f.write(struct.pack('i', pulse_pi))
+            f.write(struct.pack('h', x))
+            f.write(struct.pack('h', y))
+            f.write(struct.pack('f', z / 10.0))
+            f.write(struct.pack('f', mc))
+            f.write(struct.pack('f', tof))
+            f.write(struct.pack('h', x_det))
+            f.write(struct.pack('h', y_det))
+            f.write(struct.pack('H', dc_voltage))
+            f.write(struct.pack('H', mcp_amp))
+            f.write(struct.pack('B', num_cluster))
+
+            if num_cluster > 0:
+                f.write(struct.pack('H' * num_cluster, *cluster_id))
+
+        if mode == 'pyccapt':
+            # Append additional data for PyCCAPT mode
+            additional_data = np.zeros(num_atoms)
+            f.write(struct.pack('d' * num_atoms, *additional_data))

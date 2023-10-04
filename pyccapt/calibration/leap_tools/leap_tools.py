@@ -120,6 +120,33 @@ def read_rrng(file_path):
     return ions, rrngs
 
 
+def write_rrng(file_path, ions, rrngs):
+    """
+    Writes two DataFrames of 'ions' and 'ranges' to a .rrng file in IVAS format.
+
+    Parameters:
+    - file_path (str): The path to the .rrng file to be created.
+    - ions (DataFrame): A DataFrame containing ion data with columns 'number' and 'name'.
+    - rrngs (DataFrame): A DataFrame containing range data with columns 'number', 'lower', 'upper', 'vol', 'comp',
+      and 'color'.
+
+    Returns:
+    None
+    """
+    with open(file_path, 'w') as f:
+        # Write ion data
+        f.write('[Ions]\n')
+        for index, row in ions.iterrows():
+            ion_line = f'Ion{index}={row["name"]}\n'
+            f.write(ion_line)
+
+        # Write range data
+        f.write('[Ranges]\n')
+        for index, row in rrngs.iterrows():
+            range_line = f'Range{index}={row["lower"]:.2f} {row["upper"]:.2f} Vol:{row["vol"]:.2f} {row["comp"]} Color:{row["color"]}\n'
+            f.write(range_line)
+
+
 def label_ions(pos, rrngs):
     """
     Labels ions in a .pos or .epos DataFrame (anything with a 'Da' column) with composition and color,
