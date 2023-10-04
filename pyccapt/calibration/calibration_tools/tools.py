@@ -77,7 +77,6 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
         print('Peak finding failed.')
         peaks_find = False
 
-
     if plot:
         fig1, ax1 = plt.subplots(figsize=fig_size)
         if ranging and hist_color_range:
