@@ -88,6 +88,7 @@ class Variables:
         self.y = np.zeros(0)
         self.z = np.zeros(0)
         self.dld_high_voltage = np.zeros(0)
+        self.dld_pulse = np.zeros(0)
         self.dld_t_calib = np.zeros(0)
         self.dld_t_calib_backup = np.zeros(0)
         self.mc = np.zeros(0)

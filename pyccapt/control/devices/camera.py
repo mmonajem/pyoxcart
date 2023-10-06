@@ -132,7 +132,7 @@ class Cameras:
 				self.light_switch()
 				self.variables.light_switch = False
 
-			time.sleep(0.1)
+			time.sleep(0.2)
 
 			if not self.variables.flag_camera_grab:
 				break
@@ -149,9 +149,9 @@ class Cameras:
 		"""
 		if self.variables.light:
 			self.cameras[0].Open()
-			self.cameras[0].ExposureTime.SetValue(400)
+			self.cameras[0].ExposureTime.SetValue(4000)
 			self.cameras[1].Open()
-			self.cameras[1].ExposureTime.SetValue(2000)
+			self.cameras[1].ExposureTime.SetValue(4000)
 		elif not self.variables.light:
 			self.cameras[0].Open()
 			self.cameras[0].ExposureTime.SetValue(800000)

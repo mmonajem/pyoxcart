@@ -2,20 +2,14 @@ import numpy as np
 
 
 class VerticalLineManager:
-	def __init__(self, variables, ax, x, y):
+	def __init__(self, variables, ax, fig, x, y):
 		self.ax = ax
-		self.fig = ax.figure
+		self.fig = fig
 		self.lines = []
 		self.variables = variables
 		self.active_line = None
 		self.x = x
 		self.y = y
-		self.cid_press = self.fig.canvas.mpl_connect('button_press_event', self.on_press)
-		self.cid_release = self.fig.canvas.mpl_connect('button_release_event', self.on_release)
-		self.cid_motion = self.fig.canvas.mpl_connect('motion_notify_event', self.on_motion)
-		self.cid_key_press = self.fig.canvas.mpl_connect('key_press_event', self.on_key_press)
-		self.cid_scroll = self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
-		self.cid_key_release = self.fig.canvas.mpl_connect('key_release_event', self.on_key_release)
 		self.shift_is_pressed = False
 		self.ctrl_is_pressed = False
 
@@ -26,6 +20,7 @@ class VerticalLineManager:
 		self.ax.set_yscale('log')
 
 	def on_press(self, event):
+		print('on_press')
 		if self.ctrl_is_pressed and event.button == 1:  # if control is pressed and left mouse button is clicked
 			closest_line = min(self.lines, key=lambda line: abs(line.get_xdata()[0] - event.xdata))
 			self.active_line = closest_line
@@ -72,7 +67,7 @@ class VerticalLineManager:
 			self.lines.clear()
 			self.variables.h_line_pos.clear()
 			self.fig.canvas.draw()
-		if event.key == 'control':
+		elif event.key == 'control':
 			self.ctrl_is_pressed = True
 
 	def on_key_release(self, event):
@@ -96,16 +91,14 @@ class VerticalLineManager:
 
 
 class HorizontalZoom:
-	def __init__(self, ax):
+	def __init__(self, ax, fig):
 		self.ax = ax
-		self.fig = ax.figure
-		self.cid_key_press = self.fig.canvas.mpl_connect('key_press_event', self.on_key_press)
-		self.cid_scroll = self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
-		self.cid_key_release = self.fig.canvas.mpl_connect('key_release_event', self.on_key_release)
+		self.fig = fig
 		self.shift_is_pressed = False
 		self.zoom_factor = 1.1
 
 	def on_key_press(self, event):
+		print('key pressed')
 		if event.key == 'shift':
 			print('shift pressed')
 			self.shift_is_pressed = True

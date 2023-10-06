@@ -28,6 +28,8 @@ def fit_background(x, a, b):
 
 class AptHistPlotter:
     def __init__(self, mc_tof, variables=None):
+        self.fig = None
+        self.ax = None
         self.mc_tof = mc_tof
         self.variables = variables
         self.x = None
@@ -54,21 +56,19 @@ class AptHistPlotter:
             self.peak_widths = None
             self.prominences = None
 
-    def plot_histogram(self, bin_width=0.1, mode='count', label='mc', log=True, steps='stepfilled', fig_size=(9, 5)):
+    def plot_histogram(self, bin_width=0.1, mode=None, label='mc', log=True, steps='stepfilled', fig_size=(9, 5)):
         # Define the bins
         bins = np.linspace(np.min(self.mc_tof), np.max(self.mc_tof), round(np.max(self.mc_tof) / bin_width))
 
         # Plot the histogram directly
         self.fig, self.ax = plt.subplots(figsize=fig_size)
-        steps = 'stepfilled' if steps == 'stepfilled' else 'bar'
 
-        if mode == 'count':
-            self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=bins, alpha=0.9, color='slategray', edgecolor='k',
-                                        histtype=steps)
-        elif mode == 'normalized':
-            self.y, self.x, self.patches = self.ax.hist((self.mc_tof / bin_width) / len(self.mc_tof), bins=bins, alpha=0.9,
-                                        color='slategray', edgecolor='k', histtype=steps)
-
+        if mode == 'normalized':
+            self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=bins, alpha=0.9,
+                                                        color='slategray', edgecolor='k', histtype=steps, density=True)
+        else:
+            self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=bins, alpha=0.9, color='slategray',
+                                                        histtype=steps)
         self.ax.set_xlabel('Mass/Charge [Da]' if label == 'mc' else 'Time of Flight [ns]')
         self.ax.set_ylabel('Frequency [cts]')
         self.ax.set_yscale('log' if log else 'linear')
@@ -76,21 +76,27 @@ class AptHistPlotter:
         plt.show()
 
     def plot_range(self, range_data, legend=True):
-        colors = range_data['color'].tolist()
-        mc_low = range_data['mc_low'].tolist()
-        mc_up = range_data['mc_up'].tolist()
-        ion = range_data['ion'].tolist()
+        if len(self.patches) == len(self.x) - 1:
+            colors = range_data['color'].tolist()
+            mc_low = range_data['mc_low'].tolist()
+            mc_up = range_data['mc_up'].tolist()
+            ion = range_data['ion'].tolist()
+            color_mask = np.full((len(self.x)), '#708090')  # default color is slategray
+            for i in range(len(ion)):
+                mask = np.logical_and(self.x >= mc_low[i], self.x <= mc_up[i])
+                color_mask[mask] = colors[i]
 
-        for i in range(len(ion)):
-            mask = np.logical_and(self.x[:-1] >= mc_low[i], self.x[1:] <= mc_up[i])
-            for patch in np.array(self.patches)[mask]:
-                patch.set_facecolor(colors[i])
+            for i in range(len(self.x) - 1):
+                if color_mask[i] != '#708090':
+                    self.patches[i].set_facecolor(color_mask[i])
 
-            # Store the labels for the legend
-            self.legend_colors.append((r'%s' %ion[i], plt.Rectangle((0, 0), 1, 1, fc=colors[i])))
+            for i in range(len(ion)):
+                self.legend_colors.append((r'%s' % ion[i], plt.Rectangle((0, 0), 1, 1, fc=colors[i])))
 
-        if legend:
-            self.plot_color_legend()
+            if legend:
+                self.plot_color_legend(loc='center right')
+        else:
+            print('plot_range only works in plot_histogram mode=bar')
 
     def plot_peaks(self, range_data=None, mode='peaks'):
 
@@ -127,14 +133,30 @@ class AptHistPlotter:
             # connect peak selector
             af = intractive_point_identification.AnnoteFinder(self.x[self.peaks], self.y[self.peaks], self.annotates,
                                                               self.variables, ax=self.ax)
-            self.fig.canvas.mpl_connect('button_press_event', af)
+            self.fig.canvas.mpl_connect('button_press_event', lambda event: af.annotates_plotter(event))
+
             zoom_manager = plot_vline_draw.HorizontalZoom(self.ax)
+            self.fig.canvas.mpl_connect('key_press_event', lambda event: zoom_manager.on_key_press(event))
+            self.fig.canvas.mpl_connect('key_release_event', lambda event: zoom_manager.on_key_release(event))
+            self.fig.canvas.mpl_connect('scroll_event', lambda event: zoom_manager.on_scroll(event))
         elif selector == 'range':
             # connect range selector
-            line_manager = plot_vline_draw.VerticalLineManager(self.variables, self.ax, [], [])
+            line_manager = plot_vline_draw.VerticalLineManager(self.variables, self.ax, self.fig, [], [])
+
+            self.fig.canvas.mpl_connect('button_press_event',
+                                        lambda event: line_manager.on_press(event))
+            self.fig.canvas.mpl_connect('button_release_event',
+                                        lambda event: line_manager.on_release(event))
+            self.fig.canvas.mpl_connect('motion_notify_event',
+                                        lambda event: line_manager.on_motion(event))
+            self.fig.canvas.mpl_connect('key_press_event',
+                                        lambda event: line_manager.on_key_press(event))
+            self.fig.canvas.mpl_connect('scroll_event', lambda event: line_manager.on_scroll(event))
+            self.fig.canvas.mpl_connect('key_release_event',
+                                        lambda event: line_manager.on_key_release(event))
 
     def plot_color_legend(self, loc):
-        self.ax.legend([label[1] for label in self.legend_labels], [label[0] for label in self.legend_labels],
+        self.ax.legend([label[1] for label in self.legend_colors], [label[0] for label in self.legend_colors],
                        loc=loc)
 
     def plot_hist_info_legend(self, label='mc', bin=0.1, background=None, loc='left'):

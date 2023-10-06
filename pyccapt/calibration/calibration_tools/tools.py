@@ -237,16 +237,30 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
             elif selector == 'peak':
                 # connect peak selector
                 af = intractive_point_identification.AnnoteFinder(x[peaks], y[peaks], annotes, variables, ax=ax1)
-                fig1.canvas.mpl_connect('button_press_event', af)
-                zoom_manager = plot_vline_draw.HorizontalZoom(ax1)
+                fig1.canvas.mpl_connect('button_press_event', lambda event: af.annotates_plotter(event))
+                zoom_manager = plot_vline_draw.HorizontalZoom(ax1, fig1)
+                fig1.canvas.mpl_connect('key_press_event', lambda event: zoom_manager.on_key_press(event))
+                fig1.canvas.mpl_connect('key_release_event', lambda event: zoom_manager.on_key_release(event))
+                fig1.canvas.mpl_connect('scroll_event', lambda event: zoom_manager.on_scroll(event))
             elif selector == 'range':
                 # connect range selector
-                line_manager = plot_vline_draw.VerticalLineManager(variables, ax1, [], [])
+                line_manager = plot_vline_draw.VerticalLineManager(variables, ax1, fig1, [], [])
+                fig1.canvas.mpl_connect('button_press_event',
+                                        lambda event: line_manager.on_press(event))
+                fig1.canvas.mpl_connect('button_release_event',
+                                        lambda event: line_manager.on_release(event))
+                fig1.canvas.mpl_connect('motion_notify_event',
+                                        lambda event: line_manager.on_motion(event))
+                fig1.canvas.mpl_connect('key_press_event',
+                                        lambda event: line_manager.on_key_press(event))
+                fig1.canvas.mpl_connect('scroll_event', lambda event: line_manager.on_scroll(event))
+                fig1.canvas.mpl_connect('key_release_event',
+                                        lambda event: line_manager.on_key_release(event))
 
         else:
             if selector == 'range':
                 # connect range selector
-                line_manager = plot_vline_draw.VerticalLineManager(variables, ax1, [], [])
+                line_manager = plot_vline_draw.VerticalLineManager(variables, ax1, fig1, [], [])
                 texts = []
                 for i in range(len(variables.peak)):
                     if i in variables.peaks_idx:

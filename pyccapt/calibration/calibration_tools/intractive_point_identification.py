@@ -44,23 +44,23 @@ class AnnoteFinder(object):
         self.links = []
         self.variables = variables
 
-    def __call__(self, event):
-        """
-        Callback function to handle button press event.
+    def annotates_plotter(self, event):
+	    """
+		Callback function to handle button press event.
 
-        Args:
-            event (Event): The matplotlib event object.
-        """
-        if event.inaxes:
-            clickX = event.xdata
-            clickY = event.ydata
-            if (self.ax is None) or (self.ax is event.inaxes):
+		Args:
+			event (Event): The matplotlib event object.
+		"""
+	    if event.inaxes:
+		    clickX = event.xdata
+		    clickY = event.ydata
+		    if (self.ax is None) or (self.ax is event.inaxes):
                 annotes = []
                 for x, y, a in self.data:
                     if ((clickX - self.xtol < x < clickX + self.xtol) and
                             (clickY - self.ytol < y < clickY + self.ytol)):
                         annotes.append(
-                            (self.distance(x, clickX, y, clickY), x, y, a))
+	                        (distances(x, clickX, y, clickY), x, y, a))
                 if annotes:
                     annotes.sort()
                     distance, x, y, annote = annotes[0]
@@ -73,20 +73,7 @@ class AnnoteFinder(object):
                     for l in self.links:
                         l.drawSpecificAnnote(annote)
 
-    def distance(self, x1, x2, y1, y2):
-        """
-        Calculate the Euclidean distance between two points.
 
-        Args:
-            x1 (float): X-coordinate of the first point.
-            x2 (float): X-coordinate of the second point.
-            y1 (float): Y-coordinate of the first point.
-            y2 (float): Y-coordinate of the second point.
-
-        Returns:
-            float: The Euclidean distance between the two points.
-        """
-        return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
 
     def drawAnnote(self, ax, x, y, annote):
@@ -108,7 +95,7 @@ class AnnoteFinder(object):
             # Draw the annotation without the dash "-"
             t = ax.text(x + x_offset, y, str(annote), ha='right', va='center')
 
-            m = ax.scatter([x], [y], marker='d', c='r', zorder=100)
+            m = ax.scatter([x], [y], marker='H', c='r', zorder=100)
             self.drawnAnnotations[(x, y)] = (t, m)
             self.ax.figure.canvas.draw_idle()
 
@@ -137,12 +124,28 @@ class AnnoteFinder(object):
         self.variables.peaks_idx.sort()
 
     def drawSpecificAnnote(self, annote):
-        """
-        Draw specific annotation on the plot.
+	    """
+		Draw specific annotation on the plot.
 
-        Args:
-            annote (str): The annotation to be drawn.
-        """
-        annotesToDraw = [(x, y, a) for x, y, a in self.data if a == annote]
-        for x, y, a in annotesToDraw:
-            self.drawAnnote(self.ax, x, y, a)
+		Args:
+			annote (str): The annotation to be drawn.
+		"""
+	    annotesToDraw = [(x, y, a) for x, y, a in self.data if a == annote]
+	    for x, y, a in annotesToDraw:
+		    self.drawAnnote(self.ax, x, y, a)
+
+
+def distances(x1, x2, y1, y2):
+	"""
+	Calculate the Euclidean distance between two points.
+
+	Args:
+		x1 (float): X-coordinate of the first point.
+		x2 (float): X-coordinate of the second point.
+		y1 (float): Y-coordinate of the first point.
+		y2 (float): Y-coordinate of the second point.
+
+	Returns:
+		float: The Euclidean distance between the two points.
+	"""
+	return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
