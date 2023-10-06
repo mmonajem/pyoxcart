@@ -213,16 +213,16 @@ class AptHistPlotter:
 
         if mode == 'aspls':
             baseline_fitter = Baseline(x_data=self.bins[:-1])
-            fit_1, params_1 = baseline_fitter.aspls(y, lam=lam, tol=tol, max_iter=max_iter)
+            fit_1, params_1 = baseline_fitter.aspls(self.y, lam=lam, tol=tol, max_iter=max_iter)
 
         if mode == 'fabc':
-            fit_2, params_2 = pybaselines.classification.fabc(y, lam=lam,
+            fit_2, params_2 = pybaselines.classification.fabc(self.y, lam=lam,
                                                               num_std=num_std,
                                                               pad_kwargs='edges')
         if mode == 'dietrich':
-            fit_2, params_2 = pybaselines.classification.dietrich(y, num_std=num_std)
+            fit_2, params_2 = pybaselines.classification.dietrich(self.y, num_std=num_std)
         if mode == 'cwt_br':
-            fit_2, params_2 = pybaselines.classification.cwt_br(y, poly_order=poly_order,
+            fit_2, params_2 = pybaselines.classification.cwt_br(self.y, poly_order=poly_order,
                                                                 num_std=num_std,
                                                                 tol=tol)
         if mode == 'selective_mask_t':
