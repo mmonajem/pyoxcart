@@ -244,14 +244,6 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
                 voltage_data.extend(dc_voltage_tmp)
                 pulse_data.extend(v_p_voltage_tmp)
 
-                if time.time() - save_data_time > 600:
-                    np.save(variables.path + "/x_data.npy", np.array(xx_list))
-                    np.save(variables.path + "/y_data.npy", np.array(yy_list))
-                    np.save(variables.path + "/t_data.npy", np.array(tt_list))
-                    np.save(variables.path + "/voltage_data.npy", np.array(voltage_data))
-                    np.save(variables.path + "/pulse_data.npy", np.array(pulse_data))
-                    save_data_time = time.time()
-                    print("Data saved.")
 
                 x_plot.put(xx_tmp)
                 y_plot.put(yy_tmp)
@@ -268,6 +260,22 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
                 voltage_data_tdc.extend((np.tile(specimen_voltage, len(channel_data_tmp))).tolist())
                 pulse_data_tdc.extend((np.tile(pulse_voltage, len(channel_data_tmp))).tolist())
 
+        if time.time() - save_data_time > 120:
+            np.save(variables.path + "/x_data.npy", np.array(xx_list))
+            np.save(variables.path + "/y_data.npy", np.array(yy_list))
+            np.save(variables.path + "/t_data.npy", np.array(tt_list))
+            np.save(variables.path + "/voltage_data.npy", np.array(voltage_data))
+            np.save(variables.path + "/pulse_data.npy", np.array(pulse_data))
+            np.save(variables.path + "/start_counter.npy", np.array(start_counter))
+
+            np.save(variables.path + "/channel_data.npy", np.array(channel_data))
+            np.save(variables.path + "/time_data.npy", np.array(time_data))
+            np.save(variables.path + "/tdc_start_counter.npy", np.array(tdc_start_counter))
+            np.save(variables.path + "/voltage_data_tdc.npy", np.array(voltage_data_tdc))
+            np.save(variables.path + "/pulse_data_tdc.npy", np.array(pulse_data_tdc))
+
+            save_data_time = time.time()
+            print("Data saved.")
         # Update the counter
 
         # Calculate the detection rate
@@ -282,8 +290,6 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
             events_detected_tmp = 0
             start_time = current_time
 
-
-
         elif eventtype == QUEUE_ENDOFMEAS:
             retcode = bufdatacb.start_measurement(100, retries=10)  # retries is the number of times to retry
             if retcode < 0:
@@ -296,7 +302,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
         #     break
 
         if time.time() - start_time_loop > 0.1:
-	        loop_time += 1
+            loop_time += 1
         loop_counter += 1
     flag_stop_data_thread = True
     print("for %s times loop time took longer than 0.1 second" % loop_time, 'out of %s iteration' % loop_counter)
