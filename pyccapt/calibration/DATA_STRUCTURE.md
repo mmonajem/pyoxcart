@@ -26,17 +26,16 @@ There is also possibility to convert the PyCCAPT HDF5 file data to EPOS, POS, AT
 example code in the tutorial section.
 
 
-### HDF5 file structure of PyCCAPT range file
+### Range HDF5 file structure of PyCCAPT 
 
 The range file contains the range of the mass-to-charge ratio. The range file is a HDF5 file with the following
 
 - `ion`: Ions name in latex format (string).
-- `mass`: The mass-to-charge ratio of the peak base on the elements weight (float64).
+- `mass`: The mass-to-charge ratio of the peak base on the elements weight and complexity (float64).
 - `mc`: Mass-to-charge ratio in the dataset for the peak (float64).
 - `mc_low`: The lower bound of the mass-to-charge ratio in the dataset for the peak (float64).
 - `mc_up`: The upper bound of the mass-to-charge ratio in the dataset for the peak (float64).
 - `color`: The color of the peak in the plot (hex).
-- `peak_count`: The maximum ions number in the peak.
 - `element`: list of elements in the peak (list of string).
 - `complex`: complexity of the element (integer).
 - `isotope`: isotope list of element (list of integer).
