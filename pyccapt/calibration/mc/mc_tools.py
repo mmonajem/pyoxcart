@@ -67,7 +67,7 @@ def tof2mc(t: int, t0: int, V: float, xDet: int, yDet: int,
         alpha = 1.015
         # cThe value of b is less
         # than one, accounting for the fact that the ions field evaporate,
-        # on average, not at the peak of the evaporation pulse, but
+        # on average, not at the peak_x of the evaporation pulse, but
         # during the ascending and descending edges of the incoming
         # evaporation pulse.
         beta = 0.7

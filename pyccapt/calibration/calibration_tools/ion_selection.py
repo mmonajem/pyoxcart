@@ -432,16 +432,13 @@ def ranging_dataset_create(variables, row_index, mass_unknown):
         range = [0, 0]
     else:
         range = sorted(variables.h_line_pos, key=lambda x: abs(x - mass))[:2]
-        mc = sorted(variables.peak, key=lambda x: abs(x - mass))[:1]
-        index_mc = [index for index, value in enumerate(variables.peak) if value == mc]
-        mc_peak_height = variables.peak_y[index_mc[0]]
+        mc = sorted(variables.peak_x, key=lambda x: abs(x - mass))[:1]
+        index_mc = [index for index, value in enumerate(variables.peak_x) if value == mc]
 
-    print(mc_peak_height)
     selected_row.insert(2, mc[0])
     selected_row.insert(3, range[0])
     selected_row.insert(4, range[1])
     selected_row.insert(5, color)
-    selected_row.insert(6, int(mc_peak_height))
 
     # Add the row to the DataFrame using the .loc method
 

@@ -89,7 +89,7 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
     - sample_size (string): Sample size.
     - mode (string): Mode ('ion_seq'/'voltage').
     - calibration_mode (string): Type of calibration mode (tof/mc).
-    - peak_mode (string): Type of peak mode (peak/mean/median).
+    - peak_mode (string): Type of peak_x mode (peak_x/mean/median).
     - outlier_remove (bool): Indicates whether to remove outliers. Default is True.
     - plot (bool): Indicates whether to plot the graph. Default is True.
     - save (bool): Indicates whether to save the plot. Default is False.
@@ -311,7 +311,7 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
         calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] / f_v
 
         if plot:
-            # Plot how correction factor for selected peak
+	        # Plot how correction factor for selected peak_x
             fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
             if len(dld_highVoltage_range) > 1000:
                 mask = np.random.randint(0, len(dld_highVoltage_range), 1000)
@@ -646,22 +646,22 @@ def plot_fdm(x, y, variables, save, bins_s, index_fig, figure_size=(5, 4)):
 
 
 def plot_selected_statistic(variables, bin_fdm, index_fig, calibration_mode, save, fig_size=(5, 4)):
-    """
-    Plot the selected statistic based on the selected peak.
+	"""
+	Plot the selected statistic based on the selected peak_x.
 
-        Args:
-            variables (object): The variables object.
-            bin_fdm (int or array-like): The number of bins or bin edges for histogram2d.
-            index_fig (int): The index of the figure.
-            calibration_mode (str): The calibration mode.
-            save (bool): Flag indicating whether to save the plot.
-            fig_size (tuple, optional): The size of the figure in inches (width, height)
+		Args:
+			variables (object): The variables object.
+			bin_fdm (int or array-like): The number of bins or bin edges for histogram2d.
+			index_fig (int): The index of the figure.
+			calibration_mode (str): The calibration mode.
+			save (bool): Flag indicating whether to save the plot.
+			fig_size (tuple, optional): The size of the figure in inches (width, height)
 
-        Return:
-            None
-    """
+		Return:
+			None
+	"""
     if variables.selected_x1 == 0 or variables.selected_x2 == 0:
-        print('Please first select a peak')
+	    print('Please first select a peak_x')
     else:
         print('Selected tof are: (%s, %s)' % (variables.selected_x1, variables.selected_x2))
         mask_temporal = np.logical_and((variables.dld_t_calib > variables.selected_x1),

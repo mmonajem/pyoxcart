@@ -532,7 +532,7 @@ def heatmap(variables, selected_area, element_percentage, save):
             name_element = '%s' % ions[index]
 
         ax.scatter(variables.dld_x_det[mask] * 10, variables.dld_y_det[mask] * 10, s=2, label=name_element,
-                   color=colors[index])
+                   color=colors[index], alpha=0.1)
 
     ax.set_xlabel("x [mm]", color="red", fontsize=10)
     ax.set_ylabel("y [mm]", color="red", fontsize=10)

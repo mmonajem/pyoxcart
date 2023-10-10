@@ -15,26 +15,26 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
               distance=None, h_line=False, selector='None', fast_hist=True, fig_name=None, text_loc='right',
               fig_size=(9, 5), background={'calculation': False}):
     """
-    Generate a histogram plot with optional peak finding and background calculation.
+    Generate a histogram plot with optional peak_x finding and background calculation.
 
     Args:
         mc_tof (array-like): Input array of time-of-flight values.
         bin (float): Bin width for the histogram.
         label (str): Label type ('mc' or 'tof').
         range_data (optional, array-like): Range data.
-        adjust_label (bool): Flag to adjust overlapping peak labels.
+        adjust_label (bool): Flag to adjust overlapping peak_x labels.
         ranging (bool): Flag to enable ranging.
         hist_color_range (bool): Flag to enable histogram color ranging.
         log (bool): Flag to enable logarithmic y-axis scale.
         mode (str): Mode for histogram calculation ('count' or 'normalised').
-        percent (int): Percentage value for peak width calculation.
-        peaks_find (bool): Flag to enable peak finding.
-        peaks_find_plot (bool): Flag to plot peak finding results.
+        percent (int): Percentage value for peak_x width calculation.
+        peaks_find (bool): Flag to enable peak_x finding.
+        peaks_find_plot (bool): Flag to plot peak_x finding results.
         plot (bool): Flag to enable plotting.
-        prominence (float): Minimum prominence value for peak finding.
-        distance (optional, float): Minimum horizontal distance between peaks for peak finding.
-        h_line (bool): Flag to draw horizontal lines for peak width.
-        selector (str): Selector mode for interactive selection ('None', 'rect', or 'peak').
+        prominence (float): Minimum prominence value for peak_x finding.
+        distance (optional, float): Minimum horizontal distance between peaks for peak_x finding.
+        h_line (bool): Flag to draw horizontal lines for peak_x width.
+        selector (str): Selector mode for interactive selection ('None', 'rect', or 'peak_x').
         fast_hist (bool): Flag to enable fast histogram calculation.
         fig_name (optional, str): Name of the figure file to save.
         text_loc (str): Location of the text annotation ('left' or 'right').
@@ -71,7 +71,7 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
         if peaks_find:
             peaks, properties = find_peaks(y, prominence=prominence, distance=distance, height=0)
             index_peak_max = np.argmax(properties['peak_heights'])
-            # find peak width
+            # find peak_x width
             peak_widths_p = peak_widths(y, peaks, rel_height=(percent / 100), prominence_data=None)
     except ValueError:
         print('Peak finding failed.')
@@ -153,7 +153,7 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
                 ax1.set_xlabel("Mass/Charge [Da]", fontsize=14)
             elif label == 'tof':
                 ax1.set_xlabel("Time of Flight [ns]", fontsize=14)
-            print("The peak index for MRP calculation is:", index_peak_max)
+            print("The peak_x index for MRP calculation is:", index_peak_max)
             if label == 'mc':
                 mrp = '{:.2f}'.format(x[peaks[index_peak_max]] / (x[int(peak_widths_p[3][index_peak_max])] -
                                                                   x[int(peak_widths_p[2][index_peak_max])]))
@@ -234,8 +234,8 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
                 # Connect and initialize rectangle box selector
                 data_loadcrop.rectangle_box_selector(ax1, variables)
                 plt.connect('key_press_event', selectors_data.toggle_selector(variables))
-            elif selector == 'peak':
-                # connect peak selector
+            elif selector == 'peak_x':
+                # connect peak_x selector
                 af = intractive_point_identification.AnnoteFinder(x[peaks], y[peaks], annotes, variables, ax=ax1)
                 fig1.canvas.mpl_connect('button_press_event', lambda event: af.annotates_plotter(event))
                 zoom_manager = plot_vline_draw.HorizontalZoom(ax1, fig1)
@@ -262,10 +262,11 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
                 # connect range selector
                 line_manager = plot_vline_draw.VerticalLineManager(variables, ax1, fig1, [], [])
                 texts = []
-                for i in range(len(variables.peak)):
+                for i in range(len(variables.peak_x)):
                     if i in variables.peaks_idx:
                         texts.append(
-                            plt.text(variables.peak[i], variables.peak_y[i], '%s' % '{:.2f}'.format(variables.peak[i]),
+                            plt.text(variables.peak_x[i], variables.peak_y[i],
+                                     '%s' % '{:.2f}'.format(variables.peak_x[i]),
                                      color='black',
                                      size=10, alpha=1))
         plt.tight_layout()
@@ -299,7 +300,7 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
             mask = None
         index_max_ini = np.argmax(y_peaks)
         variables.max_peak = x_peaks[index_max_ini]
-        variables.peak = x_peaks
+        variables.peak_x = x_peaks
         variables.peak_y = y_peaks
     else:
         x_peaks = None
@@ -333,10 +334,10 @@ def mc_hist_plot(variables, bin_size, mode, prominence, distance, percent, selec
         variables (object): Variables object.
         bin_size (float): Bin size for the histogram.
         mode (str): 'mc' for mass spectrum or 'tof' for tof spectrum.
-        prominence (float): Prominence for the peak finding.
-        distance (float): Distance for the peak finding.
-        percent (float): Percent for the peak finding.
-        selector (str): Selector for the peak finding.
+        prominence (float): Prominence for the peak_x finding.
+        distance (float): Distance for the peak_x finding.
+        percent (float): Percent for the peak_x finding.
+        selector (str): Selector for the peak_x finding.
         plot (bool): Plot the histogram.
         figname (str): Figure name.
         lim (float): Limit for the histogram.
@@ -357,7 +358,7 @@ def mc_hist_plot(variables, bin_size, mode, prominence, distance, percent, selec
     elif mode == 'tof_c':
         hist = variables.dld_t_c
         label = 'tof'
-    if selector == 'peak':
+    if selector == 'peak_x':
         variables.peaks_idx = []
     peaks_ini, peaks_y_ini, peak_widths_p_ini, _ = hist_plot(hist[hist < lim], variables, bin_size,
                                                                         label=label,
@@ -368,9 +369,10 @@ def mc_hist_plot(variables, bin_size, mode, prominence, distance, percent, selec
     if peaks_ini is not None:
         index_max_ini = np.argmax(peaks_y_ini)
         mrp = (peaks_ini[index_max_ini] / (peak_widths_p_ini[index_max_ini][2] - peak_widths_p_ini[index_max_ini][1]))
-        print('Mass resolving power for the highest peak at peak index %a (MRP --> m/m_2-m_1):' % index_max_ini, mrp)
+        print('Mass resolving power for the highest peak_x at peak_x index %a (MRP --> m/m_2-m_1):' % index_max_ini,
+              mrp)
         for i in range(len(peaks_ini)):
             print('Peaks ', i, 'is at location and height: ({:.2f}, {:.2f})'.format(peaks_ini[i], peaks_y_ini[i]),
-                  'peak window sides ({:.1f}-maximum) are: ({:.2f}, {:.2f})'.format(percent, peak_widths_p_ini[i][1],
-                                                                                    peak_widths_p_ini[i][2]),
+                  'peak_x window sides ({:.1f}-maximum) are: ({:.2f}, {:.2f})'.format(percent, peak_widths_p_ini[i][1],
+                                                                                      peak_widths_p_ini[i][2]),
                   '-> {:.2f}'.format(peak_widths_p_ini[i][2] - peak_widths_p_ini[i][1]))

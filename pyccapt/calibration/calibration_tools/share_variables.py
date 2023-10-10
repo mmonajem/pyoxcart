@@ -40,7 +40,7 @@ class Variables:
         mc_calib_backup (numpy.ndarray): Backup array for mc calibration.
         max_peak (int): The maximum peak value.
         max_tof (int): The maximum tof value.
-        peak (list): List of peaks.
+        peak_x (list): List of peaks.
         peak_y (list): List of peak y-values.
         peak_width (list): List of peak widths.
         h_line_pos (list): List of horizontal line positions.
@@ -98,13 +98,13 @@ class Variables:
         self.max_peak = 0
         self.max_tof = 0
         self.peaks_index = 0
-        self.peak = []
+        self.peak_x = []
         self.peak_y = []
         self.peak_width = []
         self.last_directory = './'  # You can set a default directory here
 
         # Create an empty DataFrame with the specified columns
-        self.range_data = pd.DataFrame(columns=['ion', 'mass', 'mc', 'mc_low', 'mc_up', 'color', 'peak_count', 'element'
-            , 'complex', 'isotope', 'charge'])
+        self.range_data = pd.DataFrame(columns=['ion', 'mass', 'mc', 'mc_low', 'mc_up', 'color', 'element',
+                                                'complex', 'isotope', 'charge'])
 
         self.range_data_backup = None

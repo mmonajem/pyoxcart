@@ -28,6 +28,8 @@ def fit_background(x, a, b):
 
 class AptHistPlotter:
     def __init__(self, mc_tof, variables=None):
+        self.original_x_limits = None
+        self.bin_width = None
         self.fig = None
         self.ax = None
         self.mc_tof = mc_tof
@@ -49,37 +51,64 @@ class AptHistPlotter:
             self.peaks, self.properties = find_peaks(self.y, prominence=prominence, distance=distance, height=0)
             self.peak_widths = peak_widths(self.y, self.peaks, rel_height=(percent / 100), prominence_data=None)
             self.prominences = peak_prominences(self.y, self.peaks, wlen=None)
+
+            x_peaks = self.x[self.peaks]
+            y_peaks = self.y[self.peaks]
+            self.variables.peak_x = x_peaks
+            self.variables.peak_y = y_peaks
+            index_max_ini = np.argmax(y_peaks)
+            self.variables.max_peak = x_peaks[index_max_ini]
         except ValueError:
             print('Peak finding failed.')
             self.peaks = None
             self.properties = None
             self.peak_widths = None
             self.prominences = None
+            self.variables.peak_x = None
+            self.variables.peak_y = None
+            self.variables.max_peak = None
 
-    def plot_histogram(self, bin_width=0.1, mode=None, label='mc', log=True, steps='stepfilled', fig_size=(9, 5)):
+        return self.peaks, self.properties, self.peak_widths, self.prominences
+
+    def plot_histogram(self, bin_width=0.1, mode=None, label='mc', log=True, grid=False, steps='stepfilled',
+                       fig_size=(9, 5)):
         # Define the bins
+        self.bin_width = bin_width
         bins = np.linspace(np.min(self.mc_tof), np.max(self.mc_tof), round(np.max(self.mc_tof) / bin_width))
 
         # Plot the histogram directly
         self.fig, self.ax = plt.subplots(figsize=fig_size)
 
+        if steps == 'bar':
+            edgecolor = None
+        else:
+            edgecolor = 'k'
+
         if mode == 'normalized':
             self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=bins, alpha=0.9,
-                                                        color='slategray', edgecolor='k', histtype=steps, density=True)
+                                                        color='slategray', edgecolor=edgecolor, histtype=steps,
+                                                        density=True)
         else:
             self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=bins, alpha=0.9, color='slategray',
-                                                        histtype=steps)
+                                                        edgecolor=edgecolor, histtype=steps)
         self.ax.set_xlabel('Mass/Charge [Da]' if label == 'mc' else 'Time of Flight [ns]')
         self.ax.set_ylabel('Frequency [cts]')
         self.ax.set_yscale('log' if log else 'linear')
+        if grid:
+            plt.grid(True, which='both', axis='both', linestyle='--', linewidth=0.5)
+        if self.original_x_limits is None:
+            self.original_x_limits = self.ax.get_xlim()  # Store the original x-axis limits
         plt.tight_layout()
         plt.show()
+
+        return self.y, self.x
 
     def plot_range(self, range_data, legend=True):
         if len(self.patches) == len(self.x) - 1:
             colors = range_data['color'].tolist()
             mc_low = range_data['mc_low'].tolist()
             mc_up = range_data['mc_up'].tolist()
+            mc = range_data['mc'].tolist()
             ion = range_data['ion'].tolist()
             color_mask = np.full((len(self.x)), '#708090')  # default color is slategray
             for i in range(len(ion)):
@@ -92,6 +121,17 @@ class AptHistPlotter:
 
             for i in range(len(ion)):
                 self.legend_colors.append((r'%s' % ion[i], plt.Rectangle((0, 0), 1, 1, fc=colors[i])))
+                x_offset = 0.1  # Adjust this value as needed
+                y_offset = 10  # Adjust this value as needed
+
+                # Find the bin that contains the mc[i]
+                bin_index = np.searchsorted(self.x, mc[i])
+                peak_height = self.y[bin_index - 1] * ((mc[i] - self.x[bin_index - 1]) / self.bin_width)
+                print(mc[i])
+                print(peak_height)
+                self.peak_annotates.append(plt.text(mc[i] + x_offset, peak_height + y_offset,
+                                                    r'%s' % ion[i], color='black', size=10, alpha=1))
+                self.annotates.append(str(i + 1))
 
             if legend:
                 self.plot_color_legend(loc='center right')
@@ -130,12 +170,12 @@ class AptHistPlotter:
             data_loadcrop.rectangle_box_selector(self.ax, self.variables)
             plt.connect('key_press_event', selectors_data.toggle_selector(self.variables))
         elif selector == 'peak':
-            # connect peak selector
+            # connect peak_x selector
             af = intractive_point_identification.AnnoteFinder(self.x[self.peaks], self.y[self.peaks], self.annotates,
                                                               self.variables, ax=self.ax)
             self.fig.canvas.mpl_connect('button_press_event', lambda event: af.annotates_plotter(event))
 
-            zoom_manager = plot_vline_draw.HorizontalZoom(self.ax)
+            zoom_manager = plot_vline_draw.HorizontalZoom(self.ax, self.fig)
             self.fig.canvas.mpl_connect('key_press_event', lambda event: zoom_manager.on_key_press(event))
             self.fig.canvas.mpl_connect('key_release_event', lambda event: zoom_manager.on_key_release(event))
             self.fig.canvas.mpl_connect('scroll_event', lambda event: zoom_manager.on_scroll(event))
@@ -160,11 +200,13 @@ class AptHistPlotter:
                        loc=loc)
 
     def plot_hist_info_legend(self, label='mc', bin=0.1, background=None, loc='left'):
-        index_peak_max = np.argmax(self.prominences)
-        print("The peak index for MRP calculation is:", index_peak_max)
+        index_peak_max = np.argmax(self.prominences[0])
+
         if label == 'mc':
-            mrp = '{:.2f}'.format(self.x[self.peaks[index_peak_max]] / (self.x[int(self.peak_widths[3][index_peak_max])] -
-                                                              self.x[int(self.peak_widths[2][index_peak_max])]))
+            mrp = '{:.2f}'.format(
+                self.x[self.peaks][index_peak_max] / (self.x[int(self.peak_widths[3][index_peak_max])] -
+                                                      self.x[int(self.peak_widths[2][index_peak_max])]))
+
             if background is not None:
                 txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nMRP(FWHM): %s' \
                       % (bin, len(self.mc_tof) / 1000000, int(self.background_ppm), mrp)
@@ -265,10 +307,118 @@ class AptHistPlotter:
     def adjust_labels(self):
         adjust_text(self.peak_annotates, arrowprops=dict(arrowstyle='-', color='red', lw=0.5))
 
+    def zoom_to_x_range(self, x_min, x_max, reset=False):
+        """
+        Zoom the plot to a specific range of x-values.
+
+        Args:
+            x_min (float): Minimum x-value for the zoomed range.
+            x_max (float): Maximum x-value for the zoomed range.
+            reset (bool): If True, reset the zoom to the full range.
+        """
+        if reset:
+            """Reset the plot to the original view."""
+            if self.original_x_limits is not None:
+                self.ax.set_xlim(self.original_x_limits)
+                self.fig.canvas.draw()
+        else:
+            self.ax.set_xlim(x_min, x_max)
+            self.fig.canvas.draw()
+
     def save_fig(self, label, fig_name):
         if label == 'mc':
-            plt.savefig(self.variables.result_path + "//mc_%s.svg" % fig_name, format="svg", dpi=300)
-            plt.savefig(self.variables.result_path + "//mc_%s.png" % fig_name, format="png", dpi=300)
+            plt.savefig(self.variables.result_path + "//mc_%s.svg" % fig_name, format="svg", dpi=600)
+            plt.savefig(self.variables.result_path + "//mc_%s.png" % fig_name, format="png", dpi=600)
         elif label == 'tof':
-            plt.savefig(self.variables.result_path + "//tof_%s.svg" % fig_name, format="svg", dpi=300)
-            plt.savefig(self.variables.result_path + "//tof_%s.png" % fig_name, format="png", dpi=300)
+            plt.savefig(self.variables.result_path + "//tof_%s.svg" % fig_name, format="svg", dpi=600)
+            plt.savefig(self.variables.result_path + "//tof_%s.png" % fig_name, format="png", dpi=600)
+
+
+def hist_plot(variables, bin_size, log, target, mode, prominence, distance, percent, selector, figname, lim,
+              peaks_find_plot, range_plot=False, selected_area=False, print_info=True):
+    """
+    Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
+    Args:
+        variables (object): Variables object.
+        bin_size (float): Bin size for the histogram.
+        target (str): 'mc' for mass spectrum or 'tof' for tof spectrum.
+        mode (str): 'normal' for normal histogram or 'normalized' for normalized histogram.
+        prominence (float): Prominence for the peak_x finding.
+        distance (float): Distance for the peak_x finding.
+        percent (float): Percent for the peak_x finding.
+        selector (str): Selector for the peak_x finding.
+        figname (str): Figure name.
+        lim (float): Limit for the histogram.
+        peaks_find_plot (bool): Plot the peaks.
+        selector (str): Selector for the peak_x finding.
+        range_plot (bool): Plot the range.
+        selected_area (bool): Plot the selected area.
+        print_info: Print the information about the peaks.
+    Returns:
+        None
+
+    """
+    if target == 'mc':
+        hist = variables.mc_calib
+        label = 'mc'
+    elif target == 'mc_c':
+        hist = variables.mc_c
+        label = 'mc'
+    elif target == 'tof':
+        hist = variables.dld_t_calib
+        label = 'tof'
+    elif target == 'tof_c':
+        hist = variables.dld_t_c
+        label = 'tof'
+    if selector == 'peak':
+        variables.peaks_idx = []
+
+    if selected_area:
+        mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
+                       (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
+                       (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+    else:
+        mask_spacial = np.ones(len(hist), dtype=bool)
+
+    hist = hist[mask_spacial]
+
+    if range_plot:
+        steps = 'bar'
+    else:
+        steps = 'stepfilled'
+    if target == 'mc' or target == 'mc_c':
+        mc_hist = AptHistPlotter(hist[hist < lim], variables)
+        y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log, fig_size=(9, 5))
+    elif target == 'tof' or target == 'tof_c':
+        mc_hist = AptHistPlotter(hist[hist < lim], variables)
+        y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log, fig_size=(9, 5))
+
+    if mode != 'normalized' and peaks_find_plot and not range_plot:
+        peaks, properties, peak_widths, prominences = mc_hist.find_peaks_and_widths(prominence=prominence,
+                                                                                    distance=distance, percent=percent)
+        mc_hist.plot_peaks()
+        mc_hist.plot_hist_info_legend(label='mc', bin=0.1, background=None, loc='right')
+    else:
+        peaks = None
+        peak_widths = None
+        prominences = None
+
+    mc_hist.selector(selector=selector)  # rect, peak_x, range
+    if range_plot:
+        mc_hist.plot_range(variables.range_data, legend=True)
+        # mc_hist.plot_color_legend(loc='center right')
+
+    mc_hist.save_fig(label=mode, fig_name=figname)
+
+    if peaks is not None and print_info:
+        index_max_ini = np.argmax(prominences[0])
+        mrp = (prominences[0][index_max_ini] / (peak_widths[3][index_max_ini] - peak_widths[2][index_max_ini]))
+        print('Mass resolving power for the highest peak_x at peak_x index %a (MRP --> m/m_2-m_1):' % index_max_ini,
+              mrp)
+        for i in range(len(peaks)):
+            print('Peaks ', i,
+                  'is at location and height: ({:.2f}, {:.2f})'.format(x[int(peaks[i])], prominences[0][i]),
+                  'peak_x window sides ({:.1f}-maximum) are: ({:.2f}, {:.2f})'.format(percent,
+                                                                                      x[int(peak_widths[2][i])],
+                                                                                      x[int(peak_widths[3][i])]),
+                  '-> MRP: {:.2f}'.format(x[int(peaks[i])] / (x[int(peak_widths[3][i])] - x[int(peak_widths[2][i])])))
