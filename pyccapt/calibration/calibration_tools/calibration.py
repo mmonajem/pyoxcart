@@ -311,7 +311,7 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
         calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] / f_v
 
         if plot:
-	        # Plot how correction factor for selected peak_x
+            # Plot how correction factor for selected peak_x
             fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
             if len(dld_highVoltage_range) > 1000:
                 mask = np.random.randint(0, len(dld_highVoltage_range), 1000)
@@ -646,22 +646,22 @@ def plot_fdm(x, y, variables, save, bins_s, index_fig, figure_size=(5, 4)):
 
 
 def plot_selected_statistic(variables, bin_fdm, index_fig, calibration_mode, save, fig_size=(5, 4)):
-	"""
-	Plot the selected statistic based on the selected peak_x.
+    """
+    Plot the selected statistic based on the selected peak_x.
 
-		Args:
-			variables (object): The variables object.
-			bin_fdm (int or array-like): The number of bins or bin edges for histogram2d.
-			index_fig (int): The index of the figure.
-			calibration_mode (str): The calibration mode.
-			save (bool): Flag indicating whether to save the plot.
-			fig_size (tuple, optional): The size of the figure in inches (width, height)
+        Args:
+            variables (object): The variables object.
+            bin_fdm (int or array-like): The number of bins or bin edges for histogram2d.
+            index_fig (int): The index of the figure.
+            calibration_mode (str): The calibration mode.
+            save (bool): Flag indicating whether to save the plot.
+            fig_size (tuple, optional): The size of the figure in inches (width, height)
 
-		Return:
-			None
-	"""
+        Return:
+            None
+    """
     if variables.selected_x1 == 0 or variables.selected_x2 == 0:
-	    print('Please first select a peak_x')
+        print('Please first select a peak_x')
     else:
         print('Selected tof are: (%s, %s)' % (variables.selected_x1, variables.selected_x2))
         mask_temporal = np.logical_and((variables.dld_t_calib > variables.selected_x1),
