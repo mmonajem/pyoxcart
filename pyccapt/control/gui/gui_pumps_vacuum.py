@@ -5,8 +5,7 @@ import threading
 import time
 
 from PyQt6 import QtCore, QtGui, QtWidgets
-from PyQt6.QtCore import QTimer
-from PyQt6.QtCore import pyqtSignal, QObject
+from PyQt6.QtCore import QTimer, pyqtSignal, QObject
 from PyQt6.QtGui import QPixmap
 
 # Local module and scripts
@@ -341,7 +340,7 @@ class Ui_Pumps_Vacuum(object):
 		Return:
 			None
 		"""
-		self.vacuum_load_lock.display('{:.2e}'.format(value))
+		self.vacuum_load_lock_back.display('{:.2e}'.format(value))
 
 	def update_vacuum_load(self, value):
 		"""
@@ -352,7 +351,7 @@ class Ui_Pumps_Vacuum(object):
 		Return:
 			None
 		"""
-		self.vacuum_load_lock_back.display('{:.2e}'.format(value))
+		self.vacuum_load_lock.display('{:.2e}'.format(value))
 
 
 	def hideMessage(self):

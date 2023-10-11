@@ -187,7 +187,90 @@ def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, ch
 
     return df
 
+def load_elements(target_elements, abundance_threshold=0.0, charge=4,
+                  data_table='../../../files/isotopeTable.h5', variables=None):
+    """
+    create a dataframe from the given list of ions.
 
+    Args:
+        target_elements (float): Target elements.
+        abundance_threshold (float): Abundance threshold for filtering elements (as a percentage).
+        charge (int): Charge value.
+        data_table (str): Path to the data table (HDF5 file).
+        variables (object): Object containing the variables.
+
+    Returns:
+        pd.DataFrame: DataFrame containing closest elements and their properties.
+    """
+    # Read data from the HDF5 file
+    dataframe = pd.read_hdf(data_table)
+
+    # Expand elements based on charge
+    elements = dataframe['element'].to_numpy()
+    isotope_number = dataframe['isotope'].to_numpy()
+    weight = dataframe['weight'].to_numpy()
+    abundance = dataframe['abundance'].to_numpy()
+
+    elements = np.repeat(elements, charge)
+    isotope_number = np.repeat(isotope_number, charge)
+    weights = np.repeat(weight, charge)
+    abundance = np.repeat(abundance, charge)
+    charge_list = np.array([i % charge + 1 for i in range(len(weights))])
+
+    weights = weights / charge_list
+
+    # Filter elements by abundance threshold
+    abundance_threshold *= 100
+    mask_abundanc = (abundance > abundance_threshold)
+    elements = elements[mask_abundanc]
+    isotope_number = isotope_number[mask_abundanc]
+    weights = weights[mask_abundanc]
+    abundance = abundance[mask_abundanc]
+
+    index_elements = []
+    for i in range(len(target_elements)):
+        index_elements.append([index for index, element in enumerate(elements) if element == target_elements[i]])
+    idxs = [item for sublist in index_elements for item in sublist]
+
+    selected_elements = elements[idxs]
+    selected_isotope_number = isotope_number[idxs]
+    selected_weights = weights[idxs]
+    selected_abundance = abundance[idxs]
+    selected_charge_list = charge_list[idxs]
+    # Create LaTeX formatted element symbols
+    element_symbols = []
+    for i in range(len(idxs)):
+        formula = ''
+        formula += '{}^'
+        formula += '{%s}' % selected_isotope_number[i]
+        formula += '%s' % selected_elements[i]
+
+        if selected_charge_list[i] > 1:
+            formula = r'$' + formula + '^{%s+}$' % selected_charge_list[i]
+        else:
+            formula = r'$' + formula + '^{+}$'
+        element_symbols.append(formula)
+
+    # Create DataFrame
+    df = pd.DataFrame({
+        'ion': element_symbols,
+        'mass': selected_weights,
+        'element': selected_elements,
+        'complex': np.ones(len(idxs), dtype=int),
+        'isotope': selected_isotope_number,
+        'charge': selected_charge_list,
+        'abundance': selected_abundance,
+    })
+
+    # Sort DataFrame
+    df = df.sort_values(by=['mass'], ascending=[True])
+    df.reset_index(drop=True, inplace=True)
+
+    # Backup data if variables provided
+    if variables is not None:
+        variables.range_data_backup = df.copy()
+
+    return df
 def molecule_manual(target_element, charge, latex=True, variables=None):
     """
     Generate a list of isotopes for a given target element.

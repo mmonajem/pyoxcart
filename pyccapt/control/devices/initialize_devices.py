@@ -217,8 +217,6 @@ def state_update(conf, variables, emitter):
 				# with variables.lock_statistics:
 				vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
 				vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
-				variables.vacuum_load_lock = vacuum_load_lock
-				variables.vacuum_load_lock_backing = vacuum_load_lock_backing
 				emitter.vacuum_load.emit(vacuum_load_lock)
 				emitter.vacuum_load_back.emit(vacuum_load_lock_backing)
 
