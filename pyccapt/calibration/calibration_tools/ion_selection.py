@@ -181,6 +181,9 @@ def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, ch
     df = df.sort_values(by=['mass'], ascending=[True])
     df.reset_index(drop=True, inplace=True)
 
+    # Round the abundance column to 4 decimal places
+    df['abundance'] = df['abundance'].round(4)
+    df['mass'] = df['mass'].round(4)
     # Backup data if variables provided
     if variables is not None:
         variables.range_data_backup = df.copy()
@@ -211,6 +214,7 @@ def load_elements(target_elements, abundance_threshold=0.0, charge=4,
     weight = dataframe['weight'].to_numpy()
     abundance = dataframe['abundance'].to_numpy()
 
+
     elements = np.repeat(elements, charge)
     isotope_number = np.repeat(isotope_number, charge)
     weights = np.repeat(weight, charge)
@@ -226,6 +230,9 @@ def load_elements(target_elements, abundance_threshold=0.0, charge=4,
     isotope_number = isotope_number[mask_abundanc]
     weights = weights[mask_abundanc]
     abundance = abundance[mask_abundanc]
+
+    target_elements = target_elements.split(',')
+    target_elements = [s.replace(' ', '') for s in target_elements]
 
     index_elements = []
     for i in range(len(target_elements)):
@@ -251,12 +258,16 @@ def load_elements(target_elements, abundance_threshold=0.0, charge=4,
             formula = r'$' + formula + '^{+}$'
         element_symbols.append(formula)
 
+    selected_elements = [[item] for item in selected_elements]
+    complex = np.ones(len(idxs), dtype=int)
+    complex = [[item] for item in complex]
+    selected_isotope_number = [[item] for item in selected_isotope_number]
     # Create DataFrame
     df = pd.DataFrame({
         'ion': element_symbols,
         'mass': selected_weights,
         'element': selected_elements,
-        'complex': np.ones(len(idxs), dtype=int),
+        'complex': complex,
         'isotope': selected_isotope_number,
         'charge': selected_charge_list,
         'abundance': selected_abundance,
@@ -266,6 +277,9 @@ def load_elements(target_elements, abundance_threshold=0.0, charge=4,
     df = df.sort_values(by=['mass'], ascending=[True])
     df.reset_index(drop=True, inplace=True)
 
+    # Round the abundance column to 4 decimal places
+    df['abundance'] = df['abundance'].round(4)
+    df['mass'] = df['mass'].round(4)
     # Backup data if variables provided
     if variables is not None:
         variables.range_data_backup = df.copy()
@@ -339,6 +353,10 @@ def molecule_manual(target_element, charge, latex=True, variables=None):
     df = pd.DataFrame({'ion': [formula], 'mass': total_weight, 'element': element_list,
                        'complex': complexity_list, 'isotope': isotope_list, 'charge': [charge],
                        'abundance': abundance_c, })
+
+    # Round the abundance column to 4 decimal places
+    df['abundance'] = df['abundance'].round(4)
+    df['mass'] = df['mass'].round(4)
 
     if variables is not None:
         variables.range_data_backup = df.copy()
@@ -434,7 +452,11 @@ def molecule_create(element_list, max_complexity, charge, abundance_threshold, v
                 if comp != 1:
                     formula += '_{%s}' % comp
             if charge > 1:
-                formula = r'$(' + formula + ')^{%s+}$' % charge
+                if len(new_isotopes) > 1:
+                    formula = r'$(' + formula + ')^{%s+}$' % charge
+                else:
+                    formula = r'$' + formula + '^{%s+}$' % charge
+
             else:
                 formula = r'$' + formula + '$'
         else:
@@ -474,6 +496,9 @@ def molecule_create(element_list, max_complexity, charge, abundance_threshold, v
     df = df.sort_values(by=['mass'], ascending=[True])
     df.reset_index(drop=True, inplace=True)
 
+    # Round the abundance column to 4 decimal places
+    df['abundance'] = df['abundance'].round(4)
+    df['mass'] = df['mass'].round(4)
     # Backup data if variables provided
     if variables is not None:
         variables.range_data_backup = df.copy()

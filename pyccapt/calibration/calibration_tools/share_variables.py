@@ -21,7 +21,7 @@ class Variables:
         charge (list): List of charges.
         element (list): List of elements.
         isotope (list): List of isotopes.
-        peaks_idx (list): List of peaks indices.
+        peaks_x_selected (list): List of peaks indices.
         result_path (str): The result path.
         path (str): The path.
         dataset_name (str): The dataset name.
@@ -72,7 +72,7 @@ class Variables:
         self.element = []
         self.isotope = []
 
-        self.peaks_idx = []
+        self.peaks_x_selected = []
 
         self.result_path = ''
         self.path = ''

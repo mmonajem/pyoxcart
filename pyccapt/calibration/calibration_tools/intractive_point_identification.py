@@ -91,7 +91,7 @@ class AnnoteFinder(object):
             return
         else:
             # Calculate an offset to move the annotation to the left of the peak_x
-            x_offset = - 1.2
+            x_offset = - 0.8
             # Draw the annotation without the dash "-"
             t = ax.text(x + x_offset, y, str(annote), ha='right', va='center')
 
@@ -99,8 +99,8 @@ class AnnoteFinder(object):
             self.drawnAnnotations[(x, y)] = (t, m)
             self.ax.figure.canvas.draw_idle()
 
-        self.variables.peaks_idx.append(int(annote) - 1)
-        self.variables.peaks_idx.sort()
+        self.variables.peaks_x_selected.append(x)
+        self.variables.peaks_x_selected.sort()
 
     def deselectPoint(self, ax, x, y, annote):
         """
@@ -119,9 +119,9 @@ class AnnoteFinder(object):
                 m.set_visible(not m.get_visible())
             self.ax.figure.canvas.draw_idle()
 
-        # Remove the deselected peak_x index from peaks_idx
-        self.variables.peaks_idx.remove(int(annote) - 1)
-        self.variables.peaks_idx.sort()
+        # Remove the deselected peak_x index from peaks_x_selected
+        self.variables.peaks_x_selected.remove(int(annote) - 1)
+        self.variables.peaks_x_selected.sort()
 
     def drawSpecificAnnote(self, annote):
         """

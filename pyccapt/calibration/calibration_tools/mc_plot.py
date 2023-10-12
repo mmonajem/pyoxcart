@@ -126,9 +126,7 @@ class AptHistPlotter:
 
                 # Find the bin that contains the mc[i]
                 bin_index = np.searchsorted(self.x, mc[i])
-                peak_height = self.y[bin_index - 1] * ((mc[i] - self.x[bin_index - 1]) / self.bin_width)
-                print(mc[i])
-                print(peak_height)
+                peak_height = self.y[bin_index] * ((mc[i] - self.x[bin_index - 1]) / self.bin_width)
                 self.peak_annotates.append(plt.text(mc[i] + x_offset, peak_height + y_offset,
                                                     r'%s' % ion[i], color='black', size=10, alpha=1))
                 self.annotates.append(str(i + 1))
@@ -144,25 +142,35 @@ class AptHistPlotter:
         y_offset = 10  # Adjust this value as needed
         if range_data is not None:
             ion = range_data['ion'].tolist()
-            x_peak_loc = range_data['mc'].tolist()
-            y_peak_loc = range_data['peak_count'].tolist()
+            mc = range_data['mc'].tolist()
             for i in range(len(ion)):
-                self.peak_annotates.append(plt.text(x_peak_loc[i] + x_offset, y_peak_loc[i] + y_offset,
-                                                      r'%s' % ion[i], color='black', size=10, alpha=1))
+                # Find the bin that contains the mc[i]
+                bin_index = np.searchsorted(self.x, mc[i])
+                peak_height = self.y[bin_index] * ((mc[i] - self.x[bin_index - 1]) / self.bin_width)
+                self.peak_annotates.append(plt.text(mc[i] + x_offset, peak_height + y_offset,
+                                                    r'%s' % ion[i], color='black', size=10, alpha=1))
                 self.annotates.append(str(i + 1))
         else:
-            for i in range(len(self.peaks)):
-                if mode == 'range':
-                    if i in self.variables.peaks_idx:
-                        self.peak_annotates.append(
-                            plt.text(self.x[self.peaks][i] + x_offset, self.y[self.peaks][i] + y_offset,
-                                     '%s' % '{:.2f}'.format(self.x[self.peaks][i]), color='black', size=10, alpha=1))
-                elif mode == 'peaks':
+            if mode == 'peaks':
+                for i in range(len(self.peaks)):
                     self.peak_annotates.append(
                         plt.text(self.x[self.peaks][i] + x_offset, self.y[self.peaks][i] + y_offset,
                                  '%s' % '{:.2f}'.format(self.x[self.peaks][i]), color='black', size=10, alpha=1))
 
-                self.annotates.append(str(i + 1))
+                    self.annotates.append(str(i + 1))
+
+            elif mode == 'range':
+                for i in range(len(self.variables.peaks_x_selected)):
+                    # Find the bin that contains the mc[i]
+                    bin_index = np.searchsorted(self.x, self.variables.peaks_x_selected[i])
+                    peak_height = self.y[bin_index] * ((self.variables.peaks_x_selected[i] -
+                                                        self.x[bin_index - 1]) / self.bin_width)
+                    self.peak_annotates.append(
+                        plt.text(self.variables.peaks_x_selected[i] + x_offset, peak_height + y_offset,
+                                 '%s' % '{:.2f}'.format(self.variables.peaks_x_selected[i]), color='black', size=10,
+                                 alpha=1))
+
+                    self.annotates.append(str(i + 1))
 
     def selector(self, selector='rect'):
         if selector == 'rect':
@@ -335,7 +343,8 @@ class AptHistPlotter:
 
 
 def hist_plot(variables, bin_size, log, target, mode, prominence, distance, percent, selector, figname, lim,
-              peaks_find_plot, range_plot=False, selected_area=False, print_info=True):
+              peaks_find_plot, range_plot=False, ranging_mode=False, selected_area=False, save_fig=True,
+              print_info=True):
     """
     Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
     Args:
@@ -352,6 +361,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         peaks_find_plot (bool): Plot the peaks.
         selector (str): Selector for the peak_x finding.
         range_plot (bool): Plot the range.
+        ranging_mode (bool): Ranging mode.
         selected_area (bool): Plot the selected area.
         print_info: Print the information about the peaks.
     Returns:
@@ -371,7 +381,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         hist = variables.dld_t_c
         label = 'tof'
     if selector == 'peak':
-        variables.peaks_idx = []
+        variables.peaks_x_selected = []
 
     if selected_area:
         mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
@@ -393,11 +403,16 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         mc_hist = AptHistPlotter(hist[hist < lim], variables)
         y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log, fig_size=(9, 5))
 
-    if mode != 'normalized' and peaks_find_plot and not range_plot:
+    if mode != 'normalized' and peaks_find_plot and not range_plot and not ranging_mode:
         peaks, properties, peak_widths, prominences = mc_hist.find_peaks_and_widths(prominence=prominence,
                                                                                     distance=distance, percent=percent)
         mc_hist.plot_peaks()
         mc_hist.plot_hist_info_legend(label='mc', bin=0.1, background=None, loc='right')
+    elif ranging_mode:
+        mc_hist.plot_peaks(range_data=None, mode='range')
+        peaks = None
+        peak_widths = None
+        prominences = None
     else:
         peaks = None
         peak_widths = None
@@ -408,7 +423,8 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         mc_hist.plot_range(variables.range_data, legend=True)
         # mc_hist.plot_color_legend(loc='center right')
 
-    mc_hist.save_fig(label=mode, fig_name=figname)
+    if save_fig:
+        mc_hist.save_fig(label=mode, fig_name=figname)
 
     if peaks is not None and print_info:
         index_max_ini = np.argmax(prominences[0])

@@ -230,7 +230,7 @@ def dataset_instrument_specification_selection():
     )
 
     t0 = widgets.FloatText(
-        value='54',
+        value='38',
         placeholder='T_0 of the instrument',
         description='t0:',
         disabled=False

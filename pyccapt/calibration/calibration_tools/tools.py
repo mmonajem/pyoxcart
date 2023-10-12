@@ -213,7 +213,7 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
                 else:
                     for i in range(len(peaks)):
                         if selector == 'range':
-                            if i in variables.peaks_idx:
+                            if i in variables.peaks_x_selected:
                                 texts.append(plt.text(x[peaks][i], y[peaks][i], '%s' % '{:.2f}'.format(x[peaks][i]),
                                                       color='black',
                                                       size=10, alpha=1))
@@ -263,7 +263,7 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
                 line_manager = plot_vline_draw.VerticalLineManager(variables, ax1, fig1, [], [])
                 texts = []
                 for i in range(len(variables.peak_x)):
-                    if i in variables.peaks_idx:
+                    if i in variables.peaks_x_selected:
                         texts.append(
                             plt.text(variables.peak_x[i], variables.peak_y[i],
                                      '%s' % '{:.2f}'.format(variables.peak_x[i]),
@@ -359,7 +359,7 @@ def mc_hist_plot(variables, bin_size, mode, prominence, distance, percent, selec
         hist = variables.dld_t_c
         label = 'tof'
     if selector == 'peak_x':
-        variables.peaks_idx = []
+        variables.peaks_x_selected = []
     peaks_ini, peaks_y_ini, peak_widths_p_ini, _ = hist_plot(hist[hist < lim], variables, bin_size,
                                                                         label=label,
                                                                         distance=distance, percent=percent,
