@@ -101,10 +101,24 @@ class Variables:
         self.peak_x = []
         self.peak_y = []
         self.peak_width = []
+        self.AptHistPlotter = None
+        self.ions_list_data = None
         self.last_directory = './'  # You can set a default directory here
 
         # Create an empty DataFrame with the specified columns
         self.range_data = pd.DataFrame(columns=['ion', 'mass', 'mc', 'mc_low', 'mc_up', 'color', 'element',
                                                 'complex', 'isotope', 'charge'])
+
+        # Set data types for the columns
+        self.range_data = self.range_data.astype({'ion': 'object',
+                                                  'mass': 'float64',
+                                                  'mc': 'float64',
+                                                  'mc_low': 'float64',
+                                                  'mc_up': 'float64',
+                                                  'color': 'object',
+                                                  'element': 'object',
+                                                  'complex': 'object',
+                                                  'isotope': 'object',
+                                                  'charge': 'uint32'})
 
         self.range_data_backup = None

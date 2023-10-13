@@ -183,6 +183,8 @@ def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, ch
 
     # Round the abundance column to 4 decimal places
     df['abundance'] = df['abundance'].round(4)
+    # Divide all elements in abundance by 100
+    df['abundance'] = df['abundance'] / 100
     df['mass'] = df['mass'].round(4)
     # Backup data if variables provided
     if variables is not None:
@@ -279,6 +281,8 @@ def load_elements(target_elements, abundance_threshold=0.0, charge=4,
 
     # Round the abundance column to 4 decimal places
     df['abundance'] = df['abundance'].round(4)
+    # Divide all elements in abundance by 100
+    df['abundance'] = df['abundance'] / 100
     df['mass'] = df['mass'].round(4)
     # Backup data if variables provided
     if variables is not None:
@@ -504,14 +508,16 @@ def molecule_create(element_list, max_complexity, charge, abundance_threshold, v
         variables.range_data_backup = df.copy()
 
     return df
-def ranging_dataset_create(variables, row_index, mass_unknown):
+
+
+def ranging_dataset_create(variables, row_index, mass_ion):
     """
     This function is used to create the ranging dataset
 
         Arg:
             variables (class): The class of the variables
             row_index (int): The index of the selected row
-            mass_unknown (float): The mass of the unknown element
+            mass_ion (float): The mass of the element
 
         Returns:
             None
@@ -520,17 +526,21 @@ def ranging_dataset_create(variables, row_index, mass_unknown):
         selected_row = variables.range_data_backup.iloc[row_index].tolist()
         selected_row = selected_row[:-1]
     else:
-        selected_row = ['unranged', mass_unknown, 'unranged', 0, 0, 0]
+        selected_row = ['unranged', mass_ion, 'unranged', 0, 0, 0]
     fake = Factory.create()
     data_table = '../../../files/color_scheme.h5'
     dataframe = data_tools.read_hdf5_through_pandas(data_table)
     element_selec = selected_row[2]
-    try:
-        color_rgb = dataframe[dataframe['ion'].str.contains(element_selec, na=False)].to_numpy().tolist()
-        color = matplotlib.colors.to_hex([color_rgb[0][1], color_rgb[0][2], color_rgb[0][3]])
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        print('The element is not color list')
+    if len(element_selec) == 1:
+        element_selec = element_selec[0]
+        try:
+            color_rgb = dataframe[dataframe['ion'].str.contains(element_selec, na=False)].to_numpy().tolist()
+            color = matplotlib.colors.to_hex([color_rgb[0][1], color_rgb[0][2], color_rgb[0][3]])
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            print('The element is not color list')
+            color = fake.hex_color()
+    else:
         color = fake.hex_color()
 
     mass = selected_row[1]
@@ -540,10 +550,8 @@ def ranging_dataset_create(variables, row_index, mass_unknown):
         range = [0, 0]
     else:
         range = sorted(variables.h_line_pos, key=lambda x: abs(x - mass))[:2]
-        mc = sorted(variables.peak_x, key=lambda x: abs(x - mass))[:1]
-        index_mc = [index for index, value in enumerate(variables.peak_x) if value == mc]
 
-    selected_row.insert(2, mc[0])
+    selected_row.insert(2, mass_ion)
     selected_row.insert(3, range[0])
     selected_row.insert(4, range[1])
     selected_row.insert(5, color)

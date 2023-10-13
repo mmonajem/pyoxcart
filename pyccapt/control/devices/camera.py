@@ -92,14 +92,14 @@ class Cameras:
 			# Resize the original to the required size. Utilize the openCV tool.
 			self.img0_orig = img0
 			# Define the region to crop: (x, y, width, height)
-			crop_region = (1640, 900, 300, 100)
+			crop_region = (1625, 910, 300, 100)
 			# Crop the image
 			self.img0_zoom = self.img0_orig[crop_region[1]:crop_region[1] + crop_region[3],
 			                 crop_region[0]:crop_region[0] + crop_region[2]]
 
 			self.img1_orig = img1
 			# Define the region to crop: (x, y, width, height)
-			crop_region = (2050, 1050, 300, 100)
+			crop_region = (2060, 960, 300, 100)
 			# Crop the image
 			self.img1_zoom = self.img1_orig[crop_region[1]:crop_region[1] + crop_region[3],
 			                 crop_region[0]:crop_region[0] + crop_region[2]]

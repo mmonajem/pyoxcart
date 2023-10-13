@@ -28,6 +28,9 @@ def fit_background(x, a, b):
 
 class AptHistPlotter:
     def __init__(self, mc_tof, variables=None):
+        self.plotted_circles = []
+        self.plotted_lines = []
+        self.plotted_labels = []
         self.original_x_limits = None
         self.bin_width = None
         self.fig = None
@@ -315,6 +318,50 @@ class AptHistPlotter:
     def adjust_labels(self):
         adjust_text(self.peak_annotates, arrowprops=dict(arrowstyle='-', color='red', lw=0.5))
 
+    def plot_founded_range_loc(self, df, remove_lines=False):
+        if remove_lines or self.plotted_lines:
+            # Remove previously plotted lines,circles and labels
+            for line, circle, label in zip(self.plotted_lines, self.plotted_circles, self.plotted_labels):
+                line.remove()
+                circle[0].remove()
+                label.remove()
+
+            # Clear the lists
+            self.plotted_lines.clear()
+            self.plotted_circles.clear()
+            self.plotted_labels.clear()
+        elif not remove_lines:
+            ax1 = self.ax.twinx()
+            ions = df['ion']
+            abundances = df['abundance']
+            mass = df['mass']
+
+            # Define the scaling factor for the abundance to control the line height
+            scaling_factor = 1.0  # Adjust as needed
+
+            for ion, abundance, m in zip(ions, abundances, mass):
+                # Calculate the height of the line based on abundance
+                line_height = abundance * scaling_factor
+
+                # Plot a vertical line at the position of 'mass' with the specified height
+                line = ax1.vlines(x=m, ymin=0, ymax=line_height, color='red', linestyles='dashed')
+
+                # Plot an empty circle marker at the top of the line
+                circle = ax1.plot(m, line_height, marker='o', markersize=6, color='white', markeredgecolor='red')
+
+                # Annotate the ion label (LaTeX formula) near the circle
+                label = ax1.annotate(ion, xy=(m, line_height), xytext=(m, line_height), fontsize=10,
+                                     color='blue', annotation_clip='clip_on', textcoords="offset points",
+                                     xycoords="data")
+
+                self.plotted_lines.append(line)  # Keep track of the plotted lines
+                self.plotted_circles.append(circle)  # Keep track of the plotted circles
+                self.plotted_labels.append(label)  # Keep track of the plotted labels
+                # Remove the y-axis and labels
+                ax1.get_yaxis().set_visible(False)
+                # Set the y-axis to log scale
+                ax1.set_yscale('log')
+
     def zoom_to_x_range(self, x_min, x_max, reset=False):
         """
         Zoom the plot to a specific range of x-values.
@@ -402,6 +449,9 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
     elif target == 'tof' or target == 'tof_c':
         mc_hist = AptHistPlotter(hist[hist < lim], variables)
         y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log, fig_size=(9, 5))
+
+    # copy the mc_hist to variables to use the methods of that class in other functions
+    variables.AptHistPlotter = mc_hist
 
     if mode != 'normalized' and peaks_find_plot and not range_plot and not ranging_mode:
         peaks, properties, peak_widths, prominences = mc_hist.find_peaks_and_widths(prominence=prominence,

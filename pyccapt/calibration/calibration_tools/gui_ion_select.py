@@ -1,8 +1,8 @@
 import sys
 
 import pandas as pd
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt, QThread
+from PyQt6.QtGui import QFont, QGuiApplication
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 
@@ -93,18 +93,22 @@ class MyWindow(QMainWindow):
 
             self.selected_row = new_selected_row
 
-            # List to match
-            target_list = selected_data['element'].to_list()
-            target_list = [item for sublist in target_list for item in sublist]
-            # Find rows with matching lists
-            matching_rows = self.data[self.data['element'].apply(lambda x: x == target_list)]
-
+            # List to match for 'element' and 'complex'
+            target_element_list = selected_data['element'].to_list()
+            target_element_list = [item for sublist in target_element_list for item in sublist]
+            target_complex_list = selected_data['complex'].to_list()
+            target_complex_list = [item for sublist in target_complex_list for item in sublist]
+            # Find rows with matching 'element' and 'complex' lists
+            matching_rows = self.data[
+                (self.data['element'].apply(lambda x: all(item in x for item in target_element_list))) &
+                (self.data['complex'].apply(lambda x: all(item in x for item in target_complex_list)))
+                ]
             # Create a new DataFrame with matching rows
             new_df = pd.DataFrame(matching_rows)
-
             # Reset the index of the new DataFrame if needed
             new_df.reset_index(drop=True, inplace=True)
-            print(new_df)
+            self.variables.ions_list_data = new_df
+            # self.variables.AptHistPlotter.plot_founded_range_loc(new_df)
 
             # Disconnect the selectionChanged signal to a custom slot
             self.tableWidget.itemSelectionChanged.disconnect(self.onSelectionChanged)
@@ -162,10 +166,15 @@ class MyWindow(QMainWindow):
 
 
 def open_gui(df, variables):
-    app = QApplication(sys.argv)
+    app = 0  # This is the solution to prevent kernel crash of Jupyter lab
+    app = QApplication.instance()
+    if not app:
+        app = QApplication(sys.argv)
 
     window = MyWindow(df, variables)
     window.show()
+    # Ensure that the app is deleted when we close it
+    app.aboutToQuit.connect(app.deleteLater)
     try:
         app.exec()
     except SystemExit:

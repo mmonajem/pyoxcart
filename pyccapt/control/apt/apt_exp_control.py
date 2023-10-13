@@ -2,7 +2,6 @@ import datetime
 import multiprocessing
 import os
 import time
-
 import serial.tools.list_ports
 
 from pyccapt.control.control_tools import experiment_statistics, hdf5_creator, loggi
