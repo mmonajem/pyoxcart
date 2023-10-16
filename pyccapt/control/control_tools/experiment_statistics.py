@@ -19,22 +19,18 @@ def save_statistics_apt(variables):
     Experiment Parameters and Statistics
     -------------------------------------------
     Experiment Timestamp: {current_datetime}
-    User Information:
-        Username: {variables.user_name}
-        Email: {variables.email}
-
-    Experiment Setup Parameters:
-        Experiment Name: {variables.ex_name}
-        Maximum Experiment Time: {variables.ex_time} seconds
-        Maximum Number of Ions: {variables.max_ions}
-        Control Refresh Frequency: {variables.ex_freq} Hz
-        Specimen DC Voltage Range (Min-Max): {variables.vdc_min} V - {variables.vdc_max} V
-        K_p Upwards: {variables.vdc_step_up}
-        K_p Downwards: {variables.vdc_step_down}
-        Control Algorithm: {variables.control_algorithm}
-        Pulse Mode: {variables.pulse_mode}
+    Username: {variables.user_name}
+    Email: {variables.email}
+    Experiment Name: {variables.ex_name}
+    Maximum Experiment Time: {variables.ex_time} seconds
+    Maximum Number of Ions: {variables.max_ions}
+    Control Refresh Frequency: {variables.ex_freq} Hz
+    Specimen DC Voltage Range (Min-Max): {variables.vdc_min} V - {variables.vdc_max} V
+    K_p Upwards: {variables.vdc_step_up}
+    K_p Downwards: {variables.vdc_step_down}
+    Control Algorithm: {variables.control_algorithm}
+    Pulse Mode: {variables.pulse_mode}
     """
-
     if variables.pulse_mode == 'Voltage':
         header += f"""
         Pulse Voltage Range (Min-Max): {variables.v_p_min} V - {variables.v_p_max} V
