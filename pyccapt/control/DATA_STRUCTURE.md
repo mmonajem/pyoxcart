@@ -1,54 +1,64 @@
 # HDF5 Data Structure of PyCCAPT Control Module
 
 This document provides an overview of the data structure within the HDF5 file of the control software of the PyCCAPT.
+In the descriptions below, the notation "(n, )(unit, datatype)" is used to represent one-dimensional arrays with the
+unit and data type specified. This structure remains consistent for all other information. For example,
+"(n, )(nm, float64)" indicates a one-dimensional array in float64 data type with the unit "nm" (nanometers).
+"N/A" is used to indicate that there is no specific unit associated with the data.
 
 ## Groups
 
-### Group: `apt`
+### Group: `apt`:
 
-- `high_voltage`: Applied DC voltage in the current iteration (float64).
-- `pulse`: Applied pulse voltage or laser power in the current iteration (float64).
-- `num_event`: Number of detected ions since last control loop iteration (integer).
-- `temperature`: Temperature level in each control loop iteration (float64).
-- `main_chamber_vacuum`: Vacuum level in each control loop iteration (float64).
-- `time_counter`: Experiment time counter of the PyCCAPT control software (integer).
-- `second`: Time at which the data was recorded in each iteration (integer).
-- `minute`: Time at which the data was recorded in each iteration (integer).
-- `hour`: Time at which the data was recorded in each iteration (integer).
+The `apt` group contains the data from the APT system in each iteration of the control loop. As a result the frequency
+of saving data depends on the frequency of the control loop. The data structure of the `apt` group is as follows:
+
+- `high_voltage` (n,) (V, float64): DC voltage value of the power supply.
+- `pulse` (n,) (V, float64) or (pJ/um2, float64): Pulse voltage or laser power.
+- `num_event` (n,) (N/A, uint32): Number of detected ions
+- `temperature` (n,) (k, float64): Temperature of the sample.
+- `experiment_chamber_vacuum` (n,) (mBar, float64): Vacuum level in the experiment chamber.
+- `time_counter` (n,) (, uint64): Experiment loop iteration counter.
+- `timestamps` (n,) (UNIX, float64): UNIX time at which the data was recorded in each iteration with micro second
+  accuracy.
 
 ### Group: `dld`
 
-- `high_voltage`: Applied DC voltage for dld events (float64).
-- `pulse`: Applied pulse voltage or laser power for dld events (float64).
-- `start_counter`: Description of start counter data (float64).
-- `t`: Time-of-flight for the detected event (float64).
-- `x`: Detector x hit position for the detected event (float64).
-- `y`: Detector y hit position for the detected event (float64).
+The Delay Line Detector (`dld`) group contains the time of flight detector hit coordinates calculated via DLLs. The data
+structure of the
+
+- `high_voltage` (n,) (V, float64): DC voltage value of the power supply.
+- `pulse` (n,) (V, float64) or (pJ/um2, float64): Pulse voltage or laser power.
+- `start_counter` (n,) (N/A, float64): Description of start counter data.
+- `t` (n,) (ns, float64): Time-of-flight for the detected event.
+- `x` (n,) (cm, float64): Detector x hit position for the detected event.
+- `y` (n,) (cm, float64): Detector y hit position for the detected event.
 
 ### Group: `tdc`
 
-Raw data from the TDC system. Te data structure depends on the TDC system used.
+Raw data from the Time to Digital Converter (`TDC`) system. The data structure depends on the TDC system used (Surface
+Concept ot RoentDek).
 
 #### Surface Concept TDC:
 
-- `channel`: Description of channel data (integer).
-- `high_voltage`: Applied DC voltage for tdc events (float64).
-- `pulse_voltage`: Applied pulse voltage or laser power for tdc events (float64).
-- `start_counter`: Start counter of tdc (integer).
-- `time_data`: Description of time data (integer).
+- `channel` (n,) (N/A, uint32): Description of channel data (integer).
+- `start_counter` (n,) (N/A, uint64): Start counter of tdc (integer).
+- `time_data` (n,) (N/A, uint64): Description of time data (integer).
+- `high_voltage` (n,) (V, float64): Applied DC voltage for tdc events (float64).
+- `pulse_voltage` (n,) (V, float64) or (pJ/um2, float64): Pulse voltage or laser power for tdc events (float64).
 
 
 #### RoentDek TDC:
 
-- `ch0`: Time counter at channel 0 for tdc events, dld 1 (integer).
-- `ch1`: Time counter at channel 1 for tdc events, dld 1 (integer).
-- `ch2`: Time counter at channel 2 for tdc events, dld 2 (integer).
-- `ch3`: Time counter at channel 3 for tdc events, dld 2 (integer).
-- `ch4`: Time counter at channel 4 for tdc events, dld 3 (integer).
-- `ch5`: Time counter at channel 5 for tdc events, dld 3 (integer).
-- `ch6`: Time counter at channel 6 for tdc events, pulse trigger (integer).
-- `ch7`: Time counter at channel 7 for tdc events (integer).
-- `high_voltage`: Applied DC voltage for tdc events (float64).
-- `pulse`: Applied pulse voltage or laser power for tdc events (float64).
+- `ch0` (n,) (N/A, uint64): Time counter at channel 0 for tdc events, dld 1.
+- `ch1` (n,) (N/A, uint64): Time counter at channel 1 for tdc events, dld 1.
+- `ch2` (n,) (N/A, uint64): Time counter at channel 2 for tdc events, dld 2.
+- `ch3` (n,) (N/A, uint64): Time counter at channel 3 for tdc events, dld 2.
+- `ch4` (n,) (N/A, uint64): Time counter at channel 4 for tdc events, dld 3.
+- `ch5` (n,) (N/A, uint64): Time counter at channel 5 for tdc events, dld 3.
+- `ch6` (n,) (N/A, uint64): Time counter at channel 6 for tdc events, pulse trigger.
+- `ch7` (n,) (N/A, uint64): Time counter at channel 7 for tdc events.
+- `high_voltage` (n,) (V, float64): Applied DC voltage for tdc events.
+- `pulse` (n,) (V, float64) or (pJ/um2, float64): Pulse voltage or laser power for tdc events.
 
 

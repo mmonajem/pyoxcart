@@ -2,6 +2,7 @@ import datetime
 import multiprocessing
 import os
 import time
+
 import serial.tools.list_ports
 
 from pyccapt.control.control_tools import experiment_statistics, hdf5_creator, loggi
@@ -346,9 +347,7 @@ class APT_Exp_Control:
         self.variables.pulse_voltage_max = self.variables.v_p_max * (1 / self.variables.pulse_amp_per_supply_voltage)
         self.variables.pulse_voltage = self.variables.v_p_min
 
-        time_ex_s = []
-        time_ex_m = []
-        time_ex_h = []
+        time_ex = []
         time_counter = []
 
         steps = 0
@@ -424,10 +423,12 @@ class APT_Exp_Control:
                 time_counter.append(steps)
 
                 # Measure time
-                end = datetime.datetime.now()
-                time_ex_s.append(int(end.strftime("%S")))
-                time_ex_m.append(int(end.strftime("%M")))
-                time_ex_h.append(int(end.strftime("%H")))
+                current_time = datetime.datetime.now()
+                current_time_with_microseconds = current_time.strftime(
+                    "%Y-%m-%d %H:%M:%S.%f")  # Format with microseconds
+                current_time_unix = datetime.strptime(current_time_with_microseconds,
+                                                      "%Y-%m-%d %H:%M:%S.%f").timestamp()
+                time_ex.append(current_time_unix)
 
                 if self.variables.stop_flag:
                     self.log_apt.info('Experiment is stopped')
@@ -578,7 +579,7 @@ class APT_Exp_Control:
 
         self.variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
         # save data in hdf5 file
-        hdf5_creator.hdf_creator(self.variables, self.conf, time_counter, time_ex_s, time_ex_m, time_ex_h)
+        hdf5_creator.hdf_creator(self.variables, self.conf, time_counter, time_ex)
         # Adding results of the experiment to the log file
         self.log_apt.info('Total number of Ions is: %s' % self.variables.total_ions)
         self.log_apt.info('HDF5 file is created')
