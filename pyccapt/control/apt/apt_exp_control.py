@@ -425,9 +425,9 @@ class APT_Exp_Control:
                 # Measure time
                 current_time = datetime.datetime.now()
                 current_time_with_microseconds = current_time.strftime(
-                    "%Y-%m-%d %H:%M:%S.%f")  # Format with microseconds
-                current_time_unix = datetime.strptime(current_time_with_microseconds,
-                                                      "%Y-%m-%d %H:%M:%S.%f").timestamp()
+	                "%Y-%m-%d %H:%M:%S.%f")  # Format with microseconds
+                current_time_unix = datetime.datetime.strptime(current_time_with_microseconds,
+                                                               "%Y-%m-%d %H:%M:%S.%f").timestamp()
                 time_ex.append(current_time_unix)
 
                 if self.variables.stop_flag:

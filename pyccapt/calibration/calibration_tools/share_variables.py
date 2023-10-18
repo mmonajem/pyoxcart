@@ -42,10 +42,14 @@ class Variables:
         max_tof (int): The maximum tof value.
         peak_x (list): List of peaks.
         peak_y (list): List of peak y-values.
-        peak_width (list): List of peak widths.
+        peak_widths (list): List of peak widths.
+        x_hist (numpy.ndarray): Array for x histogram.
+        y_hist (numpy.ndarray): Array for y histogram.
         h_line_pos (list): List of horizontal line positions.
-        range_data (data frame): List of range data.
-        range_data_backup (data frame): Backup list of range data.
+        data (data frame): dataset of the experiment.
+        data_backup (data frame): backup dataset of the experiment.
+        range_data (data frame): range dataset.
+        range_data_backup (data frame): Backup range dataset.
         last_directory (str): The last directory.
     """
 
@@ -100,11 +104,19 @@ class Variables:
         self.peaks_index = 0
         self.peak_x = []
         self.peak_y = []
-        self.peak_width = []
+        self.peak_widths = []
+        self.x_hist = None
+        self.y_hist = None
         self.AptHistPlotter = None
         self.ions_list_data = None
         self.last_directory = './'  # You can set a default directory here
 
+        self.data = None
+        self.data_backup = None
+        self.max_mc = 400
+        self.max_tof = None
+        self.flight_path_length = None
+        self.pulse_mode = None
         # Create an empty DataFrame with the specified columns
         self.range_data = pd.DataFrame(columns=['ion', 'mass', 'mc', 'mc_low', 'mc_up', 'color', 'element',
                                                 'complex', 'isotope', 'charge'])

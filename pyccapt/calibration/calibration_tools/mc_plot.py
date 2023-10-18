@@ -27,7 +27,18 @@ def fit_background(x, a, b):
 
 
 class AptHistPlotter:
+    """
+    This class plots the histogram of the mass-to-charge ratio (mc) or time of flight (tof) data.
+    """
+
     def __init__(self, mc_tof, variables=None):
+        """
+        Initializes all the attributes of AptHistPlotter.
+
+        Args:
+            mc_tof (numpy.ndarray): Array for mc or tof data.
+            variables (share_variables.Variables): The global experiment variables.
+        """
         self.plotted_circles = []
         self.plotted_lines = []
         self.plotted_labels = []
@@ -49,32 +60,24 @@ class AptHistPlotter:
         self.mask_f = None
         self.legend_colors = []
 
-    def find_peaks_and_widths(self, prominence=None, distance=None, percent=50):
-        try:
-            self.peaks, self.properties = find_peaks(self.y, prominence=prominence, distance=distance, height=0)
-            self.peak_widths = peak_widths(self.y, self.peaks, rel_height=(percent / 100), prominence_data=None)
-            self.prominences = peak_prominences(self.y, self.peaks, wlen=None)
-
-            x_peaks = self.x[self.peaks]
-            y_peaks = self.y[self.peaks]
-            self.variables.peak_x = x_peaks
-            self.variables.peak_y = y_peaks
-            index_max_ini = np.argmax(y_peaks)
-            self.variables.max_peak = x_peaks[index_max_ini]
-        except ValueError:
-            print('Peak finding failed.')
-            self.peaks = None
-            self.properties = None
-            self.peak_widths = None
-            self.prominences = None
-            self.variables.peak_x = None
-            self.variables.peak_y = None
-            self.variables.max_peak = None
-
-        return self.peaks, self.properties, self.peak_widths, self.prominences
-
     def plot_histogram(self, bin_width=0.1, mode=None, label='mc', log=True, grid=False, steps='stepfilled',
                        fig_size=(9, 5)):
+        """
+        Plot the histogram of the mc or tof data.
+
+        Args:
+            bin_width (float): The width of the bins.
+            mode (str): The mode of the histogram ('normalized' or 'absolute').
+            label (str): The label of the x-axis ('mc' or 'tof').
+            log (bool): Whether to use log scale for the y-axis.
+            grid (bool): Whether to show the grid.
+            steps (str): The type of the histogram ('stepfilled' or 'bar').
+            fig_size (tuple): The size of the figure.
+
+        Returns:
+            tuple: A tuple of the y and x values of the histogram.
+
+        """
         # Define the bins
         self.bin_width = bin_width
         bins = np.linspace(np.min(self.mc_tof), np.max(self.mc_tof), round(np.max(self.mc_tof) / bin_width))
@@ -104,9 +107,21 @@ class AptHistPlotter:
         plt.tight_layout()
         plt.show()
 
+        self.variables.x_hist = self.x
+        self.variables.y_hist = self.y
         return self.y, self.x
 
     def plot_range(self, range_data, legend=True):
+        """
+        Plot the range of the histogram.
+
+        Args:
+            range_data (data frame): The range data.
+            legend (bool): Whether to show the legend.
+
+        Returns:
+            None
+        """
         if len(self.patches) == len(self.x) - 1:
             colors = range_data['color'].tolist()
             mc_low = range_data['mc_low'].tolist()
@@ -140,7 +155,16 @@ class AptHistPlotter:
             print('plot_range only works in plot_histogram mode=bar')
 
     def plot_peaks(self, range_data=None, mode='peaks'):
+        """
+        Plot the peaks of the histogram.
 
+        Args:
+            range_data (data frame): The range data.
+            mode (str): The mode of the peaks ('peaks', 'range', or 'peaks_range').
+
+        Returns:
+            None
+        """
         x_offset = 0.1  # Adjust this value as needed
         y_offset = 10  # Adjust this value as needed
         if range_data is not None:
@@ -175,42 +199,32 @@ class AptHistPlotter:
 
                     self.annotates.append(str(i + 1))
 
-    def selector(self, selector='rect'):
-        if selector == 'rect':
-            # Connect and initialize rectangle box selector
-            data_loadcrop.rectangle_box_selector(self.ax, self.variables)
-            plt.connect('key_press_event', selectors_data.toggle_selector(self.variables))
-        elif selector == 'peak':
-            # connect peak_x selector
-            af = intractive_point_identification.AnnoteFinder(self.x[self.peaks], self.y[self.peaks], self.annotates,
-                                                              self.variables, ax=self.ax)
-            self.fig.canvas.mpl_connect('button_press_event', lambda event: af.annotates_plotter(event))
-
-            zoom_manager = plot_vline_draw.HorizontalZoom(self.ax, self.fig)
-            self.fig.canvas.mpl_connect('key_press_event', lambda event: zoom_manager.on_key_press(event))
-            self.fig.canvas.mpl_connect('key_release_event', lambda event: zoom_manager.on_key_release(event))
-            self.fig.canvas.mpl_connect('scroll_event', lambda event: zoom_manager.on_scroll(event))
-        elif selector == 'range':
-            # connect range selector
-            line_manager = plot_vline_draw.VerticalLineManager(self.variables, self.ax, self.fig, [], [])
-
-            self.fig.canvas.mpl_connect('button_press_event',
-                                        lambda event: line_manager.on_press(event))
-            self.fig.canvas.mpl_connect('button_release_event',
-                                        lambda event: line_manager.on_release(event))
-            self.fig.canvas.mpl_connect('motion_notify_event',
-                                        lambda event: line_manager.on_motion(event))
-            self.fig.canvas.mpl_connect('key_press_event',
-                                        lambda event: line_manager.on_key_press(event))
-            self.fig.canvas.mpl_connect('scroll_event', lambda event: line_manager.on_scroll(event))
-            self.fig.canvas.mpl_connect('key_release_event',
-                                        lambda event: line_manager.on_key_release(event))
-
     def plot_color_legend(self, loc):
+        """
+        Plot the color legend.
+
+        Args:
+            loc (str): The location of the legend.
+
+        Returns:
+            None
+        """
         self.ax.legend([label[1] for label in self.legend_colors], [label[0] for label in self.legend_colors],
                        loc=loc)
 
     def plot_hist_info_legend(self, label='mc', bin=0.1, background=None, loc='left'):
+        """
+        Plot the histogram information legend.
+
+        Args:
+            label (str): The label of the x-axis ('mc' or 'tof').
+            bin (float): The width of the bins.
+            background (dict): The background data.
+            loc (str): The location of the legend.
+
+        Returns:
+            None
+        """
         index_peak_max = np.argmax(self.prominences[0])
 
         if label == 'mc':
@@ -257,13 +271,40 @@ class AptHistPlotter:
                      horizontalalignment='right', verticalalignment='top')
 
     def plot_horizontal_lines(self):
+        """
+        Plot the horizontal lines.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         for i in range(len(self.variables.h_line_pos)):
             if np.max(self.mc_tof) + 10 > self.variables.h_line_pos[i] > np.max(self.mc_tof) - 10:
                 plt.axvline(x=self.variables.h_line_pos[i], color='b', linestyle='--', linewidth=2)
 
     def plot_background(self, mode, non_peaks=None, lam=5e10, tol=1e-1, max_iter=100, num_std=3, poly_order=5,
                         plot_no_back=True, plot=True, patch=True):
+        """
+        Plot the background of the histogram.
 
+        Args:
+            mode (str): The mode of the background ('aspls', 'fabc', 'dietrich', 'cwt_br', 'selective_mask_t', or
+                        'selective_mask_mc').
+            non_peaks (numpy.ndarray): The non-peaks data.
+            lam (float): The lambda value for the background fitting.
+            tol (float): The tolerance value for the background fitting.
+            max_iter (int): The maximum number of iterations for the background fitting.
+            num_std (int): The number of standard deviations for the background fitting.
+            poly_order (int): The polynomial order for the background fitting.
+            plot_no_back (bool): Whether to plot the background.
+            plot (bool): Whether to plot the background.
+            patch (bool): Whether to plot the patch.
+
+        Returns:
+            numpy.ndarray: The mask of the background.
+        """
         if mode == 'aspls':
             baseline_fitter = Baseline(x_data=self.bins[:-1])
             fit_1, params_1 = baseline_fitter.aspls(self.y, lam=lam, tol=tol, max_iter=max_iter)
@@ -315,10 +356,17 @@ class AptHistPlotter:
 
         return self.mask_f
 
-    def adjust_labels(self):
-        adjust_text(self.peak_annotates, arrowprops=dict(arrowstyle='-', color='red', lw=0.5))
-
     def plot_founded_range_loc(self, df, remove_lines=False):
+        """
+        Plot the founded range location.
+
+        Args:
+            df (data frame): The data frame of the founded range.
+            remove_lines (bool): Whether to remove the lines.
+
+        Returns:
+            None
+        """
         if remove_lines or self.plotted_lines:
             # Remove previously plotted lines,circles and labels
             for line, circle, label in zip(self.plotted_lines, self.plotted_circles, self.plotted_labels):
@@ -362,6 +410,83 @@ class AptHistPlotter:
                 # Set the y-axis to log scale
                 ax1.set_yscale('log')
 
+    def find_peaks_and_widths(self, prominence=None, distance=None, percent=50):
+        """
+        Find the peaks and widths of the histogram.
+
+        Args:
+            prominence (float): The minimum prominence of peaks.
+            distance (float): The minimum horizontal distance in samples between peaks.
+            percent (float): The percentage of the peak height to calculate the peak width.
+
+        Returns:
+            tuple: A tuple of the peaks, properties, peak widths, and prominences.
+        """
+        try:
+            self.peaks, self.properties = find_peaks(self.y, prominence=prominence, distance=distance, height=0)
+            self.peak_widths = peak_widths(self.y, self.peaks, rel_height=(percent / 100), prominence_data=None)
+            self.prominences = peak_prominences(self.y, self.peaks, wlen=None)
+
+            x_peaks = self.x[self.peaks]
+            y_peaks = self.y[self.peaks]
+            self.variables.peak_x = x_peaks
+            self.variables.peak_y = y_peaks
+            index_max_ini = np.argmax(y_peaks)
+            self.variables.max_peak = x_peaks[index_max_ini]
+            self.variables.peak_widths = self.peak_widths
+        except ValueError:
+            print('Peak finding failed.')
+            self.peaks = None
+            self.properties = None
+            self.peak_widths = None
+            self.prominences = None
+            self.variables.peak_x = None
+            self.variables.peak_y = None
+            self.variables.max_peak = None
+
+        return self.peaks, self.properties, self.peak_widths, self.prominences
+
+    def selector(self, selector='rect'):
+        """
+        Connect the selector to the plot.
+
+        Args:
+            selector (str): The type of selector ('rect', 'peak', or 'range').
+
+        Returns:
+            None
+        """
+        if selector == 'rect':
+            # Connect and initialize rectangle box selector
+            data_loadcrop.rectangle_box_selector(self.ax, self.variables)
+            plt.connect('key_press_event', selectors_data.toggle_selector(self.variables))
+        elif selector == 'peak':
+            # connect peak_x selector
+            af = intractive_point_identification.AnnoteFinder(self.x[self.peaks], self.y[self.peaks], self.annotates,
+                                                              self.variables, ax=self.ax)
+            self.fig.canvas.mpl_connect('button_press_event', lambda event: af.annotates_plotter(event))
+
+            zoom_manager = plot_vline_draw.HorizontalZoom(self.ax, self.fig)
+            self.fig.canvas.mpl_connect('key_press_event', lambda event: zoom_manager.on_key_press(event))
+            self.fig.canvas.mpl_connect('key_release_event', lambda event: zoom_manager.on_key_release(event))
+            self.fig.canvas.mpl_connect('scroll_event', lambda event: zoom_manager.on_scroll(event))
+
+        elif selector == 'range':
+            # connect range selector
+            line_manager = plot_vline_draw.VerticalLineManager(self.variables, self.ax, self.fig, [], [])
+
+            self.fig.canvas.mpl_connect('button_press_event',
+                                        lambda event: line_manager.on_press(event))
+            self.fig.canvas.mpl_connect('button_release_event',
+                                        lambda event: line_manager.on_release(event))
+            self.fig.canvas.mpl_connect('motion_notify_event',
+                                        lambda event: line_manager.on_motion(event))
+            self.fig.canvas.mpl_connect('key_press_event',
+                                        lambda event: line_manager.on_key_press(event))
+            self.fig.canvas.mpl_connect('scroll_event', lambda event: line_manager.on_scroll(event))
+            self.fig.canvas.mpl_connect('key_release_event',
+                                        lambda event: line_manager.on_key_release(event))
+
     def zoom_to_x_range(self, x_min, x_max, reset=False):
         """
         Zoom the plot to a specific range of x-values.
@@ -370,6 +495,9 @@ class AptHistPlotter:
             x_min (float): Minimum x-value for the zoomed range.
             x_max (float): Maximum x-value for the zoomed range.
             reset (bool): If True, reset the zoom to the full range.
+
+        Return:
+            None
         """
         if reset:
             """Reset the plot to the original view."""
@@ -380,7 +508,29 @@ class AptHistPlotter:
             self.ax.set_xlim(x_min, x_max)
             self.fig.canvas.draw()
 
+    def adjust_labels(self):
+        """
+        Adjust the labels.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        adjust_text(self.peak_annotates, arrowprops=dict(arrowstyle='-', color='red', lw=0.5))
+
     def save_fig(self, label, fig_name):
+        """
+        Save the figure.
+
+        Args:
+            label (str): The label of the x-axis ('mc' or 'tof').
+            fig_name (str): The name of the figure.
+
+        Returns:
+            None
+        """
         if label == 'mc':
             plt.savefig(self.variables.result_path + "//mc_%s.svg" % fig_name, format="svg", dpi=600)
             plt.savefig(self.variables.result_path + "//mc_%s.png" % fig_name, format="png", dpi=600)
@@ -429,6 +579,8 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         label = 'tof'
     if selector == 'peak':
         variables.peaks_x_selected = []
+        variables.peak_widths = []
+        variables.peak_x = []
 
     if selected_area:
         mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
@@ -478,7 +630,8 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
 
     if peaks is not None and print_info:
         index_max_ini = np.argmax(prominences[0])
-        mrp = (prominences[0][index_max_ini] / (peak_widths[3][index_max_ini] - peak_widths[2][index_max_ini]))
+        mrp = x[int(peaks[index_max_ini])] / (
+                    x[int(peak_widths[3][index_max_ini])] - x[int(peak_widths[2][index_max_ini])])
         print('Mass resolving power for the highest peak_x at peak_x index %a (MRP --> m/m_2-m_1):' % index_max_ini,
               mrp)
         for i in range(len(peaks)):
