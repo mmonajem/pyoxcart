@@ -192,7 +192,7 @@ class APT_Exp_Control:
         ions, calculates the error of the desired rate, and regulates the high voltage and pulser accordingly.
 
         Args:
-            counts_target: Target ion count
+            None
 
         Returns:
             None

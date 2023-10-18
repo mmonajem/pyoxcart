@@ -367,26 +367,26 @@ def molecule_manual(target_element, charge, latex=True, variables=None):
 
 
 def transform_combination_and_isotopes(combination, isotopes):
-	"""
-	Transform the combination and isotopes lists to remove duplicates.
+    """
+    Transform the combination and isotopes lists to remove duplicates.
 
-	Args:
-		combination (list): The list of elements.
-		isotopes (list): The list of isotopes.
+    Args:
+        combination (list): The list of elements.
+        isotopes (list): The list of isotopes.
 
-	Returns:
-		list: The new combination list.
-	"""
-	new_combination = []
-	new_isotopes = []
-	complexity = []
+    Returns:
+        list: The new combination list.
+    """
+    new_combination = []
+    new_isotopes = []
+    complexity = []
 
-	for element, isotope in zip(combination, isotopes):
-		if element not in new_combination:
-			new_combination.append(element)
-			new_isotopes.append(isotope)
-			complexity.append(1)
-		else:
+    for element, isotope in zip(combination, isotopes):
+        if element not in new_combination:
+            new_combination.append(element)
+            new_isotopes.append(isotope)
+            complexity.append(1)
+        else:
             index = new_combination.index(element)
             if isotope != new_isotopes[index]:
                 new_combination.append(element)
@@ -399,30 +399,30 @@ def transform_combination_and_isotopes(combination, isotopes):
 
 
 def molecule_create(element_list, max_complexity, charge, abundance_threshold, variables=None, latex=True):
-	"""
-	Generate a list of isotopes for a given target element.
+    """
+    Generate a list of isotopes for a given target element.
 
-	Args:
-		element_list (str): The target element to find isotopes for.
-		max_complexity (int): The maximum complexity of the molecule.
-		charge (int): The charge of the target element.
-		aboundance_threshold (float): The abundance threshold for filtering isotopes.
-		variables (object, optional): The variables object. Defaults to None.
-		latex (bool, optional): Whether to generate LaTeX representation of formulas. Defaults to True.
+    Args:
+        element_list (str): The target element to find isotopes for.
+        max_complexity (int): The maximum complexity of the molecule.
+        charge (int): The charge of the target element.
+        abundance_threshold (float): The abundance threshold for filtering isotopes.
+        variables (object, optional): The variables object. Defaults to None.
+        latex (bool, optional): Whether to generate LaTeX representation of formulas. Defaults to True.
 
-	Returns:
-		pd.DataFrame: A DataFrame containing the list of isotopes with their weights and abundances.
-	"""
-	isotopeTableFile = '../../../files/isotopeTable.h5'
-	dataframe = data_tools.read_hdf5_through_pandas(isotopeTableFile)
-	elements = dataframe['element'].to_numpy()
-	isotope_number = dataframe['isotope'].to_numpy()
-	abundance = dataframe['abundance'].to_numpy()
-	weight = dataframe['weight'].to_numpy()
-	element_list = element_list.split(',')
-	element_list = [s.replace(' ', '') for s in element_list]
-	indices_elements = np.where(np.isin(elements, [element_list]))
-	selected_elements = elements[indices_elements[0]]
+    Returns:
+        pd.DataFrame: A DataFrame containing the list of isotopes with their weights and abundances.
+    """
+    isotopeTableFile = '../../../files/isotopeTable.h5'
+    dataframe = data_tools.read_hdf5_through_pandas(isotopeTableFile)
+    elements = dataframe['element'].to_numpy()
+    isotope_number = dataframe['isotope'].to_numpy()
+    abundance = dataframe['abundance'].to_numpy()
+    weight = dataframe['weight'].to_numpy()
+    element_list = element_list.split(',')
+    element_list = [s.replace(' ', '') for s in element_list]
+    indices_elements = np.where(np.isin(elements, [element_list]))
+    selected_elements = elements[indices_elements[0]]
     selected_isotope_number = isotope_number[indices_elements[0]]
     selected_weights = weight[indices_elements[0]]
     selected_abundance = abundance[indices_elements[0]]

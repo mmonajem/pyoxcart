@@ -39,6 +39,8 @@ class AptHistPlotter:
             mc_tof (numpy.ndarray): Array for mc or tof data.
             variables (share_variables.Variables): The global experiment variables.
         """
+        self.ax1 = None
+        self.bins = None
         self.plotted_circles = []
         self.plotted_lines = []
         self.plotted_labels = []
