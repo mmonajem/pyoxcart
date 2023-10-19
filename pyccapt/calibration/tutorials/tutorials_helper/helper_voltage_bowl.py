@@ -1,13 +1,9 @@
 import ipywidgets as widgets
-from IPython.display import display
-from ipywidgets import Output
-from IPython.display import clear_output
 import numpy as np
+from IPython.display import display, clear_output
+from ipywidgets import Output
 
-from pyccapt.calibration.calibration_tools import tools, share_variables, calibration
-from pyccapt.calibration.calibration_tools import widgets as wd
-from pyccapt.calibration.data_tools import data_tools, data_loadcrop, dataset_path_qt
-from pyccapt.calibration.calibration_tools import mc_plot
+from pyccapt.calibration.calibration_tools import calibration, mc_plot
 
 # Define a layout for labels to make them a fixed width
 label_layout = widgets.Layout(width='300px')
@@ -15,10 +11,6 @@ label_layout = widgets.Layout(width='300px')
 
 def reset_back_on_click(variables):
     variables.dld_t_calib = np.copy(variables.dld_t_calib_backup)
-
-
-def reset_on_click(variables, flightPathLength, max_mc):
-    data_tools.extract_data(variables.data, variables, flightPathLength.value, max_mc.value)
 
 
 def save_on_click(variables):
@@ -30,7 +22,7 @@ def clear_plot_on_click(out):
         out.clear_output()
 
 
-def call_voltage_bowl_calibration(variables, det_diam, flightPathLength, max_mc):
+def call_voltage_bowl_calibration(variables, det_diam, flightPathLength, max_mc, calibration_mode):
     out = Output()
     out_status = Output()
     # Define widgets and labels for histplot function
@@ -45,15 +37,18 @@ def call_voltage_bowl_calibration(variables, det_diam, flightPathLength, max_mc)
         description='plot peak',
         layout=label_layout
     )
+    figure_mc_size_x = widgets.FloatText(value=9.0, description="Fig. size W:", layout=label_layout)
+    figure_mc_size_y = widgets.FloatText(value=5.0, description="Fig. size H:", layout=label_layout)
 
-    def hist_plot(b, variables, out):
+    def hist_plot(b, variables, out, calibration_mode):
         plot_button.disabled = True
+        figure_size = (figure_mc_size_x.value, figure_mc_size_y.value)
         with out:
             out.clear_output()
             mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value, mode='normal',
                               prominence=prominence.value, distance=distance.value, percent=percent.value,
                               selector='rect', figname=index_fig, lim=lim_tof.value,
-                              peaks_find_plot=plot_peak, print_info=False)
+                              peaks_find_plot=plot_peak, print_info=False, figure_size=figure_size)
         plot_button.disabled = False
 
     # Create a button widget to voltage correction function
@@ -85,8 +80,10 @@ def call_voltage_bowl_calibration(variables, det_diam, flightPathLength, max_mc)
         description='apply mode:',
         layout=label_layout
     )
+    figure_v_size_x = widgets.FloatText(value=5.0, description="Fig. size W:", layout=label_layout)
+    figure_v_size_y = widgets.FloatText(value=5.0, description="Fig. size H:", layout=label_layout)
 
-    def vol_correction(b, variables, out, out_status):
+    def vol_correction(b, variables, out, out_status, calibration_mode):
         vol_button.disabled = True
         with out_status:
             out_status.clear_output()
@@ -96,6 +93,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flightPathLength, max_mc)
             else:
                 print('Selected mc ranges are: (%s, %s)' % (variables.selected_x1, variables.selected_x2))
                 with out:
+                    figure_size = (figure_v_size_x.value, figure_v_size_y.value)
                     sample_size_p = sample_size_v.value
                     index_fig_p = index_fig_v.value
                     plot_p = plot_v.value
@@ -106,7 +104,8 @@ def call_voltage_bowl_calibration(variables, det_diam, flightPathLength, max_mc)
                                                   calibration_mode=calibration_mode.value,
                                                   index_fig=index_fig_p, plot=plot_p, save=save_p,
                                                   apply_local=apply_v.value,
-                                                  num_cluster=num_cluster.value, mode=mode_p, peak_mode=peak_mode_p)
+                                                  num_cluster=num_cluster.value, mode=mode_p, peak_mode=peak_mode_p,
+                                                  fig_size=figure_size)
             pb_vol.value = "<b>Finished</b>"
         vol_button.disabled = False
 
@@ -135,7 +134,10 @@ def call_voltage_bowl_calibration(variables, det_diam, flightPathLength, max_mc)
         layout=label_layout
     )
 
-    def bowl_correction(b, variables, out, out_status):
+    figure_b_size_x = widgets.FloatText(value=5.0, description="Fig. size W:", layout=label_layout)
+    figure_b_size_y = widgets.FloatText(value=5.0, description="Fig. size H:", layout=label_layout)
+
+    def bowl_correction(b, variables, out, out_status, calibration_mode):
         bowl_button.disabled = True
         with out_status:
             out_status.clear_output()
@@ -149,11 +151,13 @@ def call_voltage_bowl_calibration(variables, det_diam, flightPathLength, max_mc)
                 plot_p = plot_b.value
                 save_p = save_b.value
                 maximum_cal_method_p = maximum_cal_method_b.value
+                figure_size = (figure_b_size_x.value, figure_b_size_y.value)
                 with out:
-                    calibration.bowl_correction_main(variables.dld_x_det, variables.dld_y_det, variables.dld_high_voltage,
+                    calibration.bowl_correction_main(variables.dld_x_det, variables.dld_y_det,
+                                                     variables.dld_high_voltage,
                                                      variables, det_diam.value,
                                                      sample_size=sample_size_p, maximum_cal_method=maximum_cal_method_p,
-                                                     apply_local=apply_b.value,
+                                                     apply_local=apply_b.value, fig_size=figure_size,
                                                      calibration_mode=calibration_mode.value, index_fig=index_fig_p,
                                                      plot=plot_p, save=save_p)
 
@@ -191,10 +195,6 @@ def call_voltage_bowl_calibration(variables, det_diam, flightPathLength, max_mc)
         description='reset back correction',
         layout=label_layout
     )
-    reset_button = widgets.Button(
-        description='reset',
-        layout=label_layout
-    )
     save_button = widgets.Button(
         description='save correction',
         layout=label_layout
@@ -211,32 +211,27 @@ def call_voltage_bowl_calibration(variables, det_diam, flightPathLength, max_mc)
 
     clear_plot = widgets.Button(description="clear plots", layout=label_layout)
 
-    plot_button.on_click(lambda b: hist_plot(b, variables, out))
+    plot_button.on_click(lambda b: hist_plot(b, variables, out, calibration_mode))
     plot_stat_button.on_click(lambda b: stat_plot(b, variables, out))
     reset_back_button.on_click(lambda b: reset_back_on_click(variables))
-    reset_button.on_click(lambda b: reset_on_click(variables, flightPathLength, max_mc))
     save_button.on_click(lambda b: save_on_click(variables))
-    vol_button.on_click(lambda b: vol_correction(b, variables, out, out_status))
-    bowl_button.on_click(lambda b: bowl_correction(b, variables, out, out_status))
+    vol_button.on_click(lambda b: vol_correction(b, variables, out, out_status, calibration_mode))
+    bowl_button.on_click(lambda b: bowl_correction(b, variables, out, out_status, calibration_mode))
     clear_plot.on_click(lambda b: clear_plot_on_click(out))
 
-    calibration_mode = widgets.Dropdown(
-        options=[('time_of_flight', 'tof'), ('mass_to_charge', 'mc')],
-        description='calibration mode:',
-        layout=label_layout
-    )
-
     # Create the layout with three columns
-    column11 = widgets.VBox([bin_size, index_fig, prominence, distance, lim_tof, percent, bin_fdm, plot_peak])
-    column12 = widgets.VBox([plot_button, save_button, clear_plot, reset_button, reset_back_button])
-    column22 = widgets.VBox([sample_size_b, index_fig_b, maximum_cal_method_b, apply_b, plot_b, save_b])
+    column11 = widgets.VBox([bin_size, index_fig, prominence, distance, lim_tof, percent, bin_fdm, plot_peak,
+                             figure_mc_size_x, figure_mc_size_y])
+    column12 = widgets.VBox([plot_button, save_button, reset_back_button, clear_plot])
+    column22 = widgets.VBox([sample_size_b, index_fig_b, maximum_cal_method_b, apply_b, plot_b, save_b, figure_b_size_x,
+                             figure_b_size_y])
     column21 = widgets.VBox([bowl_button, pb_bowl])
-    column33 = widgets.VBox([sample_size_v, index_fig_v, mode_v, apply_v, num_cluster, peak_mode, plot_v, save_v])
+    column33 = widgets.VBox([sample_size_v, index_fig_v, mode_v, apply_v, num_cluster, peak_mode, plot_v, save_v,
+                             figure_v_size_x, figure_v_size_y])
     column32 = widgets.VBox([vol_button, pb_vol])
-    column41 = widgets.VBox([calibration_mode])
 
     # Create the overall layout by arranging the columns side by side
-    layout1 = widgets.HBox([column11, column22, column33, column41])
+    layout1 = widgets.HBox([column11, column22, column33])
     layout2 = widgets.HBox([column12, column21, column32])
 
     layout = widgets.VBox([layout1, layout2])

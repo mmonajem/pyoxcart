@@ -132,16 +132,18 @@ def atom_probe_recons_Bas_et_al(detx, dety, hv, flight_path_length, kf, det_eff,
     return x * 1E9, y * 1E9, z * 1E9
 
 
-def reconstruction_plot(variables, element_percentage, rotary_fig_save, selected_area, figname):
+def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, selected_area, figname, save):
     """
     Generate a 3D plot for atom probe reconstruction data.
 
     Args:
         variables (object): Variables object.
         element_percentage (str): Percentage of elements to display.
+        opacity (float): Opacity of the markers.
         rotary_fig_save (bool): Whether to save the rotary figure.
         selected_area (bool): Whether a specific area is selected.
         figname (str): Name of the figure.
+        save (bool): Whether to save the figure.
 
     Returns:
         None
@@ -194,7 +196,7 @@ def reconstruction_plot(variables, element_percentage, rotary_fig_save, selected
                 marker=dict(
                     size=2,
                     color=colors[index],
-                    opacity=1,
+                    opacity=opacity,
                 )
             )
         )
@@ -263,8 +265,9 @@ def reconstruction_plot(variables, element_percentage, rotary_fig_save, selected
     )
 
     fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
-    fig.write_image(variables.result_path + "\\3d_o.png", scale=0.6, format='png')
-    fig.write_image(variables.result_path + "\\3d_o.svg", scale=0.4, format='svg')
+    if save:
+        fig.write_image(variables.result_path + "\\3d_o.png", scale=5, format='png')
+        fig.write_image(variables.result_path + "\\3d_o.svg", scale=5, format='svg')
     fig.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
     fig.update_layout(
         legend=dict(
@@ -274,8 +277,9 @@ def reconstruction_plot(variables, element_percentage, rotary_fig_save, selected
             x=0.99
         )
     )
-    fig.write_image(variables.result_path + "\\3d.png", scale=0.6, format='png')
-    fig.write_image(variables.result_path + "\\3d.svg", scale=0.4, format='svg')
+    if save:
+        fig.write_image(variables.result_path + "\\3d.png", scale=5, format='png')
+        fig.write_image(variables.result_path + "\\3d.svg", scale=5, format='svg')
     fig.show(config=config)
 
 
@@ -546,7 +550,8 @@ def heatmap(variables, selected_area, element_percentage, save):
 
 
 def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, field_evap,
-                               avg_dens, flight_path_length, rotary_fig_save, selected_are, mode, figname):
+                               avg_dens, flight_path_length, rotary_fig_save, selected_are, mode, opacity, figname,
+                               save):
     """
     Calculate the x, y, z coordinates of the atoms and plot them.
 
@@ -563,6 +568,7 @@ def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, 
             selected_are (bool): True to use the selected area, False to use the full area.
             mode (str): The reconstruction mode.
             figname (str): The name of the figure.
+            save (bool): True to save the plot, False to display it.
 
         Returns:
             None
@@ -581,4 +587,4 @@ def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, 
     variables.x = px
     variables.y = py
     variables.z = pz
-    reconstruction_plot(variables, element_percentage, rotary_fig_save, selected_are, figname)
+    reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, selected_are, figname, save)

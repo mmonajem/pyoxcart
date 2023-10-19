@@ -18,7 +18,6 @@ def reset(variables, out):
 def apply_crop(variables, out):
 	# Crop the dataset
 	with out:  # Capture the output within the 'out' widget
-		out.clear_output()  # Clear any previous output
 		variables.data = data_loadcrop.crop_dataset(variables.data, variables)
 		print('The crop for Min Idx:', variables.selected_x1, ' and Max Idx:', variables.selected_x2, 'is applied')
 

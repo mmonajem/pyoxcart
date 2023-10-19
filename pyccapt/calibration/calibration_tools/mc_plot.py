@@ -543,7 +543,7 @@ class AptHistPlotter:
 
 def hist_plot(variables, bin_size, log, target, mode, prominence, distance, percent, selector, figname, lim,
               peaks_find_plot, range_plot=False, ranging_mode=False, selected_area=False, save_fig=True,
-              print_info=True):
+              print_info=True, figure_size=(9, 5)):
     """
     Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
     Args:
@@ -563,6 +563,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         ranging_mode (bool): Ranging mode.
         selected_area (bool): Plot the selected area.
         print_info: Print the information about the peaks.
+        figure_size (tuple): Figure size.
     Returns:
         None
 
@@ -599,10 +600,12 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         steps = 'stepfilled'
     if target == 'mc' or target == 'mc_c':
         mc_hist = AptHistPlotter(hist[hist < lim], variables)
-        y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log, fig_size=(9, 5))
+        y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log,
+                                      fig_size=figure_size)
     elif target == 'tof' or target == 'tof_c':
         mc_hist = AptHistPlotter(hist[hist < lim], variables)
-        y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log, fig_size=(9, 5))
+        y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log,
+                                      fig_size=figure_size)
 
     # copy the mc_hist to variables to use the methods of that class in other functions
     variables.AptHistPlotter = mc_hist

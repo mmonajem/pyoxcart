@@ -17,7 +17,7 @@ class Variables:
         selected_y2 (int): The value of selected_y2.
         selected_z1 (int): The value of selected_z1.
         selected_z2 (int): The value of selected_z2.
-        listMaterial (list): List that stores mass/weights of added elements.
+        list_material (list): List that stores mass/weights of added elements.
         charge (list): List of charges.
         element (list): List of elements.
         isotope (list): List of isotopes.
@@ -71,7 +71,7 @@ class Variables:
         self.selected_z2 = 0
         self.h_line_pos = []
 
-        self.listMaterial = []
+        self.list_material = []
         self.charge = []
         self.element = []
         self.isotope = []
@@ -118,8 +118,9 @@ class Variables:
         self.flight_path_length = None
         self.pulse_mode = None
         # Create an empty DataFrame with the specified columns
-        self.range_data = pd.DataFrame(columns=['ion', 'mass', 'mc', 'mc_low', 'mc_up', 'color', 'element',
-                                                'complex', 'isotope', 'charge'])
+        self.range_data = pd.DataFrame({"ion": ['unranged'], "mass": [0], "mc": [0], "mass": [0], "mc_low": 0,
+                                        "mc_up": 400, "color": ['#000000'], "element": ['unranged'],
+                                        "complex": [0], "isotop": [0], "charge": [0]})
 
         # Set data types for the columns
         self.range_data = self.range_data.astype({'ion': 'object',

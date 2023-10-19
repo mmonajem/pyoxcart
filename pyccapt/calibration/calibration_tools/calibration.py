@@ -246,6 +246,7 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
         )
         dld_peak_b = variables.mc_calib[mask_temporal]
 
+    print(len(dld_highVoltage), len(mask_temporal))
     dld_highVoltage_peak_v = dld_highVoltage[mask_temporal]
 
     if num_cluster > 1:
@@ -283,7 +284,7 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
                                    figname='voltage_corr',
                                    sample_size=sample_size, mode=mode, calibration_mode=calibration_mode,
                                    peak_mode=peak_mode, num_cluster=len(hv_range), cluster_labels=cluster_labels,
-                                   plot=plot, save=save)
+                                   plot=plot, save=save, fig_size=fig_size)
     print('The fit result are:', fitresult)
     print('high voltage ranges are:', hv_range)
 
@@ -540,7 +541,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
     dld_highVoltage_peak = dld_highVoltage[mask_temporal]
 
     parameters = bowl_correction(dld_x_peak, dld_y_peak, dld_peak, variables, det_diam, maximum_location,
-                                 sample_size=sample_size, index_fig=index_fig, plot=plot, save=save)
+                                 sample_size=sample_size, index_fig=index_fig, plot=plot, save=save, fig_size=fig_size)
     print('The fit result is:', parameters)
 
     if apply_local == 'all':

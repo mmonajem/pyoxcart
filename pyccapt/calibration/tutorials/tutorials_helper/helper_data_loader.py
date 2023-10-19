@@ -1,5 +1,7 @@
 import os
 
+import numpy as np
+
 from pyccapt.calibration.calibration_tools import share_variables
 from pyccapt.calibration.data_tools import data_tools
 from pyccapt.calibration.mc import tof_tools
@@ -16,9 +18,9 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc):
 	dataset_main_path = os.path.dirname(dataset_path)
 	dataset_name_with_extention = os.path.basename(dataset_path)
 	variables.dataset_name = os.path.splitext(dataset_name_with_extention)[0]
-	variables.result_data_path = dataset_main_path + '/' + variables.dataset_name + '/load_crop/'
+	variables.result_data_path = dataset_main_path + '/' + variables.dataset_name + '/data_processing/'
 	variables.result_data_name = variables.dataset_name
-	variables.result_path = dataset_main_path + '/' + variables.dataset_name + '/load_crop/'
+	variables.result_path = dataset_main_path + '/' + variables.dataset_name + '/data_processing/'
 
 	if not os.path.isdir(variables.result_path):
 		os.makedirs(variables.result_path, mode=0o777, exist_ok=True)
@@ -45,3 +47,32 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc):
 	variables.pulse_mode = pulse_mode.value
 
 	return variables
+
+
+def add_columns(variables, max_mc):
+	variables.data.drop(['x (nm)', 'y (nm)', 'z (nm)', 'mc (Da)', 'mc_c (Da)', 't_c (ns)'], axis=1, errors='ignore',
+	                    inplace=True)
+
+	variables.data.insert(0, 'x (nm)', np.zeros(len(variables.dld_t)))
+	variables.data.insert(1, 'y (nm)', np.zeros(len(variables.dld_t)))
+	variables.data.insert(2, 'z (nm)', np.zeros(len(variables.dld_t)))
+	variables.data.insert(3, 'mc_c (Da)', np.zeros(len(variables.dld_t)))
+	variables.data.insert(4, 'mc (Da)', variables.mc)
+	variables.data.insert(8, 't_c (ns)', np.zeros(len(variables.dld_t)))
+
+	# Remove the data with mc biger than max mc
+	mask = (variables.data['mc (Da)'].to_numpy() > max_mc.value)
+	print('The number of data over max_mc:', len(mask[mask == True]))
+	variables.data.drop(np.where(mask)[0], inplace=True)
+	variables.data.reset_index(inplace=True, drop=True)
+
+	# Remove the data with x,y,t = 0
+	mask1 = (variables.data['x (nm)'].to_numpy() == 0)
+	mask2 = (variables.data['y (nm)'].to_numpy() == 0)
+	mask3 = (variables.data['t (ns)'].to_numpy() == 0)
+	mask = np.logical_and(mask1, mask2)
+	mask = np.logical_and(mask, mask3)
+	print('The number of data with having t, x, and y equal to zero is:', len(mask[mask == True]))
+	variables.data.drop(np.where(mask)[0], inplace=True)
+	variables.data.reset_index(inplace=True, drop=True)
+	variables.data_backup = variables.data.copy()

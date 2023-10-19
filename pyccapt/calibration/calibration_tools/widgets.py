@@ -68,8 +68,8 @@ def onClickAdd(b, variables):
     """
     if 'element' in elementWithChargeDict:
         elementMass = elementWithChargeDict['element']
-        if elementMass not in variables.listMaterial:
-            variables.listMaterial.append(elementMass)
+        if elementMass not in variables.list_material:
+            variables.list_material.append(elementMass)
 
             selectedElement = elementDict['element']
             charge = chargeDict['charge']
@@ -80,7 +80,7 @@ def onClickAdd(b, variables):
             isotope = int(re.findall("\d+", selectedElement)[0])
             variables.isotope.append(isotope)
 
-            print("Updated List: ", variables.listMaterial)
+            print("Updated List: ", variables.list_material)
             print("Updated element List: ", variables.element)
             print("Updated isotope List: ", variables.isotope)
             print("Updated charge List: ", variables.charge)
@@ -99,12 +99,12 @@ def onClickDelete(b, variables):
     """
     if 'element' in elementWithChargeDict:
         elementMass = elementWithChargeDict['element']
-        if elementMass in variables.listMaterial:
-            variables.listMaterial.remove(elementMass)
+        if elementMass in variables.list_material:
+            variables.list_material.remove(elementMass)
             variables.element.pop()
             variables.isotope.pop()
             variables.charge.pop()
-            print("Updated List: ", variables.listMaterial)
+            print("Updated List: ", variables.list_material)
             print("Updated element List: ", variables.element)
             print("Updated isotope List: ", variables.isotope)
             print("Updated charge List: ", variables.charge)
@@ -123,11 +123,11 @@ def onClickReset(b, variables):
     Returns:
         None
     """
-    variables.listMaterial.clear()
+    variables.list_material.clear()
     variables.element.clear()
     variables.isotope.clear()
     variables.charge.clear()
-    print("Updated List: ", variables.listMaterial)
+    print("Updated List: ", variables.list_material)
     print("Updated element List: ", variables.element)
     print("Updated isotope List: ", variables.isotope)
     print("Updated charge List: ", variables.charge)

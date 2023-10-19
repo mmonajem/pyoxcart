@@ -18,7 +18,6 @@ def reset(variables, out):
 def apply_crop(variables, out):
     # Crop the dataset
     with out:  # Capture the output within the 'out' widget
-        out.clear_output()  # Clear any previous output
         if variables.roi_fdm > 0:
             data_crop_spatial = data_loadcrop.crop_data_after_selection(variables.data, variables)
             print('The crop for center x:', variables.selected_x_fdm, 'center y:',
