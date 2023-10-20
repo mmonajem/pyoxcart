@@ -40,8 +40,8 @@ The range file contains the range of the mass-to-charge ratio. The range file is
 - `mc_low`: (n,) (Da, float64) The lower bound of the mass-to-charge ratio in the dataset for the peak.
 - `mc_up`: (n,) (Da, float64) The upper bound of the mass-to-charge ratio in the dataset for the peak.
 - `color`: (n,) (N/A, hex) The color of the peak in the plot.
-- `element`: (n,) (N/A, list of string) list of elements in the peak.
-- `complex`: (n,) (N/A, list of uint32) complexity of the element (integer).
-- `isotope`: (n,) (N/A, list of uint32) isotope list of element.
-- `charge`: (n,) (N/A, uint32) charge of the element.
+- `element`: (n,) (N/A, object(list of string)) list of elements in the peak.
+- `complex`: (n,) (N/A, object(list of uint32)) complexity of the element (integer).
+- `isotope`: (n,) (N/A, object(list of uint32)) isotope list of element.
+- `charge`: (n,) (N/A, object(list of uint32)) charge of the element.
 

@@ -103,8 +103,7 @@ def chunks(lst, n):
         yield lst[i:i + n]
 
 
-def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, charge=4,
-                          data_table='../../../files/isotopeTable.h5', variables=None):
+def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, charge=4, variables=None):
     """
     Find the closest elements to a target element.
 
@@ -113,12 +112,12 @@ def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, ch
         num_elements (int): Number of closest elements to find.
         abundance_threshold (float): Abundance threshold for filtering elements (as a percentage).
         charge (int): Charge value.
-        data_table (str): Path to the data table (HDF5 file).
         variables (object): Object containing the variables.
 
     Returns:
         pd.DataFrame: DataFrame containing closest elements and their properties.
     """
+    data_table = '../../../files/isotopeTable.h5'
     # Read data from the HDF5 file
     dataframe = pd.read_hdf(data_table)
 
@@ -180,7 +179,6 @@ def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, ch
     # Sort DataFrame
     df = df.sort_values(by=['mass'], ascending=[True])
     df.reset_index(drop=True, inplace=True)
-
     # Round the abundance column to 4 decimal places
     df['abundance'] = df['abundance'].round(4)
     # Divide all elements in abundance by 100
@@ -351,7 +349,6 @@ def molecule_manual(target_element, charge, latex=True, variables=None):
 
     if len(isotope_list) > 1:
         element_list = [element_list]
-        total_weight = [total_weight]
         complexity_list = [complexity_list]
         isotope_list = [isotope_list]
     df = pd.DataFrame({'ion': [formula], 'mass': total_weight, 'element': element_list,

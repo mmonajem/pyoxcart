@@ -120,7 +120,7 @@ class Variables:
         # Create an empty DataFrame with the specified columns
         self.range_data = pd.DataFrame({"ion": ['unranged'], "mass": [0], "mc": [0], "mass": [0], "mc_low": 0,
                                         "mc_up": 400, "color": ['#000000'], "element": ['unranged'],
-                                        "complex": [0], "isotop": [0], "charge": [0]})
+                                        "complex": [0], "isotope": [0], "charge": [0]})
 
         # Set data types for the columns
         self.range_data = self.range_data.astype({'ion': 'object',

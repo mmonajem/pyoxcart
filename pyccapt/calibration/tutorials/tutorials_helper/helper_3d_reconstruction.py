@@ -33,7 +33,7 @@ def call_x_y_z_calculation(variables, flight_path_length, element_selected):
 	rotary_fig_save_widget = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
 	figname_widget = widgets.Text(value='3d')
 	mode_widget = widgets.Dropdown(options=[('Gault', 'Gault'), ('Bas', 'Bas')])
-	opacity_widget = widgets.FloatText(value=0.5)
+	opacity_widget = widgets.FloatText(value=0.5, min=0, max=1, step=0.1)
 	save_widget = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
 
 	# Create a button widget to trigger the function
