@@ -542,8 +542,8 @@ class AptHistPlotter:
 
 
 def hist_plot(variables, bin_size, log, target, mode, prominence, distance, percent, selector, figname, lim,
-              peaks_find_plot, range_plot=False, ranging_mode=False, selected_area=False, save_fig=True,
-              print_info=True, figure_size=(9, 5)):
+              peaks_find_plot, range_plot=False, ranging_mode=False, selected_area_specially=False,
+              selected_area_temporally=False, save_fig=True, print_info=True, figure_size=(9, 5)):
     """
     Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
     Args:
@@ -558,10 +558,10 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         figname (str): Figure name.
         lim (float): Limit for the histogram.
         peaks_find_plot (bool): Plot the peaks.
-        selector (str): Selector for the peak_x finding.
         range_plot (bool): Plot the range.
         ranging_mode (bool): Ranging mode.
-        selected_area (bool): Plot the selected area.
+        selected_area_specially (bool): Plot selected area specially.
+        selected_area_temporally (bool): Plot selected area temporally.
         print_info: Print the information about the peaks.
         figure_size (tuple): Figure size.
     Returns:
@@ -585,10 +585,20 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         variables.peak_widths = []
         variables.peak_x = []
 
-    if selected_area:
+    if selected_area_specially:
         mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
                        (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
                        (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+    elif selected_area_temporally:
+        mask_spacial = np.logical_and((variables.mc_calib > variables.selected_x1),
+                                      (variables.mc_calib < variables.selected_x2))
+    elif selected_area_specially and selected_area_temporally:
+        mask_temporally = np.logical_and((variables.mc_calib > variables.selected_x1),
+                                         (variables.mc_calib < variables.selected_x2))
+        mask_specially = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
+                         (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
+                         (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+        mask_spacial = mask_specially & mask_temporally
     else:
         mask_spacial = np.ones(len(hist), dtype=bool)
 

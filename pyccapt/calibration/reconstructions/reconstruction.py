@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import plotly
 import plotly.graph_objects as go
+import plotly.offline as pyo
+from plotly.subplots import make_subplots
 
 # Local module and scripts
 from pyccapt.calibration.data_tools import data_loadcrop, selectors_data
@@ -132,77 +134,12 @@ def atom_probe_recons_Bas_et_al(detx, dety, hv, flight_path_length, kf, det_eff,
     return x * 1E9, y * 1E9, z * 1E9
 
 
-def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, selected_area, figname, save):
-    """
-    Generate a 3D plot for atom probe reconstruction data.
-
-    Args:
-        variables (object): Variables object.
-        element_percentage (str): Percentage of elements to display.
-        opacity (float): Opacity of the markers.
-        rotary_fig_save (bool): Whether to save the rotary figure.
-        selected_area (bool): Whether a specific area is selected.
-        figname (str): Name of the figure.
-        save (bool): Whether to save the figure.
-
-    Returns:
-        None
-    """
-
-    if selected_area:
-        mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
-                       (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
-                       (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
-    else:
-        mask_spacial = np.ones(len(variables.dld_t), dtype=bool)
-
-    element_percentage = element_percentage.replace('[', '').replace(']', '').split(',')
-
-    fig = go.Figure()
-
-    colors = variables.range_data['color'].tolist()
-    mc_low = variables.range_data['mc_low'].tolist()
-    mc_up = variables.range_data['mc_up'].tolist()
-    ion = variables.range_data['ion'].tolist()
-
-    for index, elemen in enumerate(ion):
-        mask = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
-        mask = mask & mask_spacial
-        size = int(len(mask[mask == True]) * float(element_percentage[index]))
-        # Find indices where the original mask is True
-        true_indices = np.where(mask)[0]
-        # Randomly choose 100 indices from the true indices
-        random_true_indices = np.random.choice(true_indices, size=size, replace=False)
-        # Create a new mask with the same length as the original, initialized with False
-        new_mask = np.full(len(variables.dld_t), False)
-        # Set the selected indices to True in the new mask
-        new_mask[random_true_indices] = True
-        # Apply the new mask to the original mask
-        mask = mask & new_mask
-
-        if ion[index] == 'unranged':
-            name_element = 'unranged'
-        else:
-            name_element = '%s' % ion[index]
-
-        fig.add_trace(
-            go.Scatter3d(
-                x=variables.x[mask],
-                y=variables.y[mask],
-                z=variables.z[mask],
-                mode='markers',
-                name=name_element,
-                showlegend=True,
-                marker=dict(
-                    size=2,
-                    color=colors[index],
-                    opacity=opacity,
-                )
-            )
-        )
-
+def draw_qube(variables, fig, mask=None, col=None, row=None):
     # Draw a edge of cube around the 3D plot in blue
-    x, y, z = variables.x[mask], variables.y[mask], variables.z[mask]
+    if mask is not None:
+        x, y, z = variables.x[mask], variables.y[mask], variables.z[mask]
+    else:
+        x, y, z = variables.x, variables.y, variables.z
     x_range = [min(x), max(x)]
     y_range = [min(y), max(y)]
     z_range = [min(z), max(z)]
@@ -214,19 +151,32 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     edges = [(0, 1), (1, 5), (5, 4), (4, 0),  # Bottom edges
              (2, 3), (3, 7), (7, 6), (6, 2),  # Top edges
              (0, 2), (1, 3), (5, 7), (4, 6)]  # Vertical edges
-
-    for edge in edges:
-        fig.add_trace(
-            go.Scatter3d(
-                x=[x_corner[edge[0]], x_corner[edge[1]]],
-                y=[y_corner[edge[0]], y_corner[edge[1]]],
-                z=[z_corner[edge[0]], z_corner[edge[1]]],
-                mode='lines',
-                line=dict(color='black', width=2),
-                showlegend=False,
-                hoverinfo='none'
+    if col is not None or row is not None:
+        for edge in edges:
+            fig.add_trace(
+                go.Scatter3d(
+                    x=[x_corner[edge[0]], x_corner[edge[1]]],
+                    y=[y_corner[edge[0]], y_corner[edge[1]]],
+                    z=[z_corner[edge[0]], z_corner[edge[1]]],
+                    mode='lines',
+                    line=dict(color='black', width=2),
+                    showlegend=False,
+                    hoverinfo='none'
+                ), row=row + 1, col=col + 1
             )
-        )
+    else:
+        for edge in edges:
+            fig.add_trace(
+                go.Scatter3d(
+                    x=[x_corner[edge[0]], x_corner[edge[1]]],
+                    y=[y_corner[edge[0]], y_corner[edge[1]]],
+                    z=[z_corner[edge[0]], z_corner[edge[1]]],
+                    mode='lines',
+                    line=dict(color='black', width=2),
+                    showlegend=False,
+                    hoverinfo='none'
+                )
+            )
     fig.update_scenes(
         xaxis_title="x (nm)",
         yaxis_title="y (nm)",
@@ -239,8 +189,159 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         font=dict(size=8)
     )
 
-    if rotary_fig_save:
-        rotary_fig(fig, variables, figname)
+
+def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, selected_area_specially,
+                        selected_area_temporally, figname, save, ions_individually_plots):
+    """
+    Generate a 3D plot for atom probe reconstruction data.
+
+    Args:
+        variables (object): Variables object.
+        element_percentage (str): Percentage of elements to display.
+        opacity (float): Opacity of the markers.
+        rotary_fig_save (bool): Whether to save the rotary figure.
+        selected_area_specially (bool): Whether a specific area is selected.
+        selected_area_temporally (bool): Whether a specific time range is selected.
+        figname (str): Name of the figure.
+        save (bool): Whether to save the figure.
+        ions_individually_plots (bool): Whether to plot ions individually.
+
+    Returns:
+        None
+    """
+    # Initialize Plotly for notebook mode
+    pyo.init_notebook_mode(connected=True)
+
+    if selected_area_specially:
+        mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
+                       (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
+                       (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+    elif selected_area_temporally:
+        mask_spacial = np.logical_and((variables.mc_calib > variables.selected_x1),
+                                      (variables.mc_calib < variables.selected_x2))
+    elif selected_area_specially and selected_area_temporally:
+        mask_temporally = np.logical_and((variables.mc_calib > variables.selected_x1),
+                                         (variables.mc_calib < variables.selected_x2))
+        mask_specially = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
+                         (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
+                         (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+        mask_spacial = mask_specially & mask_temporally
+    else:
+        mask_spacial = np.ones(len(variables.dld_t), dtype=bool)
+
+    if isinstance(element_percentage, list):
+        pass
+    else:
+        element_percentage = element_percentage.replace('[', '').replace(']', '').split(',')
+
+    colors = variables.range_data['color'].tolist()
+    mc_low = variables.range_data['mc_low'].tolist()
+    mc_up = variables.range_data['mc_up'].tolist()
+    ion = variables.range_data['ion'].tolist()
+
+    # Create a subplots with shared axes
+    if ions_individually_plots:
+        rows = int(len(ion) / 3)
+        cols = len(ion)
+        subplot_titles = ion
+        # Generate the specs dictionary based on the number of rows and columns
+        specs = [[{"type": "scatter3d"} for _ in range(cols)] for _ in range(rows)]
+
+        fig = make_subplots(rows=rows, cols=cols, subplot_titles=subplot_titles,
+                            start_cell="top-left",
+                            specs=specs)
+
+        for row in range(rows):
+            for col, elemen in enumerate(ion):
+                mask = (variables.mc_c > mc_low[col]) & (variables.mc_c < mc_up[col])
+                mask = mask & mask_spacial
+                size = int(len(mask[mask == True]) * float(element_percentage[col]))
+                # Find indices where the original mask is True
+                true_indices = np.where(mask)[0]
+                # Randomly choose 100 indices from the true indices
+                random_true_indices = np.random.choice(true_indices, size=size, replace=False)
+                # Create a new mask with the same length as the original, initialized with False
+                new_mask = np.full(len(variables.dld_t), False)
+                # Set the selected indices to True in the new mask
+                new_mask[random_true_indices] = True
+                # Apply the new mask to the original mask
+                mask = mask & new_mask
+
+                scatter = go.Scatter3d(
+                    x=variables.x[mask],
+                    y=variables.y[mask],
+                    z=variables.z[mask],
+                    mode='markers',
+                    name=ion[col],
+                    showlegend=True,
+                    marker=dict(
+                        size=2,
+                        color=colors[col],
+                        opacity=opacity,
+                    )
+                )
+                draw_qube(variables, fig, mask, col, row)
+                fig.add_trace(scatter, row=row + 1, col=col + 1)
+    else:
+        fig = go.Figure()
+        for index, elemen in enumerate(ion):
+            mask = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
+            mask = mask & mask_spacial
+            size = int(len(mask[mask == True]) * float(element_percentage[index]))
+            # Find indices where the original mask is True
+            true_indices = np.where(mask)[0]
+            # Randomly choose 100 indices from the true indices
+            random_true_indices = np.random.choice(true_indices, size=size, replace=False)
+            # Create a new mask with the same length as the original, initialized with False
+            new_mask = np.full(len(variables.dld_t), False)
+            # Set the selected indices to True in the new mask
+            new_mask[random_true_indices] = True
+            # Apply the new mask to the original mask
+            mask = mask & new_mask
+
+            fig.add_trace(
+                go.Scatter3d(
+                    x=variables.x[mask],
+                    y=variables.y[mask],
+                    z=variables.z[mask],
+                    mode='markers',
+                    name=ion[index],
+                    showlegend=True,
+                    marker=dict(
+                        size=2,
+                        color=colors[index],
+                        opacity=opacity,
+                    )
+                )
+            )
+
+        draw_qube(variables, fig)
+        if rotary_fig_save:
+            rotary_fig(fig, variables, figname)
+
+        plotly.offline.plot(
+            fig,
+            filename=variables.result_path + '\\{fn}.html'.format(fn=figname),
+            show_link=True,
+            auto_open=False
+        )
+
+        fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
+        if save:
+            fig.write_image(variables.result_path + "\\3d_o.png", scale=5, format='png')
+            fig.write_image(variables.result_path + "\\3d_o.svg", scale=5, format='svg')
+        fig.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
+        fig.update_layout(
+            legend=dict(
+                yanchor="top",
+                y=0.99,
+                xanchor="left",
+                x=0.99
+            )
+        )
+        if save:
+            fig.write_image(variables.result_path + "\\3d.png", scale=5, format='png')
+            fig.write_image(variables.result_path + "\\3d.svg", scale=5, format='svg')
 
     config = dict(
         {
@@ -257,32 +358,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         }
     )
 
-    plotly.offline.plot(
-        fig,
-        filename=variables.result_path + '\\{fn}.html'.format(fn=figname),
-        show_link=True,
-        auto_open=False
-    )
-
-    fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
-    if save:
-        fig.write_image(variables.result_path + "\\3d_o.png", scale=5, format='png')
-        fig.write_image(variables.result_path + "\\3d_o.svg", scale=5, format='svg')
-    fig.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
-    fig.update_layout(
-        legend=dict(
-            yanchor="top",
-            y=0.99,
-            xanchor="left",
-            x=0.99
-        )
-    )
-    if save:
-        fig.write_image(variables.result_path + "\\3d.png", scale=5, format='png')
-        fig.write_image(variables.result_path + "\\3d.svg", scale=5, format='svg')
-    fig.show(config=config)
-
-
+    pyo.iplot(fig, config=config)
 def rotate_z(x, y, z, theta):
     """
     Rotate coordinates around the z-axis.
@@ -428,17 +504,42 @@ def scatter_plot(data, range_data, variables, element_percentage, selected_area,
     plt.show()
 
 
-def projection(variables, element_percentage, selected_area, x_or_y, figname):
+def projection(variables, element_percentage, selected_area_specially, selected_area_temporally,
+               x_or_y, figname):
+    """
+    Generate a projection plot based on the provided data.
+
+    Args:
+        variables (object): The variables object.
+        element_percentage (str): Element percentage information.
+        selected_area_specially (bool): True if a specific area is selected, False otherwise.
+        selected_area_temporally (bool): True if a specific area is selected, False otherwise.
+        x_or_y (str): Either 'x' or 'y' indicating the axis to plot.
+        figname (str): The name of the figure.
+    Returns:
+        None
+    """
     ax = plt.figure().add_subplot(111)
 
     ions = variables.range_data['ion'].tolist()
     colors = variables.range_data['color'].tolist()
     mc_low = variables.range_data['mc_low'].tolist()
     mc_up = variables.range_data['mc_up'].tolist()
-    if selected_area:
+
+    if selected_area_specially:
         mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
                        (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
                        (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+    elif selected_area_specially:
+        mask_spacial = np.logical_and((variables.mc_calib > variables.selected_x1),
+                                      (variables.mc_calib < variables.selected_x2))
+    elif selected_area_specially and selected_area_temporally:
+        mask_temporally = np.logical_and((variables.mc_calib > variables.selected_x1),
+                                         (variables.mc_calib < variables.selected_x2))
+        mask_specially = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
+                         (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
+                         (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+        mask_spacial = mask_specially & mask_temporally
     else:
         mask_spacial = np.ones(len(variables.dld_t), dtype=bool)
 
@@ -486,12 +587,14 @@ def projection(variables, element_percentage, selected_area, x_or_y, figname):
     plt.show()
 
 
-def heatmap(variables, selected_area, element_percentage, save):
+def heatmap(variables, selected_area_specially, selected_area_temporally, element_percentage, save):
     """
     Generate a heatmap based on the provided data.
 
     Args:
         variables (object): The variables object.
+        selected_area_specially (bool): True if a specific area is selected, False otherwise.
+        selected_area_temporally (bool): True if a specific area is selected, False otherwise.
         element_percentage (str): Element percentage information.
         save (bool): True to save the plot, False to display it.
 
@@ -500,12 +603,23 @@ def heatmap(variables, selected_area, element_percentage, save):
     """
     ax = plt.figure().add_subplot(111)
 
-    if selected_area:
+    if selected_area_specially:
         mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
                        (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
                        (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+    elif selected_area_temporally:
+        mask_spacial = np.logical_and((variables.mc_calib > variables.selected_x1),
+                                      (variables.mc_calib < variables.selected_x2))
+    elif selected_area_specially and selected_area_temporally:
+        mask_temporally = np.logical_and((variables.mc_calib > variables.selected_x1),
+                                         (variables.mc_calib < variables.selected_x2))
+        mask_specially = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
+                         (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
+                         (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+        mask_spacial = mask_specially & mask_temporally
     else:
         mask_spacial = np.ones(len(variables.dld_t), dtype=bool)
+
 
     ions = variables.range_data['ion'].tolist()
     colors = variables.range_data['color'].tolist()
@@ -541,7 +655,8 @@ def heatmap(variables, selected_area, element_percentage, save):
     ax.set_xlabel("x [mm]", color="red", fontsize=10)
     ax.set_ylabel("y [mm]", color="red", fontsize=10)
     plt.title("Detector Heatmap")
-    plt.legend(loc='upper right')
+    if len(variables.range_data) > 1:
+        plt.legend(loc='upper right')
 
     if save:
         plt.savefig(variables.result_path + "heatmap.png", format="png", dpi=600)
