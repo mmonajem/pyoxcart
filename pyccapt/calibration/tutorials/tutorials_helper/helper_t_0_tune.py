@@ -21,6 +21,9 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
     lim_widget = widgets.IntText(value=400)
     percent_widget = widgets.IntText(value=50)
     figname_widget = widgets.Text(value='hist')
+    figure_size_x = widgets.FloatText(value=9.0)
+    figure_size_y = widgets.FloatText(value=5.0)
+    figure_size_label = widgets.Label(value="Figure Size (X, Y):", layout=label_layout)
 
     # Create a button widget to trigger the function
     button_plot = widgets.Button(description="plot")
@@ -45,17 +48,18 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
         with out:  # Capture the output within the 'out' widget
             out.clear_output()  # Clear any previous output
             # Call the function
+            figure_size = (figure_size_x.value, figure_size_y.value)
             variables.mc = mc_tools.tof2mc(variables.dld_t, t0_d_value, variables.dld_high_voltage,
                                                  variables.dld_x_det, variables.dld_y_det, flightPathLength.value,
                                                  variables.dld_pulse, mode=pulse_mode.value)
             if target_value == 'mc':
                 mc_hist = mc_plot.AptHistPlotter(variables.mc[variables.mc < lim_value], variables)
                 mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='mc', steps='stepfilled',
-                                       log=log_value, fig_size=(9, 5))
+                                       log=log_value, fig_size=figure_size)
             elif target_value == 'tof':
                 mc_hist = mc_plot.AptHistPlotter(variables.dld_t[variables.dld_t < lim_value], variables)
                 mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='tof', steps='stepfilled',
-                                       log=log_value, fig_size=(9, 5))
+                                       log=log_value, fig_size=figure_size)
 
             if mode_value != 'normalized':
                 mc_hist.find_peaks_and_widths(prominence=prominence_value, distance=distance_value,
@@ -81,6 +85,7 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
         widgets.HBox([widgets.Label(value="Lim:", layout=label_layout), lim_widget]),
         widgets.HBox([widgets.Label(value="Percent:", layout=label_layout), percent_widget]),
         widgets.HBox([widgets.Label(value="Figname:", layout=label_layout), figname_widget]),
+        widgets.HBox([figure_size_label, widgets.HBox([figure_size_x, figure_size_y])]),
         widgets.HBox([button_plot]),
     ])
 
