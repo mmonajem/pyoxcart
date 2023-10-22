@@ -20,7 +20,6 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
     distance_widget = widgets.IntText(value=100)
     lim_widget = widgets.IntText(value=400)
     percent_widget = widgets.IntText(value=50)
-    figname_widget = widgets.Text(value='hist')
     figure_size_x = widgets.FloatText(value=9.0)
     figure_size_y = widgets.FloatText(value=5.0)
     figure_size_label = widgets.Label(value="Figure Size (X, Y):", layout=label_layout)
@@ -42,7 +41,6 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
         prominence_value = prominence_widget.value
         distance_value = distance_widget.value
         percent_value = percent_widget.value
-        figname_value = figname_widget.value
         lim_value = lim_widget.value
 
         with out:  # Capture the output within the 'out' widget
@@ -67,7 +65,6 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
                 mc_hist.plot_peaks()
                 mc_hist.plot_hist_info_legend(label='mc', bin=0.1, background=None, loc='right')
 
-            mc_hist.save_fig(label=mode_value, fig_name=figname_value)
 
         # Enable the button when the code is finished
         button_plot.disabled = False
@@ -84,7 +81,6 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
         widgets.HBox([widgets.Label(value="Distance:", layout=label_layout), distance_widget]),
         widgets.HBox([widgets.Label(value="Lim:", layout=label_layout), lim_widget]),
         widgets.HBox([widgets.Label(value="Percent:", layout=label_layout), percent_widget]),
-        widgets.HBox([widgets.Label(value="Figname:", layout=label_layout), figname_widget]),
         widgets.HBox([figure_size_label, widgets.HBox([figure_size_x, figure_size_y])]),
         widgets.HBox([button_plot]),
     ])

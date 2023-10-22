@@ -69,7 +69,6 @@ def call_x_y_z_calculation(variables, flight_path_length, element_selected):
 				rotary_fig_save=rotary_fig_save_value,
 				variables=variables,
 				flight_path_length=flight_path_length.value,
-				selected_are=False,
 				figname=figname_value,
 				mode=mode_value,
 				opacity=opacity_value,

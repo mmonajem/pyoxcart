@@ -533,10 +533,10 @@ class AptHistPlotter:
         Returns:
             None
         """
-        if label == 'mc':
+        if label == 'mc' or label == 'mc_c':
             plt.savefig(self.variables.result_path + "//mc_%s.svg" % fig_name, format="svg", dpi=600)
             plt.savefig(self.variables.result_path + "//mc_%s.png" % fig_name, format="png", dpi=600)
-        elif label == 'tof':
+        elif label == 'tof' or label == 'tof_c':
             plt.savefig(self.variables.result_path + "//tof_%s.svg" % fig_name, format="svg", dpi=600)
             plt.savefig(self.variables.result_path + "//tof_%s.png" % fig_name, format="png", dpi=600)
 

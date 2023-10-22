@@ -190,8 +190,8 @@ def draw_qube(variables, fig, mask=None, col=None, row=None):
     )
 
 
-def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, selected_area_specially,
-                        selected_area_temporally, figname, save, ions_individually_plots):
+def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save,
+                        selected_area_specially=False, selected_area_temporally=False, ions_individually_plots=False):
     """
     Generate a 3D plot for atom probe reconstruction data.
 
@@ -359,6 +359,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     )
 
     pyo.iplot(fig, config=config)
+
 def rotate_z(x, y, z, theta):
     """
     Rotate coordinates around the z-axis.
@@ -505,7 +506,7 @@ def scatter_plot(data, range_data, variables, element_percentage, selected_area,
 
 
 def projection(variables, element_percentage, selected_area_specially, selected_area_temporally,
-               x_or_y, figname):
+               x_or_y, figname, figure_size, save):
     """
     Generate a projection plot based on the provided data.
 
@@ -519,7 +520,8 @@ def projection(variables, element_percentage, selected_area_specially, selected_
     Returns:
         None
     """
-    ax = plt.figure().add_subplot(111)
+    fig = plt.figure(figsize=figure_size)  # Specify the width and height
+    ax = fig.add_subplot(111)
 
     ions = variables.range_data['ion'].tolist()
     colors = variables.range_data['color'].tolist()
@@ -570,7 +572,7 @@ def projection(variables, element_percentage, selected_area_specially, selected_
         elif x_or_y == 'y':
             ax.scatter(variables.y[mask], variables.z[mask], s=2, label=name_element)
 
-    if not selected_area:
+    if not selected_area_specially and not selected_area_temporally:
         data_loadcrop.rectangle_box_selector(ax, variables)
         plt.connect('key_press_event', selectors_data.toggle_selector)
     ax.xaxis.tick_top()
@@ -583,11 +585,14 @@ def projection(variables, element_percentage, selected_area_specially, selected_
     ax.set_ylabel('Z (nm)')
     plt.legend(loc='upper right')
 
-    plt.savefig(variables.result_path + '\\projection_{fn}.png'.format(fn=figname))
+    if save:
+        plt.savefig(variables.result_path + '\\projection_{fn}.png'.format(fn=figname), format="png", dpi=600)
+        plt.savefig(variables.result_path + '\\projection_{fn}.svg'.format(fn=figname), format="svg", dpi=600)
     plt.show()
 
 
-def heatmap(variables, selected_area_specially, selected_area_temporally, element_percentage, save):
+def heatmap(variables, selected_area_specially, selected_area_temporally, element_percentage, figure_name,
+            figure_sie, save):
     """
     Generate a heatmap based on the provided data.
 
@@ -596,12 +601,15 @@ def heatmap(variables, selected_area_specially, selected_area_temporally, elemen
         selected_area_specially (bool): True if a specific area is selected, False otherwise.
         selected_area_temporally (bool): True if a specific area is selected, False otherwise.
         element_percentage (str): Element percentage information.
+        figure_name (str): The name of the figure.
+        figure_sie: The size of the figure.
         save (bool): True to save the plot, False to display it.
 
     Returns:
         None
     """
-    ax = plt.figure().add_subplot(111)
+    fig = plt.figure(figsize=figure_sie)  # Specify the width and height
+    ax = fig.add_subplot(111)
 
     if selected_area_specially:
         mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
@@ -659,14 +667,13 @@ def heatmap(variables, selected_area_specially, selected_area_temporally, elemen
         plt.legend(loc='upper right')
 
     if save:
-        plt.savefig(variables.result_path + "heatmap.png", format="png", dpi=600)
-        plt.savefig(variables.result_path + "heatmap.svg", format="svg", dpi=600)
+        plt.savefig(variables.result_path + figure_name + "heatmap.png", format="png", dpi=600)
+        plt.savefig(variables.result_path + figure_name + "heatmap.svg", format="svg", dpi=600)
     plt.show()
 
 
 def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, field_evap,
-                               avg_dens, flight_path_length, rotary_fig_save, selected_are, mode, opacity, figname,
-                               save):
+                               avg_dens, flight_path_length, rotary_fig_save, mode, opacity, figname, save):
     """
     Calculate the x, y, z coordinates of the atoms and plot them.
 
@@ -702,4 +709,5 @@ def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, 
     variables.x = px
     variables.y = py
     variables.z = pz
-    reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, selected_are, figname, save)
+    reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save,
+                        selected_area_specially=False, selected_area_temporally=False, ions_individually_plots=False)

@@ -184,7 +184,7 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
         fitresult, _ = curve_fit(voltage_corr, np.array(high_voltage_mean_list), np.array(dld_t_peak_list))
 
         fit_result.append(fitresult)
-        if plot:
+        if plot or save:
             fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
             if calibration_mode == 'tof':
                 ax1.set_ylabel("Time of Flight (ns)", fontsize=10)
@@ -208,7 +208,8 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
                 plt.savefig(variables.result_path + "//vol_corr_%s_%s.svg" % (figname, index_fig), format="svg", dpi=600)
                 plt.savefig(variables.result_path + "//vol_corr_%s_%s.png" % (figname, index_fig), format="png", dpi=600)
 
-            plt.show()
+            if plot:
+                plt.show()
 
     return fit_result
 
@@ -311,7 +312,7 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
 
         calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] / f_v
 
-        if plot:
+        if plot or save:
             # Plot how correction factor for selected peak_x
             fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
             if len(dld_highVoltage_range) > 1000:
@@ -360,9 +361,10 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
             if save:
                 plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.svg" % index_fig, format="svg", dpi=600)
                 plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.png" % index_fig, format="png", dpi=600)
+            if plot:
+                plt.show()
 
-            plt.show()
-    if plot:
+    if plot or save:
         # Plot corrected tof/mc vs. uncalibrated tof/mc
         fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
         mask = np.random.randint(0, len(dld_highVoltage_peak_v), 1000)
@@ -386,7 +388,8 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
             plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.svg" % index_fig, format="svg", dpi=600)
             plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.png" % index_fig, format="png", dpi=600)
 
-        plt.show()
+        if plot:
+            plt.show()
 
     variables.dld_t_calib = calibration_mc_tof
 
@@ -455,7 +458,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
     parameters, covariance = curve_fit(bowl_corr_fit, [np.array(x_sample_list), np.array(y_sample_list)],
                                        np.array(dld_t_peak_list))
 
-    if plot:
+    if plot or save:
         model_x_data = np.linspace(-35, 35, 30)
         model_y_data = np.linspace(-35, 35, 30)
         X, Y = np.meshgrid(model_x_data, model_y_data)
@@ -474,7 +477,8 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         if save:
             plt.savefig(variables.result_path + "//bowl_corr_%s.svg" % index_fig, format="svg", dpi=600)
             plt.savefig(variables.result_path + "//bowl_corr_%s.png" % index_fig, format="png", dpi=600)
-        plt.show()
+        if plot:
+            plt.show()
 
     return parameters
 
@@ -555,7 +559,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
 
     calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] / f_bowl
 
-    if plot:
+    if plot or save:
         # Plot how bowl correct tof/mc vs high voltage
         fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
         mask = np.random.randint(0, len(dld_highVoltage_peak), 10000)
@@ -605,8 +609,8 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         if save:
             plt.savefig(variables.result_path + "//peak_tof_bowl_corr_p_%s.svg" % index_fig, format="svg", dpi=600)
             plt.savefig(variables.result_path + "//peak_tof_bowl_corr_p_%s.png" % index_fig, format="png", dpi=600)
-
-        plt.show()
+        if plot:
+            plt.show()
 
     if calibration_mode == 'tof':
         variables.dld_t_calib = calibration_mc_tof

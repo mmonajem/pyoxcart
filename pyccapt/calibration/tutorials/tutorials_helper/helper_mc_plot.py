@@ -66,7 +66,7 @@ def call_mc_plot(variables, selector):
                 mc_hist.plot_hist_info_legend(label='mc', bin=0.1, background=None, loc='right')
 
             mc_hist.selector(selector=selector)  # rect, peak_x, range
-            mc_hist.save_fig(label=mode_value, fig_name=figname_value)
+            mc_hist.save_fig(label=target_value, fig_name=figname_value)
 
         # Enable the button when the code is finished
         button_plot.disabled = False

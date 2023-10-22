@@ -70,7 +70,7 @@ def call_ion_list(variables, selector, calibration_mode):
     bin_size_widget = widgets.FloatText(value=0.1)
     log_widget = widgets.Dropdown(options=[('True', True), ('False', False)])
     mode_widget = widgets.Dropdown(options=[('normal', 'normal'), ('normalized', 'normalized')])
-    prominence_widget = widgets.IntText(value=10)
+    prominence_widget = widgets.IntText(value=80)
     distance_widget = widgets.IntText(value=100)
     lim_widget = widgets.IntText(value=10000)
     percent_widget = widgets.IntText(value=50)
@@ -150,7 +150,7 @@ def call_ion_list(variables, selector, calibration_mode):
                 mc_hist.plot_hist_info_legend(label='mc', bin=0.1, background=None, loc='right')
 
             mc_hist.selector(selector=selector)  # rect, peak_x, range
-            mc_hist.save_fig(label=mode_value, fig_name=figname_value)
+            mc_hist.save_fig(label=target_value, fig_name=figname_value)
 
         # Enable the button when the code is finished
         button_plot.disabled = False

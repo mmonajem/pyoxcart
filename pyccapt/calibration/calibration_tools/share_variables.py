@@ -119,7 +119,7 @@ class Variables:
         self.pulse_mode = None
         # Create an empty DataFrame with the specified columns
         self.range_data = pd.DataFrame({"ion": ['unranged'], "mass": [0], "mc": [0], "mass": [0], "mc_low": 0,
-                                        "mc_up": 400, "color": ['#000000'], "element": ['unranged'],
+                                        "mc_up": 400, "color": '#000000', "element": ['unranged'],
                                         "complex": [0], "isotope": [0], "charge": [0]})
 
         # Set data types for the columns
