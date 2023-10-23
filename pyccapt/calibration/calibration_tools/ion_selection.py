@@ -570,11 +570,14 @@ def ranging_dataset_create(variables, row_index, mass_ion):
         print('first do the ranging then add the selected ion to the ranging dataset')
         range = [0, 0]
     else:
-        range = sorted(variables.h_line_pos, key=lambda x: abs(x - mass))[:2]
+        # Find the closest h_line that is smaller than mass
+        smaller_h_line = max(filter(lambda x: x < mass, variables.h_line_pos))
+        # Find the closest h_line that is bigger than mass
+        bigger_h_line = min(filter(lambda x: x > mass, variables.h_line_pos))
 
     selected_row.insert(2, mass_ion)
-    selected_row.insert(3, range[0])
-    selected_row.insert(4, range[1])
+    selected_row.insert(3, smaller_h_line)
+    selected_row.insert(4, bigger_h_line)
     selected_row.insert(5, color)
 
     # Add the row to the DataFrame using the .loc method

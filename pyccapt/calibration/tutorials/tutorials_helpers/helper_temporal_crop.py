@@ -24,7 +24,7 @@ def apply_crop(variables, out):
 
 def call_plot_crop_experiment(variables):
 	# Define widgets and labels for each parameter
-	max_tof = widgets.FloatText(value=variables.max_tof)
+	max_tof_widget = widgets.FloatText(value=variables.max_tof)
 	max_tof_label = widgets.Label(value="Max TOF:", layout=label_layout)
 
 	frac_widget = widgets.FloatText(value=1.0)
@@ -69,9 +69,9 @@ def call_plot_crop_experiment(variables):
 		# Disable the button while the code is running
 		button_plot.disabled = True
 		# Get the values from the widgets
-		data = variables.data
+		data = variables.data.copy()
 		variables = variables
-		max_tof = variables.max_tof
+		max_tof = max_tof_widget.value
 		frac = frac_widget.value
 
 		# Get the values from the editable widgets and create tuples
@@ -100,7 +100,7 @@ def call_plot_crop_experiment(variables):
 	button_rest.on_click(lambda b: reset(variables, out))
 
 	widget_container = widgets.VBox([
-		widgets.HBox([max_tof_label, max_tof]),
+		widgets.HBox([max_tof_label, max_tof_widget]),
 		widgets.HBox([frac_label, frac_widget]),
 		widgets.HBox([bins_label, widgets.HBox([bins_x, bins_y])]),
 		widgets.HBox([figure_size_label, widgets.HBox([figure_size_x, figure_size_y])]),

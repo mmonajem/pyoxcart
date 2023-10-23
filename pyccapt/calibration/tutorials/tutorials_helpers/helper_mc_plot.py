@@ -11,6 +11,7 @@ def call_mc_plot(variables, selector):
     # Define widgets for fine_tune_t_0 function
     bin_size_widget = widgets.FloatText(value=0.1)
     log_widget = widgets.Dropdown(options=[('True', True), ('False', False)])
+    grid_widget = widgets.Dropdown(options=[('True', True), ('False', False)])
     mode_widget = widgets.Dropdown(options=[('normal', 'normal'), ('normalized', 'normalized')])
     prominence_widget = widgets.IntText(value=10)
     distance_widget = widgets.IntText(value=100)
@@ -31,6 +32,7 @@ def call_mc_plot(variables, selector):
         # Get the values from the widgets
         bin_size_value = bin_size_widget.value
         log_value = log_widget.value
+        grid_value = grid_widget.value
         mode_value = mode_widget.value
         target_value = target_mode.value
         prominence_value = prominence_widget.value
@@ -45,7 +47,7 @@ def call_mc_plot(variables, selector):
             if target_value == 'mc_c':
                 mc_hist = mc_plot.AptHistPlotter(variables.mc_calib[variables.mc_calib < lim_value], variables)
                 mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='mc', steps='stepfilled',
-                                       log=log_value, fig_size=figure_size)
+                                       log=log_value, grid=grid_value, fig_size=figure_size)
             elif target_value == 'tof_c':
                 mc_hist = mc_plot.AptHistPlotter(variables.dld_t_calib[variables.dld_t_calib < lim_value], variables)
                 mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='tof', steps='stepfilled',
@@ -77,6 +79,7 @@ def call_mc_plot(variables, selector):
         widgets.HBox([widgets.Label(value="target:", layout=label_layout), target_mode]),
         widgets.HBox([widgets.Label(value="Bin Size:", layout=label_layout), bin_size_widget]),
         widgets.HBox([widgets.Label(value="Log:", layout=label_layout), log_widget]),
+        widgets.HBox([widgets.Label(value="Grid:", layout=label_layout), grid_widget]),
         widgets.HBox([widgets.Label(value="Mode:", layout=label_layout), mode_widget]),
         widgets.HBox([widgets.Label(value="Prominence:", layout=label_layout), prominence_widget]),
         widgets.HBox([widgets.Label(value="Distance:", layout=label_layout), distance_widget]),

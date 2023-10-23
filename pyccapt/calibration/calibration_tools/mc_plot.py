@@ -103,7 +103,7 @@ class AptHistPlotter:
         self.ax.set_ylabel('Frequency [cts]')
         self.ax.set_yscale('log' if log else 'linear')
         if grid:
-            plt.grid(True, which='both', axis='both', linestyle='--', linewidth=0.5)
+            plt.grid(True, which='both', axis='both', linestyle='--', linewidth=0.4, alpha=0.3)
         if self.original_x_limits is None:
             self.original_x_limits = self.ax.get_xlim()  # Store the original x-axis limits
         plt.tight_layout()
@@ -231,12 +231,12 @@ class AptHistPlotter:
 
         if label == 'mc':
             mrp = '{:.2f}'.format(
-                self.x[self.peaks][index_peak_max] / (self.x[int(self.peak_widths[3][index_peak_max])] -
-                                                      self.x[int(self.peak_widths[2][index_peak_max])]))
+                self.x[self.peaks][index_peak_max] / (self.x[round(self.peak_widths[3][index_peak_max])] -
+                                                      self.x[round(self.peak_widths[2][index_peak_max])]))
 
             if background is not None:
                 txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nMRP(FWHM): %s' \
-                      % (bin, len(self.mc_tof) / 1000000, int(self.background_ppm), mrp)
+                      % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp)
             else:
                 # annotation with range stats
                 upperLim = 4.5  # Da
@@ -246,14 +246,15 @@ class AptHistPlotter:
                 BG4 = BG4 / len(self.mc_tof) * 1E6
 
                 txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nBG@4: %s ppm/Da\nMRP(FWHM): %s' \
-                      % (bin, (len(self.mc_tof) / 1000000), int(BG4), mrp)
+                      % (bin, (len(self.mc_tof) / 1000000), round(BG4), mrp)
 
         elif label == 'tof':
-            mrp = '{:.2f}'.format(self.x[self.peaks[index_peak_max]] / (self.x[int(self.peak_widths[3][index_peak_max])] -
-                                                              self.x[int(self.peak_widths[2][index_peak_max])]))
+            mrp = '{:.2f}'.format(
+                self.x[self.peaks[index_peak_max]] / (self.x[round(self.peak_widths[3][index_peak_max])] -
+                                                      self.x[round(self.peak_widths[2][index_peak_max])]))
             if background['calculation'] and background['plot_no_back']:
                 txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nMRP(FWHM): %s' \
-                      % (bin, len(self.mc_tof) / 1000000, int(self.background_ppm), mrp)
+                      % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp)
             else:
                 # annotation with range stats
                 upperLim = 50.5  # ns
@@ -262,7 +263,7 @@ class AptHistPlotter:
                 BG50 = np.sum(self.y[np.array(mask[:-1])]) / (upperLim - lowerLim)
                 BG50 = BG50 / len(self.mc_tof) * 1E6
                 txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nBG@50: %s ppm/ns\nMRP(FWHM): %s' \
-                      % (bin, len(self.mc_tof) / 1000000, int(BG50), mrp)
+                      % (bin, len(self.mc_tof) / 1000000, round(BG50), mrp)
 
         props = dict(boxstyle='round', facecolor='wheat', alpha=1)
         if loc == 'left':
@@ -583,7 +584,8 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
     if selector == 'peak':
         variables.peaks_x_selected = []
         variables.peak_widths = []
-        variables.peak_x = []
+        variables.peaks_index_list = []
+
 
     if selected_area_specially:
         mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
@@ -638,10 +640,9 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
     mc_hist.selector(selector=selector)  # rect, peak_x, range
     if range_plot:
         mc_hist.plot_range(variables.range_data, legend=True)
-        # mc_hist.plot_color_legend(loc='center right')
 
     if save_fig:
-        mc_hist.save_fig(label=mode, fig_name=figname)
+        mc_hist.save_fig(label=target, fig_name=figname)
 
     if peaks is not None and print_info:
         index_max_ini = np.argmax(prominences[0])
@@ -650,9 +651,10 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         print('Mass resolving power for the highest peak_x at peak_x index %a (MRP --> m/m_2-m_1):' % index_max_ini,
               mrp)
         for i in range(len(peaks)):
-            print('Peaks ', i,
+            print('Peaks ', i + 1,
                   'is at location and height: ({:.2f}, {:.2f})'.format(x[int(peaks[i])], prominences[0][i]),
                   'peak_x window sides ({:.1f}-maximum) are: ({:.2f}, {:.2f})'.format(percent,
-                                                                                      x[int(peak_widths[2][i])],
-                                                                                      x[int(peak_widths[3][i])]),
-                  '-> MRP: {:.2f}'.format(x[int(peaks[i])] / (x[int(peak_widths[3][i])] - x[int(peak_widths[2][i])])))
+                                                                                      x[round(peak_widths[2][i])],
+                                                                                      x[round(peak_widths[3][i])]),
+                  '-> MRP: {:.2f}'.format(
+                      x[round(peaks[i])] / (x[round(peak_widths[3][i])] - x[round(peak_widths[2][i])])))

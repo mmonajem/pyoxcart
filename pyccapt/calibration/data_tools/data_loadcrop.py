@@ -70,7 +70,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         frac: Fraction of the data to be plotted.
         figure_size: The size of the figure.
         data_crop: Flag to control if only the plot should be shown or cropping functionality should be enabled.
-        draw_rect: Flag to draw  a rectangle over the slected area.
+        draw_rect: Flag to draw  a rectangle over the selected area.
         pulse: Flag to choose whether to plot pulse.
         pulse_mode: Flag to choose whether to plot pulse voltage or pulse.
         dc_plot: Flag to choose whether to plot dc voltage.

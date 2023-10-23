@@ -40,7 +40,7 @@ def tof2mcSimple(t: int, t0: int, V: float, xDet: int, yDet: int, flightPathLeng
 
 
 def tof2mc(t: int, t0: int, V: float, xDet: int, yDet: int,
-           flightPathLength: int, V_pulse: float, mode: str = 'voltage') -> float:
+           flightPathLength: int, V_pulse: float, mode: str = 'voltage') -> None:
     """
     Calculate m/c based on idealized geometry and electrostatics using the formula:
     m/c = 2eα(V + βV_pulse)(t/L)^2

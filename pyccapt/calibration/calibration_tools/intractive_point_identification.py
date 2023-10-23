@@ -100,7 +100,9 @@ class AnnoteFinder(object):
             self.ax.figure.canvas.draw_idle()
 
         self.variables.peaks_x_selected.append(x)
+        self.variables.peaks_index_list.append(int(annote) - 1)
         self.variables.peaks_x_selected.sort()
+        self.variables.peaks_index_list.sort()
 
     def deselectPoint(self, ax, x, y, annote):
         """
@@ -121,7 +123,9 @@ class AnnoteFinder(object):
 
         # Remove the deselected peak_x index from peaks_x_selected
         self.variables.peaks_x_selected.remove(int(annote) - 1)
+        self.variables.peaks_index_list.remove(int(annote) - 1)
         self.variables.peaks_x_selected.sort()
+        self.variables.peaks_ipeaks_index_listndex.sort()
 
     def drawSpecificAnnote(self, annote):
         """

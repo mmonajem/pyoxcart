@@ -37,7 +37,7 @@ def cluster_tof(dld_highVoltage_peak, dld_t_peak, calibration_mode, num_cluster,
         x = plt.scatter(np.array(dld_highVoltage_peak[mask]) / 1000, np.array(dld_t_peak[mask]),
                         c=cluster_labels[mask], label=label, s=1)
         ax1.set_xlabel("Voltage (kV)", fontsize=10)
-        plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
+        plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
         plt.show()
     hv_range = []
     for i in range(num_cluster):
@@ -50,7 +50,7 @@ def cluster_tof(dld_highVoltage_peak, dld_t_peak, calibration_mode, num_cluster,
             x = plt.scatter(np.array(dld_highVoltage_peak_c[mask]) / 1000, np.array(dld_t_peak_c[mask]), color='blue',
                             label=label, s=1)
             ax1.set_xlabel("Voltage (kV)", fontsize=10)
-            plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
+            plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
             plt.show()
         hv_range.append([np.min(dld_highVoltage_peak_c), np.max(dld_highVoltage_peak_c)])
 
@@ -196,7 +196,7 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
             x = plt.scatter(np.array(high_voltage_mean_list) / 1000, np.array(dld_t_peak_list) * maximum_location[j],
                             color="blue", label=label, s=1)
             ax1.set_xlabel("Voltage (kV)", fontsize=10)
-            plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
+            plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
 
             ax2 = ax1.twinx()
             f_v = voltage_corr(np.array(high_voltage_mean_list), *fitresult)
@@ -319,21 +319,21 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
                 mask = np.random.randint(0, len(dld_highVoltage_range), 1000)
             else:
                 mask = np.arange(len(dld_highVoltage_range))
-            x = plt.scatter(dld_highVoltage_range[mask], dld_t_range[mask], color="blue", label=r"$t$", s=1)
+            x = plt.scatter(dld_highVoltage_range[mask] / 1000, dld_t_range[mask], color="blue", label=r"$t$", s=1)
 
             if calibration_mode == 'tof':
                 ax1.set_ylabel("Time of Flight (ns)", fontsize=10)
             elif calibration_mode == 'mc':
                 ax1.set_ylabel("mc (Da)", fontsize=10)
             ax1.set_xlabel("Voltage (V)", fontsize=10)
-            plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
+            plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
 
             # Plot high voltage curve
             ax2 = ax1.twinx()
             f_v_plot = voltage_corr(dld_highVoltage_range, *fitresult[i])
             f_v_list_plot.append(f_v_plot)
 
-            y = ax2.plot(dld_highVoltage_range, 1 / f_v_plot, color='r', label=r"$C_{V}^{-1}$")
+            y = ax2.plot(dld_highVoltage_range / 1000, 1 / f_v_plot, color='r', label=r"$C_{V}^{-1}$")
             ax2.set_ylabel(r"$C_{V}^{-1}$", color="red", fontsize=10)
             plt.legend(handles=[x, y[0]], loc='upper left', markerscale=5., prop={'size': 10})
 
@@ -344,17 +344,18 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
 
             # Plot corrected tof/mc vs. uncalibrated tof/mc
             fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
-            x = plt.scatter(dld_highVoltage_range[mask], dld_t_range[mask], color="blue", label='t', s=1)
+            x = plt.scatter(dld_highVoltage_range[mask] / 1000, dld_t_range[mask], color="blue", label='t', s=1)
             if calibration_mode == 'tof':
                 ax1.set_ylabel("Time of Flight (ns)", fontsize=10)
             elif calibration_mode == 'mc':
                 ax1.set_ylabel("mc (Da)", fontsize=10)
-            ax1.set_xlabel("Voltage (V)", fontsize=10)
-            plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
+            ax1.set_xlabel("Voltage (KV)", fontsize=10)
+            plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
 
             dld_t_plot = dld_t_range * (1 / f_v_plot)
 
-            y = plt.scatter(dld_highVoltage_range[mask], dld_t_plot[mask], color="red", label=r"$t_{C_{V}}$", s=1)
+            y = plt.scatter(dld_highVoltage_range[mask] / 1000, dld_t_plot[mask], color="red", label=r"$t_{C_{V}}$",
+                            s=1)
 
             plt.legend(handles=[x, y], loc='upper right', markerscale=5., prop={'size': 10})
 
@@ -368,19 +369,19 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
         # Plot corrected tof/mc vs. uncalibrated tof/mc
         fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
         mask = np.random.randint(0, len(dld_highVoltage_peak_v), 1000)
-        x = plt.scatter(dld_highVoltage_peak_v[mask], dld_peak_b[mask], color="blue", label='t', s=1)
+        x = plt.scatter(dld_highVoltage_peak_v[mask] / 1000, dld_peak_b[mask], color="blue", label='t', s=1)
         if calibration_mode == 'tof':
             ax1.set_ylabel("Time of Flight (ns)", fontsize=10)
         elif calibration_mode == 'mc':
             ax1.set_ylabel("mc (Da)", fontsize=10)
-        ax1.set_xlabel("Voltage (V)", fontsize=10)
-        plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
+        ax1.set_xlabel("Voltage (KV)", fontsize=10)
+        plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
 
         dld_t_plot = np.copy(dld_peak_b)
         for i in range(len(hv_range)):
             dld_t_plot[cluster_labels == i] = dld_peak_b[cluster_labels == i] * (1 / f_v_list_plot[i])
 
-        y = plt.scatter(dld_highVoltage_peak_v[mask], dld_t_plot[mask], color="red", label=r"$t_{C_{V}}$", s=1)
+        y = plt.scatter(dld_highVoltage_peak_v[mask] / 1000, dld_t_plot[mask], color="red", label=r"$t_{C_{V}}$", s=1)
 
         plt.legend(handles=[x, y], loc='upper right', markerscale=5., prop={'size': 10})
 
@@ -469,10 +470,11 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         cmap = copy(plt.cm.plasma)
         cmap.set_bad(cmap(0))
         ax.plot_surface(X, Y, 1 / Z, cmap=cmap)
-        ax.set_xlabel('x (mm)', fontsize=10, labelpad=0)
-        ax.set_ylabel('y (mm)', fontsize=10)
-        ax.set_zlabel(r"${C_B}^{-1}$", fontsize=10, labelpad=2)
+        ax.set_xlabel('X_det (mm)', fontsize=10, labelpad=10)
+        ax.set_ylabel('Y_det (mm)', fontsize=10, labelpad=10)
+        ax.set_zlabel(r"${C_B}^{-1}$", fontsize=10, labelpad=5)
         ax.zaxis.set_major_formatter(plt.FormatStrFormatter('%.2f'))
+        ax.view_init(elev=7, azim=-41)
 
         if save:
             plt.savefig(variables.result_path + "//bowl_corr_%s.svg" % index_fig, format="svg", dpi=600)
@@ -564,20 +566,20 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
         mask = np.random.randint(0, len(dld_highVoltage_peak), 10000)
 
-        x = plt.scatter(dld_highVoltage_peak[mask], dld_peak[mask], color="blue", label=r"$t$", s=1)
+        x = plt.scatter(dld_highVoltage_peak[mask] / 1000, dld_peak[mask], color="blue", label=r"$t$", s=1)
 
         if calibration_mode == 'tof':
             ax1.set_ylabel("Time of Flight (ns)", fontsize=10)
         elif calibration_mode == 'mc':
             ax1.set_ylabel("mc (Da)", fontsize=10)
 
-        ax1.set_xlabel("Voltage (V)", fontsize=10)
-        plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
+        ax1.set_xlabel("Voltage (KV)", fontsize=10)
+        plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
 
         f_bowl_plot = bowl_corr_fit([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
         dld_t_plot = dld_peak[mask] / f_bowl_plot
 
-        y = plt.scatter(dld_highVoltage_peak[mask], dld_t_plot, color="red", label=r"$t_{C_{B}}$", s=1)
+        y = plt.scatter(dld_highVoltage_peak[mask] / 1000, dld_t_plot, color="red", label=r"$t_{C_{B}}$", s=1)
 
         plt.legend(handles=[x, y], loc='upper right', markerscale=5., prop={'size': 10})
 
@@ -708,7 +710,7 @@ def plot_selected_statistic(variables, bin_fdm, index_fig, calibration_mode, sav
         plt.scatter(x[mask], t[mask], color="blue", label=r"$t$", s=1)
         ax1.set_xlabel(r"$Y_{det} (cm)$", fontsize=10)
         ax1.set_ylabel(label, fontsize=10)
-        plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
+        plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
         if save:
             plt.savefig(variables.result_path + "y_t_%s.png" % index_fig, format="png", dpi=600)
             plt.savefig(variables.result_path + "y_t_%s.svg" % index_fig, format="svg", dpi=600)

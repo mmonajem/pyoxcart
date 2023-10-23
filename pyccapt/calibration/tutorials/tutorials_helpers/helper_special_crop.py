@@ -69,7 +69,8 @@ def call_plot_crop_fdm(variables):
         with out:  # Capture the output within the 'out' widget
             out.clear_output()  # Clear any previous output
             # Call the function
-            data_loadcrop.plot_crop_fdm(variables.data, variables, bins, frac, True, figure_size,
+            data = variables.data.copy()
+            data_loadcrop.plot_crop_fdm(data, variables, bins, frac, True, figure_size,
                                         False, save, figname)
 
         # Enable the button when the code is finished

@@ -36,7 +36,7 @@ def call_visualization(variables):
     figname_3d = widgets.Text(value='3d_plot')
     selected_area_specially_p3 = widgets.Dropdown(options=[('False', False), ('True', True)])
     selected_area_temporally_p3 = widgets.Dropdown(options=[('False', False), ('True', True)])
-    rotary_fig_save_p3 = widgets.Dropdown(options=[('True', True), ('False', False)])
+    rotary_fig_save_p3 = widgets.Dropdown(options=[('False', False), ('True', True)])
     element_percentage_p3 = widgets.Textarea(value=element_percentage)
     opacity = widgets.FloatText(value=0.5, min=0, max=1, step=0.1)
     save = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
@@ -56,7 +56,7 @@ def call_visualization(variables):
                 print('Min z (nm):', variables.selected_z1, 'Max z (nm):', variables.selected_z2)
             reconstruction.reconstruction_plot(variables, element_percentage_p3.value, opacity.value,
                                                rotary_fig_save_p3.value, selected_area_specially_p3.value,
-                                               selected_area_temporally_p3, figname_3d.value,
+                                               selected_area_temporally_p3.value, figname_3d.value,
                                                save.value, ions_individually_plots.value)
 
         plot_3d_button.disabled = False
@@ -82,15 +82,16 @@ def call_visualization(variables):
                 print('Min x (nm):', variables.selected_x1, 'Max x (nm):', variables.selected_x2)
                 print('Min y (nm):', variables.selected_y1, 'Max y (nm):', variables.selected_y2)
                 print('Min z (nm):', variables.selected_z1, 'Max z (nm):', variables.selected_z2)
-
-            reconstruction.heatmap(variables, selected_area_specially_ph.value, selected_area_temporally_ph,
-                                   element_percentage_ph.value, figure_sie=figure_size, save=save_heatmap.value)
+            reconstruction.heatmap(variables, selected_area_specially_ph.value, selected_area_temporally_ph.value,
+                                   element_percentage_ph.value, figname_heatmap.value, figure_sie=figure_size,
+                                   save=save_heatmap.value)
         plot_heatmap_button.disabled = False
 
     selected_area_specially_pm = widgets.Dropdown(options=[('False', False), ('True', True)])
     selected_area_temporally_pm = widgets.Dropdown(options=[('False', False), ('True', True)])
     peak_find_plot = widgets.Dropdown(options=[('True', True), ('False', False)])
     rangging = widgets.Dropdown(options=[('False', False), ('True', True)])
+    target_mode = widgets.Dropdown(options=[('mc_c', 'mc_c'), ('tof_c', 'tof_c'), ('mc', 'mc'), ('tof', 'tof')])
     bin_size_pm = widgets.FloatText(value=0.1)
     lim_mc_pm = widgets.IntText(value=150)
     prominence = widgets.IntText(value=50)
@@ -115,7 +116,7 @@ def call_visualization(variables):
                 print('Min y (nm):', variables.selected_y1, 'Max y (nm):', variables.selected_y2)
                 print('Min z (nm):', variables.selected_z1, 'Max z (nm):', variables.selected_z2)
 
-            mc_plot.hist_plot(variables, bin_size_pm.value, log=True, target='mc', mode='normal',
+            mc_plot.hist_plot(variables, bin_size_pm.value, log=True, target=target_mode.value, mode='normal',
                               prominence=prominence.value, distance=distance.value, percent=50, selector='rect',
                               figname=figname_mc.value, lim=lim_mc_pm.value,
                               peaks_find_plot=peak_find_plot.value, range_plot=rangging.value,
@@ -150,8 +151,8 @@ def call_visualization(variables):
                 print('Min z (nm):', variables.selected_z1, 'Max z (nm):', variables.selected_z2)
 
             reconstruction.projection(variables, element_percentage_pp.value, selected_area_specially_pp.value,
-                                      x_or_y_pp.value,
-                                      figure_size, figname_p.value, save_projection.value)
+                                      selected_area_temporally_pp.value, x_or_y_pp.value,
+                                      figname_p.value, figure_size, save_projection.value)
         plot_projection_button.disabled = False
 
     clear_button.on_click(lambda b: clear(b, out))
@@ -186,6 +187,7 @@ def call_visualization(variables):
     tab3 = widgets.VBox([
         widgets.HBox([widgets.Label(value="Selected specially:", layout=label_layout), selected_area_specially_pm]),
         widgets.HBox([widgets.Label(value="Selected temporally:", layout=label_layout), selected_area_temporally_pm]),
+        widgets.HBox([widgets.Label(value="Target:", layout=label_layout), target_mode]),
         widgets.HBox([widgets.Label(value="Peak find:", layout=label_layout), peak_find_plot]),
         widgets.HBox([widgets.Label(value="Rangging:", layout=label_layout), rangging]),
         widgets.HBox([widgets.Label(value="Bins size:", layout=label_layout), bin_size_pm]),
@@ -207,12 +209,16 @@ def call_visualization(variables):
 					  widgets.HBox([figure_mc_size_x_heatmap, figure_mc_size_y_heatmap])]),
 		widgets.HBox([plot_heatmap_button, clear_button]),
 		])
+    tab5 = widgets.VBox([])
+    tab6 = widgets.VBox([])
 
-    tab = widgets.Tab(children=[tab1, tab2, tab3, tab4])
+    tab = widgets.Tab(children=[tab1, tab2, tab3, tab4, tab5, tab6])
     tab.set_title(0, 'projection')
     tab.set_title(1, '3d plot')
     tab.set_title(2, 'mc plot')
     tab.set_title(3, 'heatmap plot')
+    tab.set_title(4, 'FDM plot')
+    tab.set_title(5, 'Experiment Hitstorty plot')
 
     out = Output()
 

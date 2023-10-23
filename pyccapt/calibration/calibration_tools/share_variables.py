@@ -22,6 +22,7 @@ class Variables:
         element (list): List of elements.
         isotope (list): List of isotopes.
         peaks_x_selected (list): List of peaks indices.
+        peaks_index_list (list): List of peak indices.
         result_path (str): The result path.
         path (str): The path.
         dataset_name (str): The dataset name.
@@ -77,6 +78,7 @@ class Variables:
         self.isotope = []
 
         self.peaks_x_selected = []
+        self.peaks_index_list = []
 
         self.result_path = ''
         self.path = ''
@@ -118,7 +120,7 @@ class Variables:
         self.flight_path_length = None
         self.pulse_mode = None
         # Create an empty DataFrame with the specified columns
-        self.range_data = pd.DataFrame({"ion": ['unranged'], "mass": [0], "mc": [0], "mass": [0], "mc_low": 0,
+        self.range_data = pd.DataFrame({"ion": ['unranged'], "mass": [0], "mc": [0], "mc_low": 0,
                                         "mc_up": 400, "color": '#000000', "element": ['unranged'],
                                         "complex": [0], "isotope": [0], "charge": [0]})
 
