@@ -134,15 +134,10 @@ def atom_probe_recons_Bas_et_al(detx, dety, hv, flight_path_length, kf, det_eff,
     return x * 1E9, y * 1E9, z * 1E9
 
 
-def draw_qube(variables, fig, mask=None, col=None, row=None):
-    # Draw a edge of cube around the 3D plot in blue
-    if mask is not None:
-        x, y, z = variables.x[mask], variables.y[mask], variables.z[mask]
-    else:
-        x, y, z = variables.x, variables.y, variables.z
-    x_range = [min(x), max(x)]
-    y_range = [min(y), max(y)]
-    z_range = [min(z), max(z)]
+def draw_qube(fig, range, col=None, row=None):
+    x_range = range[0]
+    y_range = range[1]
+    z_range = range[2]
 
     x_corner = [x_range[0], x_range[0], x_range[0], x_range[0], x_range[1], x_range[1], x_range[1], x_range[1]]
     y_corner = [y_range[0], y_range[0], y_range[1], y_range[1], y_range[0], y_range[0], y_range[1], y_range[1]]
@@ -177,10 +172,23 @@ def draw_qube(variables, fig, mask=None, col=None, row=None):
                     hoverinfo='none'
                 )
             )
-    fig.update_scenes(
-        xaxis_title="x (nm)",
-        yaxis_title="y (nm)",
-        zaxis_title="z (nm)"
+    fig.update_layout(
+        scene=dict(
+            xaxis_title="x (nm)",
+            yaxis_title="y (nm)",
+            zaxis_title="z (nm)",
+            xaxis=dict(showline=True, showspikes=True, showbackground=True, showgrid=True),
+            yaxis=dict(showline=True, showspikes=True, showbackground=True, showgrid=True),
+            zaxis=dict(showline=True, showspikes=True, showbackground=True, showgrid=True)
+        )
+    )
+
+    # Adjust margin settings to ensure the labels are displayed completely
+    fig.update_layout(
+        margin=dict(l=0, r=0, b=0, t=0),
+        scene=dict(
+            aspectmode="cube"
+        )
     )
     fig.update_scenes(zaxis_autorange="reversed")
     fig.update_layout(
@@ -239,6 +247,12 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     mc_up = variables.range_data['mc_up'].tolist()
     ion = variables.range_data['ion'].tolist()
 
+    # Draw a edge of cube around the 3D plot in blue
+    x_range = [min(variables.x), max(variables.x)]
+    y_range = [min(variables.y), max(variables.y)]
+    z_range = [min(variables.z), max(variables.z)]
+    range_cube = [x_range, y_range, z_range]
+
     # Create a subplots with shared axes
     if ions_individually_plots:
         rows = int(len(ion) / 3)
@@ -280,7 +294,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
                         opacity=opacity,
                     )
                 )
-                draw_qube(variables, fig, mask, col, row)
+                draw_qube(fig, range_cube, col, row)
                 fig.add_trace(scatter, row=row + 1, col=col + 1)
     else:
         fig = go.Figure()
@@ -315,7 +329,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
                 )
             )
 
-        draw_qube(variables, fig)
+        draw_qube(fig, range_cube)
         if rotary_fig_save:
             rotary_fig(fig, variables, figname)
 

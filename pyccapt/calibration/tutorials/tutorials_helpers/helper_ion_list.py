@@ -116,6 +116,38 @@ def call_ion_list(variables, selector, calibration_mode):
         with out_mc:
             print('parametric fit done')
 
+    button_plot_result = widgets.Button(description="plot result")
+
+    def plot_fit_result(b, variables, calibration_mode, out_mc):
+        button_plot_result.disabled = True
+        # Get the values from the widgets
+        bin_size_value = bin_size_widget.value
+        log_value = log_widget.value
+        mode_value = mode_widget.value
+        target_value = 'mc_c'
+        prominence_value = prominence_widget.value
+        distance_value = distance_widget.value
+        percent_value = percent_widget.value
+        figname_value = figname_widget.value
+        lim_value = lim_widget.value
+        figure_size = (figure_mc_size_x.value, figure_mc_size_y.value)
+        with out_mc:  # Capture the output within the 'out' widget
+            # Call the function
+            mc_hist = mc_plot.AptHistPlotter(variables.mc_calib[variables.mc_calib < lim_value], variables)
+            mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='mc', steps='stepfilled',
+                                   log=log_value, fig_size=figure_size)
+
+            if mode_value != 'normalized':
+                mc_hist.find_peaks_and_widths(prominence=prominence_value, distance=distance_value,
+                                              percent=percent_value)
+                mc_hist.plot_peaks()
+                mc_hist.plot_hist_info_legend(label=target_value, bin=0.1, background=None, loc='right')
+
+            mc_hist.save_fig(label=target_value, fig_name=figname_value)
+
+        # Enable the button when the code is finished
+        button_plot_result.disabled = False
+
     def on_button_click(b, variables, selector):
         # Disable the button while the code is running
         button_plot.disabled = True
@@ -158,6 +190,7 @@ def call_ion_list(variables, selector, calibration_mode):
     button_plot.on_click(lambda b: on_button_click(b, variables, selector))
     button_fit.on_click(lambda b: parametric_fit(variables, calibration_mode, out_mc))
     reset_back_button.on_click(lambda b: reset_back_on_click(variables))
+    button_plot_result.on_click(lambda b: plot_fit_result(b, variables, calibration_mode, out_mc))
 
     widget_container = widgets.VBox([
         widgets.HBox([widgets.Label(value="Bin Size:", layout=label_layout), bin_size_widget]),
@@ -170,7 +203,7 @@ def call_ion_list(variables, selector, calibration_mode):
         widgets.HBox([widgets.Label(value="Figname:", layout=label_layout), figname_widget]),
         widgets.HBox([widgets.Label(value="Fig. size W:", layout=label_layout), figure_mc_size_x]),
         widgets.HBox([widgets.Label(value="Fig. size H:", layout=label_layout), figure_mc_size_y]),
-        widgets.HBox([button_plot, button_fit, reset_back_button]),
+        widgets.HBox([button_plot, button_fit, button_plot_result, reset_back_button]),
     ])
 
     ion_list_box = widgets.VBox([dropdown, chargeDropdown, buttonAdd, buttonDelete, buttonReset])
@@ -182,3 +215,4 @@ def call_ion_list(variables, selector, calibration_mode):
 
 def reset_back_on_click(variables):
     variables.dld_t_calib = np.copy(variables.dld_t_calib_backup)
+    variables.mc_calib = np.copy(variables.mc_calib_backup)

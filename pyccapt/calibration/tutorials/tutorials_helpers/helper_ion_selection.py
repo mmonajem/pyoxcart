@@ -22,6 +22,10 @@ def call_ion_selection(variables):
 		options=[('True', True), ('False', False)],
 		description='plot peak:'
 	)
+	save_fig = widgets.Dropdown(
+		options=[('False', False), ('True', True)],
+		description='save fig:'
+	)
 
 	def hist_plot_p(variables, out):
 
@@ -32,7 +36,7 @@ def call_ion_selection(variables):
 			mc_plot.hist_plot(variables, bin_size.value, log=True, target='mc_c', mode='normal',
 			                  prominence=prominence.value, distance=distance.value, percent=percent.value,
 			                  selector='peak', figname=index_fig.value, lim=lim_tof.value,
-			                  peaks_find_plot=plot_peak.value, print_info=False)
+			                  peaks_find_plot=plot_peak.value, print_info=False, save_fig=save_fig.value)
 
 	def hist_plot_r(variables, out):
 		with out:
@@ -273,7 +277,7 @@ def call_ion_selection(variables):
 	def select_all_peaks(b, variables):
 		variables.peaks_idx = variables.peak_x
 
-	tab1 = widgets.VBox(children=[bin_size, index_fig, prominence, distance, lim_tof, percent, plot_peak,
+	tab1 = widgets.VBox(children=[bin_size, index_fig, prominence, distance, lim_tof, percent, plot_peak, save_fig,
 	                              widgets.HBox(children=[plot_button_p, all_peaks_button])])
 	tab2 = widgets.VBox(children=[bin_size, index_fig, prominence, distance, lim_tof, percent, widgets.HBox(
 		children=[widgets.VBox(children=[plot_button_r, start_button, next_button, prev_button, reset_zoom_button])])])

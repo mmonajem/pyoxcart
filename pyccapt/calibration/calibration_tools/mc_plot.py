@@ -113,13 +113,14 @@ class AptHistPlotter:
         self.variables.y_hist = self.y
         return self.y, self.x
 
-    def plot_range(self, range_data, legend=True):
+    def plot_range(self, range_data, legend=True, legend_loc='center right'):
         """
         Plot the range of the histogram.
 
         Args:
             range_data (data frame): The range data.
             legend (bool): Whether to show the legend.
+            legend_loc (str): The location of the legend.
 
         Returns:
             None
@@ -152,7 +153,7 @@ class AptHistPlotter:
                 self.annotates.append(str(i + 1))
 
             if legend:
-                self.plot_color_legend(loc='center right')
+                self.plot_color_legend(loc=legend_loc)
         else:
             print('plot_range only works in plot_histogram mode=bar')
 
@@ -229,7 +230,7 @@ class AptHistPlotter:
         """
         index_peak_max = np.argmax(self.prominences[0])
 
-        if label == 'mc':
+        if label == 'mc' or label == 'mc_c':
             mrp = '{:.2f}'.format(
                 self.x[self.peaks][index_peak_max] / (self.x[round(self.peak_widths[3][index_peak_max])] -
                                                       self.x[round(self.peak_widths[2][index_peak_max])]))
@@ -248,7 +249,7 @@ class AptHistPlotter:
                 txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nBG@4: %s ppm/Da\nMRP(FWHM): %s' \
                       % (bin, (len(self.mc_tof) / 1000000), round(BG4), mrp)
 
-        elif label == 'tof':
+        elif label == 'tof' or label == 'tof_c':
             mrp = '{:.2f}'.format(
                 self.x[self.peaks[index_peak_max]] / (self.x[round(self.peak_widths[3][index_peak_max])] -
                                                       self.x[round(self.peak_widths[2][index_peak_max])]))
@@ -535,11 +536,11 @@ class AptHistPlotter:
             None
         """
         if label == 'mc' or label == 'mc_c':
-            plt.savefig(self.variables.result_path + "//mc_%s.svg" % fig_name, format="svg", dpi=600)
-            plt.savefig(self.variables.result_path + "//mc_%s.png" % fig_name, format="png", dpi=600)
+            self.fig.savefig(self.variables.result_path + "//mc_%s.svg" % fig_name, format="svg", dpi=600)
+            self.fig.savefig(self.variables.result_path + "//mc_%s.png" % fig_name, format="png", dpi=600)
         elif label == 'tof' or label == 'tof_c':
-            plt.savefig(self.variables.result_path + "//tof_%s.svg" % fig_name, format="svg", dpi=600)
-            plt.savefig(self.variables.result_path + "//tof_%s.png" % fig_name, format="png", dpi=600)
+            self.fig.savefig(self.variables.result_path + "//tof_%s.svg" % fig_name, format="svg", dpi=600)
+            self.fig.savefig(self.variables.result_path + "//tof_%s.png" % fig_name, format="png", dpi=600)
 
 
 def hist_plot(variables, bin_size, log, target, mode, prominence, distance, percent, selector, figname, lim,
@@ -639,7 +640,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
 
     mc_hist.selector(selector=selector)  # rect, peak_x, range
     if range_plot:
-        mc_hist.plot_range(variables.range_data, legend=True)
+        mc_hist.plot_range(variables.range_data, legend=True, legend_loc='upper right')
 
     if save_fig:
         mc_hist.save_fig(label=target, fig_name=figname)

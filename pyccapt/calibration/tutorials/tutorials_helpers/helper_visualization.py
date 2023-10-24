@@ -3,6 +3,7 @@ from IPython.display import display, clear_output
 from ipywidgets import Output
 
 from pyccapt.calibration.calibration_tools import mc_plot
+from pyccapt.calibration.data_tools import data_loadcrop
 from pyccapt.calibration.reconstructions import reconstruction
 
 # Define a layout for labels to make them a fixed width
@@ -90,7 +91,7 @@ def call_visualization(variables):
     selected_area_specially_pm = widgets.Dropdown(options=[('False', False), ('True', True)])
     selected_area_temporally_pm = widgets.Dropdown(options=[('False', False), ('True', True)])
     peak_find_plot = widgets.Dropdown(options=[('True', True), ('False', False)])
-    rangging = widgets.Dropdown(options=[('False', False), ('True', True)])
+    rangging = widgets.Dropdown(options=[('True', True), ('False', False)])
     target_mode = widgets.Dropdown(options=[('mc_c', 'mc_c'), ('tof_c', 'tof_c'), ('mc', 'mc'), ('tof', 'tof')])
     bin_size_pm = widgets.FloatText(value=0.1)
     lim_mc_pm = widgets.IntText(value=150)
@@ -157,6 +158,83 @@ def call_visualization(variables):
 
     clear_button.on_click(lambda b: clear(b, out))
 
+    # Define widgets for each parameter
+    frac_fdm_widget = widgets.FloatText(value=1.0)
+    bins_x_fdm = widgets.IntText(value=256)
+    bins_y_fdm = widgets.IntText(value=256)
+    figure_size_x_fdm = widgets.FloatText(value=5.0)
+    figure_size_y_fdm = widgets.FloatText(value=4.0)
+    save_fdm_widget = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
+    figname_fdm_widget = widgets.Text(value='fdm_ini')
+
+    plot_fdm_button = widgets.Button(description="plot")
+
+    def plot_fdm(b, variables, out):
+        plot_fdm_button.disabled = True
+
+        # Get the values from the widgets
+        frac = frac_fdm_widget.value
+        bins = (bins_x_fdm.value, bins_y_fdm.value)
+        figure_size = (figure_size_x_fdm.value, figure_size_y_fdm.value)
+        save = save_fdm_widget.value
+        figname = figname_fdm_widget.value
+
+        with out:  # Capture the output within the 'out' widget
+            # Call the function
+            data = variables.data.copy()
+            data_loadcrop.plot_crop_fdm(data, variables, bins, frac, True, figure_size,
+                                        False, save, figname)
+
+        # Enable the button when the code is finished
+        plot_fdm_button.disabled = False
+
+    plot_fdm_button.on_click(lambda b: plot_fdm(b, variables, out))
+
+    # Define widgets and labels for each parameter
+    max_tof_mc_widget = widgets.FloatText(value=variables.max_tof)
+    frac_mc_widget = widgets.FloatText(value=1.0)
+    bins_x_mc = widgets.IntText(value=1200)
+    bins_y_mc = widgets.IntText(value=800)
+    figure_size_x_mc = widgets.FloatText(value=7.0)
+    figure_size_y_mc = widgets.FloatText(value=3.0)
+    draw_rect_mc_widget = widgets.fixed(False)
+    data_crop_mc_widget = widgets.fixed(True)
+    pulse_plot_mc_widget = widgets.Dropdown(options=[('False', False), ('True', True)], value=False)
+    dc_plot_mc_widget = widgets.Dropdown(options=[('True', True), ('False', False)], value=True)
+    pulse_mode_mc_widget = widgets.Dropdown(options=[('voltage', 'voltage'), ('laser', 'laser')], value='voltage')
+    save_mc_widget = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
+    figname_mc_widget = widgets.Text(value='hist_ini')
+
+    plot_experiment_button = widgets.Button(description="plot experiment")
+
+    def plot_experimetns_hitstory(b, variables, out):
+        plot_experiment_button.disabled = True
+        with out:
+            data = variables.data.copy()
+            variables = variables
+            max_tof = max_tof_mc_widget.value
+            frac = frac_mc_widget.value
+
+            # Get the values from the editable widgets and create tuples
+            bins = (bins_x_mc.value, bins_y_mc.value)
+            figure_size = (figure_size_x_mc.value, figure_size_y_mc.value)
+
+            draw_rect = draw_rect_mc_widget.value
+            data_crop = data_crop_mc_widget.value
+            pulse_plot = pulse_plot_mc_widget.value
+            dc_plot = dc_plot_mc_widget.value
+            pulse_mode = pulse_mode_mc_widget.value
+            save = save_mc_widget.value
+            figname = figname_mc_widget.value
+
+            with out:  # Capture the output within the 'out' widget
+                # Call the actual function with the obtained values
+                data_loadcrop.plot_crop_experiment_history(data, variables, max_tof, frac, bins, figure_size,
+                                                           draw_rect, data_crop, pulse_plot, dc_plot,
+                                                           pulse_mode, save, figname)
+        plot_experiment_button.disabled = False
+
+    plot_experiment_button.on_click(lambda b: plot_experimetns_hitstory(b, variables, out))
     def clear(b, out):
         with out:
             clear_output(True)
@@ -209,8 +287,32 @@ def call_visualization(variables):
 					  widgets.HBox([figure_mc_size_x_heatmap, figure_mc_size_y_heatmap])]),
 		widgets.HBox([plot_heatmap_button, clear_button]),
 		])
-    tab5 = widgets.VBox([])
-    tab6 = widgets.VBox([])
+
+    tab5 = widgets.VBox([
+        widgets.HBox([widgets.Label(value='Fraction:', layout=label_layout), frac_fdm_widget]),
+        widgets.HBox([widgets.Label(value='Bins:', layout=label_layout), widgets.HBox([bins_x_fdm, bins_y_fdm])]),
+        widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_fdm_widget]),
+        widgets.HBox([widgets.Label(value='Save:', layout=label_layout), save_fdm_widget]),
+        widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
+                      widgets.HBox([figure_size_x_fdm, figure_size_y_fdm])]),
+        widgets.HBox([plot_fdm_button, clear_button]),
+    ])
+
+    tab6 = widgets.VBox([
+        widgets.HBox([widgets.Label(value='Max TOF:', layout=label_layout), max_tof_mc_widget]),
+        widgets.HBox([widgets.Label(value='Fraction:', layout=label_layout), frac_mc_widget]),
+        widgets.HBox([widgets.Label(value='Bins:', layout=label_layout), widgets.HBox([bins_x_mc, bins_y_mc])]),
+        widgets.HBox([widgets.Label(value='Pulse Plot:', layout=label_layout), pulse_plot_mc_widget]),
+        widgets.HBox([widgets.Label(value='DC Plot:', layout=label_layout), dc_plot_mc_widget]),
+        widgets.HBox([widgets.Label(value='Pulse Mode:', layout=label_layout), pulse_mode_mc_widget]),
+        widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_mc_widget]),
+        widgets.HBox([widgets.Label(value='Save:', layout=label_layout), save_mc_widget]),
+        widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
+                      widgets.HBox([figure_size_x_mc, figure_size_y_mc])]),
+        widgets.HBox([plot_experiment_button, clear_button]),
+
+    ])
+
 
     tab = widgets.Tab(children=[tab1, tab2, tab3, tab4, tab5, tab6])
     tab.set_title(0, 'projection')

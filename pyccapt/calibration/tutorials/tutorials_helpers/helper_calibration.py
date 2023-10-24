@@ -11,6 +11,8 @@ label_layout = widgets.Layout(width='300px')
 
 def reset_back_on_click(variables):
     variables.dld_t_calib = np.copy(variables.dld_t_calib_backup)
+    variables.mc_calib = np.copy(variables.mc_calib_backup)
+
 
 
 def save_on_click(variables):
@@ -22,7 +24,7 @@ def clear_plot_on_click(out):
         out.clear_output()
 
 
-def call_voltage_bowl_calibration(variables, det_diam, flightPathLength, max_mc, calibration_mode):
+def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
     out = Output()
     out_status = Output()
     # Define widgets and labels for histplot function
@@ -33,8 +35,13 @@ def call_voltage_bowl_calibration(variables, det_diam, flightPathLength, max_mc,
     percent = widgets.IntText(value=50, description='percent MRP:', layout=label_layout)
     index_fig = widgets.IntText(value=1, description='fig index:', layout=label_layout)
     plot_peak = widgets.Dropdown(
-        options=[('False', False), ('True', True)],
+        options=[('True', True), ('False', False)],
         description='plot peak',
+        layout=label_layout
+    )
+    save = widgets.Dropdown(
+        options=[('False', False), ('True', True)],
+        description='save fig:',
         layout=label_layout
     )
     figure_mc_size_x = widgets.FloatText(value=9.0, description="Fig. size W:", layout=label_layout)
@@ -47,8 +54,8 @@ def call_voltage_bowl_calibration(variables, det_diam, flightPathLength, max_mc,
             out.clear_output()
             mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value, mode='normal',
                               prominence=prominence.value, distance=distance.value, percent=percent.value,
-                              selector='rect', figname=index_fig, lim=lim_tof.value,
-                              peaks_find_plot=plot_peak, print_info=False, figure_size=figure_size)
+                              selector='rect', figname=index_fig.value, lim=lim_tof.value, save_fig=save.value,
+                              peaks_find_plot=plot_peak.value, print_info=False, figure_size=figure_size)
         plot_button.disabled = False
 
     # Create a button widget to voltage correction function
@@ -220,7 +227,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flightPathLength, max_mc,
     clear_plot.on_click(lambda b: clear_plot_on_click(out))
 
     # Create the layout with three columns
-    column11 = widgets.VBox([bin_size, index_fig, prominence, distance, lim_tof, percent, bin_fdm, plot_peak,
+    column11 = widgets.VBox([bin_size, index_fig, prominence, distance, lim_tof, percent, bin_fdm, plot_peak, save,
                              figure_mc_size_x, figure_mc_size_y])
     column12 = widgets.VBox([plot_button, save_button, reset_back_button, clear_plot])
     column22 = widgets.VBox([sample_size_b, index_fig_b, maximum_cal_method_b, apply_b, plot_b, save_b, figure_b_size_x,
