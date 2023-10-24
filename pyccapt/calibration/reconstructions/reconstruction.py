@@ -3,6 +3,9 @@ import numpy as np
 import plotly
 import plotly.graph_objects as go
 import plotly.offline as pyo
+from plotly.offline import plot
+import codecs
+from IPython.display import display
 from plotly.subplots import make_subplots
 
 # Local module and scripts
@@ -218,8 +221,15 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         None
     """
     # Initialize Plotly for notebook mode
-    pyo.init_notebook_mode(connected=True)
-
+    # pyo.init_notebook_mode(connected=True)
+    print(element_percentage)
+    print(selected_area_specially)
+    print(selected_area_temporally)
+    print(ions_individually_plots)
+    print(figname)
+    print(save)
+    print(rotary_fig_save)
+    print(opacity)
     if selected_area_specially:
         mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
                        (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
@@ -330,32 +340,33 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
             )
 
         draw_qube(fig, range_cube)
-        if rotary_fig_save:
-            rotary_fig(fig, variables, figname)
+    if rotary_fig_save:
+        rotary_fig(fig, variables, figname)
 
-        plotly.offline.plot(
-            fig,
-            filename=variables.result_path + '\\{fn}.html'.format(fn=figname),
-            show_link=True,
-            auto_open=False
-        )
 
-        fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
-        if save:
-            fig.write_image(variables.result_path + "\\3d_o.png", scale=5, format='png')
-            fig.write_image(variables.result_path + "\\3d_o.svg", scale=5, format='svg')
-        fig.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
-        fig.update_layout(
-            legend=dict(
-                yanchor="top",
-                y=0.99,
-                xanchor="left",
-                x=0.99
-            )
+    plotly.offline.plot(
+        fig,
+        filename=variables.result_path + '\\{fn}.html'.format(fn=figname),
+        show_link=True,
+        auto_open=False
+    )
+
+    fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
+    if save:
+        fig.write_image(variables.result_path + "\\3d_o.png", scale=5, format='png')
+        fig.write_image(variables.result_path + "\\3d_o.svg", scale=5, format='svg')
+    fig.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
+    fig.update_layout(
+        legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=0.99
         )
-        if save:
-            fig.write_image(variables.result_path + "\\3d.png", scale=5, format='png')
-            fig.write_image(variables.result_path + "\\3d.svg", scale=5, format='svg')
+    )
+    if save:
+        fig.write_image(variables.result_path + "\\3d.png", scale=5, format='png')
+        fig.write_image(variables.result_path + "\\3d.svg", scale=5, format='svg')
 
     config = dict(
         {
@@ -372,8 +383,16 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         }
     )
 
-    pyo.iplot(fig, config=config)
+    # pyo.iplot(fig, config=config)
+    # fig.show(config=config)
+    # Use the `plot` function to generate an HTML file and display it using `display`
+    plot(fig, filename='sample_plot.html', auto_open=False)
+    # Read the HTML file in binary mode and convert it to a string
+    with open('sample_plot.html', 'rb') as file:
+        html_content = codecs.decode(file.read(), 'utf-8', 'ignore')
 
+    # Display the HTML content using `display`
+    display({'text/html': html_content}, raw=True)
 def rotate_z(x, y, z, theta):
     """
     Rotate coordinates around the z-axis.

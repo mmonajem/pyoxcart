@@ -1,6 +1,5 @@
 import itertools
 import re
-
 import matplotlib
 import numpy as np
 import pandas as pd
@@ -165,12 +164,22 @@ def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, ch
             formula = r'$' + formula + '^{+}$'
         element_symbols.append(formula)
 
+    selected_elements = [[item] for item in selected_elements]
+    complex = np.ones(len(idxs), dtype=int)
+    complex = [[item] for item in complex]
+    selected_isotope_number = [[item] for item in selected_isotope_number]
+
+
+    selected_isotope_number = [[np.uint32(float(value[0]))] for value in selected_isotope_number]
+    complex = [[np.uint32(float(value[0]))] for value in complex]
+    selected_charge_list = [np.uint32(value) for value in selected_charge_list]
+
     # Create DataFrame
     df = pd.DataFrame({
         'ion': element_symbols,
         'mass': selected_weights,
         'element': selected_elements,
-        'complex': np.ones(len(idxs), dtype=int),
+        'complex': complex,
         'isotope': selected_isotope_number,
         'charge': selected_charge_list,
         'abundance': selected_abundance,
@@ -190,13 +199,12 @@ def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, ch
 
     return df
 
-def load_elements(target_elements, abundance_threshold=0.0, charge=4,
-                  data_table='../../../files/isotopeTable.h5', variables=None):
+def load_elements(target_elements, abundance_threshold=0.0, charge=4, variables=None):
     """
     create a dataframe from the given list of ions.
 
     Args:
-        target_elements (float): Target elements.
+        target_elements (str): Target elements.
         abundance_threshold (float): Abundance threshold for filtering elements (as a percentage).
         charge (int): Charge value.
         data_table (str): Path to the data table (HDF5 file).
@@ -205,6 +213,7 @@ def load_elements(target_elements, abundance_threshold=0.0, charge=4,
     Returns:
         pd.DataFrame: DataFrame containing closest elements and their properties.
     """
+    data_table = '../../../files/isotopeTable.h5'
     # Read data from the HDF5 file
     dataframe = pd.read_hdf(data_table)
 
@@ -262,6 +271,11 @@ def load_elements(target_elements, abundance_threshold=0.0, charge=4,
     complex = np.ones(len(idxs), dtype=int)
     complex = [[item] for item in complex]
     selected_isotope_number = [[item] for item in selected_isotope_number]
+
+    complex = [[np.uint32(float(value[0]))] for value in complex]
+    selected_isotope_number = [[np.uint32(float(value[0]))] for value in selected_isotope_number]
+    selected_charge_list = [np.uint32(value) for value in selected_charge_list]
+
     # Create DataFrame
     df = pd.DataFrame({
         'ion': element_symbols,
@@ -347,12 +361,19 @@ def molecule_manual(target_element, charge, latex=True, variables=None):
     else:
         formula = target_element
 
-    if len(isotope_list) > 1:
-        element_list = [element_list]
-        complexity_list = [complexity_list]
-        isotope_list = [isotope_list]
-    df = pd.DataFrame({'ion': [formula], 'mass': total_weight, 'element': element_list,
-                       'complex': complexity_list, 'isotope': isotope_list, 'charge': [charge],
+
+    element_list = [element_list]
+    complexity_list = [complexity_list]
+    isotope_list = [isotope_list]
+    charge = [charge]
+
+    # Convert float_list to a list of uint32 values
+    complexity_list = [[np.uint32(float(value[0]))] for value in complexity_list]
+    isotope_list = [[np.uint32(float(value[0]))] for value in isotope_list]
+    charge = [np.uint32(value) for value in charge]
+
+    df = pd.DataFrame({'ion': formula, 'mass': total_weight, 'element': element_list,
+                       'complex': complexity_list, 'isotope': isotope_list, 'charge': charge,
                        'abundance': abundance_c, })
 
     # Round the abundance column to 4 decimal places
@@ -500,6 +521,10 @@ def molecule_create(element_list, max_complexity, charge, abundance_threshold, v
                     chemical_formula += str(count)
             formula = chemical_formula
         combination_formula.append(formula)
+
+    combination_complexity = [[np.uint32(float(value[0]))] for value in combination_complexity]
+    combination_isotopes = [[np.uint32(float(value[0]))] for value in combination_isotopes]
+    combination_charge = [np.uint32(value) for value in combination_charge]
 
     # Create DataFrame
     df = pd.DataFrame({

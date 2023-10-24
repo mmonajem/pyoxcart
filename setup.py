@@ -48,6 +48,7 @@ calibration_deps = [
     "nodejs",
     "adjustText",
     "pybaselines ",
+    "kaleido",
 ]
 
 setup(

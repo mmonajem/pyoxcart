@@ -56,9 +56,13 @@ def call_visualization(variables):
                 print('Min y (nm):', variables.selected_y1, 'Max y (nm):', variables.selected_y2)
                 print('Min z (nm):', variables.selected_z1, 'Max z (nm):', variables.selected_z2)
             reconstruction.reconstruction_plot(variables, element_percentage_p3.value, opacity.value,
-                                               rotary_fig_save_p3.value, selected_area_specially_p3.value,
-                                               selected_area_temporally_p3.value, figname_3d.value,
-                                               save.value, ions_individually_plots.value)
+                                               rotary_fig_save_p3.value, figname_3d.value,
+                                               save.value, selected_area_specially_p3.value,
+                                               selected_area_temporally_p3.value, ions_individually_plots.value)
+            # reconstruction.reconstruction_plot(variables, element_percentage_p3.value, opacity.value,
+            #                                    rotary_fig_save_p3.value, selected_area_specially_p3.value,
+            #                                    selected_area_temporally_p3.value, figname_3d.value,
+            #                                    save.value, ions_individually_plots.value)
 
         plot_3d_button.disabled = False
 
@@ -235,6 +239,7 @@ def call_visualization(variables):
         plot_experiment_button.disabled = False
 
     plot_experiment_button.on_click(lambda b: plot_experimetns_hitstory(b, variables, out))
+
     def clear(b, out):
         with out:
             clear_output(True)
@@ -248,8 +253,8 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_p]),
         widgets.HBox([widgets.Label(value='Save fig:', layout=label_layout), save_projection]),
         widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
-        widgets.HBox([figure_mc_size_x_projection, figure_mc_size_y_projection])]),
-		widgets.HBox([plot_projection_button, clear_button])
+                      widgets.HBox([figure_mc_size_x_projection, figure_mc_size_y_projection])]),
+        widgets.HBox([plot_projection_button, clear_button])
     ])
     tab2 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Selected specially:', layout=label_layout), selected_area_specially_p3]),
@@ -257,7 +262,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='Rotary save:', layout=label_layout), rotary_fig_save_p3]),
         widgets.HBox([widgets.Label(value='Element percentage:', layout=label_layout), element_percentage_p3]),
         widgets.HBox([widgets.Label(value='Opacity:', layout=label_layout), opacity]),
-		widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_3d]),
+        widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_3d]),
         widgets.HBox([widgets.Label(value='Save fig:', layout=label_layout), save]),
         widgets.HBox([widgets.Label(value='Ions individually plots:', layout=label_layout), ions_individually_plots]),
         widgets.HBox([plot_3d_button, clear_button]),
@@ -273,20 +278,20 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value="Peak prominance:", layout=label_layout), prominence]),
         widgets.HBox([widgets.Label(value="Peak distance:", layout=label_layout), distance]),
         widgets.HBox([widgets.Label(value="Fig name:", layout=label_layout), figname_mc]),
-		widgets.HBox([widgets.Label(value="Save fig:", layout=label_layout), save_mc]),
+        widgets.HBox([widgets.Label(value="Save fig:", layout=label_layout), save_mc]),
         widgets.HBox([widgets.Label(value="Fig size:", layout=label_layout),
                       widgets.HBox([figure_mc_size_x_mc, figure_mc_size_y_mc])]),
-    widgets.HBox([plot_mc_button, clear_button])])
+        widgets.HBox([plot_mc_button, clear_button])])
     tab4 = widgets.VBox([
-		widgets.HBox([widgets.Label(value='Selected specially:', layout=label_layout), selected_area_specially_ph]),
-		widgets.HBox([widgets.Label(value='Selected temporally:', layout=label_layout), selected_area_temporally_ph]),
-		widgets.HBox([widgets.Label(value='Element percentage:', layout=label_layout), element_percentage_ph]),
-		widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_heatmap]),
-		widgets.HBox([widgets.Label(value='Save fig:', layout=label_layout), save_heatmap]),
-		widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
-					  widgets.HBox([figure_mc_size_x_heatmap, figure_mc_size_y_heatmap])]),
-		widgets.HBox([plot_heatmap_button, clear_button]),
-		])
+        widgets.HBox([widgets.Label(value='Selected specially:', layout=label_layout), selected_area_specially_ph]),
+        widgets.HBox([widgets.Label(value='Selected temporally:', layout=label_layout), selected_area_temporally_ph]),
+        widgets.HBox([widgets.Label(value='Element percentage:', layout=label_layout), element_percentage_ph]),
+        widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_heatmap]),
+        widgets.HBox([widgets.Label(value='Save fig:', layout=label_layout), save_heatmap]),
+        widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
+                      widgets.HBox([figure_mc_size_x_heatmap, figure_mc_size_y_heatmap])]),
+        widgets.HBox([plot_heatmap_button, clear_button]),
+    ])
 
     tab5 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Fraction:', layout=label_layout), frac_fdm_widget]),
@@ -312,7 +317,6 @@ def call_visualization(variables):
         widgets.HBox([plot_experiment_button, clear_button]),
 
     ])
-
 
     tab = widgets.Tab(children=[tab1, tab2, tab3, tab4, tab5, tab6])
     tab.set_title(0, 'projection')

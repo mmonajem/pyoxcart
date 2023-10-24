@@ -13,7 +13,7 @@ def call_ion_selection(variables):
 	output3 = Output()
 
 	bin_size = widgets.FloatText(value=0.1, description='bin size:')
-	prominence = widgets.IntText(value=50, description='peak prominance:')
+	prominence = widgets.IntText(value=50, description='peak prominence:')
 	distance = widgets.IntText(value=1, description='peak distance:')
 	lim_tof = widgets.IntText(value=400, description='lim tof/mc:')
 	percent = widgets.IntText(value=50, description='percent MRP:')
@@ -153,12 +153,11 @@ def call_ion_selection(variables):
 		hist_plot_r(variables, out)
 		plot_button_r.disabled = False
 
-	plot_button.on_click(lambda b: plot_finded_elemnt(b, variables))
-
-	def plot_finded_elemnt(b, variables):
+	def plot_found_element(b, variables):
 		variables.AptHistPlotter.plot_founded_range_loc(variables.ions_list_data, remove_lines=False)
 
-	find_elem_button.on_click(lambda b: vol_on_click(b, variables, output2))
+	plot_element.on_click(lambda b: plot_found_element(b, variables))
+
 
 	def vol_on_click(b, variables, output2):
 		with output2:
@@ -179,6 +178,8 @@ def call_ion_selection(variables):
 			variables.range_data_backup = df.copy()
 			variables.ions_list_data = df.copy()
 			display(df)
+
+	find_elem_button.on_click(lambda b: vol_on_click(b, variables, output2))
 
 	formula_button.on_click(lambda b: manual_formula(b, variables, output2))
 
@@ -302,8 +303,7 @@ def call_ion_selection(variables):
 	buttons_layout = widgets.HBox([tabs1, tabs2])
 
 	# Create a VBox to display the output widgets below the buttons
-	output_layout_h = widgets.HBox([out, output3])
-	output_layout = widgets.VBox([output_layout_h, output2])
+	output_layout = widgets.HBox([out, widgets.VBox([output3, output2])])
 
 	# Display the buttons and the output widgets
 	display(buttons_layout, output_layout)
