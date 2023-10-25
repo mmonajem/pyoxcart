@@ -156,7 +156,7 @@ class Ui_Pumps_Vacuum(object):
 		self.led_pump_load_lock.setMaximumSize(QtCore.QSize(50, 50))
 		self.led_pump_load_lock.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 		self.led_pump_load_lock.setObjectName("led_pump_load_lock")
-		self.verticalLayout_6.addWidget(self.led_pump_load_lock, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+		self.verticalLayout_6.addWidget(self.led_pump_load_lock, 0, QtCore.Qt.AlignmentFlag.AlignCenter)
 		self.pump_load_lock_switch = QtWidgets.QPushButton(parent=Pumps_Vacuum)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
 		sizePolicy.setHorizontalStretch(0)
@@ -169,7 +169,7 @@ class Ui_Pumps_Vacuum(object):
 		                                         "                                            }\n"
 		                                         "                                        ")
 		self.pump_load_lock_switch.setObjectName("pump_load_lock_switch")
-		self.verticalLayout_6.addWidget(self.pump_load_lock_switch)
+		self.verticalLayout_6.addWidget(self.pump_load_lock_switch, 0, QtCore.Qt.AlignmentFlag.AlignCenter)
 		self.verticalLayout_8.addLayout(self.verticalLayout_6)
 		self.gridLayout.addLayout(self.verticalLayout_8, 0, 0, 1, 1)
 		self.verticalLayout_7 = QtWidgets.QVBoxLayout()
@@ -284,7 +284,7 @@ class Ui_Pumps_Vacuum(object):
 		self.led_pump_cryo_load_lock.setMaximumSize(QtCore.QSize(50, 50))
 		self.led_pump_cryo_load_lock.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 		self.led_pump_cryo_load_lock.setObjectName("led_pump_cryo_load_lock")
-		self.verticalLayout_5.addWidget(self.led_pump_cryo_load_lock)
+		self.verticalLayout_5.addWidget(self.led_pump_cryo_load_lock, 0, QtCore.Qt.AlignmentFlag.AlignCenter)
 		self.pump_cryo_load_lock_switch = QtWidgets.QPushButton(parent=Pumps_Vacuum)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
 		sizePolicy.setHorizontalStretch(0)
@@ -297,7 +297,7 @@ class Ui_Pumps_Vacuum(object):
 		                                              "                                            }\n"
 		                                              "                                        ")
 		self.pump_cryo_load_lock_switch.setObjectName("pump_cryo_load_lock_switch")
-		self.verticalLayout_5.addWidget(self.pump_cryo_load_lock_switch)
+		self.verticalLayout_5.addWidget(self.pump_cryo_load_lock_switch, 0, QtCore.Qt.AlignmentFlag.AlignCenter)
 		self.verticalLayout_7.addLayout(self.verticalLayout_5)
 		self.gridLayout.addLayout(self.verticalLayout_7, 0, 1, 1, 1)
 		self.Error = QtWidgets.QLabel(parent=Pumps_Vacuum)
@@ -338,8 +338,8 @@ class Ui_Pumps_Vacuum(object):
 		self.emitter.vacuum_main.connect(self.update_vacuum_main)
 		self.emitter.vacuum_buffer.connect(self.update_vacuum_buffer)
 		self.emitter.vacuum_buffer_back.connect(self.update_vacuum_buffer_back)
-		self.emitter.vacuum_load_back.connect(self.update_vacuum_load_back)
-		self.emitter.vacuum_load.connect(self.update_vacuum_load)
+		self.emitter.vacuum_load_lock_back.connect(self.update_vacuum_load_back)
+		self.emitter.vacuum_load_lock.connect(self.update_vacuum_load)
 		self.emitter.vacuum_cryo_load_lock.connect(self.update_vacuum_cryo_load_lock)
 		self.emitter.vacuum_cryo_load_lock_back.connect(self.update_vacuum_cryo_load_lock_back)
 		# Connect the bool_flag_while_loop signal to a slot
@@ -529,7 +529,32 @@ class Ui_Pumps_Vacuum(object):
 			pass
 
 	def pump_switch_cryo_ll(self):
-		pass
+		try:
+			if not self.variables.start_flag and not self.variables.flag_main_gate \
+					and not self.variables.flag_cryo_gate and not self.variables.flag_load_gate:
+				if self.variables.flag_pump_cryo_load_lock:
+					self.variables.flag_pump_cryo_load_lock_click = True
+					self.led_pump_cryo_load_lock.setPixmap(self.led_red)
+					self.pump_cryo_load_lock_switch.setEnabled(False)
+					time.sleep(1)
+					self.pump_cryo_load_lock_switch.setEnabled(True)
+				elif not self.variables.flag_pump_cryo_load_lock:
+					self.variables.flag_pump_cryo_load_lock_click = True
+					self.led_pump_cryo_load_lock.setPixmap(self.led_green)
+					self.pump_cryo_load_lock_switch.setEnabled(False)
+					time.sleep(1)
+					self.pump_cryo_load_lock_switch.setEnabled(True)
+			else:  # SHow error message in the GUI
+				if self.variables.start_flag:
+					self.error_message("!!! An experiment is running !!!")
+				else:
+					self.error_message("!!! First Close all the Gates !!!")
+
+				self.timer.start(8000)
+		except Exception as e:
+			print('Error in pump_switch function')
+			print(e)
+			pass
 
 	def error_message(self, message):
 		"""
@@ -567,8 +592,8 @@ class SignalEmitter(QObject):
 	vacuum_main = pyqtSignal(float)
 	vacuum_buffer = pyqtSignal(float)
 	vacuum_buffer_back = pyqtSignal(float)
-	vacuum_load_back = pyqtSignal(float)
-	vacuum_load = pyqtSignal(float)
+	vacuum_load_lock_back = pyqtSignal(float)
+	vacuum_load_lock = pyqtSignal(float)
 	vacuum_cryo_load_lock = pyqtSignal(float)
 	vacuum_cryo_load_lock_back = pyqtSignal(float)
 	bool_flag_while_loop = pyqtSignal(bool)

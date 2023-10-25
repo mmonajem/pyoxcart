@@ -29,6 +29,7 @@ class Variables:
         self.ns.COM_PORT_gauge_mc = conf['COM_PORT_gauge_mc']
         self.ns.COM_PORT_gauge_bc = conf['COM_PORT_gauge_bc']
         self.ns.COM_PORT_gauge_ll = conf['COM_PORT_gauge_ll']
+        self.ns.COM_PORT_gauge_cll = conf['COM_PORT_gauge_cll']
         self.ns.COM_PORT_signal_generator = conf["COM_PORT_signal_generator"]
         self.ns.COM_PORT_thorlab_motor = conf["COM_PORT_thorlab_motor"]
 
@@ -73,6 +74,9 @@ class Variables:
         self.ns.flag_pump_load_lock = True
         self.ns.flag_pump_load_lock_click = False
         self.ns.flag_pump_load_lock_led = None
+        self.ns.flag_pump_cryo_load_lock = True
+        self.ns.flag_pump_cryo_load_lock_click = False
+        self.ns.flag_pump_cryo_load_lock_led = None
         self.ns.flag_camera_grab = False
         self.ns.flag_camera_win_show = False
         self.ns.flag_visualization_win_show = False
@@ -255,6 +259,15 @@ class Variables:
     def COM_PORT_gauge_ll(self, value):
         with self.lock:
             self.ns.COM_PORT_gauge_ll = value
+
+    @property
+    def COM_PORT_gauge_cll(self):
+        return self.ns.COM_PORT_gauge_cll
+
+    @COM_PORT_gauge_cll.setter
+    def COM_PORT_gauge_cll(self, value):
+        with self.lock:
+            self.ns.COM_PORT_gauge_cll = value
 
     @property
     def COM_PORT_signal_generator(self):
@@ -597,6 +610,33 @@ class Variables:
     def flag_pump_load_lock_led(self, value):
         with self.lock:
             self.ns.flag_pump_load_lock_led = value
+
+    @property
+    def flag_pump_cryo_load_lock(self):
+        return self.ns.flag_pump_cryo_load_lock
+
+    @flag_pump_cryo_load_lock.setter
+    def flag_pump_cryo_load_lock(self, value):
+        with self.lock:
+            self.ns.flag_pump_cryo_load_lock = value
+
+    @property
+    def flag_pump_cryo_load_lock_click(self):
+        return self.ns.flag_pump_cryo_load_lock_click
+
+    @flag_pump_cryo_load_lock_click.setter
+    def flag_pump_cryo_load_lock_click(self, value):
+        with self.lock:
+            self.ns.flag_pump_cryo_load_lock_click = value
+
+    @property
+    def flag_cryo_pump_load_lock_led(self):
+        return self.ns.flag_cryo_pump_load_lock_led
+
+    @flag_cryo_pump_load_lock_led.setter
+    def flag_pump_cryo_load_lock_led(self, value):
+        with self.lock:
+            self.ns.flag_pump_cryo_load_lock_led = value
 
     @property
     def flag_camera_grab(self):

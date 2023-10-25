@@ -1,4 +1,5 @@
 {
+  "device_name": "Oxcart",
   "flight_path_length": 110,
   "t_0": 27.88,
   "max_vdc": 10000,
@@ -12,7 +13,8 @@
   "tdc": "on",
   "tdc_model": "Surface_Consept",
   "camera": "on",
-  "pump": "on",
+  "pump_ll": "on",
+  "pump_cll": "on",
   "gates": "on",
   "v_dc": "on",
   "v_p": "on",
@@ -31,6 +33,7 @@
   "COM_PORT_gauge_mc": "COM5",
   "COM_PORT_gauge_bc": "COM2",
   "COM_PORT_gauge_ll": "COM1",
+  "COM_PORT_gauge_cll": "COM8",
   "COM_PORT_signal_generator": "USB0::0xF4EC::0x1101::SDG6XBAD2R0601::INSTR",
   "COM_PORT_thorlab_motor": "27261754"
 }
