@@ -221,15 +221,8 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         None
     """
     # Initialize Plotly for notebook mode
-    # pyo.init_notebook_mode(connected=True)
-    print(element_percentage)
-    print(selected_area_specially)
-    print(selected_area_temporally)
-    print(ions_individually_plots)
-    print(figname)
-    print(save)
-    print(rotary_fig_save)
-    print(opacity)
+    pyo.init_notebook_mode(connected=True)
+
     if selected_area_specially:
         mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
                        (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
@@ -383,16 +376,16 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         }
     )
 
-    # pyo.iplot(fig, config=config)
-    # fig.show(config=config)
+    pyo.iplot(fig, config=config)
+    # fig.show()
     # Use the `plot` function to generate an HTML file and display it using `display`
-    plot(fig, filename='sample_plot.html', auto_open=False)
-    # Read the HTML file in binary mode and convert it to a string
-    with open('sample_plot.html', 'rb') as file:
-        html_content = codecs.decode(file.read(), 'utf-8', 'ignore')
-
-    # Display the HTML content using `display`
-    display({'text/html': html_content}, raw=True)
+    # plot(fig, filename='sample_plot.html', auto_open=False)
+    # # Read the HTML file in binary mode and convert it to a string
+    # with open('sample_plot.html', 'rb') as file:
+    #     html_content = codecs.decode(file.read(), 'utf-8', 'ignore')
+    #
+    # # Display the HTML content using `display`
+    # display({'text/html': html_content}, raw=True)
 def rotate_z(x, y, z, theta):
     """
     Rotate coordinates around the z-axis.
