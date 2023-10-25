@@ -1,12 +1,13 @@
 import datetime
 
 
-def save_statistics_apt(variables):
+def save_statistics_apt(variables, conf):
     """
     Save setup parameters and run statistics in a text file.
 
     Args:
         variables (object): An object containing experiment variables.
+        conf (dict): A dictionary containing the configuration file parameters.
 
     Returns:
         None
@@ -18,6 +19,7 @@ def save_statistics_apt(variables):
     header = f"""
 Experiment Parameters and Statistics
 -------------------------------------------
+Device name: {conf['device_name']}
 Experiment Timestamp: {current_datetime}
 Username: {variables.user_name}
 Experiment Name: {variables.ex_name}

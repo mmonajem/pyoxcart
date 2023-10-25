@@ -293,13 +293,15 @@ class Ui_Cameras_Alignment(object):
 		"""
 		if not self.variables.light:
 			self.led_light.setPixmap(self.led_green)
-			self.usb_lamp_switch.switch_on(16)
+			if self.conf['usb_lamp_switch'] == 'on':
+				self.usb_lamp_switch.switch_on(16)
 			self.variables.light = True
 			self.variables.light_switch = True
 
 		elif self.variables.light:
 			self.led_light.setPixmap(self.led_red)
-			self.usb_lamp_switch.switch_off(16)
+			if self.conf['usb_lamp_switch'] == 'on':
+				self.usb_lamp_switch.switch_off(16)
 			self.variables.light = False
 			self.variables.light_switch = True
 

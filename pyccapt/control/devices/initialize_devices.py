@@ -55,28 +55,31 @@ def command_edwards(conf, variables, cmd, E_AGC, status=None):
 	Returns:
 		Response code after executing the command.
 	"""
-    if conf['pump_ll'] == "on" or conf['pump_cll'] == "on":
-        if (variables.flag_pump_load_lock_click and variables.flag_pump_load_lock and status == 'load_lock' or
-                status == 'cryo_load_lock'):
+
+    if (variables.flag_pump_load_lock_click and variables.flag_pump_load_lock and status == 'load_lock' or
+            status == 'cryo_load_lock'):
+        if conf['pump_ll'] == "on" or conf['pump_cll'] == "on":
             E_AGC.comm('!C910 0')
             E_AGC.comm('!C904 0')
-            variables.flag_pump_load_lock_click = False
-            variables.flag_pump_load_lock = False
-            variables.flag_pump_load_lock_led = False
-            time.sleep(1)
-        elif (variables.flag_pump_load_lock_click and not variables.flag_pump_load_lock and status == 'load_lock' or
-              status == 'cryo_load_lock'):
+        print(bcolors.OKGREEN + 'Pump is off' + bcolors.ENDC)
+        variables.flag_pump_load_lock_click = False
+        variables.flag_pump_load_lock = False
+        variables.flag_pump_load_lock_led = False
+        time.sleep(1)
+    elif (variables.flag_pump_load_lock_click and not variables.flag_pump_load_lock and status == 'load_lock' or
+          status == 'cryo_load_lock'):
+        if conf['pump_ll'] == "on" or conf['pump_cll'] == "on":
             E_AGC.comm('!C910 1')
             E_AGC.comm('!C904 1')
-            if status == 'load_lock':
-                variables.flag_pump_load_lock_click = False
-                variables.flag_pump_load_lock = True
-                variables.flag_pump_load_lock_led = True
-            elif status == 'cryo_load_lock':
-                variables.flag_pump_cryo_load_lock_click = False
-                variables.flag_pump_cryo_load_lock = True
-                variables.flag_pump_cryo_load_lock_led = True
-            time.sleep(1)
+        if status == 'load_lock':
+            variables.flag_pump_load_lock_click = False
+            variables.flag_pump_load_lock = True
+            variables.flag_pump_load_lock_led = True
+        elif status == 'cryo_load_lock':
+            variables.flag_pump_cryo_load_lock_click = False
+            variables.flag_pump_cryo_load_lock = True
+            variables.flag_pump_cryo_load_lock_led = True
+        time.sleep(1)
 
     if conf['COM_PORT_gauge_ll'] == "on" or conf['COM_PORT_gauge_cll'] == "on":
         if cmd == 'pressure':
@@ -242,14 +245,14 @@ def state_update(conf, variables, emitter):
                 vacuum_buffer = '{}'.format(value)
                 variables.vacuum_buffer = vacuum_buffer
                 emitter.vacuum_buffer.emit(float(vacuum_buffer))
-            if conf['COM_PORT_gauge_ll'] != "off" and conf['pump_ll'] != "off":
+            if conf['pump_ll'] != "off":
                 response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_ll, status='load_lock')
                 # with variables.lock_statistics:
                 vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
                 vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
                 emitter.vacuum_load_lock.emit(vacuum_load_lock)
                 emitter.vacuum_load_lock_back.emit(vacuum_load_lock_backing)
-            if conf['COM_PORT_gauge_cll'] != "off" and conf['pump_cll'] != "off":
+            if conf['pump_cll'] != "off":
                 response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_cll, status='load_lock')
                 # with variables.lock_statistics:
                 vacuum_cryo_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01

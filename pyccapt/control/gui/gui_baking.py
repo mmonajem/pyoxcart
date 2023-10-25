@@ -138,50 +138,51 @@ class Ui_Baking(object):
 
 		index = 0
 		desired_period = 1.0
-		while self.running:
-			start_time = time.perf_counter()
-			# print('-----------', index, 'seconds', '--------------')
-			if not self.variables.flag_pumps_vacuum_start:
-				gauge_bc, _ = tpg.pressure_gauge(1)
-			else:
-				gauge_bc = float(self.variables.vacuum_buffer)
-			# print('pressure BC is {} {}'.format(gauge_bc, unit))
-			if not self.variables.flag_pumps_vacuum_start:
-				gauge_mc, _ = tpg.pressure_gauge(2)
-			else:
-				gauge_mc = float(self.variables.vacuum_main)
+		if self.conf['baking'] == 'on':
+			while self.running:
+				start_time = time.perf_counter()
+				# print('-----------', index, 'seconds', '--------------')
+				if not self.variables.flag_pumps_vacuum_start:
+					gauge_bc, _ = tpg.pressure_gauge(1)
+				else:
+					gauge_bc = float(self.variables.vacuum_buffer)
+				# print('pressure BC is {} {}'.format(gauge_bc, unit))
+				if not self.variables.flag_pumps_vacuum_start:
+					gauge_mc, _ = tpg.pressure_gauge(2)
+				else:
+					gauge_mc = float(self.variables.vacuum_main)
 
-			board_num = 0
-			value_temperature = []
-			for i in range(6):
-				options = TInOptions.NOFILTER
-				val = float(ul.t_in(board_num, i, TempScale.CELSIUS, options))
-				value_temperature.append(round(val, 3))
-			# print("Channel{:d} - {:s}:  {:.3f} Degrees.".format(i, channel_list[i], value_temperature[i]))
-			value_temperature = np.array(value_temperature, dtype=np.dtype(float))
+				board_num = 0
+				value_temperature = []
+				for i in range(6):
+					options = TInOptions.NOFILTER
+					val = float(ul.t_in(board_num, i, TempScale.CELSIUS, options))
+					value_temperature.append(round(val, 3))
+				# print("Channel{:d} - {:s}:  {:.3f} Degrees.".format(i, channel_list[i], value_temperature[i]))
+				value_temperature = np.array(value_temperature, dtype=np.dtype(float))
 
-			new_row = [self.now.strftime("%d-%m-%Y"), datetime.now().strftime('%H:%M:%S'), index, gauge_mc, gauge_bc,
-			           value_temperature[0], value_temperature[1], value_temperature[2],
-			           value_temperature[3], value_temperature[4], value_temperature[5]]
+				new_row = [self.now.strftime("%d-%m-%Y"), datetime.now().strftime('%H:%M:%S'), index, gauge_mc, gauge_bc,
+						   value_temperature[0], value_temperature[1], value_temperature[2],
+						   value_temperature[3], value_temperature[4], value_temperature[5]]
 
-			self.data.loc[len(self.data)] = new_row
+				self.data.loc[len(self.data)] = new_row
 
-			index = index + 1
-			if index % 20 == 0:
-				try:
-					self.data.to_csv(self.file_name, sep=';', index=False)
-				except Exception as e:
-					self.data.to_csv(self.file_name_backup, sep=';', index=False)
-					print('csv File cannot be saved')
-					print('close the csv file')
-					print(e)
+				index = index + 1
+				if index % 20 == 0:
+					try:
+						self.data.to_csv(self.file_name, sep=';', index=False)
+					except Exception as e:
+						self.data.to_csv(self.file_name_backup, sep=';', index=False)
+						print('csv File cannot be saved')
+						print('close the csv file')
+						print(e)
 
-			end_time = time.perf_counter()
-			elapsed_time = end_time - start_time
-			remaining_time = desired_period - elapsed_time
+				end_time = time.perf_counter()
+				elapsed_time = end_time - start_time
+				remaining_time = desired_period - elapsed_time
 
-			if remaining_time > 0:
-				time.sleep(remaining_time)
+				if remaining_time > 0:
+					time.sleep(remaining_time)
 
 	def plot(self):
 		"""

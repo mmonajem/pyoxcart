@@ -591,7 +591,7 @@ class APT_Exp_Control:
                 self.log_apt.info('Experiment counter is increased')
 
         # save setup parameters and run statistics in a txt file
-        experiment_statistics.save_statistics_apt(self.variables)
+        experiment_statistics.save_statistics_apt(self.variables, self.conf)
 
         # send an email
         if len(self.variables.email) > 3:
