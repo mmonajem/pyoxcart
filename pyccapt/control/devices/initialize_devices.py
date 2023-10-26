@@ -224,6 +224,13 @@ def state_update(conf, variables, emitter):
 
 		start_time = time.time()
 		log_time_time_interval = conf['log_time_time_interval']
+		vacuum_main = 'N/A'
+		vacuum_buffer = 'N/A'
+		vacuum_buffer_backing = 'N/A'
+		vacuum_load_lock = 'N/A'
+		vacuum_load_lock_backing = 'N/A'
+		vacuum_cryo_load_lock = 'N/A'
+		vacuum_cryo_load_lock_backing = 'N/A'
 		while emitter.bool_flag_while_loop:
 			if conf['cryo'] == "on":
 				try:
