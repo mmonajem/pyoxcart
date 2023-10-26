@@ -1,9 +1,10 @@
 Introduction to the tutorials for APT data calibration
 ============================================================
 
-In the following tutorials, we see how we can calibrate the data with PyCCAPT.
-
-
+In the tutorials, we see how we can calibrate the data with PyCCAPT. The data processing
+tutorial is a simple user friendly guide to crop, calibrate, 3d reconstruct, range, and visualize the data.
+This tutorial is a good starting point for new users which use widgets to make it easy to process the data.
+If you need more control over the data processing, you can use the other tutorials which are more advanced.
 
 
 
@@ -16,6 +17,4 @@ Tutorials
     :maxdepth: 1
 
     download_tutorial_data.md
-    tutorial_1/01_data_load_crop.rst
-    tutorial_2/02_t0_calculation.rst
-    tutorial_3/03_voltage_bowl_calibration.rst
+    tutorial/00_data_processing.rst

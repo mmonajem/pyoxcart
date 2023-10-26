@@ -3,9 +3,6 @@ import numpy as np
 import plotly
 import plotly.graph_objects as go
 import plotly.offline as pyo
-from plotly.offline import plot
-import codecs
-from IPython.display import display
 from plotly.subplots import make_subplots
 
 # Local module and scripts
@@ -186,13 +183,6 @@ def draw_qube(fig, range, col=None, row=None):
         )
     )
 
-    # Adjust margin settings to ensure the labels are displayed completely
-    fig.update_layout(
-        margin=dict(l=0, r=0, b=0, t=0),
-        scene=dict(
-            aspectmode="cube"
-        )
-    )
     fig.update_scenes(zaxis_autorange="reversed")
     fig.update_layout(
         legend_title="",
@@ -256,17 +246,17 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     z_range = [min(variables.z), max(variables.z)]
     range_cube = [x_range, y_range, z_range]
 
+    rows = int(len(ion) / 3)
+    cols = len(ion)
+    subplot_titles = ion
+    # Generate the specs dictionary based on the number of rows and columns
+    specs = [[{"type": "scatter3d", "rowspan": 1, "colspan": 1} for _ in range(cols)] for _ in range(rows)]
+
+    fig = make_subplots(rows=rows, cols=cols, subplot_titles=subplot_titles,
+                        start_cell="top-left", specs=specs)
+
     # Create a subplots with shared axes
     if ions_individually_plots:
-        rows = int(len(ion) / 3)
-        cols = len(ion)
-        subplot_titles = ion
-        # Generate the specs dictionary based on the number of rows and columns
-        specs = [[{"type": "scatter3d"} for _ in range(cols)] for _ in range(rows)]
-
-        fig = make_subplots(rows=rows, cols=cols, subplot_titles=subplot_titles,
-                            start_cell="top-left",
-                            specs=specs)
 
         for row in range(rows):
             for col, elemen in enumerate(ion):
@@ -333,8 +323,12 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
             )
 
         draw_qube(fig, range_cube)
+
     if rotary_fig_save:
-        rotary_fig(fig, variables, figname)
+        if not ions_individually_plots:
+            rotary_fig(fig, variables, figname)
+        else:
+            print('Rotary figure is not available for ions_individually_plots=True')
 
 
     plotly.offline.plot(
@@ -344,11 +338,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         auto_open=False
     )
 
-    fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
-    if save:
-        fig.write_image(variables.result_path + "\\3d_o.png", scale=5, format='png')
-        fig.write_image(variables.result_path + "\\3d_o.svg", scale=5, format='svg')
-    fig.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
+
     fig.update_layout(
         legend=dict(
             yanchor="top",
@@ -357,9 +347,6 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
             x=0.99
         )
     )
-    if save:
-        fig.write_image(variables.result_path + "\\3d.png", scale=5, format='png')
-        fig.write_image(variables.result_path + "\\3d.svg", scale=5, format='svg')
 
     config = dict(
         {
@@ -377,15 +364,20 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     )
 
     pyo.iplot(fig, config=config)
-    # fig.show()
-    # Use the `plot` function to generate an HTML file and display it using `display`
-    # plot(fig, filename='sample_plot.html', auto_open=False)
-    # # Read the HTML file in binary mode and convert it to a string
-    # with open('sample_plot.html', 'rb') as file:
-    #     html_content = codecs.decode(file.read(), 'utf-8', 'ignore')
-    #
-    # # Display the HTML content using `display`
-    # display({'text/html': html_content}, raw=True)
+    if save:
+        fig.update_scenes(
+            camera=dict(
+                eye=dict(x=4, y=4, z=4),  # Adjust the camera position for zooming
+            )
+        )
+        fig.write_image(variables.result_path + "\\%s_3d.png" % figname, scale=5, format='png')
+        fig.write_image(variables.result_path + "\\%s_3d.svg" % figname, scale=5, format='svg')
+    if save:
+        fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
+        fig.write_image(variables.result_path + "\\%s_3d_o.png" % figname, scale=5, format='png')
+        fig.write_image(variables.result_path + "\\%s_3d_o.svg" % figname, scale=5, format='svg')
+        fig.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
+
 def rotate_z(x, y, z, theta):
     """
     Rotate coordinates around the z-axis.
@@ -403,28 +395,26 @@ def rotate_z(x, y, z, theta):
     return np.real(np.exp(1j * theta) * w), np.imag(np.exp(1j * theta) * w), z
 
 
-def rotary_fig(fig1, variables, figname):
+def rotary_fig(fig, variables, figname):
     """
     Generate a rotating figure using Plotly.
 
     Args:
-        fig1 (plotly.graph_objects.Figure): The base figure.
+        fig (plotly.graph_objects.Figure): The base figure.
         variables (object): The variables object.
         figname (str): The name of the figure.
 
     Returns:
         None
     """
-    fig = go.Figure(fig1)
     x_eye = -1.25
     y_eye = 2
     z_eye = 0.5
+    fig = go.Figure(fig)
 
     fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
 
     fig.update_layout(
-        width=600,
-        height=600,
         scene_camera_eye=dict(x=x_eye, y=y_eye, z=z_eye),
         updatemenus=[
             dict(
@@ -455,6 +445,7 @@ def rotary_fig(fig1, variables, figname):
     )
 
     frames = []
+
     for t in np.arange(0, 20, 0.1):
         xe, ye, ze = rotate_z(x_eye, y_eye, z_eye, -t)
         frames.append(go.Frame(layout=dict(scene_camera_eye=dict(x=xe, y=ye, z=ze))))
@@ -713,8 +704,8 @@ def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, 
             avg_dens (float): The average density of the atoms.
             flight_path_length (float): The flight path length.
             rotary_fig_save (bool): True to save the rotary plot, False to display it.
-            selected_are (bool): True to use the selected area, False to use the full area.
             mode (str): The reconstruction mode.
+            opacity (float): The opacity of the markers.
             figname (str): The name of the figure.
             save (bool): True to save the plot, False to display it.
 

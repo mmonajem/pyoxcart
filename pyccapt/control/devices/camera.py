@@ -99,7 +99,7 @@ class Cameras:
 
 			self.img1_orig = img1
 			# Define the region to crop: (x, y, width, height)
-			crop_region = (2060, 1000, 300, 100)
+			crop_region = (1700, 865, 300, 100)
 			# Crop the image
 			self.img1_zoom = self.img1_orig[crop_region[1]:crop_region[1] + crop_region[3],
 			                 crop_region[0]:crop_region[0] + crop_region[2]]

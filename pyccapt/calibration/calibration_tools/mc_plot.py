@@ -229,7 +229,6 @@ class AptHistPlotter:
             None
         """
         index_peak_max = np.argmax(self.prominences[0])
-
         if label == 'mc' or label == 'mc_c':
             mrp = '{:.2f}'.format(
                 self.x[self.peaks][index_peak_max] / (self.x[round(self.peak_widths[3][index_peak_max])] -
@@ -253,7 +252,7 @@ class AptHistPlotter:
             mrp = '{:.2f}'.format(
                 self.x[self.peaks[index_peak_max]] / (self.x[round(self.peak_widths[3][index_peak_max])] -
                                                       self.x[round(self.peak_widths[2][index_peak_max])]))
-            if background['calculation'] and background['plot_no_back']:
+            if background is not None:
                 txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nMRP(FWHM): %s' \
                       % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp)
             else:
@@ -627,7 +626,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         peaks, properties, peak_widths, prominences = mc_hist.find_peaks_and_widths(prominence=prominence,
                                                                                     distance=distance, percent=percent)
         mc_hist.plot_peaks()
-        mc_hist.plot_hist_info_legend(label='mc', bin=0.1, background=None, loc='right')
+        mc_hist.plot_hist_info_legend(label=target, bin=0.1, background=None, loc='right')
     elif ranging_mode:
         mc_hist.plot_peaks(range_data=None, mode='range')
         peaks = None
