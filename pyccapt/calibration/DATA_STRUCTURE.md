@@ -47,6 +47,7 @@ The range file contains the range of the mass-to-charge ratio. The range file is
 - `isotope`: (n,) (N/A, list of uint32) isotope list of element.
 - `charge`: (n,) (N/A, uint32) charge of the element.
 
+A screenshot of the range HDF5 file is shown below.
 
 ![plot](../files/range_data.png)
 

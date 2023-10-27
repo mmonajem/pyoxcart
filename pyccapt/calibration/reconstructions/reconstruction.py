@@ -246,18 +246,17 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     z_range = [min(variables.z), max(variables.z)]
     range_cube = [x_range, y_range, z_range]
 
-    rows = int(len(ion) / 3)
-    cols = len(ion)
-    subplot_titles = ion
-    # Generate the specs dictionary based on the number of rows and columns
-    specs = [[{"type": "scatter3d", "rowspan": 1, "colspan": 1} for _ in range(cols)] for _ in range(rows)]
-
-    fig = make_subplots(rows=rows, cols=cols, subplot_titles=subplot_titles,
-                        start_cell="top-left", specs=specs)
 
     # Create a subplots with shared axes
     if ions_individually_plots:
+        rows = int(len(ion) / 3)
+        cols = len(ion)
+        subplot_titles = ion
+        # Generate the specs dictionary based on the number of rows and columns
+        specs = [[{"type": "scatter3d", "rowspan": 1, "colspan": 1} for _ in range(cols)] for _ in range(rows)]
 
+        fig = make_subplots(rows=rows, cols=cols, subplot_titles=subplot_titles,
+                            start_cell="top-left", specs=specs)
         for row in range(rows):
             for col, elemen in enumerate(ion):
                 mask = (variables.mc_c > mc_low[col]) & (variables.mc_c < mc_up[col])
