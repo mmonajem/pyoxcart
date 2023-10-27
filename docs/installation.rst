@@ -8,14 +8,9 @@ To install PyCCAPT using PyPi, enter the following command in the console:
 
 ``pip install pyccapt``
 
-to install the control packages, enter the following command:
+if you want to use conda environment, enter the following command in the console:
 
-``pip install pyccapt-control``
-
-and to to install the calibration packages separately, enter the following command:
-
-``pip install pyccapt-calibration``
-
+``conda install -c conda-forge pyccapt``
 
 Local installation of PyCCAPT
 ----------------------------
@@ -23,13 +18,6 @@ Clone/download this repository and unzip it. In the project directory enter the 
 
 ``pip install -e .``
 
-to install the control packages, enter the following command:
-
-``cd pyccapt/control && pip install -e .``
-
-and to to install the calibration packages separately, enter the following command:
-
-``cd pyccapt/calibration && pip install -e .``
 
 
 Running PyCCAPT control GUI
@@ -42,9 +30,13 @@ console:
 
 Running PyCCAPT Tutorials
 ------------------------
-Once the installation is done and the python environment is activated, enter the following command in the console:
+Once the installation is done and the python environment is activated, enter the following command in the console to
+run the Jupyter lab:
 
-``python -m pyccapt.Tutorials``
+``jupyter lab``
+
+After that in the Jupyter lab navigate to the ``tutorials`` folder which is in the calibration module.
+Then you can run the tutorials by clicking on the ``.ipynb`` files.
 
 
 Testing

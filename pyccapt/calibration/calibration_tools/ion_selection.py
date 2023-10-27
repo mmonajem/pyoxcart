@@ -1,5 +1,6 @@
 import itertools
 import re
+
 import matplotlib
 import numpy as np
 import pandas as pd
@@ -606,6 +607,7 @@ def ranging_dataset_create(variables, row_index, mass_ion):
     selected_row.insert(5, color)
 
     # Add the row to the DataFrame using the .loc method
+    selected_row[9] = np.uint32(selected_row[9])
 
     variables.range_data.loc[len(variables.range_data)] = selected_row
 
