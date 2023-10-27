@@ -11,14 +11,14 @@ unit and data type specified. This structure remains consistent for all other in
 ### Group: `apt`:
 
 The `apt` group contains the data from the APT system in each iteration of the control loop. As a result the frequency
-of saving data depends on the frequency of the control loop. The data structure of the `apt` group is as follows:
+of saving data depends on the frequency of the control loop.
 
 - `high_voltage` (n,) (V, float64): DC voltage value of the power supply.
 - `pulse` (n,) (V, float64) or (pJ/um2, float64): Pulse voltage or laser power.
 - `num_event` (n,) (N/A, uint32): Number of detected ions
-- `temperature` (n,) (k, float64): Temperature of the sample.
+- `temperature` (n,) (k, float64): Measured Temperature of sample.
 - `experiment_chamber_vacuum` (n,) (mBar, float64): Vacuum level in the experiment chamber.
-- `time_counter` (n,) (, uint64): Experiment loop iteration counter.
+- `time_counter` (n,) (N/A, uint64): Experiment loop iteration counter.
 - `timestamps` (n,) (UNIX, float64): UNIX time at which the data was recorded in each iteration with micro second
   accuracy.
 

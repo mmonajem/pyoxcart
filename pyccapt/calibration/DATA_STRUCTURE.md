@@ -4,7 +4,7 @@ This document provides an overview of the data structure within the HDF5 files o
 In the descriptions below, the notation "(n, )(unit, datatype)" is used to represent one-dimensional arrays with the
 unit and data type specified. This structure remains consistent for all other information. For example,
 "(n, )(nm, float64)" indicates a one-dimensional array in float64 data type with the unit "nm" (nanometers).
-"N/A" is used to indicate that there is no specific unit associated with the data.
+"N/A" is used to indicate that there is no specific unit associated with the data. 
 
 ### HDF5 file structure of PyCCAPT calibration module
 

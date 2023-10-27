@@ -52,6 +52,7 @@ class APT_Exp_Control:
         self.main_chamber_vacuum = []
 
         self.initialization_error = False
+
     def initialize_detector_process(self):
         """
         Initialize the detector process based on the configured settings.
@@ -77,7 +78,6 @@ class APT_Exp_Control:
 
         elif self.conf['tdc'] == "on" and self.conf[
             'tdc_model'] == 'RoentDek' and self.variables.counter_source == 'TDC':
-
 
             self.tdc_process = multiprocessing.Process(target=tdc_roentdec.experiment_measure,
                                                        args=(self.variables,))
@@ -261,7 +261,6 @@ class APT_Exp_Control:
         while time.perf_counter() - start_time < seconds:
             pass
 
-
     def run_experiment(self):
         """
         Run the main experiment.
@@ -425,7 +424,7 @@ class APT_Exp_Control:
                 # Measure time
                 current_time = datetime.datetime.now()
                 current_time_with_microseconds = current_time.strftime(
-	                "%Y-%m-%d %H:%M:%S.%f")  # Format with microseconds
+                    "%Y-%m-%d %H:%M:%S.%f")  # Format with microseconds
                 current_time_unix = datetime.datetime.strptime(current_time_with_microseconds,
                                                                "%Y-%m-%d %H:%M:%S.%f").timestamp()
                 time_ex.append(current_time_unix)
@@ -519,7 +518,8 @@ class APT_Exp_Control:
 
             except Exception as e:
                 print(
-                    f"{initialize_devices.bcolors.WARNING}Warning: The TDC or HSD process cannot be terminated properly{initialize_devices.bcolors.ENDC}")
+                    f"{initialize_devices.bcolors.WARNING}Warning: The TDC or HSD process cannot be terminated "
+                    f"properly{initialize_devices.bcolors.ENDC}")
                 print(e)
 
         self.variables.extend_to('main_v_dc', self.main_v_dc)
@@ -639,8 +639,6 @@ class APT_Exp_Control:
             email_send.send_email(self.variables.email, subject, message)
             self.log_apt.info('Email is sent')
 
-
-
         self.experiment_finished_event.set()
         # Clear up all the variables and deinitialize devices
         self.clear_up()
@@ -725,7 +723,6 @@ class APT_Exp_Control:
             self.variables.clear_to('main_p_tdc')
             self.variables.clear_to('main_v_dc_drs')
             self.variables.clear_to('main_v_p_drs')
-
 
         self.log_apt.info('Starting cleanup')
 
