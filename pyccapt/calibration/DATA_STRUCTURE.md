@@ -27,7 +27,9 @@ This HDF5 file in PyCCAPT contains data with the following columns:
 - `ion_pp`: (n,) (N/A, uint32) Detected ions for each pulse.
 
 There is also possibility to convert the PyCCAPT HDF5 file data to EPOS, POS, ATO, and CSV file. You can find the
-example code in the tutorial section.
+example code in the tutorial section. A screenshot of the PyCCAPT HDF5 file is shown below.
+
+![plot](../files/dataset.png)
 
 
 ### Range HDF5 file structure of PyCCAPT 
@@ -35,8 +37,8 @@ example code in the tutorial section.
 The range file contains the range of the mass-to-charge ratio. The range file is a HDF5 file with the following:
 
 - `ion`: (n,) (N/A, string) Ions name in latex format.
-- `mass`: (n,) (Da, float64) The mass-to-charge ratio of the peak base on the elements weight and complexity.
-- `mc`: (n,) (Da, float64) Mass-to-charge ratio in the dataset for the peak.
+- `mass`: (n,) (Da, float64) The mass-to-charge ratio of the element base on the elements weight and complexity.
+- `mc`: (n,) (Da, float64) Peak location of mass-to-charge ratio in the dataset.
 - `mc_low`: (n,) (Da, float64) The lower bound of the mass-to-charge ratio in the dataset for the peak.
 - `mc_up`: (n,) (Da, float64) The upper bound of the mass-to-charge ratio in the dataset for the peak.
 - `color`: (n,) (N/A, str) The color of the peak in the plot in hex format.
@@ -44,4 +46,7 @@ The range file contains the range of the mass-to-charge ratio. The range file is
 - `complex`: (n,) (N/A, list of uint32) complexity of the element (integer).
 - `isotope`: (n,) (N/A, list of uint32) isotope list of element.
 - `charge`: (n,) (N/A, uint32) charge of the element.
+
+
+![plot](../files/range_data.png)
 

@@ -309,7 +309,6 @@ def molecule_manual(target_element, charge, latex=True, variables=None):
     Args:
         target_element (str): The target element to find isotopes for.
         charge (int): The charge of the target element.
-        aboundance_threshold (float): The abundance threshold for filtering isotopes.
         latex (bool, optional): Whether to generate LaTeX representation of formulas. Defaults to True.
         variables (object, optional): The variables object. Defaults to None.
 
@@ -317,6 +316,7 @@ def molecule_manual(target_element, charge, latex=True, variables=None):
         pd.DataFrame: A DataFrame containing the list of isotopes with their weights and abundances.
 
     """
+
     isotopeTableFile = '../../../files/isotopeTable.h5'
     dataframe = data_tools.read_hdf5_through_pandas(isotopeTableFile)
     target_element = fix_parentheses(target_element)
@@ -325,10 +325,8 @@ def molecule_manual(target_element, charge, latex=True, variables=None):
     isotope_number = dataframe['isotope'].to_numpy()
     abundance = dataframe['abundance'].to_numpy()
     weight = dataframe['weight'].to_numpy()
-
     # Extract numbers enclosed in curly braces and store them in a list
     isotope_list = [int(match.group(1)) for match in re.finditer(r'{(\d+)}', target_element)]
-
     # Extract uppercase letters and store them in a list
     element_list = re.findall(r'[A-Z][a-z]*', target_element)
 
@@ -362,16 +360,15 @@ def molecule_manual(target_element, charge, latex=True, variables=None):
     else:
         formula = target_element
 
+    # Convert float_list to a list of uint32 values
+    complexity_list = [np.uint32(value) for value in complexity_list]
+    isotope_list = [np.uint32(value) for value in isotope_list]
+    charge = np.uint32(charge)
 
     element_list = [element_list]
     complexity_list = [complexity_list]
     isotope_list = [isotope_list]
     charge = [charge]
-
-    # Convert float_list to a list of uint32 values
-    complexity_list = [[np.uint32(float(value[0]))] for value in complexity_list]
-    isotope_list = [[np.uint32(float(value[0]))] for value in isotope_list]
-    charge = [np.uint32(value) for value in charge]
 
     df = pd.DataFrame({'ion': formula, 'mass': total_weight, 'element': element_list,
                        'complex': complexity_list, 'isotope': isotope_list, 'charge': charge,
