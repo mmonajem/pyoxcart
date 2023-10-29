@@ -9,12 +9,12 @@ from pyccapt.calibration.mc import tof_tools
 
 def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc):
 	# Calculate the maximum possible time of flight (TOF)
-	max_tof = int(tof_tools.mc2tof(max_mc.value, 1000, 0, 0, flightPathLength.value))
+	max_tof = int(tof_tools.mc2tof(max_mc, 1000, 0, 0, flightPathLength))
 	print('The maximum possible TOF is:', max_tof, 'ns')
 	print('=============================')
 	# create an instance of the Variables opject
 	variables = share_variables.Variables()
-	variables.pulse_mode = pulse_mode.value
+	variables.pulse_mode = pulse_mode
 	dataset_main_path = os.path.dirname(dataset_path)
 	dataset_name_with_extention = os.path.basename(dataset_path)
 	variables.dataset_name = os.path.splitext(dataset_name_with_extention)[0]
@@ -33,7 +33,7 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc):
 	print('=============================')
 
 	# Create data farame out of hdf5 file dataset
-	dld_group_storage = data_tools.load_data(dataset_path, tdc.value, mode='raw')
+	dld_group_storage = data_tools.load_data(dataset_path, tdc, mode='raw')
 
 	# Remove the data with tof greater thatn Max TOF or below 0 ns
 	data = data_tools.remove_invalid_data(dld_group_storage, max_tof)
@@ -41,10 +41,10 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc):
 
 	variables.data = data
 	variables.data_backup = data.copy()
-	variables.max_mc = max_mc.value
+	variables.max_mc = max_mc
 	variables.max_tof = max_tof
-	variables.flight_path_length = flightPathLength.value
-	variables.pulse_mode = pulse_mode.value
+	variables.flight_path_length = flightPathLength
+	variables.pulse_mode = pulse_mode
 
 	return variables
 

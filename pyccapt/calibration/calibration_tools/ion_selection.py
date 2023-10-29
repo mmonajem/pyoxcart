@@ -594,9 +594,9 @@ def ranging_dataset_create(variables, row_index, mass_ion):
         range = [0, 0]
     else:
         # Find the closest h_line that is smaller than mass
-        smaller_h_line = max(filter(lambda x: x < mass, variables.h_line_pos))
+        smaller_h_line = max(filter(lambda x: x < mass_ion, variables.h_line_pos))
         # Find the closest h_line that is bigger than mass
-        bigger_h_line = min(filter(lambda x: x > mass, variables.h_line_pos))
+        bigger_h_line = min(filter(lambda x: x > mass_ion, variables.h_line_pos))
 
     selected_row.insert(2, mass_ion)
     selected_row.insert(3, smaller_h_line)

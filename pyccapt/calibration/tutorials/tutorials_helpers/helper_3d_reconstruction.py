@@ -24,9 +24,9 @@ def call_x_y_z_calculation(variables, flight_path_length, element_selected):
 		element_percentage = str(element_percentage)
 
 	# Create widgets with initial values
-	kf_widget = widgets.FloatText(value=4)
-	det_eff_widget = widgets.FloatText(value=0.7)
-	icf_widget = widgets.FloatText(value=1.4)
+	kf_widget = widgets.FloatText(value=4, step=0.1)
+	det_eff_widget = widgets.FloatText(value=0.7, step=0.1)
+	icf_widget = widgets.FloatText(value=1.4, step=0.1)
 	field_evap_widget = widgets.FloatText(value=field_evap)
 	avg_dens_widget = widgets.FloatText(value=avg_dens)
 	element_percentage_widget = widgets.Textarea(value=element_percentage)

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import plotly
 import plotly.graph_objects as go
-import plotly.offline as pyo
+import plotly.io as pio
 from plotly.subplots import make_subplots
 
 # Local module and scripts
@@ -210,8 +210,6 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     Returns:
         None
     """
-    # Initialize Plotly for notebook mode
-    pyo.init_notebook_mode(connected=True)
 
     if selected_area_specially:
         mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
@@ -323,19 +321,13 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
 
         draw_qube(fig, range_cube)
 
+
     if rotary_fig_save:
         if not ions_individually_plots:
             rotary_fig(fig, variables, figname)
         else:
             print('Rotary figure is not available for ions_individually_plots=True')
 
-
-    plotly.offline.plot(
-        fig,
-        filename=variables.result_path + '\\{fn}.html'.format(fn=figname),
-        show_link=True,
-        auto_open=False
-    )
 
 
     fig.update_layout(
@@ -362,20 +354,28 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         }
     )
 
-    pyo.iplot(fig, config=config)
+    ## Create second figure
+    import plotly.io as pio
+    pio.renderers.default = "jupyterlab"
+    # Show the plot in the Jupyter cell output
+    fig.show(config=config)
+
     if save:
         fig.update_scenes(
             camera=dict(
                 eye=dict(x=4, y=4, z=4),  # Adjust the camera position for zooming
             )
         )
-        fig.write_image(variables.result_path + "\\%s_3d.png" % figname, scale=5, format='png')
-        fig.write_image(variables.result_path + "\\%s_3d.svg" % figname, scale=5, format='svg')
+        pio.write_image(fig,variables.result_path + "/%s_3d.png" % figname, scale=3, format='png')
+        pio.write_image(fig,variables.result_path + "/%s_3d.svg" % figname, scale=3, format='svg')
+        pio.write_html(fig, variables.result_path + "/%s_3d.html" % figname)
     if save:
         fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
-        fig.write_image(variables.result_path + "\\%s_3d_o.png" % figname, scale=5, format='png')
-        fig.write_image(variables.result_path + "\\%s_3d_o.svg" % figname, scale=5, format='svg')
+        pio.write_image(fig, variables.result_path + "/%s_3d_o.png" % figname, scale=3, format='png')
+        pio.write_image(fig, variables.result_path + "/%s_3d_o.svg" % figname, scale=3, format='svg')
+        pio.write_html(fig, variables.result_path + "/%s_3d_o.html" % figname)
         fig.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
+
 
 def rotate_z(x, y, z, theta):
     """

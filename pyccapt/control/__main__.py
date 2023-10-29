@@ -8,7 +8,7 @@ from pyccapt.control.control_tools import share_variables, read_files
 from pyccapt.control.gui import gui_main
 
 
-def load_gui():
+def main():
 	"""
 	Load the GUI based on the configuration file.
 
@@ -52,4 +52,4 @@ def load_gui():
 
 
 if __name__ == '__main__':
-	load_gui()
+	main()

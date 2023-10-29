@@ -2,6 +2,7 @@ import ipywidgets as widgets
 from IPython.display import display, clear_output
 from ipywidgets import Output
 
+
 from pyccapt.calibration.calibration_tools import mc_plot
 from pyccapt.calibration.data_tools import data_loadcrop
 from pyccapt.calibration.reconstructions import reconstruction
@@ -55,14 +56,12 @@ def call_visualization(variables):
                 print('Min x (nm):', variables.selected_x1, 'Max x (nm):', variables.selected_x2)
                 print('Min y (nm):', variables.selected_y1, 'Max y (nm):', variables.selected_y2)
                 print('Min z (nm):', variables.selected_z1, 'Max z (nm):', variables.selected_z2)
+
             reconstruction.reconstruction_plot(variables, element_percentage_p3.value, opacity.value,
                                                rotary_fig_save_p3.value, figname_3d.value,
                                                save.value, selected_area_specially_p3.value,
                                                selected_area_temporally_p3.value, ions_individually_plots.value)
-            # reconstruction.reconstruction_plot(variables, element_percentage_p3.value, opacity.value,
-            #                                    rotary_fig_save_p3.value, selected_area_specially_p3.value,
-            #                                    selected_area_temporally_p3.value, figname_3d.value,
-            #                                    save.value, ions_individually_plots.value)
+
 
         plot_3d_button.disabled = False
 
