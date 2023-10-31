@@ -15,7 +15,7 @@
   "tdc_model": "Surface_Consept",
   "camera": "on",
   "pump_ll": "on",
-  "pump_cll": "off",
+  "pump_cll": "on",
   "gates": "on",
   "v_dc": "on",
   "v_p": "on",
@@ -35,7 +35,7 @@
   "COM_PORT_gauge_mc": "COM5",
   "COM_PORT_gauge_bc": "COM2",
   "COM_PORT_gauge_ll": "COM1",
-  "COM_PORT_gauge_cll": "off",
+  "COM_PORT_gauge_cll": "COM8",
   "COM_PORT_signal_generator": "USB0::0xF4EC::0x1101::SDG6XBAD2R0601::INSTR",
   "COM_PORT_thorlab_motor": "27261754"
 }

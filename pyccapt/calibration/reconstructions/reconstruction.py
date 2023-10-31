@@ -172,14 +172,17 @@ def draw_qube(fig, range, col=None, row=None):
                     hoverinfo='none'
                 )
             )
+    # choose the figure font
+    font_dict = dict(family='Arial',
+                     size=10,
+                     color='black'
+                     )
+    fig.update_layout(font=font_dict)
     fig.update_layout(
         scene=dict(
             xaxis_title="x (nm)",
             yaxis_title="y (nm)",
             zaxis_title="z (nm)",
-            xaxis=dict(showline=True, showspikes=True, showbackground=True, showgrid=True),
-            yaxis=dict(showline=True, showspikes=True, showbackground=True, showgrid=True),
-            zaxis=dict(showline=True, showspikes=True, showbackground=True, showgrid=True)
         )
     )
 
@@ -279,7 +282,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
                     name=ion[col],
                     showlegend=True,
                     marker=dict(
-                        size=2,
+                        size=0.1,
                         color=colors[col],
                         opacity=opacity,
                     )

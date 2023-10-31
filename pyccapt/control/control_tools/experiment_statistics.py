@@ -19,7 +19,6 @@ def save_statistics_apt(variables, conf):
     header = f"""
 Experiment Parameters and Statistics
 -------------------------------------------
-Device name: {conf['device_name']}
 Experiment Timestamp: {current_datetime}
 Username: {variables.user_name}
 Experiment Name: {variables.ex_name}
@@ -44,6 +43,10 @@ Detection Rate: {variables.detection_rate} %
 Counter Source: {variables.counter_source}
 Email: {variables.email}
 -----------------------------------------------------
+Device name: {conf['device_name']}
+t_0 (Sec): {conf['t_0']}
+flight path distance (cm): {conf['flight_path_length']}
+TDC model: {conf['tdc_model']}
 """
 
     # Save setup parameters and run statistics in a text file

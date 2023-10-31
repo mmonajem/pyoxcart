@@ -107,7 +107,11 @@ class AptHistPlotter:
         if self.original_x_limits is None:
             self.original_x_limits = self.ax.get_xlim()  # Store the original x-axis limits
         plt.tight_layout()
+        # Set the limits for both x and y axes using plt.ylim
+        # plt.ylim(bottom=plt.yticks()[0][0], top=plt.yticks()[0][-1])
+        # plt.xlim(left=plt.xticks()[0][0], right=plt.xticks()[0][-1])
         plt.show()
+
 
         self.variables.x_hist = self.x
         self.variables.y_hist = self.y
@@ -543,8 +547,9 @@ class AptHistPlotter:
 
 
 def hist_plot(variables, bin_size, log, target, mode, prominence, distance, percent, selector, figname, lim,
-              peaks_find_plot, range_plot=False, ranging_mode=False, selected_area_specially=False,
-              selected_area_temporally=False, save_fig=True, print_info=True, figure_size=(9, 5)):
+              peaks_find_plot, peaks_find=True, range_plot=False, plot_ranged_ions=False, ranging_mode=False,
+              selected_area_specially=False, selected_area_temporally=False, save_fig=True, print_info=True,
+              figure_size=(9, 5)):
     """
     Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
     Args:
@@ -558,8 +563,10 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         selector (str): Selector for the peak_x finding.
         figname (str): Figure name.
         lim (float): Limit for the histogram.
+        peaks_find (bool): Find the peaks.
         peaks_find_plot (bool): Plot the peaks.
         range_plot (bool): Plot the range.
+        plot_ranged_ions (str): Plot the ranged ions.
         ranging_mode (bool): Ranging mode.
         selected_area_specially (bool): Plot selected area specially.
         selected_area_temporally (bool): Plot selected area temporally.
@@ -622,10 +629,11 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
     # copy the mc_hist to variables to use the methods of that class in other functions
     variables.AptHistPlotter = mc_hist
 
-    if mode != 'normalized' and peaks_find_plot and not range_plot and not ranging_mode:
+    if mode != 'normalized' and peaks_find and not range_plot and not ranging_mode:
         peaks, properties, peak_widths, prominences = mc_hist.find_peaks_and_widths(prominence=prominence,
                                                                                     distance=distance, percent=percent)
-        mc_hist.plot_peaks()
+        if peaks_find_plot:
+            mc_hist.plot_peaks()
         mc_hist.plot_hist_info_legend(label=target, bin=0.1, background=None, loc='right')
     elif ranging_mode:
         mc_hist.plot_peaks(range_data=None, mode='range')
@@ -637,6 +645,8 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         peak_widths = None
         prominences = None
 
+    if plot_ranged_ions:
+        mc_hist.plot_peaks(range_data=variables.range_data, mode='peaks')
     mc_hist.selector(selector=selector)  # rect, peak_x, range
     if range_plot:
         mc_hist.plot_range(variables.range_data, legend=True, legend_loc='upper right')

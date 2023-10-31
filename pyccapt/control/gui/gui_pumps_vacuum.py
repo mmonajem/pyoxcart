@@ -503,7 +503,6 @@ class Ui_Pumps_Vacuum(object):
 		try:
 			if not self.variables.start_flag and not self.variables.flag_main_gate \
 					and not self.variables.flag_cryo_gate and not self.variables.flag_load_gate:
-				print(self.variables.flag_pump_load_lock)
 				if self.variables.flag_pump_load_lock:
 					self.variables.flag_pump_load_lock_click = True
 					self.led_pump_load_lock.setPixmap(self.led_red)

@@ -22,7 +22,9 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
     percent_widget = widgets.IntText(value=50)
     figure_size_x = widgets.FloatText(value=9.0)
     figure_size_y = widgets.FloatText(value=5.0)
+    save_figure_widget = widgets.Dropdown(options=[('False', False), ('True', True)])
     figure_size_label = widgets.Label(value="Figure Size (X, Y):", layout=label_layout)
+    fig_name = widgets.Text(value='t0_tune')
 
     # Create a button widget to trigger the function
     button_plot = widgets.Button(description="plot")
@@ -59,11 +61,14 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
                 mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='tof', steps='stepfilled',
                                        log=log_value, fig_size=figure_size)
 
-            if mode_value != 'normalized':
-                mc_hist.find_peaks_and_widths(prominence=prominence_value, distance=distance_value,
-                                              percent=percent_value)
-                mc_hist.plot_peaks()
-                mc_hist.plot_hist_info_legend(label='mc', bin=0.1, background=None, loc='right')
+            # if mode_value != 'normalized':
+            #     mc_hist.find_peaks_and_widths(prominence=prominence_value, distance=distance_value,
+            #                                   percent=percent_value)
+            #     mc_hist.plot_peaks()
+            #     mc_hist.plot_hist_info_legend(label=target_value, bin=0.1, background=None, loc='right')
+
+            if save_figure_widget.value:
+                mc_hist.save_fig(target_value, fig_name.value)
 
 
         # Enable the button when the code is finished
@@ -81,6 +86,8 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
         widgets.HBox([widgets.Label(value="Distance:", layout=label_layout), distance_widget]),
         widgets.HBox([widgets.Label(value="Lim:", layout=label_layout), lim_widget]),
         widgets.HBox([widgets.Label(value="Percent:", layout=label_layout), percent_widget]),
+        widgets.HBox([widgets.Label(value="Save Figure:", layout=label_layout), save_figure_widget]),
+        widgets.HBox([widgets.Label(value="Figure Name:", layout=label_layout), fig_name]),
         widgets.HBox([figure_size_label, widgets.HBox([figure_size_x, figure_size_y])]),
         widgets.HBox([button_plot]),
     ])

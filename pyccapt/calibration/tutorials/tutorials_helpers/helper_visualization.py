@@ -1,9 +1,9 @@
 import ipywidgets as widgets
+import matplotlib.colors as mcolors
 from IPython.display import display, clear_output
 from ipywidgets import Output
 
-
-from pyccapt.calibration.calibration_tools import mc_plot
+from pyccapt.calibration.calibration_tools import mc_plot, ion_selection
 from pyccapt.calibration.data_tools import data_loadcrop
 from pyccapt.calibration.reconstructions import reconstruction
 
@@ -104,12 +104,12 @@ def call_visualization(variables):
     figure_mc_size_x_mc = widgets.FloatText(value=9.0)
     figure_mc_size_y_mc = widgets.FloatText(value=5.0)
     save_mc = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
-
+    plot_ranged_ions = widgets.Dropdown(options=[('False', False), ('True', True)], value=False)
     plot_mc_button.on_click(lambda b: plot_mc(b, variables, out))
 
     def plot_mc(b, variables, out):
         plot_mc_button.disabled = True
-        figure_size = (figure_mc_size_x_projection.value, figure_mc_size_y_projection.value)
+        figure_size = (figure_mc_size_x_mc.value, figure_mc_size_y_mc.value)
         with out:
             if selected_area_specially_pm.value:
                 variables.selected_z1 = variables.selected_y1
@@ -126,7 +126,8 @@ def call_visualization(variables):
                               peaks_find_plot=peak_find_plot.value, range_plot=rangging.value,
                               selected_area_specially=selected_area_specially_pm.value,
                               selected_area_temporally=selected_area_temporally_pm.value,
-                              print_info=False, figure_size=figure_size, save_fig=save_mc.value)
+                              print_info=False, figure_size=figure_size, save_fig=save_mc.value,
+                              plot_ranged_ions=plot_ranged_ions.value)
 
         plot_mc_button.disabled = False
 
@@ -239,6 +240,31 @@ def call_visualization(variables):
 
     plot_experiment_button.on_click(lambda b: plot_experimetns_hitstory(b, variables, out))
 
+    show_color = widgets.Button(
+        description='show color',
+    )
+    change_color = widgets.Button(
+        description='change color',
+    )
+    row_index = widgets.IntText(value=0, description='index row:')
+    color_picker = widgets.ColorPicker(description='Select a color:')
+
+    show_color.on_click(lambda b: show_color_ions(b, variables, out))
+
+    def show_color_ions(b, variables, output):
+        with output:
+            clear_output(True)
+            display(variables.range_data.style.applymap(ion_selection.display_color, subset=['color']))
+
+    change_color.on_click(lambda b: change_color_m(b, variables, out))
+
+    def change_color_m(b, variables, output):
+        with output:
+            selected_color = mcolors.to_hex(color_picker.value)
+            variables.range_data.at[row_index.value, 'color'] = selected_color
+            clear_output(True)
+            display(variables.range_data.style.applymap(ion_selection.display_color, subset=['color']))
+
     def clear(b, out):
         with out:
             clear_output(True)
@@ -271,6 +297,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value="Selected temporally:", layout=label_layout), selected_area_temporally_pm]),
         widgets.HBox([widgets.Label(value="Target:", layout=label_layout), target_mode]),
         widgets.HBox([widgets.Label(value="Peak find:", layout=label_layout), peak_find_plot]),
+        widgets.HBox([widgets.Label(value="Plot ranged ions:", layout=label_layout), plot_ranged_ions]),
         widgets.HBox([widgets.Label(value="Rangging:", layout=label_layout), rangging]),
         widgets.HBox([widgets.Label(value="Bins size:", layout=label_layout), bin_size_pm]),
         widgets.HBox([widgets.Label(value="Limit mc:", layout=label_layout), lim_mc_pm]),
@@ -280,6 +307,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value="Save fig:", layout=label_layout), save_mc]),
         widgets.HBox([widgets.Label(value="Fig size:", layout=label_layout),
                       widgets.HBox([figure_mc_size_x_mc, figure_mc_size_y_mc])]),
+
         widgets.HBox([plot_mc_button, clear_button])])
     tab4 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Selected specially:', layout=label_layout), selected_area_specially_ph]),
@@ -314,16 +342,22 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
                       widgets.HBox([figure_size_x_mc, figure_size_y_mc])]),
         widgets.HBox([plot_experiment_button, clear_button]),
-
     ])
 
-    tab = widgets.Tab(children=[tab1, tab2, tab3, tab4, tab5, tab6])
+    tab7 = widgets.VBox([
+        widgets.HBox([widgets.Label(value='Index row:', layout=label_layout), row_index]),
+        widgets.HBox([widgets.Label(value='Color:', layout=label_layout), color_picker]),
+        widgets.HBox([show_color, change_color]),
+    ])
+
+    tab = widgets.Tab(children=[tab1, tab2, tab3, tab4, tab5, tab6, tab7])
     tab.set_title(0, 'projection')
     tab.set_title(1, '3d plot')
     tab.set_title(2, 'mc plot')
     tab.set_title(3, 'heatmap plot')
     tab.set_title(4, 'FDM plot')
-    tab.set_title(5, 'Experiment Hitstorty plot')
+    tab.set_title(5, 'Experiment hitstorty plot')
+    tab.set_title(6, 'Range color change')
 
     out = Output()
 

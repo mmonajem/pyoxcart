@@ -33,7 +33,7 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
     distance = widgets.IntText(value=500, description='peak distance:', layout=label_layout)
     lim_tof = widgets.IntText(value=variables.max_tof, description='lim tof/mc:', layout=label_layout)
     percent = widgets.IntText(value=50, description='percent MRP:', layout=label_layout)
-    index_fig = widgets.IntText(value=1, description='fig index:', layout=label_layout)
+    index_fig = widgets.IntText(value=1, description='fig save index:', layout=label_layout)
     plot_peak = widgets.Dropdown(
         options=[('True', True), ('False', False)],
         description='plot peak',
@@ -227,9 +227,9 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
     clear_plot.on_click(lambda b: clear_plot_on_click(out))
 
     # Create the layout with three columns
-    column11 = widgets.VBox([bin_size, index_fig, prominence, distance, lim_tof, percent, bin_fdm, plot_peak, save,
+    column11 = widgets.VBox([bin_size, prominence, distance, lim_tof, percent, bin_fdm, plot_peak, index_fig, save,
                              figure_mc_size_x, figure_mc_size_y])
-    column12 = widgets.VBox([plot_button, save_button, reset_back_button, clear_plot])
+    column12 = widgets.VBox([plot_button, save_button, reset_back_button, clear_plot, plot_stat_button])
     column22 = widgets.VBox([sample_size_b, index_fig_b, maximum_cal_method_b, apply_b, plot_b, save_b, figure_b_size_x,
                              figure_b_size_y])
     column21 = widgets.VBox([bowl_button, pb_bowl])

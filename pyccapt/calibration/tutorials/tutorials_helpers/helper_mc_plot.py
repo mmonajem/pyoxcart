@@ -21,6 +21,8 @@ def call_mc_plot(variables, selector):
     figure_mc_size_x = widgets.FloatText(value=9.0)
     figure_mc_size_y = widgets.FloatText(value=5.0)
     target_mode = widgets.Dropdown(options=[('mc_c', 'mc_c'), ('tof_c', 'tof_c'), ('mc', 'mc'), ('tof', 'tof')])
+    plot_peak = widgets.Dropdown(options=[('True', True), ('False', False)])
+    save = widgets.Dropdown(options=[('False', False), ('True', True)])
 
     # Create a button widget to trigger the function
     button_plot = widgets.Button(description="plot")
@@ -64,11 +66,13 @@ def call_mc_plot(variables, selector):
             if mode_value != 'normalized':
                 mc_hist.find_peaks_and_widths(prominence=prominence_value, distance=distance_value,
                                               percent=percent_value)
-                mc_hist.plot_peaks()
+                if plot_peak.value:
+                    mc_hist.plot_peaks()
                 mc_hist.plot_hist_info_legend(label='mc', bin=0.1, background=None, loc='right')
 
             mc_hist.selector(selector=selector)  # rect, peak_x, range
-            mc_hist.save_fig(label=target_value, fig_name=figname_value)
+            if save.value:
+                mc_hist.save_fig(label=target_value, fig_name=figname_value)
 
         # Enable the button when the code is finished
         button_plot.disabled = False
@@ -85,6 +89,8 @@ def call_mc_plot(variables, selector):
         widgets.HBox([widgets.Label(value="Distance:", layout=label_layout), distance_widget]),
         widgets.HBox([widgets.Label(value="Lim:", layout=label_layout), lim_widget]),
         widgets.HBox([widgets.Label(value="Percent:", layout=label_layout), percent_widget]),
+        widgets.HBox([widgets.Label(value="Plot peak:", layout=label_layout), plot_peak]),
+        widgets.HBox([widgets.Label(value="Save:", layout=label_layout), save]),
         widgets.HBox([widgets.Label(value="Fig name:", layout=label_layout), figname_widget]),
         widgets.HBox([widgets.Label(value="Fig size:", layout=label_layout),
                       widgets.HBox([figure_mc_size_x, figure_mc_size_y])]),
