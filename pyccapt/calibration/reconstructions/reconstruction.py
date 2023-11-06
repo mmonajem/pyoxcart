@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import plotly
 import plotly.graph_objects as go
-import plotly.io as pio
 from plotly.subplots import make_subplots
 
 # Local module and scripts
@@ -605,6 +604,8 @@ def projection(variables, element_percentage, selected_area_specially, selected_
     plt.legend(loc='upper right')
 
     if save:
+        # Enable rendering for text elements
+        rcParams['svg.fonttype'] = 'none'
         plt.savefig(variables.result_path + '\\projection_{fn}.png'.format(fn=figname), format="png", dpi=600)
         plt.savefig(variables.result_path + '\\projection_{fn}.svg'.format(fn=figname), format="svg", dpi=600)
     plt.show()
@@ -686,6 +687,8 @@ def heatmap(variables, selected_area_specially, selected_area_temporally, elemen
         plt.legend(loc='upper right')
 
     if save:
+        # Enable rendering for text elements
+        rcParams['svg.fonttype'] = 'none'
         plt.savefig(variables.result_path + figure_name + "heatmap.png", format="png", dpi=600)
         plt.savefig(variables.result_path + figure_name + "heatmap.svg", format="svg", dpi=600)
     plt.show()

@@ -3,7 +3,7 @@ from copy import copy
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib import colors
+from matplotlib import rcParams, colors
 from matplotlib.patches import Circle, Rectangle
 from matplotlib.widgets import RectangleSelector, EllipseSelector
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
@@ -112,31 +112,38 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     cmap = copy(plt.cm.plasma)
     cmap.set_bad(cmap(0))
     pcm = ax1.pcolormesh(xedges, yedges, heatmap.T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
-    # fig1.colorbar(pcm, ax=ax1, pad=0)
+
     plt.ticklabel_format(style='sci', axis='x', scilimits=(6, 6))
 
     if dc_plot:
         ax2 = ax1.twinx()
         if not pulse_plot:
-            ax2.spines.right.set_position(("axes", 1.1))
+            ax2.spines.right.set_position(("axes", 1.12))
         else:
-            ax2.spines.right.set_position(("axes", 1.25))
+            ax2.spines.right.set_position(("axes", 1.27))
         # Plot high voltage curve
         xaxis2 = np.arange(len(high_voltage))
         dc_curve, = ax2.plot(xaxis2, high_voltage, color='red', linewidth=2)
-        ax2.set_ylabel("High Voltage [kV]", color="red", fontsize=10)
+        ax2.set_ylabel("High Voltage [KV]", color="red", fontsize=10)
         ax2.set_ylim([min(high_voltage), max(high_voltage) + 0.5])
+        ax2.spines['right'].set_color('red')  # Set Y-axis color to red
+        ax2.yaxis.label.set_color('red')  # Set Y-axis label color to red
+        ax2.tick_params(axis='y', colors='red')  # Set Y-axis tick labels color to red
 
     if pulse_plot:
         ax3 = ax1.twinx()
-        ax3.spines.right.set_position(("axes", 1.1))
+        ax3.spines.right.set_position(("axes", 1.12))
         pulse_curve, = ax3.plot(xaxis, pulse / 1e12, color='fuchsia', linewidth=2)
         if pulse_mode == 'laser':
             ax3.set_ylabel("Laser Intensity (${TW}/{cm^2}$)", color="fuchsia", fontsize=10)
+            range = max(pulse / 1e12) - min(pulse / 1e12)
+            ax3.set_ylim([min(pulse / 1e12) - range * 0.1, max(pulse / 1e12) + range * 0.1])
         elif pulse_mode == 'voltage':
             ax3.set_ylabel("Pulse (V)", color="fuchsia", fontsize=10)
-        range = max(pulse / 1e12) - min(pulse / 1e12)
-        ax3.set_ylim([min(pulse / 1e12) - range * 0.1, max(pulse / 1e12) + range * 0.1])
+            ax3.set_ylim([min(pulse), max(pulse) + 0.5])
+        ax3.spines['right'].set_color('fuchsia')  # Set Y-axis color to red
+        ax3.yaxis.label.set_color('fuchsia')  # Set Y-axis label color to red
+        ax3.tick_params(axis='y', colors='fuchsia')  # Set Y-axis tick labels color to red
 
     # if pulse_plot:
     #     pulse_curve.set_visible(False)
@@ -150,17 +157,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     else:
         cbar = fig1.colorbar(pcm, ax=ax1, pad=0)
 
-    if frac < 1:
-        # set axis limits based on entire data
-        ax1.set_xlim([0, len(tof)])
-        ax1.set_ylim([min(tof), max(tof)])
-        if dc_plot:
-            ax2.set_xlim([0, len(high_voltage)])
-            ax2.set_ylim([min(high_voltage), max(high_voltage) + 0.5])
-        if pulse_plot:
-            ax3.set_xlim([0, len(pulse)])
-            range = max(pulse / 1e12) - min(pulse / 1e12)
-            ax3.set_ylim([min(pulse / 1e12) - range * 0.1, max(pulse / 1e12) + range * 0.1])
+    cbar.set_label('Frequency [cts]', fontsize=10)
 
     if data_crop:
         if dc_plot and pulse_plot:
@@ -179,6 +176,8 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         ax1.add_patch(rect)
 
     if save:
+        # Enable rendering for text elements
+        rcParams['svg.fonttype'] = 'none'
         plt.savefig("%s.png" % (variables.result_path + figname), format="png", dpi=600, bbox_inches='tight')
         plt.savefig("%s.svg" % (variables.result_path + figname), format="svg", dpi=600)
 
@@ -224,7 +223,8 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
     cmap = copy(plt.cm.plasma)
     cmap.set_bad(cmap(0))
     pcm = ax1.pcolormesh(xedges, yedges, FDM.T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
-    fig1.colorbar(pcm, ax=ax1, pad=0)
+    cbar = fig1.colorbar(pcm, ax=ax1, pad=0)
+    cbar.set_label('Frequency [cts]', fontsize=10)
 
     if frac < 1:
         # extract tof
@@ -242,6 +242,8 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
                       alpha=0.3, color='green', linewidth=5)
         ax1.add_patch(circ)
     if save:
+        # Enable rendering for text elements
+        rcParams['svg.fonttype'] = 'none'
         plt.savefig("%s.png" % (variables.result_path + figname), format="png", dpi=600)
         plt.savefig("%s.svg" % (variables.result_path + figname), format="svg", dpi=600)
     plt.show()

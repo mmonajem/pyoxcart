@@ -205,6 +205,8 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
             plt.legend(handles=[x, y[0]], loc='lower left', markerscale=5., prop={'size': 6})
 
             if save:
+                # Enable rendering for text elements
+                rcParams['svg.fonttype'] = 'none'
                 plt.savefig(variables.result_path + "//vol_corr_%s_%s.svg" % (figname, index_fig), format="svg", dpi=600)
                 plt.savefig(variables.result_path + "//vol_corr_%s_%s.png" % (figname, index_fig), format="png", dpi=600)
 
@@ -338,6 +340,8 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
             plt.legend(handles=[x, y[0]], loc='upper left', markerscale=5., prop={'size': 10})
 
             if save:
+                # Enable rendering for text elements
+                rcParams['svg.fonttype'] = 'none'
                 plt.savefig(variables.result_path + "//vol_corr_%s.eps" % index_fig, format="svg", dpi=600)
                 plt.savefig(variables.result_path + "//vol_corr_%s.png" % index_fig, format="png", dpi=600)
             plt.show()
@@ -360,6 +364,8 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
             plt.legend(handles=[x, y], loc='upper right', markerscale=5., prop={'size': 10})
 
             if save:
+                # Enable rendering for text elements
+                rcParams['svg.fonttype'] = 'none'
                 plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.svg" % index_fig, format="svg", dpi=600)
                 plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.png" % index_fig, format="png", dpi=600)
             if plot:
@@ -386,6 +392,8 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
         plt.legend(handles=[x, y], loc='upper right', markerscale=5., prop={'size': 10})
 
         if save:
+            # Enable rendering for text elements
+            rcParams['svg.fonttype'] = 'none'
             plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.svg" % index_fig, format="svg", dpi=600)
             plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.png" % index_fig, format="png", dpi=600)
 
@@ -477,6 +485,8 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         ax.view_init(elev=7, azim=-41)
 
         if save:
+            # Enable rendering for text elements
+            rcParams['svg.fonttype'] = 'none'
             plt.savefig(variables.result_path + "//bowl_corr_%s.svg" % index_fig, format="svg", dpi=600)
             plt.savefig(variables.result_path + "//bowl_corr_%s.png" % index_fig, format="png", dpi=600)
         if plot:
@@ -584,6 +594,8 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         plt.legend(handles=[x, y], loc='upper right', markerscale=5., prop={'size': 10})
 
         if save:
+            # Enable rendering for text elements
+            rcParams['svg.fonttype'] = 'none'
             plt.savefig(variables.result_path + "//peak_tof_bowl_corr_%s.svg" % index_fig, format="svg", dpi=600)
             plt.savefig(variables.result_path + "//peak_tof_bowl_corr_%s.png" % index_fig, format="png", dpi=600)
 
@@ -609,6 +621,8 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         plt.legend(handles=[x, y], loc='upper right', markerscale=5., prop={'size': 10})
 
         if save:
+            # Enable rendering for text elements
+            rcParams['svg.fonttype'] = 'none'
             plt.savefig(variables.result_path + "//peak_tof_bowl_corr_p_%s.svg" % index_fig, format="svg", dpi=600)
             plt.savefig(variables.result_path + "//peak_tof_bowl_corr_p_%s.png" % index_fig, format="png", dpi=600)
         if plot:
@@ -647,6 +661,8 @@ def plot_fdm(x, y, variables, save, bins_s, index_fig, figure_size=(5, 4)):
     fig1.colorbar(pcm, ax=ax1, pad=0)
 
     if save:
+        # Enable rendering for text elements
+        rcParams['svg.fonttype'] = 'none'
         plt.savefig(variables.result_path + "fdm_%s.png" % index_fig, format="png", dpi=600)
         plt.savefig(variables.result_path + "fdm_%s.svg" % index_fig, format="svg", dpi=600)
     plt.show()
@@ -694,6 +710,8 @@ def plot_selected_statistic(variables, bin_fdm, index_fig, calibration_mode, sav
         ax1.set_xlabel("Voltage (V)", fontsize=10)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
         if save:
+            # Enable rendering for text elements
+            rcParams['svg.fonttype'] = 'none'
             plt.savefig(variables.result_path + "v_t_%s.png" % index_fig, format="png", dpi=600)
             plt.savefig(variables.result_path + "v_t_%s.svg" % index_fig, format="svg", dpi=600)
         plt.show()
@@ -703,6 +721,8 @@ def plot_selected_statistic(variables, bin_fdm, index_fig, calibration_mode, sav
         ax1.set_ylabel(label, fontsize=10)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
         if save:
+            # Enable rendering for text elements
+            rcParams['svg.fonttype'] = 'none'
             plt.savefig(variables.result_path + "x_t_%s.png" % index_fig, format="png", dpi=600)
             plt.savefig(variables.result_path + "x_t_%s.svg" % index_fig, format="svg", dpi=600)
         plt.show()

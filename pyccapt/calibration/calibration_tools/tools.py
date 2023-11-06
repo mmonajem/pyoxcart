@@ -272,6 +272,8 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
         plt.tight_layout()
         if fig_name is not None:
             if label == 'mc':
+                # Enable rendering for text elements
+                rcParams['svg.fonttype'] = 'none'
                 plt.savefig(variables.result_path + "//mc_%s.svg" % fig_name, format="svg", dpi=300)
                 plt.savefig(variables.result_path + "//mc_%s.png" % fig_name, format="png", dpi=300)
             elif label == 'tof':
