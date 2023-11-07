@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from matplotlib import rcParams
 from plotly.subplots import make_subplots
-
+from matplotlib import rcParams
 # Local module and scripts
 from pyccapt.calibration.data_tools import data_loadcrop, selectors_data
 

@@ -1,6 +1,5 @@
 from copy import copy
 from itertools import product
-
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import rcParams, colors
@@ -478,8 +477,8 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         cmap = copy(plt.cm.plasma)
         cmap.set_bad(cmap(0))
         ax.plot_surface(X, Y, 1 / Z, cmap=cmap)
-        ax.set_xlabel('X_det (mm)', fontsize=10, labelpad=10)
-        ax.set_ylabel('Y_det (mm)', fontsize=10, labelpad=10)
+        ax.set_xlabel(r'$X_{det}$ (mm)', fontsize=10, labelpad=10)
+        ax.set_ylabel(r'$Y_{det}$ (mm)', fontsize=10, labelpad=10)
         ax.set_zlabel(r"${C_B}^{-1}$", fontsize=10, labelpad=5)
         ax.zaxis.set_major_formatter(plt.FormatStrFormatter('%.2f'))
         ax.view_init(elev=7, azim=-41)
@@ -616,7 +615,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         elif calibration_mode == 'mc':
             ax1.set_ylabel("mc (Da)", fontsize=10)
 
-        ax1.set_xlabel("X_det(mm)", fontsize=10)
+        ax1.set_xlabel(r"$X_{det}$ (mm)", fontsize=10)
         plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
         plt.legend(handles=[x, y], loc='upper right', markerscale=5., prop={'size': 10})
 

@@ -5,6 +5,7 @@ from adjustText import adjust_text
 from pybaselines import Baseline
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks, peak_widths, peak_prominences
+from matplotlib import rcParams
 
 from pyccapt.calibration.calibration_tools import intractive_point_identification
 from pyccapt.calibration.data_tools import data_loadcrop, plot_vline_draw, selectors_data
@@ -538,6 +539,7 @@ class AptHistPlotter:
         Returns:
             None
         """
+        rcParams['svg.fonttype'] = 'none'
         if label == 'mc' or label == 'mc_c':
             self.fig.savefig(self.variables.result_path + "//mc_%s.svg" % fig_name, format="svg", dpi=600)
             self.fig.savefig(self.variables.result_path + "//mc_%s.png" % fig_name, format="png", dpi=600)
