@@ -3,7 +3,7 @@ from itertools import product
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib import colors
+from matplotlib import rcParams, colors
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 from sklearn.cluster import KMeans
@@ -353,7 +353,7 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
                 ax1.set_ylabel("Time of Flight (ns)", fontsize=10)
             elif calibration_mode == 'mc':
                 ax1.set_ylabel("mc (Da)", fontsize=10)
-            ax1.set_xlabel("Voltage (KV)", fontsize=10)
+            ax1.set_xlabel("Voltage (kV)", fontsize=10)
             plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
 
             dld_t_plot = dld_t_range * (1 / f_v_plot)
@@ -380,7 +380,7 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
             ax1.set_ylabel("Time of Flight (ns)", fontsize=10)
         elif calibration_mode == 'mc':
             ax1.set_ylabel("mc (Da)", fontsize=10)
-        ax1.set_xlabel("Voltage (KV)", fontsize=10)
+        ax1.set_xlabel("Voltage (kV)", fontsize=10)
         plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
 
         dld_t_plot = np.copy(dld_peak_b)
@@ -583,7 +583,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         elif calibration_mode == 'mc':
             ax1.set_ylabel("mc (Da)", fontsize=10)
 
-        ax1.set_xlabel("Voltage (KV)", fontsize=10)
+        ax1.set_xlabel("Voltage (kV)", fontsize=10)
         plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
 
         f_bowl_plot = bowl_corr_fit([dld_x_peak[mask], dld_y_peak[mask]], *parameters)

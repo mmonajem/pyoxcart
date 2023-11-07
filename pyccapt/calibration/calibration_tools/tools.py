@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pybaselines
 from adjustText import adjust_text
+from matplotlib import rcParams
 from pybaselines import Baseline
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks, peak_widths

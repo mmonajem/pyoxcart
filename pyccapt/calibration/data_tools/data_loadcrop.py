@@ -118,13 +118,13 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     if dc_plot:
         ax2 = ax1.twinx()
         if not pulse_plot:
-            ax2.spines.right.set_position(("axes", 1.12))
+            ax2.spines.right.set_position(("axes", 1.13))
         else:
-            ax2.spines.right.set_position(("axes", 1.27))
+            ax2.spines.right.set_position(("axes", 1.29))
         # Plot high voltage curve
         xaxis2 = np.arange(len(high_voltage))
         dc_curve, = ax2.plot(xaxis2, high_voltage, color='red', linewidth=2)
-        ax2.set_ylabel("High Voltage [KV]", color="red", fontsize=10)
+        ax2.set_ylabel("High Voltage [kV]", color="red", fontsize=10)
         ax2.set_ylim([min(high_voltage), max(high_voltage) + 0.5])
         ax2.spines['right'].set_color('red')  # Set Y-axis color to red
         ax2.yaxis.label.set_color('red')  # Set Y-axis label color to red
@@ -132,10 +132,10 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
 
     if pulse_plot:
         ax3 = ax1.twinx()
-        ax3.spines.right.set_position(("axes", 1.12))
+        ax3.spines.right.set_position(("axes", 1.13))
         pulse_curve, = ax3.plot(xaxis, pulse / 1e12, color='fuchsia', linewidth=2)
         if pulse_mode == 'laser':
-            ax3.set_ylabel("Laser Intensity (${TW}/{cm^2}$)", color="fuchsia", fontsize=10)
+            ax3.set_ylabel("Laser Intensity (${pJ}/{µm^2}$)", color="fuchsia", fontsize=10)
             range = max(pulse / 1e12) - min(pulse / 1e12)
             ax3.set_ylim([min(pulse / 1e12) - range * 0.1, max(pulse / 1e12) + range * 0.1])
         elif pulse_mode == 'voltage':

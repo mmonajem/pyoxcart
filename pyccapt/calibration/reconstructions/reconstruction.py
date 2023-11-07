@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import plotly
 import plotly.graph_objects as go
+import plotly.io as pio
+from matplotlib import rcParams
 from plotly.subplots import make_subplots
 
 # Local module and scripts
@@ -356,9 +358,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         }
     )
 
-    ## Create second figure
-    import plotly.io as pio
-    pio.renderers.default = "jupyterlab"
+
     # Show the plot in the Jupyter cell output
     fig.show(config=config)
 
@@ -370,12 +370,12 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         )
         pio.write_image(fig,variables.result_path + "/%s_3d.png" % figname, scale=3, format='png')
         pio.write_image(fig,variables.result_path + "/%s_3d.svg" % figname, scale=3, format='svg')
-        pio.write_html(fig, variables.result_path + "/%s_3d.html" % figname)
+        pio.write_html(fig, variables.result_path + "/%s_3d.html" % figname, include_mathjax='cdn')
     if save:
         fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
         pio.write_image(fig, variables.result_path + "/%s_3d_o.png" % figname, scale=3, format='png')
         pio.write_image(fig, variables.result_path + "/%s_3d_o.svg" % figname, scale=3, format='svg')
-        pio.write_html(fig, variables.result_path + "/%s_3d_o.html" % figname)
+        pio.write_html(fig, variables.result_path + "/%s_3d_o.html" % figname, include_mathjax='cdn')
         fig.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
 
 
@@ -455,7 +455,8 @@ def rotary_fig(fig, variables, figname):
         fig,
         filename=variables.result_path + '\\rota_{fn}.html'.format(fn=figname),
         show_link=True,
-        auto_open=False
+	    auto_open=False,
+	    include_mathjax='cdn'
     )
     fig.show()
 
