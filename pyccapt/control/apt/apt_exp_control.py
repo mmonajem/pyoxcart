@@ -626,6 +626,11 @@ class APT_Exp_Control:
                 additional_info += 'Pulse Stop Voltage (V): {}\n'.format(self.variables.v_p_max)
                 additional_info += 'Specimen Max Achieved Pulse Voltage (V): {:.3f}\n\n'.format(
                     self.variables.pulse_voltage)
+            additional_info += 'StopCriteria:\n'
+            additional_info += 'Criteria Time:: {}\n'.format(self.variables.criteria_time)
+            additional_info += 'Criteria DC Voltage:: {}\n'.format(self.variables.criteria_vdc)
+            additional_info += 'Criteria Ions:: {}\n'.format(self.variables.criteria_ions)
+
 
             additional_info += 'Specimen Max Achieved dc Voltage (V): {:.3f}\n'.format(self.variables.specimen_voltage)
             additional_info += 'Experiment Elapsed Time (Sec): {:.3f}\n'.format(self.variables.elapsed_time)

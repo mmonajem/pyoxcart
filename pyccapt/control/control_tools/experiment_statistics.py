@@ -34,6 +34,10 @@ Pulse Mode: {variables.pulse_mode}
     if variables.pulse_mode == 'Voltage':
         header += f"""
 Pulse Voltage Range (Min-Max): {variables.v_p_min} V - {variables.v_p_max} V
+Stop Criteria:
+Criteria Time: {variables.criteria_time}
+Criteria DC Voltage: {variables.criteria_vdc}
+Criteria Ions: {variables.criteria_ions}
 """
 
     header += f"""

@@ -94,6 +94,7 @@ def call_visualization(variables):
     selected_area_specially_pm = widgets.Dropdown(options=[('False', False), ('True', True)])
     selected_area_temporally_pm = widgets.Dropdown(options=[('False', False), ('True', True)])
     peak_find_plot = widgets.Dropdown(options=[('True', True), ('False', False)])
+    peaks_find = widgets.Dropdown(options=[('True', True), ('False', False)])
     rangging = widgets.Dropdown(options=[('True', True), ('False', False)])
     target_mode = widgets.Dropdown(options=[('mc_c', 'mc_c'), ('tof_c', 'tof_c'), ('mc', 'mc'), ('tof', 'tof')])
     bin_size_pm = widgets.FloatText(value=0.1)
@@ -122,7 +123,7 @@ def call_visualization(variables):
 
             mc_plot.hist_plot(variables, bin_size_pm.value, log=True, target=target_mode.value, mode='normal',
                               prominence=prominence.value, distance=distance.value, percent=50, selector='rect',
-                              figname=figname_mc.value, lim=lim_mc_pm.value,
+                              figname=figname_mc.value, lim=lim_mc_pm.value, peaks_find=peaks_find.value,
                               peaks_find_plot=peak_find_plot.value, range_plot=rangging.value,
                               selected_area_specially=selected_area_specially_pm.value,
                               selected_area_temporally=selected_area_temporally_pm.value,
@@ -296,7 +297,8 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value="Selected specially:", layout=label_layout), selected_area_specially_pm]),
         widgets.HBox([widgets.Label(value="Selected temporally:", layout=label_layout), selected_area_temporally_pm]),
         widgets.HBox([widgets.Label(value="Target:", layout=label_layout), target_mode]),
-        widgets.HBox([widgets.Label(value="Peak find:", layout=label_layout), peak_find_plot]),
+        widgets.HBox([widgets.Label(value="Peak find:", layout=label_layout), peaks_find]),
+        widgets.HBox([widgets.Label(value="Peak find plot:", layout=label_layout), peak_find_plot]),
         widgets.HBox([widgets.Label(value="Plot ranged ions:", layout=label_layout), plot_ranged_ions]),
         widgets.HBox([widgets.Label(value="Rangging:", layout=label_layout), rangging]),
         widgets.HBox([widgets.Label(value="Bins size:", layout=label_layout), bin_size_pm]),
