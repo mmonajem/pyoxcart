@@ -181,9 +181,9 @@ def draw_qube(fig, range, col=None, row=None):
     fig.update_layout(font=font_dict)
     fig.update_layout(
         scene=dict(
-            xaxis_title="x (nm)",
-            yaxis_title="y (nm)",
-            zaxis_title="z (nm)",
+            xaxis_title="x [nm]",
+            yaxis_title="y [nm]",
+            zaxis_title="z [nm]",
         )
     )
 

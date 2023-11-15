@@ -220,7 +220,7 @@ class AptHistPlotter:
         self.ax.legend([label[1] for label in self.legend_colors], [label[0] for label in self.legend_colors],
                        loc=loc)
 
-    def plot_hist_info_legend(self, label='mc', bin=0.1, background=None, loc='left'):
+    def plot_hist_info_legend(self, label='mc', bin=0.1, background=None, legend_mode='long', loc='left'):
         """
         Plot the histogram information legend.
 
@@ -228,6 +228,7 @@ class AptHistPlotter:
             label (str): The label of the x-axis ('mc' or 'tof').
             bin (float): The width of the bins.
             background (dict): The background data.
+            legend_mode (str): long or short legend info
             loc (str): The location of the legend.
 
         Returns:
@@ -240,8 +241,11 @@ class AptHistPlotter:
                                                       self.x[round(self.peak_widths[2][index_peak_max])]))
 
             if background is not None:
-                txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nMRP(FWHM): %s' \
-                      % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp)
+                if legend_mode == 'long':
+                    txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nMRP(FWHM): %s' \
+                          % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp)
+                elif legend_mode == 'short':
+                    txt = 'MRP(FWHM): %s' % (mrp)
             else:
                 # annotation with range stats
                 upperLim = 4.5  # Da
@@ -249,17 +253,22 @@ class AptHistPlotter:
                 mask = np.logical_and((self.x >= lowerLim), (self.x <= upperLim))
                 BG4 = np.sum(self.y[np.array(mask[:-1])]) / (upperLim - lowerLim)
                 BG4 = BG4 / len(self.mc_tof) * 1E6
-
-                txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nBG@4: %s ppm/Da\nMRP(FWHM): %s' \
-                      % (bin, (len(self.mc_tof) / 1000000), round(BG4), mrp)
+                if legend_mode == 'long':
+                    txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nBG@4: %s ppm/Da\nMRP(FWHM): %s' \
+                          % (bin, (len(self.mc_tof) / 1000000), round(BG4), mrp)
+                elif legend_mode == 'short':
+                    txt = 'MRP(FWHM): %s' % (mrp)
 
         elif label == 'tof' or label == 'tof_c':
             mrp = '{:.2f}'.format(
                 self.x[self.peaks[index_peak_max]] / (self.x[round(self.peak_widths[3][index_peak_max])] -
                                                       self.x[round(self.peak_widths[2][index_peak_max])]))
             if background is not None:
-                txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nMRP(FWHM): %s' \
-                      % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp)
+                if legend_mode == 'long':
+                    txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nMRP(FWHM): %s' \
+                          % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp)
+                elif legend_mode == 'short':
+                    txt = 'MRP(FWHM): %s' % ( mrp)
             else:
                 # annotation with range stats
                 upperLim = 50.5  # ns
@@ -267,8 +276,11 @@ class AptHistPlotter:
                 mask = np.logical_and((self.x >= lowerLim), (self.x <= upperLim))
                 BG50 = np.sum(self.y[np.array(mask[:-1])]) / (upperLim - lowerLim)
                 BG50 = BG50 / len(self.mc_tof) * 1E6
-                txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nBG@50: %s ppm/ns\nMRP(FWHM): %s' \
-                      % (bin, len(self.mc_tof) / 1000000, round(BG50), mrp)
+                if legend_mode == 'long':
+                    txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nBG@50: %s ppm/ns\nMRP(FWHM): %s' \
+                          % (bin, len(self.mc_tof) / 1000000, round(BG50), mrp)
+                elif legend_mode == 'short':
+                    txt = 'MRP(FWHM): %s' % (mrp)
 
         props = dict(boxstyle='round', facecolor='wheat', alpha=1)
         if loc == 'left':
@@ -636,7 +648,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
                                                                                     distance=distance, percent=percent)
         if peaks_find_plot:
             mc_hist.plot_peaks()
-        mc_hist.plot_hist_info_legend(label=target, bin=0.1, background=None, loc='right')
+        mc_hist.plot_hist_info_legend(label=target, bin=0.1, background=None, legend_mode='long', loc='right')
     elif ranging_mode:
         mc_hist.plot_peaks(range_data=None, mode='range')
         peaks = None
