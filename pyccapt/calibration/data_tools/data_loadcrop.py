@@ -104,8 +104,9 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     heatmap, xedges, yedges = np.histogram2d(xaxis, tof, bins=bins)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 
+
     # Set x-axis label
-    ax1.set_xlabel("Hit sequence Number", fontsize=10)
+    ax1.set_xlabel("Hit Sequence Number", fontsize=10)
     # Set y-axis label
     ax1.set_ylabel("Time of Flight [ns]", fontsize=10)
     img = plt.imshow(heatmap.T, extent=extent, origin='lower', aspect="auto")
@@ -120,7 +121,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         if not pulse_plot:
             ax2.spines.right.set_position(("axes", 1.13))
         else:
-            ax2.spines.right.set_position(("axes", 1.29))
+	        ax2.spines.right.set_position(("axes", 1.22))
         # Plot high voltage curve
         xaxis2 = np.arange(len(high_voltage))
         dc_curve, = ax2.plot(xaxis2, high_voltage, color='red', linewidth=2)
@@ -133,11 +134,12 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     if pulse_plot:
         ax3 = ax1.twinx()
         ax3.spines.right.set_position(("axes", 1.13))
-        pulse_curve, = ax3.plot(xaxis, pulse / 1e12, color='fuchsia', linewidth=2)
+        pulse_curve, = ax3.plot(xaxis, pulse, color='fuchsia', linewidth=2)
         if pulse_mode == 'laser':
-            ax3.set_ylabel("Laser Intensity (${pJ}/{µm^2}$)", color="fuchsia", fontsize=10)
-            range = max(pulse / 1e12) - min(pulse / 1e12)
-            ax3.set_ylim([min(pulse / 1e12) - range * 0.1, max(pulse / 1e12) + range * 0.1])
+	        ax3.set_ylabel("Laser Intensity [$pJ$]", color="fuchsia", fontsize=10)
+	        range = max(pulse) - min(pulse)
+	        ax3.set_ylim([min(pulse) - range * 0.1, max(pulse) + range * 0.1])
+	        ax3.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         elif pulse_mode == 'voltage':
             ax3.set_ylabel("Pulse (V)", color="fuchsia", fontsize=10)
             ax3.set_ylim([min(pulse), max(pulse) + 0.5])
@@ -393,8 +395,9 @@ def calculate_ppi_and_ipp(data):
             pulse_to_previous_ion = current_counter - previous_counter
 
             for j in range(multi_hit_count):
-                ion_pp[i + j] = multi_hit_count
-                pulse_pi[i + j] = pulse_to_previous_ion
+	            if i + j < len(counter):
+		            ion_pp[i + j] = multi_hit_count
+		            pulse_pi[i + j] = pulse_to_previous_ion
 
             multi_hit_count = 1
             previous_counter = current_counter

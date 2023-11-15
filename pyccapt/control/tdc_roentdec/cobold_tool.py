@@ -67,17 +67,28 @@ def convert_ND_angle_to_laser_intensity(file_path, ref_laser_intensity, ref_angl
 		del data['dld/pulse']
 		data.create_dataset("dld/pulse", data=dld_pulse, dtype='f')
 
+
+def rename_a_category(file_path, old_name, new_name):
+	with h5py.File(file_path, 'r+') as data:
+		temp = data[old_name][:]
+		del data[old_name]
+		data.create_dataset(new_name, data=temp)
+
+
 if __name__ == "__main__":
 	# txt_path = '../../../tests/data/physics_experiment/data_130_Sep-19-2023_14-58_W_12fs.txt'
 	# save_path = '../../../tests/data/physics_experiment/data_130_Sep-19-2023_14-58_W_12fs.h5'
 	# copy_xy_from_cobold_txt_to_hdf5(txt_path, save_path)
-	file_path = '../../../tests/data/physics_experiment/data_124_Apr-18-2023_18-46_LFIM1.h5'
+
+	file_path = '../../../tests/data/physics_experiment/data_130_Sep-19-2023_14-58_W_12fs.h5'
 	# (at 242°) corresponds to an intensity of 1.4e13 W/cm^2.
 	# 170 fs the highest intensity is at 3.4e13 W/cm^2
 	# Energy (J) = Power Density (W/cm^2) * Area (cm^2) * Pulse Duration (s)
-	ref_angle = 242
-	ref_laser_intensity = 3.4e13 * 12e-15 * 4e-4 * 4e-4 * np.pi / 1e-12
-	# ref_laser_intensity = 1.4 * 12 * 4 * 4 * np.pi
-	print(ref_laser_intensity)
-	convert_ND_angle_to_laser_intensity(file_path, ref_laser_intensity, ref_angle)
+	# ref_angle = 242
+	# ref_laser_intensity = 3.4e13 * 12e-15 * 4e-4 * 4e-4 * np.pi / 1e-12
+	# # ref_laser_intensity = 1.4 * 12 * 4 * 4 * np.pi
+	# print(ref_laser_intensity)
+	# convert_ND_angle_to_laser_intensity(file_path, ref_laser_intensity, ref_angle)
+
+	rename_a_category(file_path, 'dld/AbsoluteTimeStamp', 'dld/start_counter')
 	print('Done')

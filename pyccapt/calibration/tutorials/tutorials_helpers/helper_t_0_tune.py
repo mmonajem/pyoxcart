@@ -61,11 +61,11 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
                 mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='tof', steps='stepfilled',
                                        log=log_value, fig_size=figure_size)
 
-            # if mode_value != 'normalized':
-            #     mc_hist.find_peaks_and_widths(prominence=prominence_value, distance=distance_value,
-            #                                   percent=percent_value)
-            #     mc_hist.plot_peaks()
-            #     mc_hist.plot_hist_info_legend(label=target_value, bin=0.1, background=None, loc='right')
+            if mode_value != 'normalized':
+                mc_hist.find_peaks_and_widths(prominence=prominence_value, distance=distance_value,
+                                              percent=percent_value)
+                mc_hist.plot_peaks()
+                mc_hist.plot_hist_info_legend(label=target_value, bin=0.1, background=None, loc='right')
 
             if save_figure_widget.value:
                 mc_hist.save_fig(target_value, fig_name.value)

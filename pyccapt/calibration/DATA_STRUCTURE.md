@@ -17,7 +17,7 @@ This HDF5 file in PyCCAPT contains data with the following columns:
 - `mc_c (Da)`: (n,) (Da, float64) Bowl and voltage calibrated mass-to-charge ratio in Daltons.
 - `mc (Da)`: (n,) (Da, float64) Uncalibrated mass-to-charge ratio in Daltons.
 - `high-voltage (V)`: (n,) (V, DC voltage value of the power supply.
-- `pulse`: (n,) (V, float64) or (pJ/um2, float64)  Pulse voltage or laser power.
+- `pulse`: (n,) (V, float64) or (pJ, float64)  Pulse voltage or laser power.
 - `start_counter`: (n,) (N/A, float64) The TDC counter value
 - `t_c (ns)`: (n,) (ns, float64) Bowl and voltage calibrated time-of-flight in nanosecond.
 - `t (ns)`: (n,) (ns, float64) Uncalibrated time-of-flight in nanosecond.

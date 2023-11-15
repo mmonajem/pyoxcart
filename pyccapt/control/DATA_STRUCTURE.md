@@ -28,7 +28,7 @@ The Delay Line Detector (`dld`) group contains the time of flight detector hit c
 structure of the
 
 - `high_voltage` (n,) (V, float64): DC voltage value of the power supply.
-- `pulse` (n,) (V, float64) or (pJ/um2, float64): Pulse voltage or laser power.
+- `pulse` (n,) (V, float64) or (pJ, float64): Pulse voltage or laser power.
 - `start_counter` (n,) (N/A, float64): Description of start counter data.
 - `t` (n,) (ns, float64): Time-of-flight for the detected event.
 - `x` (n,) (cm, float64): Detector x hit position for the detected event.

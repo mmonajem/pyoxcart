@@ -165,6 +165,7 @@ def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, ch
             formula = r'$' + formula + '^{+}$'
         element_symbols.append(formula)
 
+
     selected_elements = [[item] for item in selected_elements]
     complex = np.ones(len(idxs), dtype=int)
     complex = [[item] for item in complex]
@@ -520,8 +521,8 @@ def molecule_create(element_list, max_complexity, charge, abundance_threshold, v
             formula = chemical_formula
         combination_formula.append(formula)
 
-    combination_complexity = [[np.uint32(float(value[0]))] for value in combination_complexity]
-    combination_isotopes = [[np.uint32(float(value[0]))] for value in combination_isotopes]
+    combination_complexity = [[np.uint32(x) for x in sub_list] for sub_list in combination_complexity]
+    combination_isotopes = [[np.uint32(x) for x in sub_list] for sub_list in combination_isotopes]
     combination_charge = [np.uint32(value) for value in combination_charge]
 
     # Create DataFrame

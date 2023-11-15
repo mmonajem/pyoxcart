@@ -106,7 +106,8 @@ def copy_npy_to_hdf(path, hdf5_file_name):
 
 if __name__ == '__main__':
     path = '../../../pyccapt/data/1685_Sep-29-2023_14-40_SS430_D_20_hp_test1/'
-    name = '1685_Sep-29-2023_14-40_SS430_D_20_hp_test1.h5'
+    path = 'T:/Ott/APT_Measurements/1726_Oct-17-2023_15-33_Pd_test1/'
+    name = '1726_Oct-17-2023_15-33_Pd_test1.h5'
     # copy_npy_to_hdf(path, name)
 
     # rename_subcategory(path + name, old_name='dld', new_name='dld_1')
