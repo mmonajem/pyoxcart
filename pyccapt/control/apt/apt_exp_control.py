@@ -291,9 +291,22 @@ class APT_Exp_Control:
         self.variables.log_path = self.variables.path_meta
         # Create folder to save the data
         if not os.path.isdir(self.variables.path):
-            os.makedirs(self.variables.path, mode=0o777, exist_ok=True)
+            try:
+                os.makedirs(self.variables.path, mode=0o777, exist_ok=True)
+            except Exception as e:
+                print('Can not create the directory for saving the data')
+                print(e)
+                self.variables.stop_flag = True
+                self.initialization_error = True
+                self.log_apt.info('Experiment is terminated')
         if not os.path.isdir(self.variables.path_meta):
-            os.makedirs(self.variables.path_meta, mode=0o777, exist_ok=True)
+            try:
+                os.makedirs(self.variables.path_meta, mode=0o777, exist_ok=True)
+            except:
+                print('Can not create the directory for saving the data')
+                self.variables.stop_flag = True
+                self.initialization_error = True
+                self.log_apt.info('Experiment is terminated')
 
         if self.conf['tdc'] == 'on':
             self.initialize_detector_process()

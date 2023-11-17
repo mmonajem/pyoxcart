@@ -60,7 +60,6 @@ def command_edwards(conf, variables, cmd, E_AGC, status=None):
 		if conf['pump_ll'] == "on":
 			E_AGC.comm('!C910 0')
 			E_AGC.comm('!C904 0')
-		print(bcolors.OKGREEN + 'Pump LL is off' + bcolors.ENDC)
 		variables.flag_pump_load_lock_click = False
 		variables.flag_pump_load_lock = False
 		variables.flag_pump_load_lock_led = False
@@ -78,7 +77,6 @@ def command_edwards(conf, variables, cmd, E_AGC, status=None):
 		if conf['pump_cll'] == "on":
 			E_AGC.comm('!C910 0')
 			E_AGC.comm('!C904 0')
-		print(bcolors.OKGREEN + 'Pump CLL is off' + bcolors.ENDC)
 		variables.flag_pump_cryo_load_lock_click = False
 		variables.flag_pump_cryo_load_lock = False
 		variables.flag_pump_cryo_load_lock_led = False

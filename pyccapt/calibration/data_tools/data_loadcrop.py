@@ -1,11 +1,13 @@
 from copy import copy
 
+import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib import rcParams, colors
 from matplotlib.patches import Circle, Rectangle
 from matplotlib.widgets import RectangleSelector, EllipseSelector
+from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
 from pyccapt.calibration.data_tools import data_tools, selectors_data
@@ -121,7 +123,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         if not pulse_plot:
             ax2.spines.right.set_position(("axes", 1.13))
         else:
-	        ax2.spines.right.set_position(("axes", 1.22))
+            ax2.spines.right.set_position(("axes", 1.22))
         # Plot high voltage curve
         xaxis2 = np.arange(len(high_voltage))
         dc_curve, = ax2.plot(xaxis2, high_voltage, color='red', linewidth=2)
@@ -136,10 +138,10 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         ax3.spines.right.set_position(("axes", 1.13))
         pulse_curve, = ax3.plot(xaxis, pulse, color='fuchsia', linewidth=2)
         if pulse_mode == 'laser':
-	        ax3.set_ylabel("Laser Intensity [$pJ$]", color="fuchsia", fontsize=10)
-	        range = max(pulse) - min(pulse)
-	        ax3.set_ylim([min(pulse) - range * 0.1, max(pulse) + range * 0.1])
-	        ax3.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+            ax3.set_ylabel("Laser Intensity [$pJ$]", color="fuchsia", fontsize=10)
+            range = max(pulse) - min(pulse)
+            ax3.set_ylim([min(pulse) - range * 0.1, max(pulse) + range * 0.1])
+            ax3.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         elif pulse_mode == 'voltage':
             ax3.set_ylabel("Pulse (V)", color="fuchsia", fontsize=10)
             ax3.set_ylim([min(pulse), max(pulse) + 0.5])
@@ -243,6 +245,18 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
         circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
                       alpha=0.3, color='green', linewidth=5)
         ax1.add_patch(circ)
+
+    fontprops = fm.FontProperties(size=10)
+    scalebar = AnchoredSizeBar(ax1.transData,
+                               1, '1 cm', 'lower left',
+                               pad=0.1,
+                               color='white',
+                               frameon=False,
+                               size_vertical=0.1,
+                               fontproperties=fontprops)
+
+    ax1.add_artist(scalebar)
+    plt.axis('off')  # Turn off both x and y axes
     if save:
         # Enable rendering for text elements
         rcParams['svg.fonttype'] = 'none'
@@ -395,9 +409,9 @@ def calculate_ppi_and_ipp(data):
             pulse_to_previous_ion = current_counter - previous_counter
 
             for j in range(multi_hit_count):
-	            if i + j < len(counter):
-		            ion_pp[i + j] = multi_hit_count
-		            pulse_pi[i + j] = pulse_to_previous_ion
+                if i + j < len(counter):
+                    ion_pp[i + j] = multi_hit_count
+                    pulse_pi[i + j] = pulse_to_previous_ion
 
             multi_hit_count = 1
             previous_counter = current_counter
