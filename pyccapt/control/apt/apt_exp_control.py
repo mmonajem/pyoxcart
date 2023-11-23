@@ -237,15 +237,14 @@ class APT_Exp_Control:
                 if self.conf['v_dc'] != "off":
                     self.command_v_dc(">S0 %s" % specimen_voltage_temp)
                     self.specimen_voltage = specimen_voltage_temp
+                    self.variables.specimen_voltage = self.specimen_voltage
+                    self.variables.specimen_voltage_plot = self.specimen_voltage
 
                 new_vp = self.specimen_voltage * self.pulse_fraction * (1 / self.pulse_amp_per_supply_voltage)
                 if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
                     self.command_v_p('VOLT %s' % new_vp)
                     self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
-
-                self.variables.specimen_voltage = self.specimen_voltage
-                self.variables.specimen_voltage_plot = self.specimen_voltage
-                self.variables.pulse_voltage = self.pulse_voltage
+                    self.variables.pulse_voltage = self.pulse_voltage
 
     def precise_sleep(self, seconds):
         """

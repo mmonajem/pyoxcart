@@ -4,9 +4,7 @@ import pandas as pd
 import scipy.io
 
 # Local module and scripts
-from pyccapt.calibration.data_tools import ato_tools
-from pyccapt.calibration.data_tools import data_loadcrop
-from pyccapt.calibration.data_tools import data_tools
+from pyccapt.calibration.data_tools import ato_tools, data_loadcrop, data_tools
 from pyccapt.calibration.leap_tools import ccapt_tools
 from pyccapt.calibration.mc import tof_tools
 
@@ -135,7 +133,18 @@ def remove_invalid_data(dld_group_storage, max_tof):
     mask_1 = dld_group_storage['t (ns)'].to_numpy() > max_tof
 
     mask_2 = (dld_group_storage['t (ns)'].to_numpy() < 0)
-    mask = np.logical_or(mask_1, mask_2)
+
+    mask_3 = ((dld_group_storage['x_det (cm)'].to_numpy() == 0) & (dld_group_storage['y_det (cm)'].to_numpy() == 0) &
+              (dld_group_storage['t (ns)'].to_numpy() == 0))
+
+    mask_4 = (dld_group_storage['high_voltage (V)'].to_numpy() < 0)
+
+    mask_5 = (dld_group_storage['x_det (cm)'].to_numpy() == 0) & (dld_group_storage['y_det (cm)'].to_numpy() == 0)
+
+    mask_f_1 = np.logical_or(mask_1, mask_2)
+    mask_f_2 = np.logical_or(mask_3, mask_4)
+    mask_f_2 = np.logical_or(mask_f_2, mask_5)
+    mask = np.logical_or(mask_f_1, mask_f_2)
 
     # Calculate the number of data points over max_tof
     num_over_max_tof = len(mask[mask])

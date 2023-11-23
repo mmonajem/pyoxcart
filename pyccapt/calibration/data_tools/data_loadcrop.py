@@ -123,7 +123,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         if not pulse_plot:
             ax2.spines.right.set_position(("axes", 1.13))
         else:
-            ax2.spines.right.set_position(("axes", 1.22))
+            ax2.spines.right.set_position(("axes", 1.29))
         # Plot high voltage curve
         xaxis2 = np.arange(len(high_voltage))
         dc_curve, = ax2.plot(xaxis2, high_voltage, color='red', linewidth=2)
@@ -161,7 +161,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     else:
         cbar = fig1.colorbar(pcm, ax=ax1, pad=0)
 
-    cbar.set_label('Frequency [cts]', fontsize=10)
+    cbar.set_label('Event Counts', fontsize=10)
 
     if data_crop:
         if dc_plot and pulse_plot:
@@ -228,7 +228,7 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
     cmap.set_bad(cmap(0))
     pcm = ax1.pcolormesh(xedges, yedges, FDM.T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
     cbar = fig1.colorbar(pcm, ax=ax1, pad=0)
-    cbar.set_label('Frequency [cts]', fontsize=10)
+    cbar.set_label('Event Counts', fontsize=10)
 
     if frac < 1:
         # extract tof

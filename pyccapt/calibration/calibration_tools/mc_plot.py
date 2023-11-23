@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pybaselines
 from adjustText import adjust_text
+from matplotlib import rcParams
 from pybaselines import Baseline
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks, peak_widths, peak_prominences
-from matplotlib import rcParams
 
 from pyccapt.calibration.calibration_tools import intractive_point_identification
 from pyccapt.calibration.data_tools import data_loadcrop, plot_vline_draw, selectors_data
@@ -101,7 +101,7 @@ class AptHistPlotter:
             self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=bins, alpha=0.9, color='slategray',
                                                         edgecolor=edgecolor, histtype=steps)
         self.ax.set_xlabel('Mass/Charge [Da]' if label == 'mc' else 'Time of Flight [ns]')
-        self.ax.set_ylabel('Frequency [cts]')
+        self.ax.set_ylabel('Event Counts')
         self.ax.set_yscale('log' if log else 'linear')
         if grid:
             plt.grid(True, which='both', axis='both', linestyle='--', linewidth=0.4, alpha=0.3)

@@ -9,15 +9,15 @@ def mc2tof(mc: float, V: float, xDet: float, yDet: float, flightPathLength: floa
     Args:
         mc: Mass-to-charge ratio (unit: Dalton)
         V: Voltage (unit: volts)
-        xDet: Distance along the x-axis (unit: mm)
-        yDet: Distance along the y-axis (unit: mm)
+        xDet: Distance along the x-axis (unit: cm)
+        yDet: Distance along the y-axis (unit: cm)
         flightPathLength: Length of the flight path (unit: mm)
 
     Returns:
         t: Time of flight (unit: ns)
     """
-    xDet = xDet * 1E-2  # xDet from mm to m
-    yDet = yDet * 1E-2  # yDet from mm to m
+    xDet = xDet * 1E-2  # xDet from cm to m
+    yDet = yDet * 1E-2  # yDet from cm to m
     flightPathLength = flightPathLength * 1E-3  # flightPathLength from mm to m
     e = 1.6E-19  # coulombs per electron
     amu = 1.66E-27  # conversion from kg to Dalton
@@ -28,3 +28,5 @@ def mc2tof(mc: float, V: float, xDet: float, yDet: float, flightPathLength: floa
     t = t * 1E9  # tof from s to ns
 
     return t
+
+# print(mc2tof(1, 2000, 1, 1, 100))

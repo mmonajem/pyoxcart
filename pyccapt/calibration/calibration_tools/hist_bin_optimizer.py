@@ -76,7 +76,7 @@ def bin_width_optimizer_1d(data, plot=False):
         fig, ax = plt.subplots()
         ax.hist(data, edges)
         ax.set_title("Histogram")
-        ax.set_ylabel("Frequency")
+        ax.set_ylabel("Event Counts")
         ax.set_xlabel("Value")
         plt.show()
 

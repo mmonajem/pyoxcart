@@ -234,7 +234,7 @@ class Ui_Visualization(object):
 		# Add Axis Labels
 		styles = {"color": "#f00", "font-size": "12px"}
 		self.histogram.plotItem.setMouseEnabled(y=False)  # Only allow zoom in X-axis
-		self.histogram.setLabel("left", "Frequency (counts)", **styles)
+		self.histogram.setLabel("left", "Event Counts", **styles)
 		self.histogram.setLogMode(y=True)
 		if self.conf["visualization"] == "tof":
 			self.histogram.setLabel("bottom", "Time", units='ns', **styles)

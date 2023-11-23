@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from matplotlib import rcParams
 from plotly.subplots import make_subplots
-from matplotlib import rcParams
+
 # Local module and scripts
 from pyccapt.calibration.data_tools import data_loadcrop, selectors_data
 
@@ -251,8 +251,9 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
 
     # Create a subplots with shared axes
     if ions_individually_plots:
-        rows = int(len(ion) / 3)
-        cols = len(ion)
+        num_plots = len(ion)
+        rows = (num_plots // 3) + (1 if num_plots % 3 != 0 else 0)
+        cols = 3
         subplot_titles = ion
         # Generate the specs dictionary based on the number of rows and columns
         specs = [[{"type": "scatter3d", "rowspan": 1, "colspan": 1} for _ in range(cols)] for _ in range(rows)]
@@ -260,10 +261,13 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         fig = make_subplots(rows=rows, cols=cols, subplot_titles=subplot_titles,
                             start_cell="top-left", specs=specs)
         for row in range(rows):
-            for col, elemen in enumerate(ion):
-                mask = (variables.mc_c > mc_low[col]) & (variables.mc_c < mc_up[col])
+            for col in range(cols):
+                index = col + row * 3
+                if index == len(ion):
+                    break
+                mask = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
                 mask = mask & mask_spacial
-                size = int(len(mask[mask == True]) * float(element_percentage[col]))
+                size = int(len(mask[mask == True]) * float(element_percentage[index]))
                 # Find indices where the original mask is True
                 true_indices = np.where(mask)[0]
                 # Randomly choose 100 indices from the true indices
@@ -280,15 +284,16 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
                     y=variables.y[mask],
                     z=variables.z[mask],
                     mode='markers',
-                    name=ion[col],
+                    name=ion[index],
                     showlegend=True,
                     marker=dict(
-                        size=0.1,
-                        color=colors[col],
+                        size=1,
+                        color=colors[index],
                         opacity=opacity,
                     )
                 )
                 draw_qube(fig, range_cube, col, row)
+
                 fig.add_trace(scatter, row=row + 1, col=col + 1)
     else:
         fig = go.Figure()
@@ -316,7 +321,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
                     name=ion[index],
                     showlegend=True,
                     marker=dict(
-                        size=2,
+                        size=1,
                         color=colors[index],
                         opacity=opacity,
                     )

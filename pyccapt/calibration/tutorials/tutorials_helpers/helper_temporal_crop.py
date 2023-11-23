@@ -22,7 +22,7 @@ def apply_crop(variables, out):
 		print('The crop for Min Idx:', variables.selected_x1, ' and Max Idx:', variables.selected_x2, 'is applied')
 
 
-def call_plot_crop_experiment(variables):
+def call_plot_crop_experiment(variables, pulse_mode):
 	# Define widgets and labels for each parameter
 	max_tof_widget = widgets.FloatText(value=variables.max_tof)
 	max_tof_label = widgets.Label(value="Max TOF:", layout=label_layout)
@@ -47,7 +47,7 @@ def call_plot_crop_experiment(variables):
 	dc_plot_widget = widgets.Dropdown(options=[('True', True), ('False', False)], value=True)
 	dc_plot_label = widgets.Label(value="DC Plot:", layout=label_layout)
 
-	pulse_mode_widget = widgets.Dropdown(options=[('voltage', 'voltage'), ('laser', 'laser')], value='voltage')
+	pulse_mode_widget = widgets.Dropdown(options=[('voltage', 'voltage'), ('laser', 'laser')], value=pulse_mode)
 	pulse_mode_label = widgets.Label(value="Pulse Mode:", layout=label_layout)
 
 	save_widget = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)

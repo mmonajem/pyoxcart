@@ -237,7 +237,6 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
                 dc_voltage_tmp = np.tile(specimen_voltage, len(xx_tmp)).tolist()
                 v_p_voltage_tmp = np.tile(pulse_voltage, len(xx_tmp)).tolist()
 
-                # with data_lock:
                 xx_list.extend(xx_dif.tolist())
                 yy_list.extend(yy_dif.tolist())
                 tt_list.extend(tt_dif.tolist())
