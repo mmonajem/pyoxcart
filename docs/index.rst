@@ -17,7 +17,19 @@ This control system therefore provides the basis of a fully FAIR atom probe data
 
 Documentation
 ========================
-The documentation webpage of PyCCAPT modules can be found here.
+The documentation webpage of PyCCAPT modules can be found `here <https://pyccapt.readthedocs.io/>`_.
+
+
+Most PyCCAPT software outputs are in the form of
+`Pandas DataFrames <https://pandas.pydata.org/pandas-docs/stable/reference/frame.html>`_, offering flexibility for seamless expansion with
+additional information across various levels of analysis. The control and calibration data structures can be referenced
+`here <https://pyccapt.readthedocs.io/>`_. and `here <https://pyccapt.readthedocs.io/>`_., respectively. Leveraging the capabilities of Pandas allows users to work with the analyzed data effortlessly,
+facilitating interoperability with software tools such as MATLAB and Microsoft Excel.
+
+The choice of HDF5 as a storage format is notable for its widespread readability across different programming languages.
+HDF5 adopts a file directory-like structure, enabling users to organize data systematically within the file. Moreover,
+HDF5 supports large, intricate, and heterogeneous datasets. Its inherent structure facilitates self-description,
+as users can embed metadata, enhancing the overall comprehensibility of the stored information.
 
 PyCCAPT:
 ===================
@@ -27,11 +39,11 @@ PyCCAPT:
    :caption: Contents:
 
    installation
+   CONTROL.md
    configuration
+   CALIBRATION.md
    tutorials
-   pyccapt
-   code_reference
-   appendix
+   modules
    license
    bibliography
 

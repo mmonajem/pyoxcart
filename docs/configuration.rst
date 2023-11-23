@@ -4,13 +4,13 @@ To run the GUI, you need to set the JSON file.
 The JSON file is a Python dictionary that contains the following keys:
 
 
-.. figure:: json.png
+.. figure:: json.jpg
 
 Visualization
 -----------------
-In advanced mode, the GUI will show tof or mass-to-charge ratio. You can choose
+The GUI will show tof or mass-to-charge ratio. You can choose
 tof or mc. There is also some constant parameters like flight path length, max of DC voltage and etc. that should be
-specified int he Json file.
+specified int he JSON file.
 
 Devices
 -----------------

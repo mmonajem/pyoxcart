@@ -9,7 +9,7 @@ from numpy.ctypeslib import ndpointer
 class TdcRoentec:
 	def __init__(self, buf_size, time_out):
 		p = os.path.abspath(os.path.join(__file__, "../../.."))
-		p = os.path.join(p, 'control', 'pyccapt', 'tdc_roentdec')
+		p = os.path.join(p, 'control', 'pyccapt', 'tdc_roentdek')
 		os.chdir(p)
 		self.tdc_lib = ctypes.CDLL("./wrapper_read_TDC8HP_x64.dll")
 

@@ -8,7 +8,7 @@ import serial.tools.list_ports
 from pyccapt.control.control_tools import experiment_statistics, hdf5_creator, loggi
 from pyccapt.control.devices import email_send, initialize_devices, signal_generator
 from pyccapt.control.drs import drs
-from pyccapt.control.tdc_roentdec import tdc_roentdec
+from pyccapt.control.tdc_roentdek import tdc_roentdek
 from pyccapt.control.tdc_surface_concept import tdc_surface_consept
 
 
@@ -79,7 +79,7 @@ class APT_Exp_Control:
         elif self.conf['tdc'] == "on" and self.conf[
             'tdc_model'] == 'RoentDek' and self.variables.counter_source == 'TDC':
 
-            self.tdc_process = multiprocessing.Process(target=tdc_roentdec.experiment_measure,
+            self.tdc_process = multiprocessing.Process(target=tdc_roentdek.experiment_measure,
                                                        args=(self.variables,))
             self.tdc_process.start()
 

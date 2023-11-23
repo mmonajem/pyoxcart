@@ -33,7 +33,7 @@ copyright = '2022, Mehrpad Monajem'
 author = 'Mehrpad Monajem'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+release = '0.0.34'
 
 env_flag = os.getenv("status_flag")
 

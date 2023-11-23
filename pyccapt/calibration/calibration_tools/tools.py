@@ -149,7 +149,7 @@ def hist_plot(mc_tof, variables, bin, label, range_data=None, adjust_label=False
                 if background['patch']:
                     ax1.plot(bins[:-1][mask_2], y[mask_2], 'o', color='orange')[0]
         if peaks_find:
-	        ax1.set_ylabel("Event Counts", fontsize=14)
+            ax1.set_ylabel("Event Counts", fontsize=14)
             if label == 'mc':
                 ax1.set_xlabel("Mass/Charge [Da]", fontsize=14)
             elif label == 'tof':
