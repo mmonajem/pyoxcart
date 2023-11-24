@@ -27,6 +27,12 @@ console:
 
 ``pyccapt``
 
+or if the above command does not work, you can run the following command:
+
+
+``python -m pyccapt.control``
+
+
 
 Running PyCCAPT Tutorials
 ------------------------

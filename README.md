@@ -93,8 +93,15 @@ pyccapt/
 After installation, you can run the control GUI by entering the following command in the console:
 
    ```bash
-   python pyccapt
+   pyccapt
    ```
+
+or if the above command does not work, you can run the following command:
+
+   ```bash
+   python -m pyccapt.control
+   ```
+
 
 To start the tutorial, please follow these steps:
 
