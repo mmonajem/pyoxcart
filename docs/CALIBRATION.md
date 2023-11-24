@@ -1,10 +1,9 @@
-# PyCCAPT Calibration Module
+# Calibration
 
 The PyCCAPT Calibration Sub-Module provides essential tools and workflows for calibrating and processing atom probe
 tomography (APT) data. This module is designed to assist researchers in preparing and enhancing their APT data for
 further analysis.
 
-<img align="right" src="./logo2.png" alt="Alt Text" width="100" height="100">
 
 ## Jupyter Workflows
 
@@ -56,13 +55,6 @@ example code in the [tutorial](tutorials/jupyter_files)  section.
 In addition to the core functionalities mentioned above, the calibration module of PyCCAPT offers various advanced
 features and capabilities. For detailed information on these features, consult the PyCCAPT documentation.
 
-## Documentation
-
-For comprehensive documentation, including detailed instructions, usage examples, and additional features, please refer
-to the official PyCCAPT documentation. You can access the documentation either locally or online.
-
-- Local Documentation (within your PyCCAPT installation)
-- Online Documentation (URL to your online documentation)
 
 For specific usage examples and code snippets, explore the Jupyter notebooks provided in
 the `tutorials` [directory](tutorials/jupyter_files) of the PyCCAPT package. 
