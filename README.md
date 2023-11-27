@@ -20,6 +20,7 @@ This module enhances the capabilities of PyCCAPT by providing essential tools fo
 analysis.
 
 ----------
+![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/logo2.png)
 
 # Presentation
 
@@ -29,7 +30,9 @@ unique attribute, the OXCART atom probe boasts a titanium-based measuring chambe
 vacuum environment. This system also features a state-of-the-art detector with a high detection
 efficiency of approximately 80%. While tailor-made for the OXCART, the PyCCAPT package offers versatility, extending its
 capabilities to effectively manage diverse atom probe systems.
-![plot](pyccapt/files/oxcart.jpg)
+
+![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/oxcart.jpg)
+
 The package is designed with modularity in mind, making it highly adaptable to a diverse array of instruments. This
 adaptability extends to instruments like Pfeifer gauges, Fug power supplies, and Siglent signal generators. Notably, the
 PyCCAPT package has already demonstrated its proficiency in collecting data from Surface Concept and ReoenDek TDC
@@ -39,7 +42,7 @@ The PyCCAPT package forms the foundation of a fully FAIR atom probe data collect
 repository includes the graphical user interface (GUI) and control program, which enable experiment control,
 visualization, and data acquisition. The following images provide an overview of the user interface:
 
-![plot](pyccapt/files/advance_gui.png)
+![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/advance_gui.png)
 
  ---------------------
 
