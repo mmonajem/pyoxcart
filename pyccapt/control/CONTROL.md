@@ -1,6 +1,6 @@
 # PyCCAPT Control Module
 
-<img align="right" src="../files/logo2.png" alt="Alt Text" width="100" height="100">
+<img align="right" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/logo2.png" alt="Alt Text" width="100" height="100">
 
 PyCCAPT is a powerful Python software designed for controlling atom probe tomography instruments, offering researchers
 and scientists an efficient means to interact with their equipment. With its versatile capabilities, PyCCAPT is not only
@@ -11,7 +11,7 @@ nanoscale world of materials or conducting cutting-edge research, PyCCAPT proves
 control and data management, enhancing the capabilities of atom probe tomography systems for a wide range of scientific
 applications.
 
-![plot](../files/advance_gui.png)
+![plot](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/advance_gui.png)
 
 ## Data structures
 

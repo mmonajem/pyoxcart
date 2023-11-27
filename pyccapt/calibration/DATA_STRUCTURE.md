@@ -29,7 +29,7 @@ This HDF5 file in PyCCAPT contains data with the following columns:
 There is also possibility to convert the PyCCAPT HDF5 file data to EPOS, POS, ATO, and CSV file. You can find the
 example code in the tutorial section. A screenshot of the PyCCAPT HDF5 file is shown below.
 
-![plot](../files/dataset.png)
+![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/dataset.png)
 
 
 ### Range HDF5 file structure of PyCCAPT 
@@ -49,5 +49,5 @@ The range file contains the range of the mass-to-charge ratio. The range file is
 
 A screenshot of the range HDF5 file is shown below.
 
-![plot](../files/range_data.png)
+![plot](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/range_data.png)
 
