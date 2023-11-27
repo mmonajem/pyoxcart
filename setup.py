@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from os.path import exists
+
 from setuptools import setup, find_packages
 
 try:
     from pyccapt import version
 except BaseException:
-    version = "0.0.34"
+    version = "0.0.35"
 
 common_deps = [
     "numpy",
