@@ -47,6 +47,7 @@ class Variables:
         x_hist (numpy.ndarray): Array for x histogram.
         y_hist (numpy.ndarray): Array for y histogram.
         h_line_pos (list): List of horizontal line positions.
+        plotly_3d_reconstruction (plotly.graph_objs._figure.Figure): Plotly 3D reconstruction.
         data (data frame): dataset of the experiment.
         data_backup (data frame): backup dataset of the experiment.
         range_data (data frame): range dataset.
@@ -113,6 +114,7 @@ class Variables:
         self.ions_list_data = None
         self.last_directory = './'  # You can set a default directory here
 
+        self.plotly_3d_reconstruction = None
         self.data = None
         self.data_backup = None
         self.max_mc = 400

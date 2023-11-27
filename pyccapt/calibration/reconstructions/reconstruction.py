@@ -365,9 +365,9 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
 
 
     # Show the plot in the Jupyter cell output
-    fig2 = go.FigureWidget(fig)
+    variables.plotly_3d_reconstruction = go.FigureWidget(fig)
 
-    # fig2.show()
+    fig.show()
 
     if save:
         fig.update_scenes(
@@ -385,7 +385,6 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         pio.write_html(fig, variables.result_path + "/%s_3d_o.html" % figname, include_mathjax='cdn')
         fig.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
 
-    return fig2
 
 
 def rotate_z(x, y, z, theta):
@@ -741,6 +740,5 @@ def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, 
     variables.x = px
     variables.y = py
     variables.z = pz
-    fig = reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save,
+    reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save,
                         selected_area_specially=False, selected_area_temporally=False, ions_individually_plots=False)
-    return fig
