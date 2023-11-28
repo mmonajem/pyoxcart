@@ -16,6 +16,9 @@ def rename_subcategory(hdf5_file_path, old_name, new_name):
     """
 
     with h5py.File(hdf5_file_path, 'r+') as file:
+        # data_x = file['dld/x']
+        # del file[new_name]
+        # file.create_dataset(new_name, data=np.zeros(len(data_x)), dtype=np.int64)
         if old_name in file:
             file[new_name] = file[old_name]
             del file[old_name]
@@ -124,10 +127,11 @@ def copy_npy_to_hdf_surface_concept(path, hdf5_file_name):
 
 
 if __name__ == '__main__':
-    path = '../../../pyccapt/data/1759_Nov-21-2023_10-31_AL_1/'
-    name = '1759_Nov-21-2023_10-31_AL_p3_1.h5'
+    path = '../../../tests/data/physics_experiment/'
+    name = 'data_130_Sep-19-2023_14-58_W_12fs.h5'
     # copy_npy_to_hdf(path, name)
 
     # rename_subcategory(path + name, old_name='dld', new_name='dld_1')
-    copy_npy_to_hdf_surface_concept(path, name)
+    # copy_npy_to_hdf_surface_concept(path, name)
+    rename_subcategory(path + name, old_name='dld/AbsoluteTimeStamp', new_name='dld/start_counter')
     print('Done')
