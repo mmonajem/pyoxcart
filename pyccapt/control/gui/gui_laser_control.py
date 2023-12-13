@@ -210,7 +210,7 @@ class Ui_Laser_Control(object):
         ###
         # Laser_Control.setWindowTitle(_translate("Laser_Control", "Form"))
         Laser_Control.setWindowTitle(_translate("Laser_Control", "PyCCAPT Laser Control"))
-        Laser_Control.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+        Laser_Control.setWindowIcon(QtGui.QIcon('./files/logo.png'))
         ###
         self.label_29.setText(_translate("Laser_Control", "Laser Control"))
         self.home_motor.setText(_translate("Laser_Control", "Home"))

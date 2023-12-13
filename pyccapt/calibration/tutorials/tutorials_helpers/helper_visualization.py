@@ -133,6 +133,8 @@ def call_visualization(variables):
         plot_mc_button.disabled = False
 
     element_percentage_pp = widgets.Textarea(value=element_percentage)
+    thin_pp_low = widgets.FloatText(value=5.0)
+    thin_pp_up = widgets.FloatText(value=10.0)
     selected_area_specially_pp = widgets.Dropdown(options=[('False', False), ('True', True)])
     selected_area_temporally_pp = widgets.Dropdown(options=[('False', False), ('True', True)])
     x_or_y_pp = widgets.Dropdown(options=['x', 'y'], value='x')
@@ -156,9 +158,9 @@ def call_visualization(variables):
                 print('Min y (nm):', variables.selected_y1, 'Max y (nm):', variables.selected_y2)
                 print('Min z (nm):', variables.selected_z1, 'Max z (nm):', variables.selected_z2)
 
-            reconstruction.projection(variables, element_percentage_pp.value, selected_area_specially_pp.value,
-                                      selected_area_temporally_pp.value, x_or_y_pp.value,
-                                      figname_p.value, figure_size, save_projection.value)
+            reconstruction.projection(variables, element_percentage_pp.value, (thin_pp_low.value, thin_pp_up.value),
+                                      selected_area_specially_pp.value, selected_area_temporally_pp.value,
+                                      x_or_y_pp.value, figname_p.value, figure_size, save_projection.value)
         plot_projection_button.disabled = False
 
     clear_button.on_click(lambda b: clear(b, out))
@@ -273,6 +275,8 @@ def call_visualization(variables):
 
     tab1 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Element percentage:', layout=label_layout), element_percentage_pp]),
+        widgets.HBox([widgets.Label(value='Thickness low (nm):', layout=label_layout), thin_pp_low]),
+        widgets.HBox([widgets.Label(value='Thickness up (nm):', layout=label_layout), thin_pp_up]),
         widgets.HBox([widgets.Label(value='Selected specially:', layout=label_layout), selected_area_specially_pp]),
         widgets.HBox([widgets.Label(value='Selected temporally:', layout=label_layout), selected_area_temporally_pp]),
         widgets.HBox([widgets.Label(value='X or Y:', layout=label_layout), x_or_y_pp]),

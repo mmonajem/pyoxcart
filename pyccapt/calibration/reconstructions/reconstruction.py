@@ -493,7 +493,6 @@ def scatter_plot(data, range_data, variables, element_percentage, selected_area,
     mc_up = range_data['mc_up'].tolist()
     charge = range_data['charge'].tolist()
     isotope = range_data['isotope'].tolist()
-    mc = data['mc_c (Da)']
 
     element_percentage = element_percentage.replace('[', '')
     element_percentage = element_percentage.replace(']', '')
@@ -511,9 +510,9 @@ def scatter_plot(data, range_data, variables, element_percentage, selected_area,
         else:
             name_element = r'${}^{%s}%s^{%s+}$' % (isotope[index], phases[index], charge[index])
         if x_or_y == 'x':
-            ax.scatter(df_subset['x (nm)'], df_subset['z (nm)'], s=2, label=name_element, color=colors[index])
+            ax.scatter(df_subset['x (nm)'], df_subset['z (nm)'], s=0.1, label=name_element, color=colors[index])
         elif x_or_y == 'y':
-            ax.scatter(df_subset['y (nm)'], df_subset['z (nm)'], s=2, label=name_element)
+            ax.scatter(df_subset['y (nm)'], df_subset['z (nm)'], s=0.1, label=name_element)
 
     if not selected_area:
         data_loadcrop.rectangle_box_selector(ax, variables)
@@ -521,18 +520,18 @@ def scatter_plot(data, range_data, variables, element_percentage, selected_area,
     ax.xaxis.tick_top()
     ax.invert_yaxis()
     if x_or_y == 'x':
-        ax.set_xlabel('X (nm)')
+        ax.set_xlabel('x (nm)')
     elif x_or_y == 'y':
-        ax.set_xlabel('Y (nm)')
+        ax.set_xlabel('y (nm)')
     ax.xaxis.set_label_position('top')
-    ax.set_ylabel('Z (nm)')
+    ax.set_ylabel('z (nm)')
     plt.legend(loc='upper right')
 
     plt.savefig(variables.result_path + '\\projection_{fn}.png'.format(fn=figname))
     plt.show()
 
 
-def projection(variables, element_percentage, selected_area_specially, selected_area_temporally,
+def projection(variables, element_percentage, thickness, selected_area_specially, selected_area_temporally,
                x_or_y, figname, figure_size, save):
     """
     Generate a projection plot based on the provided data.
@@ -540,6 +539,7 @@ def projection(variables, element_percentage, selected_area_specially, selected_
     Args:
         variables (object): The variables object.
         element_percentage (str): Element percentage information.
+        thickness (float, float): Thickness of the projection in nm (start, end).
         selected_area_specially (bool): True if a specific area is selected, False otherwise.
         selected_area_temporally (bool): True if a specific area is selected, False otherwise.
         x_or_y (str): Either 'x' or 'y' indicating the axis to plot.
@@ -576,6 +576,7 @@ def projection(variables, element_percentage, selected_area_specially, selected_
     element_percentage = element_percentage.replace(']', '')
     element_percentage = element_percentage.split(',')
 
+
     for index, elemen in enumerate(ions):
         mask = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
         mask = mask & mask_spacial
@@ -595,21 +596,25 @@ def projection(variables, element_percentage, selected_area_specially, selected_
         else:
             name_element = '%s' % ions[index]
         if x_or_y == 'x':
-            ax.scatter(variables.x[mask], variables.z[mask], s=2, label=name_element, color=colors[index])
+            mask_thickness = (variables.y >= thickness[0]) & (variables.y <= thickness[1])
+            ax.scatter(variables.x[mask & mask_thickness], variables.z[mask & mask_thickness], s=0.1,
+                       label=name_element, color=colors[index])
         elif x_or_y == 'y':
-            ax.scatter(variables.y[mask], variables.z[mask], s=2, label=name_element)
+            mask_thickness = (variables.x >= thickness[0]) & (variables.x <= thickness[1])
+            ax.scatter(variables.y[mask & mask_thickness], variables.z[mask & mask_thickness], s=0.1,
+                       label=name_element, color=colors[index])
 
     if not selected_area_specially and not selected_area_temporally:
         data_loadcrop.rectangle_box_selector(ax, variables)
         plt.connect('key_press_event', selectors_data.toggle_selector)
-    ax.xaxis.tick_top()
+    # ax.xaxis.tick_top()
     ax.invert_yaxis()
     if x_or_y == 'x':
-        ax.set_xlabel('X (nm)')
+        ax.set_xlabel('x (nm)')
     elif x_or_y == 'y':
-        ax.set_xlabel('Y (nm)')
+        ax.set_xlabel('y (nm)')
     ax.xaxis.set_label_position('top')
-    ax.set_ylabel('Z (nm)')
+    ax.set_ylabel('z (nm)')
     plt.legend(loc='upper right')
 
     if save:

@@ -127,11 +127,11 @@ def copy_npy_to_hdf_surface_concept(path, hdf5_file_name):
 
 
 if __name__ == '__main__':
-    path = '../../../tests/data/physics_experiment/'
-    name = 'data_130_Sep-19-2023_14-58_W_12fs.h5'
+	path = 'D:/pyccapt/pyccapt/data/1726_Oct-17-2023_15-33_Pd_test1/'
+	name = '1726_Oct-17-2023_15-33_Pd_test1.h5'
     # copy_npy_to_hdf(path, name)
 
     # rename_subcategory(path + name, old_name='dld', new_name='dld_1')
-    # copy_npy_to_hdf_surface_concept(path, name)
-    rename_subcategory(path + name, old_name='dld/AbsoluteTimeStamp', new_name='dld/start_counter')
+	copy_npy_to_hdf_surface_concept(path, name)
+	# rename_subcategory(path + name, old_name='dld/AbsoluteTimeStamp', new_name='dld/start_counter')
     print('Done')

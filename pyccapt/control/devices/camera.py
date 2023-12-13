@@ -79,14 +79,19 @@ class Cameras:
 		while self.cameras.IsGrabbing():
 			current_time = time.time()
 
-			# Fetch the raw images from camera
-			grabResult0 = self.cameras[0].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
-			grabResult1 = self.cameras[1].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
+			try:
+				# Fetch the raw images from camera
+				grabResult0 = self.cameras[0].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
+				grabResult1 = self.cameras[1].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
+				image0 = self.converter.Convert(grabResult0)
+				img0 = image0.GetArray()
+				image1 = self.converter.Convert(grabResult1)
+				img1 = image1.GetArray()
+			except Exception as e:
+				print(f"Error in grabbing the images from the camera: {e}")
+				continue
 
-			image0 = self.converter.Convert(grabResult0)
-			img0 = image0.GetArray()
-			image1 = self.converter.Convert(grabResult1)
-			img1 = image1.GetArray()
+
 
 			# Original size is 2048 * 2448
 			# Resize the original to the required size. Utilize the openCV tool.
@@ -147,16 +152,20 @@ class Cameras:
 		Return:
 			None
 		"""
-		if self.variables.light:
-			self.cameras[0].Open()
-			self.cameras[0].ExposureTime.SetValue(4000)
-			self.cameras[1].Open()
-			self.cameras[1].ExposureTime.SetValue(4000)
-		elif not self.variables.light:
-			self.cameras[0].Open()
-			self.cameras[0].ExposureTime.SetValue(800000)
-			self.cameras[1].Open()
-			self.cameras[1].ExposureTime.SetValue(100000)
+		try:
+			if self.variables.light:
+				self.cameras[0].Open()
+				self.cameras[0].ExposureTime.SetValue(4000)
+				self.cameras[1].Open()
+				self.cameras[1].ExposureTime.SetValue(4000)
+			elif not self.variables.light:
+				self.cameras[0].Open()
+				self.cameras[0].ExposureTime.SetValue(800000)
+				self.cameras[1].Open()
+				self.cameras[1].ExposureTime.SetValue(100000)
+		except Exception as e:
+			print(f"Error in switching the light: {e}")
+
 
 
 def cameras_run(variable, emmiter):

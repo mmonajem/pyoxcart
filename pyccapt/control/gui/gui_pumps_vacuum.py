@@ -370,7 +370,7 @@ class Ui_Pumps_Vacuum(object):
 		###
 		# Pumps_Vacuum.setWindowTitle(_translate("Pumps_Vacuum", "Form"))
 		Pumps_Vacuum.setWindowTitle(_translate("Pumps_Vacuum", "PyCCAPT Pumps and Vacuum Control"))
-		Pumps_Vacuum.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+		Pumps_Vacuum.setWindowIcon(QtGui.QIcon('./files/logo.png'))
 		###
 		self.label_215.setText(_translate("Pumps_Vacuum", "Temperature (K)"))
 		self.label_214.setText(_translate("Pumps_Vacuum", "Buffer Chamber Pre (mBar)"))
@@ -395,7 +395,10 @@ class Ui_Pumps_Vacuum(object):
 		Return:
 			None
 		"""
-		self.temp.display(value)
+		if value == -1:
+			self.temp.display('Error')
+		else:
+			self.temp.display(value)
 
 	def update_vacuum_main(self, value):
 		"""
@@ -406,7 +409,10 @@ class Ui_Pumps_Vacuum(object):
 		Return:
 			None
 		"""
-		self.vacuum_main.display('{:.2e}'.format(value))
+		if value == -1:
+			self.vacuum_main.display('Error')
+		else:
+			self.vacuum_main.display('{:.2e}'.format(value))
 
 	def update_vacuum_buffer(self, value):
 		"""
@@ -417,7 +423,10 @@ class Ui_Pumps_Vacuum(object):
 		Return:
 			None
 		"""
-		self.vacuum_buffer.display('{:.2e}'.format(value))
+		if value == -1:
+			self.vacuum_buffer.display('Error')
+		else:
+			self.vacuum_buffer.display('{:.2e}'.format(value))
 
 	def update_vacuum_buffer_back(self, value):
 		"""
@@ -428,7 +437,10 @@ class Ui_Pumps_Vacuum(object):
 		Return:
 			None
 		"""
-		self.vacuum_buffer_back.display('{:.2e}'.format(value))
+		if value == -1:
+			self.vacuum_buffer_back.display('Error')
+		else:
+			self.vacuum_buffer_back.display('{:.2e}'.format(value))
 
 	def update_vacuum_load_back(self, value):
 		"""
@@ -439,7 +451,10 @@ class Ui_Pumps_Vacuum(object):
 		Return:
 			None
 		"""
-		self.vacuum_load_lock_back.display('{:.2e}'.format(value))
+		if value == -1:
+			self.vacuum_load_lock_back.display('Error')
+		else:
+			self.vacuum_load_lock_back.display('{:.2e}'.format(value))
 
 	def update_vacuum_load(self, value):
 		"""
@@ -450,7 +465,10 @@ class Ui_Pumps_Vacuum(object):
 		Return:
 			None
 		"""
-		self.vacuum_load_lock.display('{:.2e}'.format(value))
+		if value == -1:
+			self.vacuum_load_lock.display('Error')
+		else:
+			self.vacuum_load_lock.display('{:.2e}'.format(value))
 
 	def update_vacuum_cryo_load_lock(self, value):
 		"""
@@ -461,7 +479,10 @@ class Ui_Pumps_Vacuum(object):
 		Return:
 			None
 		"""
-		self.vacuum_cryo_load_lock.display('{:.2e}'.format(value))
+		if value == -1:
+			self.vacuum_cryo_load_lock.display('Error')  # Or any other message you prefer
+		else:
+			self.vacuum_cryo_load_lock.display('{:.2e}'.format(value))
 
 	def update_vacuum_cryo_load_lock_back(self, value):
 		"""
@@ -472,7 +493,10 @@ class Ui_Pumps_Vacuum(object):
 		Return:
 			None
 		"""
-		self.vacuum_cryo_load_lock_back.display('{:.2e}'.format(value))
+		if value == -1:
+			self.vacuum_cryo_load_lock_back.display('Error')
+		else:
+			self.vacuum_cryo_load_lock_back.display('{:.2e}'.format(value))
 
 	def hideMessage(self):
 		"""

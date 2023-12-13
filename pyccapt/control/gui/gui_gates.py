@@ -173,7 +173,7 @@ class Ui_Gates(object):
 		_translate = QtCore.QCoreApplication.translate
 		###
 		Gates.setWindowTitle(_translate("Ui_Gates", "PyCCAPT Gates Control"))
-		Gates.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+		Gates.setWindowIcon(QtGui.QIcon('./files/logo.png'))
 		###
 		self.led_main_chamber.setText(_translate("Gates", "Main"))
 		self.main_chamber_switch.setText(_translate("Gates", "Main Chamber"))

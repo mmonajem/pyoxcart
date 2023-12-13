@@ -253,7 +253,7 @@ class Ui_Cameras_Alignment(object):
 		###
 		# Cameras_alignment.setWindowTitle(_translate("Cameras_alignment", "Form"))
 		Cameras_Alignment.setWindowTitle(_translate("Cameras_alignment", "PyCCAPT Cameras"))
-		Cameras_Alignment.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+		Cameras_Alignment.setWindowIcon(QtGui.QIcon('./files/logo.png'))
 		self.Cameras_Alignment = Cameras_Alignment
 		###
 		self.label_202.setText(_translate("Cameras_Alignment", "Camera Side"))

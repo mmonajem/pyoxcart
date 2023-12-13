@@ -154,7 +154,7 @@ class Ui_Stage_Control(object):
 		###
 		# Stage_Control.setWindowTitle(_translate("Stage_Control", "Form"))
 		Stage_Control.setWindowTitle(_translate("Stage_Control", "PyCCAPT Stage Control"))
-		Stage_Control.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+		Stage_Control.setWindowIcon(QtGui.QIcon('./files/logo.png'))
 		###
 		self.forward.setText(_translate("Stage_Control", "Forward"))
 		self.left.setText(_translate("Stage_Control", "Left"))

@@ -103,7 +103,8 @@ def call_ion_list(variables, selector, calibration_mode):
 
         elif calibration_mode.value == 'mc':
             def shift(mc, a, b, c):
-                return a * mc ** b + c
+	            return mc ** a + b * mc + c
+	            # return a * mc + b
 
             def shift_calib(mc, mc_ideal):
                 fitresult, _ = curve_fit(shift, mc, mc_ideal, maxfev=2000)
@@ -207,6 +208,13 @@ def call_ion_list(variables, selector, calibration_mode):
     ])
 
     ion_list_box = widgets.VBox([dropdown, chargeDropdown, buttonAdd, buttonDelete, buttonReset])
+
+    with out_ion_list:
+	    clear_output(True)
+	    print("Updated List: ", variables.list_material)
+	    print("Updated element List: ", variables.element)
+	    print("Updated isotope List: ", variables.isotope)
+	    print("Updated charge List: ", variables.charge)
 
     output_layout = widgets.HBox([out_mc, out_ion_list])
     display_layout = widgets.HBox([widget_container, ion_list_box])

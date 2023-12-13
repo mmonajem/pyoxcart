@@ -56,58 +56,61 @@ def command_edwards(conf, variables, cmd, E_AGC, status=None):
 		Response code after executing the command.
 	"""
 
-	if variables.flag_pump_load_lock_click and variables.flag_pump_load_lock and status == 'load_lock':
-		if conf['pump_ll'] == "on":
-			E_AGC.comm('!C910 0')
-			E_AGC.comm('!C904 0')
-		variables.flag_pump_load_lock_click = False
-		variables.flag_pump_load_lock = False
-		variables.flag_pump_load_lock_led = False
-		time.sleep(1)
-	elif variables.flag_pump_load_lock_click and not variables.flag_pump_load_lock and status == 'load_lock':
-		if conf['pump_ll'] == "on":
-			E_AGC.comm('!C910 1')
-			E_AGC.comm('!C904 1')
-		variables.flag_pump_load_lock_click = False
-		variables.flag_pump_load_lock = True
-		variables.flag_pump_load_lock_led = True
-		time.sleep(1)
+	try:
+		if variables.flag_pump_load_lock_click and variables.flag_pump_load_lock and status == 'load_lock':
+			if conf['pump_ll'] == "on":
+				E_AGC.comm('!C910 0')
+				E_AGC.comm('!C904 0')
+			variables.flag_pump_load_lock_click = False
+			variables.flag_pump_load_lock = False
+			variables.flag_pump_load_lock_led = False
+			time.sleep(1)
+		elif variables.flag_pump_load_lock_click and not variables.flag_pump_load_lock and status == 'load_lock':
+			if conf['pump_ll'] == "on":
+				E_AGC.comm('!C910 1')
+				E_AGC.comm('!C904 1')
+			variables.flag_pump_load_lock_click = False
+			variables.flag_pump_load_lock = True
+			variables.flag_pump_load_lock_led = True
+			time.sleep(1)
 
-	if variables.flag_pump_cryo_load_lock_click and variables.flag_pump_cryo_load_lock and status == 'cryo_load_lock':
-		if conf['pump_cll'] == "on":
-			E_AGC.comm('!C910 0')
-			E_AGC.comm('!C904 0')
-		variables.flag_pump_cryo_load_lock_click = False
-		variables.flag_pump_cryo_load_lock = False
-		variables.flag_pump_cryo_load_lock_led = False
-		time.sleep(1)
-	elif (variables.flag_pump_cryo_load_lock_click and not variables.flag_pump_cryo_load_lock and
-	      status == 'cryo_load_lock'):
-		if conf['pump_cll'] == "on":
-			E_AGC.comm('!C910 1')
-			E_AGC.comm('!C904 1')
-		variables.flag_pump_cryo_load_lock_click = False
-		variables.flag_pump_cryo_load_lock = True
-		variables.flag_pump_cryo_load_lock_led = True
-		time.sleep(1)
+		if variables.flag_pump_cryo_load_lock_click and variables.flag_pump_cryo_load_lock and status == 'cryo_load_lock':
+			if conf['pump_cll'] == "on":
+				E_AGC.comm('!C910 0')
+				E_AGC.comm('!C904 0')
+			variables.flag_pump_cryo_load_lock_click = False
+			variables.flag_pump_cryo_load_lock = False
+			variables.flag_pump_cryo_load_lock_led = False
+			time.sleep(1)
+		elif (variables.flag_pump_cryo_load_lock_click and not variables.flag_pump_cryo_load_lock and
+		      status == 'cryo_load_lock'):
+			if conf['pump_cll'] == "on":
+				E_AGC.comm('!C910 1')
+				E_AGC.comm('!C904 1')
+			variables.flag_pump_cryo_load_lock_click = False
+			variables.flag_pump_cryo_load_lock = True
+			variables.flag_pump_cryo_load_lock_led = True
+			time.sleep(1)
 
+		if conf['COM_PORT_gauge_ll'] != "off" or conf['COM_PORT_gauge_cll'] != "off":
+			if cmd == 'pressure':
+				response_tmp = E_AGC.comm('?V911')
+				response_tmp = float(response_tmp.replace(';', ' ').split()[1])
 
-	if conf['COM_PORT_gauge_ll'] != "off" or conf['COM_PORT_gauge_cll'] != "off":
-		if cmd == 'pressure':
-			response_tmp = E_AGC.comm('?V911')
-			response_tmp = float(response_tmp.replace(';', ' ').split()[1])
-
-			if response_tmp < 90 and status == 'load_lock':
-				variables.flag_pump_load_lock_led = False
-			elif response_tmp >= 90 and status == 'load_lock':
-				variables.flag_pump_load_lock_led = True
-			if response_tmp < 90 and status == 'cryo_load_lock':
-				variables.flag_pump_cryo_load_lock_led = False
-			elif response_tmp >= 90 and status == 'cryo_load_lock':
-				variables.flag_pump_cryo_load_lock_led = True
-			response = E_AGC.comm('?V940')
-		else:
-			print('Unknown command for Edwards TIC Load Lock')
+				if response_tmp < 90 and status == 'load_lock':
+					variables.flag_pump_load_lock_led = False
+				elif response_tmp >= 90 and status == 'load_lock':
+					variables.flag_pump_load_lock_led = True
+				if response_tmp < 90 and status == 'cryo_load_lock':
+					variables.flag_pump_cryo_load_lock_led = False
+				elif response_tmp >= 90 and status == 'cryo_load_lock':
+					variables.flag_pump_cryo_load_lock_led = True
+				response = E_AGC.comm('?V940')
+			else:
+				print('Unknown command for Edwards TIC Load Lock')
+	except Exception as e:
+		print(f"An error occurred: {e}")
+		response = "Error"  # Set response to indicate an error
 
 	return response
 
@@ -250,38 +253,75 @@ def state_update(conf, variables, emitter):
 					print(e)
 					print("cannot read the cryo temperature")
 					output = '0'
-				# with variables.lock_statistics:
-				temperature = float(output.split()[0].replace(',', ''))
+				try:
+					temperature = float(output.split()[0].replace(',', ''))
+				except Exception as e:
+					print(e)
+					# Handle the case where response is not a valid float
+					temperature = -1
 				variables.temperature = temperature
 				emitter.temp.emit(temperature)
 			if conf['COM_PORT_gauge_mc'] != "off":
 				value, _ = tpg.pressure_gauge(2)
-				# with variables.lock_statistics:
-				vacuum_main = '{}'.format(value)
+				try:
+					vacuum_main = '{}'.format(value)
+				except Exception as e:
+					print(f"Error reading Temperature:{e}")
+					# Handle the case where response is not a valid float
+					vacuum_main = -1
 				variables.vacuum_main = vacuum_main
 				emitter.vacuum_main.emit(float(vacuum_main))
 				value, _ = tpg.pressure_gauge(1)
-				vacuum_buffer = '{}'.format(value)
-				variables.vacuum_buffer = vacuum_buffer
+				try:
+					vacuum_buffer = '{}'.format(value)
+				except Exception as e:
+					print(f"Error reading BC:{e}")
+					# Handle the case where response is not a valid float
+					vacuum_buffer = -1
 				emitter.vacuum_buffer.emit(float(vacuum_buffer))
 			if conf['pump_ll'] != "off":
 				response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_ll, status='load_lock')
-				# with variables.lock_statistics:
-				vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
-				vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
+
+				try:
+					vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
+				except Exception as e:
+					print(f"Error reading LL:{e}")
+					# Handle the case where response is not a valid float
+					vacuum_load_lock = -1
+				try:
+					vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
+				except Exception as e:
+					print(f"Error reading LL backing:{e}")
+					# Handle the case where response is not a valid float
+					vacuum_load_lock_backing = -1
 				emitter.vacuum_load_lock.emit(vacuum_load_lock)
 				emitter.vacuum_load_lock_back.emit(vacuum_load_lock_backing)
 			if conf['pump_cll'] != "off":
 				response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_cll, status='cryo_load_lock')
-				# with variables.lock_statistics:
-				vacuum_cryo_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
-				vacuum_cryo_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
+
+				try:
+					vacuum_cryo_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
+				except Exception as e:
+					print(f"Error reading CLL:{e}")
+					# Handle the case where response is not a valid float
+					vacuum_cryo_load_lock = -1
+				try:
+					vacuum_cryo_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
+				except Exception as e:
+					print(f"Error reading CLL backing:{e}")
+					# Handle the case where response is not a valid float
+					vacuum_cryo_load_lock_backing = -1
 				emitter.vacuum_cryo_load_lock.emit(vacuum_cryo_load_lock)
 				emitter.vacuum_cryo_load_lock_back.emit(vacuum_cryo_load_lock_backing)
 
 			if conf['COM_PORT_gauge_bc'] != "off":
 				response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_bc)
-				vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
+				try:
+					vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01
+				except Exception as e:
+					print(f"Error reading BC backing:{e}")
+					# Handle the case where response is not a valid float
+					vacuum_buffer_backing = -1
 				variables.vacuum_buffer_backing = vacuum_buffer_backing
 				emitter.vacuum_buffer_back.emit(vacuum_buffer_backing)
 

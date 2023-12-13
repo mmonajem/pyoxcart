@@ -12,3 +12,6 @@ def list_com_ports():
     """
 	com_ports = list(serial.tools.list_ports.comports())
 	return com_ports
+
+
+print(list_com_ports())
