@@ -66,15 +66,15 @@ def correct_surface_concept_old_data(hdf5_file_path):
 
 def copy_npy_to_hdf_surface_concept(path, hdf5_file_name):
     """
-		copy npy data to hdf5 file for surface concept TDC
+        copy npy data to hdf5 file for surface concept TDC
 
-		Args:
-			path: path to the npy files
-			hdf5_file_name: name of the hdf5 file
+        Args:
+            path: path to the npy files
+            hdf5_file_name: name of the hdf5 file
 
-		Returns:
-			None
-	"""
+        Returns:
+            None
+    """
     TOFFACTOR = 27.432 / (1000 * 4)  # 27.432 ps/bin, tof in ns, data is TDC time sum
     DETBINS = 4900
     BINNINGFAC = 2
@@ -127,11 +127,11 @@ def copy_npy_to_hdf_surface_concept(path, hdf5_file_name):
 
 
 if __name__ == '__main__':
-	path = 'D:/pyccapt/pyccapt/data/1726_Oct-17-2023_15-33_Pd_test1/'
-	name = '1726_Oct-17-2023_15-33_Pd_test1.h5'
+    path = 'D:/pyccapt/pyccapt/data/1726_Oct-17-2023_15-33_Pd_test1/'
+    name = '1726_Oct-17-2023_15-33_Pd_test1.h5'
     # copy_npy_to_hdf(path, name)
 
     # rename_subcategory(path + name, old_name='dld', new_name='dld_1')
-	copy_npy_to_hdf_surface_concept(path, name)
-	# rename_subcategory(path + name, old_name='dld/AbsoluteTimeStamp', new_name='dld/start_counter')
+    copy_npy_to_hdf_surface_concept(path, name)
+    # rename_subcategory(path + name, old_name='dld/AbsoluteTimeStamp', new_name='dld/start_counter')
     print('Done')

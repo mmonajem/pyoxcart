@@ -82,6 +82,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     Returns:
         None.
     """
+
     if max_tof > 0:
         mask_1 = (data['t (ns)'].to_numpy() > max_tof)
         data.drop(np.where(mask_1)[0], inplace=True)
@@ -102,6 +103,14 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     pulse = dldGroupStorage['pulse'].to_numpy()
 
     xaxis = np.arange(len(tof))
+
+    # Check if the bin is a tuple
+    if isinstance(bins, tuple):
+        pass
+    else:
+        x_edges = np.arange(xaxis.min(), xaxis.max() + bins, bins)
+        y_edges = np.arange(tof.min(), tof.max() + bins, bins)
+        bins = [x_edges, y_edges]
 
     heatmap, xedges, yedges = np.histogram2d(xaxis, tof, bins=bins)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
@@ -217,6 +226,14 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
     # Plot and crop FDM
     x = dldGroupStorage['x_det (cm)'].to_numpy()
     y = dldGroupStorage['y_det (cm)'].to_numpy()
+
+    # Check if the bin is a tuple
+    if isinstance(bins, tuple):
+        pass
+    else:
+        x_edges = np.arange(x.min(), x.max() + bins, bins)
+        y_edges = np.arange(y.min(), y.max() + bins, bins)
+        bins = [x_edges, y_edges]
 
     FDM, xedges, yedges = np.histogram2d(x, y, bins=bins)
 
