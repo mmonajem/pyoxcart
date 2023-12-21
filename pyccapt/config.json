@@ -17,7 +17,7 @@
   "pump_ll": "on",
   "pump_cll": "on",
   "gates": "on",
-  "v_dc": "o",
+  "v_dc": "on",
   "v_p": "on",
   "signal_generator": "on",
   "cryo": "on",

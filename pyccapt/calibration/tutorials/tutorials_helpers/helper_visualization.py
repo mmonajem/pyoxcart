@@ -1,6 +1,6 @@
 import ipywidgets as widgets
 import matplotlib.colors as mcolors
-from IPython.display import display, clear_output
+from IPython.display import display, clear_output, HTML
 from ipywidgets import Output
 
 from pyccapt.calibration.calibration_tools import mc_plot, ion_selection
@@ -90,6 +90,36 @@ def call_visualization(variables):
                                    element_percentage_ph.value, figname_heatmap.value, figure_sie=figure_size,
                                    save=save_heatmap.value)
         plot_heatmap_button.disabled = False
+
+    points_per_frame_anim = widgets.IntText(value=50000)
+    selected_area_temporally_anim = widgets.Dropdown(options=[('False', False), ('True', True)])
+    selected_area_specially_anim = widgets.Dropdown(options=[('False', False), ('True', True)])
+    figname_anim = widgets.Text(value='detector_animation')
+    figure_size_x_anim = widgets.FloatText(value=5.0)
+    figure_size_y_anim = widgets.FloatText(value=5.0)
+    ranged_anim = widgets.Dropdown(options=[('False', False), ('True', True)])
+
+    plot_animated_heatmap_button = widgets.Button(description="plot animated heatmap")
+
+    def plot_animated_heatmap(b, variables, out):
+
+        points_per_frame = points_per_frame_anim.value
+        selected_area_temporally = selected_area_temporally_anim.value
+        selected_area_specially = selected_area_specially_anim.value
+        figure_name = figname_anim.value
+        figure_size = (figure_size_x_anim.value, figure_size_y_anim.value)
+        ranged = ranged_anim.value
+
+        plot_animated_heatmap_button.disabled = True
+        with out:
+            reconstruction.detector_animation(variables, points_per_frame, ranged, selected_area_specially,
+                                              selected_area_temporally, figure_name,
+                                              figure_size, save=True)
+            display(HTML(variables.animation_detector_html))
+        plot_animated_heatmap_button.disabled = False
+
+    plot_animated_heatmap_button.on_click(lambda b: plot_animated_heatmap(b, variables, out))
+
 
     selected_area_specially_pm = widgets.Dropdown(options=[('False', False), ('True', True)])
     selected_area_temporally_pm = widgets.Dropdown(options=[('False', False), ('True', True)])
@@ -196,6 +226,63 @@ def call_visualization(variables):
         plot_fdm_button.disabled = False
 
     plot_fdm_button.on_click(lambda b: plot_fdm(b, variables, out))
+
+    # Define widgets and labels for each parameter
+    first_axis = widgets.Dropdown(options=['x', 'y', 'z'], value='x')
+    second_axis = widgets.Dropdown(options=['x', 'y', 'z'], value='y')
+    bins_x_2d_hist = widgets.IntText(value=256)
+    bins_y_2d_hist = widgets.IntText(value=256)
+    percentage_2d_hist = widgets.FloatText(value=1.0)
+    selected_area_specially_2d_hist = widgets.Dropdown(options=[('False', False), ('True', True)])
+    selected_area_temporally_2d_hist = widgets.Dropdown(options=[('False', False), ('True', True)])
+    save_2d_hist = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
+    figname_2d_hist = widgets.Text(value='2d_hist')
+    figure_size_x_2d_hist = widgets.FloatText(value=5.0)
+    figure_size_y_2d_hist = widgets.FloatText(value=4.0)
+
+    plot_reconstruction_2d_hist_button = widgets.Button(description="plot")
+
+    def plot_reconstruction_2d_hist(b, variables, out):
+
+        if first_axis.value == 'x' and second_axis.value == 'y':
+            x = variables.x
+            y = variables.y
+        elif first_axis.value == 'y' and second_axis.value == 'x':
+            x = variables.y
+            y = variables.x
+        elif first_axis.value == 'x' and second_axis.value == 'z':
+            x = variables.x
+            y = variables.z
+        elif first_axis.value == 'z' and second_axis.value == 'x':
+            x = variables.z
+            y = variables.x
+        elif first_axis.value == 'y' and second_axis.value == 'z':
+            x = variables.y
+            y = variables.z
+        elif first_axis.value == 'z' and second_axis.value == 'y':
+            x = variables.z
+            y = variables.y
+        else:
+            raise ValueError('Invalid axis')
+
+        bins = (bins_x_2d_hist.value, bins_y_2d_hist.value)
+        percentage = percentage_2d_hist.value
+        plot_reconstruction_2d_hist_button.disabled = True
+        xlabel = first_axis.value + ' (nm)'
+        ylabel = second_axis.value + ' (nm)'
+        figure_name = figname_2d_hist.value + '_' + first_axis.value + '_' + second_axis.value
+        save = save_2d_hist.value
+        figure_size = (figure_size_x_2d_hist.value, figure_size_y_2d_hist.value)
+        selected_area_specially = selected_area_specially_2d_hist.value
+        selected_area_temporally = selected_area_temporally_2d_hist.value
+        with out:  # Capture the output within the 'out' widget
+            reconstruction.reconstruction_2d_histogram(variables, x, y, bins,
+                                                       selected_area_specially, selected_area_temporally, percentage,
+                                                       xlabel, ylabel, save, figure_name,
+                                                       figure_size)
+        plot_reconstruction_2d_hist_button.disabled = False
+
+    plot_reconstruction_2d_hist_button.on_click(lambda b: plot_reconstruction_2d_hist(b, variables, out))
 
     # Define widgets and labels for each parameter
     max_tof_mc_widget = widgets.FloatText(value=variables.max_tof)
@@ -327,6 +414,16 @@ def call_visualization(variables):
     ])
 
     tab5 = widgets.VBox([
+        widgets.HBox([widgets.Label(value='Points per frame:', layout=label_layout), points_per_frame_anim]),
+        widgets.HBox([widgets.Label(value='Ranged:', layout=label_layout), ranged_anim]),
+        widgets.HBox([widgets.Label(value='Selected specially:', layout=label_layout), selected_area_specially_anim]),
+        widgets.HBox([widgets.Label(value='Selected temporally:', layout=label_layout), selected_area_temporally_anim]),
+        widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_anim]),
+        widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
+                      widgets.HBox([figure_size_x_anim, figure_size_y_anim])]),
+        widgets.HBox([plot_animated_heatmap_button, clear_button]),
+    ])
+    tab6 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Fraction:', layout=label_layout), frac_fdm_widget]),
         widgets.HBox([widgets.Label(value='Bins:', layout=label_layout), widgets.HBox([bins_x_fdm, bins_y_fdm])]),
         widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_fdm_widget]),
@@ -336,7 +433,7 @@ def call_visualization(variables):
         widgets.HBox([plot_fdm_button, clear_button]),
     ])
 
-    tab6 = widgets.VBox([
+    tab7 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Max TOF:', layout=label_layout), max_tof_mc_widget]),
         widgets.HBox([widgets.Label(value='Fraction:', layout=label_layout), frac_mc_widget]),
         widgets.HBox([widgets.Label(value='Bins:', layout=label_layout), widgets.HBox([bins_x_mc, bins_y_mc])]),
@@ -350,20 +447,39 @@ def call_visualization(variables):
         widgets.HBox([plot_experiment_button, clear_button]),
     ])
 
-    tab7 = widgets.VBox([
+    tab8 = widgets.VBox([
+        widgets.HBox([widgets.Label(value='First axis:', layout=label_layout), first_axis]),
+        widgets.HBox([widgets.Label(value='Second axis:', layout=label_layout), second_axis]),
+        widgets.HBox(
+            [widgets.Label(value='Bins:', layout=label_layout), widgets.HBox([bins_x_2d_hist, bins_y_2d_hist])]),
+        widgets.HBox([widgets.Label(value='Percentage:', layout=label_layout), percentage_2d_hist]),
+        widgets.HBox(
+            [widgets.Label(value='Selected specially:', layout=label_layout), selected_area_specially_2d_hist]),
+        widgets.HBox(
+            [widgets.Label(value='Selected temporally:', layout=label_layout), selected_area_temporally_2d_hist]),
+        widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_2d_hist]),
+        widgets.HBox([widgets.Label(value='Save:', layout=label_layout), save_2d_hist]),
+        widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
+                      widgets.HBox([figure_size_x_2d_hist, figure_size_y_2d_hist])]),
+        widgets.HBox([plot_reconstruction_2d_hist_button, clear_button]),
+    ])
+
+    tab9 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Index row:', layout=label_layout), row_index]),
         widgets.HBox([widgets.Label(value='Color:', layout=label_layout), color_picker]),
         widgets.HBox([show_color, change_color]),
     ])
 
-    tab = widgets.Tab(children=[tab1, tab2, tab3, tab4, tab5, tab6, tab7])
+    tab = widgets.Tab(children=[tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9])
     tab.set_title(0, 'projection')
-    tab.set_title(1, '3d plot')
-    tab.set_title(2, 'mc plot')
-    tab.set_title(3, 'heatmap plot')
-    tab.set_title(4, 'FDM plot')
-    tab.set_title(5, 'Experiment hitstorty plot')
-    tab.set_title(6, 'Range color change')
+    tab.set_title(1, '3d')
+    tab.set_title(2, 'mc')
+    tab.set_title(3, 'heatmap')
+    tab.set_title(4, 'Animated heatmap')
+    tab.set_title(5, 'FDM')
+    tab.set_title(6, 'Experiment hitstorty')
+    tab.set_title(7, '2d sample histogram')
+    tab.set_title(8, 'Range color change')
 
     out = Output()
 

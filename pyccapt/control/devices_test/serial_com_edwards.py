@@ -54,7 +54,7 @@ class EdwardsAGC:
 
 
 if __name__ == '__main__':
-	E_AGC = EdwardsAGC('COM8')
+	E_AGC = EdwardsAGC('COM1')
 	# Example usage of the methods
 	print(E_AGC.my_commands())
 

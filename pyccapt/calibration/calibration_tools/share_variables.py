@@ -53,6 +53,7 @@ class Variables:
         range_data (data frame): range dataset.
         range_data_backup (data frame): Backup range dataset.
         last_directory (str): The last directory.
+        animation_detector_html (str): The animation detector html.
     """
 
     def __init__(self):
@@ -139,3 +140,4 @@ class Variables:
                                                   'charge': 'uint32'})
 
         self.range_data_backup = None
+        self.animation_detector_html = None

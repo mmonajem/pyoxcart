@@ -1,5 +1,3 @@
-from time import sleep
-
 import serial
 
 # Example Program using the control object
@@ -12,33 +10,43 @@ comPort = "COM9"
 
 # Open the port
 ser = serial.Serial(
-	port=comPort,
-	baudrate=38400,
-	stopbits=serial.STOPBITS_ONE,
-	bytesize=serial.EIGHTBITS,
-	rtscts=False
+    port=comPort,
+    baudrate=38400,
+    stopbits=serial.STOPBITS_ONE,
+    bytesize=serial.EIGHTBITS,
+    rtscts=False,
+    timeout=1
 )
-cmd = "ly_oxp2_dev_status"
 
-ser.write(cmd.encode())
-sleep(0.1)
-dataStore = []
-while ser.in_waiting:
-	dataBack = ser.readline()
-	dataStore.append(dataBack.decode())
-ser.close()
-sleep(1)
-print(dataStore.decode())
+# Command to be sent
+cmd = "e_freq?\n"
 
-# Set the laser into standby mode
+try:
+    # Write the command to the serial port
+    ser.write(cmd.encode())
+
+    # Read and print the response
+    response = ser.readline().decode("utf-8")
+    print("Response:", response)
+
+except Exception as e:
+    print("Exception:", e)
+except serial.SerialException as e:
+    print("Error: ", e)
+
+finally:
+    # Close the serial port
+    ser.close()
+
+# # Set the laser into standby mode
 # databack =origamiClassCLI.origClass.Standby(comPort)
 # print(databack)
-
-
-# Wait for it to warm up
-# Either at initial turn on, or after a being in "Listen" mode 
-# The laser will need to warm itself up to get ready
-# Once its ready it returns status =33, here I just use the whole string 
+#
+#
+# # Wait for it to warm up
+# # Either at initial turn on, or after a being in "Listen" mode
+# # The laser will need to warm itself up to get ready
+# # Once its ready it returns status =33, here I just use the whole string
 # flag=0
 # while (flag==0):
 #     databack = origamiClassCLI.origClass.StatusRead(comPort)

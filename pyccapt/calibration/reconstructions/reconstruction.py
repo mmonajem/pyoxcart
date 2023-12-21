@@ -1,9 +1,12 @@
+from copy import copy
+
 import matplotlib.pyplot as plt
 import numpy as np
 import plotly
 import plotly.graph_objects as go
 import plotly.io as pio
-from matplotlib import rcParams
+from matplotlib import rcParams, colors
+from matplotlib.animation import FuncAnimation
 from plotly.subplots import make_subplots
 
 # Local module and scripts
@@ -694,8 +697,8 @@ def heatmap(variables, selected_area_specially, selected_area_temporally, elemen
         ax.scatter(variables.dld_x_det[mask] * 10, variables.dld_y_det[mask] * 10, s=2, label=name_element,
                    color=colors[index], alpha=0.1)
 
-    ax.set_xlabel("x [mm]", color="red", fontsize=10)
-    ax.set_ylabel("y [mm]", color="red", fontsize=10)
+    ax.set_xlabel("det_x (cm)", color="red", fontsize=10)
+    ax.set_ylabel("det_y (cm)", color="red", fontsize=10)
     plt.title("Detector Heatmap")
     if len(variables.range_data) > 1:
         plt.legend(loc='upper right')
@@ -708,6 +711,178 @@ def heatmap(variables, selected_area_specially, selected_area_temporally, elemen
     plt.show()
 
 
+def reconstruction_2d_histogram(variables, x, y, bins, selected_area_specially, selected_area_temporally,
+                                percentage, xlabel='X-axis', ylabel='Y-axis', save=False,
+                                figure_name=None, figure_size=None):
+    """
+    Generate a 2D histogram based on the provided data.
+
+    Args:
+        variables (object): The variables object.
+        x (array): The x-axis data.
+        y (array): The y-axis data.
+        bins (int or tuple): The number of bins.
+        selected_area_specially (bool): True if a specific area is selected, False otherwise.
+        selected_area_temporally (bool): True if a specific area is selected, False otherwise.
+        percentage (float): percent of data to be plotted.
+        xlabel (str): The label of the x-axis.
+        ylabel (str): The label of the y-axis.
+        save (bool): True to save the plot, False to display it.
+        figure_name (str): The name of the figure.
+        figure_size (tuple): The size of the figure.
+
+    Returns:
+        None
+        :param percentage:
+    """
+    if selected_area_specially:
+        mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
+                       (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
+                       (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+    elif selected_area_temporally:
+        mask_spacial = np.logical_and((variables.mc_calib > variables.selected_x1),
+                                      (variables.mc_calib < variables.selected_x2))
+    elif selected_area_specially and selected_area_temporally:
+        mask_temporally = np.logical_and((variables.mc_calib > variables.selected_x1),
+                                         (variables.mc_calib < variables.selected_x2))
+        mask_specially = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
+                         (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
+                         (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+        mask_spacial = mask_specially & mask_temporally
+    else:
+        mask_spacial = np.ones(len(x), dtype=bool)
+
+    x = x[mask_spacial]
+    y = y[mask_spacial]
+
+    num_elements_to_select = int(len(x) * percentage)
+    # Randomly select elements
+    x = np.random.choice(x, size=num_elements_to_select, replace=False)
+    y = np.random.choice(y, size=num_elements_to_select, replace=False)
+
+    # Check if the bin is a tuple
+    if isinstance(bins, tuple):
+        pass
+    else:
+        x_edges = np.arange(x.min(), x.max() + bins, bins)
+        y_edges = np.arange(y.min(), y.max() + bins, bins)
+        bins = [x_edges, y_edges]
+
+    fig, ax = plt.subplots(figsize=figure_size)
+
+    hist, xedges, yedges, _ = plt.hist2d(x, y, bins=bins, cmap='viridis')
+
+    # Add a colorbar
+    cmap = copy(plt.cm.plasma)
+    cmap.set_bad(cmap(0))
+
+    pcm = ax.pcolormesh(xedges, yedges, hist.T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
+    cbar = fig.colorbar(pcm, ax=ax, pad=0)
+    cbar.set_label('Event Counts', fontsize=10)
+
+    # Add labels and title
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+    if save:
+        # Enable rendering for text elements
+        rcParams['svg.fonttype'] = 'none'
+        plt.savefig(variables.result_path + figure_name + ".png", format="png", dpi=600)
+        plt.savefig(variables.result_path + figure_name + ".svg", format="svg", dpi=600)
+    # Show the plot
+    plt.show()
+
+
+def detector_animation(variables, points_per_frame, ranged, selected_area_specially, selected_area_temporally,
+                       figure_name, figure_sie, save):
+    """
+    Generate a animated heatmap based on the provided data.
+
+    Args:
+        variables (object): The variables object.
+        points_per_frame (int): The number of points per frame.
+        ranged (bool): True if the data is ranged, False otherwise.
+        selected_area_specially (bool): True if a specific area is selected, False otherwise.
+        selected_area_temporally (bool): True if a specific area is selected, False otherwise.
+        figure_name (str): The name of the figure.
+        figure_sie: The size of the figure.
+        save (bool): True to save the plot, False to display it.
+
+    Returns:
+        None
+    """
+    if selected_area_specially:
+        mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
+                       (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
+                       (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+    elif selected_area_temporally:
+        mask_spacial = np.logical_and((variables.mc_calib > variables.selected_x1),
+                                      (variables.mc_calib < variables.selected_x2))
+    elif selected_area_specially and selected_area_temporally:
+        mask_temporally = np.logical_and((variables.mc_calib > variables.selected_x1),
+                                         (variables.mc_calib < variables.selected_x2))
+        mask_specially = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
+                         (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
+                         (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
+        mask_spacial = mask_specially & mask_temporally
+    else:
+        mask_spacial = np.ones(len(variables.dld_t), dtype=bool)
+
+    if ranged == True:
+        ions = variables.range_data['ion'].tolist()
+        colors = variables.range_data['color'].tolist()
+        mc_low = variables.range_data['mc_low'].tolist()
+        mc_up = variables.range_data['mc_up'].tolist()
+    else:
+        ions = ['unranged']
+        colors = ['black']
+        mc_low = [0]
+        mc_up = [400]
+
+    x_data = variables.dld_x_det[mask_spacial]
+    y_data = variables.dld_y_det[mask_spacial]
+
+    # Define the number of points per frame
+    points_per_frame = 5000
+
+    # Calculate the total number of frames
+    total_frames = len(x_data) // points_per_frame
+
+    # Create a figure and axis
+    fig, ax = plt.subplots(figsize=figure_sie)
+
+    # Function to update the scatter plot for each frame
+    def update(frame):
+        ax.clear()
+        start_idx = frame * points_per_frame
+        end_idx = (frame + 1) * points_per_frame
+        mc = variables.mc_c[start_idx:end_idx]
+        for index, elemen in enumerate(ions):
+            mask = (mc > mc_low[index]) & (mc < mc_up[index])
+            mask = mask & mask_spacial[start_idx:end_idx]
+            x = x_data[start_idx:end_idx][mask]
+            y = y_data[start_idx:end_idx][mask]
+            if ions[index] == 'unranged':
+                name_element = 'unranged'
+            else:
+                name_element = '%s' % ions[index]
+            ax.scatter(x, y, s=2, label=name_element,
+                       color=colors[index], alpha=0.1)
+            ax.set_title(f'Ion index: {start_idx} to {end_idx}')
+            ax.set_xlabel("det_x (cm)", color="red", fontsize=10)
+            ax.set_ylabel("det_y (cm)", color="red", fontsize=10)
+
+    # Create an animation
+    animation = FuncAnimation(fig, update, frames=total_frames, interval=500)
+
+    # Convert the animation to HTML
+    variables.animation_detector_html = animation.to_jshtml()
+
+    if save:
+        # Enable rendering for text elements
+        rcParams['svg.fonttype'] = 'none'
+        animation.save(variables.result_path + figure_name + ".gif", writer='imagemagick')
+    plt.close()
 def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, field_evap,
                                avg_dens, flight_path_length, rotary_fig_save, mode, opacity, figname, save):
     """

@@ -141,6 +141,7 @@ def initialize_edwards_tic_load_lock(conf, variables):
 	Returns:
 		None
 	"""
+
 	E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll)
 	response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_ll)
 	variables.vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
@@ -211,13 +212,32 @@ def state_update(conf, variables, emitter):
 	"""
 	if conf['gauges'] == "on":
 		if conf['COM_PORT_gauge_mc'] != "off":
-			tpg = TPG362(port=variables.COM_PORT_gauge_mc)
+			try:
+				tpg = TPG362(port=variables.COM_PORT_gauge_mc)
+			except Exception as e:
+				print(f"Error initializing TPG362 on port {variables.COM_PORT_gauge_mc}: {e}")
+				tpg = None
+
 		if conf['COM_PORT_gauge_bc'] != "off":
-			E_AGC_bc = EdwardsAGC(variables.COM_PORT_gauge_bc, variables)
+			try:
+				E_AGC_bc = EdwardsAGC(variables.COM_PORT_gauge_bc, variables)
+			except Exception as e:
+				print(f"Error initializing EdwardsAGC (BC) on port {variables.COM_PORT_gauge_bc}: {e}")
+				E_AGC_bc = None
+
 		if conf['COM_PORT_gauge_ll'] != "off":
-			E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll, variables)
+			try:
+				E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll, variables)
+			except Exception as e:
+				print(f"Error initializing EdwardsAGC (LL) on port {variables.COM_PORT_gauge_ll}: {e}")
+				E_AGC_ll = None
+
 		if conf['COM_PORT_gauge_cll'] != "off":
-			E_AGC_cll = EdwardsAGC(variables.COM_PORT_gauge_cll, variables)
+			try:
+				E_AGC_cll = EdwardsAGC(variables.COM_PORT_gauge_cll, variables)
+			except Exception as e:
+				print(f"Error initializing EdwardsAGC (CLL) on port {variables.COM_PORT_gauge_cll}: {e}")
+				E_AGC_cll = None
 
 	if conf['cryo'] == "off":
 		print('The cryo temperature monitoring is off')
