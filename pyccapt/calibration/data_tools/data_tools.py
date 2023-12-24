@@ -161,7 +161,7 @@ def remove_invalid_data(dld_group_storage, max_tof):
     return dld_group_storage
 
 
-def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, csv=False):
+def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, csv=False, temp=False):
     """
     save data in different formats
 
@@ -173,25 +173,30 @@ def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, cs
         pos (bool): save data as pos file.
         ato_6v (bool): save data as ato file.
         csv (bool): save data as csv file.
+        temp (bool): save data as temporary file.
 
     Returns:
         None. The DataFrame is modified in-place.
 
     """
+    if temp:
+        data_name = variables.result_data_name + 'temp'
+    else:
+        data_name = variables.result_data_name
     if hdf:
         # save the dataset to hdf5 file
         hierarchyName = 'df'
-        store_df_to_hdf(data, hierarchyName, variables.result_data_path + '//' + variables.result_data_name + '.h5')
+        store_df_to_hdf(data, hierarchyName, variables.result_data_path + '//' + data_name + '.h5')
     if epos:
         # save data as epos file
         ccapt_tools.ccapt_to_epos(data, path=variables.result_path,
-                                  name=variables.result_data_name + '.epos')
+                                  name=data_name + '.epos')
     if pos:
         # save data in pos format
-        ccapt_tools.ccapt_to_pos(data, path=variables.result_path, name=variables.result_data_name + '.pos')
+        ccapt_tools.ccapt_to_pos(data, path=variables.result_path, name=data_name + '.pos')
     if ato_6v:
         # save data as ato file in  ersion 6
-        ato_tools.ccapt_to_ato(data, path=variables.result_path, name=variables.result_data_name + '.ato')
+        ato_tools.ccapt_to_ato(data, path=variables.result_path, name=data_name + '.ato')
     if csv:
         # save data in csv format
         store_df_to_csv(data, variables.result_path + variables.result_data_name + '.csv')

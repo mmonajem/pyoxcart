@@ -1,9 +1,10 @@
 from copy import copy
 from itertools import product
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import rcParams, colors
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, minimize
 from scipy.signal import find_peaks
 from sklearn.cluster import KMeans
 
@@ -418,7 +419,43 @@ def bowl_corr_fit(data_xy, a, b, c, d, e, f):
     return result
 
 
-def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, maximum_location, sample_size,
+def objective_bowl(params, x, y):
+    """
+    Objective function for the bowl correction.
+
+    Args:
+        data_xy (list): Tuple containing the x and y data points.
+        a, b, c, d, e, f (float): Coefficients of the quadratic equation.
+
+    Returns:
+        result (numpy.ndarray): Result of the quadratic equation.
+    """
+
+    cx, cy, r = params
+    distance = np.sqrt((x - cx) ** 2 + (y - cy) ** 2)
+    residuals = distance - np.sqrt(r ** 2 - distance ** 2)
+    return np.sum(residuals ** 2)
+
+
+def f_bowl_calculation(x, y, params):
+    """
+    Compute the bowl correction value for a given x and y.
+
+    Args:
+        x (float): X coordinate.
+        y (float): Y coordinate.
+        params (numpy.ndarray): Parameters of the bowl correction.
+
+    Returns:
+        f_bowl (float): Bowl correction value.
+    """
+    cx, cy, r = params
+    distance = np.sqrt((x - cx) ** 2 + (y - cy) ** 2)
+    f_bowl = np.sqrt(r ** 2 - distance ** 2) / r
+    return f_bowl
+
+
+def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, maximum_location, sample_size, fit_mode,
                     index_fig, plot, save, fig_size=(7, 5)):
     """
     Perform bowl correction on the input data.
@@ -430,6 +467,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         det_diam (float): Diameter of the detector.
         maximum_location (float): Maximum location for normalization.
         sample_size (int): Size of each sample.
+        fit_mode (str): Fit mode ('curve_fit' or 'minimize').
         index_fig (int): Index for figure naming.
         plot (bool): Flag indicating whether to plot the surface.
         save (bool): Flag indicating whether to save the plot.
@@ -442,10 +480,10 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
     y_sample_list = []
     dld_t_peak_list = []
 
-    w1 = -int(det_diam)
-    w2 = int(det_diam)
-    h1 = w1
-    h2 = w2
+    w1 = int(np.min(dld_x_bowl))
+    w2 = int(np.max(dld_x_bowl))
+    h1 = int(np.min(dld_y_bowl))
+    h2 = int(np.max(dld_y_bowl))
 
 
     d = sample_size  # sample size is in mm - so we change it to cm
@@ -463,14 +501,25 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
             y_sample_list.append(np.median(x_y_selected[:, 1]))
             dld_t_peak_list.append(np.mean(dld_t_bowl[mask]) / maximum_location)
 
-    parameters, covariance = curve_fit(bowl_corr_fit, [np.array(x_sample_list), np.array(y_sample_list)],
-                                       np.array(dld_t_peak_list))
+    print('x_sample_list', x_sample_list)
+    print('y_sample_list', y_sample_list)
+    if fit_mode == 'curve_fit':
+        parameters, covariance = curve_fit(bowl_corr_fit, [np.array(x_sample_list), np.array(y_sample_list)],
+                                           np.array(dld_t_peak_list))
+    elif fit_mode == 'minimize':
+        initial_guess = [0, 0, 1]  # Initial guess for center (cx, cy) and radius r
+        parameters = minimize(objective_bowl, initial_guess,
+                              args=(np.array(x_sample_list).flatten(), np.array(y_sample_list).flatten()))
+        parameters = parameters.x
 
     if plot or save:
         model_x_data = np.linspace(-35, 35, 30)
         model_y_data = np.linspace(-35, 35, 30)
         X, Y = np.meshgrid(model_x_data, model_y_data)
-        Z = bowl_corr_fit(np.array([X, Y]), *parameters)
+        if fit_mode == 'curve_fit':
+            Z = bowl_corr_fit(np.array([X, Y]), *parameters)
+        elif fit_mode == 'minimize':
+            Z = f_bowl_calculation(X, Y, parameters)
 
         fig, ax = plt.subplots(figsize=fig_size, subplot_kw=dict(projection="3d"), constrained_layout=True)
         fig.add_axes(ax)
@@ -494,9 +543,8 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
     return parameters
 
 
-def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sample_size, calibration_mode, index_fig,
-                         plot, save, apply_local='all',
-                         maximum_cal_method='mean', fig_size=(5, 5)):
+def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sample_size, fit_mode, calibration_mode,
+                         index_fig, plot, save, apply_local='all', maximum_cal_method='mean', fig_size=(5, 5)):
     """
     Perform bowl correction on the input data and plot the results.
 
@@ -506,6 +554,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         dld_highVoltage (numpy.ndarray): High voltage values.
         det_diam (float): Detector diameter.
         sample_size (int): Sample size.
+        fit_mode (str): Fit mode ('curve_fit' or 'minimize').
         calibration_mode (str): Calibration mode ('tof' or 'mc').
         index_fig (int): Index figure.
         plot (bool): Flag indicating whether to plot the results.
@@ -549,14 +598,16 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
             maximum_location = np.mean(dld_peak_mid)
     elif maximum_cal_method == 'mean':
         maximum_location = np.mean(dld_peak_mid)
-    print('The maximum of histogram is located at:', maximum_location)
+    print('The maximum/mean of peak is located at:', maximum_location)
 
     dld_x_peak = dld_x[mask_temporal]
     dld_y_peak = dld_y[mask_temporal]
     dld_highVoltage_peak = dld_highVoltage[mask_temporal]
 
+    print('The mean of tof  before bowl calibration is:', np.mean(dld_peak))
     parameters = bowl_correction(dld_x_peak, dld_y_peak, dld_peak, variables, det_diam, maximum_location,
-                                 sample_size=sample_size, index_fig=index_fig, plot=plot, save=save, fig_size=fig_size)
+                                 sample_size=sample_size, fit_mode=fit_mode, index_fig=index_fig, plot=plot, save=save,
+                                 fig_size=fig_size)
     print('The fit result is:', parameters)
 
     if apply_local == 'all':
@@ -564,11 +615,16 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
     elif apply_local == 'temporal':
         mask_fv = mask_temporal
 
-    f_bowl = bowl_corr_fit([dld_x[mask_fv], dld_y[mask_fv]], *parameters)
+    if fit_mode == 'curve_fit':
+        f_bowl = bowl_corr_fit([dld_x[mask_fv], dld_y[mask_fv]], *parameters)
+    elif fit_mode == 'minimize':
+        f_bowl = f_bowl_calculation(dld_x[mask_fv], dld_y[mask_fv], parameters)
 
     calibration_mc_tof = np.copy(variables.dld_t_calib) if calibration_mode == 'tof' else np.copy(variables.mc_calib)
 
     calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] / f_bowl
+
+    print('The mean of tof  before bowl calibration is:', np.mean(calibration_mc_tof[mask_temporal]))
 
     if plot or save:
         # Plot how bowl correct tof/mc vs high voltage
@@ -585,7 +641,10 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         ax1.set_xlabel("Voltage (kV)", fontsize=10)
         plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
 
-        f_bowl_plot = bowl_corr_fit([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
+        if fit_mode == 'curve_fit':
+            f_bowl_plot = bowl_corr_fit([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
+        elif fit_mode == 'minimize':
+            f_bowl_plot = f_bowl_calculation(dld_x_peak[mask], dld_y_peak[mask], parameters)
         dld_t_plot = dld_peak[mask] / f_bowl_plot
 
         y = plt.scatter(dld_highVoltage_peak[mask] / 1000, dld_t_plot, color="red", label=r"$t_{C_{B}}$", s=1)
@@ -603,8 +662,10 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         # Plot how bowl correction correct tof/mc vs dld_x position
         fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
         mask = np.random.randint(0, len(dld_highVoltage_peak), 10000)
-
-        f_bowl_plot = bowl_corr_fit([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
+        if fit_mode == 'curve_fit':
+            f_bowl_plot = bowl_corr_fit([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
+        elif fit_mode == 'minimize':
+            f_bowl_plot = f_bowl_calculation(dld_x_peak[mask], dld_y_peak[mask], parameters)
         dld_t_plot = dld_peak[mask] / f_bowl_plot
 
         x = plt.scatter(dld_x_peak[mask], dld_peak[mask], color="blue", label=r"$t$", s=1)

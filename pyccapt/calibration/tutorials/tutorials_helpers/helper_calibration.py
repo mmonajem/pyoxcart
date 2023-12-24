@@ -118,6 +118,8 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
 
     # Create a button widget to bowl correction function
     sample_size_b = widgets.IntText(value=11, description='sample size:', layout=label_layout)
+    fit_mode_b = widgets.Dropdown(options=[('curve_fit', 'curve_fit'), ('minimize', 'minimize')],
+                                  description='fit mode:', layout=label_layout)
     index_fig_b = widgets.IntText(value=1, description='fig index:', layout=label_layout)
     maximum_cal_method_b = widgets.Dropdown(
         options=[('mean', 'mean'), ('histogram', 'histogram')],
@@ -154,6 +156,7 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
             else:
                 print('Selected mc ranges are: (%s, %s)' % (variables.selected_x1, variables.selected_x2))
                 sample_size_p = sample_size_b.value
+                fit_mode_p = fit_mode_b.value
                 index_fig_p = index_fig_b.value
                 plot_p = plot_b.value
                 save_p = save_b.value
@@ -163,7 +166,8 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
                     calibration.bowl_correction_main(variables.dld_x_det, variables.dld_y_det,
                                                      variables.dld_high_voltage,
                                                      variables, det_diam.value,
-                                                     sample_size=sample_size_p, maximum_cal_method=maximum_cal_method_p,
+                                                     sample_size=sample_size_p, fit_mode=fit_mode_p,
+                                                     maximum_cal_method=maximum_cal_method_p,
                                                      apply_local=apply_b.value, fig_size=figure_size,
                                                      calibration_mode=calibration_mode.value, index_fig=index_fig_p,
                                                      plot=plot_p, save=save_p)
@@ -230,8 +234,8 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
     column11 = widgets.VBox([bin_size, prominence, distance, lim_tof, percent, bin_fdm, plot_peak, index_fig, save,
                              figure_mc_size_x, figure_mc_size_y])
     column12 = widgets.VBox([plot_button, save_button, reset_back_button, clear_plot, plot_stat_button])
-    column22 = widgets.VBox([sample_size_b, index_fig_b, maximum_cal_method_b, apply_b, plot_b, save_b, figure_b_size_x,
-                             figure_b_size_y])
+    column22 = widgets.VBox([sample_size_b, fit_mode_b, index_fig_b, maximum_cal_method_b, apply_b, plot_b, save_b,
+                             figure_b_size_x, figure_b_size_y])
     column21 = widgets.VBox([bowl_button, pb_bowl])
     column33 = widgets.VBox([sample_size_v, index_fig_v, mode_v, apply_v, num_cluster, peak_mode, plot_v, save_v,
                              figure_v_size_x, figure_v_size_y])

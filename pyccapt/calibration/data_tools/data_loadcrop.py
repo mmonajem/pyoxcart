@@ -198,7 +198,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
 
 
 def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, figure_size=(5, 4), draw_circle=False,
-                  save=True, figname=''):
+                  save=True, figname='', axis_mode='normal'):
     """
     Plot and crop the FDM with the option to select a region of interest.
 
@@ -210,6 +210,7 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
         save: Flag to choose whether to save the plot or not
         data_crop: Flag to control whether only the plot is shown or cropping functionality is enabled
         figname: Name of the figure to be saved
+        axis_mode: Flag to choose whether to plot axis or scalebar: 'normal' or 'scalebar'
 
     Returns:
         None
@@ -238,8 +239,7 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
     FDM, xedges, yedges = np.histogram2d(x, y, bins=bins)
 
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    ax1.set_xlabel(r"$X_{det} (cm)$", fontsize=10)
-    ax1.set_ylabel(r"$Y_{det} (cm)$", fontsize=10)
+
 
     cmap = copy(plt.cm.plasma)
     cmap.set_bad(cmap(0))
@@ -262,18 +262,22 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
         circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
                       alpha=0.3, color='green', linewidth=5)
         ax1.add_patch(circ)
+    if axis_mode == 'scalebar':
+	    fontprops = fm.FontProperties(size=10)
+	    scalebar = AnchoredSizeBar(ax1.transData,
+	                               1, '1 cm', 'lower left',
+	                               pad=0.1,
+	                               color='white',
+	                               frameon=False,
+	                               size_vertical=0.1,
+	                               fontproperties=fontprops)
 
-    fontprops = fm.FontProperties(size=10)
-    scalebar = AnchoredSizeBar(ax1.transData,
-                               1, '1 cm', 'lower left',
-                               pad=0.1,
-                               color='white',
-                               frameon=False,
-                               size_vertical=0.1,
-                               fontproperties=fontprops)
+	    ax1.add_artist(scalebar)
+	    plt.axis('off')  # Turn off both x and y axes
+    elif axis_mode == 'normal':
+	    ax1.set_xlabel(r"$X_{det} (cm)$", fontsize=10)
+	    ax1.set_ylabel(r"$Y_{det} (cm)$", fontsize=10)
 
-    ax1.add_artist(scalebar)
-    plt.axis('off')  # Turn off both x and y axes
     if save:
         # Enable rendering for text elements
         rcParams['svg.fonttype'] = 'none'
