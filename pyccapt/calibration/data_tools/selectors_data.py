@@ -60,6 +60,7 @@ def line_select_callback(eclick, erelease, variables):
         variables (object): Object containing the variables.
 
     """
+
     x1, y1 = eclick.xdata, eclick.ydata
     x2, y2 = erelease.xdata, erelease.ydata
 
@@ -70,7 +71,7 @@ def line_select_callback(eclick, erelease, variables):
     variables.selected_calculated = False
 
 
-def toggle_selector(event):
+def toggle_selector(event,):
     """
     Toggles the rectangle selector based on the key press event.
 
@@ -78,10 +79,12 @@ def toggle_selector(event):
         event (KeyEvent): Event object representing the key press event.
 
     """
+
     try:
         if event.key in ['Q', 'q'] and toggle_selector.RS.active:
             toggle_selector.RS.set_active(False)
         if event.key in ['A', 'a'] and not toggle_selector.RS.active:
             toggle_selector.RS.set_active(True)
-    except:
+
+    except AttributeError:
         pass

@@ -40,6 +40,8 @@ class AptHistPlotter:
             mc_tof (numpy.ndarray): Array for mc or tof data.
             variables (share_variables.Variables): The global experiment variables.
         """
+        self.percent = None
+        self.rectangle = None
         self.ax1 = None
         self.bins = None
         self.plotted_circles = []
@@ -64,7 +66,7 @@ class AptHistPlotter:
         self.legend_colors = []
 
     def plot_histogram(self, bin_width=0.1, mode=None, label='mc', log=True, grid=False, steps='stepfilled',
-                       fig_size=(9, 5)):
+                       fig_size=(9, 5), plot_show=True):
         """
         Plot the histogram of the mc or tof data.
 
@@ -76,6 +78,7 @@ class AptHistPlotter:
             grid (bool): Whether to show the grid.
             steps (str): The type of the histogram ('stepfilled' or 'bar').
             fig_size (tuple): The size of the figure.
+            plot_show (bool): Whether to show the plot.
 
         Returns:
             tuple: A tuple of the y and x values of the histogram.
@@ -111,7 +114,8 @@ class AptHistPlotter:
         # Set the limits for both x and y axes using plt.ylim
         # plt.ylim(bottom=plt.yticks()[0][0], top=plt.yticks()[0][-1])
         # plt.xlim(left=plt.xticks()[0][0], right=plt.xticks()[0][-1])
-        plt.show()
+        if plot_show:
+            plt.show()
 
 
         self.variables.x_hist = self.x
@@ -242,8 +246,8 @@ class AptHistPlotter:
 
             if background is not None:
                 if legend_mode == 'long':
-                    txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nMRP(FWHM): %s' \
-                          % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp)
+                    txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nMRP(%.2f): %s' \
+                          % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent/100, mrp)
                 elif legend_mode == 'short':
                     txt = 'MRP(FWHM): %s' % (mrp)
             else:
@@ -254,8 +258,8 @@ class AptHistPlotter:
                 BG4 = np.sum(self.y[np.array(mask[:-1])]) / (upperLim - lowerLim)
                 BG4 = BG4 / len(self.mc_tof) * 1E6
                 if legend_mode == 'long':
-                    txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nBG@4: %s ppm/Da\nMRP(FWHM): %s' \
-                          % (bin, (len(self.mc_tof) / 1000000), round(BG4), mrp)
+                    txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nBG@4: %s ppm/Da\nMRP(%.2f): %s' \
+                          % (bin, (len(self.mc_tof) / 1000000), round(BG4), self.percent/100, mrp)
                 elif legend_mode == 'short':
                     txt = 'MRP(FWHM): %s' % (mrp)
 
@@ -265,8 +269,8 @@ class AptHistPlotter:
                                                       self.x[round(self.peak_widths[2][index_peak_max])]))
             if background is not None:
                 if legend_mode == 'long':
-                    txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nMRP(FWHM): %s' \
-                          % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp)
+                    txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nMRP(%.2f): %s' \
+                          % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent/100, mrp)
                 elif legend_mode == 'short':
                     txt = 'MRP(FWHM): %s' % ( mrp)
             else:
@@ -277,8 +281,8 @@ class AptHistPlotter:
                 BG50 = np.sum(self.y[np.array(mask[:-1])]) / (upperLim - lowerLim)
                 BG50 = BG50 / len(self.mc_tof) * 1E6
                 if legend_mode == 'long':
-                    txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nBG@50: %s ppm/ns\nMRP(FWHM): %s' \
-                          % (bin, len(self.mc_tof) / 1000000, round(BG50), mrp)
+                    txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nBG@50: %s ppm/ns\nMRP(%.2f): %s' \
+                          % (bin, len(self.mc_tof) / 1000000, round(BG50), self.percent/100, mrp)
                 elif legend_mode == 'short':
                     txt = 'MRP(FWHM): %s' % (mrp)
 
@@ -290,6 +294,33 @@ class AptHistPlotter:
             self.ax.text(.98, .95, txt, va='top', ma='left', transform=self.ax.transAxes, bbox=props, fontsize=10, alpha=1,
                      horizontalalignment='right', verticalalignment='top')
 
+    def mrp_calculation(self):
+        """
+        Calculate the MRP.
+
+        Args:
+            None
+
+        Returns:
+            list: A list of the MRP values.
+        """
+        mrp_range = [0.5, 0.1, 0.01]
+        mrp = []
+        for mrp_r in mrp_range:
+            mrp_r = 1 - mrp_r
+            try:
+                peaks, properties = find_peaks(self.y, prominence=None, distance=None, height=0)
+                peak_width = peak_widths(self.y, peaks, rel_height=mrp_r, prominence_data=None)
+                prominences = peak_prominences(self.y, peaks, wlen=None)
+            except ValueError:
+                print('Peak finding failed for MRP(%s)' % mrp_r)
+
+            index_peak_max = np.argmax(prominences[0])
+            mrp_tmp = self.x[peaks][index_peak_max] / (self.x[round(peak_width[3][index_peak_max])] -
+                                                                        self.x[round(peak_width[2][index_peak_max])])
+            mrp.append(mrp_tmp)
+
+        return mrp
     def plot_horizontal_lines(self):
         """
         Plot the horizontal lines.
@@ -442,6 +473,8 @@ class AptHistPlotter:
         Returns:
             tuple: A tuple of the peaks, properties, peak widths, and prominences.
         """
+        self.percent = percent
+        percent = 100 - percent
         try:
             self.peaks, self.properties = find_peaks(self.y, prominence=prominence, distance=distance, height=0)
             self.peak_widths = peak_widths(self.y, self.peaks, rel_height=(percent / 100), prominence_data=None)
@@ -454,6 +487,7 @@ class AptHistPlotter:
             index_max_ini = np.argmax(y_peaks)
             self.variables.max_peak = x_peaks[index_max_ini]
             self.variables.peak_widths = self.peak_widths
+
         except ValueError:
             print('Peak finding failed.')
             self.peaks = None
@@ -465,6 +499,31 @@ class AptHistPlotter:
             self.variables.max_peak = None
 
         return self.peaks, self.properties, self.peak_widths, self.prominences
+
+    def draw_rectangle(self,):
+        """
+        Draw the rectangle and find .
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        # Automatic left and right side of the max peak selection
+        index_max_ini = np.argmax(self.prominences[0])
+        self.variables.selected_x1 = self.x[round(self.peak_widths[2][index_max_ini])]
+        self.variables.selected_x2 = self.x[round(self.peak_widths[3][index_max_ini])]
+        self.variables.selected_y1 = 0
+        self.variables.selected_y2 = self.prominences[0][index_max_ini]
+
+        # Draw the rectangle
+        self.rectangle = plt.Rectangle((self.variables.selected_x1, self.variables.selected_y1),
+                                  self.variables.selected_x2 - self.variables.selected_x1,self.variables.selected_y2,
+                                  edgecolor='g', facecolor=(0, 1, 0, 0.5),  linewidth=1)
+        self.ax.add_patch(self.rectangle)
+
+
 
     def selector(self, selector='rect'):
         """
@@ -479,7 +538,7 @@ class AptHistPlotter:
         if selector == 'rect':
             # Connect and initialize rectangle box selector
             data_loadcrop.rectangle_box_selector(self.ax, self.variables)
-            plt.connect('key_press_event', selectors_data.toggle_selector(self.variables))
+            plt.connect('key_press_event', lambda event: data_loadcrop.toggle_selector(event))
         elif selector == 'peak':
             # connect peak_x selector
             af = intractive_point_identification.AnnoteFinder(self.x[self.peaks], self.y[self.peaks], self.annotates,
@@ -563,7 +622,7 @@ class AptHistPlotter:
 def hist_plot(variables, bin_size, log, target, mode, prominence, distance, percent, selector, figname, lim,
               peaks_find_plot, peaks_find=True, range_plot=False, plot_ranged_ions=False, ranging_mode=False,
               selected_area_specially=False, selected_area_temporally=False, save_fig=True, print_info=True,
-              figure_size=(9, 5)):
+              figure_size=(9, 5), plot_show=True):
     """
     Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
     Args:
@@ -586,6 +645,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         selected_area_temporally (bool): Plot selected area temporally.
         print_info: Print the information about the peaks.
         figure_size (tuple): Figure size.
+        plot_show (bool): Show the plot.
     Returns:
         None
 
@@ -634,11 +694,11 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
     if target == 'mc' or target == 'mc_c':
         mc_hist = AptHistPlotter(hist[hist < lim], variables)
         y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log,
-                                      fig_size=figure_size)
+                                      fig_size=figure_size, plot_show=plot_show)
     elif target == 'tof' or target == 'tof_c':
         mc_hist = AptHistPlotter(hist[hist < lim], variables)
         y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log,
-                                      fig_size=figure_size)
+                                      fig_size=figure_size, plot_show=plot_show)
 
     # copy the mc_hist to variables to use the methods of that class in other functions
     variables.AptHistPlotter = mc_hist
@@ -646,6 +706,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
     if mode != 'normalized' and peaks_find and not range_plot and not ranging_mode:
         peaks, properties, peak_widths, prominences = mc_hist.find_peaks_and_widths(prominence=prominence,
                                                                                     distance=distance, percent=percent)
+        mc_hist.draw_rectangle()
         if peaks_find_plot:
             mc_hist.plot_peaks()
         mc_hist.plot_hist_info_legend(label=target, bin=0.1, background=None, legend_mode='long', loc='right')
@@ -671,7 +732,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
     if peaks is not None and print_info:
         index_max_ini = np.argmax(prominences[0])
         mrp = x[int(peaks[index_max_ini])] / (
-                    x[int(peak_widths[3][index_max_ini])] - x[int(peak_widths[2][index_max_ini])])
+                    x[round(peak_widths[3][index_max_ini])] - x[round(peak_widths[2][index_max_ini])])
         print('Mass resolving power for the highest peak_x at peak_x index %a (MRP --> m/m_2-m_1):' % index_max_ini,
               mrp)
         for i in range(len(peaks)):
@@ -682,3 +743,10 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
                                                                                       x[round(peak_widths[3][i])]),
                   '-> MRP: {:.2f}'.format(
                       x[round(peaks[i])] / (x[round(peak_widths[3][i])] - x[round(peak_widths[2][i])])))
+
+    if not plot_show and peaks_find:
+        mrp_list = mc_hist.mrp_calculation()
+    else:
+        mrp_list = None
+
+    return mrp_list

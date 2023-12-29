@@ -115,7 +115,6 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     heatmap, xedges, yedges = np.histogram2d(xaxis, tof, bins=bins)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 
-
     # Set x-axis label
     ax1.set_xlabel("Hit Sequence Number", fontsize=10)
     # Set y-axis label
@@ -240,7 +239,6 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
 
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 
-
     cmap = copy(plt.cm.plasma)
     cmap.set_bad(cmap(0))
     pcm = ax1.pcolormesh(xedges, yedges, FDM.T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
@@ -263,20 +261,20 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
                       alpha=0.3, color='green', linewidth=5)
         ax1.add_patch(circ)
     if axis_mode == 'scalebar':
-	    fontprops = fm.FontProperties(size=10)
-	    scalebar = AnchoredSizeBar(ax1.transData,
-	                               1, '1 cm', 'lower left',
-	                               pad=0.1,
-	                               color='white',
-	                               frameon=False,
-	                               size_vertical=0.1,
-	                               fontproperties=fontprops)
+        fontprops = fm.FontProperties(size=10)
+        scalebar = AnchoredSizeBar(ax1.transData,
+                                   1, '1 cm', 'lower left',
+                                   pad=0.1,
+                                   color='white',
+                                   frameon=False,
+                                   size_vertical=0.1,
+                                   fontproperties=fontprops)
 
-	    ax1.add_artist(scalebar)
-	    plt.axis('off')  # Turn off both x and y axes
+        ax1.add_artist(scalebar)
+        plt.axis('off')  # Turn off both x and y axes
     elif axis_mode == 'normal':
-	    ax1.set_xlabel(r"$X_{det} (cm)$", fontsize=10)
-	    ax1.set_ylabel(r"$Y_{det} (cm)$", fontsize=10)
+        ax1.set_xlabel(r"$X_{det} (cm)$", fontsize=10)
+        ax1.set_ylabel(r"$Y_{det} (cm)$", fontsize=10)
 
     if save:
         # Enable rendering for text elements
@@ -292,6 +290,7 @@ def rectangle_box_selector(axisObject, variables):
 
     Args:
         axisObject: Object to create the rectangular box
+        variables: Variables object
 
     Returns:
         None
