@@ -35,8 +35,12 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc):
 	# Create data farame out of hdf5 file dataset
 	dld_group_storage = data_tools.load_data(dataset_path, tdc, mode='raw')
 
-	# Remove the data with tof greater thatn Max TOF or below 0 ns
-	data = data_tools.remove_invalid_data(dld_group_storage, max_tof)
+	if tdc == 'pyccapt':
+		# Remove the data with tof greater than Max TOF or below 0 ns
+		data = data_tools.remove_invalid_data(dld_group_storage, max_tof)
+	else:
+		data = dld_group_storage
+
 	print('Total number of Ions:', len(data))
 
 	variables.data = data

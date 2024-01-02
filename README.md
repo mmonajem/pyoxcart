@@ -78,7 +78,7 @@ pyccapt/
 
    ```bash
    conda create -n apt_env python=3.9
-    ```
+    ```**
 
 2. Activate the virtual environment:
 
