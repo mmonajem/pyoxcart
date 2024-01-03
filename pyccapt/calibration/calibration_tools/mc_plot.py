@@ -117,7 +117,6 @@ class AptHistPlotter:
         if plot_show:
             plt.show()
 
-
         self.variables.x_hist = self.x
         self.variables.y_hist = self.y
         return self.y, self.x
@@ -247,7 +246,7 @@ class AptHistPlotter:
             if background is not None:
                 if legend_mode == 'long':
                     txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nMRP(%.2f): %s' \
-                          % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent/100, mrp)
+                          % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent / 100, mrp)
                 elif legend_mode == 'short':
                     txt = 'MRP(FWHM): %s' % (mrp)
             else:
@@ -259,7 +258,7 @@ class AptHistPlotter:
                 BG4 = BG4 / len(self.mc_tof) * 1E6
                 if legend_mode == 'long':
                     txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nBG@4: %s ppm/Da\nMRP(%.2f): %s' \
-                          % (bin, (len(self.mc_tof) / 1000000), round(BG4), self.percent/100, mrp)
+                          % (bin, (len(self.mc_tof) / 1000000), round(BG4), self.percent / 100, mrp)
                 elif legend_mode == 'short':
                     txt = 'MRP(FWHM): %s' % (mrp)
 
@@ -270,9 +269,9 @@ class AptHistPlotter:
             if background is not None:
                 if legend_mode == 'long':
                     txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nMRP(%.2f): %s' \
-                          % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent/100, mrp)
+                          % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent / 100, mrp)
                 elif legend_mode == 'short':
-                    txt = 'MRP(FWHM): %s' % ( mrp)
+                    txt = 'MRP(FWHM): %s' % (mrp)
             else:
                 # annotation with range stats
                 upperLim = 50.5  # ns
@@ -282,17 +281,19 @@ class AptHistPlotter:
                 BG50 = BG50 / len(self.mc_tof) * 1E6
                 if legend_mode == 'long':
                     txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nBG@50: %s ppm/ns\nMRP(%.2f): %s' \
-                          % (bin, len(self.mc_tof) / 1000000, round(BG50), self.percent/100, mrp)
+                          % (bin, len(self.mc_tof) / 1000000, round(BG50), self.percent / 100, mrp)
                 elif legend_mode == 'short':
                     txt = 'MRP(FWHM): %s' % (mrp)
 
         props = dict(boxstyle='round', facecolor='wheat', alpha=1)
         if loc == 'left':
-            self.ax.text(.01, .95, txt, va='top', ma='left', transform=self.ax.transAxes, bbox=props, fontsize=10, alpha=1,
-                     horizontalalignment='left', verticalalignment='top')
+            self.ax.text(.01, .95, txt, va='top', ma='left', transform=self.ax.transAxes, bbox=props, fontsize=10,
+                         alpha=1,
+                         horizontalalignment='left', verticalalignment='top')
         elif loc == 'right':
-            self.ax.text(.98, .95, txt, va='top', ma='left', transform=self.ax.transAxes, bbox=props, fontsize=10, alpha=1,
-                     horizontalalignment='right', verticalalignment='top')
+            self.ax.text(.98, .95, txt, va='top', ma='left', transform=self.ax.transAxes, bbox=props, fontsize=10,
+                         alpha=1,
+                         horizontalalignment='right', verticalalignment='top')
 
     def mrp_calculation(self):
         """
@@ -317,10 +318,11 @@ class AptHistPlotter:
 
             index_peak_max = np.argmax(prominences[0])
             mrp_tmp = self.x[peaks][index_peak_max] / (self.x[round(peak_width[3][index_peak_max])] -
-                                                                        self.x[round(peak_width[2][index_peak_max])])
+                                                       self.x[round(peak_width[2][index_peak_max])])
             mrp.append(mrp_tmp)
 
         return mrp
+
     def plot_horizontal_lines(self):
         """
         Plot the horizontal lines.
@@ -500,7 +502,7 @@ class AptHistPlotter:
 
         return self.peaks, self.properties, self.peak_widths, self.prominences
 
-    def draw_rectangle(self,):
+    def draw_rectangle(self, ):
         """
         Draw the rectangle and find .
 
@@ -519,11 +521,10 @@ class AptHistPlotter:
 
         # Draw the rectangle
         self.rectangle = plt.Rectangle((self.variables.selected_x1, self.variables.selected_y1),
-                                  self.variables.selected_x2 - self.variables.selected_x1,self.variables.selected_y2,
-                                  edgecolor='g', facecolor=(0, 1, 0, 0.5),  linewidth=1)
+                                       self.variables.selected_x2 - self.variables.selected_x1,
+                                       self.variables.selected_y2,
+                                       edgecolor='g', facecolor=(0, 1, 0, 0.5), linewidth=1)
         self.ax.add_patch(self.rectangle)
-
-
 
     def selector(self, selector='rect'):
         """
@@ -622,6 +623,7 @@ class AptHistPlotter:
 def hist_plot(variables, bin_size, log, target, mode, prominence, distance, percent, selector, figname, lim,
               peaks_find_plot, peaks_find=True, range_plot=False, plot_ranged_ions=False, ranging_mode=False,
               selected_area_specially=False, selected_area_temporally=False, save_fig=True, print_info=True,
+              draw_calib_rect=False,
               figure_size=(9, 5), plot_show=True):
     """
     Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
@@ -644,6 +646,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         selected_area_specially (bool): Plot selected area specially.
         selected_area_temporally (bool): Plot selected area temporally.
         print_info: Print the information about the peaks.
+        draw_calib_rect (bool): Draw the calibration rectangle.
         figure_size (tuple): Figure size.
         plot_show (bool): Show the plot.
     Returns:
@@ -666,7 +669,6 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         variables.peaks_x_selected = []
         variables.peak_widths = []
         variables.peaks_index_list = []
-
 
     if selected_area_specially:
         mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
@@ -705,8 +707,9 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
 
     if mode != 'normalized' and peaks_find and not range_plot and not ranging_mode:
         peaks, properties, peak_widths, prominences = mc_hist.find_peaks_and_widths(prominence=prominence,
-                                                                                    distance=distance, percent=percent)
-        mc_hist.draw_rectangle()
+                                                                          distance=distance, percent=percent)
+        if draw_calib_rect:
+            mc_hist.draw_rectangle()
         if peaks_find_plot:
             mc_hist.plot_peaks()
         mc_hist.plot_hist_info_legend(label=target, bin=0.1, background=None, legend_mode='long', loc='right')
@@ -732,7 +735,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
     if peaks is not None and print_info:
         index_max_ini = np.argmax(prominences[0])
         mrp = x[int(peaks[index_max_ini])] / (
-                    x[round(peak_widths[3][index_max_ini])] - x[round(peak_widths[2][index_max_ini])])
+                x[round(peak_widths[3][index_max_ini])] - x[round(peak_widths[2][index_max_ini])])
         print('Mass resolving power for the highest peak_x at peak_x index %a (MRP --> m/m_2-m_1):' % index_max_ini,
               mrp)
         for i in range(len(peaks)):

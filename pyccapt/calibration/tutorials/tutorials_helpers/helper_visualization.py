@@ -474,10 +474,10 @@ def call_visualization(variables):
     tab.set_title(0, 'projection')
     tab.set_title(1, '3d')
     tab.set_title(2, 'mc')
-    tab.set_title(3, 'heatmap')
-    tab.set_title(4, 'Animated heatmap')
+    tab.set_title(3, 'detector heatmap')
+    tab.set_title(4, 'animated heatmap')
     tab.set_title(5, 'FDM')
-    tab.set_title(6, 'Experiment hitstorty')
+    tab.set_title(6, 'Experiment history')
     tab.set_title(7, '2d sample histogram')
     tab.set_title(8, 'Range color change')
 

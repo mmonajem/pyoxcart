@@ -27,6 +27,48 @@ def clear_plot_on_click(out):
 def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
     out = Output()
     out_status = Output()
+
+    plot_button = widgets.Button(
+        description='plot hist',
+        layout=label_layout
+    )
+    plot_stat_button = widgets.Button(
+        description='plot stat',
+        layout=label_layout
+    )
+    reset_back_button = widgets.Button(
+        description='reset back correction',
+        layout=label_layout
+    )
+    save_button = widgets.Button(
+        description='save correction',
+        layout=label_layout
+    )
+    bowl_button = widgets.Button(
+        description='bowl correction',
+        layout=label_layout
+    )
+    vol_button = widgets.Button(
+        description='voltage correction',
+        layout=label_layout
+    )
+
+    auto_button = widgets.Button(
+        description='auto calibration',
+        layout=label_layout
+    )
+
+    clear_plot = widgets.Button(description="clear plots", layout=label_layout)
+
+    plot_button.on_click(lambda b: hist_plot(b, variables, out, calibration_mode))
+    plot_stat_button.on_click(lambda b: stat_plot(b, variables, out))
+    reset_back_button.on_click(lambda b: reset_back_on_click(variables))
+    save_button.on_click(lambda b: save_on_click(variables))
+    vol_button.on_click(lambda b: vol_correction(b, variables, out, out_status, calibration_mode))
+    bowl_button.on_click(lambda b: bowl_correction(b, variables, out, out_status, calibration_mode))
+    clear_plot.on_click(lambda b: clear_plot_on_click(out))
+    auto_button.on_click(lambda b: automatic_calibration(b, variables, out, out_status, calibration_mode))
+
     # Define widgets and labels for histplot function
     bin_size = widgets.FloatText(value=0.1, description='bin size:', layout=label_layout)
     prominence = widgets.IntText(value=100, description='peak prominance:', layout=label_layout)
@@ -55,11 +97,25 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
             mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value, mode='normal',
                               prominence=prominence.value, distance=distance.value, percent=percent.value,
                               selector='rect', figname=index_fig.value, lim=lim_tof.value, save_fig=save.value,
-                              peaks_find_plot=plot_peak.value, print_info=False, figure_size=figure_size)
+                              peaks_find_plot=plot_peak.value, draw_calib_rect=True, print_info=False,
+                              figure_size=figure_size)
         plot_button.disabled = False
 
+    plot_button.click()
+
     # Create a button widget to voltage correction function
-    sample_size_v = widgets.IntText(value=10000, description='sample size:', layout=label_layout)
+    if calibration_mode.value == 'tof':
+        mask_temporal = np.logical_and(
+            (variables.dld_t_calib > variables.selected_x1),
+            (variables.dld_t_calib < variables.selected_x2)
+        )
+    elif calibration_mode.value == 'mc':
+        mask_temporal = np.logical_and(
+            (variables.mc_calib > variables.selected_x1),
+            (variables.mc_calib < variables.selected_x2)
+        )
+    sample_size_v = int(len(variables.dld_high_voltage[mask_temporal]) / 100)
+    sample_size_v = widgets.IntText(value=sample_size_v, description='sample size:', layout=label_layout)
     index_fig_v = widgets.IntText(value=1, description='fig index:', layout=label_layout)
     plot_v = widgets.Dropdown(
         options=[('False', False), ('True', True)],
@@ -86,10 +142,15 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
         description='sample max:',
         layout=label_layout
     )
-    num_cluster = widgets.IntText(value=1, description='num_cluster:', layout=label_layout)
     apply_v = widgets.Dropdown(
         options=[('all', 'all'), ('voltage', 'voltage'), ('voltage_temporal', 'voltage_temporal')],
         description='apply mode:',
+        layout=label_layout
+    )
+
+    noise_remove_v = widgets.Dropdown(
+        options=[('True', True), ('False', False)],
+        description='noise remove:',
         layout=label_layout
     )
     figure_v_size_x = widgets.FloatText(value=5.0, description="Fig. size W:", layout=label_layout)
@@ -114,19 +175,28 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
                     mode_p = mode_v.value
                     maximum_cal_method_p = maximum_cal_method_v.value
                     maximum_sample_method_p = maximum_sample_method_v.value
+                    noise_remove_p = noise_remove_v.value
                     calibration.voltage_corr_main(variables.dld_high_voltage, variables, sample_size=sample_size_p,
                                                   calibration_mode=calibration_mode.value,
                                                   index_fig=index_fig_p, plot=plot_p, save=save_p,
-                                                  apply_local=apply_v.value,
-                                                  num_cluster=num_cluster.value, mode=mode_p,
+                                                  apply_local=apply_v.value, mode=mode_p,
                                                   maximum_cal_method=maximum_cal_method_p,
-                                                maximum_sample_method=maximum_sample_method_p,
+                                                  noise_remove=noise_remove_p,
+                                                  maximum_sample_method=maximum_sample_method_p,
                                                   fig_size=figure_size)
             pb_vol.value = "<b>Finished</b>"
         vol_button.disabled = False
 
     # Create a button widget to bowl correction function
-    sample_size_b = widgets.IntText(value=11, description='sample size:', layout=label_layout)
+    sample_size_b = int(det_diam.value / 4)
+    # Check if the rounded number is even
+    if sample_size_b % 2 == 0:
+        # If even, adjust to the nearest odd number
+        sample_size_b = sample_size_b - 1
+    else:
+        pass
+
+    sample_size_b = widgets.IntText(value=sample_size_b, description='sample size:', layout=label_layout)
     fit_mode_b = widgets.Dropdown(options=[('curve_fit', 'curve_fit'), ('hemisphere_fit', 'hemisphere_fit')],
                                   description='fit mode:', layout=label_layout)
     index_fig_b = widgets.IntText(value=1, description='fig index:', layout=label_layout)
@@ -238,47 +308,11 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
         description='Status:',
         layout=label_layout
     )
-    plot_button = widgets.Button(
-        description='plot hist',
-        layout=label_layout
-    )
-    plot_stat_button = widgets.Button(
-        description='plot stat',
-        layout=label_layout
-    )
-    reset_back_button = widgets.Button(
-        description='reset back correction',
-        layout=label_layout
-    )
-    save_button = widgets.Button(
-        description='save correction',
-        layout=label_layout
-    )
-    bowl_button = widgets.Button(
-        description='bowl correction',
-        layout=label_layout
-    )
-    vol_button = widgets.Button(
-        description='voltage correction',
-        layout=label_layout
-    )
 
-    auto_button = widgets.Button(
-        description='auto calibration',
-        layout=label_layout
-    )
     bin_fdm = widgets.IntText(value=256, description='bin FDM:', layout=label_layout)
 
-    clear_plot = widgets.Button(description="clear plots", layout=label_layout)
 
-    plot_button.on_click(lambda b: hist_plot(b, variables, out, calibration_mode))
-    plot_stat_button.on_click(lambda b: stat_plot(b, variables, out))
-    reset_back_button.on_click(lambda b: reset_back_on_click(variables))
-    save_button.on_click(lambda b: save_on_click(variables))
-    vol_button.on_click(lambda b: vol_correction(b, variables, out, out_status, calibration_mode))
-    bowl_button.on_click(lambda b: bowl_correction(b, variables, out, out_status, calibration_mode))
-    clear_plot.on_click(lambda b: clear_plot_on_click(out))
-    auto_button.on_click(lambda b: automatic_calibration(b, variables, out, out_status, calibration_mode))
+
 
     # Create the layout with three columns
     column11 = widgets.VBox([bin_size, prominence, distance, lim_tof, percent, bin_fdm, plot_peak, index_fig, save,
@@ -287,7 +321,7 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
     column22 = widgets.VBox([sample_size_b, fit_mode_b, index_fig_b, maximum_cal_method_b, maximum_sample_method_b,
                              apply_b, plot_b, save_b, figure_b_size_x, figure_b_size_y])
     column21 = widgets.VBox([bowl_button, pb_bowl])
-    column33 = widgets.VBox([sample_size_v, index_fig_v, mode_v, apply_v, num_cluster, maximum_cal_method_v,
+    column33 = widgets.VBox([sample_size_v, index_fig_v, mode_v, apply_v, noise_remove_v, maximum_cal_method_v,
                              maximum_sample_method_v, plot_v, save_v, figure_v_size_x, figure_v_size_y])
     column32 = widgets.VBox([vol_button, pb_vol])
 
