@@ -243,7 +243,9 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     if isinstance(element_percentage, list):
         pass
     else:
-        element_percentage = element_percentage.replace('[', '').replace(']', '').split(',')
+        print('element_percentage should be a list')
+
+    print(element_percentage)
 
     colors = variables.range_data['color'].tolist()
     mc_low = variables.range_data['mc_low'].tolist()
@@ -613,7 +615,7 @@ def projection(variables, element_percentage, thickness, selected_area_specially
     Args:
         variables (object): The variables object.
         element_percentage (str): Element percentage information.
-        thickness (float, float): Thickness of the projection in nm (start, end).
+        thickness [float, float]: Thickness of the projection in nm (start, end).
         selected_area_specially (bool): True if a specific area is selected, False otherwise.
         selected_area_temporally (bool): True if a specific area is selected, False otherwise.
         x_or_y (str): Either 'x' or 'y' indicating the axis to plot.
@@ -646,9 +648,10 @@ def projection(variables, element_percentage, thickness, selected_area_specially
     else:
         mask_spacial = np.ones(len(variables.dld_t), dtype=bool)
 
-    element_percentage = element_percentage.replace('[', '')
-    element_percentage = element_percentage.replace(']', '')
-    element_percentage = element_percentage.split(',')
+    if isinstance(element_percentage, list):
+        pass
+    else:
+        print('element_percentage should be a list')
 
 
     for index, elemen in enumerate(ions):
@@ -669,12 +672,14 @@ def projection(variables, element_percentage, thickness, selected_area_specially
             name_element = 'unranged'
         else:
             name_element = '%s' % ions[index]
+        if thickness != []:
+            mask_thickness = (variables.z >= thickness[0]) & (variables.z <= thickness[1])
+        else:
+            mask_thickness = np.ones(len(variables.dld_t), dtype=bool)
         if x_or_y == 'x':
-            mask_thickness = (variables.y >= thickness[0]) & (variables.y <= thickness[1])
             ax.scatter(variables.x[mask & mask_thickness], variables.z[mask & mask_thickness], s=0.1,
                        label=name_element, color=colors[index])
         elif x_or_y == 'y':
-            mask_thickness = (variables.x >= thickness[0]) & (variables.x <= thickness[1])
             ax.scatter(variables.y[mask & mask_thickness], variables.z[mask & mask_thickness], s=0.1,
                        label=name_element, color=colors[index])
 
@@ -742,9 +747,10 @@ def heatmap(variables, selected_area_specially, selected_area_temporally, elemen
     mc_low = variables.range_data['mc_low'].tolist()
     mc_up = variables.range_data['mc_up'].tolist()
 
-    element_percentage = element_percentage.replace('[', '')
-    element_percentage = element_percentage.replace(']', '')
-    element_percentage = element_percentage.split(',')
+    if isinstance(element_percentage, list):
+        pass
+    else:
+        print('element_percentage should be a list')
 
     for index, elemen in enumerate(ions):
         mask = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])

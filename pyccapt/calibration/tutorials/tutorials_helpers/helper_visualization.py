@@ -1,3 +1,4 @@
+import ast
 import json
 
 import ipywidgets as widgets
@@ -32,9 +33,15 @@ def call_visualization(variables):
     )
 
     if variables.range_data.empty:
-        element_percentage = str([0.01])
+	    element_percentage = str({'unranged': 0.01})
     else:
-        element_percentage = [0.01] * len(variables.range_data['element'].tolist())
+	    # Iterate over unique elements in the "element" column
+	    element_percentage = {}
+	    for element_list in variables.range_data['element']:
+		    for element in element_list:
+			    # Check if the element is already a key in the dictionary
+			    if element not in element_percentage:
+				    element_percentage[element] = 0.01
         element_percentage = str(element_percentage)
 
     figname_3d = widgets.Text(value='3d_plot')
@@ -59,8 +66,17 @@ def call_visualization(variables):
                 print('Min x (nm):', variables.selected_x1, 'Max x (nm):', variables.selected_x2)
                 print('Min y (nm):', variables.selected_y1, 'Max y (nm):', variables.selected_y2)
                 print('Min z (nm):', variables.selected_z1, 'Max z (nm):', variables.selected_z2)
+            element_percentage_dic = ast.literal_eval(element_percentage_p3.value)
+            # Iterate through the 'element' column
+            element_percentage_list = []
+            for row_elements in variables.range_data['element']:
+	            max_value = 0.1  # Default value if no matching element is found
+	            for element in row_elements:
+		            if element in element_percentage_dic and element_percentage_dic[element] > max_value:
+			            max_value = element_percentage_dic[element]
+	            element_percentage_list.append(max_value)
 
-            reconstruction.reconstruction_plot(variables, element_percentage_p3.value, opacity.value,
+            reconstruction.reconstruction_plot(variables, element_percentage_list, opacity.value,
                                                rotary_fig_save_p3.value, figname_3d.value,
                                                save_3d.value, make_gif_p3.value, selected_area_specially_p3.value,
                                                selected_area_temporally_p3.value, ions_individually_plots.value)
@@ -76,7 +92,6 @@ def call_visualization(variables):
     figure_mc_size_x_heatmap = widgets.FloatText(value=5.0)
     figure_mc_size_y_heatmap = widgets.FloatText(value=5.0)
     plot_heatmap_button.on_click(lambda b: plot_heatmap(b, variables, out))
-
     def plot_heatmap(b, variables, out):
         plot_heatmap_button.disabled = True
         figure_size = (figure_mc_size_x_heatmap.value, figure_mc_size_y_heatmap.value)
@@ -89,8 +104,19 @@ def call_visualization(variables):
                 print('Min x (nm):', variables.selected_x1, 'Max x (nm):', variables.selected_x2)
                 print('Min y (nm):', variables.selected_y1, 'Max y (nm):', variables.selected_y2)
                 print('Min z (nm):', variables.selected_z1, 'Max z (nm):', variables.selected_z2)
+
+            element_percentage_dic = ast.literal_eval(element_percentage_p3.value)
+            # Iterate through the 'element' column
+            element_percentage_list = []
+            for row_elements in variables.range_data['element']:
+	            max_value = 0.1  # Default value if no matching element is found
+	            for element in row_elements:
+		            if element in element_percentage_dic and element_percentage_dic[element] > max_value:
+			            max_value = element_percentage_dic[element]
+	            element_percentage_list.append(max_value)
+
             reconstruction.heatmap(variables, selected_area_specially_ph.value, selected_area_temporally_ph.value,
-                                   element_percentage_ph.value, figname_heatmap.value, figure_sie=figure_size,
+                                   element_percentage_list, figname_heatmap.value, figure_sie=figure_size,
                                    save=save_heatmap.value)
         plot_heatmap_button.disabled = False
 
@@ -189,6 +215,7 @@ def call_visualization(variables):
     save_projection = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
     figure_mc_size_x_projection = widgets.FloatText(value=5.0)
     figure_mc_size_y_projection = widgets.FloatText(value=5.0)
+    range_p = widgets.Textarea(value='[0,0]')
 
     plot_projection_button.on_click(lambda b: plot_projection(b, variables, out))
 
@@ -205,7 +232,27 @@ def call_visualization(variables):
                 print('Min y (nm):', variables.selected_y1, 'Max y (nm):', variables.selected_y2)
                 print('Min z (nm):', variables.selected_z1, 'Max z (nm):', variables.selected_z2)
 
-            reconstruction.projection(variables, element_percentage_pp.value, selected_area_specially_pp.value,
+            element_percentage_dic = ast.literal_eval(element_percentage_p3.value)
+            # Iterate through the 'element' column
+            element_percentage_list = []
+            for row_elements in variables.range_data['element']:
+	            max_value = 0.1  # Default value if no matching element is found
+	            for element in row_elements:
+		            if element in element_percentage_dic and element_percentage_dic[element] > max_value:
+			            max_value = element_percentage_dic[element]
+	            element_percentage_list.append(max_value)
+
+            try:
+	            # Use json.loads to convert the entered string to a list
+	            range_1 = json.loads(range_p.value)
+	            if range_1 == [0, 0]:
+		            range_1 = []
+            except json.JSONDecodeError:
+	            # Handle invalid input
+	            range_1 = []
+	            print(f"Invalid input: {range_p.value}")
+
+            reconstruction.projection(variables, element_percentage_list, range_1, selected_area_specially_pp.value,
                                       selected_area_temporally_pp.value, x_or_y_pp.value,
                                       figname_p.value, figure_size, save_projection.value)
         plot_projection_button.disabled = False
@@ -458,10 +505,11 @@ def call_visualization(variables):
         widgets.HBox([plot_animated_heatmap_button, clear_button]),
     ])
 
-    tab5 = widgets.VBox([
+    tab7 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Element percentage:', layout=label_layout), element_percentage_pp]),
         widgets.HBox([widgets.Label(value='Selected specially:', layout=label_layout), selected_area_specially_pp]),
         widgets.HBox([widgets.Label(value='Selected temporally:', layout=label_layout), selected_area_temporally_pp]),
+	    widgets.HBox([widgets.Label(value='range z:', layout=label_layout), range_p]),
         widgets.HBox([widgets.Label(value='X or Y:', layout=label_layout), x_or_y_pp]),
         widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_p]),
         widgets.HBox([widgets.Label(value='Save fig:', layout=label_layout), save_projection]),
@@ -470,7 +518,7 @@ def call_visualization(variables):
         widgets.HBox([plot_projection_button, clear_button])
     ])
 
-    tab7 = widgets.VBox([
+    tab5 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Selected specially:', layout=label_layout), selected_area_specially_ph]),
         widgets.HBox([widgets.Label(value='Selected temporally:', layout=label_layout), selected_area_temporally_ph]),
         widgets.HBox([widgets.Label(value='Element percentage:', layout=label_layout), element_percentage_ph]),
