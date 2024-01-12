@@ -50,6 +50,8 @@ calibration_deps = [
     "adjustText",
     "pybaselines ",
     "kaleido",
+    "pymatgen",
+    "ase",
 ]
 
 setup(

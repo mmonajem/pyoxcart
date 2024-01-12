@@ -156,7 +156,7 @@ def remove_invalid_data(dld_group_storage, max_tof):
     dld_group_storage.reset_index(inplace=True, drop=True)
 
     # Print the number of data points over max_tof
-    print('The number of data over max_tof:', num_over_max_tof)
+    print('The number of data that is removed:', num_over_max_tof)
 
     return dld_group_storage
 
