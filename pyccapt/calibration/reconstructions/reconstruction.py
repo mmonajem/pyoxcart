@@ -1,5 +1,7 @@
+import io
 from copy import copy
 
+import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 import plotly
@@ -7,6 +9,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from matplotlib import rcParams, colors
 from matplotlib.animation import FuncAnimation
+from PIL import Image
 from plotly.subplots import make_subplots
 
 # Local module and scripts
@@ -198,7 +201,7 @@ def draw_qube(fig, range, col=None, row=None):
     )
 
 
-def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save,
+def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save, make_gif=False,
                         selected_area_specially=False, selected_area_temporally=False, ions_individually_plots=False):
     """
     Generate a 3D plot for atom probe reconstruction data.
@@ -208,10 +211,11 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         element_percentage (str): Percentage of elements to display.
         opacity (float): Opacity of the markers.
         rotary_fig_save (bool): Whether to save the rotary figure.
-        selected_area_specially (bool): Whether a specific area is selected.
-        selected_area_temporally (bool): Whether a specific time range is selected.
         figname (str): Name of the figure.
         save (bool): Whether to save the figure.
+        make_gif (bool): Whether to make a GIF.
+        selected_area_specially (bool): Whether a specific area is selected.
+        selected_area_temporally (bool): Whether a specific time range is selected.
         ions_individually_plots (bool): Whether to plot ions individually.
 
     Returns:
@@ -333,10 +337,9 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
 
         draw_qube(fig, range_cube)
 
-
-    if rotary_fig_save:
+    if rotary_fig_save or make_gif:
         if not ions_individually_plots:
-            rotary_fig(fig, variables, figname)
+            rotary_fig(fig, variables, rotary_fig_save, make_gif, figname)
         else:
             print('Rotary figure is not available for ions_individually_plots=True')
 
@@ -370,6 +373,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     # Show the plot in the Jupyter cell output
     variables.plotly_3d_reconstruction = go.FigureWidget(fig)
 
+    plotly.offline.init_notebook_mode()
     fig.show()
 
     if save:
@@ -378,13 +382,27 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
                 eye=dict(x=4, y=4, z=4),  # Adjust the camera position for zooming
             )
         )
-        pio.write_image(fig,variables.result_path + "/%s_3d.png" % figname, scale=3, format='png')
-        pio.write_image(fig,variables.result_path + "/%s_3d.svg" % figname, scale=3, format='svg')
         pio.write_html(fig, variables.result_path + "/%s_3d.html" % figname, include_mathjax='cdn')
+        fig.update_layout(showlegend=False)
+        layout = go.Layout(
+            margin=go.layout.Margin(
+                l=0,  # left margin
+                r=0,  # right margin
+                b=0,  # bottom margin
+                t=0,  # top margin
+            )
+        )
+        fig.update_layout(layout)
+        pio.write_image(fig, variables.result_path + "/%s_3d.png" % figname, scale=3, format='png')
+        pio.write_image(fig,variables.result_path + "/%s_3d.svg" % figname, scale=3, format='svg')
+        fig.update_layout(showlegend=True)
+
     if save:
         fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
+        fig.update_layout(showlegend=False)
         pio.write_image(fig, variables.result_path + "/%s_3d_o.png" % figname, scale=3, format='png')
         pio.write_image(fig, variables.result_path + "/%s_3d_o.svg" % figname, scale=3, format='svg')
+        fig.update_layout(showlegend=True)
         pio.write_html(fig, variables.result_path + "/%s_3d_o.html" % figname, include_mathjax='cdn')
         fig.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
 
@@ -407,13 +425,32 @@ def rotate_z(x, y, z, theta):
     return np.real(np.exp(1j * theta) * w), np.imag(np.exp(1j * theta) * w), z
 
 
-def rotary_fig(fig, variables, figname):
+def plotly_fig2array(fig):
+    """
+    convert Plotly fig to  an array
+
+    Args:
+        fig (plotly.graph_objects.Figure): The base figure.
+
+    Returns:
+        array: The array representation of the figure.
+    """
+    # convert Plotly fig to  an array
+    fig_bytes = fig.to_image(format="jpeg", scale=5, engine="kaleido")
+    buf = io.BytesIO(fig_bytes)
+    img = Image.open(buf)
+    return np.asarray(img)
+
+
+def rotary_fig(fig, variables, rotary_fig_save, make_gif, figname):
     """
     Generate a rotating figure using Plotly.
 
     Args:
         fig (plotly.graph_objects.Figure): The base figure.
         variables (object): The variables object.
+        rotary_fig_save (bool): Whether to save the rotary figure.
+        make_gif (bool): Whether to make a GIF.
         figname (str): The name of the figure.
 
     Returns:
@@ -426,50 +463,83 @@ def rotary_fig(fig, variables, figname):
 
     fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
 
-    fig.update_layout(
-        scene_camera_eye=dict(x=x_eye, y=y_eye, z=z_eye),
-        updatemenus=[
-            dict(
-                type='buttons',
-                showactive=False,
-                y=1.2,
-                x=0.8,
-                xanchor='left',
-                yanchor='bottom',
-                pad=dict(t=45, r=10),
-                buttons=[
-                    dict(
-                        label='Play',
-                        method='animate',
-                        args=[
-                            None,
-                            dict(
-                                frame=dict(duration=15, redraw=True),
-                                transition=dict(duration=0),
-                                fromcurrent=True,
-                                mode='immediate'
-                            )
-                        ]
-                    )
-                ]
+    if make_gif:
+        fig.update_layout(showlegend=False)
+        layout = go.Layout(
+            margin=go.layout.Margin(
+                l=0,  # left margin
+                r=0,  # right margin
+                b=0,  # bottom margin
+                t=0,  # top margin
             )
-        ]
-    )
+        )
+        fig.update_layout(layout)
 
-    frames = []
+        figures = []
+        for t in np.arange(0, 4, 0.2):
+            xe, ye, ze = rotate_z(x_eye, y_eye, z_eye, t)
+            rotated_fig = go.Figure(fig)
+            rotated_fig.update_layout(scene_camera_eye=dict(x=xe, y=ye, z=ze))
+            figures.append(rotated_fig)
 
-    for t in np.arange(0, 20, 0.1):
-        xe, ye, ze = rotate_z(x_eye, y_eye, z_eye, -t)
-        frames.append(go.Frame(layout=dict(scene_camera_eye=dict(x=xe, y=ye, z=ze))))
-    fig.frames = frames
-    plotly.offline.plot(
-        fig,
-        filename=variables.result_path + '\\rota_{fn}.html'.format(fn=figname),
-        show_link=True,
-	    auto_open=False,
-	    include_mathjax='cdn'
-    )
-    fig.show()
+        images = []
+        print('Starting to process the frames for the GIF')
+        print('The total number of frames is:', len(figures))
+        for index, frame in enumerate(figures):
+            print('frame', index, 'is being processed')
+            images.append(plotly_fig2array(frame))
+        print('The images are ready for the GIF')
+
+        # Save the images as a GIF using imageio
+        imageio.mimsave(variables.result_path + '\\rota_{fn}.gif'.format(fn=figname), images, fps=2)
+
+        fig.update_layout(showlegend=True)
+
+    if rotary_fig_save:
+        fig.update_layout(
+            scene_camera_eye=dict(x=x_eye, y=y_eye, z=z_eye),
+            updatemenus=[
+                dict(
+                    type='buttons',
+                    showactive=False,
+                    y=1.2,
+                    x=0.8,
+                    xanchor='left',
+                    yanchor='bottom',
+                    pad=dict(t=45, r=10),
+                    buttons=[
+                        dict(
+                            label='Play',
+                            method='animate',
+                            args=[
+                                None,
+                                dict(
+                                    frame=dict(duration=15, redraw=True),
+                                    transition=dict(duration=0),
+                                    fromcurrent=True,
+                                    mode='immediate'
+                                )
+                            ]
+                        )
+                    ]
+                )
+            ]
+        )
+
+        frames = []
+
+        for t in np.arange(0, 50, 0.1):
+            xe, ye, ze = rotate_z(x_eye, y_eye, z_eye, -t)
+            frames.append(go.Frame(layout=dict(scene_camera_eye=dict(x=xe, y=ye, z=ze))))
+        fig.frames = frames
+
+        plotly.offline.plot(
+            fig,
+            filename=variables.result_path + '\\rota_{fn}.html'.format(fn=figname),
+            show_link=True,
+            auto_open=False,
+            include_mathjax='cdn'
+        )
 
 
 def scatter_plot(data, range_data, variables, element_percentage, selected_area, x_or_y, figname):
@@ -712,7 +782,7 @@ def heatmap(variables, selected_area_specially, selected_area_temporally, elemen
 
 
 def reconstruction_2d_histogram(variables, x, y, bins, selected_area_specially, selected_area_temporally,
-                                percentage, xlabel='X-axis', ylabel='Y-axis', save=False,
+                                percentage, range_1=[], range_2=[], xlabel='X-axis', ylabel='Y-axis', save=False,
                                 figure_name=None, figure_size=None):
     """
     Generate a 2D histogram based on the provided data.
@@ -725,6 +795,8 @@ def reconstruction_2d_histogram(variables, x, y, bins, selected_area_specially, 
         selected_area_specially (bool): True if a specific area is selected, False otherwise.
         selected_area_temporally (bool): True if a specific area is selected, False otherwise.
         percentage (float): percent of data to be plotted.
+        range_1 (list): The range of the x-axis.
+        range_2 (list): The range of the y-axis.
         xlabel (str): The label of the x-axis.
         ylabel (str): The label of the y-axis.
         save (bool): True to save the plot, False to display it.
@@ -733,8 +805,8 @@ def reconstruction_2d_histogram(variables, x, y, bins, selected_area_specially, 
 
     Returns:
         None
-        :param percentage:
     """
+
     if selected_area_specially:
         mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
                        (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
@@ -755,11 +827,15 @@ def reconstruction_2d_histogram(variables, x, y, bins, selected_area_specially, 
     x = x[mask_spacial]
     y = y[mask_spacial]
 
+    if range_1 != [] and range_2 != []:
+        mask_range = (x >= range_1[0]) & (x <= range_1[1]) & (y >= range_2[0]) & (y <= range_2[1])
+        x = x[mask_range]
+        y = y[mask_range]
     num_elements_to_select = int(len(x) * percentage)
     # Randomly select elements
-    x = np.random.choice(x, size=num_elements_to_select, replace=False)
-    y = np.random.choice(y, size=num_elements_to_select, replace=False)
-
+    indices = np.random.choice(len(x), num_elements_to_select, replace=False)
+    x = x[indices]
+    y = y[indices]
     # Check if the bin is a tuple
     if isinstance(bins, tuple):
         pass
@@ -772,7 +848,7 @@ def reconstruction_2d_histogram(variables, x, y, bins, selected_area_specially, 
 
     hist, xedges, yedges, _ = plt.hist2d(x, y, bins=bins, cmap='viridis')
 
-    # Add a colorbar
+    # # Add a colorbar
     cmap = copy(plt.cm.plasma)
     cmap.set_bad(cmap(0))
 

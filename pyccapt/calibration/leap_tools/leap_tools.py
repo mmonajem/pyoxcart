@@ -66,6 +66,9 @@ def read_epos(file_path):
         'pslep': d[9::11],
         'ipp': d[10::11]
     })
+    # Convert the units from mm to cm
+    epos['det_x (cm)'] = epos['det_x (cm)'] / 10
+    epos['det_y (cm)'] = epos['det_y (cm)'] / 10
     return epos
 
 

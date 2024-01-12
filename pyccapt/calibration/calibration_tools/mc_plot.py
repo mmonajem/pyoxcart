@@ -8,7 +8,7 @@ from scipy.optimize import curve_fit
 from scipy.signal import find_peaks, peak_widths, peak_prominences
 
 from pyccapt.calibration.calibration_tools import intractive_point_identification
-from pyccapt.calibration.data_tools import data_loadcrop, plot_vline_draw, selectors_data
+from pyccapt.calibration.data_tools import data_loadcrop, plot_vline_draw
 
 
 def fit_background(x, a, b):
@@ -151,8 +151,8 @@ class AptHistPlotter:
 
             for i in range(len(ion)):
                 self.legend_colors.append((r'%s' % ion[i], plt.Rectangle((0, 0), 1, 1, fc=colors[i])))
-                x_offset = 0.1  # Adjust this value as needed
-                y_offset = 10  # Adjust this value as needed
+                x_offset = 0.5  # Adjust this value as needed
+                y_offset = 0.5  # Adjust this value as needed
 
                 # Find the bin that contains the mc[i]
                 bin_index = np.searchsorted(self.x, mc[i])
@@ -177,8 +177,8 @@ class AptHistPlotter:
         Returns:
             None
         """
-        x_offset = 0.1  # Adjust this value as needed
-        y_offset = 10  # Adjust this value as needed
+        x_offset = 0.5  # Adjust this value as needed
+        y_offset = 0.5  # Adjust this value as needed
         if range_data is not None:
             ion = range_data['ion'].tolist()
             mc = range_data['mc'].tolist()
@@ -597,7 +597,7 @@ class AptHistPlotter:
         Returns:
             None
         """
-        adjust_text(self.peak_annotates, arrowprops=dict(arrowstyle='-', color='red', lw=0.5))
+        adjust_text(self.peak_annotates)
 
     def save_fig(self, label, fig_name):
         """
@@ -724,7 +724,8 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         mc_hist.plot_peaks(range_data=variables.range_data, mode='peaks')
     mc_hist.selector(selector=selector)  # rect, peak_x, range
     if range_plot:
-        mc_hist.plot_range(variables.range_data, legend=True, legend_loc='upper right')
+        mc_hist.plot_range(variables.range_data, legend=True, legend_loc='center right')
+        mc_hist.adjust_labels()
 
     if save_fig:
         mc_hist.save_fig(label=target, fig_name=figname)

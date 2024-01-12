@@ -3,6 +3,7 @@ import os
 import sys
 
 from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtGui import QPixmap
 
 # Local module and scripts
 from pyccapt.control.control_tools import share_variables, read_files
@@ -402,6 +403,12 @@ class Ui_Laser_Control(object):
         Laser_Control.setTabOrder(self.laser_home, self.start_scanning)
         Laser_Control.setTabOrder(self.start_scanning, self.scanning_disp)
 
+        self.led_red = QPixmap('./files/led-red-on.png')
+        self.led_green = QPixmap('./files/green-led-on.png')
+        self.led_laser_laser_standby.setPixmap(self.led_red)
+        self.led_laser_on.setPixmap(self.led_red)
+        self.led_laser_enable.setPixmap(self.led_red)
+        self.led_laser_listen.setPixmap(self.led_red)
 
     def retranslateUi(self, Laser_Control):
         _translate = QtCore.QCoreApplication.translate
