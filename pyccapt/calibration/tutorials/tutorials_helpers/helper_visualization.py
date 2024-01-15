@@ -32,16 +32,16 @@ def call_visualization(variables):
         description='Clear plots',
     )
 
-    if variables.range_data.empty:
-	    element_percentage = str({'unranged': 0.01})
+    if variables.range_data.empty or variables.range_data['ion'].iloc[0] == 'unranged':
+        element_percentage = str({'unranged': 0.01})
     else:
-	    # Iterate over unique elements in the "element" column
-	    element_percentage = {}
-	    for element_list in variables.range_data['element']:
-		    for element in element_list:
-			    # Check if the element is already a key in the dictionary
-			    if element not in element_percentage:
-				    element_percentage[element] = 0.01
+        # Iterate over unique elements in the "element" column
+        element_percentage = {}
+        for element_list in variables.range_data['element']:
+            for element in element_list:
+                # Check if the element is already a key in the dictionary
+                if element not in element_percentage:
+                    element_percentage[element] = 0.01
         element_percentage = str(element_percentage)
 
     figname_3d = widgets.Text(value='3d_plot')
@@ -70,11 +70,11 @@ def call_visualization(variables):
             # Iterate through the 'element' column
             element_percentage_list = []
             for row_elements in variables.range_data['element']:
-	            max_value = 0.1  # Default value if no matching element is found
-	            for element in row_elements:
-		            if element in element_percentage_dic and element_percentage_dic[element] > max_value:
-			            max_value = element_percentage_dic[element]
-	            element_percentage_list.append(max_value)
+                max_value = 0.1  # Default value if no matching element is found
+                for element in row_elements:
+                    if element in element_percentage_dic and element_percentage_dic[element] > max_value:
+                        max_value = element_percentage_dic[element]
+                element_percentage_list.append(max_value)
 
             reconstruction.reconstruction_plot(variables, element_percentage_list, opacity.value,
                                                rotary_fig_save_p3.value, figname_3d.value,
@@ -109,11 +109,11 @@ def call_visualization(variables):
             # Iterate through the 'element' column
             element_percentage_list = []
             for row_elements in variables.range_data['element']:
-	            max_value = 0.1  # Default value if no matching element is found
-	            for element in row_elements:
-		            if element in element_percentage_dic and element_percentage_dic[element] > max_value:
-			            max_value = element_percentage_dic[element]
-	            element_percentage_list.append(max_value)
+                max_value = 0.1  # Default value if no matching element is found
+                for element in row_elements:
+                    if element in element_percentage_dic and element_percentage_dic[element] > max_value:
+                        max_value = element_percentage_dic[element]
+                element_percentage_list.append(max_value)
 
             reconstruction.heatmap(variables, selected_area_specially_ph.value, selected_area_temporally_ph.value,
                                    element_percentage_list, figname_heatmap.value, figure_sie=figure_size,
@@ -236,21 +236,21 @@ def call_visualization(variables):
             # Iterate through the 'element' column
             element_percentage_list = []
             for row_elements in variables.range_data['element']:
-	            max_value = 0.1  # Default value if no matching element is found
-	            for element in row_elements:
-		            if element in element_percentage_dic and element_percentage_dic[element] > max_value:
-			            max_value = element_percentage_dic[element]
-	            element_percentage_list.append(max_value)
+                max_value = 0.1  # Default value if no matching element is found
+                for element in row_elements:
+                    if element in element_percentage_dic and element_percentage_dic[element] > max_value:
+                        max_value = element_percentage_dic[element]
+                element_percentage_list.append(max_value)
 
             try:
-	            # Use json.loads to convert the entered string to a list
-	            range_1 = json.loads(range_p.value)
-	            if range_1 == [0, 0]:
-		            range_1 = []
+                # Use json.loads to convert the entered string to a list
+                range_1 = json.loads(range_p.value)
+                if range_1 == [0, 0]:
+                    range_1 = []
             except json.JSONDecodeError:
-	            # Handle invalid input
-	            range_1 = []
-	            print(f"Invalid input: {range_p.value}")
+                # Handle invalid input
+                range_1 = []
+                print(f"Invalid input: {range_p.value}")
 
             reconstruction.projection(variables, element_percentage_list, range_1, selected_area_specially_pp.value,
                                       selected_area_temporally_pp.value, x_or_y_pp.value,
@@ -509,7 +509,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='Element percentage:', layout=label_layout), element_percentage_pp]),
         widgets.HBox([widgets.Label(value='Selected specially:', layout=label_layout), selected_area_specially_pp]),
         widgets.HBox([widgets.Label(value='Selected temporally:', layout=label_layout), selected_area_temporally_pp]),
-	    widgets.HBox([widgets.Label(value='range z:', layout=label_layout), range_p]),
+        widgets.HBox([widgets.Label(value='range z:', layout=label_layout), range_p]),
         widgets.HBox([widgets.Label(value='X or Y:', layout=label_layout), x_or_y_pp]),
         widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_p]),
         widgets.HBox([widgets.Label(value='Save fig:', layout=label_layout), save_projection]),

@@ -32,8 +32,15 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc):
 	print('The figures will be saved on the path:', variables.result_path)
 	print('=============================')
 
-	# Create data farame out of hdf5 file dataset
-	dld_group_storage = data_tools.load_data(dataset_path, tdc, mode='raw')
+	# Create data frame out of hdf5 file dataset
+	if tdc == 'pyccapt':
+		try:
+			dld_group_storage = data_tools.load_data(dataset_path, tdc, mode='raw')
+			print('The data is loaded in raw mode')
+		except:
+			dld_group_storage = data_tools.load_data(dataset_path, tdc, mode='processed')
+	else:
+		dld_group_storage = data_tools.load_data(dataset_path, tdc, mode='raw')
 
 	if tdc == 'pyccapt':
 		# Remove the data with tof greater than Max TOF or below 0 ns

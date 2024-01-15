@@ -200,6 +200,7 @@ def draw_qube(fig, range, col=None, row=None):
         legend={'itemsizing': 'constant'},
         font=dict(size=8)
     )
+    return fig
 
 
 def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save, make_gif=False,
@@ -244,8 +245,6 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         pass
     else:
         print('element_percentage should be a list')
-
-    print(element_percentage)
 
     colors = variables.range_data['color'].tolist()
     mc_low = variables.range_data['mc_low'].tolist()
@@ -302,7 +301,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
                         opacity=opacity,
                     )
                 )
-                draw_qube(fig, range_cube, col, row)
+                fig = draw_qube(fig, range_cube, col, row)
 
                 fig.add_trace(scatter, row=row + 1, col=col + 1)
     else:
@@ -338,15 +337,13 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
                 )
             )
 
-        draw_qube(fig, range_cube)
+        fig = draw_qube(fig, range_cube)
 
     if rotary_fig_save or make_gif:
         if not ions_individually_plots:
-            rotary_fig(fig, variables, rotary_fig_save, make_gif, figname)
+            rotary_fig(go.Figure(fig), variables, rotary_fig_save, make_gif, figname)
         else:
             print('Rotary figure is not available for ions_individually_plots=True')
-
-
 
     fig.update_layout(
         legend=dict(
@@ -372,44 +369,45 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         }
     )
 
+    if save:
+        try:
+            fig1 = go.Figure(fig)
+            fig1.update_scenes(
+                camera=dict(
+                    eye=dict(x=4, y=4, z=4),  # Adjust the camera position for zooming
+                )
+            )
+            pio.write_html(fig1, variables.result_path + "/%s_3d.html" % figname, include_mathjax='cdn')
+            fig.update_layout(showlegend=False)
+            # layout = go.Layout(
+            #     margin=go.layout.Margin(
+            #         l=0,  # left margin
+            #         r=0,  # right margin
+            #         b=0,  # bottom margin
+            #         t=0,  # top margin
+            #     )
+            # )
+            # fig.update_layout(layout)
+            pio.write_image(fig1, variables.result_path + "/%s_3d.png" % figname, scale=3, format='png')
+            pio.write_image(fig1, variables.result_path + "/%s_3d.svg" % figname, scale=3, format='svg')
+            fig1.update_layout(showlegend=True)
+
+            fig1.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
+            fig1.update_layout(showlegend=False)
+            pio.write_image(fig1, variables.result_path + "/%s_3d_o.png" % figname, scale=3, format='png')
+            pio.write_image(fig1, variables.result_path + "/%s_3d_o.svg" % figname, scale=3, format='svg')
+            fig1.update_layout(showlegend=True)
+            pio.write_html(fig1, variables.result_path + "/%s_3d_o.html" % figname, include_mathjax='cdn')
+            fig1.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
+        except Exception as e:
+            print('The figure could not be saved')
+            print(e)
 
     # Show the plot in the Jupyter cell output
     variables.plotly_3d_reconstruction = go.FigureWidget(fig)
 
     plotly.offline.init_notebook_mode()
     fig.show()
-
-    if save:
-        fig.update_scenes(
-            camera=dict(
-                eye=dict(x=4, y=4, z=4),  # Adjust the camera position for zooming
-            )
-        )
-        pio.write_html(fig, variables.result_path + "/%s_3d.html" % figname, include_mathjax='cdn')
-        fig.update_layout(showlegend=False)
-        layout = go.Layout(
-            margin=go.layout.Margin(
-                l=0,  # left margin
-                r=0,  # right margin
-                b=0,  # bottom margin
-                t=0,  # top margin
-            )
-        )
-        fig.update_layout(layout)
-        pio.write_image(fig, variables.result_path + "/%s_3d.png" % figname, scale=3, format='png')
-        pio.write_image(fig,variables.result_path + "/%s_3d.svg" % figname, scale=3, format='svg')
-        fig.update_layout(showlegend=True)
-
-    if save:
-        fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
-        fig.update_layout(showlegend=False)
-        pio.write_image(fig, variables.result_path + "/%s_3d_o.png" % figname, scale=3, format='png')
-        pio.write_image(fig, variables.result_path + "/%s_3d_o.svg" % figname, scale=3, format='svg')
-        fig.update_layout(showlegend=True)
-        pio.write_html(fig, variables.result_path + "/%s_3d_o.html" % figname, include_mathjax='cdn')
-        fig.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
-
-
 
 def rotate_z(x, y, z, theta):
     """
@@ -439,7 +437,7 @@ def plotly_fig2array(fig):
         array: The array representation of the figure.
     """
     # convert Plotly fig to  an array
-    fig_bytes = fig.to_image(format="jpeg", scale=5, engine="kaleido")
+    fig_bytes = pio.to_image(fig, format="jpeg", scale=5, engine="kaleido")
     buf = io.BytesIO(fig_bytes)
     img = Image.open(buf)
     return np.asarray(img)
@@ -468,15 +466,15 @@ def rotary_fig(fig, variables, rotary_fig_save, make_gif, figname):
 
     if make_gif:
         fig.update_layout(showlegend=False)
-        layout = go.Layout(
-            margin=go.layout.Margin(
-                l=0,  # left margin
-                r=0,  # right margin
-                b=0,  # bottom margin
-                t=0,  # top margin
-            )
-        )
-        fig.update_layout(layout)
+        # layout = go.Layout(
+        #     margin=go.layout.Margin(
+        #         l=0,  # left margin
+        #         r=0,  # right margin
+        #         b=0,  # bottom margin
+        #         t=0,  # top margin
+        #     )
+        # )
+        # fig.update_layout(layout)
 
         figures = []
         for t in np.arange(0, 4, 0.2):
@@ -489,8 +487,8 @@ def rotary_fig(fig, variables, rotary_fig_save, make_gif, figname):
         print('Starting to process the frames for the GIF')
         print('The total number of frames is:', len(figures))
         for index, frame in enumerate(figures):
-            print('frame', index, 'is being processed')
             images.append(plotly_fig2array(frame))
+            print('frame', index, 'is being processed')
         print('The images are ready for the GIF')
 
         # Save the images as a GIF using imageio
