@@ -251,7 +251,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     mc_up = variables.range_data['mc_up'].tolist()
     ion = variables.range_data['ion'].tolist()
 
-    # Draw a edge of cube around the 3D plot in blue
+    # Draw an edge of cube around the 3D plot in blue
     x_range = [min(variables.x), max(variables.x)]
     y_range = [min(variables.y), max(variables.y)]
     z_range = [min(variables.z), max(variables.z)]
@@ -369,45 +369,47 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         }
     )
 
-    if save:
-        try:
-            fig1 = go.Figure(fig)
-            fig1.update_scenes(
-                camera=dict(
-                    eye=dict(x=4, y=4, z=4),  # Adjust the camera position for zooming
-                )
-            )
-            pio.write_html(fig1, variables.result_path + "/%s_3d.html" % figname, include_mathjax='cdn')
-            fig.update_layout(showlegend=False)
-            # layout = go.Layout(
-            #     margin=go.layout.Margin(
-            #         l=0,  # left margin
-            #         r=0,  # right margin
-            #         b=0,  # bottom margin
-            #         t=0,  # top margin
-            #     )
-            # )
-            # fig.update_layout(layout)
-            pio.write_image(fig1, variables.result_path + "/%s_3d.png" % figname, scale=3, format='png')
-            pio.write_image(fig1, variables.result_path + "/%s_3d.svg" % figname, scale=3, format='svg')
-            fig1.update_layout(showlegend=True)
-
-            fig1.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
-            fig1.update_layout(showlegend=False)
-            pio.write_image(fig1, variables.result_path + "/%s_3d_o.png" % figname, scale=3, format='png')
-            pio.write_image(fig1, variables.result_path + "/%s_3d_o.svg" % figname, scale=3, format='svg')
-            fig1.update_layout(showlegend=True)
-            pio.write_html(fig1, variables.result_path + "/%s_3d_o.html" % figname, include_mathjax='cdn')
-            fig1.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
-        except Exception as e:
-            print('The figure could not be saved')
-            print(e)
-
     # Show the plot in the Jupyter cell output
     variables.plotly_3d_reconstruction = go.FigureWidget(fig)
 
     plotly.offline.init_notebook_mode()
     fig.show()
+
+    if save:
+        try:
+            # fig1 = go.Figure(fig)
+            fig.update_scenes(
+                camera=dict(
+                    eye=dict(x=4, y=4, z=4),  # Adjust the camera position for zooming
+                )
+            )
+            pio.write_html(fig, variables.result_path + "/%s_3d.html" % figname, include_mathjax='cdn')
+            fig.update_layout(showlegend=False)
+            layout = go.Layout(
+                margin=go.layout.Margin(
+                    l=0,  # left margin
+                    r=0,  # right margin
+                    b=0,  # bottom margin
+                    t=0,  # top margin
+                )
+            )
+            fig.update_layout(layout)
+            pio.write_image(fig, variables.result_path + "/%s_3d.png" % figname, scale=3, format='png')
+            pio.write_image(fig, variables.result_path + "/%s_3d.svg" % figname, scale=3, format='svg')
+            fig.update_layout(showlegend=True)
+
+            fig.update_scenes(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False)
+            fig.update_layout(showlegend=False)
+            pio.write_image(fig, variables.result_path + "/%s_3d_o.png" % figname, scale=3, format='png')
+            pio.write_image(fig, variables.result_path + "/%s_3d_o.svg" % figname, scale=3, format='svg')
+            fig.update_layout(showlegend=True)
+            pio.write_html(fig, variables.result_path + "/%s_3d_o.html" % figname, include_mathjax='cdn')
+            fig.update_scenes(xaxis_visible=True, yaxis_visible=True, zaxis_visible=True)
+        except Exception as e:
+            print('The figure could not be saved')
+            print(e)
+
+
 
 def rotate_z(x, y, z, theta):
     """
@@ -466,15 +468,15 @@ def rotary_fig(fig, variables, rotary_fig_save, make_gif, figname):
 
     if make_gif:
         fig.update_layout(showlegend=False)
-        # layout = go.Layout(
-        #     margin=go.layout.Margin(
-        #         l=0,  # left margin
-        #         r=0,  # right margin
-        #         b=0,  # bottom margin
-        #         t=0,  # top margin
-        #     )
-        # )
-        # fig.update_layout(layout)
+        layout = go.Layout(
+            margin=go.layout.Margin(
+                l=0,  # left margin
+                r=0,  # right margin
+                b=0,  # bottom margin
+                t=0,  # top margin
+            )
+        )
+        fig.update_layout(layout)
 
         figures = []
         for t in np.arange(0, 4, 0.2):

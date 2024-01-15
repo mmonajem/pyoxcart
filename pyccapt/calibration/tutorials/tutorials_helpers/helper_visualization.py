@@ -72,7 +72,7 @@ def call_visualization(variables):
             for row_elements in variables.range_data['element']:
                 max_value = 0.1  # Default value if no matching element is found
                 for element in row_elements:
-                    if element in element_percentage_dic and element_percentage_dic[element] > max_value:
+                    if element in element_percentage_dic:
                         max_value = element_percentage_dic[element]
                 element_percentage_list.append(max_value)
 

@@ -52,6 +52,7 @@ calibration_deps = [
     "kaleido",
     "pymatgen",
     "ase",
+    "imageio",
 ]
 
 setup(
