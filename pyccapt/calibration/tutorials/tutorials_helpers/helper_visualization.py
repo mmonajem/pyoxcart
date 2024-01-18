@@ -54,18 +54,39 @@ def call_visualization(variables):
     ions_individually_plots = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
     make_gif_p3 = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
     plot_3d_button.on_click(lambda b: plot_3d(b, variables, out))
+    range_detx_3d = widgets.Textarea(value='[0,0]')
+    range_dety_3d = widgets.Textarea(value='[0,0]')
+    range_mc_3d = widgets.Textarea(value='[0,0]')
+    range_x_3d = widgets.Textarea(value='[0,0]')
+    range_y_3d = widgets.Textarea(value='[0,0]')
+    range_z_3d = widgets.Textarea(value='[0,0]')
 
     def plot_3d(b, variables, out):
         plot_3d_button.disabled = True
         with out:
-            if selected_area_specially_p3.value:
-                variables.selected_z1 = variables.selected_y1
-                variables.selected_z2 = variables.selected_y2
-                variables.selected_y1 = variables.selected_x1
-                variables.selected_y2 = variables.selected_x2
-                print('Min x (nm):', variables.selected_x1, 'Max x (nm):', variables.selected_x2)
-                print('Min y (nm):', variables.selected_y1, 'Max y (nm):', variables.selected_y2)
-                print('Min z (nm):', variables.selected_z1, 'Max z (nm):', variables.selected_z2)
+            try:
+                # Use json.loads to convert the entered string to a list
+                range_mc = json.loads(range_mc_3d.value)
+                range_detx = json.loads(range_detx_3d.value)
+                range_dety = json.loads(range_dety_3d.value)
+                range_x = json.loads(range_x_3d.value)
+                range_y = json.loads(range_y_3d.value)
+                range_z = json.loads(range_z_3d.value)
+
+                if range_mc == [0, 0]:
+                    range_mc = []
+                if range_detx == [0, 0] or range_dety == [0, 0]:
+                    range_detx = []
+                    range_dety = []
+
+                if range_x == [0, 0] or range_y == [] or range_z == [0, 0]:
+                    range_x = []
+                    range_y = []
+                    range_z = []
+            except json.JSONDecodeError:
+                # Handle invalid input
+                print(f"Invalid range input")
+
             element_percentage_dic = ast.literal_eval(element_percentage_p3.value)
             # Iterate through the 'element' column
             element_percentage_list = []
@@ -78,8 +99,8 @@ def call_visualization(variables):
 
             reconstruction.reconstruction_plot(variables, element_percentage_list, opacity.value,
                                                rotary_fig_save_p3.value, figname_3d.value,
-                                               save_3d.value, make_gif_p3.value, selected_area_specially_p3.value,
-                                               selected_area_temporally_p3.value, ions_individually_plots.value)
+                                               save_3d.value, make_gif_p3.value, range_mc, range_detx, range_dety,
+                                               range_x, range_y, range_z, ions_individually_plots.value)
 
 
         plot_3d_button.disabled = False
@@ -91,20 +112,41 @@ def call_visualization(variables):
     save_heatmap = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
     figure_mc_size_x_heatmap = widgets.FloatText(value=5.0)
     figure_mc_size_y_heatmap = widgets.FloatText(value=5.0)
+    range_detx_heatmap = widgets.Textarea(value='[0,0]')
+    range_dety_heatmap = widgets.Textarea(value='[0,0]')
+    range_mc_heatmap = widgets.Textarea(value='[0,0]')
+    range_x_heatmap = widgets.Textarea(value='[0,0]')
+    range_y_heatmap = widgets.Textarea(value='[0,0]')
+    range_z_heatmap = widgets.Textarea(value='[0,0]')
+
+
     plot_heatmap_button.on_click(lambda b: plot_heatmap(b, variables, out))
     def plot_heatmap(b, variables, out):
         plot_heatmap_button.disabled = True
         figure_size = (figure_mc_size_x_heatmap.value, figure_mc_size_y_heatmap.value)
         with out:
-            if selected_area_specially_pm.value:
-                variables.selected_z1 = variables.selected_y1
-                variables.selected_z2 = variables.selected_y2
-                variables.selected_y1 = variables.selected_x1
-                variables.selected_y2 = variables.selected_x2
-                print('Min x (nm):', variables.selected_x1, 'Max x (nm):', variables.selected_x2)
-                print('Min y (nm):', variables.selected_y1, 'Max y (nm):', variables.selected_y2)
-                print('Min z (nm):', variables.selected_z1, 'Max z (nm):', variables.selected_z2)
+            try:
+                # Use json.loads to convert the entered string to a list
+                range_mc = json.loads(range_mc_heatmap.value)
+                range_detx = json.loads(range_detx_heatmap.value)
+                range_dety = json.loads(range_dety_heatmap.value)
+                range_x = json.loads(range_x_heatmap.value)
+                range_y = json.loads(range_y_heatmap.value)
+                range_z = json.loads(range_z_heatmap.value)
 
+                if range_mc == [0, 0]:
+                    range_mc = []
+                if range_detx == [0, 0] or range_dety == [0, 0]:
+                    range_detx = []
+                    range_dety = []
+
+                if range_x == [0, 0] or range_y == [] or range_z == [0, 0]:
+                    range_x = []
+                    range_y = []
+                    range_z = []
+            except json.JSONDecodeError:
+                # Handle invalid input
+                print(f"Invalid range input")
             element_percentage_dic = ast.literal_eval(element_percentage_p3.value)
             # Iterate through the 'element' column
             element_percentage_list = []
@@ -114,9 +156,8 @@ def call_visualization(variables):
                     if element in element_percentage_dic and element_percentage_dic[element] > max_value:
                         max_value = element_percentage_dic[element]
                 element_percentage_list.append(max_value)
-
-            reconstruction.heatmap(variables, selected_area_specially_ph.value, selected_area_temporally_ph.value,
-                                   element_percentage_list, figname_heatmap.value, figure_sie=figure_size,
+            reconstruction.heatmap(variables, element_percentage_list, range_mc, range_detx, range_dety, range_x,
+                                   range_y, range_z, figname_heatmap.value, figure_sie=figure_size,
                                    save=save_heatmap.value)
         plot_heatmap_button.disabled = False
 
@@ -165,8 +206,6 @@ def call_visualization(variables):
 
     plot_animated_heatmap_button.on_click(lambda b: plot_animated_heatmap(b, variables, out))
 
-    selected_area_specially_pm = widgets.Dropdown(options=[('False', False), ('True', True)])
-    selected_area_temporally_pm = widgets.Dropdown(options=[('False', False), ('True', True)])
     peak_find_plot = widgets.Dropdown(options=[('True', True), ('False', False)])
     peaks_find = widgets.Dropdown(options=[('True', True), ('False', False)])
     rangging = widgets.Dropdown(options=[('True', True), ('False', False)])
@@ -182,26 +221,45 @@ def call_visualization(variables):
     plot_ranged_ions = widgets.Dropdown(options=[('False', False), ('True', True)], value=False)
     plot_mc_button.on_click(lambda b: plot_mc(b, variables, out))
 
+    range_detx_mc = widgets.Textarea(value='[0,0]')
+    range_dety_mc = widgets.Textarea(value='[0,0]')
+    range_mc_mc = widgets.Textarea(value='[0,0]')
+    range_x_mc = widgets.Textarea(value='[0,0]')
+    range_y_mc = widgets.Textarea(value='[0,0]')
+    range_z_mc = widgets.Textarea(value='[0,0]')
 
     def plot_mc(b, variables, out):
         plot_mc_button.disabled = True
         figure_size = (figure_mc_size_x_mc.value, figure_mc_size_y_mc.value)
         with out:
-            if selected_area_specially_pm.value:
-                variables.selected_z1 = variables.selected_y1
-                variables.selected_z2 = variables.selected_y2
-                variables.selected_y1 = variables.selected_x1
-                variables.selected_y2 = variables.selected_x2
-                print('Min x (nm):', variables.selected_x1, 'Max x (nm):', variables.selected_x2)
-                print('Min y (nm):', variables.selected_y1, 'Max y (nm):', variables.selected_y2)
-                print('Min z (nm):', variables.selected_z1, 'Max z (nm):', variables.selected_z2)
+            try:
+                # Use json.loads to convert the entered string to a list
+                range_mc = json.loads(range_mc_mc.value)
+                range_detx = json.loads(range_detx_mc.value)
+                range_dety = json.loads(range_dety_mc.value)
+                range_x = json.loads(range_x_mc.value)
+                range_y = json.loads(range_y_mc.value)
+                range_z = json.loads(range_z_mc.value)
 
+                if range_mc == [0, 0]:
+                    range_mc = []
+                if range_detx == [0, 0] or range_dety == [0, 0]:
+                    range_detx = []
+                    range_dety = []
+
+                if range_x == [0, 0] or range_y == [] or range_z == [0, 0]:
+                    range_x = []
+                    range_y = []
+                    range_z = []
+            except json.JSONDecodeError:
+                # Handle invalid input
+                print(f"Invalid range input")
             mc_plot.hist_plot(variables, bin_size_pm.value, log=True, target=target_mode.value, mode='normal',
                               prominence=prominence.value, distance=distance.value, percent=50, selector='rect',
                               figname=figname_mc.value, lim=lim_mc_pm.value, peaks_find=peaks_find.value,
                               peaks_find_plot=peak_find_plot.value, range_plot=rangging.value,
-                              selected_area_specially=selected_area_specially_pm.value,
-                              selected_area_temporally=selected_area_temporally_pm.value,
+                              range_mc=range_mc, range_detx=range_detx, range_dety=range_dety, range_x=range_x,
+                              range_y=range_y, range_z=range_z,
                               print_info=False, figure_size=figure_size, save_fig=save_mc.value,
                               plot_ranged_ions=plot_ranged_ions.value)
 
@@ -215,7 +273,12 @@ def call_visualization(variables):
     save_projection = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
     figure_mc_size_x_projection = widgets.FloatText(value=5.0)
     figure_mc_size_y_projection = widgets.FloatText(value=5.0)
-    range_p = widgets.Textarea(value='[0,0]')
+    range_detx_pp = widgets.Textarea(value='[0,0]')
+    range_dety_pp = widgets.Textarea(value='[0,0]')
+    range_mc_pp = widgets.Textarea(value='[0,0]')
+    range_x_pp = widgets.Textarea(value='[0,0]')
+    range_y_pp = widgets.Textarea(value='[0,0]')
+    range_z_pp = widgets.Textarea(value='[0,0]')
 
     plot_projection_button.on_click(lambda b: plot_projection(b, variables, out))
 
@@ -223,14 +286,29 @@ def call_visualization(variables):
         plot_projection_button.disabled = True
         figure_size = (figure_mc_size_x_projection.value, figure_mc_size_y_projection.value)
         with out:
-            if selected_area_specially_pp.value:
-                variables.selected_z1 = variables.selected_y1
-                variables.selected_z2 = variables.selected_y2
-                variables.selected_y1 = variables.selected_x1
-                variables.selected_y2 = variables.selected_x2
-                print('Min x (nm):', variables.selected_x1, 'Max x (nm):', variables.selected_x2)
-                print('Min y (nm):', variables.selected_y1, 'Max y (nm):', variables.selected_y2)
-                print('Min z (nm):', variables.selected_z1, 'Max z (nm):', variables.selected_z2)
+            try:
+                # Use json.loads to convert the entered string to a list
+                range_mc = json.loads(range_mc_pp.value)
+                range_detx = json.loads(range_detx_pp.value)
+                range_dety = json.loads(range_dety_pp.value)
+                range_x = json.loads(range_x_pp.value)
+                range_y = json.loads(range_y_pp.value)
+                range_z = json.loads(range_z_pp.value)
+
+                if range_mc == [0, 0]:
+                    range_mc = []
+                if range_detx == [0, 0] or range_dety == [0, 0]:
+                    range_detx = []
+                    range_dety = []
+
+                if range_x == [0, 0] or range_y == [] or range_z == [0, 0]:
+                    range_x = []
+                    range_y = []
+                    range_z = []
+            except json.JSONDecodeError:
+                # Handle invalid input
+                print(f"Invalid range input")
+                print(f"Invalid range input")
 
             element_percentage_dic = ast.literal_eval(element_percentage_p3.value)
             # Iterate through the 'element' column
@@ -242,48 +320,30 @@ def call_visualization(variables):
                         max_value = element_percentage_dic[element]
                 element_percentage_list.append(max_value)
 
-            try:
-                # Use json.loads to convert the entered string to a list
-                range_1 = json.loads(range_p.value)
-                if range_1 == [0, 0]:
-                    range_1 = []
-            except json.JSONDecodeError:
-                # Handle invalid input
-                range_1 = []
-                print(f"Invalid input: {range_p.value}")
-
-            reconstruction.projection(variables, element_percentage_list, range_1, selected_area_specially_pp.value,
-                                      selected_area_temporally_pp.value, x_or_y_pp.value,
+            reconstruction.projection(variables, element_percentage_list, range_mc, range_detx, range_dety,
+                                      range_x, range_y, range_z, x_or_y_pp.value,
                                       figname_p.value, figure_size, save_projection.value)
         plot_projection_button.disabled = False
 
     clear_button.on_click(lambda b: clear(b, out))
 
-    # Define widgets for each parameter
-    frac_fdm_widget = widgets.FloatText(value=1.0)
-    bins_x_fdm = widgets.IntText(value=256)
-    bins_y_fdm = widgets.IntText(value=256)
-    figure_size_x_fdm = widgets.FloatText(value=5.0)
-    figure_size_y_fdm = widgets.FloatText(value=4.0)
-    save_fdm_widget = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
-    figname_fdm_widget = widgets.Text(value='fdm_ini')
-
-    plot_fdm_button = widgets.Button(description="plot")
 
     first_axis = widgets.Dropdown(options=['x', 'y', 'z'], value='x')
     second_axis = widgets.Dropdown(options=['x', 'y', 'z'], value='y')
     bins_x_2d_hist = widgets.IntText(value=256)
     bins_y_2d_hist = widgets.IntText(value=256)
     percentage_2d_hist = widgets.FloatText(value=1.0)
-    selected_area_specially_2d_hist = widgets.Dropdown(options=[('False', False), ('True', True)])
-    selected_area_temporally_2d_hist = widgets.Dropdown(options=[('False', False), ('True', True)])
     save_2d_hist = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
     figname_2d_hist = widgets.Text(value='2d_hist')
     figure_size_x_2d_hist = widgets.FloatText(value=5.0)
     figure_size_y_2d_hist = widgets.FloatText(value=4.0)
 
-    range_1_2d_hist = widgets.Textarea(value='[0,0]')
-    range_2_2d_hist = widgets.Textarea(value='[0,0]')
+    range_detx_2d_hist = widgets.Textarea(value='[0,0]')
+    range_dety_2d_hist = widgets.Textarea(value='[0,0]')
+    range_mc_2d_hist = widgets.Textarea(value='[0,0]')
+    range_x_2d_hist = widgets.Textarea(value='[0,0]')
+    range_y_2d_hist = widgets.Textarea(value='[0,0]')
+    range_z_2d_hist = widgets.Textarea(value='[0,0]')
 
     plot_reconstruction_2d_hist_button = widgets.Button(description="plot")
 
@@ -318,46 +378,87 @@ def call_visualization(variables):
         figure_name = figname_2d_hist.value + '_' + first_axis.value + '_' + second_axis.value
         save = save_2d_hist.value
         figure_size = (figure_size_x_2d_hist.value, figure_size_y_2d_hist.value)
-        selected_area_specially = selected_area_specially_2d_hist.value
-        selected_area_temporally = selected_area_temporally_2d_hist.value
         try:
             # Use json.loads to convert the entered string to a list
-            range_1 = json.loads(range_1_2d_hist.value)
-            range_2 = json.loads(range_2_2d_hist.value)
-            if range_1 == [0, 0] or range_2 == [0, 0]:
-                range_1 = []
-                range_2 = []
+            range_mc = json.loads(range_mc_2d_hist.value)
+            range_detx = json.loads(range_detx_2d_hist.value)
+            range_dety = json.loads(range_dety_2d_hist.value)
+            range_x = json.loads(range_x_2d_hist.value)
+            range_y = json.loads(range_y_2d_hist.value)
+            range_z = json.loads(range_z_2d_hist.value)
+
+            if range_mc == [0, 0]:
+                range_mc = []
+            if range_detx == [0, 0] or range_dety == [0, 0]:
+                range_detx = []
+                range_dety = []
+
+            if range_x == [0, 0] or range_y == [] or range_z == [0, 0]:
+                range_x = []
+                range_y = []
+                range_z = []
         except json.JSONDecodeError:
             # Handle invalid input
-            range_1 = []
-            range_2 = []
-            print(f"Invalid input: {range_1_2d_hist.value} or {range_2_2d_hist.value}")
-
+            print(f"Invalid range input")
         with out:  # Capture the output within the 'out' widget
-            reconstruction.reconstruction_2d_histogram(variables, x, y, bins,
-                                                       selected_area_specially, selected_area_temporally, percentage,
-                                                       range_1, range_2,
+            reconstruction.reconstruction_2d_histogram(variables, x, y, bins, percentage, range_mc, range_detx,
+                                                       range_dety, range_x, range_y, range_z,
                                                        xlabel, ylabel, save, figure_name,
                                                        figure_size)
         plot_reconstruction_2d_hist_button.disabled = False
 
     plot_reconstruction_2d_hist_button.on_click(lambda b: plot_reconstruction_2d_hist(b, variables, out))
 
+    # Define widgets for each parameter
+    frac_fdm_widget = widgets.FloatText(value=1.0)
+    bins_x_fdm = widgets.IntText(value=256)
+    bins_y_fdm = widgets.IntText(value=256)
+    axis_mode_fdm = widgets.Dropdown(options=['normal', 'scalebar'], value='normal')
+    figure_size_x_fdm = widgets.FloatText(value=5.0)
+    figure_size_y_fdm = widgets.FloatText(value=4.0)
+    save_fdm_widget = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
+    figname_fdm_widget = widgets.Text(value='fdm_ini')
+    range_detx_fdm = widgets.Textarea(value='[0,0]')
+    range_dety_fdm = widgets.Textarea(value='[0,0]')
+    range_mc_fdm = widgets.Textarea(value='[0,0]')
+    range_x_fdm = widgets.Textarea(value='[0,0]')
+    range_y_fdm = widgets.Textarea(value='[0,0]')
+    range_z_fdm = widgets.Textarea(value='[0,0]')
+
+    plot_fdm_button = widgets.Button(description="plot")
     def plot_fdm(b, variables, out):
         plot_fdm_button.disabled = True
 
-        # Get the values from the widgets
-        frac = frac_fdm_widget.value
-        bins = (bins_x_fdm.value, bins_y_fdm.value)
-        figure_size = (figure_size_x_fdm.value, figure_size_y_fdm.value)
-        save = save_fdm_widget.value
-        figname = figname_fdm_widget.value
-
-        with out:  # Capture the output within the 'out' widget
+        with (out):  # Capture the output within the 'out' widget
             # Call the function
             data = variables.data.copy()
-            data_loadcrop.plot_crop_fdm(data, variables, bins, frac, True, figure_size,
-                                        False, save, figname)
+            bins = (bins_x_fdm.value, bins_y_fdm.value)
+            figure_size = (figure_size_x_fdm.value, figure_size_y_fdm.value)
+            try:
+                # Use json.loads to convert the entered string to a list
+                range_mc = json.loads(range_mc_fdm.value)
+                range_detx = json.loads(range_detx_fdm.value)
+                range_dety = json.loads(range_dety_fdm.value)
+                range_x = json.loads(range_x_fdm.value)
+                range_y = json.loads(range_y_fdm.value)
+                range_z = json.loads(range_z_fdm.value)
+
+                if range_mc == [0, 0]:
+                    range_mc = []
+                if range_detx == [0, 0] or range_dety == [0, 0]:
+                    range_detx = []
+                    range_dety = []
+
+                if range_x == [0, 0] or range_y == [] or range_z == [0, 0]:
+                    range_x = []
+                    range_y = []
+                    range_z = []
+            except json.JSONDecodeError:
+                # Handle invalid input
+                print(f"Invalid range input")
+            data_loadcrop.plot_crop_fdm(data, bins, frac_fdm_widget.value, axis_mode_fdm.value, figure_size, variables,
+                                        range_mc, range_detx, range_dety, range_x, range_y, range_z, False,
+                                        False, save_fdm_widget.value, figname_fdm_widget.value)
 
         # Enable the button when the code is finished
         plot_fdm_button.disabled = False
@@ -456,11 +557,30 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value="Save fig:", layout=label_layout), save_mc]),
         widgets.HBox([widgets.Label(value="Fig size:", layout=label_layout),
                       widgets.HBox([figure_mc_size_x_mc, figure_mc_size_y_mc])]),
-
+        widgets.HBox([widgets.Label(value="mc range:", layout=label_layout), range_mc_mc]),
+        widgets.HBox([widgets.Label(value="detx range:", layout=label_layout), range_detx_mc]),
+        widgets.HBox([widgets.Label(value="dety range:", layout=label_layout), range_dety_mc]),
+        widgets.HBox([widgets.Label(value="x range:", layout=label_layout), range_x_mc]),
+        widgets.HBox([widgets.Label(value="y range:", layout=label_layout), range_y_mc]),
+        widgets.HBox([widgets.Label(value="z range:", layout=label_layout), range_z_mc]),
         widgets.HBox([plot_mc_button, clear_button])])
+
     tab2 = widgets.VBox([
-        widgets.HBox([widgets.Label(value='Selected specially:', layout=label_layout), selected_area_specially_p3]),
-        widgets.HBox([widgets.Label(value='Selected temporally:', layout=label_layout), selected_area_temporally_p3]),
+        widgets.HBox([widgets.Label(value='Fraction:', layout=label_layout), frac_fdm_widget]),
+        widgets.HBox([widgets.Label(value='Bins:', layout=label_layout), widgets.HBox([bins_x_fdm, bins_y_fdm])]),
+        widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_fdm_widget]),
+        widgets.HBox([widgets.Label(value='Save:', layout=label_layout), save_fdm_widget]),
+        widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
+                      widgets.HBox([figure_size_x_fdm, figure_size_y_fdm])]),
+        widgets.HBox([widgets.Label(value='mc range:', layout=label_layout), range_mc_fdm]),
+        widgets.HBox([widgets.Label(value='detx range:', layout=label_layout), range_detx_fdm]),
+        widgets.HBox([widgets.Label(value='dety range:', layout=label_layout), range_dety_fdm]),
+        widgets.HBox([widgets.Label(value='x range:', layout=label_layout), range_x_fdm]),
+        widgets.HBox([widgets.Label(value='y range:', layout=label_layout), range_y_fdm]),
+        widgets.HBox([widgets.Label(value='z range:', layout=label_layout), range_z_fdm]),
+        widgets.HBox([plot_fdm_button, clear_button]),
+    ])
+    tab3 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Element percentage:', layout=label_layout), element_percentage_p3]),
         widgets.HBox([widgets.Label(value='Opacity:', layout=label_layout), opacity]),
         widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_3d]),
@@ -468,18 +588,14 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='Save GIF:', layout=label_layout), make_gif_p3]),
         widgets.HBox([widgets.Label(value='Save fig:', layout=label_layout), save_3d]),
         widgets.HBox([widgets.Label(value='Ions individually plots:', layout=label_layout), ions_individually_plots]),
+        widgets.HBox([widgets.Label(value='Range mc:', layout=label_layout), range_mc_3d]),
+        widgets.HBox([widgets.Label(value='Range detx:', layout=label_layout), range_detx_3d]),
+        widgets.HBox([widgets.Label(value='Range dety:', layout=label_layout), range_dety_3d]),
+        widgets.HBox([widgets.Label(value='Range x:', layout=label_layout), range_x_3d]),
+        widgets.HBox([widgets.Label(value='Range y:', layout=label_layout), range_y_3d]),
+        widgets.HBox([widgets.Label(value='Range z:', layout=label_layout), range_z_3d]),
         widgets.HBox([plot_3d_button, clear_button]),
     ])
-    tab3 = widgets.VBox([
-        widgets.HBox([widgets.Label(value='Fraction:', layout=label_layout), frac_fdm_widget]),
-        widgets.HBox([widgets.Label(value='Bins:', layout=label_layout), widgets.HBox([bins_x_fdm, bins_y_fdm])]),
-        widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_fdm_widget]),
-        widgets.HBox([widgets.Label(value='Save:', layout=label_layout), save_fdm_widget]),
-        widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
-                      widgets.HBox([figure_size_x_fdm, figure_size_y_fdm])]),
-        widgets.HBox([plot_fdm_button, clear_button]),
-    ])
-
     tab4 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Max TOF:', layout=label_layout), max_tof_mc_widget]),
         widgets.HBox([widgets.Label(value='Fraction:', layout=label_layout), frac_mc_widget]),
@@ -507,14 +623,17 @@ def call_visualization(variables):
 
     tab7 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Element percentage:', layout=label_layout), element_percentage_pp]),
-        widgets.HBox([widgets.Label(value='Selected specially:', layout=label_layout), selected_area_specially_pp]),
-        widgets.HBox([widgets.Label(value='Selected temporally:', layout=label_layout), selected_area_temporally_pp]),
-        widgets.HBox([widgets.Label(value='range z:', layout=label_layout), range_p]),
         widgets.HBox([widgets.Label(value='X or Y:', layout=label_layout), x_or_y_pp]),
         widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_p]),
         widgets.HBox([widgets.Label(value='Save fig:', layout=label_layout), save_projection]),
         widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
                       widgets.HBox([figure_mc_size_x_projection, figure_mc_size_y_projection])]),
+        widgets.HBox([widgets.Label(value='range mc:', layout=label_layout), range_mc_pp]),
+        widgets.HBox([widgets.Label(value='range detx:', layout=label_layout), range_detx_pp]),
+        widgets.HBox([widgets.Label(value='range dety:', layout=label_layout), range_dety_pp]),
+        widgets.HBox([widgets.Label(value='range x:', layout=label_layout), range_x_pp]),
+        widgets.HBox([widgets.Label(value='range y:', layout=label_layout), range_y_pp]),
+        widgets.HBox([widgets.Label(value='range z:', layout=label_layout), range_z_pp]),
         widgets.HBox([plot_projection_button, clear_button])
     ])
 
@@ -526,6 +645,12 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='Save fig:', layout=label_layout), save_heatmap]),
         widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
                       widgets.HBox([figure_mc_size_x_heatmap, figure_mc_size_y_heatmap])]),
+        widgets.HBox([widgets.Label(value='range mc:', layout=label_layout), range_mc_heatmap]),
+        widgets.HBox([widgets.Label(value='range detx:', layout=label_layout), range_detx_heatmap]),
+        widgets.HBox([widgets.Label(value='range dety:', layout=label_layout), range_dety_heatmap]),
+        widgets.HBox([widgets.Label(value='range x:', layout=label_layout), range_x_heatmap]),
+        widgets.HBox([widgets.Label(value='range y:', layout=label_layout), range_y_heatmap]),
+        widgets.HBox([widgets.Label(value='range z:', layout=label_layout), range_z_heatmap]),
         widgets.HBox([plot_heatmap_button, clear_button]),
     ])
 
@@ -535,35 +660,39 @@ def call_visualization(variables):
         widgets.HBox(
             [widgets.Label(value='Bins:', layout=label_layout), widgets.HBox([bins_x_2d_hist, bins_y_2d_hist])]),
         widgets.HBox([widgets.Label(value='Percentage:', layout=label_layout), percentage_2d_hist]),
-        widgets.HBox([widgets.Label(value='Range axis 1:', layout=label_layout), range_1_2d_hist]),
-        widgets.HBox([widgets.Label(value='Range axis 2:', layout=label_layout), range_2_2d_hist]),
-        widgets.HBox(
-            [widgets.Label(value='Selected specially:', layout=label_layout), selected_area_specially_2d_hist]),
-        widgets.HBox(
-            [widgets.Label(value='Selected temporally:', layout=label_layout), selected_area_temporally_2d_hist]),
         widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_2d_hist]),
         widgets.HBox([widgets.Label(value='Save:', layout=label_layout), save_2d_hist]),
         widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
                       widgets.HBox([figure_size_x_2d_hist, figure_size_y_2d_hist])]),
+        widgets.HBox([widgets.Label(value='mc range:', layout=label_layout), range_mc_2d_hist]),
+        widgets.HBox([widgets.Label(value='detx range:', layout=label_layout), range_detx_2d_hist]),
+        widgets.HBox([widgets.Label(value='dety range:', layout=label_layout), range_dety_2d_hist]),
+        widgets.HBox([widgets.Label(value='x range:', layout=label_layout), range_x_2d_hist]),
+        widgets.HBox([widgets.Label(value='y range:', layout=label_layout), range_y_2d_hist]),
+        widgets.HBox([widgets.Label(value='z range:', layout=label_layout), range_z_2d_hist]),
         widgets.HBox([plot_reconstruction_2d_hist_button, clear_button]),
     ])
-
     tab9 = widgets.VBox([
+    ])
+
+    tab10 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Index row:', layout=label_layout), row_index]),
         widgets.HBox([widgets.Label(value='Color:', layout=label_layout), color_picker]),
         widgets.HBox([show_color, change_color]),
     ])
 
-    tab = widgets.Tab(children=[tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9])
+    tab = widgets.Tab(children=[tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10])
     tab.set_title(0, 'mc')
-    tab.set_title(1, '3d')
-    tab.set_title(2, 'FDM')
+    tab.set_title(1, 'FDM')
+    tab.set_title(2, '3D')
     tab.set_title(3, 'Experiment history')
     tab.set_title(4, 'Heatmap')
-    tab.set_title(5, 'animated heatmap')
+    tab.set_title(5, 'Animated heatmap')
     tab.set_title(6, 'Projection')
     tab.set_title(7, '2D reconstruction histogram')
-    tab.set_title(8, 'Color')
+    tab.set_title(8, 'SDM & RDF')
+
+    tab.set_title(9, 'Change Color')
 
     out = Output()
 

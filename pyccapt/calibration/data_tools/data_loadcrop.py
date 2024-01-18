@@ -196,24 +196,61 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     plt.show()
 
 
-def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, figure_size=(5, 4), draw_circle=False,
-                  save=True, figname='', axis_mode='normal'):
+def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_size=(5, 4), variables=None,
+                  range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[], data_crop=False,
+                  draw_circle=False, save=True, figname=''):
     """
     Plot and crop the FDM with the option to select a region of interest.
 
     Args:
         data: Cropped dataset (type: list)
         bins: Number of bins for the histogram
+        frac: Fraction of the data to be plotted
+        axis_mode: Flag to choose whether to plot axis or scalebar: 'normal' or 'scalebar'
+        variables: Variables object
+        range_mc: Range of mc
+        range_detx: Range of detx
+        range_dety: Range of dety
+        range_x: Range of x-axis
+        range_y: Range of y-axis
+        range_z: Range of z-axis
         figure_size: Size of the plot
         draw_circle: Flag to enable circular region of interest selection
         save: Flag to choose whether to save the plot or not
         data_crop: Flag to control whether only the plot is shown or cropping functionality is enabled
         figname: Name of the figure to be saved
-        axis_mode: Flag to choose whether to plot axis or scalebar: 'normal' or 'scalebar'
 
     Returns:
         None
     """
+    if range_mc or range_detx or range_dety or range_x or range_y or range_z:
+        if range_detx and range_dety:
+            mask_det_x = (variables.dld_x_det < range_detx[1]) & (variables.dld_x_det > range_detx[0])
+            mask_det_y = (variables.dld_y_det < range_dety[1]) & (variables.dld_y_det > range_dety[0])
+            mask_det = mask_det_x & mask_det_y
+        else:
+            mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
+        if range_mc:
+            mask_mc = (variables.mc_c < range_mc[1]) & (variables.mc_c > range_mc[0])
+        else:
+            mask_mc = np.ones(len(variables.mc), dtype=bool)
+        if range_x and range_y and range_z:
+            mask_x = (variables.x < range_x[1]) & (variables.x > range_x[0])
+            mask_y = (variables.y < range_y[1]) & (variables.y > range_y[0])
+            mask_z = (variables.z < range_z[1]) & (variables.z > range_z[0])
+            mask_3d = mask_x & mask_y & mask_z
+        else:
+            mask_3d = np.ones(len(variables.x), dtype=bool)
+        mask = mask_det & mask_mc & mask_3d
+        print('The number of data mc:', len(mask_mc[mask_mc == True]))
+        print('The number of data det:', len(mask_det[mask_det == True]))
+        print('The number of data 3d:', len(mask_3d[mask_3d == True]))
+        print('The number of data after cropping:', len(mask[mask == True]))
+    else:
+        mask = np.ones(len(data), dtype=bool)
+
+    data = data[mask]
+
     if frac < 1:
         # set axis limits based on fraction of data
         dldGroupStorage = data.sample(frac=frac, random_state=42)
@@ -253,13 +290,14 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
         ax1.set_xlim([min(x_lim), max(x_lim)])
         ax1.set_ylim([min(y_lim), max(y_lim)])
 
-    if data_crop:
-        elliptical_shape_selector(ax1, fig1, variables)
-    if draw_circle:
-        print('x:', variables.selected_x_fdm, 'y:', variables.selected_y_fdm, 'roi:', variables.roi_fdm)
-        circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
-                      alpha=0.3, color='green', linewidth=5)
-        ax1.add_patch(circ)
+    if variables is not None:
+        if data_crop:
+            elliptical_shape_selector(ax1, fig1, variables)
+        if draw_circle:
+            print('x:', variables.selected_x_fdm, 'y:', variables.selected_y_fdm, 'roi:', variables.roi_fdm)
+            circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
+                          alpha=0.3, color='green', linewidth=5)
+            ax1.add_patch(circ)
     if axis_mode == 'scalebar':
         fontprops = fm.FontProperties(size=10)
         scalebar = AnchoredSizeBar(ax1.transData,
@@ -276,7 +314,7 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
         ax1.set_xlabel(r"$X_{det} (cm)$", fontsize=10)
         ax1.set_ylabel(r"$Y_{det} (cm)$", fontsize=10)
 
-    if save:
+    if save and variables is not None:
         # Enable rendering for text elements
         rcParams['svg.fonttype'] = 'none'
         plt.savefig("%s.png" % (variables.result_path + figname), format="png", dpi=600)

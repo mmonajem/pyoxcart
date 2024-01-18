@@ -622,9 +622,8 @@ class AptHistPlotter:
 
 def hist_plot(variables, bin_size, log, target, mode, prominence, distance, percent, selector, figname, lim,
               peaks_find_plot, peaks_find=True, range_plot=False, plot_ranged_ions=False, ranging_mode=False,
-              selected_area_specially=False, selected_area_temporally=False, save_fig=True, print_info=True,
-              draw_calib_rect=False,
-              figure_size=(9, 5), plot_show=True):
+              range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[], save_fig=True,
+              print_info=True, draw_calib_rect=False, figure_size=(9, 5), plot_show=True):
     """
     Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
     Args:
@@ -643,8 +642,12 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         range_plot (bool): Plot the range.
         plot_ranged_ions (str): Plot the ranged ions.
         ranging_mode (bool): Ranging mode.
-        selected_area_specially (bool): Plot selected area specially.
-        selected_area_temporally (bool): Plot selected area temporally.
+        range_mc: Range of mc
+        range_detx: Range of detx
+        range_dety: Range of dety
+        range_x: Range of x-axis
+        range_y: Range of y-axis
+        range_z: Range of z-axis
         print_info: Print the information about the peaks.
         draw_calib_rect (bool): Draw the calibration rectangle.
         figure_size (tuple): Figure size.
@@ -670,24 +673,33 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         variables.peak_widths = []
         variables.peaks_index_list = []
 
-    if selected_area_specially:
-        mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
-                       (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
-                       (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
-    elif selected_area_temporally:
-        mask_spacial = np.logical_and((variables.mc_calib > variables.selected_x1),
-                                      (variables.mc_calib < variables.selected_x2))
-    elif selected_area_specially and selected_area_temporally:
-        mask_temporally = np.logical_and((variables.mc_calib > variables.selected_x1),
-                                         (variables.mc_calib < variables.selected_x2))
-        mask_specially = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
-                         (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
-                         (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
-        mask_spacial = mask_specially & mask_temporally
+    if range_mc or range_detx or range_dety or range_x or range_y or range_z:
+        if range_detx and range_dety:
+            mask_det_x = (variables.dld_x_det < range_detx[1]) & (variables.dld_x_det > range_detx[0])
+            mask_det_y = (variables.dld_y_det < range_dety[1]) & (variables.dld_y_det > range_dety[0])
+            mask_det = mask_det_x & mask_det_y
+        else:
+            mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
+        if range_mc:
+            mask_mc = (variables.mc_c < range_mc[1]) & (variables.mc_c > range_mc[0])
+        else:
+            mask_mc = np.ones(len(variables.mc), dtype=bool)
+        if range_x and range_y and range_z:
+            mask_x = (variables.x < range_x[1]) & (variables.x > range_x[0])
+            mask_y = (variables.y < range_y[1]) & (variables.y > range_y[0])
+            mask_z = (variables.z < range_z[1]) & (variables.z > range_z[0])
+            mask_3d = mask_x & mask_y & mask_z
+        else:
+            mask_3d = np.ones(len(variables.x), dtype=bool)
+        mask = mask_det & mask_mc & mask_3d
+        print('The number of data mc:', len(mask_mc[mask_mc == True]))
+        print('The number of data det:', len(mask_det[mask_det == True]))
+        print('The number of data 3d:', len(mask_3d[mask_3d == True]))
+        print('The number of data after cropping:', len(mask[mask == True]))
     else:
-        mask_spacial = np.ones(len(hist), dtype=bool)
+        mask = np.ones(len(variables.mc), dtype=bool)
 
-    hist = hist[mask_spacial]
+    hist = hist[mask]
 
     if range_plot:
         steps = 'bar'

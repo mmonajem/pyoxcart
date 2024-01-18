@@ -204,7 +204,8 @@ def draw_qube(fig, range, col=None, row=None):
 
 
 def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save, make_gif=False,
-                        selected_area_specially=False, selected_area_temporally=False, ions_individually_plots=False):
+                        range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[],
+                        ions_individually_plots=False):
     """
     Generate a 3D plot for atom probe reconstruction data.
 
@@ -216,30 +217,44 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         figname (str): Name of the figure.
         save (bool): Whether to save the figure.
         make_gif (bool): Whether to make a GIF.
-        selected_area_specially (bool): Whether a specific area is selected.
-        selected_area_temporally (bool): Whether a specific time range is selected.
+        range_mc: Range of mc
+        range_detx: Range of detx
+        range_dety: Range of dety
+        range_x: Range of x-axis
+        range_y: Range of y-axis
+        range_z: Range of z-axis
         ions_individually_plots (bool): Whether to plot ions individually.
 
     Returns:
         None
     """
+    if range_detx or range_dety or range_mc or range_x or range_y or range_z:
+        if range_detx and range_dety:
+            mask_det_x = (variables.dld_x_det < range_detx[1]) & (variables.dld_x_det > range_detx[0])
+            mask_det_y = (variables.dld_y_det < range_dety[1]) & (variables.dld_y_det > range_dety[0])
+            mask_det = mask_det_x & mask_det_y
+        else:
+            mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
+        if range_mc:
+            mask_mc = (variables.mc_c < range_mc[1]) & (variables.mc_c > range_mc[0])
+        else:
+            mask_mc = np.ones(len(variables.mc), dtype=bool)
+        if range_x and range_y and range_z:
+            mask_x = (variables.x < range_x[1]) & (variables.x > range_x[0])
+            mask_y = (variables.y < range_y[1]) & (variables.y > range_y[0])
+            mask_z = (variables.z < range_z[1]) & (variables.z > range_z[0])
+            mask_3d = mask_x & mask_y & mask_z
+        else:
+            mask_3d = np.ones(len(variables.x), dtype=bool)
 
-    if selected_area_specially:
-        mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
-                       (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
-                       (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
-    elif selected_area_temporally:
-        mask_spacial = np.logical_and((variables.mc_calib > variables.selected_x1),
-                                      (variables.mc_calib < variables.selected_x2))
-    elif selected_area_specially and selected_area_temporally:
-        mask_temporally = np.logical_and((variables.mc_calib > variables.selected_x1),
-                                         (variables.mc_calib < variables.selected_x2))
-        mask_specially = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
-                         (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
-                         (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
-        mask_spacial = mask_specially & mask_temporally
+        mask_f = mask_det & mask_mc & mask_3d
+        print('The number of data mc:', len(mask_mc[mask_mc == True]))
+        print('The number of data det:', len(mask_det[mask_det == True]))
+        print('The number of data 3d:', len(mask_3d[mask_3d == True]))
+        print('The number of data after cropping:', len(mask_f[mask_f == True]))
+
     else:
-        mask_spacial = np.ones(len(variables.dld_t), dtype=bool)
+        mask_f = np.ones(len(variables.x), dtype=bool)
 
     if isinstance(element_percentage, list):
         pass
@@ -275,7 +290,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
                 if index == len(ion):
                     break
                 mask = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
-                mask = mask & mask_spacial
+                mask = mask & mask_f
                 size = int(len(mask[mask == True]) * float(element_percentage[index]))
                 # Find indices where the original mask is True
                 true_indices = np.where(mask)[0]
@@ -308,7 +323,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         fig = go.Figure()
         for index, elemen in enumerate(ion):
             mask = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
-            mask = mask & mask_spacial
+            mask = mask & mask_f
             size = int(len(mask[mask == True]) * float(element_percentage[index]))
             # Find indices where the original mask is True
             true_indices = np.where(mask)[0]
@@ -545,7 +560,8 @@ def rotary_fig(fig, variables, rotary_fig_save, make_gif, figname):
         )
 
 
-def scatter_plot(data, range_data, variables, element_percentage, selected_area, x_or_y, figname):
+def scatter_plot(data, range_data, variables, element_percentage, selected_area, x_or_y, figname, figure_size,
+                 save=False):
     """
     Generate a scatter plot based on the provided data.
 
@@ -561,7 +577,8 @@ def scatter_plot(data, range_data, variables, element_percentage, selected_area,
     Returns:
         None
     """
-    ax = plt.figure().add_subplot(111)
+    fig = plt.figure(figsize=figure_size)  # Specify the width and height
+    ax = fig.add_subplot(111)
 
     phases = range_data['element'].tolist()
     colors = range_data['color'].tolist()
@@ -603,21 +620,28 @@ def scatter_plot(data, range_data, variables, element_percentage, selected_area,
     ax.set_ylabel('z (nm)')
     plt.legend(loc='upper right')
 
-    plt.savefig(variables.result_path + '\\projection_{fn}.png'.format(fn=figname))
+    if save:
+        # Enable rendering for text elements
+        rcParams['svg.fonttype'] = 'none'
+        plt.savefig(variables.result_path + '\\projection_{fn}.png'.format(fn=figname))
+        plt.savefig(variables.result_path + '\\projection_{fn}.svg'.format(fn=figname))
     plt.show()
 
 
-def projection(variables, element_percentage, thickness, selected_area_specially, selected_area_temporally,
-               x_or_y, figname, figure_size, save):
+def projection(variables, element_percentage, range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[],
+               range_z=[], x_or_y='x', figname='projection', figure_size=(5, 5), save=False):
     """
     Generate a projection plot based on the provided data.
 
     Args:
         variables (object): The variables object.
         element_percentage (str): Element percentage information.
-        thickness [float, float]: Thickness of the projection in nm (start, end).
-        selected_area_specially (bool): True if a specific area is selected, False otherwise.
-        selected_area_temporally (bool): True if a specific area is selected, False otherwise.
+        range_mc: Range of mc
+        range_detx: Range of detx
+        range_dety: Range of dety
+        range_x: Range of x-axis
+        range_y: Range of y-axis
+        range_z: Range of z-axis
         x_or_y (str): Either 'x' or 'y' indicating the axis to plot.
         figname (str): The name of the figure.
     Returns:
@@ -626,27 +650,38 @@ def projection(variables, element_percentage, thickness, selected_area_specially
     fig = plt.figure(figsize=figure_size)  # Specify the width and height
     ax = fig.add_subplot(111)
 
+    if range_mc or range_detx or range_dety or range_x or range_y or range_z:
+        if range_detx and range_dety:
+            mask_det_x = (variables.dld_x_det < range_detx[1]) & (variables.dld_x_det > range_detx[0])
+            mask_det_y = (variables.dld_y_det < range_dety[1]) & (variables.dld_y_det > range_dety[0])
+            mask_det = mask_det_x & mask_det_y
+        else:
+            mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
+        if range_mc:
+            mask_mc = (variables.mc_c < range_mc[1]) & (variables.mc_c > range_mc[0])
+        else:
+            mask_mc = np.ones(len(variables.mc), dtype=bool)
+        if range_x and range_y and range_z:
+            mask_x = (variables.x < range_x[1]) & (variables.x > range_x[0])
+            mask_y = (variables.y < range_y[1]) & (variables.y > range_y[0])
+            mask_z = (variables.z < range_z[1]) & (variables.z > range_z[0])
+            mask_3d = mask_x & mask_y & mask_z
+        else:
+            mask_3d = np.ones(len(variables.x), dtype=bool)
+        mask = mask_det & mask_mc & mask_3d
+        print('The number of data mc:', len(mask_mc[mask_mc == True]))
+        print('The number of data det:', len(mask_det[mask_det == True]))
+        print('The number of data 3d:', len(mask_3d[mask_3d == True]))
+        print('The number of data after cropping:', len(mask[mask == True]))
+    else:
+        mask = np.ones(len(variables.mc_c), dtype=bool)
+
+
     ions = variables.range_data['ion'].tolist()
     colors = variables.range_data['color'].tolist()
     mc_low = variables.range_data['mc_low'].tolist()
     mc_up = variables.range_data['mc_up'].tolist()
 
-    if selected_area_specially:
-        mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
-                       (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
-                       (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
-    elif selected_area_specially:
-        mask_spacial = np.logical_and((variables.mc_calib > variables.selected_x1),
-                                      (variables.mc_calib < variables.selected_x2))
-    elif selected_area_specially and selected_area_temporally:
-        mask_temporally = np.logical_and((variables.mc_calib > variables.selected_x1),
-                                         (variables.mc_calib < variables.selected_x2))
-        mask_specially = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
-                         (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
-                         (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
-        mask_spacial = mask_specially & mask_temporally
-    else:
-        mask_spacial = np.ones(len(variables.dld_t), dtype=bool)
 
     if isinstance(element_percentage, list):
         pass
@@ -655,7 +690,7 @@ def projection(variables, element_percentage, thickness, selected_area_specially
 
 
     for index, elemen in enumerate(ions):
-        mask = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
+        mask_spacial = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
         mask = mask & mask_spacial
         size = int(len(mask[mask == True]) * float(element_percentage[index]))
         # Find indices where the original mask is True
@@ -672,20 +707,13 @@ def projection(variables, element_percentage, thickness, selected_area_specially
             name_element = 'unranged'
         else:
             name_element = '%s' % ions[index]
-        if thickness != []:
-            mask_thickness = (variables.z >= thickness[0]) & (variables.z <= thickness[1])
-        else:
-            mask_thickness = np.ones(len(variables.dld_t), dtype=bool)
         if x_or_y == 'x':
-            ax.scatter(variables.x[mask & mask_thickness], variables.z[mask & mask_thickness], s=0.1,
+            ax.scatter(variables.x[mask], variables.z[mask], s=0.1,
                        label=name_element, color=colors[index])
         elif x_or_y == 'y':
-            ax.scatter(variables.y[mask & mask_thickness], variables.z[mask & mask_thickness], s=0.1,
+            ax.scatter(variables.y[mask], variables.z[mask], s=0.1,
                        label=name_element, color=colors[index])
 
-    if not selected_area_specially and not selected_area_temporally:
-        data_loadcrop.rectangle_box_selector(ax, variables)
-        plt.connect('key_press_event', selectors_data.toggle_selector)
     # ax.xaxis.tick_top()
     ax.invert_yaxis()
     if x_or_y == 'x':
@@ -704,16 +732,20 @@ def projection(variables, element_percentage, thickness, selected_area_specially
     plt.show()
 
 
-def heatmap(variables, selected_area_specially, selected_area_temporally, element_percentage, figure_name,
-            figure_sie, save):
+def heatmap(variables, element_percentage, range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[],
+            range_z=[], figure_name='hetmap', figure_sie=(5, 5), save=False):
     """
     Generate a heatmap based on the provided data.
 
     Args:
         variables (object): The variables object.
-        selected_area_specially (bool): True if a specific area is selected, False otherwise.
-        selected_area_temporally (bool): True if a specific area is selected, False otherwise.
         element_percentage (str): Element percentage information.
+        range_mc: Range of mc
+        range_detx: Range of detx
+        range_dety: Range of dety
+        range_x: Range of x-axis
+        range_y: Range of y-axis
+        range_z: Range of z-axis
         figure_name (str): The name of the figure.
         figure_sie: The size of the figure.
         save (bool): True to save the plot, False to display it.
@@ -724,22 +756,31 @@ def heatmap(variables, selected_area_specially, selected_area_temporally, elemen
     fig = plt.figure(figsize=figure_sie)  # Specify the width and height
     ax = fig.add_subplot(111)
 
-    if selected_area_specially:
-        mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
-                       (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
-                       (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
-    elif selected_area_temporally:
-        mask_spacial = np.logical_and((variables.mc_calib > variables.selected_x1),
-                                      (variables.mc_calib < variables.selected_x2))
-    elif selected_area_specially and selected_area_temporally:
-        mask_temporally = np.logical_and((variables.mc_calib > variables.selected_x1),
-                                         (variables.mc_calib < variables.selected_x2))
-        mask_specially = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
-                         (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
-                         (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
-        mask_spacial = mask_specially & mask_temporally
+    if range_mc or range_detx or range_dety or range_x or range_y or range_z:
+        if range_detx and range_dety:
+            mask_det_x = (variables.dld_x_det < range_detx[1]) & (variables.dld_x_det > range_detx[0])
+            mask_det_y = (variables.dld_y_det < range_dety[1]) & (variables.dld_y_det > range_dety[0])
+            mask_det = mask_det_x & mask_det_y
+        else:
+            mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
+        if range_mc:
+            mask_mc = (variables.mc_c < range_mc[1]) & (variables.mc_c > range_mc[0])
+        else:
+            mask_mc = np.ones(len(variables.mc), dtype=bool)
+        if range_x and range_y and range_z:
+            mask_x = (variables.x < range_x[1]) & (variables.x > range_x[0])
+            mask_y = (variables.y < range_y[1]) & (variables.y > range_y[0])
+            mask_z = (variables.z < range_z[1]) & (variables.z > range_z[0])
+            mask_3d = mask_x & mask_y & mask_z
+        else:
+            mask_3d = np.ones(len(variables.x), dtype=bool)
+        mask = mask_det & mask_mc & mask_3d
+        print('The number of data mc:', len(mask_mc[mask_mc == True]))
+        print('The number of data det:', len(mask_det[mask_det == True]))
+        print('The number of data 3d:', len(mask_3d[mask_3d == True]))
+        print('The number of data after cropping:', len(mask[mask == True]))
     else:
-        mask_spacial = np.ones(len(variables.dld_t), dtype=bool)
+        mask = np.ones(len(variables.mc_c), dtype=bool)
 
 
     ions = variables.range_data['ion'].tolist()
@@ -753,7 +794,7 @@ def heatmap(variables, selected_area_specially, selected_area_temporally, elemen
         print('element_percentage should be a list')
 
     for index, elemen in enumerate(ions):
-        mask = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
+        mask_spacial = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
         mask = mask & mask_spacial
         size = int(len(mask[mask == True]) * float(element_percentage[index]))
         # Find indices where the original mask is True
@@ -788,8 +829,8 @@ def heatmap(variables, selected_area_specially, selected_area_temporally, elemen
     plt.show()
 
 
-def reconstruction_2d_histogram(variables, x, y, bins, selected_area_specially, selected_area_temporally,
-                                percentage, range_1=[], range_2=[], xlabel='X-axis', ylabel='Y-axis', save=False,
+def reconstruction_2d_histogram(variables, x, y, bins, percentage, range_mc=[], range_detx=[], range_dety=[],
+                                range_x=[], range_y=[], range_z=[], xlabel='X-axis', ylabel='Y-axis', save=False,
                                 figure_name=None, figure_size=None):
     """
     Generate a 2D histogram based on the provided data.
@@ -799,11 +840,13 @@ def reconstruction_2d_histogram(variables, x, y, bins, selected_area_specially, 
         x (array): The x-axis data.
         y (array): The y-axis data.
         bins (int or tuple): The number of bins.
-        selected_area_specially (bool): True if a specific area is selected, False otherwise.
-        selected_area_temporally (bool): True if a specific area is selected, False otherwise.
         percentage (float): percent of data to be plotted.
-        range_1 (list): The range of the x-axis.
-        range_2 (list): The range of the y-axis.
+        range_mc: Range of mc
+        range_detx: Range of detx
+        range_dety: Range of dety
+        range_x: Range of x-axis
+        range_y: Range of y-axis
+        range_z: Range of z-axis
         xlabel (str): The label of the x-axis.
         ylabel (str): The label of the y-axis.
         save (bool): True to save the plot, False to display it.
@@ -813,31 +856,35 @@ def reconstruction_2d_histogram(variables, x, y, bins, selected_area_specially, 
     Returns:
         None
     """
-
-    if selected_area_specially:
-        mask_spacial = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
-                       (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
-                       (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
-    elif selected_area_temporally:
-        mask_spacial = np.logical_and((variables.mc_calib > variables.selected_x1),
-                                      (variables.mc_calib < variables.selected_x2))
-    elif selected_area_specially and selected_area_temporally:
-        mask_temporally = np.logical_and((variables.mc_calib > variables.selected_x1),
-                                         (variables.mc_calib < variables.selected_x2))
-        mask_specially = (variables.x >= variables.selected_x1) & (variables.x <= variables.selected_x2) & \
-                         (variables.y >= variables.selected_y1) & (variables.y <= variables.selected_y2) & \
-                         (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
-        mask_spacial = mask_specially & mask_temporally
+    if range_mc or range_detx or range_dety or range_x or range_y or range_z:
+        if range_detx and range_dety:
+            mask_det_x = (variables.dld_x_det < range_detx[1]) & (variables.dld_x_det > range_detx[0])
+            mask_det_y = (variables.dld_y_det < range_dety[1]) & (variables.dld_y_det > range_dety[0])
+            mask_det = mask_det_x & mask_det_y
+        else:
+            mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
+        if range_mc:
+            mask_mc = (variables.mc_c < range_mc[1]) & (variables.mc_c > range_mc[0])
+        else:
+            mask_mc = np.ones(len(variables.mc), dtype=bool)
+        if range_x and range_y and range_z:
+            mask_x = (variables.x < range_x[1]) & (variables.x > range_x[0])
+            mask_y = (variables.y < range_y[1]) & (variables.y > range_y[0])
+            mask_z = (variables.z < range_z[1]) & (variables.z > range_z[0])
+            mask_3d = mask_x & mask_y & mask_z
+        else:
+            mask_3d = np.ones(len(variables.x), dtype=bool)
+        mask = mask_det & mask_mc & mask_3d
+        print('The number of data mc:', len(mask_mc[mask_mc == True]))
+        print('The number of data det:', len(mask_det[mask_det == True]))
+        print('The number of data 3d:', len(mask_3d[mask_3d == True]))
+        print('The number of data after cropping:', len(mask[mask == True]))
     else:
-        mask_spacial = np.ones(len(x), dtype=bool)
+        mask = np.ones(len(variables.mc_c), dtype=bool)
 
-    x = x[mask_spacial]
-    y = y[mask_spacial]
+    x = x[mask]
+    y = y[mask]
 
-    if range_1 != [] and range_2 != []:
-        mask_range = (x >= range_1[0]) & (x <= range_1[1]) & (y >= range_2[0]) & (y <= range_2[1])
-        x = x[mask_range]
-        y = y[mask_range]
     num_elements_to_select = int(len(x) * percentage)
     # Randomly select elements
     indices = np.random.choice(len(x), num_elements_to_select, replace=False)

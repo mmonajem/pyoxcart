@@ -6,7 +6,7 @@ import time
 import numpy as np
 import pyqtgraph as pg
 import pyqtgraph.exporters
-from numba import njit
+# from numba import njit
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer
 
@@ -514,7 +514,7 @@ class Ui_Visualization(object):
 		pass
 
 
-@njit
+# @njit
 def efficient_histogram(viz, bin_size):
 	bins = np.arange(np.min(viz), np.max(viz) + bin_size, bin_size)
 	hist, edges = np.histogram(viz, bins=bins)
