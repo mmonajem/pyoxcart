@@ -114,10 +114,10 @@ def rdf(particles, dr, variables=None, rho=None, rcutoff=0.9, eps=1e-15, normali
 
 	if plot or save:
 		# Plot RDF
-		fig, ax = plt.figure(figsize=figure_size)
+		fig, ax = plt.subplots(figsize=figure_size)
 		plt.plot(radii, g_r)
 		plt.xlabel('Distance (nm)')
-		plt.ylabel('Frequency')
+		plt.ylabel('Counts')
 		if save and variables is not None:
 			# Enable rendering for text elements
 			rcParams['svg.fonttype'] = 'none'
