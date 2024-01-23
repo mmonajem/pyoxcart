@@ -1,4 +1,5 @@
 from copy import copy
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colors, rcParams
@@ -36,7 +37,7 @@ def sdm(particles, bin_size, variables=None, normalize=False, reference_point=No
 	figname : str, optional
 		The name of the figure.
 	histogram_type : str, optional
-		Type of histogram. Options are '1d' or '2d' or '3d'.
+		Type of histogram. Options are '1D' or '2D' or '3D'.
 	axes : list or None, optional
 		Specifies the axes for 1D or 2D histograms. For '1d', provide a list like ['x'], ['y'], or ['z'].
 		For '2d', provide a list like ['x', 'y'], ['y', 'z'], or ['x', 'z'] or ['x', 'y', 'z'].
@@ -50,21 +51,22 @@ def sdm(particles, bin_size, variables=None, normalize=False, reference_point=No
 	"""
 
     if reference_point is not None and box_dimensions is not None:
-        if isinstance(reference_point, list):
-            reference_point = np.array(reference_point)
-        if isinstance(box_dimensions, list):
-            box_dimensions = np.array(box_dimensions)
-        # Ensure box_dimensions has at least 3 components
-        assert len(box_dimensions) == 3, "box_dimensions must have 3 components (x, y, z)."
+        if box_dimensions != [0, 0, 0]:
+            if isinstance(reference_point, list):
+                reference_point = np.array(reference_point)
+            if isinstance(box_dimensions, list):
+                box_dimensions = np.array(box_dimensions)
+            # Ensure box_dimensions has at least 3 components
+            assert len(box_dimensions) == 3, "box_dimensions must have 3 components (x, y, z)."
 
-        # Calculate the bounds of the box
-        box_min = reference_point - 0.5 * box_dimensions
-        box_max = reference_point + 0.5 * box_dimensions
+            # Calculate the bounds of the box
+            box_min = reference_point - 0.5 * box_dimensions
+            box_max = reference_point + 0.5 * box_dimensions
+            # Crop particles within the specified box
+            inside_box = np.all((particles >= box_min) & (particles <= box_max), axis=1)
+            particles = particles[inside_box]
 
-        # Crop particles within the specified box
-        inside_box = np.all((particles >= box_min) & (particles <= box_max), axis=1)
-        particles = particles[inside_box]
-
+    print('The number of ions is: ', len(particles))
     # Calculate relative positions based on user choices
     dx, dy, dz = None, None, None
 
@@ -82,7 +84,6 @@ def sdm(particles, bin_size, variables=None, normalize=False, reference_point=No
         dz = np.subtract.outer(particles[:, 2], particles[:, 2])
         if reference_point_shift and reference_point is not None and box_dimensions is not None:
             dz = dz + reference_point[2]
-
     histograms = []
     edges_list = []
     if 'x' in axes and 'y' in axes and 'z' in axes:
@@ -100,7 +101,7 @@ def sdm(particles, bin_size, variables=None, normalize=False, reference_point=No
     elif 'z' in axes:
         edges = np.arange(np.min(dz), np.max(dz), bin_size)
 
-    if histogram_type == '1d':
+    if histogram_type == '1D':
         if 'x' in axes:
             histo_dx, bins_dx = np.histogram(dx.flatten(), bins=edges)
             histograms.append(histo_dx)
@@ -118,7 +119,7 @@ def sdm(particles, bin_size, variables=None, normalize=False, reference_point=No
         if normalize:
             histograms[-1] = histograms[-1] / np.sum(histograms[-1])
 
-    if histogram_type == '2d':
+    if histogram_type == '2D':
         if 'x' in axes and 'y' in axes:
             hist2d, x_edges, y_edges = np.histogram2d(dx.flatten(), dy.flatten(), bins=[edges, edges])
             extent = [x_edges[0], x_edges[-1], y_edges[0], y_edges[-1]]
@@ -140,7 +141,7 @@ def sdm(particles, bin_size, variables=None, normalize=False, reference_point=No
         if normalize:
             histograms[-1] = histograms[-1] / np.sum(histograms[-1])
 
-    if histogram_type == '3d':
+    if histogram_type == '3D':
         if 'x' in axes and 'y' in axes and 'z' in axes:
             hist3d, edges = np.histogramdd((dx.flatten(), dy.flatten(), dz.flatten()), bins=[edges, edges, edges])
             histograms.append(hist3d)
@@ -150,7 +151,7 @@ def sdm(particles, bin_size, variables=None, normalize=False, reference_point=No
 
     if plot or save:
         # Plot histograms
-        if histogram_type == '1d':
+        if histogram_type == '1D':
             fig, ax = plt.subplots(figsize=figure_size)
             for i, hist in enumerate(histograms):
                 if plot_mode == 'bar':
@@ -161,7 +162,7 @@ def sdm(particles, bin_size, variables=None, normalize=False, reference_point=No
                     ax.plot(edges[:-1], hist)
                     ax.set_ylabel('Counts')
                     ax.set_xlabel(f'{axes[i]} (nm)')
-        elif histogram_type == '2d':
+        elif histogram_type == '2D':
             fig, ax = plt.subplots(figsize=figure_size)
             img = ax.imshow(histograms[-1].T, origin='lower', extent=extent, aspect="auto")
             ax.set_ylabel(f'{axes[1]} (nm)')
@@ -171,7 +172,7 @@ def sdm(particles, bin_size, variables=None, normalize=False, reference_point=No
             pcm = ax.pcolormesh(x_edges, y_edges, histograms[-1].T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
             cbar = fig.colorbar(pcm, ax=ax, pad=0)
             cbar.set_label('Counts', fontsize=10)
-        elif histogram_type == '3d':
+        elif histogram_type == '3D':
             pass
 
         if save and variables is not None:

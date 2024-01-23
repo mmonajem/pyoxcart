@@ -197,8 +197,8 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
 
 
 def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_size=(5, 4), variables=None,
-                  range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[], data_crop=False,
-                  draw_circle=False, save=True, figname=''):
+                  range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[],
+                  data_crop=False, draw_circle=False, save=True, figname=''):
     """
     Plot and crop the FDM with the option to select a region of interest.
 
@@ -208,6 +208,7 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
         frac: Fraction of the data to be plotted
         axis_mode: Flag to choose whether to plot axis or scalebar: 'normal' or 'scalebar'
         variables: Variables object
+        range_sequence: Range of sequence
         range_mc: Range of mc
         range_detx: Range of detx
         range_dety: Range of dety
@@ -223,7 +224,12 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
     Returns:
         None
     """
-    if range_mc or range_detx or range_dety or range_x or range_y or range_z:
+    if range_sequence or range_mc or range_detx or range_dety or range_x or range_y or range_z:
+        if range_sequence:
+            mask_sequence = np.zeros_like(len(data), dtype=bool)
+            mask_sequence[range_sequence[0]:range_sequence[1]] = True
+        else:
+            mask_sequence = np.ones(len(data), dtype=bool)
         if range_detx and range_dety:
             mask_det_x = (variables.dld_x_det < range_detx[1]) & (variables.dld_x_det > range_detx[0])
             mask_det_y = (variables.dld_y_det < range_dety[1]) & (variables.dld_y_det > range_dety[0])
@@ -241,7 +247,7 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
             mask_3d = mask_x & mask_y & mask_z
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
-        mask = mask_det & mask_mc & mask_3d
+        mask = mask_sequence & mask_det & mask_mc & mask_3d
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
         print('The number of data det:', len(mask_det[mask_det == True]))
         print('The number of data 3d:', len(mask_3d[mask_3d == True]))

@@ -3,7 +3,6 @@ import numpy as np
 from matplotlib import rcParams
 from scipy.spatial import cKDTree
 
-
 def rdf(particles, dr, variables=None, rho=None, rcutoff=0.9, eps=1e-15, normalize=True, reference_point=None,
         box_dimensions=None, plot=False, save=False, figure_size=(6, 6), figname='rdf'):
 	"""
@@ -75,6 +74,7 @@ def rdf(particles, dr, variables=None, rho=None, rcutoff=0.9, eps=1e-15, normali
 		inside_box = np.all((particles >= box_min) & (particles <= box_max), axis=1)
 		particles = particles[inside_box]
 
+	print('The number of ions is: ', len(particles))
 	mins = np.min(particles, axis=0)
 	maxs = np.max(particles, axis=0)
 	# translate particles such that the particle with min coords is at origin

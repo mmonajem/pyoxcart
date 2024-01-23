@@ -1,6 +1,29 @@
+import os
+
 import numpy as np
 import pandas as pd
 
+
+def get_project_path():
+	"""
+	Get the absolute path of the current Python script
+
+	Args:
+		None
+	Returns:
+		script_path (str): The absolute path of the current Python script.
+	"""
+	script_path = os.path.abspath(__file__)
+
+	# Traverse up the directory tree until reaching the project's main folder
+	while not os.path.isfile(os.path.join(script_path, 'setup.py')):
+		script_path = os.path.dirname(script_path)
+
+		# Break the loop if we reached the root directory
+		if script_path == os.path.dirname(script_path):
+			break
+
+	return script_path
 
 class Variables:
     """
@@ -113,7 +136,7 @@ class Variables:
         self.y_hist = None
         self.AptHistPlotter = None
         self.ions_list_data = None
-        self.last_directory = './'  # You can set a default directory here
+        self.last_directory = get_project_path()  # You can set a default directory here
 
         self.plotly_3d_reconstruction = None
         self.data = None

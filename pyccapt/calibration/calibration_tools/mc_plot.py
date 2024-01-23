@@ -622,8 +622,8 @@ class AptHistPlotter:
 
 def hist_plot(variables, bin_size, log, target, mode, prominence, distance, percent, selector, figname, lim,
               peaks_find_plot, peaks_find=True, range_plot=False, plot_ranged_ions=False, ranging_mode=False,
-              range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[], save_fig=True,
-              print_info=True, draw_calib_rect=False, figure_size=(9, 5), plot_show=True):
+              range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[],
+              save_fig=True, print_info=True, draw_calib_rect=False, figure_size=(9, 5), plot_show=True):
     """
     Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
     Args:
@@ -642,6 +642,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         range_plot (bool): Plot the range.
         plot_ranged_ions (str): Plot the ranged ions.
         ranging_mode (bool): Ranging mode.
+        range_sequence (list): Range sequence.
         range_mc: Range of mc
         range_detx: Range of detx
         range_dety: Range of dety
@@ -673,7 +674,12 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         variables.peak_widths = []
         variables.peaks_index_list = []
 
-    if range_mc or range_detx or range_dety or range_x or range_y or range_z:
+    if range_sequence or range_mc or range_detx or range_dety or range_x or range_y or range_z:
+        if range_sequence:
+            mask_sequence = np.zeros_like(hist, dtype=bool)
+            mask_sequence[range_sequence[0]:range_sequence[1]] = True
+        else:
+            mask_sequence = np.ones_like(hist, dtype=bool)
         if range_detx and range_dety:
             mask_det_x = (variables.dld_x_det < range_detx[1]) & (variables.dld_x_det > range_detx[0])
             mask_det_y = (variables.dld_y_det < range_dety[1]) & (variables.dld_y_det > range_dety[0])
@@ -691,7 +697,8 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
             mask_3d = mask_x & mask_y & mask_z
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
-        mask = mask_det & mask_mc & mask_3d
+        mask = mask_sequence & mask_det & mask_mc & mask_3d
+        print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
         print('The number of data det:', len(mask_det[mask_det == True]))
         print('The number of data 3d:', len(mask_3d[mask_3d == True]))
