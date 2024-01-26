@@ -28,6 +28,7 @@
   "usb_lamp_switch": "on",
   "thorlab_motor": "off",
   "baking": "on",
+  "COM_PORT_laser": "COM9",
   "COM_PORT_gates": "Dev2/port0/",
   "COM_PORT_cryo": "COM7",
   "COM_PORT_V_dc": "COM6",

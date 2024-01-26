@@ -12,572 +12,291 @@ import serial
 class origClass:
 	## Control methods
 
-	def Listen(comPort):  # Sets the laser to Listen mode
-		# tested works (18/08/2023)
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
+	def __init__(self, comPort):
+		self.comPort = comPort
+		self.ser = None
 
-		# command to the port
+	def open_port(self):
+		try:
+			self.ser = serial.Serial(
+				port=self.comPort,
+				baudrate=38400,
+				stopbits=serial.STOPBITS_ONE,
+				bytesize=serial.EIGHTBITS,
+				rtscts=False)
+			return 0
+		except Exception as e:
+			print(e)
+			return -1
+
+	def close_port(self):
+		self.ser.close()
+
+	def Listen(self):
 		cmd = "ly_oxp2_listen\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			sleep(1)
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def Standby(comPort):  # Sets the laser to Standby mode  - warning class 4 laser emissions
-		# tested works (18/08/2023)
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
-
+	def Standby(self):
 		cmd = "ly_oxp2_standby\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			sleep(1)
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def Enable(comPort):  # Turns the laser ON and enables emission - warning class 4 laser emissions
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
-
+	def Enable(self):
 		cmd = "ly_oxp2_enabled\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			sleep(1)
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def Temp(comPort):  # Displays the laser system temperatures (needs a read back)
+	def Temp(self, comPort):  # Displays the laser system temperatures (needs a read back)
 		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
 
 		cmd = "ly_oxp2_temp_status\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			return dataBack.decode()
-		except:
-			ser.close()
-			sleep(1)
-			return -1
 
-	def Power(comPort, power):  # Sets the laser power in nanojoules
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		return dataBack.decode()
 
+	def Power(self, power):
 		cmd = "ly_oxp2_power=" + str(power) + "\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def PowerRead(comPort):  # Displays the laser power setting in nanojoules (needs a read back)
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
-
+	def PowerRead(self):
 		cmd = "ly_oxp2_power?\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def AOM(comPort,
-	        power):  # Sets the laser power through AOM control [xxxx range: 0-4000, 0-AOM closed, 4000-AOM opened]
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
-
+	def AOM(self, power):
 		cmd = "e_power=xxxx" + str(power) + "\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def AOMRead(comPort):  # Displays the e_power setting
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
+	def AOMRead(self):  # Displays the e_power setting
 
 		cmd = "e_power?\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def Freq(comPort, freq):  # Sets the repetition rate frequency index [index range: 0-12] Note: optional command
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
+	def Freq(self, freq):
 		cmd = "e_freq " + str(freq) + "\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def FreqRead(comPort):  # Displays the configured repetition rate frequency index
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
-
+	def FreqRead(self):
 		cmd = "e_freq?\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def Div(comPort, division):  # Sets the division factor [Range: 1-1000000]
-		# tested works (18/08/2023)
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
+	def Div(self, division):
 		cmd = "e_div" + str(division) + "\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def DivRead(comPort):  # Displays the configured division factor
-		# tested works (18/08/2023)
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
-
+	def DivRead(self):
 		cmd = "e_div?\r\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def Mode(comPort,
-	         mode):  # Sets the power mode of the laser [power modes x=2,3,or 8 where 2=internal,3=external, 8=SPI]
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
+	def Mode(self, mode):
 		cmd = "e_mode " + str(mode) + "\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def ModeRead(comPort):  # Displays the power mode setting
-		# slightly buggy, doesnt readback properly (18/08/2023)
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
+	def ModeRead(self):
 		cmd = "e_mode?\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def StatusRead(comPort):  # Displays the state of the status LEDs where the output is an 8 bit word in decimal form.
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
-
-		""""
-		Displays the state of the status LEDs where the output is an 8 bit word in decimal form.
-		Example 33 in binary: 00100001 - Standby LED ON | Power LED ON
-		Bit 8 On enabled (MSB)
-		Bit 7 On disabled
-		Bit 6 Standby
-		Bit 5 Setup
-		Bit 4 Listen
-		Bit 3 Warning
-		Bit 2 Error
-		Bit 1 Power (LSB)
-		"""
+	def StatusRead(self):
 		cmd = "ly_oxp2_dev_status\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def ModeRead(comPort):  # Displays the power mode setting
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
-
-		cmd = "e_mode?\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			return dataBack.decode()
-		except:
-			ser.close()
-			sleep(1)
-			return -1
-
-	def ServiceMode(comPort):  # Sets the laser in service mode (must be in standby)
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
-
+	def ServiceMode(self):
 		cmd = "ly_oxp2_service_mode\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def DigitalGateLogic(comPort,
-	                     choice):  # Sets the Digital Gate logic [x range: 0 or 1, when a logic low or no connection is detected at the port
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)  # 0 sets the AOM to open and 1 sets the AOM to close]
+	def DigitalGateLogic(self, choice):
 		cmd = "ly_oxp2_digiop=" + str(choice) + "\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def DigitalGateLogicRead(
-			comPort):  # Reads the Digital Gate logic. When a logic low or no connection is detected at the port
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
-		# AOM is open if return value is 0 and closed if return value is 1]
+	def DigitalGateLogicRead(self):
 		cmd = "ly_oxp2_digiop?\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def AOMEnable(comPort):  # Enables the output AOM
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
-
+	def AOMEnable(self):
 		cmd = "ly_oxp2_output_enable\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def AOMDisable(comPort):  # Disables the output AOM
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
-
+	def AOMDisable(self):
 		cmd = "ly_oxp2_output_disable\n"
-		try:
-			ser.write(cmd.encode())
-			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
-			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
 
-	def AOMState(comPort):  # Questions the state
-		# Open the port
-		ser = serial.Serial(
-			port=comPort,
-			baudrate=38400,
-			stopbits=serial.STOPBITS_ONE,
-			bytesize=serial.EIGHTBITS,
-			rtscts=False
-		)
-
+	def AOMState(self):
 		cmd = "ly_oxp2_output?\n"
-		try:
-			ser.write(cmd.encode())
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
+
+	def InterbusEnable(self):
+
+		# AOM is open if return value is 0 and closed if return value is 1]
+		cmd = "ly_oxp2_nktpbus=1\n"
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
 			sleep(0.1)
-			dataStore = []
-			while ser.in_waiting:
-				dataBack = ser.readline()
-				dataStore.append(dataBack.decode())
-			ser.close()
-			sleep(1)
 			return dataBack.decode()
-		except:
-			ser.close()
-			return -1
+
+	def change_wavelength(self, wavelength):
+		cmd = "ls_wavelength=" + str(wavelength) + "\n"
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			data_back = self.ser.readline()
+			dataStore.append(data_back.decode())
+		sleep(0.1)
+		return data_back.decode()
+
+	def read_average_power(self):
+		cmd = "e_mlp?\n"
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			data_back = self.ser.readline()
+			dataStore.append(data_back.decode())
+		sleep(0.1)
+		return data_back.decode()

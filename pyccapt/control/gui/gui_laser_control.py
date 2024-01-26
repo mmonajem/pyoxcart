@@ -1,12 +1,15 @@
 import multiprocessing
 import os
+import re
 import sys
 
 from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtCore import QThread
 from PyQt6.QtGui import QPixmap
 
 # Local module and scripts
 from pyccapt.control.control_tools import share_variables, read_files
+from pyccapt.control.nkt_photonics import origamiClassCLI
 
 
 class Ui_Laser_Control(object):
@@ -21,6 +24,17 @@ class Ui_Laser_Control(object):
         self.variables = variables
         self.conf = conf
 
+        self.listen_mode = False
+        self.standby_mode = False
+        self.enable_mode = False
+        self.laser_on_mode = False
+        self.change_laser_wavelegnth = False
+        self.change_laser_power = False
+        self.change_laser_rate = False
+        self.change_laser_divition_factor = False
+
+        self.index = 0
+
     def setupUi(self, Laser_Control):
         """
         Setup the GUI for the laser control.
@@ -31,36 +45,45 @@ class Ui_Laser_Control(object):
             None
         """
         Laser_Control.setObjectName("Laser_Control")
-        Laser_Control.resize(936, 345)
-        self.gridLayout_5 = QtWidgets.QGridLayout(Laser_Control)
+        Laser_Control.resize(939, 345)
+        self.gridLayout_6 = QtWidgets.QGridLayout(Laser_Control)
+        self.gridLayout_6.setObjectName("gridLayout_6")
+        self.gridLayout_5 = QtWidgets.QGridLayout()
         self.gridLayout_5.setObjectName("gridLayout_5")
-        self.gridLayout_4 = QtWidgets.QGridLayout()
-        self.gridLayout_4.setObjectName("gridLayout_4")
         self.gridLayout_3 = QtWidgets.QGridLayout()
         self.gridLayout_3.setObjectName("gridLayout_3")
-        self.label_4 = QtWidgets.QLabel(Laser_Control)
+        self.label_4 = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_4.setFont(font)
         self.label_4.setObjectName("label_4")
         self.gridLayout_3.addWidget(self.label_4, 0, 0, 1, 1)
-        self.laser_wavelegnth = QtWidgets.QComboBox(Laser_Control)
+        self.laser_wavelegnth = QtWidgets.QComboBox(parent=Laser_Control)
         self.laser_wavelegnth.setStyleSheet("QComboBox{background: rgb(223,223,233)}")
         self.laser_wavelegnth.setObjectName("laser_wavelegnth")
         self.laser_wavelegnth.addItem("")
         self.laser_wavelegnth.addItem("")
         self.laser_wavelegnth.addItem("")
         self.gridLayout_3.addWidget(self.laser_wavelegnth, 0, 1, 1, 1)
-        self.laser_enable = QtWidgets.QPushButton(Laser_Control)
+        self.laser_enable = QtWidgets.QPushButton(parent=Laser_Control)
         self.laser_enable.setMinimumSize(QtCore.QSize(90, 25))
         self.laser_enable.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.laser_enable.setStyleSheet("")
         self.laser_enable.setObjectName("laser_enable")
         self.gridLayout_3.addWidget(self.laser_enable, 0, 2, 1, 1)
-        self.led_laser_enable = QtWidgets.QLabel(Laser_Control)
+        self.led_laser_enable = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.led_laser_enable.setFont(font)
         self.led_laser_enable.setObjectName("led_laser_enable")
         self.gridLayout_3.addWidget(self.led_laser_enable, 0, 3, 1, 1)
-        self.label = QtWidgets.QLabel(Laser_Control)
+        self.label = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label.setFont(font)
         self.label.setObjectName("label")
         self.gridLayout_3.addWidget(self.label, 1, 0, 1, 1)
-        self.laser_power = QtWidgets.QComboBox(Laser_Control)
+        self.laser_power = QtWidgets.QComboBox(parent=Laser_Control)
         self.laser_power.setStyleSheet("QComboBox{background: rgb(223,223,233)}")
         self.laser_power.setObjectName("laser_power")
         self.laser_power.addItem("")
@@ -86,19 +109,25 @@ class Ui_Laser_Control(object):
         self.laser_power.addItem("")
         self.laser_power.addItem("")
         self.gridLayout_3.addWidget(self.laser_power, 1, 1, 1, 1)
-        self.laser_on = QtWidgets.QPushButton(Laser_Control)
+        self.laser_on = QtWidgets.QPushButton(parent=Laser_Control)
         self.laser_on.setMinimumSize(QtCore.QSize(90, 25))
         self.laser_on.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.laser_on.setStyleSheet("")
         self.laser_on.setObjectName("laser_on")
         self.gridLayout_3.addWidget(self.laser_on, 1, 2, 1, 1)
-        self.led_laser_on = QtWidgets.QLabel(Laser_Control)
+        self.led_laser_on = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.led_laser_on.setFont(font)
         self.led_laser_on.setObjectName("led_laser_on")
         self.gridLayout_3.addWidget(self.led_laser_on, 1, 3, 1, 1)
-        self.label_2 = QtWidgets.QLabel(Laser_Control)
+        self.label_2 = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_2.setFont(font)
         self.label_2.setObjectName("label_2")
         self.gridLayout_3.addWidget(self.label_2, 2, 0, 1, 1)
-        self.laser_rate = QtWidgets.QComboBox(Laser_Control)
+        self.laser_rate = QtWidgets.QComboBox(parent=Laser_Control)
         self.laser_rate.setStyleSheet("QComboBox{background: rgb(223,223,233)}")
         self.laser_rate.setObjectName("laser_rate")
         self.laser_rate.addItem("")
@@ -109,19 +138,25 @@ class Ui_Laser_Control(object):
         self.laser_rate.addItem("")
         self.laser_rate.addItem("")
         self.gridLayout_3.addWidget(self.laser_rate, 2, 1, 1, 1)
-        self.laser_standby = QtWidgets.QPushButton(Laser_Control)
+        self.laser_standby = QtWidgets.QPushButton(parent=Laser_Control)
         self.laser_standby.setMinimumSize(QtCore.QSize(90, 25))
         self.laser_standby.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.laser_standby.setStyleSheet("")
         self.laser_standby.setObjectName("laser_standby")
         self.gridLayout_3.addWidget(self.laser_standby, 2, 2, 1, 1)
-        self.led_laser_laser_standby = QtWidgets.QLabel(Laser_Control)
+        self.led_laser_laser_standby = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.led_laser_laser_standby.setFont(font)
         self.led_laser_laser_standby.setObjectName("led_laser_laser_standby")
         self.gridLayout_3.addWidget(self.led_laser_laser_standby, 2, 3, 1, 1)
-        self.label_3 = QtWidgets.QLabel(Laser_Control)
+        self.label_3 = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
         self.gridLayout_3.addWidget(self.label_3, 3, 0, 1, 1)
-        self.laser_divition_factor = QtWidgets.QComboBox(Laser_Control)
+        self.laser_divition_factor = QtWidgets.QComboBox(parent=Laser_Control)
         self.laser_divition_factor.setStyleSheet("QComboBox{background: rgb(223,223,233)}")
         self.laser_divition_factor.setObjectName("laser_divition_factor")
         self.laser_divition_factor.addItem("")
@@ -150,25 +185,31 @@ class Ui_Laser_Control(object):
         self.laser_divition_factor.addItem("")
         self.laser_divition_factor.addItem("")
         self.gridLayout_3.addWidget(self.laser_divition_factor, 3, 1, 1, 1)
-        self.laser_listen = QtWidgets.QPushButton(Laser_Control)
+        self.laser_listen = QtWidgets.QPushButton(parent=Laser_Control)
         self.laser_listen.setMinimumSize(QtCore.QSize(90, 25))
         self.laser_listen.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.laser_listen.setStyleSheet("")
         self.laser_listen.setObjectName("laser_listen")
         self.gridLayout_3.addWidget(self.laser_listen, 3, 2, 1, 1)
-        self.led_laser_listen = QtWidgets.QLabel(Laser_Control)
+        self.led_laser_listen = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.led_laser_listen.setFont(font)
         self.led_laser_listen.setObjectName("led_laser_listen")
         self.gridLayout_3.addWidget(self.led_laser_listen, 3, 3, 1, 1)
-        self.gridLayout_4.addLayout(self.gridLayout_3, 0, 0, 2, 3)
-        self.label_12 = QtWidgets.QLabel(Laser_Control)
+        self.gridLayout_5.addLayout(self.gridLayout_3, 0, 0, 2, 3)
+        self.label_12 = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_12.setFont(font)
         self.label_12.setObjectName("label_12")
-        self.gridLayout_4.addWidget(self.label_12, 0, 4, 1, 1)
-        self.laser_scan_mode5 = QtWidgets.QComboBox(Laser_Control)
+        self.gridLayout_5.addWidget(self.label_12, 0, 4, 1, 1)
+        self.laser_scan_mode5 = QtWidgets.QComboBox(parent=Laser_Control)
         self.laser_scan_mode5.setStyleSheet("QComboBox{background: rgb(223,223,233)}")
         self.laser_scan_mode5.setObjectName("laser_scan_mode5")
         self.laser_scan_mode5.addItem("")
-        self.gridLayout_4.addWidget(self.laser_scan_mode5, 0, 5, 1, 1)
-        self.scanning_disp = QtWidgets.QGraphicsView(Laser_Control)
+        self.gridLayout_5.addWidget(self.laser_scan_mode5, 0, 5, 1, 1)
+        self.scanning_disp = QtWidgets.QGraphicsView(parent=Laser_Control)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,
                                            QtWidgets.QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(1)
@@ -177,28 +218,34 @@ class Ui_Laser_Control(object):
         self.scanning_disp.setSizePolicy(sizePolicy)
         self.scanning_disp.setMinimumSize(QtCore.QSize(250, 250))
         self.scanning_disp.setStyleSheet("QWidget{\n"
-                                         "                                            border: 0.5px solid gray;\n"
-                                         "                                            }\n"
-                                         "                                        ")
+                                         "                                    border: 0.5px solid gray;\n"
+                                         "                                    }\n"
+                                         "                                ")
         self.scanning_disp.setObjectName("scanning_disp")
-        self.gridLayout_4.addWidget(self.scanning_disp, 0, 6, 4, 1)
-        self.label_13 = QtWidgets.QLabel(Laser_Control)
+        self.gridLayout_5.addWidget(self.scanning_disp, 0, 6, 4, 1)
+        self.label_13 = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_13.setFont(font)
         self.label_13.setObjectName("label_13")
-        self.gridLayout_4.addWidget(self.label_13, 1, 4, 1, 1)
-        self.laser_focus_mode = QtWidgets.QComboBox(Laser_Control)
+        self.gridLayout_5.addWidget(self.label_13, 1, 4, 1, 1)
+        self.laser_focus_mode = QtWidgets.QComboBox(parent=Laser_Control)
         self.laser_focus_mode.setStyleSheet("QComboBox{background: rgb(223,223,233)}")
         self.laser_focus_mode.setObjectName("laser_focus_mode")
         self.laser_focus_mode.addItem("")
-        self.gridLayout_4.addWidget(self.laser_focus_mode, 1, 5, 1, 1)
+        self.gridLayout_5.addWidget(self.laser_focus_mode, 1, 5, 1, 1)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
                                            QtWidgets.QSizePolicy.Policy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.label_9 = QtWidgets.QLabel(Laser_Control)
+        self.label_9 = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_9.setFont(font)
         self.label_9.setObjectName("label_9")
         self.horizontalLayout.addWidget(self.label_9)
-        self.laser_power_disp = QtWidgets.QLCDNumber(Laser_Control)
+        self.laser_power_disp = QtWidgets.QLCDNumber(parent=Laser_Control)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
                                            QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -211,17 +258,20 @@ class Ui_Laser_Control(object):
         font.setPointSize(9)
         self.laser_power_disp.setFont(font)
         self.laser_power_disp.setStyleSheet("QLCDNumber{\n"
-                                            "                                                            border: 2px solid green;\n"
+                                            "                                            border: 2px solid green;\n"
                                             "                                            border-radius: 10px;\n"
                                             "                                            padding: 0 8px;\n"
                                             "                                            }\n"
                                             "                                        ")
         self.laser_power_disp.setObjectName("laser_power_disp")
         self.horizontalLayout.addWidget(self.laser_power_disp)
-        self.label_10 = QtWidgets.QLabel(Laser_Control)
+        self.label_10 = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_10.setFont(font)
         self.label_10.setObjectName("label_10")
         self.horizontalLayout.addWidget(self.label_10)
-        self.laser_pulse_energy_disp = QtWidgets.QLCDNumber(Laser_Control)
+        self.laser_pulse_energy_disp = QtWidgets.QLCDNumber(parent=Laser_Control)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
                                            QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -234,17 +284,20 @@ class Ui_Laser_Control(object):
         font.setPointSize(9)
         self.laser_pulse_energy_disp.setFont(font)
         self.laser_pulse_energy_disp.setStyleSheet("QLCDNumber{\n"
-                                                   "                                                            border: 2px solid green;\n"
+                                                   "                                            border: 2px solid green;\n"
                                                    "                                            border-radius: 10px;\n"
                                                    "                                            padding: 0 8px;\n"
                                                    "                                            }\n"
                                                    "                                        ")
         self.laser_pulse_energy_disp.setObjectName("laser_pulse_energy_disp")
         self.horizontalLayout.addWidget(self.laser_pulse_energy_disp)
-        self.label_11 = QtWidgets.QLabel(Laser_Control)
+        self.label_11 = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_11.setFont(font)
         self.label_11.setObjectName("label_11")
         self.horizontalLayout.addWidget(self.label_11)
-        self.laser_repetion_rate_disp = QtWidgets.QLCDNumber(Laser_Control)
+        self.laser_repetion_rate_disp = QtWidgets.QLCDNumber(parent=Laser_Control)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
                                            QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -257,7 +310,7 @@ class Ui_Laser_Control(object):
         font.setPointSize(9)
         self.laser_repetion_rate_disp.setFont(font)
         self.laser_repetion_rate_disp.setStyleSheet("QLCDNumber{\n"
-                                                    "                                                            border: 2px solid green;\n"
+                                                    "                                            border: 2px solid green;\n"
                                                     "                                            border-radius: 10px;\n"
                                                     "                                            padding: 0 8px;\n"
                                                     "                                            }\n"
@@ -267,46 +320,85 @@ class Ui_Laser_Control(object):
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
                                             QtWidgets.QSizePolicy.Policy.Minimum)
         self.horizontalLayout.addItem(spacerItem1)
-        self.gridLayout_4.addLayout(self.horizontalLayout, 2, 0, 1, 6)
+        self.gridLayout_5.addLayout(self.horizontalLayout, 2, 0, 1, 6)
+        self.gridLayout_4 = QtWidgets.QGridLayout()
+        self.gridLayout_4.setObjectName("gridLayout_4")
+        self.label_19 = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_19.setFont(font)
+        self.label_19.setObjectName("label_19")
+        self.gridLayout_4.addWidget(self.label_19, 0, 0, 1, 1)
+        self.laser_x_cord = QtWidgets.QLCDNumber(parent=Laser_Control)
+        self.laser_x_cord.setObjectName("laser_x_cord")
+        self.gridLayout_4.addWidget(self.laser_x_cord, 0, 1, 1, 1)
+        self.label_17 = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_17.setFont(font)
+        self.label_17.setObjectName("label_17")
+        self.gridLayout_4.addWidget(self.label_17, 1, 0, 1, 1)
+        self.laser_y_cord = QtWidgets.QLCDNumber(parent=Laser_Control)
+        self.laser_y_cord.setObjectName("laser_y_cord")
+        self.gridLayout_4.addWidget(self.laser_y_cord, 1, 1, 1, 1)
+        self.label_18 = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_18.setFont(font)
+        self.label_18.setObjectName("label_18")
+        self.gridLayout_4.addWidget(self.label_18, 2, 0, 1, 1)
+        self.laser_z_cord = QtWidgets.QLCDNumber(parent=Laser_Control)
+        self.laser_z_cord.setObjectName("laser_z_cord")
+        self.gridLayout_4.addWidget(self.laser_z_cord, 2, 1, 1, 1)
+        self.gridLayout_5.addLayout(self.gridLayout_4, 3, 0, 1, 1)
         self.gridLayout_2 = QtWidgets.QGridLayout()
         self.gridLayout_2.setObjectName("gridLayout_2")
-        self.label_14 = QtWidgets.QLabel(Laser_Control)
+        self.label_14 = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_14.setFont(font)
         self.label_14.setObjectName("label_14")
         self.gridLayout_2.addWidget(self.label_14, 0, 0, 1, 1)
-        self.laser_speed_lr = QtWidgets.QDoubleSpinBox(Laser_Control)
+        self.laser_speed_lr = QtWidgets.QDoubleSpinBox(parent=Laser_Control)
         self.laser_speed_lr.setStyleSheet("QDoubleSpinBox{\n"
-                                          "                                                background: rgb(223,223,233)\n"
-                                          "                                                }\n"
-                                          "                                            ")
+                                          "                                            background: rgb(223,223,233)\n"
+                                          "                                            }\n"
+                                          "                                        ")
         self.laser_speed_lr.setObjectName("laser_speed_lr")
         self.gridLayout_2.addWidget(self.laser_speed_lr, 0, 1, 1, 1)
-        self.label_15 = QtWidgets.QLabel(Laser_Control)
+        self.label_15 = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_15.setFont(font)
         self.label_15.setObjectName("label_15")
         self.gridLayout_2.addWidget(self.label_15, 1, 0, 1, 1)
-        self.laser_speed_ud = QtWidgets.QDoubleSpinBox(Laser_Control)
+        self.laser_speed_ud = QtWidgets.QDoubleSpinBox(parent=Laser_Control)
         self.laser_speed_ud.setStyleSheet("QDoubleSpinBox{\n"
-                                          "                                                background: rgb(223,223,233)\n"
-                                          "                                                }\n"
-                                          "                                            ")
+                                          "                                            background: rgb(223,223,233)\n"
+                                          "                                            }\n"
+                                          "                                        ")
         self.laser_speed_ud.setObjectName("laser_speed_ud")
         self.gridLayout_2.addWidget(self.laser_speed_ud, 1, 1, 1, 1)
-        self.label_16 = QtWidgets.QLabel(Laser_Control)
+        self.label_16 = QtWidgets.QLabel(parent=Laser_Control)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_16.setFont(font)
         self.label_16.setObjectName("label_16")
         self.gridLayout_2.addWidget(self.label_16, 2, 0, 1, 1)
-        self.laser_speed_fb = QtWidgets.QDoubleSpinBox(Laser_Control)
+        self.laser_speed_fb = QtWidgets.QDoubleSpinBox(parent=Laser_Control)
         self.laser_speed_fb.setStyleSheet("QDoubleSpinBox{\n"
-                                          "                                                background: rgb(223,223,233)\n"
-                                          "                                                }\n"
-                                          "                                            ")
+                                          "                                            background: rgb(223,223,233)\n"
+                                          "                                            }\n"
+                                          "                                        ")
         self.laser_speed_fb.setObjectName("laser_speed_fb")
         self.gridLayout_2.addWidget(self.laser_speed_fb, 2, 1, 1, 1)
-        self.gridLayout_4.addLayout(self.gridLayout_2, 3, 0, 1, 1)
+        self.gridLayout_5.addLayout(self.gridLayout_2, 3, 1, 1, 1)
         self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")
         spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
                                             QtWidgets.QSizePolicy.Policy.Minimum)
         self.gridLayout.addItem(spacerItem2, 0, 0, 1, 1)
-        self.laser_up = QtWidgets.QPushButton(Laser_Control)
+        self.laser_up = QtWidgets.QPushButton(parent=Laser_Control)
         self.laser_up.setMinimumSize(QtCore.QSize(50, 25))
         self.laser_up.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.laser_up.setStyleSheet("")
@@ -315,7 +407,7 @@ class Ui_Laser_Control(object):
         spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
                                             QtWidgets.QSizePolicy.Policy.Minimum)
         self.gridLayout.addItem(spacerItem3, 0, 2, 1, 1)
-        self.laser_left = QtWidgets.QPushButton(Laser_Control)
+        self.laser_left = QtWidgets.QPushButton(parent=Laser_Control)
         self.laser_left.setMinimumSize(QtCore.QSize(50, 25))
         self.laser_left.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.laser_left.setStyleSheet("")
@@ -324,7 +416,7 @@ class Ui_Laser_Control(object):
         spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
                                             QtWidgets.QSizePolicy.Policy.Minimum)
         self.gridLayout.addItem(spacerItem4, 1, 1, 1, 1)
-        self.leser_right = QtWidgets.QPushButton(Laser_Control)
+        self.leser_right = QtWidgets.QPushButton(parent=Laser_Control)
         self.leser_right.setMinimumSize(QtCore.QSize(50, 25))
         self.leser_right.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.leser_right.setStyleSheet("")
@@ -333,7 +425,7 @@ class Ui_Laser_Control(object):
         spacerItem5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
                                             QtWidgets.QSizePolicy.Policy.Minimum)
         self.gridLayout.addItem(spacerItem5, 2, 0, 1, 1)
-        self.laser_down = QtWidgets.QPushButton(Laser_Control)
+        self.laser_down = QtWidgets.QPushButton(parent=Laser_Control)
         self.laser_down.setMinimumSize(QtCore.QSize(50, 25))
         self.laser_down.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.laser_down.setStyleSheet("")
@@ -342,26 +434,26 @@ class Ui_Laser_Control(object):
         spacerItem6 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
                                             QtWidgets.QSizePolicy.Policy.Minimum)
         self.gridLayout.addItem(spacerItem6, 2, 2, 1, 1)
-        self.gridLayout_4.addLayout(self.gridLayout, 3, 1, 1, 1)
+        self.gridLayout_5.addLayout(self.gridLayout, 3, 2, 1, 1)
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
-        self.laser_forward = QtWidgets.QPushButton(Laser_Control)
+        self.laser_forward = QtWidgets.QPushButton(parent=Laser_Control)
         self.laser_forward.setStyleSheet("")
         self.laser_forward.setObjectName("laser_forward")
         self.verticalLayout.addWidget(self.laser_forward)
         spacerItem7 = QtWidgets.QSpacerItem(17, 24, QtWidgets.QSizePolicy.Policy.Minimum,
                                             QtWidgets.QSizePolicy.Policy.Expanding)
         self.verticalLayout.addItem(spacerItem7)
-        self.laser_backward = QtWidgets.QPushButton(Laser_Control)
+        self.laser_backward = QtWidgets.QPushButton(parent=Laser_Control)
         self.laser_backward.setStyleSheet("")
         self.laser_backward.setObjectName("laser_backward")
         self.verticalLayout.addWidget(self.laser_backward)
-        self.gridLayout_4.addLayout(self.verticalLayout, 3, 2, 1, 1)
-        self.laser_home = QtWidgets.QPushButton(Laser_Control)
+        self.gridLayout_5.addLayout(self.verticalLayout, 3, 3, 1, 2)
+        self.laser_home = QtWidgets.QPushButton(parent=Laser_Control)
         self.laser_home.setStyleSheet("")
         self.laser_home.setObjectName("laser_home")
-        self.gridLayout_4.addWidget(self.laser_home, 3, 3, 1, 1)
-        self.Error = QtWidgets.QLabel(Laser_Control)
+        self.gridLayout_5.addWidget(self.laser_home, 3, 5, 1, 1)
+        self.Error = QtWidgets.QLabel(parent=Laser_Control)
         self.Error.setMinimumSize(QtCore.QSize(500, 30))
         font = QtGui.QFont()
         font.setPointSize(13)
@@ -371,13 +463,13 @@ class Ui_Laser_Control(object):
         self.Error.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.Error.setTextInteractionFlags(QtCore.Qt.TextInteractionFlag.LinksAccessibleByMouse)
         self.Error.setObjectName("Error")
-        self.gridLayout_4.addWidget(self.Error, 4, 0, 1, 4)
-        self.start_scanning = QtWidgets.QPushButton(Laser_Control)
+        self.gridLayout_5.addWidget(self.Error, 4, 0, 1, 4)
+        self.start_scanning = QtWidgets.QPushButton(parent=Laser_Control)
         self.start_scanning.setStyleSheet("QPushButton{background: rgb(193, 193, 193)}\n"
-                                          "                                            ")
+                                          "                                ")
         self.start_scanning.setObjectName("start_scanning")
-        self.gridLayout_4.addWidget(self.start_scanning, 4, 6, 1, 1)
-        self.gridLayout_5.addLayout(self.gridLayout_4, 0, 0, 1, 1)
+        self.gridLayout_5.addWidget(self.start_scanning, 4, 6, 1, 1)
+        self.gridLayout_6.addLayout(self.gridLayout_5, 0, 0, 1, 1)
 
         self.retranslateUi(Laser_Control)
         QtCore.QMetaObject.connectSlotsByName(Laser_Control)
@@ -403,13 +495,56 @@ class Ui_Laser_Control(object):
         Laser_Control.setTabOrder(self.laser_home, self.start_scanning)
         Laser_Control.setTabOrder(self.start_scanning, self.scanning_disp)
 
+        ######
         self.led_red = QPixmap('./files/led-red-on.png')
         self.led_green = QPixmap('./files/green-led-on.png')
+        self.led_orange = QPixmap('./files/led-orange.png')
         self.led_laser_laser_standby.setPixmap(self.led_red)
         self.led_laser_on.setPixmap(self.led_red)
         self.led_laser_enable.setPixmap(self.led_red)
         self.led_laser_listen.setPixmap(self.led_red)
 
+        self.laser_enable.setEnabled(False)
+        self.laser_on.setEnabled(False)
+        # self.laser_listen.clicked.connect(partial(self.start_task, self.laser_listen_clicked, self.laser_listen))
+        # self.laser_standby.clicked.connect(partial(self.start_task, self.laser_standby_clicked, self.laser_standby))
+        # self.laser_on.clicked.connect(partial(self.start_task, self.laser_on_clicked, self.laser_on))
+        # self.laser_enable.clicked.connect(partial(self.start_task, self.laser_enable_clicked, self.laser_enable))
+
+        self.listen_mode = False
+        self.standby_mode = False
+        self.on_mode = False
+        self.enable_ouput_mode = False
+        self.laser_listen.clicked.connect(self.laser_listen_clicked)
+        self.laser_standby.clicked.connect(self.laser_standby_clicked)
+        self.laser_on.clicked.connect(self.laser_on_clicked)
+        self.laser_enable.clicked.connect(self.laser_enable_clicked)
+
+        self.laser_wavelegnth.currentIndexChanged.connect(self.laser_wavelegnth_changed)
+        self.laser_power.currentIndexChanged.connect(self.laser_power_changed)
+        self.laser_rate.currentIndexChanged.connect(self.laser_rate_changed)
+        self.laser_divition_factor.currentIndexChanged.connect(self.laser_divition_factor_changed)
+        self.laser_device = origamiClassCLI.origClass(self.conf['COM_PORT_laser'])
+
+        try:
+            databack = self.laser_device.open_port()
+
+            if databack == 0:
+                self.laser_device.Listen()
+                databack = self.laser_device.StatusRead()
+                if databack.strip() == 'ly_oxp2_dev_status 9':
+                    self.led_laser_listen.setPixmap(self.led_green)
+                else:
+                    print("The laser status code is:", databack)
+            else:
+                print("laser port can not be opened")
+                self.laser_device = None
+        except Exception as e:
+            print("laser port can not be opened")
+            self.laser_device = None
+
+        self.worker = Worker(self.check_laser_status)
+        self.worker.start()
     def retranslateUi(self, Laser_Control):
         _translate = QtCore.QCoreApplication.translate
         ###
@@ -494,9 +629,12 @@ class Ui_Laser_Control(object):
         self.label_9.setText(_translate("Laser_Control", "Laser power"))
         self.label_10.setText(_translate("Laser_Control", "Pulse energy"))
         self.label_11.setText(_translate("Laser_Control", "Repetirion rate"))
+        self.label_19.setText(_translate("Laser_Control", "x"))
+        self.label_17.setText(_translate("Laser_Control", "y"))
+        self.label_18.setText(_translate("Laser_Control", "z"))
         self.label_14.setText(_translate("Laser_Control", "Speed L/R"))
-        self.label_15.setText(_translate("Laser_Control", "Speed  U/D"))
-        self.label_16.setText(_translate("Laser_Control", "Speed  F/B"))
+        self.label_15.setText(_translate("Laser_Control", "Speed U/D"))
+        self.label_16.setText(_translate("Laser_Control", "Speed F/B"))
         self.laser_up.setText(_translate("Laser_Control", "up"))
         self.laser_left.setText(_translate("Laser_Control", "Left"))
         self.leser_right.setText(_translate("Laser_Control", "Right"))
@@ -507,17 +645,248 @@ class Ui_Laser_Control(object):
         self.Error.setText(_translate("Laser_Control", "<html><head/><body><p><br/></p></body></html>"))
         self.start_scanning.setText(_translate("Laser_Control", "Start scaning"))
 
-    def disable_button_for_10_seconds(self):
+        ####
+
+    def laser_enable_clicked(self):
         """
         Handle the close event of the GatesWindow.
 
         Args:
             None
-
         Return:
             None
         """
-        pass
+        self.enable_ouput_mode = True
+
+    def laser_on_clicked(self):
+        """
+        Handle the close event of the GatesWindow.
+
+        Args:
+            None
+        Return:
+            None
+        """
+        self.on_mode = True
+
+    def laser_standby_clicked(self):
+        """
+        Handle the close event of the GatesWindow.
+
+        Args:
+            None
+        Return:
+            None
+        """
+        self.standby_mode = True
+
+    def laser_listen_clicked(self):
+        """
+        Handle the close event of the GatesWindow.
+
+        Args:
+            None
+        Return:
+            None
+        """
+        self.listen_mode = True
+
+    def laser_wavelegnth_changed(self):
+        """
+        Handle the close event of the GatesWindow.
+
+        Args:
+            None
+        Return:
+            None
+        """
+        self.change_laser_wavelegnth = True
+
+    def laser_power_changed(self):
+        """
+        Handle the close event of the GatesWindow.
+
+        Args:
+            None
+        Return:
+            None
+        """
+        self.change_laser_power = True
+
+    def laser_rate_changed(self):
+        """
+        Handle the close event of the GatesWindow.
+
+        Args:
+            None
+        Return:
+            None
+        """
+        self.change_laser_rate = True
+
+    def laser_divition_factor_changed(self):
+        """
+        Handle the close event of the GatesWindow.
+
+        Args:
+            None
+        Return:
+            None
+        """
+        self.change_laser_divition_factor = True
+
+    def check_laser_status(self):
+        if self.laser_device is not None:
+            databack = self.laser_device.StatusRead()
+            if self.listen_mode:
+                if databack.strip() != 'ly_oxp2_dev_status 9':
+                    self.laser_listen.setEnabled(False)
+                    databack = self.laser_device.Listen()
+                elif databack.strip() == 'ly_oxp2_dev_status 9':
+                    self.led_laser_listen.setPixmap(self.led_green)
+                    self.led_laser_enable.setPixmap(self.led_red)
+                    self.led_laser_on.setPixmap(self.led_red)
+                    self.led_laser_laser_standby.setPixmap(self.led_red)
+                    self.laser_enable.setEnabled(False)
+                    self.laser_on.setEnabled(False)
+                    self.on_mode = False
+                    self.enable_ouput_mode = False
+                    self.standby_mode = False
+                    self.listen_mode = False
+                    self.laser_listen.setEnabled(True)
+                    self.laser_standby.setEnabled(True)
+
+            elif self.standby_mode:
+                if databack.strip() != 'ly_oxp2_dev_status 33':
+                    if self.laser_standby.isEnabled():
+                        self.laser_standby.setEnabled(False)
+                        self.laser_on.setEnabled(False)
+                        self.led_laser_listen.setPixmap(self.led_orange)
+                        self.led_laser_laser_standby.setPixmap(self.led_orange)
+                        self.laser_device.Standby()
+                    else:
+                        if self.led_laser_laser_standby.pixmap().toImage() == self.led_orange.toImage():
+                            self.led_laser_laser_standby.setPixmap(self.led_green)
+                        elif self.led_laser_laser_standby.pixmap().toImage() == self.led_green.toImage():
+                            self.led_laser_laser_standby.setPixmap(self.led_orange)
+                elif databack.strip() == 'ly_oxp2_dev_status 33':
+                    self.laser_on.setEnabled(True)
+                    self.laser_standby.setEnabled(True)
+                    self.led_laser_on.setPixmap(self.led_red)
+                    self.led_laser_laser_standby.setPixmap(self.led_green)
+                    self.led_laser_enable.setPixmap(self.led_red)
+                    self.laser_enable.setEnabled(False)
+                    self.standby_mode = False
+            elif self.on_mode:
+                if databack.strip() == 'ly_oxp2_dev_status 33':
+                    if self.laser_on.isEnabled():
+                        self.laser_on.setEnabled(False)
+                        self.led_laser_on.setPixmap(self.led_orange)
+                        self.led_laser_laser_standby.setPixmap(self.led_orange)
+                        self.laser_device.Enable()
+                elif databack.strip() == 'ly_oxp2_dev_status 129':
+                    self.laser_on.setEnabled(True)
+                    self.led_laser_on.setPixmap(self.led_green)
+                    self.led_laser_laser_standby.setPixmap(self.led_orange)
+                    self.led_laser_enable.setPixmap(self.led_green)
+                    self.laser_enable.setEnabled(True)
+                    self.on_mode = False
+                elif databack.strip() == 'ly_oxp2_dev_status 1':
+                    if self.led_laser_on.pixmap().toImage() == self.led_orange.toImage():
+                        self.led_laser_on.setPixmap(self.led_green)
+                    elif self.led_laser_on.pixmap().toImage() == self.led_green.toImage():
+                        self.led_laser_on.setPixmap(self.led_orange)
+                else:
+                    self.on_mode = False
+            elif self.enable_ouput_mode:
+                # print(self.laser_device.AOMState())
+                print(databack)
+                self.laser_enable.setEnabled(False)
+                if databack.strip() == 'ly_oxp2_dev_status 65':
+                    if self.laser_enable.isEnabled():
+                        self.laser_enable.setEnabled(False)
+                        self.laser_device.AOMEnable()
+                        self.enable_ouput_mode = False
+                        self.led_laser_enable.setPixmap(self.led_green)
+                        self.laser_enable.setEnabled(True)
+
+                elif databack.strip() == 'ly_oxp2_dev_status 129':
+                    if self.laser_enable.isEnabled():
+                        self.laser_enable.setEnabled(False)
+                        self.laser_device.AOMDisable()
+                        self.enable_ouput_mode = False
+                        self.led_laser_enable.setPixmap(self.led_red)
+                        self.laser_enable.setEnabled(True)
+            elif self.change_laser_wavelegnth:
+                # if emission is on we cannot change the wavelength
+                if databack != 'ly_oxp2_dev_status 129':
+                    self.laser_wavelegnth.setEnabled(False)
+                    if self.laser_wavelegnth.currentText() == "IR":
+                        dd = self.laser_device.change_wavelength(0)
+                    elif self.laser_wavelegnth.currentText() == "Green":
+                        dd = self.laser_device.change_wavelength(1)
+                    elif self.laser_wavelegnth.currentText() == "DUV":
+                        dd = self.laser_device.change_wavelength(3)
+                    self.laser_wavelegnth.setEnabled(True)
+                else:
+                    print('The laser is on, you can not change the wavelength')
+                self.change_laser_wavelegnth = False
+
+            elif self.change_laser_power:
+                # only if the laser is on we can change the power
+                if databack == 'ly_oxp2_dev_status 129':
+                    self.laser_power.setEnabled(False)
+                    self.laser_device.Power(float(self.laser_power.currentText()))
+                    self.laser_power.setEnabled(True)
+                else:
+                    print('The laser is off, you can not change the power')
+                self.change_laser_power = False
+
+            elif self.change_laser_rate:
+                self.laser_rate.setEnabled(False)
+                # self.laser_device.Freq(int(self.laser_rate.currentText()))
+                self.laser_rate.setEnabled(True)
+
+            elif self.change_laser_divition_factor:
+                self.laser_divition_factor.setEnabled(False)
+                self.laser_device.DivitionFactor(int(self.laser_divition_factor.currentText()))
+                self.laser_divition_factor.setEnabled(True)
+
+            # Power
+            amo_o = self.laser_device.AOMRead()
+            amo = re.search(r'[-+]?\d*\.\d+|\d+', amo_o)
+            if amo:
+                amo = float(amo.group())
+            else:
+                amo = 'Nan'
+            self.laser_power_disp.display(amo)
+
+            # Pulse energy
+            power_o = self.laser_device.PowerRead()
+            power = re.search(r'[-+]?\d*\.\d+|\d+', power_o)
+            if power:
+                power = float(power.group())
+            else:
+                power = 'Nan'
+            self.laser_pulse_energy_disp.display(power)
+            # Repetition rate
+            # At base frequencies above 100 kHz, the pulse energy linearly decreases.
+            freq_o = self.laser_device.FreqRead()
+            freq = re.search(r'[-+]?\d*\.\d+|\d+', freq_o)
+            if freq:
+                freq = float(freq.group())
+            else:
+                freq = 'Nan'
+            self.laser_repetion_rate_disp.display(freq)
+
+            if self.index == 10:
+                print(self.laser_device.read_average_power())
+                print(amo_o)
+                print(power_o)
+                print(freq_o)
+                self.index = 0
+            self.index += 1
+
 
     def stop(self):
         """
@@ -532,8 +901,21 @@ class Ui_Laser_Control(object):
         # Stop any background processes, timers, or threads here
         pass
 
+
+class Worker(QThread):
+    def __init__(self, task_function):
+        super().__init__()
+        self.task_function = task_function
+
+    def run(self):
+        while True:  # Run indefinitely
+            self.task_function()
+            self.msleep(1000)  # Sleep for 1000 milliseconds (1 second)
+
+
 class LaserControlWindow(QtWidgets.QWidget):
     closed = QtCore.pyqtSignal()  # Define a custom closed signal
+
     def __init__(self, gui_laser_control, *args, **kwargs):
         """
         Initialize the LaserControlWindow class.
@@ -585,4 +967,3 @@ if __name__ == "__main__":
     ui.setupUi(Laser_Control)
     Laser_Control.show()
     sys.exit(app.exec())
-

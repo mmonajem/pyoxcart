@@ -13,38 +13,62 @@ from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from pyccapt.calibration.data_tools import data_tools, selectors_data
 
 
-def fetch_dataset_from_dld_grp(filename: str) -> pd.DataFrame:
+def fetch_dataset_from_dld_grp(filename: str, extract_mode='dld') -> pd.DataFrame:
     """
     Fetches dataset from HDF5 file.
 
     Args:
         filename: Path to the HDF5 file.
-        tdc: Model of TDC.
+        extract_mode: Mode of extraction.
+                    dld: Extracts data from dld group.
+                    tdc_sc: Extracts data from tdc for Surface Consept.
+                    tdc_ro: Extracts data from tdc for Roentdek detector.
 
     Returns:
         DataFrame: Contains relevant information from the dld group.
     """
-
-    try:
-        hdf5Data = data_tools.read_hdf5(filename)
-        if hdf5Data is None:
-            raise FileNotFoundError
-        dld_highVoltage = hdf5Data['dld/high_voltage'].to_numpy()
-        dld_pulse = hdf5Data['dld/pulse'].to_numpy()
-        dld_startCounter = hdf5Data['dld/start_counter'].to_numpy()
-        dld_t = hdf5Data['dld/t'].to_numpy()
-        dld_x = hdf5Data['dld/x'].to_numpy()
-        dld_y = hdf5Data['dld/y'].to_numpy()
-        dldGroupStorage = np.concatenate((dld_highVoltage, dld_pulse, dld_startCounter, dld_t, dld_x, dld_y), axis=1)
-        dld_group_storage = create_pandas_dataframe(dldGroupStorage)
-        return dld_group_storage
-    except KeyError as error:
-        print(error)
-        print("[*] Keys missing in the dataset")
-    except FileNotFoundError as error:
-        print(error)
-        print("[*] HDF5 file not found")
-
+    if extract_mode == 'dld':
+        try:
+            hdf5Data = data_tools.read_hdf5(filename)
+            if hdf5Data is None:
+                raise FileNotFoundError
+            dld_highVoltage = hdf5Data['dld/high_voltage'].to_numpy()
+            dld_pulse = hdf5Data['dld/pulse'].to_numpy()
+            dld_startCounter = hdf5Data['dld/start_counter'].to_numpy()
+            dld_t = hdf5Data['dld/t'].to_numpy()
+            dld_x = hdf5Data['dld/x'].to_numpy()
+            dld_y = hdf5Data['dld/y'].to_numpy()
+            dldGroupStorage = np.concatenate((dld_highVoltage, dld_pulse, dld_startCounter, dld_t, dld_x, dld_y),
+                                             axis=1)
+            dld_group_storage = create_pandas_dataframe(dldGroupStorage, mode='dld')
+            return dld_group_storage
+        except KeyError as error:
+            print(error)
+            print("[*] Keys missing in the dataset")
+        except FileNotFoundError as error:
+            print(error)
+            print("[*] HDF5 file not found")
+    elif extract_mode == 'tdc_sc':
+        try:
+            hdf5Data = data_tools.read_hdf5(filename)
+            if hdf5Data is None:
+                raise FileNotFoundError
+            channel = hdf5Data['tdc/channel'].to_numpy()
+            start_counter = hdf5Data['tdc/start_counter'].to_numpy()
+            high_voltage = hdf5Data['tdc/high_voltage'].to_numpy()
+            pulse = hdf5Data['tdc/pulse'].to_numpy()
+            time_data = hdf5Data['tdc/time_data'].to_numpy()
+            dldGroupStorage = np.concatenate((channel, start_counter, high_voltage, pulse, time_data), axis=1)
+            dld_group_storage = create_pandas_dataframe(dldGroupStorage, mode='tdc_sc')
+            return dld_group_storage
+        except KeyError as error:
+            print(error)
+            print("[*] Keys missing in the dataset")
+        except FileNotFoundError as error:
+            print(error)
+            print("[*] HDF5 file not found")
+    elif extract_mode == 'tdc_ro':
+        print('Not implemented yet')
 
 def concatenate_dataframes_of_dld_grp(dataframeList: list) -> pd.DataFrame:
     """
@@ -423,21 +447,38 @@ def crop_data_after_selection(data_crop, variables):
     return data_crop
 
 
-def create_pandas_dataframe(data_crop):
+def create_pandas_dataframe(data_crop, mode='dld'):
     """
     Create a pandas dataframe from the cropped data.
 
     Args:
         data_crop: Cropped dataset
+        mode: Mode of extraction
+                dld: Extracts data from dld group
+                tdc_sc: Extracts data from tdc for Surface Consept
+                tdc_ro: Extracts data from tdc for Roentdek detector
 
     Returns:
         hdf_dataframe: Dataframe to be inserted in the HDF file
     """
-    hdf_dataframe = pd.DataFrame(data=data_crop,
-                                 columns=['high_voltage (V)', 'pulse', 'start_counter', 't (ns)',
-                                          'x_det (cm)', 'y_det (cm)'])
+    if mode == 'dld':
+        hdf_dataframe = pd.DataFrame(data=data_crop,
+                                     columns=['high_voltage (V)', 'pulse', 'start_counter', 't (ns)',
+                                              'x_det (cm)', 'y_det (cm)'])
 
-    hdf_dataframe['start_counter'] = hdf_dataframe['start_counter'].astype('uint32')
+        hdf_dataframe['start_counter'] = hdf_dataframe['start_counter'].astype('uint32')
+    elif mode == 'tdc_sc':
+        hdf_dataframe = pd.DataFrame(data=data_crop,
+                                     columns=['channel', 'start_counter', 'high_voltage (V)', 'pulse',
+                                              'time_data'])
+
+        hdf_dataframe['channel'] = hdf_dataframe['channel'].astype('uint32')
+        hdf_dataframe['start_counter'] = hdf_dataframe['start_counter'].astype('uint32')
+        hdf_dataframe['time_data'] = hdf_dataframe['time_data'].astype('uint32')
+    elif mode == 'tdc_ro':
+        print('Not implemented yet')
+        hdf_dataframe = None
+
     return hdf_dataframe
 
 

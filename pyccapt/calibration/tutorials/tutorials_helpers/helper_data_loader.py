@@ -57,9 +57,9 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc, variables
 		dataset_main_path = os.path.dirname(dataset_path)
 		dataset_name_with_extention = os.path.basename(dataset_path)
 		variables.dataset_name = os.path.splitext(dataset_name_with_extention)[0]
-		variables.result_data_path = dataset_main_path + '/visualization/'
+		variables.result_data_path = dataset_main_path + '/' + variables.dataset_name + '/visualization/'
 		variables.result_data_name = variables.dataset_name
-		variables.result_path = dataset_main_path + '/visualization/'
+		variables.result_path = dataset_main_path + '/' + variables.dataset_name + '/visualization/'
 
 		if not os.path.isdir(variables.result_path):
 			os.makedirs(variables.result_path, mode=0o777, exist_ok=True)
