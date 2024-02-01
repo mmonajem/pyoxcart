@@ -65,18 +65,18 @@ def ccapt_to_epos(data, path=None, name=None):
     return epos
 
 
-def pos_to_ccapt(data):
+def pos_to_ccapt(file_path):
     """
     Convert POS data to CCAPT format.
 
     Args:
-        data: POS data.
+        file_path: POS data file_path.
 
     Returns:
         pandas.DataFrame: CCAPT data.
 
     """
-    pos = leap_tools.read_pos(data)
+    pos = leap_tools.read_pos(file_path)
     length = len(pos['m/n (Da)'].to_numpy())
     ccapt = pd.DataFrame({'x (nm)': pos['x (nm)'].to_numpy(),
                           'y (nm)': pos['y (nm)'].to_numpy(),
@@ -96,18 +96,18 @@ def pos_to_ccapt(data):
     return ccapt
 
 
-def epos_to_ccapt(data):
+def epos_to_ccapt(file_path):
     """
     Convert EPOS data to PyCCAPT format.
 
     Args:
-        data: EPOS data.
+        file_path: EPOS data file path.
 
     Returns:
         pandas.DataFrame: CCAPT data.
 
     """
-    epos = leap_tools.read_epos(data)
+    epos = leap_tools.read_epos(file_path)
     length = len(epos['m/n (Da)'].to_numpy())
     ccapt = pd.DataFrame({'x (nm)': epos['x (nm)'].to_numpy(),
                           'y (nm)': epos['y (nm)'].to_numpy(),
@@ -125,3 +125,45 @@ def epos_to_ccapt(data):
                           'ion_pp': epos['ipp'].to_numpy(),
                           })
     return ccapt
+
+
+def apt_to_ccapt(file_path):
+    """
+    Convert APT data to PyCCAPT format.
+
+    Args:
+        file_path: APT data file path.
+
+    Returns:
+        pandas.DataFrame: CCAPT data.
+    """
+
+    data = leap_tools.read_apt(file_path)
+
+    length_data = len(data["Mass"])
+
+    # Define the keys and corresponding column names
+    key_mappings = {
+        'x': 'x (nm)',
+        'y': 'y (nm)',
+        'z': 'z (nm)',
+        'Mass': 'mc (Da)',
+        'Voltage': 'high_voltage (V)',
+        'Vap': 'pulse',
+        'Epos ToF': 't (ns)',
+        'det_x': 'x_det (cm)',
+        'det_y': 'y_det (cm)',
+        'Delta Pulse': 'pulse_pi',
+        'Multiplicity': 'ion_pp',
+    }
+
+    # Create a dictionary with zero-filled arrays for missing keys
+    data_dict = {column_name: data.get(key, np.zeros(length_data)) for key, column_name in key_mappings.items()}
+
+    data_dict['mc_c (Da)'] = np.zeros(length_data)
+    data_dict['start_counter'] = np.zeros(length_data, dtype=int)
+    data_dict['t_c (ns)'] = np.zeros(length_data)
+
+    df = pd.DataFrame(data_dict)
+
+    return df

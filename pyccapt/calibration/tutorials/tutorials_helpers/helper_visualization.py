@@ -45,12 +45,13 @@ def call_visualization(variables):
     #############
     peak_find_plot = widgets.Dropdown(options=[('True', True), ('False', False)])
     peaks_find = widgets.Dropdown(options=[('True', True), ('False', False)])
-    rangging = widgets.Dropdown(options=[('True', True), ('False', False)])
+    rangging = widgets.Dropdown(options=[('False', False), ('True', True)])
     target_mode = widgets.Dropdown(options=[('mc_c', 'mc_c'), ('tof_c', 'tof_c'), ('mc', 'mc'), ('tof', 'tof')])
     bin_size_pm = widgets.FloatText(value=0.1)
     lim_mc_pm = widgets.IntText(value=150)
     prominence = widgets.IntText(value=50)
     distance = widgets.IntText(value=50)
+    percent = widgets.IntText(value=50)
     figname_mc = widgets.Text(value='mc')
     figure_mc_size_x_mc = widgets.FloatText(value=9.0)
     figure_mc_size_y_mc = widgets.FloatText(value=5.0)
@@ -96,7 +97,8 @@ def call_visualization(variables):
                 # Handle invalid input
                 print(f"Invalid range input")
             mc_plot.hist_plot(variables, bin_size_pm.value, log=True, target=target_mode.value, mode='normal',
-                              prominence=prominence.value, distance=distance.value, percent=50, selector='rect',
+                              prominence=prominence.value, distance=distance.value, percent=percent.value,
+                              selector='rect',
                               figname=figname_mc.value, lim=lim_mc_pm.value, peaks_find=peaks_find.value,
                               peaks_find_plot=peak_find_plot.value, range_plot=rangging.value,
                               range_sequence=range_sequence, range_mc=range_mc, range_detx=range_detx,
@@ -622,6 +624,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value="Rangging:", layout=label_layout), rangging]),
         widgets.HBox([widgets.Label(value="Bins size:", layout=label_layout), bin_size_pm]),
         widgets.HBox([widgets.Label(value="Limit mc:", layout=label_layout), lim_mc_pm]),
+        widgets.HBox([widgets.Label(value="MRP Percent:", layout=label_layout), percent]),
         widgets.HBox([widgets.Label(value="Peak prominance:", layout=label_layout), prominence]),
         widgets.HBox([widgets.Label(value="Peak distance:", layout=label_layout), distance]),
         widgets.HBox([widgets.Label(value="Fig name:", layout=label_layout), figname_mc]),

@@ -75,6 +75,14 @@ def rename_a_category(file_path, old_name, new_name):
         data.create_dataset(new_name, data=temp)
 
 
+def fill_a_category(file_path, name):
+    with h5py.File(file_path, 'r+') as data:
+        temp = data['dld/pulse'][:]
+        array = np.zeros(len(temp))
+        del data[name]
+        data.create_dataset(name, data=array)
+
+
 def pulse_energy_calculator_list(ref_angle, ref_laser_intensity, step_pulse_energy, output_file="output.xlsx"):
     # pulse energy = ref_laser_intensity * pulse duration * area
     pulse_ref_energy = ref_laser_intensity * 1e2 * 1e2 * 12e-15 * 4e-6 * 4e-6 * np.pi
@@ -119,9 +127,9 @@ def pulse_energy_calculator(ref_angle, ref_laser_intensity, pulse_energy):
     # return dld_pulse
 
 if __name__ == "__main__":
-    # txt_path = '../../../tests/data/physics_experiment/data_130_Sep-19-2023_14-58_W_12fs.txt'
-    # save_path = '../../../tests/data/physics_experiment/data_130_Sep-19-2023_14-58_W_12fs.h5'
-    # copy_xy_from_cobold_txt_to_hdf5(txt_path, save_path)
+    txt_path = '../../../tests/data/physics_experiment/data_207_Feb-01-2024_13-08_Powersweep.txt'
+    save_path = '../../../tests/data/physics_experiment/data_207_Feb-01-2024_13-08_Powersweep.h5'
+    copy_xy_from_cobold_txt_to_hdf5(txt_path, save_path)
 
     # file_path = '../../../tests/data/physics_experiment/data_130_Sep-19-2023_14-58_W_12fs.h5'
     # (at 242°) corresponds to an intensity of 1.4e13 W/cm^2.
@@ -133,6 +141,9 @@ if __name__ == "__main__":
     # print(ref_laser_intensity)
     # convert_ND_angle_to_laser_intensity(file_path, ref_laser_intensity, ref_angle)
 
+    # file_path = '../../../tests/data/physics_experiment/data_207_Feb-01-2024_13-08_Powersweep.h5'
     # rename_a_category(file_path, 'dld/AbsoluteTimeStamp', 'dld/start_counter')
-    pulse_energy_calculator_list(242, 1.4e13, 5000)
+    # rename_a_category(file_path, 'dld/laser_intensity', 'dld/pulse')
+    # fill_a_category(file_path, 'dld/start_counter')
+    # pulse_energy_calculator_list(242, 1.4e13, 5000)
     print('Done')

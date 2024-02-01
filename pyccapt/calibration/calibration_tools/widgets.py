@@ -244,7 +244,7 @@ def dataset_instrument_specification_selection():
     )
 
     tdc = widgets.Dropdown(
-        options=['pyccapt', 'leap_epos', 'leap_pos', 'ato_v6'],
+        options=['pyccapt', 'leap_epos', 'leap_pos', 'leap_apt', 'ato_v6'],
         value='pyccapt',
         description='Data mode:',
     )

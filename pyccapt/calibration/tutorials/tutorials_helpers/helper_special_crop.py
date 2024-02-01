@@ -70,8 +70,10 @@ def call_plot_crop_fdm(variables):
             out.clear_output()  # Clear any previous output
             # Call the function
             data = variables.data.copy()
-            data_loadcrop.plot_crop_fdm(data, variables, bins, frac, True, figure_size,
-                                        False, save, figname)
+            data_loadcrop.plot_crop_fdm(data, bins, frac, axis_mode='normal', figure_size=figure_size,
+                                        variables=variables, range_sequence=[], range_mc=[], range_detx=[],
+                                        range_dety=[], range_x=[], range_y=[], range_z=[],
+                                        data_crop=True, draw_circle=False, save=save, figname=figname)
 
         # Enable the button when the code is finished
         button_plot.disabled = False

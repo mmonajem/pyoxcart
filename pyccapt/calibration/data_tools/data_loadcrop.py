@@ -170,7 +170,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         ax3.spines.right.set_position(("axes", 1.13))
         pulse_curve, = ax3.plot(xaxis, pulse, color='fuchsia', linewidth=2)
         if pulse_mode == 'laser':
-            ax3.set_ylabel("Laser Intensity [$pJ$]", color="fuchsia", fontsize=10)
+            ax3.set_ylabel("Laser Pulse Energy [$pJ$]", color="fuchsia", fontsize=10)
             range = max(pulse) - min(pulse)
             ax3.set_ylim([min(pulse) - range * 0.1, max(pulse) + range * 0.1])
             ax3.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
@@ -259,6 +259,7 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
             mask_det_y = (variables.dld_y_det < range_dety[1]) & (variables.dld_y_det > range_dety[0])
             mask_det = mask_det_x & mask_det_y
         else:
+            print(variables.dld_x_det)
             mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
         if range_mc:
             mask_mc = (variables.mc_c < range_mc[1]) & (variables.mc_c > range_mc[0])

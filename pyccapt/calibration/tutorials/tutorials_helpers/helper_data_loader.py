@@ -8,6 +8,7 @@ from pyccapt.calibration.mc import tof_tools
 
 
 def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc, variables, processing_mode=True):
+
 	if processing_mode:
 		# Calculate the maximum possible time of flight (TOF)
 		max_tof = int(tof_tools.mc2tof(max_mc, 1000, 0, 0, flightPathLength))
@@ -31,7 +32,6 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc, variables
 		print('The figures will be saved on the path:', variables.result_path)
 		print('=============================')
 
-		mode = 'processed'
 		# Create data frame out of hdf5 file dataset
 		if tdc == 'pyccapt':
 			try:
@@ -40,6 +40,8 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc, variables
 				mode = 'raw'
 			except:
 				dld_group_storage = data_tools.load_data(dataset_path, tdc, mode='processed')
+				print('The data is loaded in processed mode')
+				mode = 'processed'
 		else:
 			dld_group_storage = data_tools.load_data(dataset_path, tdc)
 

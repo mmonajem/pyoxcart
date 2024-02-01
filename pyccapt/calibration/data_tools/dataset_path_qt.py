@@ -15,7 +15,7 @@ def gui_fname(initial_directory):
     app = QApplication([initial_directory])
     fname = QFileDialog.getOpenFileName(None, "Select a file...", initial_directory,
                                         filter="PyCCAPT data (*.h5);;"
-                                               "LEAP (*.pos *.epos);;"
+                                               "LEAP (*.pos *.epos *.apt);;"
                                                "APT (*.ato);;"
                                                "CSV (*.csv);;"
                                                "All Files (*)")
