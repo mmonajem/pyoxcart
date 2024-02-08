@@ -159,7 +159,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         # Plot high voltage curve
         xaxis2 = np.arange(len(high_voltage))
         dc_curve, = ax2.plot(xaxis2, high_voltage, color='red', linewidth=2)
-        ax2.set_ylabel("High Voltage [kV]", color="red", fontsize=10)
+        ax2.set_ylabel("DC Voltage [kV]", color="red", fontsize=10)
         ax2.set_ylim([min(high_voltage), max(high_voltage) + 0.5])
         ax2.spines['right'].set_color('red')  # Set Y-axis color to red
         ax2.yaxis.label.set_color('red')  # Set Y-axis label color to red
@@ -170,12 +170,12 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         ax3.spines.right.set_position(("axes", 1.13))
         pulse_curve, = ax3.plot(xaxis, pulse, color='fuchsia', linewidth=2)
         if pulse_mode == 'laser':
-            ax3.set_ylabel("Laser Pulse Energy [$pJ$]", color="fuchsia", fontsize=10)
+            ax3.set_ylabel("Pulse Energy [$pJ$]", color="fuchsia", fontsize=10)
             range = max(pulse) - min(pulse)
             ax3.set_ylim([min(pulse) - range * 0.1, max(pulse) + range * 0.1])
             ax3.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         elif pulse_mode == 'voltage':
-            ax3.set_ylabel("Pulse (V)", color="fuchsia", fontsize=10)
+            ax3.set_ylabel("Pulse Voltage (V)", color="fuchsia", fontsize=10)
             ax3.set_ylim([min(pulse), max(pulse) + 0.5])
         ax3.spines['right'].set_color('fuchsia')  # Set Y-axis color to red
         ax3.yaxis.label.set_color('fuchsia')  # Set Y-axis label color to red
@@ -273,6 +273,7 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
         mask = mask_sequence & mask_det & mask_mc & mask_3d
+        variables.mask = mask
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
         print('The number of data det:', len(mask_det[mask_det == True]))
         print('The number of data 3d:', len(mask_3d[mask_3d == True]))

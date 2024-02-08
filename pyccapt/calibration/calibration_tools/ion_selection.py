@@ -459,23 +459,24 @@ def molecule_create(element_list, max_complexity, charge, abundance_threshold, v
     combination_complexity = []
     combination_formula = []
     # Generate all possible combinations with complexity 3
-    for combo in itertools.product(element_data, repeat=max_complexity):
-        combo_elements = [elem['element'] for elem in combo]
-        combo_weights = [elem['weight'] for elem in combo]
-        combo_abundances = [elem['abundance'] for elem in combo]
+    for comploex in range(1, max_complexity + 1):
+        for combo in itertools.product(element_data, repeat=comploex):
+            combo_elements = [elem['element'] for elem in combo]
+            combo_weights = [elem['weight'] for elem in combo]
+            combo_abundances = [elem['abundance'] for elem in combo]
 
-        combo_weight = sum(combo_weights)
-        combo_abundance = 1.0
+            combo_weight = sum(combo_weights)
+            combo_abundance = 1.0
 
-        for ab in combo_abundances:
-            combo_abundance *= ab / 100
-        for i in range(charge):
-            combinations.append(combo_elements)
-            combinations_list.append(combo_elements)
-            combination_weights.append(combo_weight / (i + 1))
-            combination_isotopes.append([elem['isotope'] for elem in combo])
-            combination_abundances.append(combo_abundance)
-            combination_charge.append(i + 1)
+            for ab in combo_abundances:
+                combo_abundance *= ab / 100
+            for i in range(charge):
+                combinations.append(combo_elements)
+                combinations_list.append(combo_elements)
+                combination_weights.append(combo_weight / (i + 1))
+                combination_isotopes.append([elem['isotope'] for elem in combo])
+                combination_abundances.append(combo_abundance)
+                combination_charge.append(i + 1)
 
     for i in range(len(combinations)):
         new_combination, new_isotopes, complexity = transform_combination_and_isotopes(combinations[i],
@@ -497,13 +498,10 @@ def molecule_create(element_list, max_complexity, charge, abundance_threshold, v
                 if comp != 1:
                     formula += '_{%s}' % comp
             if charge > 1:
-                if len(new_isotopes) > 1:
-                    formula = r'$(' + formula + ')^{%s+}$' % charge
-                else:
-                    formula = r'$' + formula + '^{%s+}$' % charge
-
+                formula = r'$' + formula + '^{%s+}$' % charge
             else:
-                formula = r'$' + formula + '$'
+                formula = r'$' + formula + '^{+}$'
+
         else:
             element_counts = {}
             chemical_formula = ''

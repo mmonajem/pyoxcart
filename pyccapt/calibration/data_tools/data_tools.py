@@ -180,7 +180,7 @@ def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, cs
 
     """
     if temp:
-        data_name = variables.result_data_name + 'temp'
+	    data_name = variables.result_data_name + '_temp'
     else:
         data_name = variables.result_data_name
     if hdf:

@@ -115,6 +115,7 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
             (variables.mc_calib < variables.selected_x2)
         )
     sample_size_v = int(len(variables.dld_high_voltage[mask_temporal]) / 100)
+
     sample_size_v = widgets.IntText(value=sample_size_v, description='sample size:', layout=label_layout)
     index_fig_v = widgets.IntText(value=1, description='fig index:', layout=label_layout)
     plot_v = widgets.Dropdown(
@@ -149,7 +150,7 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
     )
 
     noise_remove_v = widgets.Dropdown(
-        options=[('True', True), ('False', False)],
+        options=[('False', False), ('True', True)],
         description='noise remove:',
         layout=label_layout
     )

@@ -145,6 +145,7 @@ class Variables:
         self.max_tof = None
         self.flight_path_length = None
         self.pulse_mode = None
+        self.mask = None
         # Create an empty DataFrame with the specified columns
         self.range_data = pd.DataFrame({"ion": ['unranged'], "mass": [0], "mc": [0], "mc_low": 0,
                                         "mc_up": 400, "color": '#000000', "element": ['unranged'],

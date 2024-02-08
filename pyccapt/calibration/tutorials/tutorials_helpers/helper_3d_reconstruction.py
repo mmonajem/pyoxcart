@@ -1,3 +1,5 @@
+import ast
+
 import ipywidgets as widgets
 from IPython.display import display
 from ipywidgets import Output
@@ -17,10 +19,16 @@ def call_x_y_z_calculation(variables, flight_path_length, element_selected):
 	avg_dens = element_selected.value[2]
 	field_evap = element_selected.value[3]
 
-	if variables.range_data.empty:
-		element_percentage = str([0.01])
+	if variables.range_data.empty or variables.range_data['ion'].iloc[0] == 'unranged':
+		element_percentage = str({'unranged': 0.01})
 	else:
-		element_percentage = [0.01] * len(variables.range_data['element'].tolist())
+		# Iterate over unique elements in the "element" column
+		element_percentage = {}
+		for element_list in variables.range_data['element']:
+			for element in element_list:
+				# Check if the element is already a key in the dictionary
+				if element not in element_percentage:
+					element_percentage[element] = 0.01
 		element_percentage = str(element_percentage)
 
 	# Create widgets with initial values
@@ -30,7 +38,6 @@ def call_x_y_z_calculation(variables, flight_path_length, element_selected):
 	field_evap_widget = widgets.FloatText(value=field_evap)
 	avg_dens_widget = widgets.FloatText(value=avg_dens)
 	element_percentage_widget = widgets.Textarea(value=element_percentage)
-	rotary_fig_save_widget = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
 	figname_widget = widgets.Text(value='3d')
 	mode_widget = widgets.Dropdown(options=[('Gault', 'Gault'), ('Bas', 'Bas')])
 	opacity_widget = widgets.FloatText(value=0.5, min=0, max=1, step=0.1)
@@ -50,7 +57,6 @@ def call_x_y_z_calculation(variables, flight_path_length, element_selected):
 		field_evap_value = field_evap_widget.value
 		avg_dens_value = avg_dens_widget.value
 		element_percentage_value = element_percentage_widget.value
-		rotary_fig_save_value = rotary_fig_save_widget.value
 		figname_value = figname_widget.value
 		mode_value = mode_widget.value
 		opacity_value = opacity_widget.value
@@ -59,14 +65,24 @@ def call_x_y_z_calculation(variables, flight_path_length, element_selected):
 		with out:
 			out.clear_output()
 			# Call the function
+			element_percentage_dic = ast.literal_eval(element_percentage_value)
+			# Iterate through the 'element' column
+			element_percentage_list = []
+			for row_elements in variables.range_data['element']:
+				max_value = 0.1  # Default value if no matching element is found
+				for element in row_elements:
+					if element in element_percentage_dic:
+						max_value = element_percentage_dic[element]
+				element_percentage_list.append(max_value)
+
 			reconstruction.x_y_z_calculation_and_plot(
 				kf=kf_value,
 				det_eff=det_eff_value,
 				icf=icf_value,
 				field_evap=field_evap_value,
 				avg_dens=avg_dens_value,
-				element_percentage=element_percentage_value,
-				rotary_fig_save=rotary_fig_save_value,
+				element_percentage=element_percentage_list,
+				rotary_fig_save=False,
 				variables=variables,
 				flight_path_length=flight_path_length.value,
 				figname=figname_value,
@@ -88,7 +104,6 @@ def call_x_y_z_calculation(variables, flight_path_length, element_selected):
 		widgets.HBox([widgets.Label(value='Avg_dens:', layout=label_layout), avg_dens_widget,
 		              widgets.Label(value='(amu/nm^3)')]),
 		widgets.HBox([widgets.Label(value='Element_percentage:', layout=label_layout), element_percentage_widget]),
-		widgets.HBox([widgets.Label(value='Rotary_fig_save:', layout=label_layout), rotary_fig_save_widget]),
 		widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_widget]),
 		widgets.HBox([widgets.Label(value='Save fig:', layout=label_layout), save_widget]),
 		widgets.HBox([widgets.Label(value='Mode:', layout=label_layout), mode_widget]),

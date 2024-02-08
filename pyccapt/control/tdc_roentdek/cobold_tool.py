@@ -147,3 +147,13 @@ if __name__ == "__main__":
     # fill_a_category(file_path, 'dld/start_counter')
     # pulse_energy_calculator_list(242, 1.4e13, 5000)
     print('Done')
+
+#########
+
+# ref_angle = 260
+# ref_laser_intensity = 1.4e13
+# pulse_energy = ref_laser_intensity * (10 ** ((angle - ref_angle) / (270 * 0.5)))
+# # 1 μm^2 =1×10^−8 cm^2
+# #Energy per pulse (J) = Power Density (W/cm^2) * Area (cm^2) * Pulse Duration (s)
+# pulse_energy = pulse_energy * 6e-8 *  12e-15 * 1e12
+# variables.data['pulse'] = pulse_energy

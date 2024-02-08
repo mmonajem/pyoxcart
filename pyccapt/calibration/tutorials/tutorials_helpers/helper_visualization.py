@@ -45,12 +45,14 @@ def call_visualization(variables):
     #############
     peak_find_plot = widgets.Dropdown(options=[('True', True), ('False', False)])
     peaks_find = widgets.Dropdown(options=[('True', True), ('False', False)])
-    rangging = widgets.Dropdown(options=[('False', False), ('True', True)])
+    plot_ranged_colors = widgets.Dropdown(options=[('False', False), ('True', True)])
+    plot_ranged_peak = widgets.Dropdown(options=[('False', False), ('True', True)])
     target_mode = widgets.Dropdown(options=[('mc_c', 'mc_c'), ('tof_c', 'tof_c'), ('mc', 'mc'), ('tof', 'tof')])
     bin_size_pm = widgets.FloatText(value=0.1)
     lim_mc_pm = widgets.IntText(value=150)
     prominence = widgets.IntText(value=50)
     distance = widgets.IntText(value=50)
+    mrp_all = widgets.Dropdown(options=[('False', False), ('True', True)], value=False)
     percent = widgets.IntText(value=50)
     figname_mc = widgets.Text(value='mc')
     figure_mc_size_x_mc = widgets.FloatText(value=9.0)
@@ -100,11 +102,11 @@ def call_visualization(variables):
                               prominence=prominence.value, distance=distance.value, percent=percent.value,
                               selector='rect',
                               figname=figname_mc.value, lim=lim_mc_pm.value, peaks_find=peaks_find.value,
-                              peaks_find_plot=peak_find_plot.value, range_plot=rangging.value,
+                              peaks_find_plot=peak_find_plot.value, plot_ranged_colors=plot_ranged_colors.value,
+                              plot_ranged_peak=plot_ranged_peak.value, mrp_all=mrp_all.value,
                               range_sequence=range_sequence, range_mc=range_mc, range_detx=range_detx,
                               range_dety=range_dety, range_x=range_x, range_y=range_y, range_z=range_z,
-                              print_info=False, figure_size=figure_size, save_fig=save_mc.value,
-                              plot_ranged_ions=plot_ranged_ions.value)
+                              print_info=False, figure_size=figure_size, save_fig=save_mc.value)
 
         plot_mc_button.disabled = False
 
@@ -620,10 +622,11 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value="Target:", layout=label_layout), target_mode]),
         widgets.HBox([widgets.Label(value="Peak find:", layout=label_layout), peaks_find]),
         widgets.HBox([widgets.Label(value="Peak find plot:", layout=label_layout), peak_find_plot]),
-        widgets.HBox([widgets.Label(value="Plot ions:", layout=label_layout), plot_ranged_ions]),
-        widgets.HBox([widgets.Label(value="Rangging:", layout=label_layout), rangging]),
+        widgets.HBox([widgets.Label(value="Plot ranged colors:", layout=label_layout), plot_ranged_colors]),
+        widgets.HBox([widgets.Label(value="Plot ranged peak:", layout=label_layout), plot_ranged_peak]),
         widgets.HBox([widgets.Label(value="Bins size:", layout=label_layout), bin_size_pm]),
         widgets.HBox([widgets.Label(value="Limit mc:", layout=label_layout), lim_mc_pm]),
+        widgets.HBox([widgets.Label(value="MRP all(1%, 10%, 50%):", layout=label_layout), mrp_all]),
         widgets.HBox([widgets.Label(value="MRP Percent:", layout=label_layout), percent]),
         widgets.HBox([widgets.Label(value="Peak prominance:", layout=label_layout), prominence]),
         widgets.HBox([widgets.Label(value="Peak distance:", layout=label_layout), distance]),

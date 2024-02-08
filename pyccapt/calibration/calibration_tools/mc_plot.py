@@ -1,3 +1,5 @@
+import math
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pybaselines
@@ -93,15 +95,17 @@ class AptHistPlotter:
 
         if steps == 'bar':
             edgecolor = None
+            alpha = 1
         else:
             edgecolor = 'k'
+            alpha = 0.9
 
         if mode == 'normalized':
-            self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=bins, alpha=0.9,
+            self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=bins, alpha=alpha,
                                                         color='slategray', edgecolor=edgecolor, histtype=steps,
                                                         density=True)
         else:
-            self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=bins, alpha=0.9, color='slategray',
+            self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=bins, alpha=alpha, color='slategray',
                                                         edgecolor=edgecolor, histtype=steps)
         self.ax.set_xlabel('Mass/Charge [Da]' if label == 'mc' else 'Time of Flight [ns]')
         self.ax.set_ylabel('Event Counts')
@@ -121,7 +125,7 @@ class AptHistPlotter:
         self.variables.y_hist = self.y
         return self.y, self.x
 
-    def plot_range(self, range_data, legend=True, legend_loc='center right'):
+    def plot_range(self, range_data, legend=True, legend_loc='upper right'):
         """
         Plot the range of the histogram.
 
@@ -164,6 +168,26 @@ class AptHistPlotter:
                 self.plot_color_legend(loc=legend_loc)
         else:
             print('plot_range only works in plot_histogram mode=bar')
+
+    def change_peak_color(self, peak_loc, dx, color='red'):
+        """
+        Change the color of the peak.
+
+        Args:
+            peak_loc (float): The location of the peak.
+            dx (float): The width of the peak.
+            color (str): The color of the peak.
+
+        Returns:
+            None
+        """
+        bin_index = np.digitize([peak_loc], self.x) - 1
+        try:
+            self.ranged_line.remove()
+        except AttributeError:
+            pass
+        self.ranged_line = plt.axvline(x=peak_loc, color='red', linestyle='dashdot', linewidth=2,
+                                       ymax=self.y[bin_index])
 
     def plot_peaks(self, range_data=None, mode='peaks'):
         """
@@ -220,16 +244,21 @@ class AptHistPlotter:
         Returns:
             None
         """
+        # Adjust the layout
+        if len(self.legend_colors) > 5:
+            ncol = math.ceil(len(self.legend_colors) // 8)
         self.ax.legend([label[1] for label in self.legend_colors], [label[0] for label in self.legend_colors],
-                       loc=loc)
+                       loc=loc, ncol=ncol)
 
-    def plot_hist_info_legend(self, label='mc', bin=0.1, background=None, legend_mode='long', loc='left'):
+    def plot_hist_info_legend(self, label='mc', bin=0.1, mrp_all=False, background=None, legend_mode='long',
+                              loc='left'):
         """
         Plot the histogram information legend.
 
         Args:
             label (str): The label of the x-axis ('mc' or 'tof').
             bin (float): The width of the bins.
+            mrp_all (bool): Whether to calculate the MRP for 0.1 and 0.01 and 0.5
             background (dict): The background data.
             legend_mode (str): long or short legend info
             loc (str): The location of the legend.
@@ -237,18 +266,29 @@ class AptHistPlotter:
         Returns:
             None
         """
+        print(mrp_all)
         index_peak_max = np.argmax(self.prominences[0])
         if label == 'mc' or label == 'mc_c':
             mrp = '{:.2f}'.format(
                 self.x[self.peaks][index_peak_max] / (self.x[round(self.peak_widths[3][index_peak_max])] -
                                                       self.x[round(self.peak_widths[2][index_peak_max])]))
-
+            if mrp_all:
+                mrp_list = self.mrp_calculation()
             if background is not None:
-                if legend_mode == 'long':
-                    txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nFW%d%%M: %s' \
-                          % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp)
-                elif legend_mode == 'short':
-                    txt = 'MRP(FWHM): %s' % (mrp)
+                if mrp_all:
+                    if legend_mode == 'long':
+                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nFW%d%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
+                              % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp_list[0],
+                                 mrp_list[1], mrp_list[2])
+                    elif legend_mode == 'short':
+                        txt = 'MRP(FWHM): %s\nMRP(FW10M): %s\nMRP(FW1M): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
+
+                else:
+                    if legend_mode == 'long':
+                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nFW%d%%M: %s' \
+                              % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp)
+                    elif legend_mode == 'short':
+                        txt = 'MRP(FWHM): %s' % (mrp)
             else:
                 # annotation with range stats
                 upperLim = 4.5  # Da
@@ -256,22 +296,40 @@ class AptHistPlotter:
                 mask = np.logical_and((self.x >= lowerLim), (self.x <= upperLim))
                 BG4 = np.sum(self.y[np.array(mask[:-1])]) / (upperLim - lowerLim)
                 BG4 = BG4 / len(self.mc_tof) * 1E6
-                if legend_mode == 'long':
-                    txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nBG@4: %s ppm/Da\nFW%d%%M: %s' \
-                          % (bin, (len(self.mc_tof) / 1000000), round(BG4), self.percent, mrp)
-                elif legend_mode == 'short':
-                    txt = 'MRP(FWHM): %s' % (mrp)
+                if mrp_all:
+                    if legend_mode == 'long':
+                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$ \nBG@4: %s ppm/Da\nFW%d%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
+                              % (bin, len(self.mc_tof) / 1000000, round(BG4), self.percent, mrp_list[0], mrp_list[1],
+                                 mrp_list[2])
+                    elif legend_mode == 'short':
+                        txt = 'MRP(FWHM): %s\nMRP(FW10M): %s\nMRP(FW1M): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
+                else:
+                    if legend_mode == 'long':
+                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nBG@4: %s ppm/Da\nFW%d%%M: %s' \
+                              % (bin, (len(self.mc_tof) / 1000000), round(BG4), self.percent, mrp)
+                    elif legend_mode == 'short':
+                        txt = 'MRP(FWHM): %s' % (mrp)
 
         elif label == 'tof' or label == 'tof_c':
             mrp = '{:.2f}'.format(
                 self.x[self.peaks[index_peak_max]] / (self.x[round(self.peak_widths[3][index_peak_max])] -
                                                       self.x[round(self.peak_widths[2][index_peak_max])]))
+            if mrp_all:
+                mrp_list = self.mrp_calculation()
             if background is not None:
-                if legend_mode == 'long':
-                    txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nFW%d%%M: %s' \
-                          % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp)
-                elif legend_mode == 'short':
-                    txt = 'MRP(FWHM): %s' % (mrp)
+                if mrp_all:
+                    if legend_mode == 'long':
+                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nFW%d%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
+                              % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp_list[0],
+                                 mrp_list[1], mrp_list[2])
+                    elif legend_mode == 'short':
+                        txt = 'MRP(FWHM): %s\nMRP(FW10M): %s\nMRP(FW1M): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
+                else:
+                    if legend_mode == 'long':
+                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nFW%d%%M: %s' \
+                              % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp)
+                    elif legend_mode == 'short':
+                        txt = 'MRP(FWHM): %s' % (mrp)
             else:
                 # annotation with range stats
                 upperLim = 50.5  # ns
@@ -279,11 +337,19 @@ class AptHistPlotter:
                 mask = np.logical_and((self.x >= lowerLim), (self.x <= upperLim))
                 BG50 = np.sum(self.y[np.array(mask[:-1])]) / (upperLim - lowerLim)
                 BG50 = BG50 / len(self.mc_tof) * 1E6
-                if legend_mode == 'long':
-                    txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nBG@50: %s ppm/ns\nFW%d%%M: %s' \
-                          % (bin, len(self.mc_tof) / 1000000, round(BG50), self.percent, mrp)
-                elif legend_mode == 'short':
-                    txt = 'MRP(FWHM): %s' % (mrp)
+                if mrp_all:
+                    if legend_mode == 'long':
+                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nBG@50: %s ppm/ns\nFW%d%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
+                              % (bin, len(self.mc_tof) / 1000000, round(BG50), self.percent, mrp_list[0], mrp_list[1],
+                                 mrp_list[2])
+                    elif legend_mode == 'short':
+                        txt = 'MRP(FWHM): %s\nMRP(FW10M): %s\nMRP(FW1M): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
+                else:
+                    if legend_mode == 'long':
+                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nBG@50: %s ppm/ns\nFW%d%%M: %s' \
+                              % (bin, len(self.mc_tof) / 1000000, round(BG50), self.percent, mrp)
+                    elif legend_mode == 'short':
+                        txt = 'MRP(FWHM): %s' % (mrp)
 
         props = dict(boxstyle='round', facecolor='wheat', alpha=1)
         if loc == 'left':
@@ -319,7 +385,7 @@ class AptHistPlotter:
             index_peak_max = np.argmax(prominences[0])
             mrp_tmp = self.x[peaks][index_peak_max] / (self.x[round(peak_width[3][index_peak_max])] -
                                                        self.x[round(peak_width[2][index_peak_max])])
-            mrp.append(mrp_tmp)
+            mrp.append(round(mrp_tmp, 2))
 
         return mrp
 
@@ -621,9 +687,9 @@ class AptHistPlotter:
 
 
 def hist_plot(variables, bin_size, log, target, mode, prominence, distance, percent, selector, figname, lim,
-              peaks_find_plot, peaks_find=True, range_plot=False, plot_ranged_ions=False, ranging_mode=False,
-              range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[],
-              save_fig=True, print_info=True, draw_calib_rect=False, figure_size=(9, 5), plot_show=True):
+              peaks_find=True, peaks_find_plot=False, plot_ranged_peak=False, plot_ranged_colors=False, mrp_all=False,
+              ranging_mode=False, range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[],
+              range_z=[], save_fig=True, print_info=True, draw_calib_rect=False, figure_size=(9, 5), plot_show=True):
     """
     Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
     Args:
@@ -641,7 +707,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         peaks_find_plot (bool): Plot the peaks.
         range_plot (bool): Plot the range.
         plot_ranged_ions (str): Plot the ranged ions.
-        ranging_mode (bool): Ranging mode.
+        mrp_all (bool): Calculate the MRP for 0.1 and 0.01 and 0.5
         range_sequence (list): Range sequence.
         range_mc: Range of mc
         range_detx: Range of detx
@@ -657,6 +723,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         None
 
     """
+
     if target == 'mc':
         hist = variables.mc_calib
         label = 'mc'
@@ -708,7 +775,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
 
     hist = hist[mask]
 
-    if range_plot:
+    if plot_ranged_peak or plot_ranged_colors:
         steps = 'bar'
     else:
         steps = 'stepfilled'
@@ -724,30 +791,44 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
     # copy the mc_hist to variables to use the methods of that class in other functions
     variables.AptHistPlotter = mc_hist
 
-    if mode != 'normalized' and peaks_find and not range_plot and not ranging_mode:
+    if ranging_mode:
+        mc_hist.plot_peaks(range_data=None, mode='range')
+        peaks = None
+        peak_widths = None
+        prominences = None
+
+    elif mode != 'normalized' and peaks_find and not plot_ranged_peak and not plot_ranged_colors:
         peaks, properties, peak_widths, prominences = mc_hist.find_peaks_and_widths(prominence=prominence,
                                                                           distance=distance, percent=percent)
         if draw_calib_rect:
             mc_hist.draw_rectangle()
         if peaks_find_plot:
             mc_hist.plot_peaks()
-        mc_hist.plot_hist_info_legend(label=target, bin=0.1, background=None, legend_mode='long', loc='right')
-    elif ranging_mode:
-        mc_hist.plot_peaks(range_data=None, mode='range')
+        mc_hist.plot_hist_info_legend(label=target, bin=0.1, mrp_all=mrp_all, background=None, legend_mode='long',
+                                      loc='right')
+    elif plot_ranged_colors and not plot_ranged_peak:
+        mc_hist.plot_range(range_data=variables.range_data, legend=True, legend_loc='upper right')
+        mc_hist.adjust_labels()
         peaks = None
         peak_widths = None
         prominences = None
+    elif plot_ranged_peak and not plot_ranged_colors:
+        mc_hist.plot_peaks(range_data=variables.range_data, mode='peaks')
+        mc_hist.adjust_labels()
+        peaks, properties, peak_widths, prominences = mc_hist.find_peaks_and_widths(prominence=prominence,
+                                                                                    distance=distance, percent=percent)
+        mc_hist.plot_hist_info_legend(label=target, bin=0.1, mrp_all=mrp_all, background=None, legend_mode='long',
+                                      loc='right')
+
+    elif plot_ranged_colors and plot_ranged_peak:
+        print('Please select only one of the plot_ranged_peak and plot_ranged_colors')
+
     else:
         peaks = None
         peak_widths = None
         prominences = None
 
-    if plot_ranged_ions:
-        mc_hist.plot_peaks(range_data=variables.range_data, mode='peaks')
     mc_hist.selector(selector=selector)  # rect, peak_x, range
-    if range_plot:
-        mc_hist.plot_range(variables.range_data, legend=True, legend_loc='center right')
-        mc_hist.adjust_labels()
 
     if save_fig:
         mc_hist.save_fig(label=target, fig_name=figname)

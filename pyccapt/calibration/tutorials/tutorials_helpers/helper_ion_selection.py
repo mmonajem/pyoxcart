@@ -136,6 +136,10 @@ def call_ion_selection(variables):
 		description='change color',
 	)
 
+	change_row = widgets.Button(
+		description='change row',
+	)
+
 	color_picker = widgets.ColorPicker(description='Select a color:')
 	row_index = widgets.IntText(value=0, description='index row:')
 
@@ -237,6 +241,33 @@ def call_ion_selection(variables):
 	# Define button click events
 	start_button.on_click(lambda b: start_peak(b, variables))
 
+	change_row.on_click(lambda b: move_and_sort_dataframe(b, variables, row_index_source.value, row_index_dest.value,
+	                                                      output3))
+
+	row_index_source = widgets.IntText(value=0, description='Target index:')
+	row_index_dest = widgets.IntText(value=0, description='destination index:')
+
+	def move_and_sort_dataframe(b, variables, row_index, destination_index, output3):
+		# Check if the indices are valid
+		with output3:
+			if (row_index not in variables.range_data.index or destination_index < 0 or
+					destination_index >= len(variables.range_data.index)):
+				print("Invalid indices provided.")
+				return variables.range_data
+
+			# Move the row to the destination index
+			row_to_move = variables.range_data.loc[row_index]
+			variables.range_data = variables.range_data.drop(row_index)
+			variables.range_data = pd.concat([variables.range_data.iloc[:destination_index],
+			                                  pd.DataFrame([row_to_move]),
+			                                  variables.range_data.iloc[destination_index:]])
+
+			# Sort the DataFrame based on index
+			variables.range_data.reset_index(drop=True, inplace=True)
+			clear_output(True)
+			display(variables.range_data)
+
+
 	def start_peak(b, variables):
 		variables.h_line_pos = []
 		print('=============================')
@@ -251,6 +282,7 @@ def call_ion_selection(variables):
 		peak_val.value = variables.peaks_x_selected[variables.peaks_index]
 		print('peak idc:', variables.peaks_index, 'Peak location:', peak_val.value)
 		variables.AptHistPlotter.zoom_to_x_range(x_min=peak_val.value - 5, x_max=peak_val.value + 5, reset=False)
+		variables.AptHistPlotter.change_peak_color(peak_val.value, dx=0.2)
 
 	next_button.on_click(lambda b: next_peak(b, variables))
 
@@ -259,6 +291,7 @@ def call_ion_selection(variables):
 		peak_val.value = variables.peaks_x_selected[variables.peaks_index]
 		print('peak idc:', variables.peaks_index, 'Peak location:', peak_val.value)
 		variables.AptHistPlotter.zoom_to_x_range(x_min=peak_val.value - 5, x_max=peak_val.value + 5, reset=False)
+		variables.AptHistPlotter.change_peak_color(peak_val.value, dx=0.2)
 
 	prev_button.on_click(lambda b: prev_peak(b, variables))
 
@@ -267,6 +300,7 @@ def call_ion_selection(variables):
 		peak_val.value = variables.peaks_x_selected[variables.peaks_index]
 		print('peak idc:', variables.peaks_index, 'Peak location:', peak_val.value)
 		variables.AptHistPlotter.zoom_to_x_range(x_min=peak_val.value - 5, x_max=peak_val.value + 5, reset=False)
+		variables.AptHistPlotter.change_peak_color(peak_val.value, dx=0.2)
 
 	reset_zoom_button.on_click(lambda b: rest_h_line(b, variables))
 
@@ -285,9 +319,11 @@ def call_ion_selection(variables):
 	tab4 = widgets.VBox(children=[widgets.HBox(children=[widgets.VBox(
 		children=[peak_val, charge, aboundance_threshold, mass_difference, num_element, formula_com, complexity,
 		          find_elem_button, plot_element]),
+		widgets.VBox(children=[formula_m, molecule_charge, formula_button]),
 		widgets.VBox(children=[row_index, color_picker, add_ion_button, romove_ion_button,
 		                       show_color, change_color]),
-		widgets.VBox(children=[formula_m, molecule_charge, formula_button])])])
+		widgets.VBox(children=[row_index_source, row_index_dest, change_row])
+	])])
 
 	tabs1 = widgets.Tab(children=[tab1, tab2])
 	tabs2 = widgets.Tab(children=[tab4])

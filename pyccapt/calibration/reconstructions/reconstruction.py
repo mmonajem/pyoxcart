@@ -28,7 +28,7 @@ def cart2pol(x, y):
         float: rho, the radial distance from the origin.
         float: phi, the angle in radians.
     """
-    rho = np.sqrt(x ** 2 + y ** 2)
+    rho = np.hypot(x, y)
     phi = np.arctan2(y, x)
     return rho, phi
 
@@ -82,7 +82,7 @@ def atom_probe_recons_from_detector_Gault_et_al(detx, dety, hv, flight_path_leng
     # Calculate launch angle relative to specimen axis
     theta_p = np.arctan(rad / (flight_path_length * 1E-3))
 
-    # Calculate theta normal
+    # Calculate theta normal (image compression correction)
     theta_a = theta_p + np.arcsin((icf - 1) * np.sin(theta_p))
 
     # Convert polar coordinates to Cartesian coordinates
@@ -124,8 +124,8 @@ def atom_probe_recons_Bas_et_al(detx, dety, hv, flight_path_length, kf, det_eff,
         float: y-coordinates of reconstructed atom positions in nm.
         float: z-coordinates of reconstructed atom positions in nm.
     """
-    radius_evolution = hv / (icf * (field_evap / 1E-9))
-    m = (flight_path_length * 1E-3) / (kf * radius_evolution)
+    radius_evolution = hv / (kf * (field_evap / 1E-9))
+    m = (flight_path_length * 1E-3) / (icf * radius_evolution)
 
     x = (detx * 1E-2) / m
     y = (dety * 1E-2) / m
@@ -275,12 +275,11 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     mc_up = variables.range_data['mc_up'].tolist()
     ion = variables.range_data['ion'].tolist()
 
-    # Draw an edge of cube around the 3D plot in blue
+    # Draw an edge of cube around the 3D plot
     x_range = [min(variables.x), max(variables.x)]
     y_range = [min(variables.y), max(variables.y)]
     z_range = [min(variables.z), max(variables.z)]
     range_cube = [x_range, y_range, z_range]
-
 
     # Create a subplots with shared axes
     if ions_individually_plots:
@@ -1082,5 +1081,4 @@ def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, 
     variables.x = px
     variables.y = py
     variables.z = pz
-    reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save,
-                        selected_area_specially=False, selected_area_temporally=False, ions_individually_plots=False)
+    reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save)
