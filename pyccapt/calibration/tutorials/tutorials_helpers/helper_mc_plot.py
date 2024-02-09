@@ -68,7 +68,7 @@ def call_mc_plot(variables, selector):
                                               percent=percent_value)
                 if plot_peak.value:
                     mc_hist.plot_peaks()
-                mc_hist.plot_hist_info_legend(label='mc', bin=0.1, background=None, loc='right')
+                mc_hist.plot_hist_info_legend(label='mc', background=None, loc='right')
 
             mc_hist.selector(selector=selector)  # rect, peak_x, range
             if save.value:

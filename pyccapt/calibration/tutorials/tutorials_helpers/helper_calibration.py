@@ -97,7 +97,7 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
             mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value, mode='normal',
                               prominence=prominence.value, distance=distance.value, percent=percent.value,
                               selector='rect', figname=index_fig.value, lim=lim_tof.value, save_fig=save.value,
-                              peaks_find_plot=plot_peak.value, draw_calib_rect=True, print_info=False,
+                              peaks_find_plot=plot_peak.value, draw_calib_rect=True, print_info=True, mrp_all=True,
                               figure_size=figure_size)
         plot_button.disabled = False
 
@@ -139,7 +139,7 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
         layout=label_layout
     )
     maximum_sample_method_v = widgets.Dropdown(
-        options=[('mean', 'mean'), ('histogram', 'histogram'), ('median', 'median')],
+        options=[('histogram', 'histogram'), ('mean', 'mean'), ('median', 'median')],
         description='sample max:',
         layout=label_layout
     )
@@ -189,7 +189,7 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
         vol_button.disabled = False
 
     # Create a button widget to bowl correction function
-    sample_size_b = int(det_diam.value / 4)
+    sample_size_b = int(det_diam.value / 8)
     # Check if the rounded number is even
     if sample_size_b % 2 == 0:
         # If even, adjust to the nearest odd number
@@ -207,7 +207,7 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
         layout=label_layout
     )
     maximum_sample_method_b = widgets.Dropdown(
-        options=[('mean', 'mean'), ('histogram', 'histogram')],
+        options=[('histogram', 'histogram'), ('mean', 'mean')],
         description='sample max:',
         layout=label_layout
     )
