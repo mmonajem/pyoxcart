@@ -123,7 +123,7 @@ class Variables:
         self.dld_t_calib = np.zeros(0)
         self.dld_t_calib_backup = np.zeros(0)
         self.mc = np.zeros(0)
-        self.mc_c = np.zeros(0)
+        self.mc_uc = np.zeros(0)
         self.mc_calib = np.zeros(0)
         self.mc_calib_backup = np.zeros(0)
         self.max_peak = 0

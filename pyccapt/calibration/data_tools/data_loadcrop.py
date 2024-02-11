@@ -262,7 +262,7 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
             print(variables.dld_x_det)
             mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
         if range_mc:
-            mask_mc = (variables.mc_c < range_mc[1]) & (variables.mc_c > range_mc[0])
+            mask_mc = (variables.mc_uc < range_mc[1]) & (variables.mc_uc > range_mc[0])
         else:
             mask_mc = np.ones(len(variables.mc), dtype=bool)
         if range_x and range_y and range_z:

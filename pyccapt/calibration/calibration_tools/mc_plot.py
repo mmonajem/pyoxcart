@@ -721,12 +721,11 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         None
 
     """
-
     if target == 'mc':
         hist = variables.mc_calib
         label = 'mc'
-    elif target == 'mc_c':
-        hist = variables.mc_c
+    elif target == 'mc_uc':
+        hist = variables.mc_uc
         label = 'mc'
     elif target == 'tof':
         hist = variables.dld_t_calib
@@ -752,7 +751,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         else:
             mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
         if range_mc:
-            mask_mc = (variables.mc_c < range_mc[1]) & (variables.mc_c > range_mc[0])
+            mask_mc = (variables.mc_uc < range_mc[1]) & (variables.mc_uc > range_mc[0])
         else:
             mask_mc = np.ones(len(variables.mc), dtype=bool)
         if range_x and range_y and range_z:

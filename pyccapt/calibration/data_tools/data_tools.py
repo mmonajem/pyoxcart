@@ -180,7 +180,7 @@ def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, cs
 
     """
     if temp:
-	    data_name = variables.result_data_name + '_temp'
+        data_name = variables.result_data_name + '_temp'
     else:
         data_name = variables.result_data_name
     if hdf:
@@ -253,12 +253,12 @@ def extract_data(data, variables, flightPathLength_d, max_mc):
     variables.dld_y_det = data['y_det (cm)'].to_numpy()
     if 'mc (Da)' in data.columns:
         variables.mc = data['mc (Da)'].to_numpy()
-        variables.mc_calib = data['mc (Da)'].to_numpy()
-        variables.mc_calib_backup = data['mc (Da)'].to_numpy()
     if 't_c (ns)' in data.columns:
         variables.dld_t_c = data['t_c (ns)'].to_numpy()
-    if 'mc_c (Da)' in data.columns:
-        variables.mc_c = data['mc_c (Da)'].to_numpy()
+    if 'mc_uc (Da)' in data.columns:
+        variables.mc_calib = data['mc_uc (Da)'].to_numpy()
+        variables.mc_calib_backup = data['mc_uc (Da)'].to_numpy()
+        variables.mc_uc = data['mc_uc (Da)'].to_numpy()
 
     # Calculate the maximum possible time of flight (TOF)
     variables.max_tof = int(tof_tools.mc2tof(max_mc, 1000, 0, 0, flightPathLength_d))
