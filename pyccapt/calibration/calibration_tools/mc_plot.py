@@ -250,14 +250,13 @@ class AptHistPlotter:
         self.ax.legend([label[1] for label in self.legend_colors], [label[0] for label in self.legend_colors],
                        loc=loc, ncol=ncol)
 
-    def plot_hist_info_legend(self, label='mc', bin=0.1, mrp_all=False, background=None, legend_mode='long',
+    def plot_hist_info_legend(self, label='mc', mrp_all=False, background=None, legend_mode='long',
                               loc='left'):
         """
         Plot the histogram information legend.
 
         Args:
             label (str): The label of the x-axis ('mc' or 'tof').
-            bin (float): The width of the bins.
             mrp_all (bool): Whether to calculate the MRP for 0.1 and 0.01 and 0.5
             background (dict): The background data.
             legend_mode (str): long or short legend info
@@ -266,7 +265,6 @@ class AptHistPlotter:
         Returns:
             None
         """
-        print(mrp_all)
         index_peak_max = np.argmax(self.prominences[0])
         if label == 'mc' or label == 'mc_c':
             mrp = '{:.2f}'.format(
@@ -277,8 +275,8 @@ class AptHistPlotter:
             if background is not None:
                 if mrp_all:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nFW%d%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
-                              % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp_list[0],
+                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
+                              % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp_list[0],
                                  mrp_list[1], mrp_list[2])
                     elif legend_mode == 'short':
                         txt = 'MRP(FWHM): %s\nMRP(FW10M): %s\nMRP(FW1M): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
@@ -286,7 +284,7 @@ class AptHistPlotter:
                 else:
                     if legend_mode == 'long':
                         txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nFW%d%%M: %s' \
-                              % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp)
+                              % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp)
                     elif legend_mode == 'short':
                         txt = 'MRP(FWHM): %s' % (mrp)
             else:
@@ -298,15 +296,15 @@ class AptHistPlotter:
                 BG4 = BG4 / len(self.mc_tof) * 1E6
                 if mrp_all:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$ \nBG@4: %s ppm/Da\nFW%d%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
-                              % (bin, len(self.mc_tof) / 1000000, round(BG4), self.percent, mrp_list[0], mrp_list[1],
+                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$ \nBG@4: %s ppm/Da\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
+                              % (self.bin_width, len(self.mc_tof) / 1000000, round(BG4), mrp_list[0], mrp_list[1],
                                  mrp_list[2])
                     elif legend_mode == 'short':
                         txt = 'MRP(FWHM): %s\nMRP(FW10M): %s\nMRP(FW1M): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
                 else:
                     if legend_mode == 'long':
                         txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nBG@4: %s ppm/Da\nFW%d%%M: %s' \
-                              % (bin, (len(self.mc_tof) / 1000000), round(BG4), self.percent, mrp)
+                              % (self.bin_width, (len(self.mc_tof) / 1000000), round(BG4), self.percent, mrp)
                     elif legend_mode == 'short':
                         txt = 'MRP(FWHM): %s' % (mrp)
 
@@ -319,15 +317,15 @@ class AptHistPlotter:
             if background is not None:
                 if mrp_all:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nFW%d%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
-                              % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp_list[0],
+                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
+                              % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp_list[0],
                                  mrp_list[1], mrp_list[2])
                     elif legend_mode == 'short':
                         txt = 'MRP(FWHM): %s\nMRP(FW10M): %s\nMRP(FW1M): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
                 else:
                     if legend_mode == 'long':
                         txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nFW%d%%M: %s' \
-                              % (bin, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp)
+                              % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp)
                     elif legend_mode == 'short':
                         txt = 'MRP(FWHM): %s' % (mrp)
             else:
@@ -339,15 +337,15 @@ class AptHistPlotter:
                 BG50 = BG50 / len(self.mc_tof) * 1E6
                 if mrp_all:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nBG@50: %s ppm/ns\nFW%d%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
-                              % (bin, len(self.mc_tof) / 1000000, round(BG50), self.percent, mrp_list[0], mrp_list[1],
+                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nBG@50: %s ppm/ns\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
+                              % (self.bin_width, len(self.mc_tof) / 1000000, round(BG50), mrp_list[0], mrp_list[1],
                                  mrp_list[2])
                     elif legend_mode == 'short':
                         txt = 'MRP(FWHM): %s\nMRP(FW10M): %s\nMRP(FW1M): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
                 else:
                     if legend_mode == 'long':
                         txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nBG@50: %s ppm/ns\nFW%d%%M: %s' \
-                              % (bin, len(self.mc_tof) / 1000000, round(BG50), self.percent, mrp)
+                              % (self.bin_width, len(self.mc_tof) / 1000000, round(BG50), self.percent, mrp)
                     elif legend_mode == 'short':
                         txt = 'MRP(FWHM): %s' % (mrp)
 
@@ -804,7 +802,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
             mc_hist.draw_rectangle()
         if peaks_find_plot:
             mc_hist.plot_peaks()
-        mc_hist.plot_hist_info_legend(label=target, bin=0.1, mrp_all=mrp_all, background=None, legend_mode='long',
+        mc_hist.plot_hist_info_legend(label=target, mrp_all=mrp_all, background=None, legend_mode='long',
                                       loc='right')
     elif plot_ranged_colors and not plot_ranged_peak:
         mc_hist.plot_range(range_data=variables.range_data, legend=True, legend_loc='upper right')
@@ -837,7 +835,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         index_max_ini = np.argmax(prominences[0])
         mrp = x[int(peaks[index_max_ini])] / (
                 x[round(peak_widths[3][index_max_ini])] - x[round(peak_widths[2][index_max_ini])])
-        print('Mass resolving power for the highest peak_x at peak_x index %a (MRP --> m/m_2-m_1):' % index_max_ini,
+        print('Mass resolving power for the highest peak at index %a (MRP --> m/m_2-m_1):' % index_max_ini,
               mrp)
         for i in range(len(peaks)):
             print('Peaks ', i + 1,
