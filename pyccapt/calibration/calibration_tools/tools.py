@@ -353,7 +353,7 @@ def mc_hist_plot(variables, bin_size, mode, prominence, distance, percent, selec
         hist = variables.mc_calib
         label = 'mc'
     elif mode == 'mc_c':
-        hist = variables.mc_c
+        hist = variables.mc_uc
         label = 'mc'
     elif mode == 'tof':
         hist = variables.dld_t_calib

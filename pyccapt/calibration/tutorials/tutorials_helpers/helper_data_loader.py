@@ -92,15 +92,21 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc, variables
 
 
 def add_columns(variables, max_mc):
-	variables.data.drop(['x (nm)', 'y (nm)', 'z (nm)', 'mc (Da)', 'mc_c (Da)', 't_c (ns)'], axis=1, errors='ignore',
-	                    inplace=True)
 
-	variables.data.insert(0, 'x (nm)', np.zeros(len(variables.dld_t)))
-	variables.data.insert(1, 'y (nm)', np.zeros(len(variables.dld_t)))
-	variables.data.insert(2, 'z (nm)', np.zeros(len(variables.dld_t)))
-	variables.data.insert(3, 'mc_c (Da)', np.zeros(len(variables.dld_t)))
-	variables.data.insert(4, 'mc (Da)', variables.mc)
-	variables.data.insert(8, 't_c (ns)', np.zeros(len(variables.dld_t)))
+	if 'x (nm)' not in variables.data:
+		variables.data.insert(0, 'x (nm)', np.zeros(len(variables.dld_t)))
+	if 'y (nm)' not in variables.data:
+		variables.data.insert(1, 'y (nm)', np.zeros(len(variables.dld_t)))
+	if 'z (nm)' not in variables.data:
+		variables.data.insert(2, 'z (nm)', np.zeros(len(variables.dld_t)))
+	if 'mc (Da)' not in variables.data:
+		variables.data.insert(4, 'mc (Da)', np.zeros(len(variables.dld_t)))
+	if 'mc_uc (Da)' not in variables.data:
+		variables.data.insert(5, 'mc_uc (Da)', variables.mc_uc)
+	else:
+		variables.data['mc_uc (Da)'] = variables.mc_uc
+	if 't_c (ns)' not in variables.data:
+		variables.data.insert(8, 't_c (ns)', np.zeros(len(variables.dld_t)))
 
 	# Remove the data with mc biger than max mc
 	mask = (variables.data['mc (Da)'].to_numpy() > max_mc.value)

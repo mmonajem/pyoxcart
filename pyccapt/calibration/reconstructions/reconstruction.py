@@ -244,7 +244,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         else:
             mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
         if range_mc:
-            mask_mc = (variables.mc_c < range_mc[1]) & (variables.mc_c > range_mc[0])
+            mask_mc = (variables.mc_uc < range_mc[1]) & (variables.mc_uc > range_mc[0])
         else:
             mask_mc = np.ones(len(variables.mc), dtype=bool)
         if range_x and range_y and range_z:
@@ -297,7 +297,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
                 index = col + row * 3
                 if index == len(ion):
                     break
-                mask = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
+                mask = (variables.mc_uc > mc_low[index]) & (variables.mc_uc < mc_up[index])
                 mask = mask & mask_f
                 size = int(len(mask[mask == True]) * float(element_percentage[index]))
                 # Find indices where the original mask is True
@@ -330,7 +330,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     else:
         fig = go.Figure()
         for index, elemen in enumerate(ion):
-            mask = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
+            mask = (variables.mc_uc > mc_low[index]) & (variables.mc_uc < mc_up[index])
             mask = mask & mask_f
             size = int(len(mask[mask == True]) * float(element_percentage[index]))
             # Find indices where the original mask is True
@@ -673,7 +673,7 @@ def projection(variables, element_percentage, range_sequence=[], range_mc=[], ra
         else:
             mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
         if range_mc:
-            mask_mc = (variables.mc_c < range_mc[1]) & (variables.mc_c > range_mc[0])
+            mask_mc = (variables.mc_uc < range_mc[1]) & (variables.mc_uc > range_mc[0])
         else:
             mask_mc = np.ones(len(variables.mc), dtype=bool)
         if range_x and range_y and range_z:
@@ -690,7 +690,7 @@ def projection(variables, element_percentage, range_sequence=[], range_mc=[], ra
         print('The number of data 3d:', len(mask_3d[mask_3d == True]))
         print('The number of data after cropping:', len(mask[mask == True]))
     else:
-        mask = np.ones(len(variables.mc_c), dtype=bool)
+        mask = np.ones(len(variables.mc_uc), dtype=bool)
 
 
     ions = variables.range_data['ion'].tolist()
@@ -706,7 +706,7 @@ def projection(variables, element_percentage, range_sequence=[], range_mc=[], ra
 
 
     for index, elemen in enumerate(ions):
-        mask_spacial = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
+        mask_spacial = (variables.mc_uc > mc_low[index]) & (variables.mc_uc < mc_up[index])
         mask = mask & mask_spacial
         size = int(len(mask[mask == True]) * float(element_percentage[index]))
         # Find indices where the original mask is True
@@ -787,7 +787,7 @@ def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range
         else:
             mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
         if range_mc:
-            mask_mc = (variables.mc_c < range_mc[1]) & (variables.mc_c > range_mc[0])
+            mask_mc = (variables.mc_uc < range_mc[1]) & (variables.mc_uc > range_mc[0])
         else:
             mask_mc = np.ones(len(variables.mc), dtype=bool)
         if range_x and range_y and range_z:
@@ -804,7 +804,7 @@ def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range
         print('The number of data 3d:', len(mask_3d[mask_3d == True]))
         print('The number of data after cropping:', len(mask[mask == True]))
     else:
-        mask = np.ones(len(variables.mc_c), dtype=bool)
+        mask = np.ones(len(variables.mc_uc), dtype=bool)
 
 
     ions = variables.range_data['ion'].tolist()
@@ -818,7 +818,7 @@ def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range
         print('element_percentage should be a list')
 
     for index, elemen in enumerate(ions):
-        mask_spacial = (variables.mc_c > mc_low[index]) & (variables.mc_c < mc_up[index])
+        mask_spacial = (variables.mc_uc > mc_low[index]) & (variables.mc_uc < mc_up[index])
         mask = mask & mask_spacial
         size = int(len(mask[mask == True]) * float(element_percentage[index]))
         # Find indices where the original mask is True
@@ -894,7 +894,7 @@ def reconstruction_2d_histogram(variables, x, y, bins, percentage, range_sequenc
         else:
             mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
         if range_mc:
-            mask_mc = (variables.mc_c < range_mc[1]) & (variables.mc_c > range_mc[0])
+            mask_mc = (variables.mc_uc < range_mc[1]) & (variables.mc_uc > range_mc[0])
         else:
             mask_mc = np.ones(len(variables.mc), dtype=bool)
         if range_x and range_y and range_z:
@@ -911,7 +911,7 @@ def reconstruction_2d_histogram(variables, x, y, bins, percentage, range_sequenc
         print('The number of data 3d:', len(mask_3d[mask_3d == True]))
         print('The number of data after cropping:', len(mask[mask == True]))
     else:
-        mask = np.ones(len(variables.mc_c), dtype=bool)
+        mask = np.ones(len(variables.mc_uc), dtype=bool)
 
     x = x[mask]
     y = y[mask]
@@ -1017,7 +1017,7 @@ def detector_animation(variables, points_per_frame, ranged, selected_area_specia
         ax.clear()
         start_idx = frame * points_per_frame
         end_idx = (frame + 1) * points_per_frame
-        mc = variables.mc_c[start_idx:end_idx]
+        mc = variables.mc_uc[start_idx:end_idx]
         for index, elemen in enumerate(ions):
             mask = (mc > mc_low[index]) & (mc < mc_up[index])
             mask = mask & mask_spacial[start_idx:end_idx]

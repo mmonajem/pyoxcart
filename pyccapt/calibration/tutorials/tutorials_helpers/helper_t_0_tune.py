@@ -12,6 +12,7 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
 
     # Define widgets for fine_tune_t_0 function
     t0_d_widget = widgets.FloatText(value=t0.value)
+    flightPathLength = widgets.FloatText(value=flightPathLength.value)
     bin_size_widget = widgets.FloatText(value=0.1)
     log_widget = widgets.Dropdown(options=[('True', True), ('False', False)])
     mode_widget = widgets.Dropdown(options=[('normal', 'normal'), ('normalized', 'normalized')])
@@ -36,6 +37,7 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
 
         # Get the values from the widgets
         t0_d_value = t0_d_widget.value
+        flightPathLength_value = flightPathLength.value
         bin_size_value = bin_size_widget.value
         log_value = log_widget.value
         mode_value = mode_widget.value
@@ -49,11 +51,11 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
             out.clear_output()  # Clear any previous output
             # Call the function
             figure_size = (figure_size_x.value, figure_size_y.value)
-            variables.mc = mc_tools.tof2mc(variables.dld_t, t0_d_value, variables.dld_high_voltage,
-                                                 variables.dld_x_det, variables.dld_y_det, flightPathLength.value,
+            variables.mc_uc = mc_tools.tof2mc(variables.dld_t, t0_d_value, variables.dld_high_voltage,
+                                                 variables.dld_x_det, variables.dld_y_det, flightPathLength_value,
                                                  variables.dld_pulse, mode=pulse_mode.value)
             if target_value == 'mc':
-                mc_hist = mc_plot.AptHistPlotter(variables.mc[variables.mc < lim_value], variables)
+                mc_hist = mc_plot.AptHistPlotter(variables.mc_uc[variables.mc_uc < lim_value], variables)
                 mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='mc', steps='stepfilled',
                                        log=log_value, fig_size=figure_size)
             elif target_value == 'tof':
@@ -78,6 +80,7 @@ def call_fine_tune_t_0(variables, flightPathLength, pulse_mode, t0):
 
     widget_container = widgets.VBox([
         widgets.HBox([widgets.Label(value="t0:", layout=label_layout), t0_d_widget]),
+        widgets.HBox([widgets.Label(value="Flight Path Length:", layout=label_layout), flightPathLength]),
         widgets.HBox([widgets.Label(value="Bin Size:", layout=label_layout), bin_size_widget]),
         widgets.HBox([widgets.Label(value="Log:", layout=label_layout), log_widget]),
         widgets.HBox([widgets.Label(value="Mode:", layout=label_layout), mode_widget]),

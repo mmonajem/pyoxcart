@@ -1,6 +1,11 @@
 import re
 import sys
-
+from enum import Enum
+from typing import Union, Tuple, Any
+import numpy as np
+import pandas as pd
+import struct
+from warnings import warn
 import matplotlib.colors as cols
 from vispy import app, scene
 
@@ -58,14 +63,14 @@ def read_epos(file_path):
         'TOF (ns)': d[4::11],
         'HV_DC (V)': d[5::11],
         'pulse (V)': d[6::11],
-        'det_x (cm)': d[7::11],
-        'det_y (cm)': d[8::11],
+        'det_x (mm)': d[7::11],
+        'det_y (mm)': d[8::11],
         'pslep': d[9::11],
         'ipp': d[10::11]
     })
     # Convert the units from mm to cm
-    epos['det_x (cm)'] = epos['det_x (cm)'] / 10
-    epos['det_y (cm)'] = epos['det_y (cm)'] / 10
+    epos['det_x (cm)'] = epos['det_x (cm)']
+    epos['det_y (cm)'] = epos['det_y (cm)']
     return epos
 
 
@@ -295,12 +300,7 @@ def volvis(pos, size=2, alpha=1):
         app.run()
 
 
-from enum import Enum
-from typing import Union, Tuple, Any
-import numpy as np
-import pandas as pd
-import struct
-from warnings import warn
+
 
 
 class RelType(Enum):
