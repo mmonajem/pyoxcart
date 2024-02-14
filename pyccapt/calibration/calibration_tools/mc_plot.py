@@ -722,17 +722,23 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
 
     """
     if target == 'mc':
-        hist = variables.mc_calib
+        hist = variables.mc
         label = 'mc'
     elif target == 'mc_uc':
         hist = variables.mc_uc
         label = 'mc'
     elif target == 'tof':
-        hist = variables.dld_t_calib
+        hist = variables.dld_t
         label = 'tof'
     elif target == 'tof_c':
         hist = variables.dld_t_c
         label = 'tof'
+    elif target == 'tof_calib':
+        hist = variables.dld_t_calib
+        label = 'tof'
+    elif target == 'mc_calib':
+        hist = variables.mc_calib
+        label = 'mc'
     if selector == 'peak':
         variables.peaks_x_selected = []
         variables.peak_widths = []
@@ -776,14 +782,10 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         steps = 'bar'
     else:
         steps = 'stepfilled'
-    if target == 'mc' or target == 'mc_c':
-        mc_hist = AptHistPlotter(hist[hist < lim], variables)
-        y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log,
-                                      fig_size=figure_size, plot_show=plot_show)
-    elif target == 'tof' or target == 'tof_c':
-        mc_hist = AptHistPlotter(hist[hist < lim], variables)
-        y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log,
-                                      fig_size=figure_size, plot_show=plot_show)
+
+    mc_hist = AptHistPlotter(hist[hist < lim], variables)
+    y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log,
+                                  fig_size=figure_size, plot_show=plot_show)
 
     # copy the mc_hist to variables to use the methods of that class in other functions
     variables.AptHistPlotter = mc_hist
@@ -801,7 +803,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
             mc_hist.draw_rectangle()
         if peaks_find_plot:
             mc_hist.plot_peaks()
-        mc_hist.plot_hist_info_legend(label=target, mrp_all=mrp_all, background=None, legend_mode='long',
+        mc_hist.plot_hist_info_legend(label=label, mrp_all=mrp_all, background=None, legend_mode='long',
                                       loc='right')
     elif plot_ranged_colors and not plot_ranged_peak:
         mc_hist.plot_range(range_data=variables.range_data, legend=True, legend_loc='upper right')
@@ -814,7 +816,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         mc_hist.adjust_labels()
         peaks, properties, peak_widths, prominences = mc_hist.find_peaks_and_widths(prominence=prominence,
                                                                                     distance=distance, percent=percent)
-        mc_hist.plot_hist_info_legend(label=target, bin=0.1, mrp_all=mrp_all, background=None, legend_mode='long',
+        mc_hist.plot_hist_info_legend(label=label, bin=0.1, mrp_all=mrp_all, background=None, legend_mode='long',
                                       loc='right')
 
     elif plot_ranged_colors and plot_ranged_peak:
@@ -828,7 +830,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
     mc_hist.selector(selector=selector)  # rect, peak_x, range
 
     if save_fig:
-        mc_hist.save_fig(label=target, fig_name=figname)
+        mc_hist.save_fig(label=label, fig_name=figname)
 
     if peaks is not None and print_info:
         index_max_ini = np.argmax(prominences[0])

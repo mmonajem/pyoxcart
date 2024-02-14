@@ -1,15 +1,14 @@
+import multiprocessing
 from copy import copy
 from itertools import product
+from math import ceil
+
 import matplotlib.pyplot as plt
 import numpy as np
-import multiprocessing
-from math import ceil
 from matplotlib import rcParams, colors
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
-from sklearn.cluster import KMeans
-from sklearn.cluster import DBSCAN
-from sklearn.cluster import HDBSCAN
+from sklearn.cluster import KMeans, DBSCAN
 
 
 def cluster_tof(dld_highVoltage_peak, dld_t_peak, calibration_mode, num_cluster, plot=True, fig_size=(5, 5)):
@@ -257,10 +256,10 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
         # Use DBSCAN to cluster the data
         num_cores = multiprocessing.cpu_count()
         half_cores = max(1, ceil(num_cores / 2))
-        # dbscan = DBSCAN(eps=1, min_samples=5, n_jobs=half_cores)
-        # labels = dbscan.fit_predict(data)
-        hdbscan = HDBSCAN(min_cluster_size=10, min_samples=10, n_jobs=half_cores)
-        labels = hdbscan.fit_predict(data)
+        dbscan = DBSCAN(eps=1, min_samples=5, n_jobs=half_cores)
+        labels = dbscan.fit_predict(data)
+        # hdbscan = HDBSCAN(min_cluster_size=10, min_samples=10, n_jobs=half_cores)
+        # labels = hdbscan.fit_predict(data)
         noise_mask = labels == -1  # Points labeled as noise
         if plot or save:
             # Plot how correction factor for selected peak_x

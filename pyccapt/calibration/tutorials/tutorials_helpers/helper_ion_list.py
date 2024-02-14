@@ -89,7 +89,7 @@ def call_ion_list(variables, selector, calibration_mode):
     def parametric_fit(variables, calibration_mode, out_mc):
         button_fit.disabled = True
         peaks_chos = np.array(variables.peaks_x_selected)
-        if calibration_mode.value == 'tof':
+        if calibration_mode.value == 'tof_calib':
             def parametric(t, t0, c, d):
                 return c * ((t - t0) ** 2) + d * t
 
@@ -101,7 +101,7 @@ def call_ion_list(variables, selector, calibration_mode):
 
             variables.mc_calib = parametric(variables.dld_t_calib, *fitresult)
 
-        elif calibration_mode.value == 'mc':
+        elif calibration_mode.value == 'mc_calib':
             def shift(mc, a, b, c):
                 return mc ** a + b * mc + c
                 # return a * mc + b
@@ -167,11 +167,11 @@ def call_ion_list(variables, selector, calibration_mode):
         with out_mc:  # Capture the output within the 'out' widget
             out_mc.clear_output()  # Clear any previous output
             # Call the function
-            if target_value == 'mc':
+            if target_value == 'mc_calib':
                 mc_hist = mc_plot.AptHistPlotter(variables.mc_calib[variables.mc_calib < lim_value], variables)
                 mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='mc', steps='stepfilled',
                                        log=log_value, fig_size=figure_size)
-            elif target_value == 'tof':
+            elif target_value == 'tof_calib':
                 mc_hist = mc_plot.AptHistPlotter(variables.dld_t_calib[variables.dld_t_calib < lim_value], variables)
                 mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='tof', steps='stepfilled',
                                        log=log_value, fig_size=figure_size)

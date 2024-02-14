@@ -13,6 +13,7 @@ def call_mc_plot(variables, selector):
     log_widget = widgets.Dropdown(options=[('True', True), ('False', False)])
     grid_widget = widgets.Dropdown(options=[('True', True), ('False', False)])
     mode_widget = widgets.Dropdown(options=[('normal', 'normal'), ('normalized', 'normalized')])
+    mrp_all_widget = widgets.Dropdown(options=[('True', True), ('False', False)])
     prominence_widget = widgets.IntText(value=10)
     distance_widget = widgets.IntText(value=100)
     lim_widget = widgets.IntText(value=10000)
@@ -20,7 +21,7 @@ def call_mc_plot(variables, selector):
     figname_widget = widgets.Text(value='hist')
     figure_mc_size_x = widgets.FloatText(value=9.0)
     figure_mc_size_y = widgets.FloatText(value=5.0)
-    target_mode = widgets.Dropdown(options=[('mc_c', 'mc_c'), ('tof_c', 'tof_c'), ('mc', 'mc'), ('tof', 'tof')])
+    target_mode = widgets.Dropdown(options=[('mc', 'mc'), ('tof', 'tof'), ('mc_uc', 'mc_uc'), ('tof_c', 'tof_c')])
     plot_peak = widgets.Dropdown(options=[('True', True), ('False', False)])
     save = widgets.Dropdown(options=[('False', False), ('True', True)])
 
@@ -46,29 +47,23 @@ def call_mc_plot(variables, selector):
         with out:  # Capture the output within the 'out' widget
             out.clear_output()  # Clear any previous output
             # Call the function
-            if target_value == 'mc_c':
-                mc_hist = mc_plot.AptHistPlotter(variables.mc_calib[variables.mc_calib < lim_value], variables)
-                mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='mc', steps='stepfilled',
-                                       log=log_value, grid=grid_value, fig_size=figure_size)
+            if target_value == 'mc_uc':
+                hist = variables.data['mc_uc (Da)']
             elif target_value == 'tof_c':
-                mc_hist = mc_plot.AptHistPlotter(variables.dld_t_calib[variables.dld_t_calib < lim_value], variables)
-                mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='tof', steps='stepfilled',
-                                       log=log_value, fig_size=figure_size)
+                hist = variables.data['t_c (ns)']
             elif target_value == 'mc':
-                mc_hist = mc_plot.AptHistPlotter(variables.mc[variables.mc < lim_value], variables)
-                mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='mc', steps='stepfilled',
-                                       log=log_value, fig_size=figure_size)
+                hist = variables.data['mc (Da)']
             elif target_value == 'tof':
-                mc_hist = mc_plot.AptHistPlotter(variables.dld_t[variables.dld_t < lim_value], variables)
-                mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='tof', steps='stepfilled',
-                                       log=log_value, fig_size=figure_size)
-
+                hist = variables.data['t (ns)']
+            mc_hist = mc_plot.AptHistPlotter(hist[hist < lim_value], variables)
+            mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='mc', steps='stepfilled',
+                                   log=log_value, grid=grid_value, fig_size=figure_size)
             if mode_value != 'normalized':
                 mc_hist.find_peaks_and_widths(prominence=prominence_value, distance=distance_value,
                                               percent=percent_value)
                 if plot_peak.value:
                     mc_hist.plot_peaks()
-                mc_hist.plot_hist_info_legend(label='mc', background=None, loc='right')
+                mc_hist.plot_hist_info_legend(label='mc', mrp_all=mrp_all_widget.value, background=None, loc='right')
 
             mc_hist.selector(selector=selector)  # rect, peak_x, range
             if save.value:
@@ -89,6 +84,7 @@ def call_mc_plot(variables, selector):
         widgets.HBox([widgets.Label(value="Distance:", layout=label_layout), distance_widget]),
         widgets.HBox([widgets.Label(value="Lim:", layout=label_layout), lim_widget]),
         widgets.HBox([widgets.Label(value="Percent:", layout=label_layout), percent_widget]),
+        widgets.HBox([widgets.Label(value="MRP all:", layout=label_layout), mrp_all_widget]),
         widgets.HBox([widgets.Label(value="Plot peak:", layout=label_layout), plot_peak]),
         widgets.HBox([widgets.Label(value="Save:", layout=label_layout), save]),
         widgets.HBox([widgets.Label(value="Fig name:", layout=label_layout), figname_widget]),

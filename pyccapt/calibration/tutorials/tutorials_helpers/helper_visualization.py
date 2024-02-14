@@ -47,7 +47,7 @@ def call_visualization(variables):
     peaks_find = widgets.Dropdown(options=[('True', True), ('False', False)])
     plot_ranged_colors = widgets.Dropdown(options=[('False', False), ('True', True)])
     plot_ranged_peak = widgets.Dropdown(options=[('False', False), ('True', True)])
-    target_mode = widgets.Dropdown(options=[('mc_c', 'mc_c'), ('tof_c', 'tof_c'), ('mc', 'mc'), ('tof', 'tof')])
+    target_mode = widgets.Dropdown(options=[('mc', 'mc'), ('mc_uc', 'mc_uc'), ('tof_c', 'tof_c'), ('tof', 'tof')])
     bin_size_pm = widgets.FloatText(value=0.1)
     lim_mc_pm = widgets.IntText(value=150)
     prominence = widgets.IntText(value=50)

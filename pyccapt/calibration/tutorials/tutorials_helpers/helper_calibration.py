@@ -9,14 +9,18 @@ from pyccapt.calibration.calibration_tools import calibration, mc_plot
 label_layout = widgets.Layout(width='300px')
 
 
-def reset_back_on_click(variables):
-    variables.dld_t_calib = np.copy(variables.dld_t_calib_backup)
-    variables.mc_calib = np.copy(variables.mc_calib_backup)
+def reset_back_on_click(variables, calibration_mode):
+    if calibration_mode.value == 'tof_calib':
+        variables.dld_t_calib = np.copy(variables.dld_t_calib_backup)
+    elif calibration_mode.value == 'mc_calib':
+        variables.mc_calib = np.copy(variables.mc_calib_backup)
 
 
-
-def save_on_click(variables):
-    variables.dld_t_calib_backup = np.copy(variables.dld_t_calib)
+def save_on_click(variables, calibration_mode):
+    if calibration_mode.value == 'tof_calib':
+        variables.dld_t_calib_backup = np.copy(variables.dld_t_calib)
+    elif calibration_mode.value == 'mc_calib':
+        variables.mc_calib_backup = np.copy(variables.mc_calib)
 
 
 def clear_plot_on_click(out):
@@ -61,9 +65,9 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
     clear_plot = widgets.Button(description="clear plots", layout=label_layout)
 
     plot_button.on_click(lambda b: hist_plot(b, variables, out, calibration_mode))
-    plot_stat_button.on_click(lambda b: stat_plot(b, variables, out))
-    reset_back_button.on_click(lambda b: reset_back_on_click(variables))
-    save_button.on_click(lambda b: save_on_click(variables))
+    plot_stat_button.on_click(lambda b: stat_plot(b, variables, calibration_mode, out))
+    reset_back_button.on_click(lambda b: reset_back_on_click(variables, calibration_mode))
+    save_button.on_click(lambda b: save_on_click(variables, calibration_mode))
     vol_button.on_click(lambda b: vol_correction(b, variables, out, out_status, calibration_mode))
     bowl_button.on_click(lambda b: bowl_correction(b, variables, out, out_status, calibration_mode))
     clear_plot.on_click(lambda b: clear_plot_on_click(out))
@@ -104,12 +108,12 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
     plot_button.click()
 
     # Create a button widget to voltage correction function
-    if calibration_mode.value == 'tof':
+    if calibration_mode.value == 'tof_calib':
         mask_temporal = np.logical_and(
             (variables.dld_t_calib > variables.selected_x1),
             (variables.dld_t_calib < variables.selected_x2)
         )
-    elif calibration_mode.value == 'mc':
+    elif calibration_mode.value == 'mc_calib':
         mask_temporal = np.logical_and(
             (variables.mc_calib > variables.selected_x1),
             (variables.mc_calib < variables.selected_x2)
@@ -177,8 +181,12 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
                     maximum_cal_method_p = maximum_cal_method_v.value
                     maximum_sample_method_p = maximum_sample_method_v.value
                     noise_remove_p = noise_remove_v.value
+                    if calibration_mode.value == 'tof_calib':
+                        caliration_mode_t = 'tof'
+                    elif calibration_mode.value == 'mc_calib':
+                        caliration_mode_t = 'mc'
                     calibration.voltage_corr_main(variables.dld_high_voltage, variables, sample_size=sample_size_p,
-                                                  calibration_mode=calibration_mode.value,
+                                                  calibration_mode=caliration_mode_t,
                                                   index_fig=index_fig_p, plot=plot_p, save=save_p,
                                                   apply_local=apply_v.value, mode=mode_p,
                                                   maximum_cal_method=maximum_cal_method_p,
@@ -248,6 +256,10 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
                 maximum_cal_method_p = maximum_cal_method_b.value
                 maximum_sample_method_p = maximum_sample_method_b.value
                 figure_size = (figure_b_size_x.value, figure_b_size_y.value)
+                if calibration_mode.value == 'tof_calib':
+                    calibration_mode_t = 'tof'
+                elif calibration_mode.value == 'mc_calib':
+                    calibration_mode_t = 'mc'
                 with out:
                     print('------------------Bowl Calibration---------------------')
                     calibration.bowl_correction_main(variables.dld_x_det, variables.dld_y_det,
@@ -257,17 +269,21 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
                                                      maximum_cal_method=maximum_cal_method_p,
                                                      maximum_sample_method=maximum_sample_method_p,
                                                      apply_local=apply_b.value, fig_size=figure_size,
-                                                     calibration_mode=calibration_mode.value, index_fig=index_fig_p,
+                                                     calibration_mode=calibration_mode_t, index_fig=index_fig_p,
                                                      plot=plot_p, save=save_p)
 
             pb_bowl.value = "<b>Finished</b>"
         bowl_button.disabled = False
 
-    def stat_plot(b, variables, out):
+    def stat_plot(b, variables, calibration_mode, out):
+        if calibration_mode.value == 'tof_calib':
+            calibration_mode_t = 'tof'
+        elif calibration_mode.value == 'mc_calib':
+            calibration_mode_t = 'mc'
         with out:
             clear_output(True)
-            calibration.plot_selected_statistic(variables, bin_fdm.value, index_fig.value, calibration_mode='tof',
-                                                save=True)
+            calibration.plot_selected_statistic(variables, bin_fdm.value, index_fig.value,
+                                                calibration_mode=calibration_mode_t, save=True)
 
     def automatic_calibration(b, variables, out, out_status, calibration_mode):
 
