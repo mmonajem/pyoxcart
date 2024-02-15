@@ -22,6 +22,6 @@ def gui_fname(initial_directory):
     chosen_file = fname[0]
 
     if chosen_file:
-	    return chosen_file
+        return chosen_file
     else:
-	    return None
+        return None
