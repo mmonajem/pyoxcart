@@ -48,6 +48,7 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc, variables
 		if tdc == 'pyccapt' and mode == 'raw':
 			# Remove the data with tof greater than Max TOF or below 0 ns
 			data = data_tools.remove_invalid_data(dld_group_storage, max_tof)
+			data = data_tools.pyccapt_raw_to_processed(data)
 		else:
 			data = dld_group_storage
 

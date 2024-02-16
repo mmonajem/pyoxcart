@@ -192,15 +192,17 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
             label = 'mc'
 
         x = plt.scatter(np.array(high_voltage_mean_list) / 1000, np.array(dld_t_peak_list) * maximum_location,
-                        color="blue", label=label, s=1)
+                        color="forestgreen", label=r"$%s_{wp}$" % label, s=3)
         ax1.set_xlabel("Voltage (kV)", fontsize=10)
         plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
 
         ax2 = ax1.twinx()
         f_v = voltage_corr(np.array(high_voltage_mean_list), *fitresult)
-        y = ax2.plot(np.array(high_voltage_mean_list) / 1000, f_v, color='r', label=r"$C_V$", linewidth=0.5)
-        ax2.set_ylabel(r"$C_V$", color="red", fontsize=10)
-        plt.legend(handles=[x, y[0]], loc='lower left', markerscale=5., prop={'size': 6})
+        y = ax2.plot(np.array(high_voltage_mean_list) / 1000, f_v, color='r', label=r"$C_V$")
+        ax2.set_ylabel(r"$C_V$", color="red", fontsize=10)  # Get the current axis
+        ax2.tick_params(axis='y', colors='red')  # Change color and thickness of tick labels on y-axis
+        ax2.spines['right'].set_color('red')  # Change color of right border
+        plt.legend(handles=[x, y[0]], loc='lower left', markerscale=5., prop={'size': 10})
 
         if save:
             # Enable rendering for text elements
@@ -362,12 +364,14 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
 
         y = ax2.plot(dld_highVoltage_peak_v / 1000, 1 / f_v_plot, color='r', label=r"$C_{V}^{-1}$")
         ax2.set_ylabel(r"$C_{V}^{-1}$", color="red", fontsize=10)
+        ax2.tick_params(axis='y', colors='red')  # Change color and thickness of tick labels on y-axis
+        ax2.spines['right'].set_color('red')  # Change color of right border
         plt.legend(handles=[x, y[0]], loc='upper left', markerscale=5., prop={'size': 10})
 
         if save:
             # Enable rendering for text elements
             rcParams['svg.fonttype'] = 'none'
-            plt.savefig(variables.result_path + "//vol_corr_%s.eps" % index_fig, format="svg", dpi=600)
+            plt.savefig(variables.result_path + "//vol_corr_%s.svg" % index_fig, format="svg", dpi=600)
             plt.savefig(variables.result_path + "//vol_corr_%s.png" % index_fig, format="png", dpi=600)
         plt.show()
 
@@ -393,33 +397,6 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
             rcParams['svg.fonttype'] = 'none'
             plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.svg" % index_fig, format="svg", dpi=600)
             plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.png" % index_fig, format="png", dpi=600)
-        if plot:
-            plt.show()
-
-    if plot or save:
-        # Plot corrected tof/mc vs. uncalibrated tof/mc
-        fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
-        mask = np.random.randint(0, len(dld_highVoltage_peak_v), 1000)
-        x = plt.scatter(dld_highVoltage_peak_v[mask] / 1000, dld_peak_b[mask], color="blue", label='t', s=1)
-        if calibration_mode == 'tof':
-            ax1.set_ylabel("Time of Flight (ns)", fontsize=10)
-        elif calibration_mode == 'mc':
-            ax1.set_ylabel("mc (Da)", fontsize=10)
-        ax1.set_xlabel("Voltage (kV)", fontsize=10)
-        plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
-
-        dld_t_plot = dld_peak_b * (1 / f_v_list_plot)
-
-        y = plt.scatter(dld_highVoltage_peak_v[mask] / 1000, dld_t_plot[mask], color="red", label=r"$t_{C_{V}}$", s=1)
-
-        plt.legend(handles=[x, y], loc='upper right', markerscale=5., prop={'size': 10})
-
-        if save:
-            # Enable rendering for text elements
-            rcParams['svg.fonttype'] = 'none'
-            plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.svg" % index_fig, format="svg", dpi=600)
-            plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.png" % index_fig, format="png", dpi=600)
-
         if plot:
             plt.show()
 
@@ -467,7 +444,7 @@ def hemisphere_corr(data_xy, a, b, c, r):
 
 
 def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, maximum_location, sample_range_max,
-                    sample_size, fit_mode, index_fig, plot, save, fig_size=(7, 5)):
+                    sample_size, calibration_mode, fit_mode, index_fig, plot, save, fig_size=(7, 5)):
     """
     Perform bowl correction on the input data.
 
@@ -479,6 +456,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         maximum_location (float): Maximum location for normalization.
         sample_range_max (str, optional): Sample range maximum ('mean' or 'histogram').
         sample_size (int): Size of each sample.
+        calibration_mode (str): Calibration mode ('tof' or 'mc').
         fit_mode (str): Fit mode ('curve_fit' or 'hemisphere_fit').
         index_fig (int): Index for figure naming.
         plot (bool): Flag indicating whether to plot the surface.
@@ -539,8 +517,12 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         print('The cx, cy, r, c0 are:', parameters)
 
     if plot or save:
-        model_x_data = np.linspace(-35, 35, 30)
-        model_y_data = np.linspace(-35, 35, 30)
+        if calibration_mode == 'tof':
+            label = 't'
+        elif calibration_mode == 'mc':
+            label = 'mc'
+        model_x_data = np.array(x_sample_list)
+        model_y_data = np.array(y_sample_list)
         X, Y = np.meshgrid(model_x_data, model_y_data)
         if fit_mode == 'curve_fit':
             Z = bowl_corr(np.array([X, Y]), *parameters)
@@ -548,14 +530,22 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
             Z = hemisphere_corr(np.array([X, Y]), *parameters)
 
         fig, ax = plt.subplots(figsize=fig_size, subplot_kw=dict(projection="3d"), constrained_layout=True)
+        print('The shape of the data is:', X.shape, Y.shape, Z.shape)
+        print('the shape ofmodel data is:', model_x_data.shape, model_y_data.shape)
+        scat = ax.scatter(model_x_data, model_y_data, zs=1 / np.array(dld_t_peak_list), color="forestgreen",
+                          label=r"$%s_{wp}$" % label, s=3)
         fig.add_axes(ax)
         cmap = copy(plt.cm.plasma)
         cmap.set_bad(cmap(0))
-        ax.plot_surface(X, Y, 1 / Z, cmap=cmap)
+        surf = ax.plot_surface(X, Y, 1 / Z, color='red', alpha=0.05, label='bowl')
         ax.set_xlabel(r'$X_{det}$ (mm)', fontsize=10, labelpad=10)
         ax.set_ylabel(r'$Y_{det}$ (mm)', fontsize=10, labelpad=10)
-        ax.set_zlabel(r"${C_B}^{-1}$", fontsize=10, labelpad=5)
+        ax.set_zlabel(r"${C_B}^{-1}$", fontsize=10, labelpad=5, color='red')
         ax.zaxis.set_major_formatter(plt.FormatStrFormatter('%.2f'))
+        ax.zaxis.line.set_color('red')
+        # Change z-axis tick label color
+        for tick in ax.get_zaxis().get_ticklabels():
+            tick.set_color('red')
         ax.view_init(elev=7, azim=-41)
 
         if save:
@@ -635,8 +625,8 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
 
     print('The mean of tof  before bowl calibration is:', np.mean(dld_peak))
     parameters = bowl_correction(dld_x_peak, dld_y_peak, dld_peak, variables, det_diam, maximum_location,
-                                 maximum_sample_method, sample_size=sample_size, fit_mode=fit_mode, index_fig=index_fig,
-                                 plot=plot, save=save, fig_size=fig_size)
+                                 maximum_sample_method, sample_size=sample_size, calibration_mode=calibration_mode,
+                                 fit_mode=fit_mode, index_fig=index_fig, plot=plot, save=save, fig_size=fig_size)
     print('The fit result is:', parameters)
 
     if apply_local == 'all':

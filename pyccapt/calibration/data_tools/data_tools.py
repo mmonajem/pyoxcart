@@ -132,7 +132,7 @@ def remove_invalid_data(dld_group_storage, max_tof):
     # Create a mask for data with TOF values greater than max_tof
     mask_1 = dld_group_storage['t (ns)'].to_numpy() > max_tof
 
-    mask_2 = (dld_group_storage['t (ns)'].to_numpy() < 0)
+    mask_2 = (dld_group_storage['t (ns)'].to_numpy() < 50)  # Remove data with TOF values less than 50 ns
 
     mask_3 = ((dld_group_storage['x_det (cm)'].to_numpy() == 0) & (dld_group_storage['y_det (cm)'].to_numpy() == 0) &
               (dld_group_storage['t (ns)'].to_numpy() == 0))
@@ -269,7 +269,37 @@ def extract_data(data, variables, flightPathLength_d, max_mc):
         variables.x = data['x (nm)'].to_numpy()
         variables.y = data['y (nm)'].to_numpy()
         variables.z = data['z (nm)'].to_numpy()
-    print('The maximum time of flight:', variables.max_tof)
+    print('The maximum possible time of flight is:', variables.max_tof)
     # ion_distance = np.sqrt(flightPathLength_d**2 + (variables.dld_x_det*10)**2 + (variables.dld_y_det*10)**2)
     # ion_distance = flightPathLength_d / ion_distance
     # variables.dld_t = variables.dld_t * ion_distance
+
+
+def pyccapt_raw_to_processed(data):
+    """
+    process the raw data
+
+    Args:
+        data (pandas.DataFrame): DataFrame containing the data.
+    Returns:
+        data (pandas.DataFrame): DataFrame containing the processed data.
+
+    """
+    # create pandas an empty dataframe
+    data_processed = pd.DataFrame()
+    data_processed['x (nm)'] = np.zeros(len(data))
+    data_processed['y (nm)'] = np.zeros(len(data))
+    data_processed['z (nm)'] = np.zeros(len(data))
+    data_processed['mc (Da)'] = np.zeros(len(data))
+    data_processed['mc_uc (Da)'] = np.zeros(len(data))
+    data_processed['high_voltage (V)'] = data['high_voltage (V)'].to_numpy()
+    data_processed['pulse'] = data['pulse'].to_numpy()
+    data_processed['t (ns)'] = data['t (ns)'].to_numpy()
+    data_processed['t_c (ns)'] = np.zeros(len(data))
+    data_processed['x_det (cm)'] = data['x_det (cm)'].to_numpy()
+    data_processed['y_det (cm)'] = data['y_det (cm)'].to_numpy()
+    data_processed['pulse_pi'] = np.zeros(len(data))
+    data_processed['ion_pp'] = np.zeros(len(data))
+    data_processed['start_counter'] = data['start_counter'].to_numpy()
+
+    return data_processed

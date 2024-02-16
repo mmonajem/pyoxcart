@@ -33,7 +33,7 @@ def call_ion_selection(variables):
 			clear_output(True)
 			# clear the peak_idx
 			variables.peaks_idx = []
-			mc_plot.hist_plot(variables, bin_size.value, log=True, target='mc_c', mode='normal',
+			mc_plot.hist_plot(variables, bin_size.value, log=True, target='mc', mode='normal',
 			                  prominence=prominence.value, distance=distance.value, percent=percent.value,
 			                  selector='peak', figname=index_fig.value, lim=lim_tof.value,
 			                  peaks_find_plot=plot_peak.value, print_info=False, save_fig=save_fig.value)
