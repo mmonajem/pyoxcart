@@ -330,7 +330,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     else:
         fig = go.Figure()
         for index, elemen in enumerate(ion):
-            mask = (variables.mc_uc > mc_low[index]) & (variables.mc_uc < mc_up[index])
+            mask = (variables.mc > mc_low[index]) & (variables.mc < mc_up[index])
             mask = mask & mask_f
             size = int(len(mask[mask == True]) * float(element_percentage[index]))
             # Find indices where the original mask is True

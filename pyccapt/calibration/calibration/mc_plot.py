@@ -247,6 +247,8 @@ class AptHistPlotter:
         # Adjust the layout
         if len(self.legend_colors) > 5:
             ncol = math.ceil(len(self.legend_colors) // 8)
+        else:
+            ncol = 1
         self.ax.legend([label[1] for label in self.legend_colors], [label[0] for label in self.legend_colors],
                        loc=loc, ncol=ncol)
 
