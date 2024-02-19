@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from os.path import exists
+
+from setuptools import setup, find_packages
+
+try:
+    from pyccapt import version
+except BaseException:
+    version = "0.0.35"
+
+common_deps = [
+    "numpy",
+    "matplotlib",
+    "pandas",
+    "PyQt6",
+    "networkx",
+    "numba",
+    "requests",
+    "wget",
+    "h5py",
+    "tables",
+    "deepdiff",
+]
+
+control_deps = [
+    "opencv-python",
+    "pyqt6-tools",
+    "pyqtgraph",
+    "nidaqmx",
+    "pypylon",
+    "pyvisa",
+    "pyserial",
+    "deepdiff",
+    "scipy",
+    "mcculw",
+]
+
+setup(
+    name='pyccapt',
+    author=u"Mehrpad Monajem",
+    author_email='mehrpad.monajem@fau.de',
+    url='https://github.com/mmonajem/pyccapt',
+    version=version,
+    entry_points={
+            'console_scripts': {
+                'pyccapt=pyccapt.control.__main__:main',
+                }
+    },
+    data_files=[('my_data', ['./tests/data'])],
+    packages=find_packages(),
+    license="GPL v3",
+    description='A package for controlling APT experiment',
+    install_requires=common_deps + control_deps,
+    # not to be confused with definitions in pyproject.toml [build-system]
+    setup_requires=["pytest-runner"],
+    python_requires=">=3.9",
+    tests_require=["pytest", "pytest-mock"],
+    keywords=[],
+    classifiers=['Operating System :: Microsoft :: Windows',
+                 'Programming Language :: Python :: 3',
+                 'Topic :: Scientific/Engineering :: Visualization',
+                 'Intended Audience :: Science/Research',
+                 ],
+    platforms=['ALL'],
+)
