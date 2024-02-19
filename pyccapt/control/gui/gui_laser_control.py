@@ -8,7 +8,7 @@ from PyQt6.QtCore import QThread
 from PyQt6.QtGui import QPixmap
 
 # Local module and scripts
-from pyccapt.control.control_tools import share_variables, read_files
+from pyccapt.control.control import share_variables, read_files
 from pyccapt.control.nkt_photonics import origamiClassCLI
 
 

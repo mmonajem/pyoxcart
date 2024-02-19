@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 
-from pyccapt.calibration.calibration_tools import share_variables
+from pyccapt.calibration.calibration import share_variables
 from pyccapt.calibration.data_tools import data_tools
 from pyccapt.calibration.mc import tof_tools
 

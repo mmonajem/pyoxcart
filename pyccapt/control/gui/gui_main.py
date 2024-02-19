@@ -9,7 +9,7 @@ from PyQt6.QtCore import Qt
 
 # Local module and scripts
 from pyccapt.control.apt import apt_exp_control
-from pyccapt.control.control_tools import share_variables, read_files
+from pyccapt.control.control import share_variables, read_files
 from pyccapt.control.gui import gui_baking, gui_cameras, gui_gates, gui_laser_control, gui_pumps_vacuum, \
 	gui_stage_control, gui_visualization
 

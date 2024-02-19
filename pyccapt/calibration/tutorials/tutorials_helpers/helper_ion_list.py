@@ -6,7 +6,7 @@ from IPython.display import clear_output, display
 from ipywidgets import Output
 from scipy.optimize import curve_fit
 
-from pyccapt.calibration.calibration_tools import mc_plot, widgets as wd
+from pyccapt.calibration.calibration import mc_plot, widgets as wd
 from pyccapt.calibration.data_tools import data_tools
 
 # Define a layout for labels to make them a fixed width

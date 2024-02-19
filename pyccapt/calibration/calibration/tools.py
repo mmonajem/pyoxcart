@@ -7,7 +7,7 @@ from pybaselines import Baseline
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks, peak_widths
 
-from pyccapt.calibration.calibration_tools import intractive_point_identification
+from pyccapt.calibration.calibration import intractive_point_identification
 from pyccapt.calibration.data_tools import data_loadcrop, plot_vline_draw, selectors_data
 
 

@@ -5,7 +5,7 @@ import time
 
 import serial.tools.list_ports
 
-from pyccapt.control.control_tools import experiment_statistics, hdf5_creator, loggi
+from pyccapt.control.control import experiment_statistics, hdf5_creator, loggi
 from pyccapt.control.devices import email_send, initialize_devices, signal_generator
 from pyccapt.control.drs import drs
 from pyccapt.control.tdc_roentdek import tdc_roentdek

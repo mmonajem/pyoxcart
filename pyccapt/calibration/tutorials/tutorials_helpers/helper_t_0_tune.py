@@ -2,7 +2,7 @@ import ipywidgets as widgets
 from IPython.display import display
 from ipywidgets import Output
 
-from pyccapt.calibration.calibration_tools import mc_plot
+from pyccapt.calibration.calibration import mc_plot
 from pyccapt.calibration.mc import mc_tools
 
 # Define a layout for labels to make them a fixed width

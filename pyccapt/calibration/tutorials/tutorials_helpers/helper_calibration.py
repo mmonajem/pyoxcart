@@ -3,7 +3,7 @@ import numpy as np
 from IPython.display import display, clear_output
 from ipywidgets import Output
 
-from pyccapt.calibration.calibration_tools import calibration, mc_plot
+from pyccapt.calibration.calibration import calibration, mc_plot
 
 # Define a layout for labels to make them a fixed width
 label_layout = widgets.Layout(width='300px')

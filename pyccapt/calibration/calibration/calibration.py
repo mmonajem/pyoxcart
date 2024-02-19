@@ -119,8 +119,8 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
                     max_peak = peaks[index_peak_max_ini]
                     dld_t_peak_list.append(x[max_peak] / maximum_location)
 
-                    mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - 0.2)
-                                            , (dld_t_peak_selected <= x[max_peak] + 0.2))
+                    mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - 0.1)
+                                            , (dld_t_peak_selected <= x[max_peak] + 0.1))
                     high_voltage_mean_list.append(np.mean(dld_highVoltage_peak_selected[mask_v]))
                 except ValueError:
                     print('cannot find the maximum')
@@ -133,7 +133,6 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
                 dld_t_mean = np.mean(dld_t_peak_selected)
                 dld_t_peak_list.append(dld_t_mean / maximum_location)
                 high_voltage_mean = np.mean(dld_highVoltage_peak_selected)
-                high_voltage_mean_list.append(high_voltage_mean)
             elif sample_range_max == 'median':
                 dld_t_mean = np.median(dld_t_peak_selected)
                 dld_t_peak_list.append(dld_t_mean / maximum_location)

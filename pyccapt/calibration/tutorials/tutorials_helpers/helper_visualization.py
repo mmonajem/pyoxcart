@@ -7,7 +7,7 @@ import numpy as np
 from IPython.display import display, clear_output, HTML
 from ipywidgets import Output
 
-from pyccapt.calibration.calibration_tools import mc_plot, ion_selection
+from pyccapt.calibration.calibration import mc_plot, ion_selection
 from pyccapt.calibration.data_tools import data_loadcrop
 from pyccapt.calibration.reconstructions import reconstruction, sdm, rdf
 

@@ -10,7 +10,7 @@ from PyQt6.QtCore import pyqtSignal, QObject
 from PyQt6.QtGui import QPixmap
 
 # Local module and scripts
-from pyccapt.control.control_tools import share_variables, read_files
+from pyccapt.control.control import share_variables, read_files
 from pyccapt.control.devices import camera
 from pyccapt.control.usb_switch import usb_switch
 
