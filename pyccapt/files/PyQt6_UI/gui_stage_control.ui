@@ -6,160 +6,381 @@
             <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>226</width>
-                <height>166</height>
+                <width>636</width>
+                <height>161</height>
             </rect>
         </property>
         <property name="windowTitle">
             <string>Form</string>
         </property>
-        <layout class="QGridLayout" name="gridLayout_4">
+        <layout class="QGridLayout" name="gridLayout_5">
             <item row="0" column="0">
                 <layout class="QGridLayout" name="gridLayout_3">
                     <item row="0" column="0">
-                        <layout class="QGridLayout" name="gridLayout_2">
+                        <layout class="QGridLayout" name="gridLayout_4">
                             <item row="0" column="0">
-                                <widget class="QPushButton" name="forward">
-                                    <property name="styleSheet">
-                                        <string notr="true">QPushButton {
-                                            border: none;
-                                            background-image: url('arrow.png');
-                                            background-repeat: no-repeat;
-                                            background-position: center;
-                                            background-color: transparent;
-                                            width: 40px;
-                                            height: 40px;
-                                            }
-                                        </string>
+                                <widget class="QLabel" name="label_19">
+                                    <property name="font">
+                                        <font>
+                                            <bold>true</bold>
+                                        </font>
                                     </property>
                                     <property name="text">
-                                        <string>Forward</string>
+                                        <string>x</string>
                                     </property>
                                 </widget>
                             </item>
                             <item row="0" column="1">
-                                <widget class="QPushButton" name="left">
+                                <widget class="QLCDNumber" name="stage_x_cord"/>
+                            </item>
+                            <item row="1" column="0">
+                                <widget class="QLabel" name="label_17">
+                                    <property name="font">
+                                        <font>
+                                            <bold>true</bold>
+                                        </font>
+                                    </property>
+                                    <property name="text">
+                                        <string>y</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item row="1" column="1">
+                                <widget class="QLCDNumber" name="stage_y_cord"/>
+                            </item>
+                            <item row="2" column="0">
+                                <widget class="QLabel" name="label_18">
+                                    <property name="font">
+                                        <font>
+                                            <bold>true</bold>
+                                        </font>
+                                    </property>
+                                    <property name="text">
+                                        <string>z</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item row="2" column="1">
+                                <widget class="QLCDNumber" name="stage_z_cord"/>
+                            </item>
+                        </layout>
+                    </item>
+                    <item row="0" column="1">
+                        <layout class="QGridLayout" name="gridLayout_2">
+                            <item row="0" column="0">
+                                <widget class="QLabel" name="label_14">
+                                    <property name="font">
+                                        <font>
+                                            <bold>true</bold>
+                                        </font>
+                                    </property>
+                                    <property name="text">
+                                        <string>Speed L/R</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item row="0" column="1">
+                                <widget class="QDoubleSpinBox" name="stage_speed_lr">
                                     <property name="styleSheet">
-                                        <string notr="true">QPushButton {
-                                            border: none;
-                                            background-image: url('arrow.png');
-                                            background-repeat: no-repeat;
-                                            background-position: center;
-                                            background-color: transparent;
-                                            width: 40px;
-                                            height: 40px;
+                                        <string notr="true">QDoubleSpinBox{
+                                            background: rgb(223,223,233)
                                             }
                                         </string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item row="1" column="0">
+                                <widget class="QLabel" name="label_15">
+                                    <property name="font">
+                                        <font>
+                                            <bold>true</bold>
+                                        </font>
+                                    </property>
+                                    <property name="text">
+                                        <string>Speed U/D</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item row="1" column="1">
+                                <widget class="QDoubleSpinBox" name="stage_speed_ud">
+                                    <property name="styleSheet">
+                                        <string notr="true">QDoubleSpinBox{
+                                            background: rgb(223,223,233)
+                                            }
+                                        </string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item row="2" column="0">
+                                <widget class="QLabel" name="label_16">
+                                    <property name="font">
+                                        <font>
+                                            <bold>true</bold>
+                                        </font>
+                                    </property>
+                                    <property name="text">
+                                        <string>Speed F/B</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item row="2" column="1">
+                                <widget class="QDoubleSpinBox" name="stage_speed_fb">
+                                    <property name="styleSheet">
+                                        <string notr="true">QDoubleSpinBox{
+                                            background: rgb(223,223,233)
+                                            }
+                                        </string>
+                                    </property>
+                                </widget>
+                            </item>
+                        </layout>
+                    </item>
+                    <item row="0" column="2">
+                        <layout class="QGridLayout" name="gridLayout">
+                            <item row="0" column="0">
+                                <spacer name="horizontalSpacer_2">
+                                    <property name="orientation">
+                                        <enum>Qt::Horizontal</enum>
+                                    </property>
+                                    <property name="sizeHint" stdset="0">
+                                        <size>
+                                            <width>40</width>
+                                            <height>20</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                            </item>
+                            <item row="0" column="1">
+                                <widget class="QPushButton" name="stage_up">
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>25</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>16777215</width>
+                                            <height>16777215</height>
+                                        </size>
+                                    </property>
+                                    <property name="styleSheet">
+                                        <string notr="true"/>
+                                    </property>
+                                    <property name="text">
+                                        <string>up</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item row="0" column="2">
+                                <spacer name="horizontalSpacer">
+                                    <property name="orientation">
+                                        <enum>Qt::Horizontal</enum>
+                                    </property>
+                                    <property name="sizeHint" stdset="0">
+                                        <size>
+                                            <width>40</width>
+                                            <height>20</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                            </item>
+                            <item row="1" column="0">
+                                <widget class="QPushButton" name="stage_left">
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>25</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>16777215</width>
+                                            <height>16777215</height>
+                                        </size>
+                                    </property>
+                                    <property name="styleSheet">
+                                        <string notr="true"/>
                                     </property>
                                     <property name="text">
                                         <string>Left</string>
                                     </property>
                                 </widget>
                             </item>
-                            <item row="0" column="2">
-                                <widget class="QPushButton" name="up">
-                                    <property name="styleSheet">
-                                        <string notr="true">QPushButton {
-                                            border: none;
-                                            background-image: url('arrow.png');
-                                            background-repeat: no-repeat;
-                                            background-position: center;
-                                            background-color: transparent;
-                                            width: 40px;
-                                            height: 40px;
-                                            }
-                                        </string>
-                                    </property>
-                                    <property name="text">
-                                        <string>Up</string>
-                                    </property>
-                                </widget>
-                            </item>
-                            <item row="1" column="0">
-                                <widget class="QPushButton" name="back">
-                                    <property name="styleSheet">
-                                        <string notr="true">QPushButton {
-                                            border: none;
-                                            background-image: url('arrow.png');
-                                            background-repeat: no-repeat;
-                                            background-position: center;
-                                            background-color: transparent;
-                                            width: 40px;
-                                            height: 40px;
-                                            }
-                                        </string>
-                                    </property>
-                                    <property name="text">
-                                        <string>Back</string>
-                                    </property>
-                                </widget>
-                            </item>
                             <item row="1" column="1">
-                                <widget class="QPushButton" name="right">
+                                <spacer name="horizontalSpacer_5">
+                                    <property name="orientation">
+                                        <enum>Qt::Horizontal</enum>
+                                    </property>
+                                    <property name="sizeHint" stdset="0">
+                                        <size>
+                                            <width>40</width>
+                                            <height>20</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                            </item>
+                            <item row="1" column="2">
+                                <widget class="QPushButton" name="stage_right">
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>25</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>16777215</width>
+                                            <height>16777215</height>
+                                        </size>
+                                    </property>
                                     <property name="styleSheet">
-                                        <string notr="true">QPushButton {
-                                            border: none;
-                                            background-image: url('arrow.png');
-                                            background-repeat: no-repeat;
-                                            background-position: center;
-                                            background-color: transparent;
-                                            width: 40px;
-                                            height: 40px;
-                                            }
-                                        </string>
+                                        <string notr="true"/>
                                     </property>
                                     <property name="text">
                                         <string>Right</string>
                                     </property>
                                 </widget>
                             </item>
-                            <item row="1" column="2">
-                                <widget class="QPushButton" name="down">
+                            <item row="2" column="0">
+                                <spacer name="horizontalSpacer_3">
+                                    <property name="orientation">
+                                        <enum>Qt::Horizontal</enum>
+                                    </property>
+                                    <property name="sizeHint" stdset="0">
+                                        <size>
+                                            <width>40</width>
+                                            <height>20</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                            </item>
+                            <item row="2" column="1">
+                                <widget class="QPushButton" name="stage_down">
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>50</width>
+                                            <height>25</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>16777215</width>
+                                            <height>16777215</height>
+                                        </size>
+                                    </property>
                                     <property name="styleSheet">
-                                        <string notr="true">QPushButton {
-                                            border: none;
-                                            background-image: url('arrow.png');
-                                            background-repeat: no-repeat;
-                                            background-position: center;
-                                            background-color: transparent;
-                                            width: 40px;
-                                            height: 40px;
-                                            }
-                                        </string>
+                                        <string notr="true"/>
                                     </property>
                                     <property name="text">
                                         <string>Down</string>
                                     </property>
                                 </widget>
                             </item>
+                            <item row="2" column="2">
+                                <spacer name="horizontalSpacer_4">
+                                    <property name="orientation">
+                                        <enum>Qt::Horizontal</enum>
+                                    </property>
+                                    <property name="sizeHint" stdset="0">
+                                        <size>
+                                            <width>40</width>
+                                            <height>20</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                            </item>
                         </layout>
                     </item>
-                    <item row="1" column="0">
-                        <layout class="QGridLayout" name="gridLayout">
-                            <item row="0" column="0">
-                                <widget class="QLCDNumber" name="x_cord"/>
+                    <item row="0" column="3">
+                        <layout class="QVBoxLayout" name="verticalLayout">
+                            <item>
+                                <widget class="QPushButton" name="stage_forward">
+                                    <property name="styleSheet">
+                                        <string notr="true"/>
+                                    </property>
+                                    <property name="text">
+                                        <string>Forward</string>
+                                    </property>
+                                </widget>
                             </item>
-                            <item row="0" column="1">
-                                <widget class="QLCDNumber" name="y_cord"/>
+                            <item>
+                                <spacer name="verticalSpacer">
+                                    <property name="orientation">
+                                        <enum>Qt::Vertical</enum>
+                                    </property>
+                                    <property name="sizeHint" stdset="0">
+                                        <size>
+                                            <width>17</width>
+                                            <height>24</height>
+                                        </size>
+                                    </property>
+                                </spacer>
                             </item>
-                            <item row="0" column="2">
-                                <widget class="QLCDNumber" name="z_cord"/>
-                            </item>
-                            <item row="1" column="0">
-                                <widget class="QSpinBox" name="x_speed"/>
-                            </item>
-                            <item row="1" column="1">
-                                <widget class="QSpinBox" name="y_speed"/>
-                            </item>
-                            <item row="1" column="2">
-                                <widget class="QSpinBox" name="z_speed"/>
+                            <item>
+                                <widget class="QPushButton" name="stage_backward">
+                                    <property name="styleSheet">
+                                        <string notr="true"/>
+                                    </property>
+                                    <property name="text">
+                                        <string>Backward</string>
+                                    </property>
+                                </widget>
                             </item>
                         </layout>
+                    </item>
+                    <item row="0" column="4">
+                        <widget class="QPushButton" name="stage_home">
+                            <property name="styleSheet">
+                                <string notr="true"/>
+                            </property>
+                            <property name="text">
+                                <string>Home</string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="1" column="0" colspan="4">
+                        <widget class="QLabel" name="Error">
+                            <property name="minimumSize">
+                                <size>
+                                    <width>500</width>
+                                    <height>30</height>
+                                </size>
+                            </property>
+                            <property name="font">
+                                <font>
+                                    <pointsize>13</pointsize>
+                                    <bold>true</bold>
+                                    <strikeout>false</strikeout>
+                                </font>
+                            </property>
+                            <property name="text">
+                                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                            </property>
+                            <property name="alignment">
+                                <set>Qt::AlignCenter</set>
+                            </property>
+                            <property name="textInteractionFlags">
+                                <set>Qt::LinksAccessibleByMouse</set>
+                            </property>
+                        </widget>
                     </item>
                 </layout>
             </item>
         </layout>
     </widget>
+    <tabstops>
+        <tabstop>stage_speed_lr</tabstop>
+        <tabstop>stage_speed_ud</tabstop>
+        <tabstop>stage_speed_fb</tabstop>
+        <tabstop>stage_left</tabstop>
+        <tabstop>stage_right</tabstop>
+        <tabstop>stage_up</tabstop>
+        <tabstop>stage_down</tabstop>
+        <tabstop>stage_forward</tabstop>
+        <tabstop>stage_backward</tabstop>
+        <tabstop>stage_home</tabstop>
+    </tabstops>
     <resources/>
     <connections/>
 </ui>

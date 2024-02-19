@@ -21,7 +21,7 @@ def ccapt_to_pos(data, path=None, name=None):
         bytes: POS data.
 
     """
-    dd = data[['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)']]
+    dd = data[['x (nm)', 'y (nm)', 'z (nm)', 'mc (Da)']]
     dd = dd.astype(np.single)
     records = dd.to_records(index=False)
     list_records = list(records)
@@ -47,7 +47,7 @@ def ccapt_to_epos(data, path=None, name=None):
 
     """
     dd = data[
-        ['x (nm)', 'y (nm)', 'z (nm)', 'mc_c (Da)', 't (ns)', 'high_voltage (V)', 'pulse', 'x_det (cm)',
+        ['x (nm)', 'y (nm)', 'z (nm)', 'mc (Da)', 't (ns)', 'high_voltage (V)', 'pulse', 'x_det (cm)',
          'y_det (cm)', 'pulse_pi', 'ion_pp']]
 
     dd = dd.astype(np.single)
@@ -65,63 +65,108 @@ def ccapt_to_epos(data, path=None, name=None):
     return epos
 
 
-def pos_to_ccapt(data):
+def pos_to_ccapt(file_path):
     """
     Convert POS data to CCAPT format.
 
     Args:
-        data: POS data.
+        file_path: POS data file_path.
 
     Returns:
         pandas.DataFrame: CCAPT data.
 
     """
-    pos = leap_tools.read_pos(data)
+    pos = leap_tools.read_pos(file_path)
     length = len(pos['m/n (Da)'].to_numpy())
     ccapt = pd.DataFrame({'x (nm)': pos['x (nm)'].to_numpy(),
                           'y (nm)': pos['y (nm)'].to_numpy(),
                           'z (nm)': pos['z (nm)'].to_numpy(),
-                          'mc_c (Da)': pos['m/n (Da)'].to_numpy(),
-                          'mc (Da)': np.zeros(length),
+                          'mc (Da)': pos['m/n (Da)'].to_numpy(),
+                          'mc_uc (Da)': np.zeros(length),
                           'high_voltage (V)': np.zeros(length),
                           'pulse': np.zeros(length),
-                          'start_counter': np.zeros(length, dtype=int),
-                          't_c (ns)': np.zeros(length),
                           't (ns)': np.zeros(length),
+                          't_c (ns)': np.zeros(length),
                           'x_det (cm)': np.zeros(length),
                           'y_det (cm)': np.zeros(length),
                           'pulse_pi': np.zeros(length, dtype=int),
                           'ion_pp': np.zeros(length, dtype=int),
+                          'start_counter': np.zeros(length, dtype=int),
                           })
     return ccapt
 
 
-def epos_to_ccapt(data):
+def epos_to_ccapt(file_path):
     """
     Convert EPOS data to PyCCAPT format.
 
     Args:
-        data: EPOS data.
+        file_path: EPOS data file path.
 
     Returns:
         pandas.DataFrame: CCAPT data.
 
     """
-    epos = leap_tools.read_epos(data)
+    epos = leap_tools.read_epos(file_path)
+    epos['det_x (cm)'] = epos['det_x (cm)'] / 10
+    epos['det_y (cm)'] = epos['det_y (cm)'] / 10
     length = len(epos['m/n (Da)'].to_numpy())
     ccapt = pd.DataFrame({'x (nm)': epos['x (nm)'].to_numpy(),
                           'y (nm)': epos['y (nm)'].to_numpy(),
                           'z (nm)': epos['z (nm)'].to_numpy(),
-                          'mc_c (Da)': epos['m/n (Da)'].to_numpy(),
-                          'mc (Da)': np.zeros(length),
+                          'mc (Da)': epos['m/n (Da)'].to_numpy(),
+                          'mc_uc (Da)': np.zeros(length),
                           'high_voltage (V)': epos['HV_DC (V)'].to_numpy(),
                           'pulse': epos['pulse (V)'].to_numpy(),
-                          'start_counter': np.zeros(length, dtype=int),
-                          't_c (ns)': np.zeros(length),
                           't (ns)': epos['TOF (ns)'].to_numpy(),
+                          't_c (ns)': np.zeros(length),
                           'x_det (cm)': epos['det_x (cm)'].to_numpy(),
                           'y_det (cm)': epos['det_y (cm)'].to_numpy(),
                           'pulse_pi': epos['pslep'].to_numpy(),
                           'ion_pp': epos['ipp'].to_numpy(),
+                          'start_counter': np.zeros(length, dtype=int),
                           })
     return ccapt
+
+
+def apt_to_ccapt(file_path):
+    """
+    Convert APT data to PyCCAPT format.
+
+    Args:
+        file_path: APT data file path.
+
+    Returns:
+        pandas.DataFrame: CCAPT data.
+    """
+
+    data = leap_tools.read_apt(file_path)
+
+    length_data = len(data["Mass"])
+
+    # Define the keys and corresponding column names
+    key_mappings = {
+        'x': 'x (nm)',
+        'y': 'y (nm)',
+        'z': 'z (nm)',
+        'Mass': 'mc (Da)',
+        'Voltage': 'high_voltage (V)',
+        'Vap': 'pulse',
+        'Epos ToF': 't (ns)',
+        'det_x': 'x_det (cm)',
+        'det_y': 'y_det (cm)',
+        'Delta Pulse': 'pulse_pi',
+        'Multiplicity': 'ion_pp',
+    }
+
+    # Create a dictionary with zero-filled arrays for missing keys
+    data_dict = {column_name: data.get(key, np.zeros(length_data)) for key, column_name in key_mappings.items()}
+    data_dict['start_counter'] = np.zeros(length_data, dtype=int)
+
+    df = pd.DataFrame(data_dict)
+    df.insert(loc=4, column='mc_uc (Da)', value=np.zeros(length_data))
+    df.insert(loc=8, column='t_c (ns)', value=np.zeros(length_data))
+    df['x_det (cm)'] = df['x_det (cm)'] / 10
+    df['y_det (cm)'] = df['y_det (cm)'] / 10
+
+    return df

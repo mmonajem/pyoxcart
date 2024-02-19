@@ -10,7 +10,7 @@ from PyQt6.QtCore import pyqtSignal, QObject
 from PyQt6.QtGui import QPixmap
 
 # Local module and scripts
-from pyccapt.control.control_tools import share_variables, read_files
+from pyccapt.control.control import share_variables, read_files
 from pyccapt.control.devices import camera
 from pyccapt.control.usb_switch import usb_switch
 
@@ -216,7 +216,7 @@ class Ui_Cameras_Alignment(object):
 		# arrow1 = pg.ArrowItem(pos=(925, 770), angle=0)
 		# self.cam_b_o.addItem(arrow1)
 		# Side camera (x, y)
-		arrow1 = pg.ArrowItem(pos=(750, 545), angle=-90)
+		arrow1 = pg.ArrowItem(pos=(530, 538), angle=-90)
 		# arrow2 = pg.ArrowItem(pos=(685, 1580), angle=90)
 		# arrow3 = pg.ArrowItem(pos=(890, 1100), angle=0)
 		self.cam_s_o.addItem(arrow1)
@@ -226,7 +226,7 @@ class Ui_Cameras_Alignment(object):
 		arrow1 = pg.ArrowItem(pos=(431, 95), angle=90, brush='r')
 		self.cam_s_d.addItem(arrow1)
 		# bottom camera zoom (x, y)
-		arrow1 = pg.ArrowItem(pos=(440, 71), angle=90, brush='r')
+		arrow1 = pg.ArrowItem(pos=(415, 100), angle=90, brush='r')
 		self.cam_b_d.addItem(arrow1)
 		###
 		self.light.clicked.connect(self.light_switch)
@@ -253,7 +253,7 @@ class Ui_Cameras_Alignment(object):
 		###
 		# Cameras_alignment.setWindowTitle(_translate("Cameras_alignment", "Form"))
 		Cameras_Alignment.setWindowTitle(_translate("Cameras_alignment", "PyCCAPT Cameras"))
-		Cameras_Alignment.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+		Cameras_Alignment.setWindowIcon(QtGui.QIcon('./files/logo.png'))
 		self.Cameras_Alignment = Cameras_Alignment
 		###
 		self.label_202.setText(_translate("Cameras_Alignment", "Camera Side"))

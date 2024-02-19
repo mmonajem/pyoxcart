@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from os.path import exists
+
 from setuptools import setup, find_packages
 
 try:
@@ -29,7 +30,6 @@ control_deps = [
     "nidaqmx",
     "pypylon",
     "pyvisa",
-    "pyvisa-py",
     "pyserial",
     "deepdiff",
     "scipy",
@@ -49,6 +49,10 @@ calibration_deps = [
     "adjustText",
     "pybaselines ",
     "kaleido",
+    "pymatgen",
+    "ase",
+    "imageio",
+	"nglview",
 ]
 
 setup(

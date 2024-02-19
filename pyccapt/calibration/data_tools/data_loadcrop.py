@@ -13,38 +13,62 @@ from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from pyccapt.calibration.data_tools import data_tools, selectors_data
 
 
-def fetch_dataset_from_dld_grp(filename: str) -> pd.DataFrame:
+def fetch_dataset_from_dld_grp(filename: str, extract_mode='dld') -> pd.DataFrame:
     """
     Fetches dataset from HDF5 file.
 
     Args:
         filename: Path to the HDF5 file.
-        tdc: Model of TDC.
+        extract_mode: Mode of extraction.
+                    dld: Extracts data from dld group.
+                    tdc_sc: Extracts data from tdc for Surface Consept.
+                    tdc_ro: Extracts data from tdc for Roentdek detector.
 
     Returns:
         DataFrame: Contains relevant information from the dld group.
     """
-
-    try:
-        hdf5Data = data_tools.read_hdf5(filename)
-        if hdf5Data is None:
-            raise FileNotFoundError
-        dld_highVoltage = hdf5Data['dld/high_voltage'].to_numpy()
-        dld_pulse = hdf5Data['dld/pulse'].to_numpy()
-        dld_startCounter = hdf5Data['dld/start_counter'].to_numpy()
-        dld_t = hdf5Data['dld/t'].to_numpy()
-        dld_x = hdf5Data['dld/x'].to_numpy()
-        dld_y = hdf5Data['dld/y'].to_numpy()
-        dldGroupStorage = np.concatenate((dld_highVoltage, dld_pulse, dld_startCounter, dld_t, dld_x, dld_y), axis=1)
-        dld_group_storage = create_pandas_dataframe(dldGroupStorage)
-        return dld_group_storage
-    except KeyError as error:
-        print(error)
-        print("[*] Keys missing in the dataset")
-    except FileNotFoundError as error:
-        print(error)
-        print("[*] HDF5 file not found")
-
+    if extract_mode == 'dld':
+        try:
+            hdf5Data = data_tools.read_hdf5(filename)
+            if hdf5Data is None:
+                raise FileNotFoundError
+            dld_highVoltage = hdf5Data['dld/high_voltage'].to_numpy()
+            dld_pulse = hdf5Data['dld/pulse'].to_numpy()
+            dld_startCounter = hdf5Data['dld/start_counter'].to_numpy()
+            dld_t = hdf5Data['dld/t'].to_numpy()
+            dld_x = hdf5Data['dld/x'].to_numpy()
+            dld_y = hdf5Data['dld/y'].to_numpy()
+            dldGroupStorage = np.concatenate((dld_highVoltage, dld_pulse, dld_startCounter, dld_t, dld_x, dld_y),
+                                             axis=1)
+            dld_group_storage = create_pandas_dataframe(dldGroupStorage, mode='dld')
+            return dld_group_storage
+        except KeyError as error:
+            print(error)
+            print("[*] Keys missing in the dataset")
+        except FileNotFoundError as error:
+            print(error)
+            print("[*] HDF5 file not found")
+    elif extract_mode == 'tdc_sc':
+        try:
+            hdf5Data = data_tools.read_hdf5(filename)
+            if hdf5Data is None:
+                raise FileNotFoundError
+            channel = hdf5Data['tdc/channel'].to_numpy()
+            start_counter = hdf5Data['tdc/start_counter'].to_numpy()
+            high_voltage = hdf5Data['tdc/high_voltage'].to_numpy()
+            pulse = hdf5Data['tdc/pulse'].to_numpy()
+            time_data = hdf5Data['tdc/time_data'].to_numpy()
+            dldGroupStorage = np.concatenate((channel, start_counter, high_voltage, pulse, time_data), axis=1)
+            dld_group_storage = create_pandas_dataframe(dldGroupStorage, mode='tdc_sc')
+            return dld_group_storage
+        except KeyError as error:
+            print(error)
+            print("[*] Keys missing in the dataset")
+        except FileNotFoundError as error:
+            print(error)
+            print("[*] HDF5 file not found")
+    elif extract_mode == 'tdc_ro':
+        print('Not implemented yet')
 
 def concatenate_dataframes_of_dld_grp(dataframeList: list) -> pd.DataFrame:
     """
@@ -82,6 +106,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     Returns:
         None.
     """
+
     if max_tof > 0:
         mask_1 = (data['t (ns)'].to_numpy() > max_tof)
         data.drop(np.where(mask_1)[0], inplace=True)
@@ -103,9 +128,16 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
 
     xaxis = np.arange(len(tof))
 
+    # Check if the bin is a tuple
+    if isinstance(bins, tuple):
+        pass
+    else:
+        x_edges = np.arange(xaxis.min(), xaxis.max() + bins, bins)
+        y_edges = np.arange(tof.min(), tof.max() + bins, bins)
+        bins = [x_edges, y_edges]
+
     heatmap, xedges, yedges = np.histogram2d(xaxis, tof, bins=bins)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-
 
     # Set x-axis label
     ax1.set_xlabel("Hit Sequence Number", fontsize=10)
@@ -127,7 +159,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         # Plot high voltage curve
         xaxis2 = np.arange(len(high_voltage))
         dc_curve, = ax2.plot(xaxis2, high_voltage, color='red', linewidth=2)
-        ax2.set_ylabel("High Voltage [kV]", color="red", fontsize=10)
+        ax2.set_ylabel("DC Voltage [kV]", color="red", fontsize=10)
         ax2.set_ylim([min(high_voltage), max(high_voltage) + 0.5])
         ax2.spines['right'].set_color('red')  # Set Y-axis color to red
         ax2.yaxis.label.set_color('red')  # Set Y-axis label color to red
@@ -138,12 +170,12 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         ax3.spines.right.set_position(("axes", 1.13))
         pulse_curve, = ax3.plot(xaxis, pulse, color='fuchsia', linewidth=2)
         if pulse_mode == 'laser':
-            ax3.set_ylabel("Laser Intensity [$pJ$]", color="fuchsia", fontsize=10)
+            ax3.set_ylabel("Pulse Energy [$pJ$]", color="fuchsia", fontsize=10)
             range = max(pulse) - min(pulse)
             ax3.set_ylim([min(pulse) - range * 0.1, max(pulse) + range * 0.1])
             ax3.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         elif pulse_mode == 'voltage':
-            ax3.set_ylabel("Pulse (V)", color="fuchsia", fontsize=10)
+            ax3.set_ylabel("Pulse Voltage (V)", color="fuchsia", fontsize=10)
             ax3.set_ylim([min(pulse), max(pulse) + 0.5])
         ax3.spines['right'].set_color('fuchsia')  # Set Y-axis color to red
         ax3.yaxis.label.set_color('fuchsia')  # Set Y-axis label color to red
@@ -188,14 +220,25 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     plt.show()
 
 
-def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, figure_size=(5, 4), draw_circle=False,
-                  save=True, figname=''):
+def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_size=(5, 4), variables=None,
+                  range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[],
+                  data_crop=False, draw_circle=False, save=True, figname=''):
     """
     Plot and crop the FDM with the option to select a region of interest.
 
     Args:
         data: Cropped dataset (type: list)
         bins: Number of bins for the histogram
+        frac: Fraction of the data to be plotted
+        axis_mode: Flag to choose whether to plot axis or scalebar: 'normal' or 'scalebar'
+        variables: Variables object
+        range_sequence: Range of sequence
+        range_mc: Range of mc
+        range_detx: Range of detx
+        range_dety: Range of dety
+        range_x: Range of x-axis
+        range_y: Range of y-axis
+        range_z: Range of z-axis
         figure_size: Size of the plot
         draw_circle: Flag to enable circular region of interest selection
         save: Flag to choose whether to save the plot or not
@@ -205,6 +248,41 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
     Returns:
         None
     """
+    if range_sequence or range_mc or range_detx or range_dety or range_x or range_y or range_z:
+        if range_sequence:
+            mask_sequence = np.zeros_like(len(data), dtype=bool)
+            mask_sequence[range_sequence[0]:range_sequence[1]] = True
+        else:
+            mask_sequence = np.ones(len(data), dtype=bool)
+        if range_detx and range_dety:
+            mask_det_x = (variables.dld_x_det < range_detx[1]) & (variables.dld_x_det > range_detx[0])
+            mask_det_y = (variables.dld_y_det < range_dety[1]) & (variables.dld_y_det > range_dety[0])
+            mask_det = mask_det_x & mask_det_y
+        else:
+            print(variables.dld_x_det)
+            mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
+        if range_mc:
+            mask_mc = (variables.mc_uc < range_mc[1]) & (variables.mc_uc > range_mc[0])
+        else:
+            mask_mc = np.ones(len(variables.mc), dtype=bool)
+        if range_x and range_y and range_z:
+            mask_x = (variables.x < range_x[1]) & (variables.x > range_x[0])
+            mask_y = (variables.y < range_y[1]) & (variables.y > range_y[0])
+            mask_z = (variables.z < range_z[1]) & (variables.z > range_z[0])
+            mask_3d = mask_x & mask_y & mask_z
+        else:
+            mask_3d = np.ones(len(variables.x), dtype=bool)
+        mask = mask_sequence & mask_det & mask_mc & mask_3d
+        variables.mask = mask
+        print('The number of data mc:', len(mask_mc[mask_mc == True]))
+        print('The number of data det:', len(mask_det[mask_det == True]))
+        print('The number of data 3d:', len(mask_3d[mask_3d == True]))
+        print('The number of data after cropping:', len(mask[mask == True]))
+    else:
+        mask = np.ones(len(data), dtype=bool)
+
+    data = data[mask]
+
     if frac < 1:
         # set axis limits based on fraction of data
         dldGroupStorage = data.sample(frac=frac, random_state=42)
@@ -218,11 +296,17 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
     x = dldGroupStorage['x_det (cm)'].to_numpy()
     y = dldGroupStorage['y_det (cm)'].to_numpy()
 
+    # Check if the bin is a tuple
+    if isinstance(bins, tuple):
+        pass
+    else:
+        x_edges = np.arange(x.min(), x.max() + bins, bins)
+        y_edges = np.arange(y.min(), y.max() + bins, bins)
+        bins = [x_edges, y_edges]
+
     FDM, xedges, yedges = np.histogram2d(x, y, bins=bins)
 
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    ax1.set_xlabel(r"$X_{det} (cm)$", fontsize=10)
-    ax1.set_ylabel(r"$Y_{det} (cm)$", fontsize=10)
 
     cmap = copy(plt.cm.plasma)
     cmap.set_bad(cmap(0))
@@ -238,26 +322,31 @@ def plot_crop_fdm(data, variables, bins=(256, 256), frac=1.0, data_crop=False, f
         ax1.set_xlim([min(x_lim), max(x_lim)])
         ax1.set_ylim([min(y_lim), max(y_lim)])
 
-    if data_crop:
-        elliptical_shape_selector(ax1, fig1, variables)
-    if draw_circle:
-        print('x:', variables.selected_x_fdm, 'y:', variables.selected_y_fdm, 'roi:', variables.roi_fdm)
-        circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
-                      alpha=0.3, color='green', linewidth=5)
-        ax1.add_patch(circ)
+    if variables is not None:
+        if data_crop:
+            elliptical_shape_selector(ax1, fig1, variables)
+        if draw_circle:
+            print('x:', variables.selected_x_fdm, 'y:', variables.selected_y_fdm, 'roi:', variables.roi_fdm)
+            circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
+                          alpha=0.3, color='green', linewidth=5)
+            ax1.add_patch(circ)
+    if axis_mode == 'scalebar':
+        fontprops = fm.FontProperties(size=10)
+        scalebar = AnchoredSizeBar(ax1.transData,
+                                   1, '1 cm', 'lower left',
+                                   pad=0.1,
+                                   color='white',
+                                   frameon=False,
+                                   size_vertical=0.1,
+                                   fontproperties=fontprops)
 
-    fontprops = fm.FontProperties(size=10)
-    scalebar = AnchoredSizeBar(ax1.transData,
-                               1, '1 cm', 'lower left',
-                               pad=0.1,
-                               color='white',
-                               frameon=False,
-                               size_vertical=0.1,
-                               fontproperties=fontprops)
+        ax1.add_artist(scalebar)
+        plt.axis('off')  # Turn off both x and y axes
+    elif axis_mode == 'normal':
+        ax1.set_xlabel(r"$X_{det} (cm)$", fontsize=10)
+        ax1.set_ylabel(r"$Y_{det} (cm)$", fontsize=10)
 
-    ax1.add_artist(scalebar)
-    plt.axis('off')  # Turn off both x and y axes
-    if save:
+    if save and variables is not None:
         # Enable rendering for text elements
         rcParams['svg.fonttype'] = 'none'
         plt.savefig("%s.png" % (variables.result_path + figname), format="png", dpi=600)
@@ -271,6 +360,7 @@ def rectangle_box_selector(axisObject, variables):
 
     Args:
         axisObject: Object to create the rectangular box
+        variables: Variables object
 
     Returns:
         None
@@ -359,21 +449,38 @@ def crop_data_after_selection(data_crop, variables):
     return data_crop
 
 
-def create_pandas_dataframe(data_crop):
+def create_pandas_dataframe(data_crop, mode='dld'):
     """
     Create a pandas dataframe from the cropped data.
 
     Args:
         data_crop: Cropped dataset
+        mode: Mode of extraction
+                dld: Extracts data from dld group
+                tdc_sc: Extracts data from tdc for Surface Consept
+                tdc_ro: Extracts data from tdc for Roentdek detector
 
     Returns:
         hdf_dataframe: Dataframe to be inserted in the HDF file
     """
-    hdf_dataframe = pd.DataFrame(data=data_crop,
-                                 columns=['high_voltage (V)', 'pulse', 'start_counter', 't (ns)',
-                                          'x_det (cm)', 'y_det (cm)'])
+    if mode == 'dld':
+        hdf_dataframe = pd.DataFrame(data=data_crop,
+                                     columns=['high_voltage (V)', 'pulse', 'start_counter', 't (ns)',
+                                              'x_det (cm)', 'y_det (cm)'])
 
-    hdf_dataframe['start_counter'] = hdf_dataframe['start_counter'].astype('uint32')
+        hdf_dataframe['start_counter'] = hdf_dataframe['start_counter'].astype('uint32')
+    elif mode == 'tdc_sc':
+        hdf_dataframe = pd.DataFrame(data=data_crop,
+                                     columns=['channel', 'start_counter', 'high_voltage (V)', 'pulse',
+                                              'time_data'])
+
+        hdf_dataframe['channel'] = hdf_dataframe['channel'].astype('uint32')
+        hdf_dataframe['start_counter'] = hdf_dataframe['start_counter'].astype('uint32')
+        hdf_dataframe['time_data'] = hdf_dataframe['time_data'].astype('uint32')
+    elif mode == 'tdc_ro':
+        print('Not implemented yet')
+        hdf_dataframe = None
+
     return hdf_dataframe
 
 

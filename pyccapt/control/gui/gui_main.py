@@ -3,12 +3,13 @@ import os
 import re
 import sys
 
+import pkg_resources
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 
 # Local module and scripts
 from pyccapt.control.apt import apt_exp_control
-from pyccapt.control.control_tools import share_variables, read_files
+from pyccapt.control.control import share_variables, read_files
 from pyccapt.control.gui import gui_baking, gui_cameras, gui_gates, gui_laser_control, gui_pumps_vacuum, \
 	gui_stage_control, gui_visualization
 
@@ -877,6 +878,9 @@ class Ui_PyCCAPT(object):
 		PyCCAPT.setTabOrder(self.pulse_voltage, self.detection_rate)
 
 		###
+		self.actionAbout.triggered.connect(self.about)
+		self.actionExit.triggered.connect(PyCCAPT.close)
+		self.actiontake_sceernshot.triggered.connect(self.take_screenshot)
 		self.camears.clicked.connect(self.open_cameras_win)
 		self.gates_control.clicked.connect(self.open_gates_win)
 		self.laser_control.clicked.connect(self.open_laser_control_win)
@@ -1213,14 +1217,14 @@ class Ui_PyCCAPT(object):
 
 	def setup_parameters_changes(self):
 		"""
-        Function to setup parameters changes
+		Function to setup parameters changes
 
-        Args:
-            None
+		Args:
+			None
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		# with self.variables.lock_setup_parameters:
 		if self.parameters_source.currentText() == 'TextLine':
 			self.read_text_lines()
@@ -1275,14 +1279,14 @@ class Ui_PyCCAPT(object):
 
 	def start_experiment_clicked(self):
 		"""
-        Start the experiment worker thread
+		Start the experiment worker thread
 
-        Args:
-            None
+		Args:
+			None
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		# with self.variables.lock_statistics:
 		self.variables.start_flag = True  # Set the start flag
 		self.variables.stop_flag = False  # Set the stop flag
@@ -1306,14 +1310,14 @@ class Ui_PyCCAPT(object):
 
 	def statistics_update(self):
 		"""
-            Update the statistics
+			Update the statistics
 
-            Args:
-                None
+			Args:
+				None
 
-            Return:
-                None
-        """
+			Return:
+				None
+		"""
 		self.emitter.elapsed_time.emit(self.variables.elapsed_time)
 		self.emitter.total_ions.emit(self.variables.total_ions)
 		self.emitter.speciemen_voltage.emit(self.variables.specimen_voltage)
@@ -1327,12 +1331,12 @@ class Ui_PyCCAPT(object):
 		"""
 			Stop the experiment worker thread
 
-            Args:
-                None
+			Args:
+				None
 
-            Return:
-                None
-        """
+			Return:
+				None
+		"""
 		self.statistics_timer.stop()
 		self.variables.stop_flag = True  # Set the STOP flag
 		self.stop_button.setEnabled(False)  # Disable the stop button
@@ -1346,14 +1350,78 @@ class Ui_PyCCAPT(object):
 				None
 
 			Return:
-                None
-        """
+				None
+		"""
 		self.experiment_process = multiprocessing.Process(target=apt_exp_control.run_experiment,
 		                                                  args=(self.variables, self.conf,
 		                                                        self.experimetn_finished_event, self.x_plot,
 		                                                        self.y_plot, self.t_plot, self.main_v_dc_plot,))
 		self.experiment_process.start()
 		self.statistics_timer.start()
+
+	def about(self):
+		"""
+		Show the about window
+
+		Args:
+			None
+
+		Return:
+			None
+		"""
+		# Get the PyCCAPT version from your setup file
+		# Replace 'your_version_here' with the actual way you extract the version
+		pyccapt_version = 'your_version_here'
+
+		# Create the about dialog
+		about_win = QtWidgets.QDialog()
+		about_win.setWindowTitle("PyCCAPT APT Experiment Control")
+		about_win.setWindowIcon(QtGui.QIcon('./files/logo.png'))
+
+		# Add version information
+		package_version = get_package_version('pyccapt')
+		version_label = QtWidgets.QLabel(f"PyCCAPT Control Software Version {package_version}")
+		version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+		# Add link to documentation
+		documentation_label = QtWidgets.QLabel('For documentation, please visit: <a '
+		                                       'href="https://pyccapt.readthedocs.io/en/latest">Documentation</a>')
+		documentation_label.setOpenExternalLinks(True)
+		documentation_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+		license_label = QtWidgets.QLabel(f"License: GPLv3")
+		license_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+		# Create a button to close the about dialog
+		ok_button = QtWidgets.QPushButton("OK", about_win)
+		ok_button.clicked.connect(about_win.accept)
+
+		# Create a layout for the QDialog
+		layout = QtWidgets.QVBoxLayout(about_win)
+		layout.addWidget(version_label)
+		layout.addWidget(documentation_label)
+		layout.addWidget(ok_button)
+
+		# Show the about dialog
+		about_win.exec()
+
+	def take_screenshot(self):
+		"""
+			Take a screenshot of the GUI
+
+			Args:
+				None
+
+			Return:
+				None
+		"""
+		screen = QtWidgets.QApplication.primaryScreen()
+		w = self.centralwidget
+		screenshot = screen.grabWindow(w.winId())
+		try:
+			screenshot.save(self.variables.path + '\screenshot.png', 'png')
+		except:
+			pass
 
 	def on_stop_experiment_worker(self):
 		"""
@@ -1405,27 +1473,27 @@ class Ui_PyCCAPT(object):
 
 	def reset_heatmap_clicked(self):
 		"""
-            Reset the heatmap
-            Args:
-                None
+			Reset the heatmap
+			Args:
+				None
 
-            Return:
-                None
-        """
+			Return:
+				None
+		"""
 		# with self.variables.lock_setup_parameters:
 		if not self.variables.reset_heatmap:
 			self.variables.reset_heatmap = True
 
 	def dc_hold_clicked(self):
 		"""
-            Hold the DC voltage
+			Hold the DC voltage
 
-            Args:
-                None
+			Args:
+				None
 
-            Return:
-                None
-        """
+			Return:
+				None
+		"""
 		# with self.variables.lock_setup_parameters:
 		if not self.variables.vdc_hold:
 			self.variables.vdc_hold = True
@@ -1499,14 +1567,14 @@ class Ui_PyCCAPT(object):
 
 	def open_cameras_win(self):
 		"""
-        Open the Cameras window
+		Open the Cameras window
 
-        Args:
-            None
+		Args:
+			None
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		self.variables.flag_camera_win_show = True
 		self.camera_win_front.set()
 		self.camears.setStyleSheet("background-color: green")
@@ -1516,7 +1584,7 @@ class Ui_PyCCAPT(object):
 		Check if the camera window is closed
 
 		Args:
-		    None
+			None
 
 		Return:
 			None
@@ -1538,10 +1606,10 @@ class Ui_PyCCAPT(object):
 		Open the Gates window
 
 		Args:
-		    None
+			None
 
 		Return:
-		    None
+			None
 		"""
 		if hasattr(self, 'Gates') and self.Gates.isVisible():
 			self.Gates.raise_()
@@ -1556,11 +1624,11 @@ class Ui_PyCCAPT(object):
 		Open the Pumps and Vacuum window
 
 		Args:
-            None
+			None
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		if hasattr(self, 'Pumps_vacuum') and self.Pumps_vacuum.isVisible():
 			self.Pumps_vacuum.raise_()
 			self.Pumps_vacuum.activateWindow()
@@ -1573,12 +1641,12 @@ class Ui_PyCCAPT(object):
 		"""
 		Open laser control window
 
-        Args:
-            None
+		Args:
+			None
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		if hasattr(self, 'Laser_control') and self.Laser_control.isVisible():
 			self.Laser_control.raise_()
 			self.Laser_control.activateWindow()
@@ -1591,12 +1659,12 @@ class Ui_PyCCAPT(object):
 		"""
 		Open stage control window
 
-        Args:
-            None
+		Args:
+			None
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		if hasattr(self, 'Stage_control') and self.Stage_control.isVisible():
 			self.Stage_control.raise_()
 			self.Stage_control.activateWindow()
@@ -1609,31 +1677,33 @@ class Ui_PyCCAPT(object):
 		"""
 		Open visualization window
 
-        Args:
-            None
+		Args:
+			None
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		self.variables.flag_visualization_win_show = True
 		self.visualization_win_front.set()
 		self.visualization.setStyleSheet("background-color: green")
+
 	def open_baking_win(self):
 		"""
 		Open baking window
 
 		Args:
-            None
+			None
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 
 		if hasattr(self, 'Baking') and self.Baking.isVisible():
 			self.Baking.raise_()
 			self.Baking.activateWindow()
 		else:
-			self.gui_baking = gui_baking.Ui_Baking(self.variables, self.conf)
+
+			self.gui_baking = gui_baking.Ui_Baking(self.variables, self.conf, self.SignalEmitter_Pumps_Vacuum)
 			self.Baking = gui_baking.BakingWindow(self.gui_baking, flags=Qt.WindowType.Tool)
 			self.gui_baking.setupUi(self.Baking)
 			self.Baking.show()
@@ -1654,14 +1724,14 @@ class Ui_PyCCAPT(object):
 
 	def error_message(self, message):
 		"""
-        Display an error message and start a timer to hide it after 8 seconds
+		Display an error message and start a timer to hide it after 8 seconds
 
-        Args:
-            message (str): Error message to display
+		Args:
+			message (str): Error message to display
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		_translate = QtCore.QCoreApplication.translate
 		self.Error.setText(_translate("OXCART",
 		                              "<html><head/><body><p><span style=\" color:#ff0000;\">"
@@ -1672,12 +1742,12 @@ class Ui_PyCCAPT(object):
 	def hideMessage(self, ):
 		"""
 		Hide the message and stop the timer
-        Args:
-            None
+		Args:
+			None
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		# Hide the message and stop the timer
 		_translate = QtCore.QCoreApplication.translate
 		self.Error.setText(_translate("OXCART",
@@ -1708,6 +1778,13 @@ class SignalEmitter(QtCore.QObject):
 	pulse_voltage = QtCore.pyqtSignal(float)
 	detection_rate = QtCore.pyqtSignal(float)
 
+
+def get_package_version(package_name):
+	try:
+		version = pkg_resources.get_distribution(package_name).version
+		return version
+	except pkg_resources.DistributionNotFound:
+		return None
 
 if __name__ == "__main__":
 	try:

@@ -78,7 +78,7 @@ pyccapt/
 
    ```bash
    conda create -n apt_env python=3.9
-    ```
+    ```**
 
 2. Activate the virtual environment:
 
@@ -134,6 +134,10 @@ on [documentation](https://pyccapt.readthedocs.io/en/latest/configuration.html).
 
 For calibration, review the [tutorial](https://pyccapt.readthedocs.io/en/latest/tutorials.html) to understand package
 features.
+
+To test the code on google colab, you can use the following links:
+[data processing](https://colab.research.google.com/github/mmonajem/pyccapt/blob/develop/pyccapt/calibration/tutorials/colab/data_processing.ipynb)
+[data visualization](https://colab.research.google.com/github/mmonajem/pyccapt/blob/develop/pyccapt/calibration/tutorials/colab/visualization.ipynb)
 
 ---------------------
 # Data structure

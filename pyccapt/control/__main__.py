@@ -4,7 +4,7 @@ import sys
 
 from PyQt6 import QtWidgets
 
-from pyccapt.control.control_tools import share_variables, read_files
+from pyccapt.control.control import share_variables, read_files
 from pyccapt.control.gui import gui_main
 
 

@@ -6,11 +6,12 @@ import time
 import numpy as np
 import pyqtgraph as pg
 import pyqtgraph.exporters
+# from numba import njit
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer
 
 # Local module and scripts
-from pyccapt.control.control_tools import share_variables, read_files, tof2mc_simple
+from pyccapt.control.control import share_variables, read_files, tof2mc_simple
 from pyccapt.control.devices import initialize_devices
 
 
@@ -259,7 +260,7 @@ class Ui_Visualization(object):
 		###
 		# Visualization.setWindowTitle(_translate("Visualization", "Form"))
 		Visualization.setWindowTitle(_translate("Visualization", "PyCCAPT Visualization"))
-		Visualization.setWindowIcon(QtGui.QIcon('./files/logo3.png'))
+		Visualization.setWindowIcon(QtGui.QIcon('./files/logo.png'))
 		###
 		self.label_200.setText(_translate("Visualization", "Voltage"))
 		self.label_201.setText(_translate("Visualization", "Detection Rate"))
@@ -357,7 +358,16 @@ class Ui_Visualization(object):
 				self.x_vdc.append(x_vdc_last + 0.5)  # Add a new value 1 higher than the last.
 				self.y_vdc.append(int(self.variables.specimen_voltage_plot))
 
-			self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
+			# Set the maximum number of data points to display
+			max_display_points = 200
+			# Downsample the data if needed
+			if len(self.x_vdc) > max_display_points:
+				step = len(self.x_vdc) // max_display_points
+				x_vdc_downsampled = self.x_vdc[::step]
+				y_vdc_downsampled = self.y_vdc[::step]
+				self.data_line_vdc.setData(x_vdc_downsampled, y_vdc_downsampled)
+			else:
+				self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
 
 			# Detection Rate Visualization
 			# with self.variables.lock_statistics:
@@ -370,7 +380,16 @@ class Ui_Visualization(object):
 				self.y_dtec.append(self.variables.detection_rate_current_plot)
 
 			# self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
-			self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+			# Set the maximum number of data points to display
+			max_display_points = 200
+			# Downsample the data if needed
+			if len(self.x_dtec) > max_display_points:
+				step = len(self.x_dtec) // max_display_points
+				x_dtec_downsampled = self.x_dtec[::step]
+				y_dtec_downsampled = self.y_dtec[::step]
+				self.data_line_dtec.setData(x_dtec_downsampled, y_dtec_downsampled)
+			else:
+				self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 			# Increase the index
 			# with self.variables.lock_statistics:
 			self.index_plot += 1
@@ -406,12 +425,11 @@ class Ui_Visualization(object):
 						                             yy[:max_lenght],
 						                             flightPathLength=self.conf["flight_path_length"])
 						viz = viz[viz < self.conf["max_mass"]]
-					# bin size of 0.1
+
 					bin_size = self.conf["bin_size"]
 					bins = np.linspace(np.min(viz), np.max(viz), round(np.max(viz) / bin_size))
-					y_tof_mc, x_tof_mc = np.histogram(viz, bins=bins)
-					# put 1 instead of zero to fix problem of log(0) = -inf
-					y_tof_mc[y_tof_mc == 0] = 1
+					# Efficient histogram computation
+					y_tof_mc, x_tof_mc = efficient_histogram(viz, bin_size)
 					self.histogram.clear()
 					self.histogram.plot(x_tof_mc, y_tof_mc, stepMode="center", fillLevel=0, fillOutline=True,
 					                    brush='black', name="num ions: %s" % len(xx))
@@ -495,6 +513,13 @@ class Ui_Visualization(object):
 		# Add any additional cleanup code here
 		pass
 
+
+# @njit
+def efficient_histogram(viz, bin_size):
+	bins = np.arange(np.min(viz), np.max(viz) + bin_size, bin_size)
+	hist, edges = np.histogram(viz, bins=bins)
+	hist[hist == 0] = 1  # Avoid log(0)
+	return hist, edges
 
 class VisualizationWindow(QtWidgets.QWidget):
 	"""

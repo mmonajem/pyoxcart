@@ -156,12 +156,12 @@ def remove_invalid_data(dld_group_storage, max_tof):
     dld_group_storage.reset_index(inplace=True, drop=True)
 
     # Print the number of data points over max_tof
-    print('The number of data over max_tof:', num_over_max_tof)
+    print('The number of data that is removed:', num_over_max_tof)
 
     return dld_group_storage
 
 
-def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, csv=False):
+def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, csv=False, temp=False):
     """
     save data in different formats
 
@@ -173,54 +173,61 @@ def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, cs
         pos (bool): save data as pos file.
         ato_6v (bool): save data as ato file.
         csv (bool): save data as csv file.
+        temp (bool): save data as temporary file.
 
     Returns:
         None. The DataFrame is modified in-place.
 
     """
+    if temp:
+        data_name = variables.result_data_name + '_temp'
+    else:
+        data_name = variables.result_data_name
     if hdf:
         # save the dataset to hdf5 file
         hierarchyName = 'df'
-        store_df_to_hdf(data, hierarchyName, variables.result_data_path + '//' + variables.result_data_name + '.h5')
+        store_df_to_hdf(data, hierarchyName, variables.result_data_path + '//' + data_name + '.h5')
     if epos:
         # save data as epos file
         ccapt_tools.ccapt_to_epos(data, path=variables.result_path,
-                                  name=variables.result_data_name + '.epos')
+                                  name=data_name + '.epos')
     if pos:
         # save data in pos format
-        ccapt_tools.ccapt_to_pos(data, path=variables.result_path, name=variables.result_data_name + '.pos')
+        ccapt_tools.ccapt_to_pos(data, path=variables.result_path, name=data_name + '.pos')
     if ato_6v:
         # save data as ato file in  ersion 6
-        ato_tools.ccapt_to_ato(data, path=variables.result_path, name=variables.result_data_name + '.ato')
+        ato_tools.ccapt_to_ato(data, path=variables.result_path, name=data_name + '.ato')
     if csv:
         # save data in csv format
         store_df_to_csv(data, variables.result_path + variables.result_data_name + '.csv')
 
 
-def load_data(dataset_path, tdc, mode='processed'):
+def load_data(dataset_path, data_type, mode='processed'):
     """
     save data in different formats
 
     Args:
         dataset_path (string): path to the dataset.
-        tdc (string): type of the dataset.
+        data_type (string): type of the dataset.
         mode (string): mode of the dataset.
 
     Returns:
         data (pandas.DataFrame): DataFrame containing the data.
 
     """
-    if tdc == 'leap_pos' or tdc == 'leap_epos':
-        if tdc == 'leap_epos':
+    if data_type == 'leap_pos' or data_type == 'leap_epos':
+        if data_type == 'leap_epos':
             data = ccapt_tools.epos_to_ccapt(dataset_path)
         else:
             print('The file has to be epos. With pos information this tutorial cannot be run')
             data = ccapt_tools.pos_to_ccapt(dataset_path)
-    elif tdc == 'ato_v6':
+    elif data_type == 'leap_apt':
+        data = ccapt_tools.apt_to_ccapt(dataset_path)
+    elif data_type == 'ato_v6':
         data = ato_tools.ato_to_ccapt(dataset_path, moed='pyccapt')
-    elif tdc == 'pyccapt' and mode == 'raw':
+    elif data_type == 'pyccapt' and mode == 'raw':
         data = data_loadcrop.fetch_dataset_from_dld_grp(dataset_path)
-    elif tdc == 'pyccapt' and mode == 'processed':
+    elif data_type == 'pyccapt' and mode == 'processed':
         data = data_tools.read_hdf5_through_pandas(dataset_path)
     return data
 
@@ -242,21 +249,26 @@ def extract_data(data, variables, flightPathLength_d, max_mc):
     variables.dld_high_voltage = data['high_voltage (V)'].to_numpy()
     variables.dld_pulse = data['pulse'].to_numpy()
     variables.dld_t = data['t (ns)'].to_numpy()
-    variables.dld_t_c = data['t_c (ns)'].to_numpy()
     variables.dld_x_det = data['x_det (cm)'].to_numpy()
     variables.dld_y_det = data['y_det (cm)'].to_numpy()
-    variables.mc = data['mc (Da)'].to_numpy()
-    variables.mc_c = data['mc_c (Da)'].to_numpy()
+    if 'mc (Da)' in data.columns:
+        variables.mc = data['mc (Da)'].to_numpy()
+    if 't_c (ns)' in data.columns:
+        variables.dld_t_c = data['t_c (ns)'].to_numpy()
+    if 'mc_uc (Da)' in data.columns:
+        variables.mc_calib = data['mc_uc (Da)'].to_numpy()
+        variables.mc_calib_backup = data['mc_uc (Da)'].to_numpy()
+        variables.mc_uc = data['mc_uc (Da)'].to_numpy()
 
     # Calculate the maximum possible time of flight (TOF)
     variables.max_tof = int(tof_tools.mc2tof(max_mc, 1000, 0, 0, flightPathLength_d))
     variables.dld_t_calib = data['t (ns)'].to_numpy()
     variables.dld_t_calib_backup = data['t (ns)'].to_numpy()
-    variables.mc_calib = data['mc (Da)'].to_numpy()
-    variables.mc_calib_backup = data['mc (Da)'].to_numpy()
-    variables.x = data['x (nm)'].to_numpy()
-    variables.y = data['y (nm)'].to_numpy()
-    variables.z = data['z (nm)'].to_numpy()
+
+    if 'x (nm)' in data.columns and 'y (nm)' in data.columns and 'z (nm)' in data.columns:
+        variables.x = data['x (nm)'].to_numpy()
+        variables.y = data['y (nm)'].to_numpy()
+        variables.z = data['z (nm)'].to_numpy()
     print('The maximum time of flight:', variables.max_tof)
     # ion_distance = np.sqrt(flightPathLength_d**2 + (variables.dld_x_det*10)**2 + (variables.dld_y_det*10)**2)
     # ion_distance = flightPathLength_d / ion_distance
