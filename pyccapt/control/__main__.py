@@ -32,6 +32,7 @@ def main():
 		print(e)
 		sys.exit()
 
+
 	# Initialize global experiment variables
 	manager = multiprocessing.Manager()
 	ns = manager.Namespace()
