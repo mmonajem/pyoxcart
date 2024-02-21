@@ -5,7 +5,7 @@ import sys
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 # Local module and scripts
-from pyccapt.control.control_tools import share_variables, read_files
+from pyccapt.control.control import share_variables, read_files
 
 
 class Ui_Stage_Control(object):

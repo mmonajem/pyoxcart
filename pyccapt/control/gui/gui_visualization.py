@@ -11,7 +11,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer
 
 # Local module and scripts
-from pyccapt.control.control_tools import share_variables, read_files, tof2mc_simple
+from pyccapt.control.control import share_variables, read_files, tof2mc_simple
 from pyccapt.control.devices import initialize_devices
 
 

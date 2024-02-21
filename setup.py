@@ -30,7 +30,6 @@ control_deps = [
     "nidaqmx",
     "pypylon",
     "pyvisa",
-    "pyvisa-py",
     "pyserial",
     "deepdiff",
     "scipy",

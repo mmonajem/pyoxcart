@@ -19,7 +19,7 @@ except Exception as e:
 	print(e)
 
 # Local module and scripts
-from pyccapt.control.control_tools import share_variables, read_files
+from pyccapt.control.control import share_variables, read_files
 from pyccapt.control.gui import gui_pumps_vacuum
 from pyccapt.control.devices import initialize_devices
 

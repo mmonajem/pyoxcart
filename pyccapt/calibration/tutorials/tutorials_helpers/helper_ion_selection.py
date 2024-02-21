@@ -4,7 +4,7 @@ import pandas as pd
 from IPython.display import display, clear_output
 from ipywidgets import Output
 
-from pyccapt.calibration.calibration_tools import ion_selection, mc_plot
+from pyccapt.calibration.calibration import ion_selection, mc_plot
 
 
 def call_ion_selection(variables):
