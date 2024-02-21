@@ -19,13 +19,16 @@ def copy_xy_from_cobold_txt_to_hdf5(txt_path, save_path):
 
     xx = data[:, 6] / 10
     yy = data[:, 7] / 10
+    tof = data[:, 8]
 
     with h5py.File(save_path, 'r+') as file:
         del file['dld/x']
         del file['dld/y']
+        del file['dld/t']
 
         file.create_dataset('dld/x', data=xx)
         file.create_dataset('dld/y', data=yy)
+        file.create_dataset('dld/t', data=tof)
 
     print('finish')
 
@@ -127,8 +130,8 @@ def pulse_energy_calculator(ref_angle, ref_laser_intensity, pulse_energy):
     # return dld_pulse
 
 if __name__ == "__main__":
-    txt_path = '../../../tests/data/physics_experiment/data_207_Feb-01-2024_13-08_Powersweep.txt'
-    save_path = '../../../tests/data/physics_experiment/data_207_Feb-01-2024_13-08_Powersweep.h5'
+    txt_path = '../../../tests/data/physics_experiment/data_204_Feb-01-2024_11-51_Constant_power_W.txt'
+    save_path = '../../../tests/data/physics_experiment/data_204_Feb-01-2024_11-51_Constant_power_W.h5'
     copy_xy_from_cobold_txt_to_hdf5(txt_path, save_path)
 
     # file_path = '../../../tests/data/physics_experiment/data_130_Sep-19-2023_14-58_W_12fs.h5'
