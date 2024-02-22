@@ -53,6 +53,7 @@ calibration_deps = [
     "ase",
     "imageio",
 	"nglview",
+    "tqdm",
 ]
 
 setup(

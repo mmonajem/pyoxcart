@@ -222,7 +222,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
 
 def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_size=(5, 4), variables=None,
                   range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[],
-                  data_crop=False, draw_circle=False, save=True, figname=''):
+                  data_crop=False, draw_circle=False, save=False, figname=''):
     """
     Plot and crop the FDM with the option to select a region of interest.
 

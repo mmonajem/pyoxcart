@@ -58,6 +58,12 @@ def tof2mc(t: int, t0: int, V: float, xDet: int, yDet: int,
     Returns:
         mc: Mass-to-charge ratio (unit: Dalton)
     """
+    # check to see that the input are arrays
+    assert isinstance(t, np.ndarray), "t must be a NumPy array"
+    assert isinstance(V, np.ndarray), "V must be a NumPy array"
+    assert isinstance(V_pulse, np.ndarray), "V_pulse must be a NumPy array"
+    assert isinstance(xDet, np.ndarray), "xDet must be a NumPy array"
+    assert isinstance(yDet, np.ndarray), "yDet must be a NumPy array"
 
     try:
         # cThe value of α is greater than one, accounting for the fact thatThe value of a
