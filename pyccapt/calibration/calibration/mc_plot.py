@@ -42,6 +42,8 @@ class AptHistPlotter:
             mc_tof (numpy.ndarray): Array for mc or tof data.
             variables (share_variables.Variables): The global experiment variables.
         """
+        self.distance = None
+        self.prominence = None
         self.percent = None
         self.rectangle = None
         self.ax1 = None
@@ -273,7 +275,7 @@ class AptHistPlotter:
                 self.x[self.peaks][index_peak_max] / (self.x[round(self.peak_widths[3][index_peak_max])] -
                                                       self.x[round(self.peak_widths[2][index_peak_max])]))
             if mrp_all:
-                mrp_list = self.mrp_calculation()
+                mrp_list, mrp_list_all_peak = self.mrp_calculation()
             if background is not None:
                 if mrp_all:
                     if legend_mode == 'long':
@@ -315,7 +317,7 @@ class AptHistPlotter:
                 self.x[self.peaks[index_peak_max]] / (self.x[round(self.peak_widths[3][index_peak_max])] -
                                                       self.x[round(self.peak_widths[2][index_peak_max])]))
             if mrp_all:
-                mrp_list = self.mrp_calculation()
+                mrp_list, mrp_list_all_peak = self.mrp_calculation()
             if background is not None:
                 if mrp_all:
                     if legend_mode == 'long':
@@ -370,11 +372,13 @@ class AptHistPlotter:
 
         Returns:
             list: A list of the MRP values.
+            dict: A dictionary contains the percentage of MRP and the MRP value
         """
         mrp_range = [0.5, 0.1, 0.01]
-        mrp = []
-        for mrp_r in mrp_range:
-            mrp_r = 1 - mrp_r
+        mrp_peak = []
+        mrp = {}
+        for mrp_s in mrp_range:
+            mrp_r = 1 - mrp_s
             try:
                 peaks, properties = find_peaks(self.y, prominence=None, distance=None, height=0)
                 peak_width = peak_widths(self.y, peaks, rel_height=mrp_r, prominence_data=None)
@@ -385,9 +389,25 @@ class AptHistPlotter:
             index_peak_max = np.argmax(prominences[0])
             mrp_tmp = self.x[peaks][index_peak_max] / (self.x[round(peak_width[3][index_peak_max])] -
                                                        self.x[round(peak_width[2][index_peak_max])])
-            mrp.append(round(mrp_tmp, 2))
+            mrp_peak.append(round(mrp_tmp, 2))
 
-        return mrp
+            try:
+                peaks, properties = find_peaks(self.y, prominence=self.prominence, distance=self.distance, height=0)
+                peak_width = peak_widths(self.y, peaks, rel_height=mrp_r, prominence_data=None)
+                prominences = peak_prominences(self.y, peaks, wlen=None)
+            except ValueError:
+                print('Peak finding failed for MRP(%s)' % mrp_r)
+            mrp_tmp = []
+            peak_width_tmp = []
+            for i in range(len(peaks)):
+                mrp_tmp_2 = self.x[peaks][i] / (self.x[round(peak_width[3][i])] - self.x[round(peak_width[2][i])])
+                mrp_tmp.append(round(mrp_tmp_2, 2))
+                peak_width_tmp.append([self.x[round(peak_width[2][i])], self.x[round(peak_width[3][i])]])
+                # dictionary contains the percentage of MRP and the MRP value
+            mrp['MRP(%s)' % mrp_s] = mrp_tmp
+            mrp['peak_sides(%s)' % mrp_s] = peak_width_tmp
+
+        return mrp_peak, mrp
 
     def plot_horizontal_lines(self):
         """
@@ -543,8 +563,11 @@ class AptHistPlotter:
         """
         self.percent = percent
         percent = 100 - percent
+        self.prominence = prominence
+        self.distance = distance
         try:
-            self.peaks, self.properties = find_peaks(self.y, prominence=prominence, distance=distance, height=0)
+            self.peaks, self.properties = find_peaks(self.y, prominence=self.prominence, distance=self.distance,
+                                                     height=0)
             self.peak_widths = peak_widths(self.y, self.peaks, rel_height=(percent / 100), prominence_data=None)
             self.prominences = peak_prominences(self.y, self.peaks, wlen=None)
 
@@ -818,7 +841,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         mc_hist.adjust_labels()
         peaks, properties, peak_widths, prominences = mc_hist.find_peaks_and_widths(prominence=prominence,
                                                                                     distance=distance, percent=percent)
-        mc_hist.plot_hist_info_legend(label=label, bin=0.1, mrp_all=mrp_all, background=None, legend_mode='long',
+        mc_hist.plot_hist_info_legend(label=label, mrp_all=mrp_all, background=None, legend_mode='long',
                                       loc='right')
 
     elif plot_ranged_colors and plot_ranged_peak:
@@ -834,6 +857,8 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
     if save_fig:
         mc_hist.save_fig(label=label, fig_name=figname)
 
+    mrp_list, mrp_list_all_peak = mc_hist.mrp_calculation()
+
     if peaks is not None and print_info:
         index_max_ini = np.argmax(prominences[0])
         mrp = x[int(peaks[index_max_ini])] / (
@@ -841,17 +866,30 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         print('Mass resolving power for the highest peak at index %a (MRP --> m/m_2-m_1):' % index_max_ini,
               mrp)
         for i in range(len(peaks)):
-            print('Peaks ', i + 1,
-                  'is at location and height: ({:.2f}, {:.2f})'.format(x[int(peaks[i])], prominences[0][i]),
-                  'peak_x window sides ({:.1f}-maximum) are: ({:.2f}, {:.2f})'.format(percent,
-                                                                                      x[round(peak_widths[2][i])],
-                                                                                      x[round(peak_widths[3][i])]),
-                  '-> MRP: {:.2f}'.format(
-                      x[round(peaks[i])] / (x[round(peak_widths[3][i])] - x[round(peak_widths[2][i])])))
-
-    if not plot_show and peaks_find:
-        mrp_list = mc_hist.mrp_calculation()
-    else:
-        mrp_list = None
+            if not mrp_all:
+                print('Peaks ', i + 1,
+                      'is at location and height: ({:.2f}, {:.2f})'.format(x[int(peaks[i])], prominences[0][i]),
+                      'peak_x window sides ({:.0f} percent-maximum) are: ({:.2f}, {:.2f})'.format(percent,
+                                                                                                  x[round(
+                                                                                                      peak_widths[2][
+                                                                                                          i])],
+                                                                                                  x[round(
+                                                                                                      peak_widths[3][
+                                                                                                          i])]),
+                      '-> MRP: {:.2f}'.format(
+                          x[round(peaks[i])] / (x[round(peak_widths[3][i])] - x[round(peak_widths[2][i])])))
+            if mrp_all:
+                print('------------------------------')
+                for percent in [0.5, 0.1, 0.01]:
+                    print('Peaks ', i + 1,
+                          'is at location and height: ({:.2f}, {:.2f})'.format(x[int(peaks[i])], prominences[0][i]),
+                          'peak_x window sides ({:.0f} percent-maximum) are: ({:.2f}, {:.2f})'.format(percent * 100,
+                                                                                                      mrp_list_all_peak[
+                                                                                                          'peak_sides(%s)' % percent][
+                                                                                                          i][0],
+                                                                                                      mrp_list_all_peak[
+                                                                                                          'peak_sides(%s)' % percent][
+                                                                                                          i][1]),
+                          '-> MRP: {:.2f}'.format(mrp_list_all_peak['MRP(%s)' % percent][i]))
 
     return mrp_list

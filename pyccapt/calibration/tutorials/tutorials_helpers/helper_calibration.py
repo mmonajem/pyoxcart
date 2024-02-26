@@ -117,7 +117,9 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
         mask_temporal = np.logical_and(
             (variables.mc_calib > variables.selected_x1),
             (variables.mc_calib < variables.selected_x2)
+
         )
+        lim_tof.value = 400
     sample_size_v = int(len(variables.dld_high_voltage[mask_temporal]) / 100)
 
     sample_size_v = widgets.IntText(value=sample_size_v, description='sample size:', layout=label_layout)

@@ -1,6 +1,8 @@
 import h5py
 import numpy as np
 import pandas as pd
+import scipy.io
+from scipy.interpolate import interp1d
 
 def copy_xy_from_cobold_txt_to_hdf5(txt_path, save_path):
     """
@@ -130,10 +132,49 @@ def pulse_energy_calculator(ref_angle, ref_laser_intensity, pulse_energy):
     # return dld_pulse
 
 
+def laser_pulse_energy_from_mat_file(mat_path, source_file, target_file):
+    laser_table = scipy.io.loadmat(mat_path)
+
+    angle_val = laser_table['angle_vals'].flatten()
+    P_L_val = laser_table['P_L_vals'].flatten()
+
+    # Take the logarithm of both angle and P_L
+    log_angle_val = np.log(angle_val)
+    log_P_L_val = np.log(P_L_val)
+
+    # Create an interpolation function
+    interp_func = interp1d(log_angle_val, log_P_L_val, kind='linear', fill_value="extrapolate")
+
+    # Create an interpolation function
+    # interp_func = interp1d(angle_val, P_L_val, kind='log', fill_value="extrapolate")
+
+    with h5py.File(source_file, 'r') as data:
+        laser_angle = data['dld/laser_intensity'][:]
+    # laser_P_L = interp_func(laser_angle)
+    # Apply interpolation on the logarithmic scale
+    log_laser_P_L = interp_func(np.log(laser_angle))
+    # Exponentiate to get back to the original scale
+    laser_P_L = np.exp(log_laser_P_L)
+    laser_P_L = laser_P_L * 1e-3 / 2 / 100e3
+
+    with h5py.File(target_file, 'r+') as data:
+        del data['dld/pulse']
+        data.create_dataset("dld/pulse", data=laser_P_L, dtype='f')
+
+
+
+
+
 if __name__ == "__main__":
-    txt_path = '../../../tests/data/physics_experiment/data_207_Feb-01-2024_13-08_Powersweep.txt'
-    save_path = '../../../tests/data/physics_experiment/data_207_Feb-01-2024_13-08_Powersweep.h5'
+    txt_path = '../../../tests/data/physics_experiment/data_204_Feb-01-2024_11-51_Constant_power_W.txt'
+    save_path = '../../../tests/data/physics_experiment/data_204_Feb-01-2024_11-51_Constant_power_W.h5'
     copy_xy_from_cobold_txt_to_hdf5(txt_path, save_path)
+    # mat_path = 'T:/Monajem/physics_atom_probe_data/Backup_data/Power_vals_calibration.mat'
+    # source_file = ('T:/Monajem/physics_atom_probe_data/Backup_data/Measurements_2024_02_01/'
+    #                '204_Feb-01-2024_11-51_Constant_power_W/data_204_Feb-01-2024_11-51_Constant_power_W.h5')
+    # target_file = '../../../tests/data/physics_experiment/data_204_Feb-01-2024_11-51_Constant_power_W.h5'
+    #
+    # laser_pulse_energy_from_mat_file(mat_path, source_file, target_file)
 
     # file_path = '../../../tests/data/physics_experiment/data_130_Sep-19-2023_14-58_W_12fs.h5'
     # (at 242°) corresponds to an intensity of 1.4e13 W/cm^2.
