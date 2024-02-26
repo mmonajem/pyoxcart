@@ -41,7 +41,10 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc, variables
 			except:
 				dld_group_storage = data_tools.load_data(dataset_path, tdc, mode='processed')
 				print('The data is loaded in processed mode')
-				mode = 'processed'
+				if 'x (nm)' not in dld_group_storage:
+					mode = 'raw'
+				else:
+					mode = 'processed'
 		else:
 			dld_group_storage = data_tools.load_data(dataset_path, tdc)
 

@@ -266,11 +266,11 @@ def find_consecutive_sequences_seperatly(start_counter, channel, time_data, high
 	lenght_result_other_odd = sum(item['length'] for item in result_other_odd)
 	lenght_result_other_even = sum(item['length'] for item in result_other_even)
 
-	print(f"Length of 4 channel: {lenght_result_4}, {lenght_result_4 / len(start_counter) * 100} %")
+	print(f"Length of 4 channel: {lenght_result_4 / 4}, {lenght_result_4 / len(start_counter) * 100} %")
 	print(
-		f"Length of 4 channel (invalid): {length_result_4_invalid}, {length_result_4_invalid / len(start_counter) * 100} %")
-	print(f"Length of 3 channel: {lenght_result_3}, {lenght_result_3 / len(start_counter) * 100} %")
-	print(f"Length of 2 channel: {lenght_result_2}, {lenght_result_2 / len(start_counter) * 100} %")
+		f"Length of 4 channel (invalid): {length_result_4_invalid / 4}, {length_result_4_invalid / len(start_counter) * 100} %")
+	print(f"Length of 3 channel: {lenght_result_3 / 3}, {lenght_result_3 / len(start_counter) * 100} %")
+	print(f"Length of 2 channel: {lenght_result_2 / 2}, {lenght_result_2 / len(start_counter) * 100} %")
 	print(f"Length of 1 channel: {lenght_result_1}, {lenght_result_1 / len(start_counter) * 100} %")
 	print(
 		f"Length of groups of four channel (multihit): {lenght_result_other_even}, {lenght_result_other_even / len(start_counter) * 100} %")
@@ -362,9 +362,12 @@ def find_consecutive_sequences(start_counter, channel, time_data, high_voltage, 
 							j = 0
 							continue
 					j = j + 1
-					time = [time[idx] for idx in index]
-					ch = ch_sorted
-					sc = [sc[idx] for idx in index]
+				time = [time[idx] for idx in index]
+				ch = ch_sorted
+				sc = [sc[idx] for idx in index]
+
+				if ch[-1] != 3 or ch[-2] != 2 or ch[-3] != 1 or ch[-4] != 0:
+					valid_event.append(False)
 
 			result.append({
 				'channels': ch,
@@ -411,6 +414,8 @@ def find_consecutive_sequences(start_counter, channel, time_data, high_voltage, 
 		for i in range(len(result)):
 			if result[i]['length'] % 4 != 0 and result[i]['length'] > 4:
 				lenght_result_other_odd += result[i]['length']
+		# length of valid events if results that has lenth bigger than 4
+		lenght_of_valid_even_events = len([x for x in result if x['length'] > 4 and x['valid_event'] == [True]])
 		print(f"Length of 4 channel: {lenght_result_4}, {lenght_result_4 * 4 / len(start_counter) * 100} %")
 		print(
 			f"Length of 4 channel (invalid): {length_result_4_invalid}, {length_result_4_invalid * 4 / len(start_counter) * 100} %")
