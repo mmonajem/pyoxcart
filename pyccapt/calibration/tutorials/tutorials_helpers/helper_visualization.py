@@ -48,6 +48,7 @@ def call_visualization(variables):
     plot_ranged_colors = widgets.Dropdown(options=[('False', False), ('True', True)])
     plot_ranged_peak = widgets.Dropdown(options=[('False', False), ('True', True)])
     target_mode = widgets.Dropdown(options=[('mc', 'mc'), ('mc_uc', 'mc_uc'), ('tof_c', 'tof_c'), ('tof', 'tof')])
+    print_info = widgets.Dropdown(options=[('False', False), ('True', True)])
     bin_size_pm = widgets.FloatText(value=0.1)
     lim_mc_pm = widgets.IntText(value=150)
     prominence = widgets.IntText(value=50)
@@ -58,7 +59,6 @@ def call_visualization(variables):
     figure_mc_size_x_mc = widgets.FloatText(value=9.0)
     figure_mc_size_y_mc = widgets.FloatText(value=5.0)
     save_mc = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
-    plot_ranged_ions = widgets.Dropdown(options=[('False', False), ('True', True)], value=False)
 
     range_sequence_mc = widgets.Textarea(value='[0,0]')
     range_detx_mc = widgets.Textarea(value='[0,0]')
@@ -106,7 +106,7 @@ def call_visualization(variables):
                               plot_ranged_peak=plot_ranged_peak.value, mrp_all=mrp_all.value,
                               range_sequence=range_sequence, range_mc=range_mc, range_detx=range_detx,
                               range_dety=range_dety, range_x=range_x, range_y=range_y, range_z=range_z,
-                              print_info=False, figure_size=figure_size, save_fig=save_mc.value)
+                              print_info=print_info.value, figure_size=figure_size, save_fig=save_mc.value)
 
         plot_mc_button.disabled = False
 
@@ -624,6 +624,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value="Peak find plot:", layout=label_layout), peak_find_plot]),
         widgets.HBox([widgets.Label(value="Plot ranged colors:", layout=label_layout), plot_ranged_colors]),
         widgets.HBox([widgets.Label(value="Plot ranged peak:", layout=label_layout), plot_ranged_peak]),
+        widgets.HBox([widgets.Label(value="Print info:", layout=label_layout), print_info]),
         widgets.HBox([widgets.Label(value="Bins size:", layout=label_layout), bin_size_pm]),
         widgets.HBox([widgets.Label(value="Limit mc:", layout=label_layout), lim_mc_pm]),
         widgets.HBox([widgets.Label(value="MRP all(1%, 10%, 50%):", layout=label_layout), mrp_all]),
