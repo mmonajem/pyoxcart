@@ -293,22 +293,18 @@ class AptHistPlotter:
                         txt = 'MRP(FWHM): %s' % (mrp)
             else:
                 # annotation with range stats
-                upperLim = 4.5  # Da
-                lowerLim = 3.5  # Da
-                mask = np.logical_and((self.x >= lowerLim), (self.x <= upperLim))
-                BG4 = np.sum(self.y[np.array(mask[:-1])]) / (upperLim - lowerLim)
-                BG4 = BG4 / len(self.mc_tof) * 1E6
+
                 if mrp_all:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$ \nBG@4: %s ppm/Da\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
-                              % (self.bin_width, len(self.mc_tof) / 1000000, round(BG4), mrp_list[0], mrp_list[1],
+                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
+                              % (self.bin_width, len(self.mc_tof) / 1000000, mrp_list[0], mrp_list[1],
                                  mrp_list[2])
                     elif legend_mode == 'short':
                         txt = 'MRP(FWHM): %s\nMRP(FW10M): %s\nMRP(FW1M): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
                 else:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nBG@4: %s ppm/Da\nFW%d%%M: %s' \
-                              % (self.bin_width, (len(self.mc_tof) / 1000000), round(BG4), self.percent, mrp)
+                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nFW%d%%M: %s' \
+                              % (self.bin_width, (len(self.mc_tof) / 1000000), self.percent, mrp)
                     elif legend_mode == 'short':
                         txt = 'MRP(FWHM): %s' % (mrp)
 
@@ -333,23 +329,17 @@ class AptHistPlotter:
                     elif legend_mode == 'short':
                         txt = 'MRP(FWHM): %s' % (mrp)
             else:
-                # annotation with range stats
-                upperLim = 50.5  # ns
-                lowerLim = 49.5  # ns
-                mask = np.logical_and((self.x >= lowerLim), (self.x <= upperLim))
-                BG50 = np.sum(self.y[np.array(mask[:-1])]) / (upperLim - lowerLim)
-                BG50 = BG50 / len(self.mc_tof) * 1E6
                 if mrp_all:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nBG@50: %s ppm/ns\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
-                              % (self.bin_width, len(self.mc_tof) / 1000000, round(BG50), mrp_list[0], mrp_list[1],
+                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
+                              % (self.bin_width, len(self.mc_tof) / 1000000, mrp_list[0], mrp_list[1],
                                  mrp_list[2])
                     elif legend_mode == 'short':
                         txt = 'MRP(FWHM): %s\nMRP(FW10M): %s\nMRP(FW1M): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
                 else:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nBG@50: %s ppm/ns\nFW%d%%M: %s' \
-                              % (self.bin_width, len(self.mc_tof) / 1000000, round(BG50), self.percent, mrp)
+                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nFW%d%%M: %s' \
+                              % (self.bin_width, len(self.mc_tof) / 1000000, self.percent, mrp)
                     elif legend_mode == 'short':
                         txt = 'MRP(FWHM): %s' % (mrp)
 
@@ -458,6 +448,19 @@ class AptHistPlotter:
             fit_2, params_2 = pybaselines.classification.cwt_br(self.y, poly_order=poly_order,
                                                                 num_std=num_std,
                                                                 tol=tol)
+        if mode == 'manual@4':
+            upperLim = 4.5  # Da
+            lowerLim = 3.5  # Da
+            mask = np.logical_and((self.x >= lowerLim), (self.x <= upperLim))
+            BG4 = np.sum(self.y[np.array(mask[:-1])]) / (upperLim - lowerLim)
+            self.background_ppm = BG4 / len(self.mc_tof) * 1E6
+        if mode == 'manual@100':
+            upperLim = 100.5
+            lowerLim = 99.5
+            mask = np.logical_and((self.x >= lowerLim), (self.x <= upperLim))
+            BG100 = np.sum(self.y[np.array(mask[:-1])]) / (upperLim - lowerLim)
+            self.background_ppm = BG100 / len(self.mc_tof) * 1E6
+
         if mode == 'selective_mask_t':
             if non_peaks is None:
                 print('Please give the non peaks')
