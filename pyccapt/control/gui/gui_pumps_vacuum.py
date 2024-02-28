@@ -6,7 +6,7 @@ import time
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer, pyqtSignal, QObject
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QPixmap, QFont
 
 # Local module and scripts
 from pyccapt.control.control import share_variables, read_files
@@ -354,10 +354,14 @@ class Ui_Pumps_Vacuum(object):
 		self.vacuum_cryo_load_lock.setDigitCount(8)
 		self.vacuum_cryo_load_lock_back.setDigitCount(8)
 		self.temp_stage.setDigitCount(8)
+		self.temp_cryo_head.setDigitCount(8)
+		self.target_tempreature.setValue(40)
 
 		###
-		self.emitter.temp.connect(self.update_temperature)
+		self.emitter.temp_stage.connect(self.update_temperature_stage)
+		self.emitter.temp_cryo_head.connect(self.update_temperature_cryo)
 		self.emitter.vacuum_main.connect(self.update_vacuum_main)
+		self.set_temperature.clicked.connect(self.update_target_temperature)
 		self.emitter.vacuum_buffer.connect(self.update_vacuum_buffer)
 		self.emitter.vacuum_buffer_back.connect(self.update_vacuum_buffer_back)
 		self.emitter.vacuum_load_lock_back.connect(self.update_vacuum_load_back)
@@ -366,6 +370,11 @@ class Ui_Pumps_Vacuum(object):
 		self.emitter.vacuum_cryo_load_lock_back.connect(self.update_vacuum_cryo_load_lock_back)
 		# Connect the bool_flag_while_loop signal to a slot
 		self.emitter.bool_flag_while_loop.emit(True)
+
+		# Create a bold font
+		font = QFont()
+		font.setItalic(True)
+		self.vacuum_main.setFont(font)
 
 		# Thread for reading gauges
 		if self.conf['gauges'] == "on":
@@ -410,11 +419,11 @@ class Ui_Pumps_Vacuum(object):
 		self.label_212.setText(_translate("Pumps_Vacuum", "Main Chamber (mBar)"))
 		self.Error.setText(_translate("Pumps_Vacuum", "<html><head/><body><p><br/></p></body></html>"))
 
-	def update_temperature(self, value):
+	def update_temperature_stage(self, value):
 		"""
         Update the temperature value in the GUI
         Args:
-            value: the temperature value
+            value: the temperature value of stage
 
         Return:
             None
@@ -423,6 +432,38 @@ class Ui_Pumps_Vacuum(object):
 			self.temp_stage.display('Error')
 		else:
 			self.temp_stage.display(value)
+
+	def update_temperature_cryo(self, value):
+		"""
+        Update the temperature value in the GUI
+        Args:
+            value: the temperature value of cryo head
+
+        Return:
+            None
+        """
+		if value == -1:
+			self.temp_cryo_head.display('Error')
+		else:
+			self.temp_cryo_head.display(value)
+
+	def update_target_temperature(self, ):
+		"""
+		Update the temperature value in the GUI
+		Args:
+			None
+
+		Return:
+			None
+		"""
+
+		if self.target_tempreature.value() > self.conf['max_temperature']:
+			self.error_message("!!! Highest possible tempreture is %s !!!" % self.conf['max_temperature'])
+		elif self.target_tempreature.value() < self.conf['min_temperature']:
+			self.error_message("!!! Lowest possible tempreture is %s !!!" % self.conf['min_temperature'])
+		else:
+			self.variables.set_temperature = self.target_tempreature.value()
+
 
 	def update_vacuum_main(self, value):
 		"""
@@ -635,7 +676,8 @@ class SignalEmitter(QObject):
 	Signal emitter class for emitting signals related to vacuum and pumps control.
 	"""
 
-	temp = pyqtSignal(float)
+	temp_stage = pyqtSignal(float)
+	temp_cryo_head = pyqtSignal(float)
 	vacuum_main = pyqtSignal(float)
 	vacuum_buffer = pyqtSignal(float)
 	vacuum_buffer_back = pyqtSignal(float)

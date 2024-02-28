@@ -129,6 +129,7 @@ class Variables:
         self.ns.index_experiment_in_text_line = 0
         self.ns.flag_cameras_take_screenshot = False
         self.ns.temperature = 0
+        self.ns.set_temperature = 0
         self.ns.vacuum_main = 0
         self.ns.vacuum_buffer = 0
         self.ns.vacuum_buffer_backing = 0
@@ -1079,6 +1080,16 @@ class Variables:
     def temperature(self, value):
         with self.lock_vacuum_tmp:
             self.ns.temperature = value
+
+    @property
+    def set_temperature(self):
+        return self.ns.set_temperature
+
+    @set_temperature.setter
+    def set_temperature(self, value):
+        with self.lock_vacuum_tmp:
+            self.ns.set_temperature = value
+
 
     @property
     def vacuum_main(self):
