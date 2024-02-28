@@ -127,6 +127,7 @@ def initialize_cryovac(com_port_cryovac, variables):
 		None
 	"""
 	output = command_cryovac('getOutput', com_port_cryovac)
+	time.sleep(0.1)
 	variables.temperature = float(output.split()[0].replace(',', ''))
 
 
@@ -210,6 +211,7 @@ def state_update(conf, variables, emitter):
 	Returns:
 		None
 	"""
+
 	if conf['gauges'] == "on":
 		if conf['COM_PORT_gauge_mc'] != "off":
 			try:
@@ -265,6 +267,7 @@ def state_update(conf, variables, emitter):
 		vacuum_load_lock_backing = 'N/A'
 		vacuum_cryo_load_lock = 'N/A'
 		vacuum_cryo_load_lock_backing = 'N/A'
+		set_temperature_tmp = 0
 		while emitter.bool_flag_while_loop:
 			if conf['cryo'] == "on":
 				try:
@@ -274,13 +277,24 @@ def state_update(conf, variables, emitter):
 					print("cannot read the cryo temperature")
 					output = '0'
 				try:
-					temperature = float(output.split()[0].replace(',', ''))
+					temperature_stage = float(output.split()[0].replace(',', ''))
+					temperature_cryo_head = float(output.split()[2].replace(',', ''))
 				except Exception as e:
 					print(e)
 					# Handle the case where response is not a valid float
 					temperature = -1
-				variables.temperature = temperature
-				emitter.temp.emit(temperature)
+				variables.temperature = temperature_stage
+				emitter.temp_stage.emit(temperature_stage)
+				emitter.temp_cryo_head.emit(temperature_cryo_head)
+
+				if variables.set_temperature != set_temperature_tmp:
+					try:
+						res = command_cryovac(f'Out1.PID.Setpoint {variables.set_temperature}', com_port_cryovac)
+						set_temperature_tmp = variables.set_temperature
+					except Exception as e:
+						print(e)
+						print("cannot set the cryo temperature")
+
 			if conf['COM_PORT_gauge_mc'] != "off":
 				value, _ = tpg.pressure_gauge(2)
 				try:
