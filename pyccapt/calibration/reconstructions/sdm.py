@@ -52,6 +52,7 @@ def sdm(particles, bin_size, variables=None, normalize=False, reference_point=No
 
     if reference_point is not None and box_dimensions is not None:
         if box_dimensions != [0, 0, 0]:
+            print('Cropping the data based on the reference point and box dimensions.')
             if isinstance(reference_point, list):
                 reference_point = np.array(reference_point)
             if isinstance(box_dimensions, list):
