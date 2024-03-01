@@ -13,7 +13,6 @@ from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from pyccapt.calibration.data_tools import data_tools, selectors_data
 
 
-
 def fetch_dataset_from_dld_grp(filename: str, extract_mode='dld') -> pd.DataFrame:
     """
     Fetches dataset from HDF5 file.
@@ -169,14 +168,17 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     if pulse_plot:
         ax3 = ax1.twinx()
         ax3.spines.right.set_position(("axes", 1.13))
-        pulse_curve, = ax3.plot(xaxis, pulse, color='fuchsia', linewidth=2)
         if pulse_mode == 'laser':
+            # pulse = pulse * 1e12
+            pulse_curve, = ax3.plot(xaxis, pulse, color='fuchsia', linewidth=2)
             ax3.set_ylabel("Pulse Energy [$pJ$]", color="fuchsia", fontsize=10)
             range = max(pulse) - min(pulse)
             ax3.set_ylim([min(pulse) - range * 0.1, max(pulse) + range * 0.1])
             ax3.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         elif pulse_mode == 'voltage':
-            ax3.set_ylabel("Pulse Voltage (V)", color="fuchsia", fontsize=10)
+            pulse = pulse / 1000
+            pulse_curve, = ax3.plot(xaxis, pulse, color='fuchsia', linewidth=2)
+            ax3.set_ylabel("Pulse Voltage [kV]", color="fuchsia", fontsize=10)
             ax3.set_ylim([min(pulse), max(pulse) + 0.5])
         ax3.spines['right'].set_color('fuchsia')  # Set Y-axis color to red
         ax3.yaxis.label.set_color('fuchsia')  # Set Y-axis label color to red

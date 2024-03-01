@@ -166,15 +166,15 @@ def laser_pulse_energy_from_mat_file(mat_path, source_file, target_file):
 
 
 if __name__ == "__main__":
-    txt_path = '../../../tests/data/physics_experiment/data_204_Feb-01-2024_11-51_Constant_power_W.txt'
-    save_path = '../../../tests/data/physics_experiment/data_204_Feb-01-2024_11-51_Constant_power_W.h5'
+    txt_path = '../../../tests/data/physics_experiment/data_115_Jul-27-2022_17-44_Powersweep3.txt'
+    save_path = '../../../tests/data/physics_experiment/data_115_Jul-27-2022_17-44_Powersweep3.h5'
     copy_xy_from_cobold_txt_to_hdf5(txt_path, save_path)
-    # mat_path = 'T:/Monajem/physics_atom_probe_data/Backup_data/Power_vals_calibration.mat'
-    # source_file = ('T:/Monajem/physics_atom_probe_data/Backup_data/Measurements_2024_02_01/'
-    #                '204_Feb-01-2024_11-51_Constant_power_W/data_204_Feb-01-2024_11-51_Constant_power_W.h5')
-    # target_file = '../../../tests/data/physics_experiment/data_204_Feb-01-2024_11-51_Constant_power_W.h5'
-    #
-    # laser_pulse_energy_from_mat_file(mat_path, source_file, target_file)
+    mat_path = 'T:/Monajem/physics_atom_probe_data/Backup_data/Power_vals_calibration.mat'
+    source_file = ('T:/Monajem/physics_atom_probe_data/Backup_data/Measurements_2024_02_01/'
+                   '204_Feb-01-2024_11-51_Constant_power_W/data_204_Feb-01-2024_11-51_Constant_power_W.h5')
+    target_file = '../../../tests/data/physics_experiment/data_204_Feb-01-2024_11-51_Constant_power_W.h5'
+
+    laser_pulse_energy_from_mat_file(mat_path, source_file, target_file)
 
     # file_path = '../../../tests/data/physics_experiment/data_130_Sep-19-2023_14-58_W_12fs.h5'
     # (at 242°) corresponds to an intensity of 1.4e13 W/cm^2.

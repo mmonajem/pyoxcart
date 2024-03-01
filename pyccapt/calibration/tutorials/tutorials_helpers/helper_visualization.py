@@ -49,6 +49,7 @@ def call_visualization(variables):
     plot_ranged_peak = widgets.Dropdown(options=[('False', False), ('True', True)])
     target_mode = widgets.Dropdown(options=[('mc', 'mc'), ('mc_uc', 'mc_uc'), ('tof_c', 'tof_c'), ('tof', 'tof')])
     print_info = widgets.Dropdown(options=[('False', False), ('True', True)])
+    legend_widget = widgets.Dropdown(options=[('long', 'long'), ('short', 'short')])
     bin_size_pm = widgets.FloatText(value=0.1)
     lim_mc_pm = widgets.IntText(value=150)
     prominence = widgets.IntText(value=50)
@@ -106,7 +107,8 @@ def call_visualization(variables):
                               plot_ranged_peak=plot_ranged_peak.value, mrp_all=mrp_all.value,
                               range_sequence=range_sequence, range_mc=range_mc, range_detx=range_detx,
                               range_dety=range_dety, range_x=range_x, range_y=range_y, range_z=range_z,
-                              print_info=print_info.value, figure_size=figure_size, save_fig=save_mc.value)
+                              print_info=print_info.value, figure_size=figure_size, save_fig=save_mc.value,
+                              legend_mode=legend_widget.value)
 
         plot_mc_button.disabled = False
 
@@ -629,6 +631,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value="Limit mc:", layout=label_layout), lim_mc_pm]),
         widgets.HBox([widgets.Label(value="MRP all(1%, 10%, 50%):", layout=label_layout), mrp_all]),
         widgets.HBox([widgets.Label(value="MRP Percent:", layout=label_layout), percent]),
+        widgets.HBox([widgets.Label(value="Legend mode:", layout=label_layout), legend_widget]),
         widgets.HBox([widgets.Label(value="Peak prominance:", layout=label_layout), prominence]),
         widgets.HBox([widgets.Label(value="Peak distance:", layout=label_layout), distance]),
         widgets.HBox([widgets.Label(value="Fig name:", layout=label_layout), figname_mc]),
@@ -647,6 +650,7 @@ def call_visualization(variables):
     tab1 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Fraction:', layout=label_layout), frac_fdm_widget]),
         widgets.HBox([widgets.Label(value='Bins:', layout=label_layout), widgets.HBox([bins_x_fdm, bins_y_fdm])]),
+        widgets.HBox([widgets.Label(value='Axis mode:', layout=label_layout), axis_mode_fdm]),
         widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_fdm_widget]),
         widgets.HBox([widgets.Label(value='Save:', layout=label_layout), save_fdm_widget]),
         widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
