@@ -14,17 +14,15 @@ common_deps = [
     "matplotlib",
     "pandas",
     "PyQt6",
-    "networkx",
     "numba",
     "requests",
     "wget",
-    "h5py",
-    "tables",
     "deepdiff",
 ]
 
 control_deps = [
     "opencv-python",
+    "networkx",
     "pyqt6-tools",
     "pyqtgraph",
     "nidaqmx",
@@ -33,6 +31,8 @@ control_deps = [
     "pyserial",
     "deepdiff",
     "scipy",
+    "h5py",
+    "tables",
     "mcculw",
 ]
 
@@ -43,7 +43,6 @@ calibration_deps = [
     "vispy",
     "plotly",
     "faker",
-    "jupyterlab",
     "scipy",
     "nodejs",
     "adjustText",
@@ -73,7 +72,7 @@ setup(
     description='A package for controlling APT experiment and calibrating the APT data',
     long_description=open('README.md').read() if exists('README.md') else '',
     long_description_content_type="text/markdown",
-    install_requires=common_deps + control_deps + calibration_deps,
+    install_requires=common_deps + calibration_deps,
     # not to be confused with definitions in pyproject.toml [build-system]
     setup_requires=["pytest-runner"],
     python_requires=">=3.9",
