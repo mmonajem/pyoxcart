@@ -51,7 +51,6 @@ calibration_deps = [
     "pymatgen",
     "ase",
     "imageio",
-	"nglview",
 ]
 
 setup(
