@@ -1,12 +1,13 @@
 import re
+import struct
 import sys
 from enum import Enum
 from typing import Union, Tuple, Any
+from warnings import warn
+
+import matplotlib.colors as cols
 import numpy as np
 import pandas as pd
-import struct
-from warnings import warn
-import matplotlib.colors as cols
 from vispy import app, scene
 
 
@@ -68,9 +69,6 @@ def read_epos(file_path):
         'pslep': d[9::11],
         'ipp': d[10::11]
     })
-    # Convert the units from mm to cm
-    epos['det_x (cm)'] = epos['det_x (cm)']
-    epos['det_y (cm)'] = epos['det_y (cm)']
     return epos
 
 

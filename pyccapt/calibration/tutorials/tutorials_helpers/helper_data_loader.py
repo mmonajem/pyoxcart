@@ -8,6 +8,26 @@ from pyccapt.calibration.mc import tof_tools
 
 
 def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc, variables, processing_mode=True):
+	if tdc == 'pyccapt':
+		# check that the dataset is a valid pyccapt dataset with .h5 extension
+		if not dataset_path.endswith('.h5'):
+			raise ValueError('The dataset should be a valid pyccapt dataset with .h5 extension')
+	if tdc == 'leap_epos':
+		# check that the dataset is a valid leap_epos dataset with .h5 extension
+		if not dataset_path.endswith('.epos'):
+			raise ValueError('The dataset should be a valid leap_epos dataset with .epos extension')
+	if tdc == 'pos':
+		# check that the dataset is a valid pos dataset with .pos extension
+		if not dataset_path.endswith('.pos'):
+			raise ValueError('The dataset should be a valid pos dataset with .pos extension')
+	if tdc == 'leap_apt':
+		# check that the dataset is a valid lep_apt dataset with .lep extension
+		if not dataset_path.endswith('.apt'):
+			raise ValueError('The dataset should be a valid lep_apt dataset with .lep extension')
+	if tdc == 'ato_v6':
+		# check that the dataset is a valid ato_v6 dataset with .h5 extension
+		if not dataset_path.endswith('.ato'):
+			raise ValueError('The dataset should be a valid ato_v6 dataset with .ato extension')
 
 	if processing_mode:
 		# Calculate the maximum possible time of flight (TOF)
