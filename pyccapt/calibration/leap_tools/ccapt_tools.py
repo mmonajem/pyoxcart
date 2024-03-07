@@ -108,8 +108,6 @@ def epos_to_ccapt(file_path):
 
     """
     epos = leap_tools.read_epos(file_path)
-    epos['det_x (cm)'] = epos['det_x (cm)'] / 10
-    epos['det_y (cm)'] = epos['det_y (cm)'] / 10
     length = len(epos['m/n (Da)'].to_numpy())
     ccapt = pd.DataFrame({'x (nm)': epos['x (nm)'].to_numpy(),
                           'y (nm)': epos['y (nm)'].to_numpy(),
@@ -120,8 +118,8 @@ def epos_to_ccapt(file_path):
                           'pulse': epos['pulse (V)'].to_numpy(),
                           't (ns)': epos['TOF (ns)'].to_numpy(),
                           't_c (ns)': np.zeros(length),
-                          'x_det (cm)': epos['det_x (cm)'].to_numpy(),
-                          'y_det (cm)': epos['det_y (cm)'].to_numpy(),
+                          'x_det (cm)': epos['det_x (mm)'].to_numpy() / 10,
+                          'y_det (cm)': epos['det_y (mm)'].to_numpy() / 10,
                           'pulse_pi': epos['pslep'].to_numpy(),
                           'ion_pp': epos['ipp'].to_numpy(),
                           'start_counter': np.zeros(length, dtype=int),

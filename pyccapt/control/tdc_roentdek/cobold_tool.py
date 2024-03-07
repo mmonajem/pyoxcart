@@ -1,12 +1,13 @@
 import h5py
+import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import scipy.io
 from scipy.interpolate import interp1d
 
-def copy_xy_from_cobold_txt_to_hdf5(txt_path, save_path):
+
+def copy_xytof_from_cobold_txt_to_hdf5(txt_path, save_path):
     """
-    Copy x and y data from Cobold text file to an existing HDF5 file.
+    Copy x, y, tof, multi event data from Cobold text file to an existing HDF5 file.
 
     Args:
         txt_path (str): Path to the Cobold text file.
@@ -15,6 +16,9 @@ def copy_xy_from_cobold_txt_to_hdf5(txt_path, save_path):
     Returns:
         None
     """
+
+    def append_number_at_index(array, index, number):
+        return np.concatenate((array[:index], [number], array[index:]))
     # Read data from text file
     with open(txt_path, 'r') as f:
         data = np.loadtxt(f)
@@ -23,54 +27,81 @@ def copy_xy_from_cobold_txt_to_hdf5(txt_path, save_path):
     yy = data[:, 7] / 10
     tof = data[:, 8]
 
+    xx_2 = data[:, 10] / 10
+    yy_2 = data[:, 11] / 10
+    tof_2 = data[:, 12]
+
+    xx_3 = data[:, 14] / 10
+    yy_3 = data[:, 15] / 10
+    tof_3 = data[:, 16]
+
+    xx_4 = data[:, 18] / 10
+    yy_4 = data[:, 19] / 10
+    tof_4 = data[:, 20]
     with h5py.File(save_path, 'r+') as file:
         del file['dld/x']
         del file['dld/y']
         del file['dld/t']
+        del file['dld/start_counter']
 
         file.create_dataset('dld/x', data=xx)
         file.create_dataset('dld/y', data=yy)
         file.create_dataset('dld/t', data=tof)
+        file.create_dataset('dld/start_counter', data=np.arange(len(xx)), dtype='i')
+
+        x = file['dld/x'][:]
+        y = file['dld/y'][:]
+        t = file['dld/t'][:]
+        dc_v = file['dld/high_voltage'][:]
+        pulse = file['dld/pulse'][:]
+        sc = file['dld/start_counter'][:]
+    print('multi event length:', len(tof_2[tof_2 != 0]) + len(tof_3[tof_3 != 0]) + len(tof_4[tof_4 != 0]))
+    index = 0
+    for i in range(len(tof_2)):
+        if tof_2[i] != 0:
+            x = append_number_at_index(x, index + 1, xx_2[i])
+            y = append_number_at_index(y, index + 1, yy_2[i])
+            t = append_number_at_index(t, index + 1, tof_2[i])
+            dc_v = append_number_at_index(dc_v, index + 1, dc_v[index])
+            pulse = append_number_at_index(pulse, index + 1, pulse[index])
+            sc = append_number_at_index(sc, index + 1, sc[index])
+            index = index + 1
+        if tof_3[i] != 0:
+            x = append_number_at_index(x, index + 1, xx_3[i])
+            y = append_number_at_index(y, index + 1, yy_3[i])
+            t = append_number_at_index(t, index + 1, tof_3[i])
+            dc_v = append_number_at_index(dc_v, index + 1, dc_v[index])
+            pulse = append_number_at_index(pulse, index + 1, pulse[index])
+            sc = append_number_at_index(sc, index + 1, sc[index])
+            index = index + 1
+        if tof_4[i] != 0:
+            x = append_number_at_index(x, index + 1, xx_4[i])
+            y = append_number_at_index(y, index + 1, yy_4[i])
+            t = append_number_at_index(t, index + 1, tof_4[i])
+            dc_v = append_number_at_index(dc_v, index + 1, dc_v[index])
+            pulse = append_number_at_index(pulse, index + 1, pulse[index])
+            sc = append_number_at_index(sc, index + 1, sc[index])
+        index = index + 1
+        if ((i + 1) / len(tof_2)) * 100 % 10 == 0:
+            print("Processed {} percent".format(int(((i + 1) / len(tof_2)) * 100)))
+
+    with h5py.File(save_path, 'r+') as file:
+        del file['dld/x']
+        del file['dld/y']
+        del file['dld/t']
+        del file['dld/high_voltage']
+        del file['dld/pulse']
+        del file['dld/start_counter']
+
+        file.create_dataset('dld/x', data=x)
+        file.create_dataset('dld/y', data=y)
+        file.create_dataset('dld/t', data=t)
+        file.create_dataset('dld/high_voltage', data=dc_v)
+        file.create_dataset('dld/pulse', data=pulse)
+        file.create_dataset('dld/start_counter', data=sc)
 
     print('finish')
 
-
-def cobold_txt_to_hdf5(txt_path, save_path):
-    """
-    Convert Cobold text data to an HDF5 file.
-
-    Args:
-        txt_path (str): Path to the Cobold text file.
-        save_path (str): Path to the save file.
-    Returns:
-        None
-    """
-    with open(txt_path, 'r') as f:
-        data = np.loadtxt(f)
-
-    xx = data[:, 6] / 10
-    yy = data[:, 7] / 10
-    tof = data[:, 8]
-
-    with h5py.File(save_path, "w") as f:
-        f.create_dataset("dld/x", data=xx, dtype='f')
-        f.create_dataset("dld/y", data=yy, dtype='f')
-        f.create_dataset("dld/t", data=tof, dtype='f')
-        f.create_dataset("dld/start_counter", data=np.zeros(len(xx)), dtype='i')
-        f.create_dataset("dld/high_voltage", data=np.full(len(xx), 5300), dtype='f')
-        f.create_dataset("dld/pulse", data=np.zeros(len(xx)), dtype='f')
-
-    print('finish')
-
-
-def convert_ND_angle_to_laser_intensity(file_path, ref_laser_intensity, ref_angle):
-    with h5py.File(file_path, 'r+') as data:
-        laser_intensity = data['dld/pulse'][:]
-        OD = (laser_intensity - ref_angle) / 270
-        scale = 10 ** OD
-        dld_pulse = ref_laser_intensity * scale
-        del data['dld/pulse']
-        data.create_dataset("dld/pulse", data=dld_pulse, dtype='f')
 
 
 def rename_a_category(file_path, old_name, new_name):
@@ -80,82 +111,50 @@ def rename_a_category(file_path, old_name, new_name):
         data.create_dataset(new_name, data=temp)
 
 
-def fill_a_category(file_path, name):
-    with h5py.File(file_path, 'r+') as data:
-        temp = data['dld/pulse'][:]
-        array = np.zeros(len(temp))
-        del data[name]
-        data.create_dataset(name, data=array)
-
-
-def pulse_energy_calculator_list(ref_angle, ref_laser_intensity, step_pulse_energy, output_file="output.xlsx"):
-    # pulse energy = ref_laser_intensity * pulse duration * area
-    pulse_ref_energy = ref_laser_intensity * 1e2 * 1e2 * 12e-15 * 4e-6 * 4e-6 * np.pi
-    pulse_ref_energy = pulse_ref_energy * 1e12  # pJ
-    print(
-        f'Pulse energy at {ref_angle}°: {pulse_ref_energy:.2e} pJ , Laser intensity: {ref_laser_intensity:.2e} W/cm^2')
-
-    data = {"Angle (degrees)": [ref_angle], "Pulse Energy (pJ)": [pulse_ref_energy],
-            "Laser Intensity (W/cm^2)": [ref_laser_intensity]}
-
-    for i in range(1, 25):
-        pulse_energy = 10000 + i * step_pulse_energy
-        angle = ref_angle + 270 * np.log10(pulse_energy / pulse_ref_energy)
-        angle = round(angle, 2)
-        laser_intensity = ref_laser_intensity * (10 ** ((angle - ref_angle) / 270))
-
-        print(f'Pulse energy at {angle:.2f}°: {pulse_energy:.2e} pJ , Laser intensity: {laser_intensity:.2e} W/cm^2')
-
-        # Append data to the dictionary
-        data["Angle (degrees)"].append(angle)
-        data["Pulse Energy (pJ)"].append(pulse_energy)
-        data["Laser Intensity (W/cm^2)"].append(laser_intensity)
-
-    # Convert the dictionary to a DataFrame
-    df = pd.DataFrame(data)
-
-    # Save DataFrame to Excel file
-    df.to_excel(output_file, index=False)
-    print(f'Data saved to {output_file}')
-
-
-def pulse_energy_calculator(ref_angle, ref_laser_intensity, pulse_energy):
-    # pulse energy = ref_laser_intensity * pulse duration * area
-    pulse_ref_energy = ref_laser_intensity * 1e2 * 1e2 * 12e-15 * 4e-6 * 4e-6 * np.pi
-    pulse_ref_energy = pulse_ref_energy * 1e12  # pJ
-    angle = ref_angle + 270 * np.log10(pulse_energy / pulse_ref_energy)
-    return angle
-
-    # OD = (laser_intensity - ref_angle) / 270
-    # scale = 10 ** OD
-    # dld_pulse = ref_laser_intensity * scale
-    # return dld_pulse
-
-
 def laser_pulse_energy_from_mat_file(mat_path, source_file, target_file):
+    # pulse energy = ref_laser_intensity * pulse duration * area
+    # pulse_ref_energy = ref_laser_intensity * 1e2 * 1e2 * 12e-15 * 4e-6 * 4e-6 * np.pi
+    # pulse_ref_energy = pulse_ref_energy * 1e12  # pJ
+    # angle = ref_angle + 270 * np.log10(pulse_energy / pulse_ref_energy)
+
     laser_table = scipy.io.loadmat(mat_path)
 
     angle_val = laser_table['angle_vals'].flatten()
     P_L_val = laser_table['P_L_vals'].flatten()
 
     # Take the logarithm of both angle and P_L
-    log_angle_val = np.log(angle_val)
-    log_P_L_val = np.log(P_L_val)
+    log_angle_val = angle_val
+    # log_P_L_val = np.log(P_L_val)
 
     # Create an interpolation function
-    interp_func = interp1d(log_angle_val, log_P_L_val, kind='linear', fill_value="extrapolate")
+    interp_func = interp1d(log_angle_val, P_L_val, fill_value="extrapolate")
 
-    # Create an interpolation function
-    # interp_func = interp1d(angle_val, P_L_val, kind='log', fill_value="extrapolate")
+    # Generate points for plotting
+    x_values = np.linspace(log_angle_val.min(), log_angle_val.max(), 100)
+    y_values = interp_func(x_values)
+
+    # Plot original data and interpolation
+    plt.figure(figsize=(8, 6))
+    plt.scatter(log_angle_val, P_L_val, label='Original Data')
+    plt.plot(x_values, y_values, label='Interpolation')
+    plt.xlabel('Log Angle Value')
+    plt.ylabel('Pulse Energy')
+    plt.title('Interpolation of Pulse Energy vs. Log Angle')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
 
     with h5py.File(source_file, 'r') as data:
         laser_angle = data['dld/laser_intensity'][:]
     # laser_P_L = interp_func(laser_angle)
     # Apply interpolation on the logarithmic scale
-    log_laser_P_L = interp_func(np.log(laser_angle))
+    laser_P_L = interp_func(laser_angle)
     # Exponentiate to get back to the original scale
-    laser_P_L = np.exp(log_laser_P_L)
+    b = np.unique(laser_P_L)
+    # laser_P_L = np.exp(laser_P_L)
     laser_P_L = laser_P_L * 1e-3 / 2 / 100e3
+    laser_P_L = laser_P_L * 1e12
 
     with h5py.File(target_file, 'r+') as data:
         del data['dld/pulse']
@@ -166,15 +165,15 @@ def laser_pulse_energy_from_mat_file(mat_path, source_file, target_file):
 
 
 if __name__ == "__main__":
-    txt_path = '../../../tests/data/physics_experiment/data_115_Jul-27-2022_17-44_Powersweep3.txt'
-    save_path = '../../../tests/data/physics_experiment/data_115_Jul-27-2022_17-44_Powersweep3.h5'
-    copy_xy_from_cobold_txt_to_hdf5(txt_path, save_path)
-    mat_path = 'T:/Monajem/physics_atom_probe_data/Backup_data/Power_vals_calibration.mat'
-    source_file = ('T:/Monajem/physics_atom_probe_data/Backup_data/Measurements_2024_02_01/'
-                   '204_Feb-01-2024_11-51_Constant_power_W/data_204_Feb-01-2024_11-51_Constant_power_W.h5')
-    target_file = '../../../tests/data/physics_experiment/data_204_Feb-01-2024_11-51_Constant_power_W.h5'
-
-    laser_pulse_energy_from_mat_file(mat_path, source_file, target_file)
+    txt_path = '../../../tests/data/physics_experiment/data_204_Feb-01-2024_11-51_Constant_power_W.txt'
+    save_path = '../../../tests/data/physics_experiment/data_204_Feb-01-2024_11-51_Constant_power_W.h5'
+    copy_xytof_from_cobold_txt_to_hdf5(txt_path, save_path)
+    # mat_path = 'T:/Monajem/physics_atom_probe_data/Backup_data/Power_vals_calibration.mat'
+    # source_file = ('T:/Monajem/physics_atom_probe_data/Backup_data/Measurements_2024_02_01/'
+    #                '207_Feb-01-2024_13-08_Powersweep/data_207_Feb-01-2024_13-08_Powersweep.h5')
+    # target_file = '../../../tests/data/physics_experiment/data_207_Feb-01-2024_13-08_Powersweep.h5'
+    #
+    # laser_pulse_energy_from_mat_file(mat_path, source_file, target_file)
 
     # file_path = '../../../tests/data/physics_experiment/data_130_Sep-19-2023_14-58_W_12fs.h5'
     # (at 242°) corresponds to an intensity of 1.4e13 W/cm^2.

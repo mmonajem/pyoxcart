@@ -169,7 +169,6 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
         ax3 = ax1.twinx()
         ax3.spines.right.set_position(("axes", 1.13))
         if pulse_mode == 'laser':
-            # pulse = pulse * 1e12
             pulse_curve, = ax3.plot(xaxis, pulse, color='fuchsia', linewidth=2)
             ax3.set_ylabel("Pulse Energy [$pJ$]", color="fuchsia", fontsize=10)
             range = max(pulse) - min(pulse)
@@ -487,12 +486,13 @@ def create_pandas_dataframe(data_crop, mode='dld'):
     return hdf_dataframe
 
 
-def calculate_ppi_and_ipp(data):
+def calculate_ppi_and_ipp(data, max_start_counter):
     """
     Calculate pulses since the last event pulse and ions per pulse.
 
     Args:
         data (dict): A dictionary containing the 'start_counter' data.
+        max_start_counter (int): The maximum start counter value.
 
     Returns:
         tuple: A tuple containing two numpy arrays: pulse_pi and ion_pp.
@@ -506,24 +506,40 @@ def calculate_ppi_and_ipp(data):
     pulse_pi = np.zeros(len(counter))
     ion_pp = np.zeros(len(counter))
 
-    pulse_to_previous_ion = 0
     multi_hit_count = 1
-    previous_counter = counter[0]
+
+    total_iterations = len(counter)
+    twenty_percent = total_iterations // 5  # 20% of total iterations
 
     for i, current_counter in enumerate(counter):
-        pulse_pi[i] = current_counter - previous_counter
-
-        if current_counter == previous_counter:
-            multi_hit_count += 1
-        else:
-            pulse_to_previous_ion = current_counter - previous_counter
-
-            for j in range(multi_hit_count):
-                if i + j < len(counter):
-                    ion_pp[i + j] = multi_hit_count
-                    pulse_pi[i + j] = pulse_to_previous_ion
-
-            multi_hit_count = 1
+        if i == 0:
+            pulse_pi[i] = 0
             previous_counter = current_counter
+        else:
+            sc = current_counter - previous_counter
+            if sc < 0:
+                sc_a = max_start_counter - previous_counter
+                sc_b = current_counter
+                sc = sc_a + sc_b
+
+            pulse_pi[i] = sc
+
+            if current_counter == previous_counter:
+                multi_hit_count += 1
+            else:
+                for j in range(multi_hit_count):
+                    if i + j <= len(counter):
+                        ion_pp[i - j - 1] = multi_hit_count
+
+                multi_hit_count = 1
+                previous_counter = current_counter
+        # for the last event
+        if i == len(counter) - 1:
+            ion_pp[i] = multi_hit_count
+
+        # Print progress at each 20% interval
+        if i % twenty_percent == 0:
+            progress_percent = int((i / total_iterations) * 100)
+            print(f"Progress: {progress_percent}% complete")
 
     return pulse_pi, ion_pp
