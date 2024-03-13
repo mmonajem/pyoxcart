@@ -357,7 +357,6 @@ def find_consecutive_sequences(start_counter, channel, time_data, high_voltage, 
                                         index[-4]] == 0:
                                         valid_event.append(True)
                                 except:
-
                                     valid_event.append(False)
                             j = 0
                             continue

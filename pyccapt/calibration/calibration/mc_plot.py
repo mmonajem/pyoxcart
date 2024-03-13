@@ -884,7 +884,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
                       '-> MRP: {:.2f}'.format(
                           x[round(peaks[i])] / (x[round(peak_widths[3][i])] - x[round(peak_widths[2][i])])))
             if mrp_all:
-                print('------------------------------')
+
                 for percent in [0.5, 0.1, 0.01]:
                     print('Peaks ', i + 1,
                           'is at location and height: ({:.2f}, {:.2f})'.format(x[int(peaks[i])], prominences[0][i]),
@@ -896,5 +896,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
                                                                                                           'peak_sides(%s)' % percent][
                                                                                                           i][1]),
                           '-> MRP: {:.2f}'.format(mrp_list_all_peak['MRP(%s)' % percent][i]))
+
+            print('------------------------------')
 
     return mrp_list

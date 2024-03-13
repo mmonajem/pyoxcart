@@ -9,6 +9,26 @@ from pyccapt.calibration.calibration import calibration, mc_plot
 label_layout = widgets.Layout(width='300px')
 
 
+def initial_calibration(variables, calibration_mode, flight_path_length):
+    if calibration_mode.value == 'tof_calib':
+        v_dc = variables.data['high_voltage (V)'].to_numpy()
+        t = variables.data['t (ns)'].to_numpy() * 1E-9
+        xDet = variables.data['x_det (cm)'].to_numpy() * 1E-2
+        yDet = variables.data['y_det (cm)'].to_numpy() * 1E-2
+        flightPathLength = flight_path_length * 1E-3
+        flightPathLength = np.sqrt(xDet ** 2 + yDet ** 2 + flightPathLength ** 2)
+        # Calculate initial TOF values
+        t_initial = t * np.sqrt(v_dc) / flightPathLength
+
+        # Define calibration factor (you need to determine this based on your reference TOF values)
+        calibration_factor = t / t_initial
+
+        # Apply calibration factor to obtain calibrated TOF values
+        variables.dld_t_calib = t_initial * calibration_factor * 1E9
+
+    elif calibration_mode.value == 'mc_calib':
+        print('initial mc calibration is not needed when calibrating directly the mc')
+
 def reset_back_on_click(variables, calibration_mode):
     if calibration_mode.value == 'tof_calib':
         variables.dld_t_calib = np.copy(variables.dld_t_calib_backup)
@@ -28,7 +48,7 @@ def clear_plot_on_click(out):
         out.clear_output()
 
 
-def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
+def call_voltage_bowl_calibration(variables, det_diam, calibration_mode, flight_path_length):
     out = Output()
     out_status = Output()
 
@@ -61,6 +81,10 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
         description='auto calibration',
         layout=label_layout
     )
+    initial_calib_button = widgets.Button(
+        description='initial calibration',
+        layout=label_layout
+    )
 
     clear_plot = widgets.Button(description="clear plots", layout=label_layout)
 
@@ -72,6 +96,7 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
     bowl_button.on_click(lambda b: bowl_correction(b, variables, out, out_status, calibration_mode))
     clear_plot.on_click(lambda b: clear_plot_on_click(out))
     auto_button.on_click(lambda b: automatic_calibration(b, variables, out, out_status, calibration_mode))
+    initial_calib_button.on_click(lambda b: initial_calibration(variables, calibration_mode, flight_path_length))
 
     # Define widgets and labels for histplot function
     bin_size = widgets.FloatText(value=0.1, description='bin size:', layout=label_layout)
@@ -184,11 +209,11 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
                     maximum_sample_method_p = maximum_sample_method_v.value
                     noise_remove_p = noise_remove_v.value
                     if calibration_mode.value == 'tof_calib':
-                        caliration_mode_t = 'tof'
+                        calibration_mode_t = 'tof'
                     elif calibration_mode.value == 'mc_calib':
-                        caliration_mode_t = 'mc'
+                        calibration_mode_t = 'mc'
                     calibration.voltage_corr_main(variables.dld_high_voltage, variables, sample_size=sample_size_p,
-                                                  calibration_mode=caliration_mode_t,
+                                                  calibration_mode=calibration_mode_t,
                                                   index_fig=index_fig_p, plot=plot_p, save=save_p,
                                                   apply_local=apply_v.value, mode=mode_p,
                                                   maximum_cal_method=maximum_cal_method_p,
@@ -199,7 +224,7 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
         vol_button.disabled = False
 
     # Create a button widget to bowl correction function
-    sample_size_b = int(det_diam.value / 8)
+    sample_size_b = int(det_diam / 8)
     # Check if the rounded number is even
     if sample_size_b % 2 == 0:
         # If even, adjust to the nearest odd number
@@ -266,7 +291,7 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
                     print('------------------Bowl Calibration---------------------')
                     calibration.bowl_correction_main(variables.dld_x_det, variables.dld_y_det,
                                                      variables.dld_high_voltage,
-                                                     variables, det_diam.value,
+                                                     variables, det_diam,
                                                      sample_size=sample_size_p, fit_mode=fit_mode_p,
                                                      maximum_cal_method=maximum_cal_method_p,
                                                      maximum_sample_method=maximum_sample_method_p,
@@ -293,6 +318,10 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
         counter = 1
         continue_calibration = True
         mrp_last = 0
+        if calibration_mode.value == 'tof_calib':
+            back_tof_mc = np.copy(variables.dld_t_calib)
+        elif calibration_mode.value == 'mc_calib':
+            back_tof_mc = np.copy(variables.mc_calib)
         while continue_calibration:
             with out:
                 print('=======================================================')
@@ -304,15 +333,26 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
                                   peaks_find_plot=plot_peak.value, print_info=False, figure_size=figure_size,
                                   plot_show=False)
                 print('The MRPs at (0.5, 0.1, 0.01) are:', mrp)
+
+            if calibration_mode.value == 'tof_calib' and counter == 1:
+                initial_calibration(variables, calibration_mode, flight_path_length)
             vol_correction(b, variables, out, out_status, calibration_mode)
             bowl_correction(b, variables, out, out_status, calibration_mode)
 
             counter += 1
-            if abs(mrp_last - mrp[0]) < 5:
+            if abs(mrp_last - mrp[0]) < 5 or counter > 15:
                 continue_calibration = False
+            if mrp_last < mrp[0]:
+                continue_calibration = False
+                if calibration_mode.value == 'tof_calib':
+                    variables.dld_t_calib = np.copy(back_tof_mc)
+                elif calibration_mode.value == 'mc_calib':
+                    variables.mc_calib = np.copy(back_tof_mc)
             mrp_last = mrp[0]
-            if counter > 15:
-                continue_calibration = False
+            if calibration_mode.value == 'tof_calib':
+                back_tof_mc = np.copy(variables.dld_t_calib)
+            elif calibration_mode.value == 'mc_calib':
+                back_tof_mc = np.copy(variables.mc_calib)
         auto_button.disabled = False
     # Create a button widget to trigger the function
     pb_bowl = widgets.HTML(
@@ -336,7 +376,8 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode):
     # Create the layout with three columns
     column11 = widgets.VBox([bin_size, prominence, distance, lim_tof, percent, bin_fdm, plot_peak, index_fig, save,
                              figure_mc_size_x, figure_mc_size_y])
-    column12 = widgets.VBox([plot_button, auto_button, save_button, reset_back_button, clear_plot, plot_stat_button])
+    column12 = widgets.VBox([plot_button, initial_calib_button, auto_button, save_button, reset_back_button, clear_plot,
+                             plot_stat_button])
     column22 = widgets.VBox([sample_size_b, fit_mode_b, index_fig_b, maximum_cal_method_b, maximum_sample_method_b,
                              apply_b, plot_b, save_b, figure_b_size_x, figure_b_size_y])
     column21 = widgets.VBox([bowl_button, pb_bowl])
