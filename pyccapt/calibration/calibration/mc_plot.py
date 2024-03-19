@@ -122,6 +122,8 @@ class AptHistPlotter:
         # plt.xlim(left=plt.xticks()[0][0], right=plt.xticks()[0][-1])
         if plot_show:
             plt.show()
+        else:
+            plt.close()
         if self.variables is not None:
             self.variables.x_hist = self.x
             self.variables.y_hist = self.y

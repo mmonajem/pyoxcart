@@ -12,19 +12,14 @@ label_layout = widgets.Layout(width='300px')
 def initial_calibration(variables, calibration_mode, flight_path_length):
     if calibration_mode.value == 'tof_calib':
         v_dc = variables.data['high_voltage (V)'].to_numpy()
-        t = variables.data['t (ns)'].to_numpy() * 1E-9
+        t = variables.data['t (ns)'].to_numpy()
         xDet = variables.data['x_det (cm)'].to_numpy() * 1E-2
         yDet = variables.data['y_det (cm)'].to_numpy() * 1E-2
         flightPathLength = flight_path_length * 1E-3
-        flightPathLength = np.sqrt(xDet ** 2 + yDet ** 2 + flightPathLength ** 2)
-        # Calculate initial TOF values
-        t_initial = t * np.sqrt(v_dc) / flightPathLength
-
-        # Define calibration factor (you need to determine this based on your reference TOF values)
-        calibration_factor = t / t_initial
-
-        # Apply calibration factor to obtain calibrated TOF values
-        variables.dld_t_calib = t_initial * calibration_factor * 1E9
+        flightPathLength = xDet ** 2 + yDet ** 2 + flightPathLength ** 2
+        ini_calib_factor_flight_path = flightPathLength / np.mean(flightPathLength)
+        ini_calib_factor_voltage = v_dc / np.median(v_dc)
+        variables.dld_t_calib = t * ini_calib_factor_flight_path * ini_calib_factor_voltage
 
     elif calibration_mode.value == 'mc_calib':
         print('initial mc calibration is not needed when calibrating directly the mc')
@@ -48,7 +43,7 @@ def clear_plot_on_click(out):
         out.clear_output()
 
 
-def call_voltage_bowl_calibration(variables, det_diam, calibration_mode, flight_path_length):
+def call_voltage_bowl_calibration(variables, det_diam, flight_path_length):
     out = Output()
     out_status = Output()
 
@@ -85,6 +80,37 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode, flight_
         description='initial calibration',
         layout=label_layout
     )
+    calibration_mode = widgets.Dropdown(
+        options=[('mass_to_charge', 'mc_calib'), ('time_of_flight', 'tof_calib')],
+        description='calibration mode:')
+
+    def sample_size_v_set(sample_size_v):
+        # Create a button widget to voltage correction function
+        if calibration_mode.value == 'tof_calib':
+            lim_tof.value = variables.max_tof
+        elif calibration_mode.value == 'mc_calib':
+            lim_tof.value = 400
+        mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value, mode='normal',
+                          prominence=prominence.value, distance=distance.value, percent=percent.value,
+                          selector='rect', figname=index_fig.value, lim=lim_tof.value, save_fig=save.value,
+                          peaks_find_plot=plot_peak.value, draw_calib_rect=True, print_info=False, mrp_all=False,
+                          figure_size=(figure_mc_size_x.value, figure_mc_size_y.value), plot_show=False)
+
+        if calibration_mode.value == 'tof_calib':
+            mask_temporal = np.logical_and(
+                (variables.dld_t_calib > variables.selected_x1),
+                (variables.dld_t_calib < variables.selected_x2)
+            )
+        elif calibration_mode.value == 'mc_calib':
+            mask_temporal = np.logical_and(
+                (variables.mc_calib > variables.selected_x1),
+                (variables.mc_calib < variables.selected_x2)
+
+            )
+        sample_size = int(len(variables.dld_high_voltage[mask_temporal]) / 100)
+        sample_size_v.value = sample_size
+
+    calibration_mode.observe(lambda change: sample_size_v_set(sample_size_v), names='value')
 
     clear_plot = widgets.Button(description="clear plots", layout=label_layout)
 
@@ -132,22 +158,10 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode, flight_
 
     plot_button.click()
 
-    # Create a button widget to voltage correction function
-    if calibration_mode.value == 'tof_calib':
-        mask_temporal = np.logical_and(
-            (variables.dld_t_calib > variables.selected_x1),
-            (variables.dld_t_calib < variables.selected_x2)
-        )
-    elif calibration_mode.value == 'mc_calib':
-        mask_temporal = np.logical_and(
-            (variables.mc_calib > variables.selected_x1),
-            (variables.mc_calib < variables.selected_x2)
+    sample_size_v = widgets.IntText(value=10000, description='sample size:', layout=label_layout)
+    sample_size_v_set(sample_size_v)
 
-        )
-        lim_tof.value = 400
-    sample_size_v = int(len(variables.dld_high_voltage[mask_temporal]) / 100)
 
-    sample_size_v = widgets.IntText(value=sample_size_v, description='sample size:', layout=label_layout)
     index_fig_v = widgets.IntText(value=1, description='fig index:', layout=label_layout)
     plot_v = widgets.Dropdown(
         options=[('False', False), ('True', True)],
@@ -316,6 +330,8 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode, flight_
 
         auto_button.disabled = True
         counter = 1
+        try_counter = 0
+        index_fig_val = index_fig.value
         continue_calibration = True
         mrp_last = 0
         if calibration_mode.value == 'tof_calib':
@@ -324,26 +340,38 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode, flight_
             back_tof_mc = np.copy(variables.mc_calib)
         while continue_calibration:
             with out:
+                # if calibration_mode.value == 'tof_calib' and counter == 1:
+                #     print('Initial calibration')
+                #     initial_calibration(variables, calibration_mode, flight_path_length)
                 print('=======================================================')
                 print('Starting calibration number %s' % counter)
                 figure_size = (figure_mc_size_x.value, figure_mc_size_y.value)
                 mrp = mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value, mode='normal',
                                   prominence=prominence.value, distance=distance.value, percent=percent.value,
-                                  selector='rect', figname=index_fig.value, lim=lim_tof.value, save_fig=save.value,
+                                        selector='rect', figname=index_fig_val, lim=lim_tof.value, save_fig=save.value,
                                   peaks_find_plot=plot_peak.value, print_info=False, figure_size=figure_size,
                                   plot_show=False)
                 print('The MRPs at (0.5, 0.1, 0.01) are:', mrp)
 
-            if calibration_mode.value == 'tof_calib' and counter == 1:
-                initial_calibration(variables, calibration_mode, flight_path_length)
+                counter += 1
+                index_fig_val += 1
+                if abs(mrp_last - mrp[0]) < 10 or counter > 15:
+                    try_counter += 1
+                    if try_counter == 2:
+                        print('*********************************************************')
+                        print('Calibration is not improving, stopping', try_counter)
+                        print('*********************************************************')
+                        continue_calibration = False
+                        continue
+                else:
+                    try_counter = 0
+
+
             vol_correction(b, variables, out, out_status, calibration_mode)
             bowl_correction(b, variables, out, out_status, calibration_mode)
 
-            counter += 1
-            if abs(mrp_last - mrp[0]) < 5 or counter > 15:
-                continue_calibration = False
+
             if mrp_last < mrp[0]:
-                continue_calibration = False
                 if calibration_mode.value == 'tof_calib':
                     variables.dld_t_calib = np.copy(back_tof_mc)
                 elif calibration_mode.value == 'mc_calib':
@@ -376,7 +404,7 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode, flight_
     # Create the layout with three columns
     column11 = widgets.VBox([bin_size, prominence, distance, lim_tof, percent, bin_fdm, plot_peak, index_fig, save,
                              figure_mc_size_x, figure_mc_size_y])
-    column12 = widgets.VBox([plot_button, initial_calib_button, auto_button, save_button, reset_back_button, clear_plot,
+    column12 = widgets.VBox([plot_button, auto_button, initial_calib_button, save_button, reset_back_button, clear_plot,
                              plot_stat_button])
     column22 = widgets.VBox([sample_size_b, fit_mode_b, index_fig_b, maximum_cal_method_b, maximum_sample_method_b,
                              apply_b, plot_b, save_b, figure_b_size_x, figure_b_size_y])
@@ -384,9 +412,10 @@ def call_voltage_bowl_calibration(variables, det_diam, calibration_mode, flight_
     column33 = widgets.VBox([sample_size_v, index_fig_v, mode_v, apply_v, noise_remove_v, maximum_cal_method_v,
                              maximum_sample_method_v, plot_v, save_v, figure_v_size_x, figure_v_size_y])
     column32 = widgets.VBox([vol_button, pb_vol])
+    column34 = widgets.VBox([calibration_mode])
 
     # Create the overall layout by arranging the columns side by side
-    layout1 = widgets.HBox([column11, column22, column33])
+    layout1 = widgets.HBox([column11, column22, column33, column34])
     layout2 = widgets.HBox([column12, column21, column32])
 
     layout = widgets.VBox([layout1, layout2])

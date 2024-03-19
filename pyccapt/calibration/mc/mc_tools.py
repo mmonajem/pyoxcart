@@ -28,9 +28,9 @@ def tof2mcSimple(t: int, t0: int, V: float, xDet: int, yDet: int, flightPathLeng
         e = 1.6E-19  # coulombs per electron
         amu = 1.66E-27  # conversion from kg to Dalton
 
-        flightPathLength = np.sqrt(xDet ** 2 + yDet ** 2 + flightPathLength ** 2)
+        flightPathLength = xDet ** 2 + yDet ** 2 + flightPathLength ** 2
 
-        mc = 2 * e * V * (t / flightPathLength) ** 2
+        mc = 2 * e * V * (t ** 2) / flightPathLength
         mc = mc / amu  # conversion from kg/C to Da (6.022E23 g/mol, 1.6E-19C/ec)
 
         return mc
