@@ -197,7 +197,7 @@ def call_ion_list(variables, selector):
     button_plot_result.on_click(lambda b: plot_fit_result(b, variables, calibration_mode, out_mc))
 
     widget_container = widgets.VBox([
-        widgets.HBox(widgets.Label(value="Calibration Mode:", layout=label_layout), calibration_mode),
+        widgets.HBox([widgets.Label(value="Calibration mde:", layout=label_layout), calibration_mode]),
         widgets.HBox([widgets.Label(value="Bin Size:", layout=label_layout), bin_size_widget]),
         widgets.HBox([widgets.Label(value="Log:", layout=label_layout), log_widget]),
         widgets.HBox([widgets.Label(value="Mode:", layout=label_layout), mode_widget]),
