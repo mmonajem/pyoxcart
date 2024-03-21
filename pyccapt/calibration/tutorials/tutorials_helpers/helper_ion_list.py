@@ -13,13 +13,14 @@ from pyccapt.calibration.data_tools import data_tools
 label_layout = widgets.Layout(width='200px')
 
 
-def call_ion_list(variables, selector, calibration_mode):
+def call_ion_list(variables, selector):
     isotopeTableFile = '../../../files/isotopeTable.h5'
     dataframe = data_tools.read_hdf5_through_pandas(isotopeTableFile)
     elementsList = dataframe['element']
     elementIsotopeList = dataframe['isotope']
     elementMassList = dataframe['weight']
     abundanceList = dataframe['abundance']
+
 
     elements = list(zip(elementsList, elementIsotopeList, elementMassList, abundanceList))
     dropdownList = []
@@ -85,6 +86,8 @@ def call_ion_list(variables, selector, calibration_mode):
         layout=label_layout
     )
     button_fit = widgets.Button(description="fit")
+    calibration_mode = widgets.Dropdown(
+        options=[('mass_to_charge', 'mc_calib'), ('time_of_flight', 'tof_calib')])
 
     def parametric_fit(variables, calibration_mode, out_mc):
         button_fit.disabled = True
@@ -194,6 +197,7 @@ def call_ion_list(variables, selector, calibration_mode):
     button_plot_result.on_click(lambda b: plot_fit_result(b, variables, calibration_mode, out_mc))
 
     widget_container = widgets.VBox([
+        widgets.HBox([widgets.Label(value="Calibration mde:", layout=label_layout), calibration_mode]),
         widgets.HBox([widgets.Label(value="Bin Size:", layout=label_layout), bin_size_widget]),
         widgets.HBox([widgets.Label(value="Log:", layout=label_layout), log_widget]),
         widgets.HBox([widgets.Label(value="Mode:", layout=label_layout), mode_widget]),

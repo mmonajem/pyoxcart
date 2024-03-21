@@ -367,8 +367,8 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length):
                     try_counter = 0
 
 
-            vol_correction(b, variables, out, out_status, calibration_mode)
-            bowl_correction(b, variables, out, out_status, calibration_mode)
+            vol_correction(variables, out, out_status, calibration_mode)
+            bowl_correction(variables, out, out_status, calibration_mode)
 
 
             if mrp_last < mrp[0]:
