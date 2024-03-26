@@ -52,13 +52,26 @@ t_0 (Sec): {conf['t_0']}
 flight path distance (cm): {conf['flight_path_length']}
 TDC model: {conf['tdc_model']}
 """
-
-    # Save setup parameters and run statistics in a text file
-    statistics = f"""
+    if variables.pulse_mode == 'Voltage':
+        statistics = f"""
 Experiment Elapsed Time (Sec): {variables.elapsed_time:.3f}
 Experiment Total Ions: {variables.total_ions}
 Specimen Max Achieved Voltage (V): {variables.specimen_voltage:.3f}
+
 Specimen Max Achieved Pulse Voltage (V): {variables.pulse_voltage:.3f}
+Last detection rate: {variables.detection_rate_current_plot:.3f}%
+-----------------------------------------------------
+"""
+    elif variables.pulse_mode == 'Laser':
+        statistics = f"""
+Experiment Elapsed Time (Sec): {variables.elapsed_time:.3f}
+Experiment Total Ions: {variables.total_ions}
+Specimen Max Achieved Voltage (V): {variables.specimen_voltage:.3f}
+Laser pulse energy (): {0.0:.3f}
+Laser average power (mW): {variables.laser_average_power:.3f}
+Laser pulse frequency (kHz): {variables.laser_freq}
+Laser power (mW): {variables.laser_power:.3f}
+Laser division factor: {variables.laser_division_factor:.3f}
 Last detection rate: {variables.detection_rate_current_plot:.3f}%
 -----------------------------------------------------
 """

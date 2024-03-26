@@ -130,6 +130,7 @@ class Variables:
         self.ns.flag_cameras_take_screenshot = False
         self.ns.temperature = 0
         self.ns.set_temperature = 0
+        self.ns.set_temperature_flag = None
         self.ns.vacuum_main = 0
         self.ns.vacuum_buffer = 0
         self.ns.vacuum_buffer_backing = 0
@@ -154,6 +155,11 @@ class Variables:
         self.ns.dld_start_counter = []
         self.ns.time_stamp = []
         self.ns.laser_intensity = []
+        self.ns.laser_pulse_energy = 0
+        self.ns.laser_power = 0
+        self.ns.laser_freq = 0
+        self.ns.laser_division_factor = 0
+        self.ns.laser_average_power = 0
 
         self.ns.main_v_dc_dld = []
         self.ns.main_p_dld = []
@@ -1090,6 +1096,14 @@ class Variables:
         with self.lock_vacuum_tmp:
             self.ns.set_temperature = value
 
+    @property
+    def set_temperature_flag(self):
+        return self.ns.set_temperature_flag
+
+    @set_temperature_flag.setter
+    def set_temperature_flag(self, value):
+        with self.lock_vacuum_tmp:
+            self.ns.set_temperature_flag = value
 
     @property
     def vacuum_main(self):
@@ -1266,6 +1280,56 @@ class Variables:
     def laser_intensity(self, value):
         with self.lock_lists:
             self.ns.laser_intensity = value
+
+    @property
+    def laser_pulse_energy(self):
+        with self.lock_lists:
+            return self.ns.laser_pulse_energy
+
+    @laser_pulse_energy.setter
+    def laser_pulse_energy(self, value):
+        with self.lock_lists:
+            self.ns.laser_pulse_energy = value
+
+    @property
+    def laser_power(self):
+        with self.lock_lists:
+            return self.ns.laser_power
+
+    @laser_power.setter
+    def laser_power(self, value):
+        with self.lock_lists:
+            self.ns.laser_power = value
+
+    @property
+    def laser_freq(self):
+        with self.lock_lists:
+            return self.ns.laser_freq
+
+    @laser_freq.setter
+    def laser_freq(self, value):
+        with self.lock_lists:
+            self.ns.laser_freq = value
+
+    @property
+    def laser_division_factor(self):
+        with self.lock_lists:
+            return self.ns.laser_division_factor
+
+    @laser_division_factor.setter
+    def laser_division_factor(self, value):
+        with self.lock_lists:
+            self.ns.laser_division_factor = value
+
+    @property
+    def laser_average_power(self):
+        with self.lock_lists:
+            return self.ns.laser_average_power
+
+    @laser_average_power.setter
+    def laser_average_power(self, value):
+        with self.lock_lists:
+            self.ns.laser_average_power = value
 
     @property
     def main_v_dc_dld(self):

@@ -158,7 +158,7 @@ class Ui_Laser_Control(object):
         self.gridLayout_3.addWidget(self.label_3, 3, 0, 1, 1)
         self.laser_divition_factor = QtWidgets.QComboBox(parent=Laser_Control)
         self.laser_divition_factor.setStyleSheet("QComboBox{background: rgb(223,223,233)}")
-        self.laser_divition_factor.setObjectName("laser_divition_factor")
+        self.laser_divition_factor.setObjectName("laser_division_factor")
         self.laser_divition_factor.addItem("")
         self.laser_divition_factor.addItem("")
         self.laser_divition_factor.addItem("")
@@ -531,7 +531,13 @@ class Ui_Laser_Control(object):
 
             if databack == 0:
                 self.laser_device.Listen()
+                self.laser_device.change_wavelength(0)
                 databack = self.laser_device.StatusRead()
+                # reset the values to default
+                self.laser_device.Power(float(self.laser_power.currentText()))
+                self.laser_device.Freq(int(int(self.laser_rate.currentText()) / 100))
+                self.laser_repetion_rate_disp.display(int(self.laser_rate.currentText()))
+                self.laser_device.Div(float(self.laser_divition_factor.currentText()))
                 if databack.strip() == 'ly_oxp2_dev_status 9':
                     self.led_laser_listen.setPixmap(self.led_green)
                 else:
@@ -540,6 +546,7 @@ class Ui_Laser_Control(object):
                 print("laser port can not be opened")
                 self.laser_device = None
         except Exception as e:
+            print(e)
             print("laser port can not be opened")
             self.laser_device = None
 
@@ -587,38 +594,37 @@ class Ui_Laser_Control(object):
         self.label_2.setText(_translate("Laser_Control", "Repetion rate"))
         self.laser_rate.setItemText(0, _translate("Laser_Control", "400"))
         self.laser_rate.setItemText(1, _translate("Laser_Control", "500"))
-        self.laser_rate.setItemText(2, _translate("Laser_Control", "580"))
-        self.laser_rate.setItemText(3, _translate("Laser_Control", "721"))
+        self.laser_rate.setItemText(2, _translate("Laser_Control", "600"))
+        self.laser_rate.setItemText(3, _translate("Laser_Control", "700"))
         self.laser_rate.setItemText(4, _translate("Laser_Control", "800"))
-        self.laser_rate.setItemText(5, _translate("Laser_Control", "899"))
+        self.laser_rate.setItemText(5, _translate("Laser_Control", "900"))
         self.laser_rate.setItemText(6, _translate("Laser_Control", "1000"))
         self.laser_standby.setText(_translate("Laser_Control", "Standby"))
         self.led_laser_laser_standby.setText(_translate("Laser_Control", "Standby"))
         self.label_3.setText(_translate("Laser_Control", "Divition Factor"))
-        self.laser_divition_factor.setItemText(0, _translate("Laser_Control", "1.0"))
-        self.laser_divition_factor.setItemText(1, _translate("Laser_Control", "1.8"))
-        self.laser_divition_factor.setItemText(2, _translate("Laser_Control", "3.2"))
-        self.laser_divition_factor.setItemText(3, _translate("Laser_Control", "5.6"))
-        self.laser_divition_factor.setItemText(4, _translate("Laser_Control", "10"))
-        self.laser_divition_factor.setItemText(5, _translate("Laser_Control", "18"))
-        self.laser_divition_factor.setItemText(6, _translate("Laser_Control", "32"))
-        self.laser_divition_factor.setItemText(7, _translate("Laser_Control", "56"))
-        self.laser_divition_factor.setItemText(8, _translate("Laser_Control", "100"))
-        self.laser_divition_factor.setItemText(9, _translate("Laser_Control", "180"))
-        self.laser_divition_factor.setItemText(10, _translate("Laser_Control", "320"))
-        self.laser_divition_factor.setItemText(11, _translate("Laser_Control", "560"))
-        self.laser_divition_factor.setItemText(12, _translate("Laser_Control", "1000"))
-        self.laser_divition_factor.setItemText(13, _translate("Laser_Control", "1800"))
-        self.laser_divition_factor.setItemText(14, _translate("Laser_Control", "3200"))
-        self.laser_divition_factor.setItemText(15, _translate("Laser_Control", "5600"))
-        self.laser_divition_factor.setItemText(16, _translate("Laser_Control", "10000"))
-        self.laser_divition_factor.setItemText(17, _translate("Laser_Control", "18000"))
-        self.laser_divition_factor.setItemText(18, _translate("Laser_Control", "32000"))
+        self.laser_divition_factor.setItemText(0, _translate("Laser_Control", "1"))
+        self.laser_divition_factor.setItemText(1, _translate("Laser_Control", "2"))
+        self.laser_divition_factor.setItemText(2, _translate("Laser_Control", "3"))
+        self.laser_divition_factor.setItemText(3, _translate("Laser_Control", "4"))
+        self.laser_divition_factor.setItemText(4, _translate("Laser_Control", "8"))
+        self.laser_divition_factor.setItemText(5, _translate("Laser_Control", "10"))
+        self.laser_divition_factor.setItemText(6, _translate("Laser_Control", "16"))
+        self.laser_divition_factor.setItemText(7, _translate("Laser_Control", "32"))
+        self.laser_divition_factor.setItemText(8, _translate("Laser_Control", "64"))
+        self.laser_divition_factor.setItemText(9, _translate("Laser_Control", "100"))
+        self.laser_divition_factor.setItemText(10, _translate("Laser_Control", "200"))
+        self.laser_divition_factor.setItemText(11, _translate("Laser_Control", "300"))
+        self.laser_divition_factor.setItemText(12, _translate("Laser_Control", "400"))
+        self.laser_divition_factor.setItemText(13, _translate("Laser_Control", "500"))
+        self.laser_divition_factor.setItemText(14, _translate("Laser_Control", "600"))
+        self.laser_divition_factor.setItemText(15, _translate("Laser_Control", "700"))
+        self.laser_divition_factor.setItemText(16, _translate("Laser_Control", "8000"))
+        self.laser_divition_factor.setItemText(17, _translate("Laser_Control", "9000"))
+        self.laser_divition_factor.setItemText(18, _translate("Laser_Control", "10000"))
         self.laser_divition_factor.setItemText(19, _translate("Laser_Control", "56000"))
         self.laser_divition_factor.setItemText(20, _translate("Laser_Control", "100000"))
-        self.laser_divition_factor.setItemText(21, _translate("Laser_Control", "180000"))
-        self.laser_divition_factor.setItemText(22, _translate("Laser_Control", "320000"))
-        self.laser_divition_factor.setItemText(23, _translate("Laser_Control", "560000"))
+        self.laser_divition_factor.setItemText(22, _translate("Laser_Control", "200000"))
+        self.laser_divition_factor.setItemText(23, _translate("Laser_Control", "500000"))
         self.laser_divition_factor.setItemText(24, _translate("Laser_Control", "1000000"))
         self.laser_listen.setText(_translate("Laser_Control", "Listen"))
         self.led_laser_listen.setText(_translate("Laser_Control", "Listen"))
@@ -646,6 +652,7 @@ class Ui_Laser_Control(object):
         self.start_scanning.setText(_translate("Laser_Control", "Start scaning"))
 
         ####
+        self.pattern_number = r'\b\d+\b'
 
     def laser_enable_clicked(self):
         """
@@ -755,11 +762,17 @@ class Ui_Laser_Control(object):
                     self.listen_mode = False
                     self.laser_listen.setEnabled(True)
                     self.laser_standby.setEnabled(True)
+                    self.laser_divition_factor.setEnabled(True)
+                    self.laser_rate.setEnabled(True)
+                    self.laser_wavelegnth.setEnabled(True)
 
             elif self.standby_mode:
                 if databack.strip() != 'ly_oxp2_dev_status 33':
                     if self.laser_standby.isEnabled():
                         self.laser_standby.setEnabled(False)
+                        self.laser_divition_factor.setEnabled(False)
+                        self.laser_rate.setEnabled(False)
+                        self.laser_wavelegnth.setEnabled(False)
                         self.laser_on.setEnabled(False)
                         self.led_laser_listen.setPixmap(self.led_orange)
                         self.led_laser_laser_standby.setPixmap(self.led_orange)
@@ -799,24 +812,18 @@ class Ui_Laser_Control(object):
                 else:
                     self.on_mode = False
             elif self.enable_ouput_mode:
-                # print(self.laser_device.AOMState())
-                print(databack)
                 self.laser_enable.setEnabled(False)
                 if databack.strip() == 'ly_oxp2_dev_status 65':
-                    if self.laser_enable.isEnabled():
-                        self.laser_enable.setEnabled(False)
-                        self.laser_device.AOMEnable()
-                        self.enable_ouput_mode = False
-                        self.led_laser_enable.setPixmap(self.led_green)
-                        self.laser_enable.setEnabled(True)
+                    self.laser_device.AOMEnable()
+                    self.enable_ouput_mode = False
+                    self.led_laser_enable.setPixmap(self.led_green)
+                    self.laser_enable.setEnabled(True)
 
                 elif databack.strip() == 'ly_oxp2_dev_status 129':
-                    if self.laser_enable.isEnabled():
-                        self.laser_enable.setEnabled(False)
-                        self.laser_device.AOMDisable()
-                        self.enable_ouput_mode = False
-                        self.led_laser_enable.setPixmap(self.led_red)
-                        self.laser_enable.setEnabled(True)
+                    self.laser_device.AOMDisable()
+                    self.enable_ouput_mode = False
+                    self.led_laser_enable.setPixmap(self.led_red)
+                    self.laser_enable.setEnabled(True)
             elif self.change_laser_wavelegnth:
                 # if emission is on we cannot change the wavelength
                 if databack != 'ly_oxp2_dev_status 129':
@@ -834,9 +841,23 @@ class Ui_Laser_Control(object):
 
             elif self.change_laser_power:
                 # only if the laser is on we can change the power
-                if databack == 'ly_oxp2_dev_status 129':
+                if databack.strip() == 'ly_oxp2_dev_status 129':
                     self.laser_power.setEnabled(False)
                     self.laser_device.Power(float(self.laser_power.currentText()))
+
+                    # Pulse energy in nJ
+                    power_pe = self.laser_device.PowerRead()
+                    power_pe = re.search(r'[-+]?\d*\.\d+|\d+', power_pe)
+                    if power_pe:
+                        power = float(power_pe.group())
+                    else:
+                        power = 'Nan'
+                    self.laser_pulse_energy_disp.display(power_pe)
+                    # update variables for laser power
+                    self.average_power = self.laser_device.read_average_power()
+                    self.variables.laser_power = float(self.laser_power.currentText())
+                    self.variables.laser_average_power = float(re.findall(self.pattern_number, self.average_power)[0])
+                    self.laser_power_disp.display(self.variables.laser_average_power)
                     self.laser_power.setEnabled(True)
                 else:
                     print('The laser is off, you can not change the power')
@@ -844,48 +865,35 @@ class Ui_Laser_Control(object):
 
             elif self.change_laser_rate:
                 self.laser_rate.setEnabled(False)
-                # self.laser_device.Freq(int(self.laser_rate.currentText()))
+                res = self.laser_device.Freq(int(int(self.laser_rate.currentText()) / 100))
+                # Repetition rate
+                # At base frequencies above 100 kHz, the pulse energy linearly decreases.
+                freq_o = self.laser_device.FreqRead()
+                freq = re.search(r'[-+]?\d*\.\d+|\d+', freq_o)
+                if freq:
+                    freq = float(freq.group()) * 100  # to get the kHz
+                else:
+                    freq = 'Nan'
+                self.laser_repetion_rate_disp.display(freq)
+                self.variables.laser_freq = int(self.laser_rate.currentText())
                 self.laser_rate.setEnabled(True)
+                self.change_laser_rate = False
 
             elif self.change_laser_divition_factor:
                 self.laser_divition_factor.setEnabled(False)
-                self.laser_device.DivitionFactor(int(self.laser_divition_factor.currentText()))
+                res = self.laser_device.Div(float(self.laser_divition_factor.currentText()))
+                self.variables.laser_division_factor = float(self.laser_divition_factor.currentText())
                 self.laser_divition_factor.setEnabled(True)
+                self.change_laser_divition_factor = False
 
-            # Power
-            amo_o = self.laser_device.AOMRead()
-            amo = re.search(r'[-+]?\d*\.\d+|\d+', amo_o)
-            if amo:
-                amo = float(amo.group())
-            else:
-                amo = 'Nan'
-            self.laser_power_disp.display(amo)
-
-            # Pulse energy
-            power_o = self.laser_device.PowerRead()
-            power = re.search(r'[-+]?\d*\.\d+|\d+', power_o)
-            if power:
-                power = float(power.group())
-            else:
-                power = 'Nan'
-            self.laser_pulse_energy_disp.display(power)
-            # Repetition rate
-            # At base frequencies above 100 kHz, the pulse energy linearly decreases.
-            freq_o = self.laser_device.FreqRead()
-            freq = re.search(r'[-+]?\d*\.\d+|\d+', freq_o)
-            if freq:
-                freq = float(freq.group())
-            else:
-                freq = 'Nan'
-            self.laser_repetion_rate_disp.display(freq)
-
-            if self.index == 10:
-                print(self.laser_device.read_average_power())
-                print(amo_o)
-                print(power_o)
-                print(freq_o)
-                self.index = 0
-            self.index += 1
+            # if self.index == 5:
+            #     print('avg power', self.laser_device.read_average_power())
+            #     print('amo_o', self.laser_device.AOMRead())
+            #     print('power_o', self.laser_device.PowerRead())
+            #     print('freq_o', self.laser_device.FreqRead())
+            #     print('Div', self.laser_device.DivRead())
+            #     self.index = 0
+            # self.index += 1
 
 
     def stop(self):
