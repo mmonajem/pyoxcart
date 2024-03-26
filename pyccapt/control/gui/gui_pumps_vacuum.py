@@ -388,6 +388,7 @@ class Ui_Pumps_Vacuum(object):
 		self.timer = QTimer(self.parent)
 		self.timer.timeout.connect(self.hideMessage)
 
+		self.original_button_style = self.set_temperature.styleSheet()
 	def retranslateUi(self, Pumps_Vacuum):
 		"""
            Set the text and title of the widgets
@@ -459,10 +460,20 @@ class Ui_Pumps_Vacuum(object):
 
 		if self.target_tempreature.value() > self.conf['max_temperature']:
 			self.error_message("!!! Highest possible tempreture is %s !!!" % self.conf['max_temperature'])
+			self.timer.start(8000)
 		elif self.target_tempreature.value() < self.conf['min_temperature']:
 			self.error_message("!!! Lowest possible tempreture is %s !!!" % self.conf['min_temperature'])
+			self.timer.start(8000)
 		else:
-			self.variables.set_temperature = self.target_tempreature.value()
+			if not self.variables.set_temperature_flag:
+				self.variables.set_temperature_flag = True
+				self.set_temperature.setStyleSheet("QPushButton{\n"
+				                                   "background: rgb(0, 255, 26)\n"
+				                                   "}")
+				self.variables.set_temperature = self.target_tempreature.value()
+			elif self.variables.set_temperature_flag:
+				self.variables.set_temperature_flag = False
+				self.set_temperature.setStyleSheet(self.original_button_style)
 
 
 	def update_vacuum_main(self, value):

@@ -48,7 +48,7 @@ def call_ion_selection(variables):
 			print('Hold shift and use mouse scroll for zooming on x axis')
 			print('Hold ctrl and left mouse bottom to move a line')
 			print('=============================')
-			mc_plot.hist_plot(variables, bin_size.value, log=True, target='mc_c', mode='normal',
+			mc_plot.hist_plot(variables, bin_size.value, log=True, target='mc', mode='normal',
 			                  prominence=prominence.value, distance=distance.value, percent=percent.value,
 			                  selector='range', figname=index_fig.value, lim=lim_tof.value, peaks_find_plot=True,
 			                  ranging_mode=True, save_fig=False, print_info=False)

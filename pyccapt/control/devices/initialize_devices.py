@@ -287,13 +287,18 @@ def state_update(conf, variables, emitter):
 				emitter.temp_stage.emit(temperature_stage)
 				emitter.temp_cryo_head.emit(temperature_cryo_head)
 
-				if variables.set_temperature != set_temperature_tmp:
-					try:
-						res = command_cryovac(f'Out1.PID.Setpoint {variables.set_temperature}', com_port_cryovac)
-						set_temperature_tmp = variables.set_temperature
-					except Exception as e:
-						print(e)
-						print("cannot set the cryo temperature")
+				if variables.set_temperature_flag:
+					if variables.set_temperature != set_temperature_tmp:
+						try:
+							res = command_cryovac(f'Out1.PID.Setpoint {variables.set_temperature}', com_port_cryovac)
+							set_temperature_tmp = variables.set_temperature
+						except Exception as e:
+							print(e)
+							print("cannot set the cryo temperature")
+				elif variables.set_temperature_flag == False:
+					variables.set_temperature = 0
+					res = command_cryovac(f'Out1.PID.Setpoint {variables.set_temperature}', com_port_cryovac)
+					variables.set_temperature_flag = None
 
 			if conf['COM_PORT_gauge_mc'] != "off":
 				value, _ = tpg.pressure_gauge(2)

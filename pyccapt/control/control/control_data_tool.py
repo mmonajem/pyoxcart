@@ -125,14 +125,13 @@ def copy_npy_to_hdf_surface_concept(path, hdf5_file_name):
         file.create_dataset('tdc/time_data', data=time_data, dtype=np.uint64)
 
 
-
 if __name__ == '__main__':
-    path = 'C:/Users/mehrp/PycharmProjects/pyccapt/tests/data/'
-    name = 'OLO_W_6-1_data.h5'
+    path = 'D:/pyccapt/pyccapt/data/1780_Mar-25-2024_13-15_Al_test_1/'
+    name = '1780_Mar-25-2024_13-15_Al_test_1.h5'
     # copy_npy_to_hdf(path, name)
 
     # rename_subcategory(path + name, old_name='dld', new_name='dld_1')
-    # copy_npy_to_hdf_surface_concept(path, name)
+    copy_npy_to_hdf_surface_concept(path, name)
     # rename_subcategory(path + name, old_name='dld/AbsoluteTimeStamp', new_name='dld/start_counter')
-    rename_subcategory(path + name, old_name='dld/pulse_voltage', new_name='dld/pulse')
+    # rename_subcategory(path + name, old_name='dld/pulse_voltage', new_name='dld/pulse')
     print('Done')

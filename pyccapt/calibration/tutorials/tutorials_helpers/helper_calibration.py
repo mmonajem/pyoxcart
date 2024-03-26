@@ -237,16 +237,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length):
             pb_vol.value = "<b>Finished</b>"
         vol_button.disabled = False
 
-    # Create a button widget to bowl correction function
-    sample_size_b = int(det_diam / 8)
-    # Check if the rounded number is even
-    if sample_size_b % 2 == 0:
-        # If even, adjust to the nearest odd number
-        sample_size_b = sample_size_b - 1
-    else:
-        pass
-
-    sample_size_b = widgets.IntText(value=sample_size_b, description='sample size:', layout=label_layout)
+    sample_size_b = widgets.IntText(value=5, description='sample size:', layout=label_layout)
     fit_mode_b = widgets.Dropdown(options=[('curve_fit', 'curve_fit'), ('hemisphere_fit', 'hemisphere_fit')],
                                   description='fit mode:', layout=label_layout)
     index_fig_b = widgets.IntText(value=1, description='fig index:', layout=label_layout)
@@ -366,9 +357,8 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length):
                 else:
                     try_counter = 0
 
-
-            vol_correction(variables, out, out_status, calibration_mode)
-            bowl_correction(variables, out, out_status, calibration_mode)
+            vol_correction(b, variables, out, out_status, calibration_mode)
+            bowl_correction(b, variables, out, out_status, calibration_mode)
 
 
             if mrp_last < mrp[0]:

@@ -124,7 +124,7 @@ class origClass:
 		return dataBack.decode()
 
 	def Freq(self, freq):
-		cmd = "e_freq " + str(freq) + "\n"
+		cmd = "e_freq=" + str(freq) + "\n"
 		self.ser.write(cmd.encode())
 		sleep(0.1)
 		dataStore = []
@@ -146,7 +146,7 @@ class origClass:
 		return dataBack.decode()
 
 	def Div(self, division):
-		cmd = "e_div" + str(division) + "\n"
+		cmd = "e_div=" + str(division) + "\n"
 		self.ser.write(cmd.encode())
 		sleep(0.1)
 		dataStore = []
