@@ -136,9 +136,9 @@ For calibration, review the [tutorial](https://pyccapt.readthedocs.io/en/latest/
 features.
 
 To test the code on google colab, you can use the following links:
-[data processing](https://colab.research.google.com/github/mmonajem/pyccapt/pyccapt/calibration/tutorials/colab/data_processing.ipynb)
+[data processing](https://colab.research.google.com/github/mmonajem/pyccapt/blob/main/pyccapt/calibration/tutorials/colab/data_processing.ipynb)
 and
-[data visualization](https://colab.research.google.com/github/mmonajem/pyccapt/pyccapt/calibration/tutorials/colab/visualization.ipynb)
+[data visualization](https://colab.research.google.com/github/mmonajem/pyccapt/blob/main/pyccapt/calibration/tutorials/colab/visualization.ipynb)
 
 
 ---------------------
