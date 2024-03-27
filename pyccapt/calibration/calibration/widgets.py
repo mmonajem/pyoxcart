@@ -265,8 +265,18 @@ def density_field_selection():
     Returns:
         element (object): Dropdown widget for selecting an element.
     """
-    TableFile = '../../../files/field_density_table.h5'
-    dataframe = data_tools.read_hdf5_through_pandas(TableFile)
+    try:
+        TableFile = '../../../files/field_density_table.h5'
+        dataframe = data_tools.read_hdf5_through_pandas(TableFile)
+    except Exception as e:
+        print("Error: ", e)
+        print("Trying to load the file from the default path")
+        try:
+            TableFile = './pyccapt/files/field_density_table.h5'
+            dataframe = data_tools.read_hdf5_through_pandas(TableFile)
+        except Exception as e:
+            print("Error: ", e)
+            
     elementsAtomicNumber = dataframe['atomic_number']
     elementsList = dataframe['element']
     elementDensityList = dataframe['atom_density']

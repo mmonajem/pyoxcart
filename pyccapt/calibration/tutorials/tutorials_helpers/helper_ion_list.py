@@ -14,7 +14,16 @@ label_layout = widgets.Layout(width='200px')
 
 
 def call_ion_list(variables, selector):
-    isotopeTableFile = '../../../files/isotopeTable.h5'
+	try:
+		isotopeTableFile = '../../../files/isotopeTable.h5'
+	except Exception as e:
+		print(f"Error in loading the isotopeTable file: {e}")
+		print("Trying to load the isotopeTable file from the pyccapt package")
+		try:
+			isotopeTableFile = './pyccapt/files/isotopeTable.h5'
+		except Exception as e:
+			print(f"Error in loading the isotopeTable file: {e}")
+
     dataframe = data_tools.read_hdf5_through_pandas(isotopeTableFile)
     elementsList = dataframe['element']
     elementIsotopeList = dataframe['isotope']

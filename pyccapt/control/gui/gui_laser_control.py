@@ -632,9 +632,9 @@ class Ui_Laser_Control(object):
         self.laser_scan_mode5.setItemText(0, _translate("Laser_Control", "Standard"))
         self.label_13.setText(_translate("Laser_Control", "Focus mode"))
         self.laser_focus_mode.setItemText(0, _translate("Laser_Control", "Standard"))
-        self.label_9.setText(_translate("Laser_Control", "Laser power"))
-        self.label_10.setText(_translate("Laser_Control", "Pulse energy"))
-        self.label_11.setText(_translate("Laser_Control", "Repetirion rate"))
+        self.label_9.setText(_translate("Laser_Control", "Laser power (mW)"))
+        self.label_10.setText(_translate("Laser_Control", "Pulse energy (mW)"))
+        self.label_11.setText(_translate("Laser_Control", "Frequency"))
         self.label_19.setText(_translate("Laser_Control", "x"))
         self.label_17.setText(_translate("Laser_Control", "y"))
         self.label_18.setText(_translate("Laser_Control", "z"))
@@ -852,7 +852,7 @@ class Ui_Laser_Control(object):
                         power = float(power_pe.group())
                     else:
                         power = 'Nan'
-                    self.laser_pulse_energy_disp.display(power_pe)
+                    self.laser_pulse_energy_disp.display(power)
                     # update variables for laser power
                     self.average_power = self.laser_device.read_average_power()
                     self.variables.laser_power = float(self.laser_power.currentText())
@@ -874,8 +874,9 @@ class Ui_Laser_Control(object):
                     freq = float(freq.group()) * 100  # to get the kHz
                 else:
                     freq = 'Nan'
-                self.laser_repetion_rate_disp.display(freq)
                 self.variables.laser_freq = int(self.laser_rate.currentText())
+                self.laser_repetion_rate_disp.display(
+                    int(self.variables.laser_freq / self.variables.laser_division_factor))
                 self.laser_rate.setEnabled(True)
                 self.change_laser_rate = False
 
@@ -883,6 +884,8 @@ class Ui_Laser_Control(object):
                 self.laser_divition_factor.setEnabled(False)
                 res = self.laser_device.Div(float(self.laser_divition_factor.currentText()))
                 self.variables.laser_division_factor = float(self.laser_divition_factor.currentText())
+                self.laser_repetion_rate_disp.display(
+                    int(self.variables.laser_freq / self.variables.laser_division_factor))
                 self.laser_divition_factor.setEnabled(True)
                 self.change_laser_divition_factor = False
 
