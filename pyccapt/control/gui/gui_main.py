@@ -1217,7 +1217,7 @@ class Ui_PyCCAPT(object):
 
 	def setup_parameters_changes(self):
 		"""
-		Function to setup parameters changes
+		Function to set up parameters changes
 
 		Args:
 			None
@@ -1497,11 +1497,13 @@ class Ui_PyCCAPT(object):
 		# with self.variables.lock_setup_parameters:
 		if not self.variables.vdc_hold:
 			self.variables.vdc_hold = True
+			self.pulse_mode.setEnabled(True)  # Disable the pulse mode
 			self.dc_hold.setStyleSheet("QPushButton{\n"
 			                           "background: rgb(0, 255, 26)\n"
 			                           "}")
 		elif self.variables.vdc_hold:
 			self.variables.vdc_hold = False
+			self.pulse_mode.setEnabled(False)  # Enable the pulse mode
 			self.dc_hold.setStyleSheet(self.original_button_style)
 
 	def set_min_voltage_clicked(self):

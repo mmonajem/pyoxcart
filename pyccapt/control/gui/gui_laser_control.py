@@ -526,6 +526,7 @@ class Ui_Laser_Control(object):
         self.laser_divition_factor.currentIndexChanged.connect(self.laser_divition_factor_changed)
         self.laser_device = origamiClassCLI.origClass(self.conf['COM_PORT_laser'])
 
+        self.variables.laser_pulse_energy = 0.0
         try:
             databack = self.laser_device.open_port()
 

@@ -717,8 +717,8 @@ class AptHistPlotter:
 def hist_plot(variables, bin_size, log, target, mode, prominence, distance, percent, selector, figname, lim,
               peaks_find=True, peaks_find_plot=False, plot_ranged_peak=False, plot_ranged_colors=False, mrp_all=False,
               ranging_mode=False, range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[],
-              range_z=[], save_fig=True, print_info=True, legend_mode='long', draw_calib_rect=False, figure_size=(9, 5),
-              plot_show=True):
+              range_z=[], range_vol=[], save_fig=True, print_info=True, legend_mode='long', draw_calib_rect=False,
+              figure_size=(9, 5), plot_show=True):
     """
     Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
     Args:
@@ -776,7 +776,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         variables.peak_widths = []
         variables.peaks_index_list = []
 
-    if range_sequence or range_mc or range_detx or range_dety or range_x or range_y or range_z:
+    if range_sequence or range_mc or range_detx or range_dety or range_x or range_y or range_z or range_vol:
         if range_sequence:
             mask_sequence = np.zeros_like(hist, dtype=bool)
             mask_sequence[range_sequence[0]:range_sequence[1]] = True
@@ -799,7 +799,11 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
             mask_3d = mask_x & mask_y & mask_z
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
-        mask = mask_sequence & mask_det & mask_mc & mask_3d
+        if range_vol:
+	        mask_vol = (variables.vol < range_vol[1]) & (variables.vol > range_vol[0])
+        else:
+	        mask_vol = np.ones(len(variables.vol), dtype=bool)
+        mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
         print('The number of data det:', len(mask_det[mask_det == True]))

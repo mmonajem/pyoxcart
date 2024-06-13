@@ -56,10 +56,10 @@ class Cameras:
 		self.emitter = emitter
 		self.cameras[0].Open()
 		self.cameras[0].ExposureAuto.SetValue('Off')
-		self.cameras[0].ExposureTime.SetValue(800000)
+		self.cameras[0].ExposureTime.SetValue(300000)
 		self.cameras[1].Open()
 		self.cameras[1].ExposureAuto.SetValue('Off')
-		self.cameras[1].ExposureTime.SetValue(100000)
+		self.cameras[1].ExposureTime.SetValue(6000000)
 
 		self.index_save_image = 0
 
@@ -81,8 +81,8 @@ class Cameras:
 
 			try:
 				# Fetch the raw images from camera
-				grabResult0 = self.cameras[0].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
-				grabResult1 = self.cameras[1].RetrieveResult(2000, pylon.TimeoutHandling_ThrowException)
+				grabResult0 = self.cameras[0].RetrieveResult(8000, pylon.TimeoutHandling_ThrowException)
+				grabResult1 = self.cameras[1].RetrieveResult(8000, pylon.TimeoutHandling_ThrowException)
 				image0 = self.converter.Convert(grabResult0)
 				img0 = image0.GetArray()
 				image1 = self.converter.Convert(grabResult1)
@@ -97,14 +97,14 @@ class Cameras:
 			# Resize the original to the required size. Utilize the openCV tool.
 			self.img0_orig = img0
 			# Define the region to crop: (x, y, width, height) side camera
-			crop_region = (1080, 925, 500, 200)
+			crop_region = (1100, 900, 500, 200)
 			# Crop the image
 			self.img0_zoom = self.img0_orig[crop_region[1]:crop_region[1] + crop_region[3],
 			                 crop_region[0]:crop_region[0] + crop_region[2]]
 
 			self.img1_orig = img1
 			# Define the region to crop: (x, y, width, height) bottom camera
-			crop_region = (1375, 920, 500, 200)
+			crop_region = (1200, 800, 400, 600)
 			# Crop the image
 			self.img1_zoom = self.img1_orig[crop_region[1]:crop_region[1] + crop_region[3],
 			                 crop_region[0]:crop_region[0] + crop_region[2]]
@@ -153,16 +153,17 @@ class Cameras:
 			None
 		"""
 		try:
+			# set the exposure time to see sharp images
 			if self.variables.light:
 				self.cameras[0].Open()
-				self.cameras[0].ExposureTime.SetValue(4000)
+				self.cameras[0].ExposureTime.SetValue(50)
 				self.cameras[1].Open()
-				self.cameras[1].ExposureTime.SetValue(4000)
+				self.cameras[1].ExposureTime.SetValue(20000)
 			elif not self.variables.light:
 				self.cameras[0].Open()
-				self.cameras[0].ExposureTime.SetValue(800000)
+				self.cameras[0].ExposureTime.SetValue(300000)
 				self.cameras[1].Open()
-				self.cameras[1].ExposureTime.SetValue(100000)
+				self.cameras[1].ExposureTime.SetValue(6000000)
 		except Exception as e:
 			print(f"Error in switching the light: {e}")
 

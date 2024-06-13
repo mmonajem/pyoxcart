@@ -1,3 +1,4 @@
+import copy
 import datetime
 import multiprocessing
 import os
@@ -5,8 +6,9 @@ import time
 
 import serial.tools.list_ports
 
+from pyccapt.control.apt import apt_exp_control_func
 from pyccapt.control.control import experiment_statistics, hdf5_creator, loggi
-from pyccapt.control.devices import email_send, initialize_devices, signal_generator
+from pyccapt.control.devices import initialize_devices, signal_generator
 from pyccapt.control.drs import drs
 from pyccapt.control.tdc_roentdek import tdc_roentdek
 from pyccapt.control.tdc_surface_concept import tdc_surface_consept
@@ -19,6 +21,10 @@ class APT_Exp_Control:
 
     def __init__(self, variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot):
 
+        self.com_port_v_dc = None
+        self.initialization_v_p = None
+        self.initialization_v_dc = None
+        self.initialization_signal_generator = None
         self.pulse_mode = None
         self.variables = variables
         self.conf = conf
@@ -47,7 +53,8 @@ class APT_Exp_Control:
         self.ex_freq = 0
 
         self.main_v_dc = []
-        self.main_pulse = []
+        self.main_v_pulse = []
+        self.main_l_pulse = []
         self.main_counter = []
         self.main_temperature = []
         self.main_chamber_vacuum = []
@@ -95,96 +102,6 @@ class APT_Exp_Control:
         else:
             print("No counter source selected")
 
-    def initialize_v_dc(self):
-        """
-        Initialize the V_dc source.
-
-        This function initializes the V_dc source by configuring the COM port settings and sending commands to set
-        the parameters.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        self.com_port_v_dc = serial.Serial(
-            port=self.variables.COM_PORT_V_dc,
-            baudrate=115200,
-            bytesize=serial.EIGHTBITS,
-            parity=serial.PARITY_NONE,
-            stopbits=serial.STOPBITS_ONE
-        )
-
-        if self.com_port_v_dc.is_open:
-            self.com_port_v_dc.flushInput()
-            self.com_port_v_dc.flushOutput()
-
-            cmd_list = [">S1 3.0e-4", ">S0B 0", ">S0 %s" % self.variables.vdc_min, "F0", ">S0?", ">DON?", ">S0A?"]
-            for cmd in range(len(cmd_list)):
-                self.command_v_dc(cmd_list[cmd])
-        else:
-            print("Couldn't open Port!")
-            exit()
-
-    def initialize_v_p(self):
-        """
-        Initialize the Pulser device.
-
-        This method initializes the Pulser device using the Visa library.
-
-        Args:
-            None
-
-        Returns:
-            None
-        """
-        self.com_port_v_p = serial.Serial(self.variables.COM_PORT_V_p, baudrate=115200, timeout=0.01)
-
-        self.command_v_p('*RST')
-
-    def command_v_p(self, cmd):
-        """
-        Send commands to the pulser.
-
-        This method sends commands to the pulser over the COM port and reads the response.
-
-        Args:
-            cmd (str): The command to send.
-
-        Returns:
-            str: The response received from the device.
-        """
-        cmd = cmd + '\r\n'
-        self.com_port_v_p.write(cmd.encode())
-        # response = self.com_port_v_p.readline().decode().strip()
-        # return response
-
-    def command_v_dc(self, cmd):
-        """
-        Send commands to the high voltage parameter: v_dc.
-
-        This method sends commands to the V_dc source over the COM port and reads the response.
-
-        Args:
-            cmd (str): The command to send.
-
-        Returns:
-            str: The response received from the device.
-        """
-        self.com_port_v_dc.write((cmd + '\r\n').encode())
-        # response = ''
-        # try:
-        #     while self.com_port_v_dc.in_waiting > 0:
-        #         response = self.com_port_v_dc.readline()
-        # except Exception as error:
-        #     print(error)
-        #
-        # if isinstance(response, bytes):
-        #     response = response.decode("utf-8")
-
-        # return response
-
     def main_ex_loop(self, ):
         """
         Execute main experiment loop.
@@ -213,10 +130,6 @@ class APT_Exp_Control:
         # saving the values of high dc voltage, pulse, and current iteration ions
         # with self.variables.lock_experiment_variables:
         self.main_v_dc.extend([self.specimen_voltage])
-        if self.pulse_mode == 'Voltage':
-            self.main_pulse.extend([self.pulse_voltage])
-        elif self.pulse_mode == 'Laser':
-            self.main_pulse.extend([self.variables.laser_intensity])
         self.main_counter.extend([count_temp])
         self.main_temperature.extend([self.variables.temperature])
         self.main_chamber_vacuum.extend([self.variables.vacuum_main])
@@ -239,14 +152,14 @@ class APT_Exp_Control:
             specimen_voltage_temp = min(self.specimen_voltage + voltage_step, self.vdc_max)
             if specimen_voltage_temp != self.specimen_voltage:
                 if self.conf['v_dc'] != "off":
-                    self.command_v_dc(">S0 %s" % specimen_voltage_temp)
+                    apt_exp_control_func.command_v_dc(self.com_port_v_dc, ">S0 %s" % specimen_voltage_temp)
                     self.specimen_voltage = specimen_voltage_temp
                     self.variables.specimen_voltage = self.specimen_voltage
                     self.variables.specimen_voltage_plot = self.specimen_voltage
                 if self.pulse_mode == 'Voltage':
                     new_vp = self.specimen_voltage * self.pulse_fraction * (1 / self.pulse_amp_per_supply_voltage)
                     if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
-                        self.command_v_p('VOLT %s' % new_vp)
+                        apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % new_vp)
                         self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
                         self.variables.pulse_voltage = self.pulse_voltage
 
@@ -306,67 +219,63 @@ class APT_Exp_Control:
         if not os.path.isdir(self.variables.path_meta):
             try:
                 os.makedirs(self.variables.path_meta, mode=0o777, exist_ok=True)
-            except:
+            except Exception as e:
                 print('Can not create the directory for saving the data')
+                print(e)
                 self.variables.stop_flag = True
                 self.initialization_error = True
                 self.log_apt.info('Experiment is terminated')
 
-        if self.conf['tdc'] == 'on':
+        if self.conf['tdc'] == 'on' and not self.initialization_error:
+            self.variables.flag_tdc_failure = False
             self.initialize_detector_process()
 
         self.log_apt = loggi.logger_creator('apt', self.variables, 'apt.log', path=self.variables.log_path)
-        if self.conf['signal_generator'] == 'on' and self.pulse_mode == 'Voltage':
-            # Initialize the signal generator
-            try:
-                signal_generator.initialize_signal_generator(self.variables, self.variables.pulse_frequency)
-                self.log_apt.info('Signal generator is initialized')
-            except Exception as e:
-                self.log_apt.info('Signal generator is not initialized')
-                print('Can not initialize the signal generator')
-                print('Make the signal_generator off in the config file or fix the error below')
-                print(e)
-                self.variables.stop_flag = True
-                self.initialization_error = True
-                self.log_apt.info('Experiment is terminated')
+        if self.conf['signal_generator'] == 'on' and self.pulse_mode == 'Voltage' and not self.initialization_error:
+            self.initialization_error = apt_exp_control_func.initialization_signal_generator(self.variables,
+                                                                                             self.log_apt)
+            if not self.initialization_error:
+                self.initialization_signal_generator = True
 
-        if self.conf['v_dc'] == 'on':
+        if self.conf['v_dc'] == 'on' and not self.initialization_error:
             try:
-                # Initialize high voltage
-                self.initialize_v_dc()
-                self.log_apt.info('High voltage is initialized')
+                self.com_port_v_dc = serial.Serial(
+                    port=self.variables.COM_PORT_V_dc,
+                    baudrate=115200,
+                    bytesize=serial.EIGHTBITS,
+                    parity=serial.PARITY_NONE,
+                    stopbits=serial.STOPBITS_ONE
+                )
             except Exception as e:
-                self.log_apt.info('High voltage is  not initialized')
-                print('Can not initialize the high voltage')
-                print('Make the v_dc off in the config file or fix the error below')
+                print('Can not open the COM port for V_dc')
                 print(e)
-                self.variables.stop_flag = True
-                self.initialization_error = True
-                self.log_apt.info('Experiment is terminated')
+                self.initialization_v_dc = True
+            if not self.initialization_error:
+                self.initialization_error = apt_exp_control_func.initialization_v_dc(self.com_port_v_dc, self.log_apt,
+                                                                                     self.variables)
+            if not self.initialization_error:
+                self.initialization_v_dc = True
 
         if self.conf['v_p'] == 'on' and self.pulse_mode == 'Voltage':
+            # Initialize pulser
             try:
-                # Initialize pulser
-                self.initialize_v_p()
-                self.log_apt.info('Pulser is initialized')
+                self.com_port_v_p = serial.Serial(self.variables.COM_PORT_V_p, baudrate=115200, timeout=0.01)
             except Exception as e:
-                self.log_apt.info('Pulser is not initialized')
-                print('Can not initialize the pulser')
-                print('Make the v_p off in the config file or fix the error below')
+                print('Can not open the COM port for V_p')
                 print(e)
-                self.variables.stop_flag = True
-                self.initialization_error = True
-                self.log_apt.info('Experiment is terminated')
+                self.initialization_v_p = True
+            if not self.initialization_error:
+                self.initialization_error = apt_exp_control_func.initialization_v_p(self.com_port_v_p, self.log_apt,
+                                                                                    self.variables)
+
+            if not self.initialization_error:
+                self.initialization_v_p = True
         elif self.conf['laser'] == 'on' and self.pulse_mode == 'Laser':
             print(f"{initialize_devices.bcolors.WARNING}Warning: turn on the laser manually"
                   f"{initialize_devices.bcolors.ENDC}")
 
         self.variables.specimen_voltage = self.variables.vdc_min
         if self.pulse_mode == 'Voltage':
-            self.variables.pulse_voltage_min = self.variables.v_p_min * (
-                        1 / self.variables.pulse_amp_per_supply_voltage)
-            self.variables.pulse_voltage_max = self.variables.v_p_max * (
-                        1 / self.variables.pulse_amp_per_supply_voltage)
             self.variables.pulse_voltage = self.variables.v_p_min
 
         time_ex = []
@@ -384,18 +293,17 @@ class APT_Exp_Control:
         if not self.initialization_error:
             if self.pulse_mode == 'Voltage':
                 if self.conf['v_p'] == "on":
-                    self.command_v_p('OUTPut ON')
+                    apt_exp_control_func.command_v_p(self.com_port_v_p, 'OUTPut ON')
                     vol = self.variables.v_p_min / self.variables.pulse_amp_per_supply_voltage
                     cmd = 'VOLT %s' % vol
-                    self.command_v_p(cmd)
-                    self.com_port_v_p.write(cmd.encode())
+                    apt_exp_control_func.command_v_p(self.com_port_v_p, cmd)
                     time.sleep(0.1)
             elif self.pulse_mode == 'Laser':
                 if self.conf['laser'] == "on":
                     print(f"{initialize_devices.bcolors.WARNING}Warning: enable output of laser manually"
                           f"{initialize_devices.bcolors.ENDC}")
             if self.conf['v_dc'] == "on":
-                self.command_v_dc("F1")
+                apt_exp_control_func.command_v_dc(self.com_port_v_dc, "F1")
                 time.sleep(0.1)
 
         self.pulse_frequency = self.variables.pulse_frequency * 1000
@@ -412,7 +320,10 @@ class APT_Exp_Control:
         self.log_apt.info('Experiment is started')
         # Main loop of experiment
         remaining_time_list = []
-
+        total_ions_tmp = 0
+        index_tdc_failure = 0
+        last_pulse_mode = self.pulse_mode
+        flag_change_pulse_mode = False
         if self.initialization_error:
             pass
         else:
@@ -424,28 +335,75 @@ class APT_Exp_Control:
                     self.pulse_voltage_min = self.variables.v_p_min / self.pulse_amp_per_supply_voltage
                     self.pulse_voltage_max = self.variables.v_p_max / self.pulse_amp_per_supply_voltage
                 self.total_ions = self.variables.total_ions
+                # here we check if tdc is failed or not by checking if the total number of ions is
+                # constant for 100 iteration
+                if total_ions_tmp == self.total_ions:
+                    pass
+                    # index_tdc_failure += 1
+                    # if index_tdc_failure > 100:
+                    #     self.variables.flag_tdc_failure = True
+                else:
+                    index_tdc_failure = 0
+                    total_ions_tmp = copy.deepcopy(self.total_ions)
                 self.detection_rate = self.variables.detection_rate
 
-                if self.variables.flag_new_min_voltage:
-                    if self.variables.vdc_hold:
-                        decrement_vol = (self.specimen_voltage - self.vdc_min) / 10
-                        for _ in range(10):
-                            self.specimen_voltage -= decrement_vol
-                            if self.conf['v_dc'] != "off":
-                                self.command_v_dc(">S0 %s" % self.specimen_voltage)
-                            time.sleep(0.3)
+                if self.variables.vdc_hold:
+                    self.pulse_mode = self.variables.pulse_mode
+                    if last_pulse_mode != self.pulse_mode:
+                        flag_change_pulse_mode = True
+                        last_pulse_mode = self.pulse_mode
+                    if self.pulse_mode == 'Voltage':
 
-                        new_vp = self.specimen_voltage * self.pulse_fraction / self.pulse_amp_per_supply_voltage
-                        if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
-                            self.command_v_p('VOLT %s' % new_vp)
-                        if self.pulse_mode == 'Voltage':
-                            self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
+                        if not self.initialization_v_p:
+                            # Initialize pulser
+                            self.com_port_v_p = serial.Serial(self.variables.COM_PORT_V_p, baudrate=115200,
+                                                              timeout=0.01)
+                            self.initialization_error = apt_exp_control_func.initialization_v_p(self.com_port_v_p,
+                                                                                                self.log_apt,
+                                                                                                self.variables)
+                            apt_exp_control_func.command_v_p(self.com_port_v_p, 'OUTPut ON')
+                        if flag_change_pulse_mode:
+                            start_vp = (self.specimen_voltage * self.pulse_fraction *
+                                        (1 / self.pulse_amp_per_supply_voltage))
+                            if start_vp < self.pulse_voltage_min:
+                                start_vp = self.variables.v_p_min / self.variables.pulse_amp_per_supply_voltage
 
-                        self.variables.specimen_voltage = self.specimen_voltage
-                        self.variables.specimen_voltage_plot = self.specimen_voltage
-                        if self.pulse_mode == 'Voltage':
+                            if self.pulse_voltage_max > start_vp > self.pulse_voltage_min - 1 and self.conf[
+                                'v_p'] != "off":
+                                apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % start_vp)
+                                self.pulse_voltage = start_vp * self.pulse_amp_per_supply_voltage
+                                self.variables.pulse_voltage = self.pulse_voltage
+                            flag_change_pulse_mode = False
+
+                        elif self.variables.flag_new_min_voltage:
+                            decrement_vol = (self.specimen_voltage - self.vdc_min) / 10
+                            for _ in range(10):
+                                self.specimen_voltage -= decrement_vol
+                                if self.conf['v_dc'] != "off":
+                                    apt_exp_control_func.command_v_dc(self.com_port_v_dc,
+                                                                      ">S0 %s" % self.specimen_voltage)
+                                time.sleep(0.3)
+
+                            new_vp = self.specimen_voltage * self.pulse_fraction / self.pulse_amp_per_supply_voltage
+                            if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
+                                apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % new_vp)
+                            if self.pulse_mode == 'Voltage':
+                                self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
+
+                            self.variables.specimen_voltage = self.specimen_voltage
+                            self.variables.specimen_voltage_plot = self.specimen_voltage
+                            if self.pulse_mode == 'Voltage':
+                                self.variables.pulse_voltage = self.pulse_voltage
+                            self.variables.flag_new_min_voltage = False
+                            if not self.initialization_error:
+                                self.initialization_v_p = True
+
+                    elif self.pulse_mode == 'Laser':
+                        if self.com_port_v_p is not None:
+                            # if switch to laser mode chamge the voltage to zero
+                            apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT 0')
+                            self.pulse_voltage = 0 * self.pulse_amp_per_supply_voltage
                             self.variables.pulse_voltage = self.pulse_voltage
-                        self.variables.flag_new_min_voltage = False
 
                 # main loop function
                 self.main_ex_loop()
@@ -471,6 +429,8 @@ class APT_Exp_Control:
 
                 if self.variables.flag_tdc_failure:
                     self.log_apt.info('Experiment is stopped because of tdc failure')
+                    print(f"{initialize_devices.bcolors.FAIL}Experiment is stopped because of TDC failure")
+                    print(f"{initialize_devices.bcolors.FAIL}Restart the TDC and start the experiment again")
                     if self.conf['tdc'] == "on":
                         if self.variables.counter_source == 'TDC':
                             self.variables.stop_flag = True  # Set the STOP flag
@@ -529,7 +489,7 @@ class APT_Exp_Control:
             % (int(1000 / self.variables.ex_freq), index_time, steps))
 
         print('Waiting for TDC process to be finished for maximum 60 seconds...')
-        for i in range(60):
+        for i in range(10):
             if self.variables.flag_finished_tdc:
                 print('TDC process is finished')
                 break
@@ -555,7 +515,6 @@ class APT_Exp_Control:
                 print(e)
 
         self.variables.extend_to('main_v_dc', self.main_v_dc)
-        self.variables.extend_to('main_v_p', self.main_pulse)
         self.variables.extend_to('main_counter', self.main_counter)
         self.variables.extend_to('main_temperature', self.main_temperature)
         self.variables.extend_to('main_chamber_vacuum', self.main_chamber_vacuum)
@@ -592,13 +551,15 @@ class APT_Exp_Control:
             if all(len(lst) == len(self.variables.x) for lst in [self.variables.x, self.variables.y,
                                                                  self.variables.t, self.variables.dld_start_counter,
                                                                  self.variables.main_v_dc_dld,
-                                                                 self.variables.main_p_dld]):
+                                                                 self.variables.main_v_p_dld,
+                                                                 self.variables.main_l_p_dld]):
                 self.log_apt.warning('dld data have not same length')
 
             if all(len(lst) == len(self.variables.channel) for lst in [self.variables.channel, self.variables.time_data,
                                                                        self.variables.tdc_start_counter,
                                                                        self.variables.main_v_dc_tdc,
-                                                                       self.variables.main_p_tdc]):
+                                                                       self.variables.main_v_p_tdc,
+                                                                       self.variables.main_l_p_tdc]):
                 self.log_apt.warning('tdc data have not same length')
         elif self.variables.counter_source == 'DRS':
             if all(len(lst) == len(self.variables.ch0_time) for lst in
@@ -606,7 +567,7 @@ class APT_Exp_Control:
                     self.variables.ch1_wave, self.variables.ch2_time,
                     self.variables.ch2_wave, self.variables.ch3_time,
                     self.variables.ch3_wave,
-                    self.variables.main_v_dc_drs, self.variables.main_v_p_drs]):
+                    self.variables.main_v_dc_drs, self.variables.main_v_p_drs, self.variables.main_l_p_drs]):
                 self.log_apt.warning('tdc data have not same length')
 
         self.variables.end_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -627,57 +588,7 @@ class APT_Exp_Control:
 
         # send an email
         if len(self.variables.email) > 3:
-            subject = 'Experiment {} Report on {}'.format(self.variables.hdf5_data_name, self.variables.start_time)
-            elapsed_time_temp = float("{:.3f}".format(self.variables.elapsed_time))
-            message = 'The experiment was started at: {}\n' \
-                      'The experiment was ended at: {}\n' \
-                      'Experiment duration: {}\n' \
-                      'Total number of ions: {}\n\n'.format(self.variables.start_time,
-                                                            self.variables.end_time, elapsed_time_temp,
-                                                            self.variables.total_ions)
-
-            additional_info = 'Username: {}\n'.format(self.variables.user_name)
-            additional_info += 'Experiment Name: {}\n'.format(self.variables.ex_name)
-            additional_info += 'Detection Rate (%): {}\n'.format(self.variables.detection_rate)
-            additional_info += 'Maximum Number of Ions: {}\n'.format(self.variables.max_ions)
-            additional_info += 'Counter source: {}\n'.format(self.variables.counter_source)
-            additional_info += 'Pulse Fraction (%): {}\n'.format(self.variables.pulse_fraction)
-            additional_info += 'Pulse Frequency (kHz): {}\n'.format(self.variables.pulse_frequency)
-            additional_info += 'Control Algorithm: {}\n'.format(self.variables.control_algorithm)
-            additional_info += 'pulse_mode: {}\n'.format(self.variables.pulse_mode)
-            additional_info += 'Experiment Control Refresh freq. (Hz): {}\n'.format(self.variables.ex_freq)
-            additional_info += 'K_p Upwards: {}\n'.format(self.variables.vdc_step_up)
-            additional_info += 'K_p Downwards: {}\n'.format(self.variables.vdc_step_down)
-            additional_info += 'Specimen start Voltage (V): {}\n'.format(self.variables.vdc_min)
-            additional_info += 'Specimen Stop Voltage (V): {}\n'.format(self.variables.vdc_max)
-            additional_info += 'Temperature (C): {}\n'.format(self.variables.temperature)
-            additional_info += 'Vacuum (mbar): {}\n'.format(self.variables.vacuum_main)
-
-            if self.variables.pulse_mode == 'Voltage':
-                additional_info += 'Pulse start Voltage (V): {}\n'.format(self.variables.v_p_min)
-                additional_info += 'Pulse Stop Voltage (V): {}\n'.format(self.variables.v_p_max)
-                additional_info += 'Specimen Max Achieved Pulse Voltage (V): {:.3f}\n\n'.format(
-                    self.variables.pulse_voltage)
-            elif self.variables.pulse_mode == 'Laser':
-                additional_info += 'Specimen Laser Pulsed Energy (pJ): {:.3f}\n\n'.format(
-                    self.variables.laser_intensity)
-            additional_info += 'StopCriteria:\n'
-            additional_info += 'Criteria Time:: {}\n'.format(self.variables.criteria_time)
-            additional_info += 'Criteria DC Voltage:: {}\n'.format(self.variables.criteria_vdc)
-            additional_info += 'Criteria Ions:: {}\n'.format(self.variables.criteria_ions)
-
-
-            additional_info += 'Specimen Max Achieved dc Voltage (V): {:.3f}\n'.format(self.variables.specimen_voltage)
-            additional_info += 'Experiment Elapsed Time (Sec): {:.3f}\n'.format(self.variables.elapsed_time)
-            additional_info += 'Experiment Total Ions: {}\n\n'.format(self.variables.total_ions)
-
-            additional_info += 'Email: {}\n'.format(self.variables.email)
-
-            additional_info += 'The experiment was conducted using PyCCAPT Python package.'
-
-            message += additional_info
-            email_send.send_email(self.variables.email, subject, message)
-            self.log_apt.info('Email is sent')
+            apt_exp_control_func.send_info_email(self.log_apt, self.variables)
 
         self.experiment_finished_event.set()
         # Clear up all the variables and deinitialize devices
@@ -767,9 +678,9 @@ class APT_Exp_Control:
         self.log_apt.info('Starting cleanup')
 
         try:
-            if self.conf['v_dc'] != "off":
+            if self.conf['v_dc'] == "on":
                 # Turn off the v_dc
-                self.command_v_dc('F0')
+                apt_exp_control_func.command_v_dc(self.com_port_v_dc, 'F0')
                 self.com_port_v_dc.close()
         except:
             pass
@@ -777,8 +688,8 @@ class APT_Exp_Control:
         try:
             if self.conf['v_p'] == "on":
                 # Turn off the v_p
-                self.command_v_p('VOLT 0')
-                self.command_v_p('OUTPut OFF')
+                apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT 0')
+                apt_exp_control_func.command_v_p(self.com_port_v_p, 'OUTPut OFF')
                 self.com_port_v_p.close()
         except:
             pass

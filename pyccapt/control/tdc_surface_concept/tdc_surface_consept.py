@@ -155,9 +155,12 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
         print("Error during init:", retcode, errmsg)
         print(f"{initialize_devices.bcolors.FAIL}Error: Restart the TDC manually "
               f"(Turn it On and Off){initialize_devices.bcolors.ENDC}")
+        # variables.flag_tdc_failure = True
         return -1
+
     else:
         print("TDC is successfully initialized")
+        variables.flag_tdc_failure = False
 
     DATA_FIELD_SEL = (scTDC.SC_DATA_FIELD_DIF1 |
                       scTDC.SC_DATA_FIELD_DIF2 |
@@ -177,14 +180,16 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
     yy = []
     tt = []
     voltage_data = []
-    pulse_data = []
+    voltage_pulse_data = []
+    laser_pulse_data = []
     start_counter = []
 
     channel_data = []
     time_data = []
     tdc_start_counter = []
     voltage_data_tdc = []
-    pulse_data_tdc = []
+    voltage_pulse_data_tdc = []
+    laser_pulse_data_tdc = []
 
     retcode = bufdatacb.start_measurement(100)
     if errorcheck(device, bufdatacb, bufdatacb_raw, retcode) < 0:
@@ -195,7 +200,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
 
     # Define a lock
     # data_lock = threading.Lock()
-    flag_stop_data_thread = False
+    # flag_stop_data_thread = False
     # Create a thread
     # data_thread = threading.Thread(target=save_data_thread, args=(variables, xx_list, yy_list, tt_list,
     #                                                               voltage_data, pulse_data, flag_stop_data_thread))
@@ -216,7 +221,8 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
         eventtype, data = bufdatacb.queue.get()
         eventtype_raw, data_raw = bufdatacb_raw.queue.get()
         specimen_voltage = variables.specimen_voltage
-        pulse_voltage = variables.pulse_voltage
+        voltage_pulse = variables.pulse_voltage
+        laser_pulse = variables.laser_pulse_energy
         if eventtype == QUEUE_DATA:
             # correct for binning of surface concept
             xx_dif = data["dif1"]
@@ -235,13 +241,15 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
                 yy.extend(yy_tmp)
                 tt.extend(tt_tmp)
                 dc_voltage_tmp = np.tile(specimen_voltage, len(xx_tmp)).tolist()
-                v_p_voltage_tmp = np.tile(pulse_voltage, len(xx_tmp)).tolist()
+                v_p_voltage_tmp = np.tile(voltage_pulse, len(xx_tmp)).tolist()
+                l_p_voltage_tmp = np.tile(laser_pulse, len(xx_tmp)).tolist()
 
                 xx_list.extend(xx_dif.tolist())
                 yy_list.extend(yy_dif.tolist())
                 tt_list.extend(tt_dif.tolist())
                 voltage_data.extend(dc_voltage_tmp)
-                pulse_data.extend(v_p_voltage_tmp)
+                voltage_pulse_data.extend(v_p_voltage_tmp)
+                laser_pulse_data.extend(l_p_voltage_tmp)
 
 
                 x_plot.put(xx_tmp)
@@ -257,21 +265,24 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
                 # raw data
                 channel_data.extend(channel_data_tmp)
                 voltage_data_tdc.extend((np.tile(specimen_voltage, len(channel_data_tmp))).tolist())
-                pulse_data_tdc.extend((np.tile(pulse_voltage, len(channel_data_tmp))).tolist())
+                voltage_pulse_data_tdc.extend((np.tile(voltage_pulse, len(channel_data_tmp))).tolist())
+                laser_pulse_data_tdc.extend((np.tile(laser_pulse, len(channel_data_tmp))).tolist())
 
         if time.time() - save_data_time > 120:
             np.save(variables.path + "/x_data.npy", np.array(xx_list))
             np.save(variables.path + "/y_data.npy", np.array(yy_list))
             np.save(variables.path + "/t_data.npy", np.array(tt_list))
             np.save(variables.path + "/voltage_data.npy", np.array(voltage_data))
-            np.save(variables.path + "/pulse_data.npy", np.array(pulse_data))
+            np.save(variables.path + "/voltage_pulse_data.npy", np.array(voltage_pulse_data))
+            np.save(variables.path + "/laser_pulse_data.npy", np.array(laser_pulse_data))
             np.save(variables.path + "/start_counter.npy", np.array(start_counter))
 
             np.save(variables.path + "/channel_data.npy", np.array(channel_data))
             np.save(variables.path + "/time_data.npy", np.array(time_data))
             np.save(variables.path + "/tdc_start_counter.npy", np.array(tdc_start_counter))
             np.save(variables.path + "/voltage_data_tdc.npy", np.array(voltage_data_tdc))
-            np.save(variables.path + "/pulse_data_tdc.npy", np.array(pulse_data_tdc))
+            np.save(variables.path + "/voltage_pulse_data_tdc.npy", np.array(voltage_pulse_data_tdc))
+            np.save(variables.path + "/laser_pulse_data_tdc.npy", np.array(laser_pulse_data_tdc))
 
             save_data_time = time.time()
             print("Data saved.")
@@ -294,7 +305,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
             if retcode < 0:
                 print("Error during read (error code: %s - error msg: %s):" % (retcode,
                                                                                device.lib.sc_get_err_msg(retcode)))
-                variables.flag_tdc_failure = True
+                # variables.flag_tdc_failure = True
                 break
 
         # else:  # unknown event
@@ -311,20 +322,23 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
     np.save(variables.path + "/y_data.npy", np.array(yy_list))
     np.save(variables.path + "/t_data.npy", np.array(tt_list))
     np.save(variables.path + "/voltage_data.npy", np.array(voltage_data))
-    np.save(variables.path + "/pulse_data.npy", np.array(pulse_data))
+    np.save(variables.path + "/voltage_pulse_data.npy", np.array(voltage_pulse_data))
+    np.save(variables.path + "/laser_pulse_data.npy", np.array(laser_pulse_data))
 
     variables.extend_to('x', xx)
     variables.extend_to('y', yy)
     variables.extend_to('t', tt)
     variables.extend_to('dld_start_counter', start_counter)
     variables.extend_to('main_v_dc_dld', voltage_data)
-    variables.extend_to('main_p_dld', pulse_data)
+    variables.extend_to('main_v_p_dld', voltage_pulse_data)
+    variables.extend_to('main_l_p_dld', laser_pulse_data)
 
     variables.extend_to('channel', channel_data)
     variables.extend_to('time_data', time_data)
     variables.extend_to('tdc_start_counter', tdc_start_counter)
     variables.extend_to('main_v_dc_tdc', voltage_data_tdc)
-    variables.extend_to('main_p_tdc', pulse_data_tdc)
+    variables.extend_to('main_v_p_tdc', voltage_pulse_data_tdc)
+    variables.extend_to('main_l_p_tdc', laser_pulse_data_tdc)
     print("data save in share variables")
     time.sleep(0.1)
     bufdatacb.close()

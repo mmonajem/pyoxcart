@@ -205,7 +205,7 @@ def draw_qube(fig, range, col=None, row=None):
 
 def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save, make_gif=False,
                         range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[],
-                        range_z=[],
+                        range_z=[], range_vol=[],
                         ions_individually_plots=False):
     """
     Generate a 3D plot for atom probe reconstruction data.
@@ -225,6 +225,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         range_x: Range of x-axis
         range_y: Range of y-axis
         range_z: Range of z-axis
+        range_vol: Range of volume
         ions_individually_plots (bool): Whether to plot ions individually.
 
     Returns:
@@ -254,8 +255,12 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
             mask_3d = mask_x & mask_y & mask_z
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
+        if range_vol:
+	        mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
+        else:
+	        mask_vol = np.ones(len(variables.volume), dtype=bool)
 
-        mask_f = mask_sequence & mask_det & mask_mc & mask_3d
+        mask_f = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
         print('The number of data det:', len(mask_det[mask_det == True]))
@@ -637,7 +642,7 @@ def scatter_plot(data, range_data, variables, element_percentage, selected_area,
 
 
 def projection(variables, element_percentage, range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[],
-               range_y=[], range_z=[], x_or_y='x', figname='projection', figure_size=(5, 5), save=False):
+               range_y=[], range_z=[], range_vol=[], x_or_y='x', figname='projection', figure_size=(5, 5), save=False):
     """
     Generate a projection plot based on the provided data.
 
@@ -651,6 +656,7 @@ def projection(variables, element_percentage, range_sequence=[], range_mc=[], ra
         range_x: Range of x-axis
         range_y: Range of y-axis
         range_z: Range of z-axis
+        range_vol: Range of volume
         x_or_y (str): Either 'x' or 'y' indicating the axis to plot.
         figname (str): The name of the figure.
     Returns:
@@ -683,7 +689,11 @@ def projection(variables, element_percentage, range_sequence=[], range_mc=[], ra
             mask_3d = mask_x & mask_y & mask_z
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
-        mask = mask_sequence & mask_det & mask_mc & mask_3d
+        if range_vol:
+	        mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
+        else:
+	        mask_vol = np.ones(len(variables.volume), dtype=bool)
+        mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
         print('The number of data det:', len(mask_det[mask_det == True]))
@@ -749,7 +759,7 @@ def projection(variables, element_percentage, range_sequence=[], range_mc=[], ra
 
 
 def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[],
-            range_y=[], range_z=[], figure_name='hetmap', figure_sie=(5, 5), save=False):
+            range_y=[], range_z=[], range_vol=[], figure_name='hetmap', figure_sie=(5, 5), save=False):
     """
     Generate a heatmap based on the provided data.
 
@@ -763,6 +773,7 @@ def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range
         range_x: Range of x-axis
         range_y: Range of y-axis
         range_z: Range of z-axis
+        range_vol: Range of volume
         figure_name (str): The name of the figure.
         figure_sie: The size of the figure.
         save (bool): True to save the plot, False to display it.
@@ -797,7 +808,11 @@ def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range
             mask_3d = mask_x & mask_y & mask_z
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
-        mask = mask_sequence & mask_det & mask_mc & mask_3d
+        if range_vol:
+	        mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
+        else:
+	        mask_vol = np.ones(len(variables.volume), dtype=bool)
+        mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
         print('The number of data det:', len(mask_det[mask_det == True]))
@@ -854,8 +869,8 @@ def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range
 
 
 def reconstruction_2d_histogram(variables, x, y, bins, percentage, range_sequence=[], range_mc=[], range_detx=[],
-                                range_dety=[], range_x=[], range_y=[], range_z=[], xlabel='X-axis', ylabel='Y-axis',
-                                save=False, igure_name=None, figure_size=None):
+                                range_dety=[], range_x=[], range_y=[], range_z=[], range_vol=[], xlabel='X-axis',
+                                ylabel='Y-axis', save=False, igure_name=None, figure_size=None):
     """
     Generate a 2D histogram based on the provided data.
 
@@ -872,6 +887,7 @@ def reconstruction_2d_histogram(variables, x, y, bins, percentage, range_sequenc
         range_x: Range of x-axis
         range_y: Range of y-axis
         range_z: Range of z-axis
+        range_vol: Range of volume
         xlabel (str): The label of the x-axis.
         ylabel (str): The label of the y-axis.
         save (bool): True to save the plot, False to display it.
@@ -904,7 +920,11 @@ def reconstruction_2d_histogram(variables, x, y, bins, percentage, range_sequenc
             mask_3d = mask_x & mask_y & mask_z
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
-        mask = mask_sequence & mask_det & mask_mc & mask_3d
+        if range_vol:
+	        mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
+        else:
+	        mask_vol = np.ones(len(variables.volume), dtype=bool)
+        mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
         print('The number of data det:', len(mask_det[mask_det == True]))

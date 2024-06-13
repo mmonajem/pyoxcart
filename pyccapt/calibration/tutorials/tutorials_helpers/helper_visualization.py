@@ -68,6 +68,7 @@ def call_visualization(variables):
     range_x_mc = widgets.Textarea(value='[0,0]')
     range_y_mc = widgets.Textarea(value='[0,0]')
     range_z_mc = widgets.Textarea(value='[0,0]')
+    range_vol_mc = widgets.Textarea(value='[0,0]')
 
     plot_mc_button.on_click(lambda b: plot_mc(b, variables, out))
 
@@ -84,6 +85,7 @@ def call_visualization(variables):
                 range_x = json.loads(range_x_mc.value)
                 range_y = json.loads(range_y_mc.value)
                 range_z = json.loads(range_z_mc.value)
+                range_vol = json.loads(range_vol_mc.value)
                 if range_sequence == [0, 0]:
                     range_sequence = []
                 if range_mc == [0, 0]:
@@ -96,6 +98,9 @@ def call_visualization(variables):
                     range_x = []
                     range_y = []
                     range_z = []
+                if range_vol == [0, 0]:
+	                range_vol = []
+
             except json.JSONDecodeError:
                 # Handle invalid input
                 print(f"Invalid range input")
@@ -107,8 +112,8 @@ def call_visualization(variables):
                               plot_ranged_peak=plot_ranged_peak.value, mrp_all=mrp_all.value,
                               range_sequence=range_sequence, range_mc=range_mc, range_detx=range_detx,
                               range_dety=range_dety, range_x=range_x, range_y=range_y, range_z=range_z,
-                              print_info=print_info.value, figure_size=figure_size, save_fig=save_mc.value,
-                              legend_mode=legend_widget.value)
+                              range_vol=range_vol, print_info=print_info.value, figure_size=figure_size,
+                              save_fig=save_mc.value, legend_mode=legend_widget.value)
 
         plot_mc_button.disabled = False
 
@@ -129,6 +134,7 @@ def call_visualization(variables):
     range_x_fdm = widgets.Textarea(value='[0,0]')
     range_y_fdm = widgets.Textarea(value='[0,0]')
     range_z_fdm = widgets.Textarea(value='[0,0]')
+    range_vol_fdm = widgets.Textarea(value='[0,0]')
 
     plot_fdm_button.on_click(lambda b: plot_fdm(b, variables, out))
 
@@ -149,6 +155,7 @@ def call_visualization(variables):
                 range_x = json.loads(range_x_fdm.value)
                 range_y = json.loads(range_y_fdm.value)
                 range_z = json.loads(range_z_fdm.value)
+                range_vol = json.loads(range_vol_fdm.value)
                 if range_sequence == [0, 0]:
                     range_sequence = []
                 if range_mc == [0, 0]:
@@ -161,13 +168,15 @@ def call_visualization(variables):
                     range_x = []
                     range_y = []
                     range_z = []
+                if range_vol == [0, 0]:
+	                range_vol = []
             except json.JSONDecodeError:
                 # Handle invalid input
                 print(f"Invalid range input")
             data_loadcrop.plot_crop_fdm(data, bins, frac_fdm_widget.value, axis_mode_fdm.value, figure_size,
                                         variables, range_sequence,
-                                        range_mc, range_detx, range_dety, range_x, range_y, range_z, False,
-                                        False, save_fdm_widget.value, figname_fdm_widget.value)
+                                        range_mc, range_detx, range_dety, range_x, range_y, range_z, range_vol,
+                                        False, False, save_fdm_widget.value, figname_fdm_widget.value)
 
         # Enable the button when the code is finished
         plot_fdm_button.disabled = False
@@ -188,6 +197,7 @@ def call_visualization(variables):
     range_x_3d = widgets.Textarea(value='[0,0]')
     range_y_3d = widgets.Textarea(value='[0,0]')
     range_z_3d = widgets.Textarea(value='[0,0]')
+    range_vol_3d = widgets.Textarea(value='[0,0]')
 
     def plot_3d(b, variables, out):
         plot_3d_button.disabled = True
@@ -201,6 +211,7 @@ def call_visualization(variables):
                 range_x = json.loads(range_x_3d.value)
                 range_y = json.loads(range_y_3d.value)
                 range_z = json.loads(range_z_3d.value)
+                range_vol = json.loads(range_vol_3d.value)
                 if range_sequence == [0, 0]:
                     range_sequence = []
                 if range_mc == [0, 0]:
@@ -213,6 +224,8 @@ def call_visualization(variables):
                     range_x = []
                     range_y = []
                     range_z = []
+                if range_vol == [0, 0]:
+	                range_vol = []
             except json.JSONDecodeError:
                 # Handle invalid input
                 print(f"Invalid range input")
@@ -230,7 +243,8 @@ def call_visualization(variables):
             reconstruction.reconstruction_plot(variables, element_percentage_list, opacity.value,
                                                rotary_fig_save_p3.value, figname_3d.value,
                                                save_3d.value, make_gif_p3.value, range_sequence, range_mc, range_detx,
-                                               range_dety, range_x, range_y, range_z, ions_individually_plots.value)
+                                               range_dety, range_x, range_y, range_z, range_vol,
+                                               ions_individually_plots.value)
 
         plot_3d_button.disabled = False
 
@@ -291,6 +305,7 @@ def call_visualization(variables):
     range_x_heatmap = widgets.Textarea(value='[0,0]')
     range_y_heatmap = widgets.Textarea(value='[0,0]')
     range_z_heatmap = widgets.Textarea(value='[0,0]')
+    range_vol_heatmap = widgets.Textarea(value='[0,0]')
 
     plot_heatmap_button.on_click(lambda b: plot_heatmap(b, variables, out))
 
@@ -307,6 +322,7 @@ def call_visualization(variables):
                 range_x = json.loads(range_x_heatmap.value)
                 range_y = json.loads(range_y_heatmap.value)
                 range_z = json.loads(range_z_heatmap.value)
+                range_vol = json.loads(range_vol_heatmap.value)
                 if range_sequence == [0, 0]:
                     range_sequence = []
                 if range_mc == [0, 0]:
@@ -319,6 +335,8 @@ def call_visualization(variables):
                     range_x = []
                     range_y = []
                     range_z = []
+                if range_vol == [0, 0]:
+	                range_vol = []
             except json.JSONDecodeError:
                 # Handle invalid input
                 print(f"Invalid range input")
@@ -332,8 +350,8 @@ def call_visualization(variables):
                         max_value = element_percentage_dic[element]
                 element_percentage_list.append(max_value)
             reconstruction.heatmap(variables, element_percentage_list, range_sequence, range_mc, range_detx,
-                                   range_dety, range_x, range_y, range_z, figname_heatmap.value, figure_sie=figure_size,
-                                   save=save_heatmap.value)
+                                   range_dety, range_x, range_y, range_z, range_vol,
+                                   figname_heatmap.value, figure_sie=figure_size, save=save_heatmap.value)
         plot_heatmap_button.disabled = False
 
     #############
@@ -382,6 +400,7 @@ def call_visualization(variables):
     range_x_pp = widgets.Textarea(value='[0,0]')
     range_y_pp = widgets.Textarea(value='[0,0]')
     range_z_pp = widgets.Textarea(value='[0,0]')
+    range_vol_pp = widgets.Textarea(value='[0,0]')
 
     plot_projection_button.on_click(lambda b: plot_projection(b, variables, out))
 
@@ -398,6 +417,7 @@ def call_visualization(variables):
                 range_x = json.loads(range_x_pp.value)
                 range_y = json.loads(range_y_pp.value)
                 range_z = json.loads(range_z_pp.value)
+                range_vol = json.loads(range_vol_pp.value)
                 if range_sequence == [0, 0]:
                     range_sequence = []
                 if range_mc == [0, 0]:
@@ -410,6 +430,8 @@ def call_visualization(variables):
                     range_x = []
                     range_y = []
                     range_z = []
+                if range_vol == [0, 0]:
+	                range_vol = []
             except json.JSONDecodeError:
                 # Handle invalid input
                 print(f"Invalid range input")
@@ -426,7 +448,7 @@ def call_visualization(variables):
                 element_percentage_list.append(max_value)
 
             reconstruction.projection(variables, element_percentage_list, range_sequence, range_mc, range_detx,
-                                      range_dety, range_x, range_y, range_z, x_or_y_pp.value,
+                                      range_dety, range_x, range_y, range_z, range_vol, x_or_y_pp.value,
                                       figname_p.value, figure_size, save_projection.value)
         plot_projection_button.disabled = False
 
@@ -449,6 +471,7 @@ def call_visualization(variables):
     range_x_2d_hist = widgets.Textarea(value='[0,0]')
     range_y_2d_hist = widgets.Textarea(value='[0,0]')
     range_z_2d_hist = widgets.Textarea(value='[0,0]')
+    range_vol_2d_hist = widgets.Textarea(value='[0,0]')
 
     plot_reconstruction_2d_hist_button.on_click(lambda b: plot_reconstruction_2d_hist(b, variables, out))
     def plot_reconstruction_2d_hist(b, variables, out):
@@ -491,6 +514,7 @@ def call_visualization(variables):
             range_x = json.loads(range_x_2d_hist.value)
             range_y = json.loads(range_y_2d_hist.value)
             range_z = json.loads(range_z_2d_hist.value)
+            range_vol = json.loads(range_vol_2d_hist.value)
             if range_sequence == [0, 0]:
                 range_sequence = []
             if range_mc == [0, 0]:
@@ -503,12 +527,14 @@ def call_visualization(variables):
                 range_x = []
                 range_y = []
                 range_z = []
+            if range_vol == [0, 0]:
+	            range_vol = []
         except json.JSONDecodeError:
             # Handle invalid input
             print(f"Invalid range input")
         with out:  # Capture the output within the 'out' widget
             reconstruction.reconstruction_2d_histogram(variables, x, y, bins, percentage, range_sequence, range_mc,
-                                                       range_detx, range_dety, range_x, range_y, range_z,
+                                                       range_detx, range_dety, range_x, range_y, range_z, range_vol,
                                                        xlabel, ylabel, save, figure_name, figure_size)
         plot_reconstruction_2d_hist_button.disabled = False
 
@@ -645,6 +671,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value="x range:", layout=label_layout), range_x_mc]),
         widgets.HBox([widgets.Label(value="y range:", layout=label_layout), range_y_mc]),
         widgets.HBox([widgets.Label(value="z range:", layout=label_layout), range_z_mc]),
+	    widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_mc]),
         widgets.HBox([plot_mc_button, clear_button])])
 
     tab1 = widgets.VBox([
@@ -662,6 +689,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='x range:', layout=label_layout), range_x_fdm]),
         widgets.HBox([widgets.Label(value='y range:', layout=label_layout), range_y_fdm]),
         widgets.HBox([widgets.Label(value='z range:', layout=label_layout), range_z_fdm]),
+	    widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_fdm]),
         widgets.HBox([plot_fdm_button, clear_button]),
     ])
     tab2 = widgets.VBox([
@@ -679,6 +707,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='Range x:', layout=label_layout), range_x_3d]),
         widgets.HBox([widgets.Label(value='Range y:', layout=label_layout), range_y_3d]),
         widgets.HBox([widgets.Label(value='Range z:', layout=label_layout), range_z_3d]),
+	    widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_3d]),
         widgets.HBox([plot_3d_button, clear_button]),
     ])
     tab3 = widgets.VBox([
@@ -708,6 +737,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='range x:', layout=label_layout), range_x_heatmap]),
         widgets.HBox([widgets.Label(value='range y:', layout=label_layout), range_y_heatmap]),
         widgets.HBox([widgets.Label(value='range z:', layout=label_layout), range_z_heatmap]),
+	    widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_heatmap]),
         widgets.HBox([plot_heatmap_button, clear_button]),
     ])
 
@@ -734,6 +764,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='range x:', layout=label_layout), range_x_pp]),
         widgets.HBox([widgets.Label(value='range y:', layout=label_layout), range_y_pp]),
         widgets.HBox([widgets.Label(value='range z:', layout=label_layout), range_z_pp]),
+	    widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_pp]),
         widgets.HBox([plot_projection_button, clear_button])
     ])
 
@@ -754,6 +785,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='x range:', layout=label_layout), range_x_2d_hist]),
         widgets.HBox([widgets.Label(value='y range:', layout=label_layout), range_y_2d_hist]),
         widgets.HBox([widgets.Label(value='z range:', layout=label_layout), range_z_2d_hist]),
+	    widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_2d_hist]),
         widgets.HBox([plot_reconstruction_2d_hist_button, clear_button]),
     ])
     tab8 = widgets.VBox([

@@ -224,7 +224,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
 
 def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_size=(5, 4), variables=None,
                   range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[],
-                  data_crop=False, draw_circle=False, save=False, figname=''):
+                  range_vol=[], data_crop=False, draw_circle=False, save=False, figname=''):
     """
     Plot and crop the FDM with the option to select a region of interest.
 
@@ -241,6 +241,7 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
         range_x: Range of x-axis
         range_y: Range of y-axis
         range_z: Range of z-axis
+        range_vol: Range of voltage
         figure_size: Size of the plot
         draw_circle: Flag to enable circular region of interest selection
         save: Flag to choose whether to save the plot or not
@@ -274,7 +275,11 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
             mask_3d = mask_x & mask_y & mask_z
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
-        mask = mask_sequence & mask_det & mask_mc & mask_3d
+        if range_vol:
+	        mask_vol = (variables.voltage < range_vol[1]) & (variables.voltage > range_vol[0])
+        else:
+	        mask_vol = np.ones(len(variables.voltage), dtype=bool)
+        mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         variables.mask = mask
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
         print('The number of data det:', len(mask_det[mask_det == True]))
