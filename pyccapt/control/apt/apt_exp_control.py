@@ -156,7 +156,7 @@ class APT_Exp_Control:
                     self.specimen_voltage = specimen_voltage_temp
                     self.variables.specimen_voltage = self.specimen_voltage
                     self.variables.specimen_voltage_plot = self.specimen_voltage
-                if self.pulse_mode == 'Voltage':
+                if self.pulse_mode in ['Voltage', 'VoltageLaser']:
                     new_vp = self.specimen_voltage * self.pulse_fraction * (1 / self.pulse_amp_per_supply_voltage)
                     if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
                         apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % new_vp)
@@ -215,7 +215,6 @@ class APT_Exp_Control:
                 print(e)
                 self.variables.stop_flag = True
                 self.initialization_error = True
-                self.log_apt.info('Experiment is terminated')
         if not os.path.isdir(self.variables.path_meta):
             try:
                 os.makedirs(self.variables.path_meta, mode=0o777, exist_ok=True)
@@ -224,14 +223,14 @@ class APT_Exp_Control:
                 print(e)
                 self.variables.stop_flag = True
                 self.initialization_error = True
-                self.log_apt.info('Experiment is terminated')
 
         if self.conf['tdc'] == 'on' and not self.initialization_error:
             self.variables.flag_tdc_failure = False
             self.initialize_detector_process()
 
         self.log_apt = loggi.logger_creator('apt', self.variables, 'apt.log', path=self.variables.log_path)
-        if self.conf['signal_generator'] == 'on' and self.pulse_mode == 'Voltage' and not self.initialization_error:
+        if self.conf['signal_generator'] == 'on' and self.pulse_mode in ['Voltage',
+                                                                         'VoltageLaser'] and not self.initialization_error:
             self.initialization_error = apt_exp_control_func.initialization_signal_generator(self.variables,
                                                                                              self.log_apt)
             if not self.initialization_error:
@@ -256,7 +255,7 @@ class APT_Exp_Control:
             if not self.initialization_error:
                 self.initialization_v_dc = True
 
-        if self.conf['v_p'] == 'on' and self.pulse_mode == 'Voltage':
+        if self.conf['v_p'] == 'on' and self.pulse_mode in ['Voltage', 'VoltageLaser']:
             # Initialize pulser
             try:
                 self.com_port_v_p = serial.Serial(self.variables.COM_PORT_V_p, baudrate=115200, timeout=0.01)
@@ -270,12 +269,12 @@ class APT_Exp_Control:
 
             if not self.initialization_error:
                 self.initialization_v_p = True
-        elif self.conf['laser'] == 'on' and self.pulse_mode == 'Laser':
+        elif self.conf['laser'] == 'on' and self.pulse_mode in ['Laser', 'VoltageLaser']:
             print(f"{initialize_devices.bcolors.WARNING}Warning: turn on the laser manually"
                   f"{initialize_devices.bcolors.ENDC}")
 
         self.variables.specimen_voltage = self.variables.vdc_min
-        if self.pulse_mode == 'Voltage':
+        if self.pulse_mode in ['Voltage', 'VoltageLaser']:
             self.variables.pulse_voltage = self.variables.v_p_min
 
         time_ex = []
@@ -291,14 +290,14 @@ class APT_Exp_Control:
 
         # Turn on the v_dc and v_p
         if not self.initialization_error:
-            if self.pulse_mode == 'Voltage':
+            if self.pulse_mode in ['Voltage', 'VoltageLaser']:
                 if self.conf['v_p'] == "on":
                     apt_exp_control_func.command_v_p(self.com_port_v_p, 'OUTPut ON')
                     vol = self.variables.v_p_min / self.variables.pulse_amp_per_supply_voltage
                     cmd = 'VOLT %s' % vol
                     apt_exp_control_func.command_v_p(self.com_port_v_p, cmd)
                     time.sleep(0.1)
-            elif self.pulse_mode == 'Laser':
+            elif self.pulse_mode in ['Laser', 'VoltageLaser']:
                 if self.conf['laser'] == "on":
                     print(f"{initialize_devices.bcolors.WARNING}Warning: enable output of laser manually"
                           f"{initialize_devices.bcolors.ENDC}")
@@ -310,7 +309,7 @@ class APT_Exp_Control:
         self.pulse_fraction = self.variables.pulse_fraction
         self.pulse_amp_per_supply_voltage = self.variables.pulse_amp_per_supply_voltage
         self.specimen_voltage = self.variables.specimen_voltage
-        if self.pulse_mode == 'Voltage':
+        if self.pulse_mode in ['Voltage', 'VoltageLaser']:
             self.pulse_voltage = self.variables.pulse_voltage
 
         self.ex_freq = self.variables.ex_freq
@@ -331,7 +330,7 @@ class APT_Exp_Control:
                 start_time = time.perf_counter()
                 self.vdc_max = self.variables.vdc_max
                 self.vdc_min = self.variables.vdc_min
-                if self.pulse_mode == 'Voltage':
+                if self.pulse_mode in ['Voltage', 'VoltageLaser']:
                     self.pulse_voltage_min = self.variables.v_p_min / self.pulse_amp_per_supply_voltage
                     self.pulse_voltage_max = self.variables.v_p_max / self.pulse_amp_per_supply_voltage
                 self.total_ions = self.variables.total_ions
@@ -352,17 +351,30 @@ class APT_Exp_Control:
                     if last_pulse_mode != self.pulse_mode:
                         flag_change_pulse_mode = True
                         last_pulse_mode = self.pulse_mode
-                    if self.pulse_mode == 'Voltage':
+                    if self.pulse_mode in ['Voltage', 'VoltageLaser']:
 
                         if not self.initialization_v_p:
-                            # Initialize pulser
-                            self.com_port_v_p = serial.Serial(self.variables.COM_PORT_V_p, baudrate=115200,
-                                                              timeout=0.01)
-                            self.initialization_error = apt_exp_control_func.initialization_v_p(self.com_port_v_p,
-                                                                                                self.log_apt,
-                                                                                                self.variables)
-                            apt_exp_control_func.command_v_p(self.com_port_v_p, 'OUTPut ON')
+                            try:
+                                # Initialize pulser
+                                self.com_port_v_p = serial.Serial(self.variables.COM_PORT_V_p, baudrate=115200,
+                                                                  timeout=0.01)
+                                self.initialization_error = apt_exp_control_func.initialization_v_p(self.com_port_v_p,
+                                                                                                    self.log_apt,
+                                                                                                    self.variables)
+                                self.initialization_v_p = True
+                                apt_exp_control_func.command_v_p(self.com_port_v_p, 'OUTPut ON')
+                            except Exception as e:
+                                print('Can not open the COM port for V_p')
+                                print(e)
+                        if not self.initialization_signal_generator:
+                            self.initialization_error = apt_exp_control_func.initialization_signal_generator(
+                                self.variables,
+                                self.log_apt)
+                            if not self.initialization_error:
+                                self.initialization_signal_generator = True
                         if flag_change_pulse_mode:
+                            self.pulse_voltage_min = self.variables.v_p_min / self.pulse_amp_per_supply_voltage
+                            self.pulse_voltage_max = self.variables.v_p_max / self.pulse_amp_per_supply_voltage
                             start_vp = (self.specimen_voltage * self.pulse_fraction *
                                         (1 / self.pulse_amp_per_supply_voltage))
                             if start_vp < self.pulse_voltage_min:
@@ -387,18 +399,18 @@ class APT_Exp_Control:
                             new_vp = self.specimen_voltage * self.pulse_fraction / self.pulse_amp_per_supply_voltage
                             if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
                                 apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % new_vp)
-                            if self.pulse_mode == 'Voltage':
+                            if self.pulse_mode in ['Voltage', 'VoltageLaser']:
                                 self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
 
                             self.variables.specimen_voltage = self.specimen_voltage
                             self.variables.specimen_voltage_plot = self.specimen_voltage
-                            if self.pulse_mode == 'Voltage':
+                            if self.pulse_mode in ['Voltage', 'VoltageLaser']:
                                 self.variables.pulse_voltage = self.pulse_voltage
                             self.variables.flag_new_min_voltage = False
                             if not self.initialization_error:
                                 self.initialization_v_p = True
 
-                    elif self.pulse_mode == 'Laser':
+                    elif self.pulse_mode in ['Laser', 'VoltageLaser']:
                         if self.com_port_v_p is not None:
                             # if switch to laser mode chamge the voltage to zero
                             apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT 0')

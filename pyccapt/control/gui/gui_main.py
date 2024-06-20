@@ -561,6 +561,7 @@ class Ui_PyCCAPT(object):
 		self.pulse_mode.setObjectName("pulse_mode")
 		self.pulse_mode.addItem("")
 		self.pulse_mode.addItem("")
+		self.pulse_mode.addItem("")
 		self.gridLayout.addWidget(self.pulse_mode, 11, 6, 1, 1)
 		self.ex_freq = QtWidgets.QLineEdit(self.centralwidget)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
@@ -1031,6 +1032,7 @@ class Ui_PyCCAPT(object):
 		self.ex_time.setText(_translate("PyCCAPT", "900"))
 		self.pulse_mode.setItemText(0, _translate("PyCCAPT", "Voltage"))
 		self.pulse_mode.setItemText(1, _translate("PyCCAPT", "Laser"))
+		self.pulse_mode.setItemText(2, _translate("PyCCAPT", "VoltageLaser"))
 		self.ex_freq.setText(_translate("PyCCAPT", "5"))
 		self.label_194.setText(_translate("PyCCAPT", "Elapsed Time (sec)"))
 		self.label_176.setText(_translate("PyCCAPT", "Max. Experiment Time (sec)"))
@@ -1229,53 +1231,56 @@ class Ui_PyCCAPT(object):
 		if self.parameters_source.currentText() == 'TextLine':
 			self.read_text_lines()
 		else:
-			self.variables.user_name = self.ex_user.text()
-			self.variables.ex_name = self.ex_name.text()
-			self.variables.ex_time = int(float(self.ex_time.text()))
-			self.variables.ex_freq = int(float(self.ex_freq.text()))
-			self.variables.max_ions = int(float(self.max_ions.text()))
-			self.variables.vdc_min = int(float(self.vdc_min.text()))
-			self.variables.detection_rate = float(self.detection_rate_init.text())
-			self.variables.hit_display = int(float(self.hit_displayed.text()))
-			self.variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
-			self.variables.pulse_frequency = float(self.pulse_frequency.text())
-			self.variables.hdf5_data_name = self.ex_name.text()
-			self.variables.email = self.email.text()
-			self.variables.vdc_step_up = float(self.vdc_steps_up.text())
-			self.variables.vdc_step_down = float(self.vdc_steps_down.text())
-			self.variables.control_algorithm = str(self.control_algorithm.currentText())
-			self.variables.pulse_mode = str(self.pulse_mode.currentText())
-			self.variables.v_p_min = int(float(self.vp_min.text()))
-			self.variables.v_p_max = int(float(self.vp_max.text()))
-			self.variables.counter_source = str(self.counter_source.currentText())
-			self.variables.hitmap_plot_size = self.hitmap_plot_size.value()
-
-			if float(self.vp_max.text()) > self.conf['max_vp']:
-				self.error_message.setText("Maximum possible number is " + str(self.conf['max_vp']))
-				_translate = QtCore.QCoreApplication.translate
-				self.vp_max.setText(_translate("PyCCAPT", self.conf['max_vp']))
-			else:
+			try:
+				self.variables.user_name = self.ex_user.text()
+				self.variables.ex_name = self.ex_name.text()
+				self.variables.ex_time = int(float(self.ex_time.text()))
+				self.variables.ex_freq = int(float(self.ex_freq.text()))
+				self.variables.max_ions = int(float(self.max_ions.text()))
+				self.variables.vdc_min = int(float(self.vdc_min.text()))
+				self.variables.detection_rate = float(self.detection_rate_init.text())
+				self.variables.hit_display = int(float(self.hit_displayed.text()))
+				self.variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
+				self.variables.pulse_frequency = float(self.pulse_frequency.text())
+				self.variables.hdf5_data_name = self.ex_name.text()
+				self.variables.email = self.email.text()
+				self.variables.vdc_step_up = float(self.vdc_steps_up.text())
+				self.variables.vdc_step_down = float(self.vdc_steps_down.text())
+				self.variables.control_algorithm = str(self.control_algorithm.currentText())
+				self.variables.pulse_mode = str(self.pulse_mode.currentText())
+				self.variables.v_p_min = int(float(self.vp_min.text()))
 				self.variables.v_p_max = int(float(self.vp_max.text()))
+				self.variables.counter_source = str(self.counter_source.currentText())
+				self.variables.hitmap_plot_size = self.hitmap_plot_size.value()
 
-			if int(float(self.vdc_max.text())) > self.conf['max_vdc']:
-				self.error_message("Maximum possible number is " + str(self.conf['max_vdc']))
-				_translate = QtCore.QCoreApplication.translate
-				self.vdc_max.setText(_translate("PyCCAPT", str(self.conf['max_vdc'])))
-			else:
-				self.variables.vdc_max = int(float(self.vdc_max.text()))
+				if float(self.vp_max.text()) > self.conf['max_vp']:
+					self.error_message.setText("Maximum possible number is " + str(self.conf['max_vp']))
+					_translate = QtCore.QCoreApplication.translate
+					self.vp_max.setText(_translate("PyCCAPT", self.conf['max_vp']))
+				else:
+					self.variables.v_p_max = int(float(self.vp_max.text()))
 
-			if self.criteria_time.isChecked():
-				self.variables.criteria_time = True
-			elif not self.criteria_time.isChecked():
-				self.variables.criteria_time = False
-			if self.criteria_ions.isChecked():
-				self.variables.criteria_ions = True
-			elif not self.criteria_ions.isChecked():
-				self.variables.criteria_ions = False
-			if self.criteria_vdc.isChecked():
-				self.variables.criteria_vdc = True
-			elif not self.criteria_vdc.isChecked():
-				self.variables.criteria_vdc = False
+				if int(float(self.vdc_max.text())) > self.conf['max_vdc']:
+					self.error_message("Maximum possible number is " + str(self.conf['max_vdc']))
+					_translate = QtCore.QCoreApplication.translate
+					self.vdc_max.setText(_translate("PyCCAPT", str(self.conf['max_vdc'])))
+				else:
+					self.variables.vdc_max = int(float(self.vdc_max.text()))
+
+				if self.criteria_time.isChecked():
+					self.variables.criteria_time = True
+				elif not self.criteria_time.isChecked():
+					self.variables.criteria_time = False
+				if self.criteria_ions.isChecked():
+					self.variables.criteria_ions = True
+				elif not self.criteria_ions.isChecked():
+					self.variables.criteria_ions = False
+				if self.criteria_vdc.isChecked():
+					self.variables.criteria_vdc = True
+				elif not self.criteria_vdc.isChecked():
+					self.variables.criteria_vdc = False
+			except ValueError:
+				self.error_message("Please enter a valid number")
 
 	def start_experiment_clicked(self):
 		"""

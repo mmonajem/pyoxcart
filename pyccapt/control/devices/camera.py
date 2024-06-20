@@ -56,10 +56,10 @@ class Cameras:
 		self.emitter = emitter
 		self.cameras[0].Open()
 		self.cameras[0].ExposureAuto.SetValue('Off')
-		self.cameras[0].ExposureTime.SetValue(300000)
+		self.cameras[0].ExposureTime.SetValue(400000)
 		self.cameras[1].Open()
 		self.cameras[1].ExposureAuto.SetValue('Off')
-		self.cameras[1].ExposureTime.SetValue(6000000)
+		self.cameras[1].ExposureTime.SetValue(600000)
 
 		self.index_save_image = 0
 
@@ -96,6 +96,7 @@ class Cameras:
 			# Original size is 2048 * 2448
 			# Resize the original to the required size. Utilize the openCV tool.
 			self.img0_orig = img0
+
 			# Define the region to crop: (x, y, width, height) side camera
 			crop_region = (1100, 900, 500, 200)
 			# Crop the image
@@ -103,8 +104,10 @@ class Cameras:
 			                 crop_region[0]:crop_region[0] + crop_region[2]]
 
 			self.img1_orig = img1
+			# Rotate img1_orig by 90 degrees counter-clockwise
+			self.img1_orig = cv2.rotate(self.img1_orig, cv2.ROTATE_90_CLOCKWISE)
 			# Define the region to crop: (x, y, width, height) bottom camera
-			crop_region = (1200, 800, 400, 600)
+			crop_region = (600, 1300, 800, 400)
 			# Crop the image
 			self.img1_zoom = self.img1_orig[crop_region[1]:crop_region[1] + crop_region[3],
 			                 crop_region[0]:crop_region[0] + crop_region[2]]
@@ -156,14 +159,14 @@ class Cameras:
 			# set the exposure time to see sharp images
 			if self.variables.light:
 				self.cameras[0].Open()
-				self.cameras[0].ExposureTime.SetValue(50)
+				self.cameras[0].ExposureTime.SetValue(2000)
 				self.cameras[1].Open()
-				self.cameras[1].ExposureTime.SetValue(20000)
+				self.cameras[1].ExposureTime.SetValue(10000)
 			elif not self.variables.light:
 				self.cameras[0].Open()
-				self.cameras[0].ExposureTime.SetValue(300000)
+				self.cameras[0].ExposureTime.SetValue(400000)
 				self.cameras[1].Open()
-				self.cameras[1].ExposureTime.SetValue(6000000)
+				self.cameras[1].ExposureTime.SetValue(600000)
 		except Exception as e:
 			print(f"Error in switching the light: {e}")
 
