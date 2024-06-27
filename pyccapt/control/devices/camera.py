@@ -59,7 +59,7 @@ class Cameras:
 		self.cameras[0].ExposureTime.SetValue(400000)
 		self.cameras[1].Open()
 		self.cameras[1].ExposureAuto.SetValue('Off')
-		self.cameras[1].ExposureTime.SetValue(600000)
+		self.cameras[1].ExposureTime.SetValue(1000000)
 
 		self.index_save_image = 0
 
@@ -140,7 +140,10 @@ class Cameras:
 				self.light_switch()
 				self.variables.light_switch = False
 
-			time.sleep(0.2)
+			if self.variables.light:
+				time.sleep(0.5)
+			else:
+				time.sleep(0.2)
 
 			if not self.variables.flag_camera_grab:
 				break
@@ -159,14 +162,14 @@ class Cameras:
 			# set the exposure time to see sharp images
 			if self.variables.light:
 				self.cameras[0].Open()
-				self.cameras[0].ExposureTime.SetValue(2000)
+				self.cameras[0].ExposureTime.SetValue(200)
 				self.cameras[1].Open()
 				self.cameras[1].ExposureTime.SetValue(10000)
 			elif not self.variables.light:
 				self.cameras[0].Open()
 				self.cameras[0].ExposureTime.SetValue(400000)
 				self.cameras[1].Open()
-				self.cameras[1].ExposureTime.SetValue(600000)
+				self.cameras[1].ExposureTime.SetValue(1000000)
 		except Exception as e:
 			print(f"Error in switching the light: {e}")
 

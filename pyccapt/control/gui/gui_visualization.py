@@ -31,6 +31,9 @@ class Ui_Visualization(object):
             main_v_dc_plot (multiprocessing.Array): Array for storing the main voltage values of the mass spectrum.
 
         """
+        self.styles = None
+        self.num_event_mc_tof = None
+        self.mc_tof_last_events_flag = False
         self.change_detection_rate_range = False
         self.start_time_metadata = 0
         self.start_main_exp = 0
@@ -68,8 +71,10 @@ class Ui_Visualization(object):
             None
         """
         Visualization.setObjectName("Visualization")
-        Visualization.resize(806, 523)
-        self.gridLayout_2 = QtWidgets.QGridLayout(Visualization)
+        Visualization.resize(808, 558)
+        self.gridLayout_3 = QtWidgets.QGridLayout(Visualization)
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        self.gridLayout_2 = QtWidgets.QGridLayout()
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")
@@ -94,9 +99,9 @@ class Ui_Visualization(object):
         self.vdc_time.setSizePolicy(sizePolicy)
         self.vdc_time.setMinimumSize(QtCore.QSize(250, 250))
         self.vdc_time.setStyleSheet("QWidget{\n"
-                                    "                                            border: 0.5px solid gray;\n"
-                                    "                                            }\n"
-                                    "                                        ")
+                                    "                                                    border: 0.5px solid gray;\n"
+                                    "                                                    }\n"
+                                    "                                                ")
         self.vdc_time.setObjectName("vdc_time")
         self.verticalLayout_3.addWidget(self.vdc_time)
         self.label_207 = QtWidgets.QLabel(parent=Visualization)
@@ -184,17 +189,93 @@ class Ui_Visualization(object):
         self.histogram.setSizePolicy(sizePolicy)
         self.histogram.setMinimumSize(QtCore.QSize(750, 150))
         self.histogram.setStyleSheet("QWidget{\n"
-                                     "                                    border: 0.5px solid gray;\n"
-                                     "                                    }\n"
-                                     "                                ")
+                                     "                                            border: 0.5px solid gray;\n"
+                                     "                                            }\n"
+                                     "                                        ")
         self.histogram.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
         self.histogram.setObjectName("histogram")
         self.gridLayout.addWidget(self.histogram, 1, 0, 1, 3)
         self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.spectrum_switch = QtWidgets.QPushButton(parent=Visualization)
+        self.spectrum_switch.setMinimumSize(QtCore.QSize(0, 20))
+        self.spectrum_switch.setMaximumSize(QtCore.QSize(60, 16777215))
+        self.spectrum_switch.setObjectName("spectrum_switch")
+        self.horizontalLayout.addWidget(self.spectrum_switch)
+        self.spectrum_last_events_switch = QtWidgets.QPushButton(parent=Visualization)
+        self.spectrum_last_events_switch.setMinimumSize(QtCore.QSize(0, 20))
+        self.spectrum_last_events_switch.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.spectrum_last_events_switch.setObjectName("spectrum_last_events_switch")
+        self.horizontalLayout.addWidget(self.spectrum_last_events_switch)
+        self.num_last_events = QtWidgets.QLineEdit(parent=Visualization)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.num_last_events.sizePolicy().hasHeightForWidth())
+        self.num_last_events.setSizePolicy(sizePolicy)
+        self.num_last_events.setMinimumSize(QtCore.QSize(100, 20))
+        self.num_last_events.setStyleSheet("QLineEdit{\n"
+                                           "                                            background: rgb(223,223,233)\n"
+                                           "                                            }\n"
+                                           "                                        ")
+        self.num_last_events.setObjectName("num_last_events")
+        self.horizontalLayout.addWidget(self.num_last_events)
+        self.label_208 = QtWidgets.QLabel(parent=Visualization)
+        self.label_208.setMinimumSize(QtCore.QSize(0, 25))
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_208.setFont(font)
+        self.label_208.setObjectName("label_208")
+        self.horizontalLayout.addWidget(self.label_208)
+        self.max_mc = QtWidgets.QLineEdit(parent=Visualization)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.max_mc.sizePolicy().hasHeightForWidth())
+        self.max_mc.setSizePolicy(sizePolicy)
+        self.max_mc.setMinimumSize(QtCore.QSize(100, 20))
+        self.max_mc.setStyleSheet("QLineEdit{\n"
+                                  "                                            background: rgb(223,223,233)\n"
+                                  "                                            }\n"
+                                  "                                        ")
+        self.max_mc.setObjectName("max_mc")
+        self.horizontalLayout.addWidget(self.max_mc)
+        self.label_209 = QtWidgets.QLabel(parent=Visualization)
+        self.label_209.setMinimumSize(QtCore.QSize(0, 25))
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.label_209.setFont(font)
+        self.label_209.setObjectName("label_209")
+        self.horizontalLayout.addWidget(self.label_209)
+        self.max_tof = QtWidgets.QLineEdit(parent=Visualization)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.max_tof.sizePolicy().hasHeightForWidth())
+        self.max_tof.setSizePolicy(sizePolicy)
+        self.max_tof.setMinimumSize(QtCore.QSize(100, 20))
+        self.max_tof.setStyleSheet("QLineEdit{\n"
+                                   "                                            background: rgb(223,223,233)\n"
+                                   "                                            }\n"
+                                   "                                        ")
+        self.max_tof.setObjectName("max_tof")
+        self.horizontalLayout.addWidget(self.max_tof)
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
+                                           QtWidgets.QSizePolicy.Policy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
+        self.gridLayout_2.addLayout(self.horizontalLayout, 1, 0, 1, 1)
+        self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 1, 1)
 
         self.retranslateUi(Visualization)
         QtCore.QMetaObject.connectSlotsByName(Visualization)
-        Visualization.setTabOrder(self.reset_heatmap_v, self.vdc_time)
+        Visualization.setTabOrder(self.detection_rate_range_switch, self.reset_heatmap_v)
+        Visualization.setTabOrder(self.reset_heatmap_v, self.spectrum_switch)
+        Visualization.setTabOrder(self.spectrum_switch, self.spectrum_last_events_switch)
+        Visualization.setTabOrder(self.spectrum_last_events_switch, self.num_last_events)
+        Visualization.setTabOrder(self.num_last_events, self.max_mc)
+        Visualization.setTabOrder(self.max_mc, self.max_tof)
+        Visualization.setTabOrder(self.max_tof, self.vdc_time)
         Visualization.setTabOrder(self.vdc_time, self.detection_rate_viz)
         Visualization.setTabOrder(self.detection_rate_viz, self.detector_heatmap)
         Visualization.setTabOrder(self.detector_heatmap, self.histogram)
@@ -211,9 +292,9 @@ class Ui_Visualization(object):
         self.data_line_vdc = self.vdc_time.plot(self.x_vdc, self.y_vdc, pen=pen_vdc)
         self.vdc_time.plotItem.setMouseEnabled(x=False)  # Only allow zoom in Y-axis
         # Add Axis Labels
-        styles = {"color": "#f00", "font-size": "12px"}
-        self.vdc_time.setLabel("left", "High Voltage", units='V', **styles)
-        self.vdc_time.setLabel("bottom", "Time (s)", **styles)
+        self.styles = {"color": "#f00", "font-size": "12px"}
+        self.vdc_time.setLabel("left", "High Voltage", units='V', **self.styles)
+        self.vdc_time.setLabel("bottom", "Time (s)", **self.styles)
         # Add grid
         self.vdc_time.showGrid(x=True, y=True)
         # Add Range
@@ -228,9 +309,8 @@ class Ui_Visualization(object):
         self.data_line_dtec = self.detection_rate_viz.plot(self.x_dtec, self.y_dtec, pen=pen_dtec)
 
         # Add Axis Labels
-        styles = {"color": "#f00", "font-size": "12px"}
-        self.detection_rate_viz.setLabel("left", "Detection rate (%)", **styles)
-        self.detection_rate_viz.setLabel("bottom", "Time (s)", **styles)
+        self.detection_rate_viz.setLabel("left", "Detection rate (%)", **self.styles)
+        self.detection_rate_viz.setLabel("bottom", "Time (s)", **self.styles)
 
         # Add grid
         self.detection_rate_viz.showGrid(x=True, y=True)
@@ -245,19 +325,18 @@ class Ui_Visualization(object):
         self.detector_circle = QtWidgets.QGraphicsEllipseItem(-40, -40, 80, 80)  # x, y, width, height
         self.detector_circle.setPen(pg.mkPen(color=(255, 0, 0), width=2))
         self.detector_heatmap.addItem(self.detector_circle)
-        self.detector_heatmap.setLabel("left", "X_det", units='mm', **styles)
-        self.detector_heatmap.setLabel("bottom", "Y_det", units='mm', **styles)
+        self.detector_heatmap.setLabel("left", "X_det", units='mm', **self.styles)
+        self.detector_heatmap.setLabel("bottom", "Y_det", units='mm', **self.styles)
 
         # Histogram #########################
         # Add Axis Labels
-        styles = {"color": "#f00", "font-size": "12px"}
         self.histogram.plotItem.setMouseEnabled(y=False)  # Only allow zoom in X-axis
-        self.histogram.setLabel("left", "Event Counts", **styles)
+        self.histogram.setLabel("left", "Event Counts", **self.styles)
         self.histogram.setLogMode(y=True)
         if self.conf["visualization"] == "tof":
-            self.histogram.setLabel("bottom", "Time", units='ns', **styles)
+	        self.histogram.setLabel("bottom", "Time", units='ns', **self.styles)
         elif self.conf["visualization"] == "mc":
-            self.histogram.setLabel("bottom", "m/c", units='Da', **styles)
+	        self.histogram.setLabel("bottom", "m/c", units='Da', **self.styles)
 
         self.visualization_window = Visualization  # Assign the attribute when setting up the UI
 
@@ -266,16 +345,21 @@ class Ui_Visualization(object):
 
         self.original_button_style = self.detection_rate_range_switch.styleSheet()
         self.detection_rate_range_switch.clicked.connect(self.detection_rate_range)
+        self.spectrum_switch.clicked.connect(self.spectrum_switch_mc_tof)
+        self.spectrum_last_events_switch.clicked.connect(self.spectrum_last_events)
+        self.num_last_events.editingFinished.connect(self.parameters_changes)
+        self.max_mc.editingFinished.connect(self.parameters_changes)
+        self.max_tof.editingFinished.connect(self.parameters_changes)
 
     def retranslateUi(self, Visualization):
         """
-        Set the text of the widgets
-        Args:
-           Visualization: The main window
+                        Set the text of the widgets
+                        Args:
+                           Visualization: The main window
 
-        Return:
-           None
-        """
+                        Return:
+                           None
+                        """
         _translate = QtCore.QCoreApplication.translate
         ###
         # Visualization.setWindowTitle(_translate("Visualization", "Form"))
@@ -285,9 +369,17 @@ class Ui_Visualization(object):
         self.label_200.setText(_translate("Visualization", "Voltage"))
         self.label_207.setText(_translate("Visualization", "Spectrum"))
         self.label_201.setText(_translate("Visualization", "Detection Rate"))
-        self.detection_rate_range_switch.setText(_translate("Visualization", "Change Range"))
+        self.detection_rate_range_switch.setText(_translate("Visualization", "Short range"))
         self.label_206.setText(_translate("Visualization", "Detector Heatmap"))
         self.reset_heatmap_v.setText(_translate("Visualization", "Reset"))
+        self.spectrum_switch.setText(_translate("Visualization", "mc/tof"))
+        self.spectrum_last_events_switch.setText(_translate("Visualization", "Last events"))
+        self.num_last_events.setText(_translate("Visualization", "10000"))
+        self.label_208.setText(_translate("Visualization", "Max mc (Da)"))
+        self.max_mc.setText(_translate("Visualization", "200"))
+        self.label_209.setText(_translate("Visualization", "Max tof (ns)"))
+        self.max_tof.setText(_translate("Visualization", "5000"))
+
 
     def reset_heatmap(self):
         """
@@ -462,16 +554,29 @@ class Ui_Visualization(object):
                         viz = tt[tt < self.conf["max_tof"]]
                     elif self.conf["visualization"] == "mc":
                         max_lenght = min(len(xx), len(yy), len(tt), len(main_v_dc_dld))
-                        viz = tof2mc_simple.tof_2_mc(tt[:max_lenght], self.conf["t_0"],
-                                                     main_v_dc_dld[
-                                                     :max_lenght],
-                                                     xx[:max_lenght],
-                                                     yy[:max_lenght],
+                        xx_max_lenght = xx[:max_lenght]
+                        yy_max_lenght = yy[:max_lenght]
+                        tt_max_lenght = tt[:max_lenght]
+                        main_v_dc_dld_max_lenght = main_v_dc_dld[:max_lenght]
+
+                        if self.mc_tof_last_events_flag:
+	                        xx_max_lenght = xx_max_lenght[-self.num_event_mc_tof:]
+	                        yy_max_lenght = yy_max_lenght[-self.num_event_mc_tof:]
+	                        tt_max_lenght = tt_max_lenght[-self.num_event_mc_tof:]
+	                        main_v_dc_dld_max_lenght = main_v_dc_dld_max_lenght[-self.num_event_mc_tof:]
+
+                        viz = tof2mc_simple.tof_2_mc(tt_max_lenght, self.conf["t_0"],
+                                                     main_v_dc_dld_max_lenght,
+                                                     xx_max_lenght,
+                                                     yy_max_lenght,
                                                      flightPathLength=self.conf["flight_path_length"])
-                        viz = viz[viz < self.conf["max_mass"]]
+                        if self.conf["visualization"] == "mc":
+	                        viz = viz[viz < self.conf["max_mass"]]
+                        elif self.conf["visualization"] == "tof":
+	                        viz = tt_max_lenght[tt_max_lenght < self.conf["max_tof"]]
 
                     bin_size = self.conf["bin_size"]
-                    bins = np.linspace(np.min(viz), np.max(viz), round(np.max(viz) / bin_size))
+                    # bins = np.linspace(np.min(viz), np.max(viz), round(np.max(viz) / bin_size))
                     # Efficient histogram computation
                     y_tof_mc, x_tof_mc = efficient_histogram(viz, bin_size)
                     self.histogram.clear()
@@ -545,6 +650,55 @@ class Ui_Visualization(object):
                 # Increase the index
                 self.index_plot_save += 1
 
+    def spectrum_switch_mc_tof(self):
+	    """
+		Switch between mass spectrum and time of flight spectrum
+		Args:
+			None
+
+		Return:
+			None
+		"""
+	    if self.conf["visualization"] == "tof":
+		    self.conf["visualization"] = "mc"
+		    self.histogram.setLabel("bottom", "m/c", units='Da', **self.styles)
+	    elif self.conf["visualization"] == "mc":
+		    self.conf["visualization"] = "tof"
+		    self.histogram.setLabel("bottom", "Time", units='ns', **self.styles)
+
+    def spectrum_last_events(self):
+	    """
+		Display the last events in the mass spectrum
+		Args:
+			None
+
+		Return:
+			None
+		"""
+	    self.mc_tof_last_events_flag = not self.mc_tof_last_events_flag
+	    if self.mc_tof_last_events_flag:
+		    self.spectrum_last_events_switch.setStyleSheet("QPushButton{\n"
+		                                                   "background: rgb(0, 255, 26)\n"
+		                                                   "}")
+	    else:
+		    self.spectrum_last_events_switch.setStyleSheet(self.original_button_style)
+
+    def parameters_changes(self):
+	    """
+		Change the parameters for the mass spectrum
+		Args:
+			None
+
+		Return:
+			None
+		"""
+	    if self.num_last_events.text().isdigit():
+		    self.num_event_mc_tof = int(self.num_last_events.text())
+	    if self.max_mc.text().isdigit():
+		    self.conf["max_mass"] = int(self.max_mc.text())
+	    if self.max_tof.text().isdigit():
+		    self.conf["max_tof"] = int(self.max_tof.text())
+
     def stop(self):
         """
         Stop any background activity
@@ -557,11 +711,13 @@ class Ui_Visualization(object):
         # Add any additional cleanup code here
         pass
 
+
 def efficient_histogram(viz, bin_size):
     bins = np.arange(np.min(viz), np.max(viz) + bin_size, bin_size)
     hist, edges = np.histogram(viz, bins=bins)
     hist[hist == 0] = 1  # Avoid log(0)
     return hist, edges
+
 
 class VisualizationWindow(QtWidgets.QWidget):
     """
@@ -688,3 +844,4 @@ if __name__ == "__main__":
     ui.setupUi(Visualization)
     Visualization.show()
     sys.exit(app.exec())
+

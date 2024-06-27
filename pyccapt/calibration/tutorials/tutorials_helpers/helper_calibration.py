@@ -345,7 +345,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length):
                 print('The MRPs at (0.5, 0.1, 0.01) are:', mrp)
 
                 counter += 1
-                index_fig_val += 1
+
                 if abs(mrp_last - mrp[0]) < 10 or counter > 15:
                     try_counter += 1
                     if try_counter == 2:
@@ -356,10 +356,11 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length):
                         continue
                 else:
                     try_counter = 0
-
+            index_fig_v.value = index_fig_val
+            index_fig_b.value = index_fig_val
             vol_correction(b, variables, out, out_status, calibration_mode)
             bowl_correction(b, variables, out, out_status, calibration_mode)
-
+            index_fig_val += 1
 
             if mrp_last < mrp[0]:
                 if calibration_mode.value == 'tof_calib':
@@ -371,6 +372,9 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length):
                 back_tof_mc = np.copy(variables.dld_t_calib)
             elif calibration_mode.value == 'mc_calib':
                 back_tof_mc = np.copy(variables.mc_calib)
+
+        index_fig_v.value = 1
+        index_fig_b.value = 1
         auto_button.disabled = False
     # Create a button widget to trigger the function
     pb_bowl = widgets.HTML(

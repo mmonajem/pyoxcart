@@ -241,16 +241,15 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
                 yy.extend(yy_tmp)
                 tt.extend(tt_tmp)
                 dc_voltage_tmp = np.tile(specimen_voltage, len(xx_tmp)).tolist()
-                v_p_voltage_tmp = np.tile(voltage_pulse, len(xx_tmp)).tolist()
-                l_p_voltage_tmp = np.tile(laser_pulse, len(xx_tmp)).tolist()
+                p_voltage_tmp = np.tile(voltage_pulse, len(xx_tmp)).tolist()
+                p_laser_tmp = np.tile(laser_pulse, len(xx_tmp)).tolist()
 
                 xx_list.extend(xx_dif.tolist())
                 yy_list.extend(yy_dif.tolist())
                 tt_list.extend(tt_dif.tolist())
                 voltage_data.extend(dc_voltage_tmp)
-                voltage_pulse_data.extend(v_p_voltage_tmp)
-                laser_pulse_data.extend(l_p_voltage_tmp)
-
+                voltage_pulse_data.extend(p_voltage_tmp)
+                laser_pulse_data.extend(p_laser_tmp)
 
                 x_plot.put(xx_tmp)
                 y_plot.put(yy_tmp)
@@ -324,7 +323,6 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
     np.save(variables.path + "/voltage_data.npy", np.array(voltage_data))
     np.save(variables.path + "/voltage_pulse_data.npy", np.array(voltage_pulse_data))
     np.save(variables.path + "/laser_pulse_data.npy", np.array(laser_pulse_data))
-
     variables.extend_to('x', xx)
     variables.extend_to('y', yy)
     variables.extend_to('t', tt)

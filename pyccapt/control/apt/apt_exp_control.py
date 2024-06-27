@@ -681,11 +681,14 @@ class APT_Exp_Control:
             self.variables.clear_to('main_temperature')
             self.variables.clear_to('main_chamber_vacuum')
             self.variables.clear_to('main_v_dc_dld')
-            self.variables.clear_to('main_p_dld')
+            self.variables.clear_to('main_v_p_dld')
+            self.variables.clear_to('main_l_p_dld')
             self.variables.clear_to('main_v_dc_tdc')
-            self.variables.clear_to('main_p_tdc')
+            self.variables.clear_to('main_v_p_tdc')
+            self.variables.clear_to('main_l_p_tdc')
             self.variables.clear_to('main_v_dc_drs')
             self.variables.clear_to('main_v_p_drs')
+            self.variables.clear_to('main_l_p_drs')
 
         self.log_apt.info('Starting cleanup')
 

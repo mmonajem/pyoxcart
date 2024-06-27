@@ -281,34 +281,34 @@ class AptHistPlotter:
             if background is not None:
                 if mrp_all:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
-                              % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp_list[0],
+	                    txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nMRO(0.5): %s\nMRO(0.1): %s\nMRO(0.01): %s' \
+	                          % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp_list[0],
                                  mrp_list[1], mrp_list[2])
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s\nFW10%%M: %s\nFW1%%M: %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
+	                    txt = 'MRO(0.5): %s\nMRO(0.1): %s\nMRO(0.01): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
 
                 else:
                     if legend_mode == 'long':
                         txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nFW%d%%M: %s' \
                               % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp)
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s' % (mrp)
+	                    txt = 'MRO(0.5): %s' % (mrp)
             else:
                 # annotation with range stats
 
                 if mrp_all:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
-                              % (self.bin_width, len(self.mc_tof) / 1000000, mrp_list[0], mrp_list[1],
+	                    txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nMRO(0.5): %s\nMRO(0.1): %s\nMRO(0.01): %s' \
+	                          % (self.bin_width, len(self.mc_tof) / 1000000, mrp_list[0], mrp_list[1],
                                  mrp_list[2])
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s\nFW10%%M: %s\nFW1%%M: %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
+	                    txt = 'MRO(0.5): %s\nMRO(0.1): %s\nMRO(0.01): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
                 else:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nFW%d%%M: %s' \
-                              % (self.bin_width, (len(self.mc_tof) / 1000000), self.percent, mrp)
+	                    txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nMRO(%s): %s' \
+	                          % (self.bin_width, (len(self.mc_tof) / 1000000), self.percent / 100, mrp)
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s' % (mrp)
+	                    txt = 'MRO(0.5): %s' % (mrp)
 
         elif label == 'tof' or label == 'tof_c':
             mrp = '{:.2f}'.format(
@@ -319,31 +319,32 @@ class AptHistPlotter:
             if background is not None:
                 if mrp_all:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
-                              % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp_list[0],
+	                    txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nMRO(0.5): %s\nMRO(0.1): %s\nMRO(0.01): %s' \
+	                          % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp_list[0],
                                  mrp_list[1], mrp_list[2])
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s\nFW10%%M: %s\nFW1%%M: %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
+	                    txt = 'MRO(0.5): %s\nMRO(0.1): %s\nMRO(0.01): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
                 else:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nFW%d%%M: %s' \
-                              % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp)
+	                    txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nMRO(%s): %s' \
+	                          % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm),
+	                             self.percent / 100, mrp)
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s' % (mrp)
+	                    txt = 'MRO(0.5): %s' % (mrp)
             else:
                 if mrp_all:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
-                              % (self.bin_width, len(self.mc_tof) / 1000000, mrp_list[0], mrp_list[1],
+	                    txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nMRP(0.5): %s\nMRP(0.1): %s\nMRP(0.01): %s' \
+	                          % (self.bin_width, len(self.mc_tof) / 1000000, mrp_list[0], mrp_list[1],
                                  mrp_list[2])
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s\nFW10%%M: %s\nFW1%%M: %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
+	                    txt = 'MRO(0.5): %s\nMRO(0.1): %s\nMRO(0.01): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
                 else:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nFW%d%%M: %s' \
-                              % (self.bin_width, len(self.mc_tof) / 1000000, self.percent, mrp)
+	                    txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nMRO(%s): %s' \
+	                          % (self.bin_width, len(self.mc_tof) / 1000000, self.percent / 100, mrp)
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s' % (mrp)
+	                    txt = 'MRO(0.5): %s' % (mrp)
 
         props = dict(boxstyle='round', facecolor='wheat', alpha=1)
         if loc == 'left':

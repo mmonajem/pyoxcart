@@ -110,7 +110,7 @@ def command_edwards(conf, variables, cmd, E_AGC, status=None):
 				print('Unknown command for Edwards TIC Load Lock')
 	except Exception as e:
 		print(f"An error occurred: {e}")
-		response = "Error"  # Set response to indicate an error
+		response = -1  # Set response to -1 indicate an error
 
 	return response
 
@@ -280,6 +280,8 @@ def state_update(conf, variables, emitter):
 					temperature_stage = float(output.split()[0].replace(',', ''))
 					temperature_cryo_head = float(output.split()[2].replace(',', ''))
 				except Exception as e:
+					temperature_cryo_head = -1
+					temperature_stage = -1
 					print(e)
 					# Handle the case where response is not a valid float
 					temperature = -1

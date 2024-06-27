@@ -529,8 +529,9 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
             Z = hemisphere_corr(np.array([X, Y]), *parameters)
 
         fig, ax = plt.subplots(figsize=fig_size, subplot_kw=dict(projection="3d"), constrained_layout=True)
-        print('The shape of the data is:', X.shape, Y.shape, Z.shape)
-        print('the shape ofmodel data is:', model_x_data.shape, model_y_data.shape)
+        # Adjust the subplot parameters to make the plot smaller
+        box = ax.get_position()
+        ax.set_position([box.x0 + 0.1, box.y0 + 0.1, box.width * 0.75, box.height * 0.75])
         scat = ax.scatter(model_x_data, model_y_data, zs=1 / np.array(dld_t_peak_list), color="forestgreen",
                           label=r"$%s_{wp}$" % label, s=3)
         fig.add_axes(ax)
@@ -546,7 +547,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         for tick in ax.get_zaxis().get_ticklabels():
             tick.set_color('red')
         ax.view_init(elev=7, azim=-41)
-
+        plt.legend(handles=[scat, surf], loc='upper left', markerscale=5., prop={'size': 10})
         if save:
             # Enable rendering for text elements
             rcParams['svg.fonttype'] = 'none'
@@ -675,7 +676,8 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
             plt.savefig(variables.result_path + "//peak_tof_bowl_corr_%s.svg" % index_fig, format="svg", dpi=600)
             plt.savefig(variables.result_path + "//peak_tof_bowl_corr_%s.png" % index_fig, format="png", dpi=600)
 
-        plt.show()
+        if plot:
+            plt.show()
 
         # Plot how bowl correction correct tof/mc vs dld_x position
         fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
@@ -703,6 +705,36 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
             rcParams['svg.fonttype'] = 'none'
             plt.savefig(variables.result_path + "//peak_tof_bowl_corr_p_%s.svg" % index_fig, format="svg", dpi=600)
             plt.savefig(variables.result_path + "//peak_tof_bowl_corr_p_%s.png" % index_fig, format="png", dpi=600)
+        if plot:
+            plt.show()
+
+        fig, ax = plt.subplots(figsize=fig_size, subplot_kw=dict(projection="3d"), constrained_layout=True)
+        # Adjust the subplot parameters to make the plot smaller
+        box = ax.get_position()
+        ax.set_position([box.x0 + 0.1, box.y0 + 0.1, box.width * 0.75, box.height * 0.75])
+        mask = np.random.randint(0, len(dld_highVoltage_peak), 500)
+        if fit_mode == 'curve_fit':
+            f_bowl_plot = bowl_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
+        elif fit_mode == 'hemisphere_fit':
+            f_bowl_plot = hemisphere_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
+        dld_t_plot = dld_peak[mask] / f_bowl_plot
+
+        scat_1 = ax.scatter(dld_x_peak[mask], dld_y_peak[mask], zs=dld_peak[mask], color="blue",
+                            label=r"$t$", s=1, alpha=0.3)
+        scat_2 = ax.scatter(dld_x_peak[mask], dld_y_peak[mask], zs=dld_t_plot, color="red",
+                            label=r"$t_{C_{B}}$", s=1, alpha=0.3)
+        plt.legend(handles=[scat_1, scat_2], loc='upper left', markerscale=5., prop={'size': 10})
+
+        ax.set_xlabel(r'$X_{det}$ (mm)', fontsize=10, labelpad=10)
+        ax.set_ylabel(r'$Y_{det}$ (mm)', fontsize=10, labelpad=10)
+        ax.set_zlabel(r"$t_{C_{B}}}$", fontsize=10, labelpad=5)
+        ax.view_init(elev=7, azim=-41)
+
+        if save:
+            # Enable rendering for text elements
+            rcParams['svg.fonttype'] = 'none'
+            plt.savefig(variables.result_path + "//peak_tof_bowl_corr_3d_%s.svg" % index_fig, format="svg", dpi=600)
+            plt.savefig(variables.result_path + "//peak_tof_bowl_corr_3d_%s.png" % index_fig, format="png", dpi=600)
         if plot:
             plt.show()
 
