@@ -191,7 +191,7 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
             label = 'mc'
 
         x = plt.scatter(np.array(high_voltage_mean_list) / 1000, np.array(dld_t_peak_list) * maximum_location,
-                        color="forestgreen", label=r"$%s_{wp}$" % label, s=3)
+                        color="forestgreen", label=r"$%s_{wp}$" % label, s=5)
         ax1.set_xlabel("Voltage (kV)", fontsize=10)
         plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
 
@@ -547,7 +547,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         for tick in ax.get_zaxis().get_ticklabels():
             tick.set_color('red')
         ax.view_init(elev=7, azim=-41)
-        plt.legend(handles=[scat, surf], loc='upper left', markerscale=5., prop={'size': 10})
+
         if save:
             # Enable rendering for text elements
             rcParams['svg.fonttype'] = 'none'
@@ -720,9 +720,9 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         dld_t_plot = dld_peak[mask] / f_bowl_plot
 
         scat_1 = ax.scatter(dld_x_peak[mask], dld_y_peak[mask], zs=dld_peak[mask], color="blue",
-                            label=r"$t$", s=1, alpha=0.3)
+                            label=r"$t$", s=1)
         scat_2 = ax.scatter(dld_x_peak[mask], dld_y_peak[mask], zs=dld_t_plot, color="red",
-                            label=r"$t_{C_{B}}$", s=1, alpha=0.3)
+                            label=r"$t_{C_{B}}$", s=1)
         plt.legend(handles=[scat_1, scat_2], loc='upper left', markerscale=5., prop={'size': 10})
 
         ax.set_xlabel(r'$X_{det}$ (mm)', fontsize=10, labelpad=10)

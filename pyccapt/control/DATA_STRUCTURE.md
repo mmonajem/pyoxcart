@@ -14,7 +14,6 @@ The `apt` group contains the data from the APT system in each iteration of the c
 of saving data depends on the frequency of the control loop.
 
 - `high_voltage` (n,) (V, float64): DC voltage value of the power supply.
-- `pulse` (n,) (V, float64) or (pJ/um2, float64): Pulse voltage or laser power.
 - `num_event` (n,) (N/A, uint32): Number of detected ions
 - `temperature` (n,) (k, float64): Measured Temperature of sample.
 - `experiment_chamber_vacuum` (n,) (mBar, float64): Vacuum level in the experiment chamber.
@@ -28,7 +27,8 @@ The Delay Line Detector (`dld`) group contains the time of flight detector hit c
 structure of the
 
 - `high_voltage` (n,) (V, float64): DC voltage value of the power supply.
-- `pulse` (n,) (V, float64) or (pJ, float64): Pulse voltage or laser power.
+- `voltage_pulse` (n,) (V, float64): Pulse voltage.
+- `laser_pulse` (n,) (pJ, float64): Laser pulse energy.
 - `start_counter` (n,) (N/A, float64): Description of start counter data.
 - `t` (n,) (ns, float64): Time-of-flight for the detected event.
 - `x` (n,) (cm, float64): Detector x hit position for the detected event.
@@ -45,9 +45,8 @@ Concept ot RoentDek).
 - `start_counter` (n,) (N/A, uint64): Start counter of tdc (integer).
 - `time_data` (n,) (N/A, uint64): Description of time data (integer).
 - `high_voltage` (n,) (V, float64): Applied DC voltage for tdc events (float64).
-- `pulse_voltage` (n,) (V, float64) or (pJ/um2, float64): Pulse voltage or laser power for tdc events (float64).
-
-
+- `voltage_pulse` (n,) (V, float64): Pulse voltage.
+- `laser_pulse` (n,) (pJ, float64): Laser pulse energy.
 #### RoentDek TDC:
 
 - `ch0` (n,) (N/A, uint64): Time counter at channel 0 for tdc events, dld 1.
@@ -58,7 +57,5 @@ Concept ot RoentDek).
 - `ch5` (n,) (N/A, uint64): Time counter at channel 5 for tdc events, dld 3.
 - `ch6` (n,) (N/A, uint64): Time counter at channel 6 for tdc events, pulse trigger.
 - `ch7` (n,) (N/A, uint64): Time counter at channel 7 for tdc events.
-- `high_voltage` (n,) (V, float64): Applied DC voltage for tdc events.
-- `pulse` (n,) (V, float64) or (pJ/um2, float64): Pulse voltage or laser power for tdc events.
-
-
+- `voltage_pulse` (n,) (V, float64): Pulse voltage.
+- `laser_pulse` (n,) (pJ, float64): Laser pulse energy.

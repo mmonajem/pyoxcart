@@ -27,6 +27,7 @@ class Ui_Pumps_Vacuum(object):
         Return:
                 None
         """
+		self.default_color = None
 		self.variables = variables
 		self.conf = conf
 		self.parent = parent
@@ -389,6 +390,10 @@ class Ui_Pumps_Vacuum(object):
 		self.timer.timeout.connect(self.hideMessage)
 
 		self.original_button_style = self.set_temperature.styleSheet()
+
+		# default Qlcd color
+		self.default_color = self.vacuum_buffer_back.style().standardPalette().color(
+			QtGui.QPalette.ColorRole.WindowText)
 	def retranslateUi(self, Pumps_Vacuum):
 		"""
            Set the text and title of the widgets
@@ -419,6 +424,7 @@ class Ui_Pumps_Vacuum(object):
 		self.pump_cryo_load_lock_switch.setText(_translate("Pumps_Vacuum", "Vent CLL"))
 		self.label_212.setText(_translate("Pumps_Vacuum", "Main Chamber (mBar)"))
 		self.Error.setText(_translate("Pumps_Vacuum", "<html><head/><body><p><br/></p></body></html>"))
+
 
 	def update_temperature_stage(self, value):
 		"""
@@ -489,6 +495,10 @@ class Ui_Pumps_Vacuum(object):
 			self.vacuum_main.display('Error')
 		else:
 			self.vacuum_main.display('{:.2e}'.format(value))
+		if value > 0.000000001:
+			self.label_212.setStyleSheet("color: red")
+		else:
+			self.label_212.setStyleSheet("color: black")
 
 	def update_vacuum_buffer(self, value):
 		"""
@@ -503,6 +513,10 @@ class Ui_Pumps_Vacuum(object):
 			self.vacuum_buffer.display('Error')
 		else:
 			self.vacuum_buffer.display('{:.2e}'.format(value))
+		if value > 0.000000001:
+			self.label_211.setStyleSheet("color: red")
+		else:
+			self.label_211.setStyleSheet("color: black")
 
 	def update_vacuum_buffer_back(self, value):
 		"""
@@ -517,6 +531,11 @@ class Ui_Pumps_Vacuum(object):
 			self.vacuum_buffer_back.display('Error')
 		else:
 			self.vacuum_buffer_back.display('{:.2e}'.format(value))
+		if value > 0.01:
+			self.label_214.setStyleSheet("color: red")
+		else:
+			self.label_214.setStyleSheet("color: black")
+
 
 	def update_vacuum_load_back(self, value):
 		"""
@@ -531,6 +550,10 @@ class Ui_Pumps_Vacuum(object):
 			self.vacuum_load_lock_back.display('Error')
 		else:
 			self.vacuum_load_lock_back.display('{:.2e}'.format(value))
+		if value > 0.01:
+			self.label_213.setStyleSheet("color: red")
+		else:
+			self.label_213.setStyleSheet("color: black")
 
 	def update_vacuum_load(self, value):
 		"""
@@ -545,6 +568,11 @@ class Ui_Pumps_Vacuum(object):
 			self.vacuum_load_lock.display('Error')
 		else:
 			self.vacuum_load_lock.display('{:.2e}'.format(value))
+		if value > 0.00001:
+			self.label_210.setStyleSheet("color: red")
+		else:
+			self.label_210.setStyleSheet("color: black")
+
 
 	def update_vacuum_cryo_load_lock(self, value):
 		"""
@@ -560,6 +588,11 @@ class Ui_Pumps_Vacuum(object):
 		else:
 			self.vacuum_cryo_load_lock.display('{:.2e}'.format(value))
 
+		if value > 0.00001:
+			self.label_216.setStyleSheet("color: red")
+		else:
+			self.label_216.setStyleSheet("color: black")
+
 	def update_vacuum_cryo_load_lock_back(self, value):
 		"""
         Update the vacuum value in the GUI
@@ -573,7 +606,10 @@ class Ui_Pumps_Vacuum(object):
 			self.vacuum_cryo_load_lock_back.display('Error')
 		else:
 			self.vacuum_cryo_load_lock_back.display('{:.2e}'.format(value))
-
+		if value > 0.1:
+			self.label_217.setStyleSheet("color: red")
+		else:
+			self.label_217.setStyleSheet("color: black")
 	def hideMessage(self):
 		"""
         Hide the warning message

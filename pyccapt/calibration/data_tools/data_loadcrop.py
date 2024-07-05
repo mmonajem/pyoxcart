@@ -34,22 +34,22 @@ def fetch_dataset_from_dld_grp(filename: str, extract_mode='dld') -> pd.DataFram
                 raise FileNotFoundError
             dld_highVoltage = hdf5Data['dld/high_voltage'].to_numpy()
             if 'dld/pulse' in hdf5Data:
-	            dld_voltage_pulse = hdf5Data['dld/pulse'].to_numpy()
+                dld_voltage_pulse = hdf5Data['dld/pulse'].to_numpy()
             elif 'dld/voltage_pulse' in hdf5Data:
-	            dld_voltage_pulse = hdf5Data['dld/voltage_pulse'].to_numpy()
+                dld_voltage_pulse = hdf5Data['dld/voltage_pulse'].to_numpy()
             else:
-	            raise KeyError('Neither dld/pulse nor dld/voltage_pulse exists in the dataset')
+                raise KeyError('Neither dld/pulse nor dld/voltage_pulse exists in the dataset')
             if 'dld/laser_pulse' in hdf5Data:
-	            dld_laser_pulse = hdf5Data['dld/laser_pulse'].to_numpy()
+                dld_laser_pulse = hdf5Data['dld/laser_pulse'].to_numpy()
             else:
-	            dld_laser_pulse = np.expand_dims(np.zeros(len(dld_highVoltage)), axis=1)
+                dld_laser_pulse = np.expand_dims(np.zeros(len(dld_highVoltage)), axis=1)
 
             dld_startCounter = hdf5Data['dld/start_counter'].to_numpy()
             dld_t = hdf5Data['dld/t'].to_numpy()
             dld_x = hdf5Data['dld/x'].to_numpy()
             dld_y = hdf5Data['dld/y'].to_numpy()
             dldGroupStorage = np.concatenate(
-	            (dld_highVoltage, dld_voltage_pulse, dld_startCounter, dld_t, dld_x, dld_y),
+                (dld_highVoltage, dld_voltage_pulse, dld_startCounter, dld_t, dld_x, dld_y),
                                              axis=1)
             dld_group_storage = create_pandas_dataframe(dldGroupStorage, mode='dld')
             return dld_group_storage
@@ -68,15 +68,15 @@ def fetch_dataset_from_dld_grp(filename: str, extract_mode='dld') -> pd.DataFram
             start_counter = hdf5Data['tdc/start_counter'].to_numpy()
             high_voltage = hdf5Data['tdc/high_voltage'].to_numpy()
             if 'tdc/pulse' in hdf5Data:
-	            voltage_pulse = hdf5Data['tdc/pulse'].to_numpy()
+                voltage_pulse = hdf5Data['tdc/pulse'].to_numpy()
             elif 'tdc/pulse_voltage' in hdf5Data:
-	            voltage_pulse = hdf5Data['tdc/voltage_pulse'].to_numpy()
+                voltage_pulse = hdf5Data['tdc/voltage_pulse'].to_numpy()
             else:
-	            raise KeyError('Neither dld/pulse nor dld/voltage_pulse exists in the dataset')
+                raise KeyError('Neither dld/pulse nor dld/voltage_pulse exists in the dataset')
             if 'tdc/laser_pulse' in hdf5Data:
-	            laser_pulse = hdf5Data['tdc/laser_pulse'].to_numpy()
+                laser_pulse = hdf5Data['tdc/laser_pulse'].to_numpy()
             else:
-	            laser_pulse = np.zeros(len(channel))
+                laser_pulse = np.zeros(len(channel))
             time_data = hdf5Data['tdc/time_data'].to_numpy()
 
             dldGroupStorage = np.concatenate((channel, start_counter, high_voltage, voltage_pulse,
@@ -298,9 +298,9 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
         if range_vol:
-	        mask_vol = (variables.voltage < range_vol[1]) & (variables.voltage > range_vol[0])
+            mask_vol = (variables.voltage < range_vol[1]) & (variables.voltage > range_vol[0])
         else:
-	        mask_vol = np.ones(len(variables.voltage), dtype=bool)
+            mask_vol = np.ones(len(variables.voltage), dtype=bool)
         mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         variables.mask = mask
         print('The number of data mc:', len(mask_mc[mask_mc == True]))

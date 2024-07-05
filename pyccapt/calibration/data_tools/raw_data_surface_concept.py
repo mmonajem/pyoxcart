@@ -2,6 +2,23 @@ from tqdm import tqdm
 
 
 def find_consecutive_sequences_seperatly(start_counter, channel, time_data, high_voltage, pulse):
+    """"
+    find the consecutive sequences of the start counter and the corresponding channels
+    Args:
+        start_counter: list of start counter values
+        channel: list of channel values
+        time_data: list of time data values
+        high_voltage: list of high voltage values
+        pulse: list of pulse values
+    Return:
+        result_4: list of dictionaries containing the valid sequences of 4 channels
+        result_4_invalid: list of dictionaries containing the invalid sequences of 4 channels
+        result_3_invalid: list of dictionaries containing the invalid sequences of 3 channels
+        result_2_invalid: list of dictionaries containing the invalid sequences of 2 channels
+        result_1_invalid: list of dictionaries containing the invalid sequences of 1 channels
+        result_other_odd: list of dictionaries containing the sequences of odd length
+        result_other_even: list of dictionaries containing the sequences of even length
+    """
     result_4 = []
     result_4_invalid = []
     result_3_invalid = []
@@ -289,6 +306,18 @@ def find_consecutive_sequences_seperatly(start_counter, channel, time_data, high
 
 
 def find_consecutive_sequences(start_counter, channel, time_data, high_voltage, pulse, print_stats=False):
+    """"
+        Find the consecutive sequences of the start counter and the corresponding channels
+    Args:
+        start_counter: list of start counter values
+        channel: list of channel values
+        time_data: list of time data values
+        high_voltage: list of high voltage values
+        pulse: list of pulse values
+        print_stats: bool, print the statistics of the sequences
+    Return:
+        result: list of dictionaries containing the sequences
+    """
     result = []
     current_sequence = []
     ch = []
@@ -342,7 +371,7 @@ def find_consecutive_sequences(start_counter, channel, time_data, high_voltage, 
                         k = k + 1
                         if k == 4:
                             k = 0
-                            valid_event.append(False)
+                            # valid_event.append(False)
 
                     if ch[j] == k:
                         if j not in index:
@@ -352,12 +381,12 @@ def find_consecutive_sequences(start_counter, channel, time_data, high_voltage, 
                             k = k + 1
                             if k == 4:
                                 k = 0
-                                try:
-                                    if ch[index[-1]] == 3 and ch[index[-2]] == 2 and ch[index[-3]] == 1 and ch[
-                                        index[-4]] == 0:
-                                        valid_event.append(True)
-                                except:
-                                    valid_event.append(False)
+                                # try:
+                                #     if ch[index[-1]] == 3 and ch[index[-2]] == 2 and ch[index[-3]] == 1 and ch[
+                                #         index[-4]] == 0:
+                                #         valid_event.append(True)
+                                # except:
+                                #     valid_event.append(False)
                             j = 0
                             continue
                     j = j + 1
@@ -365,8 +394,15 @@ def find_consecutive_sequences(start_counter, channel, time_data, high_voltage, 
                 ch = ch_sorted
                 sc = [sc[idx] for idx in index]
 
-                if ch[-1] != 3 or ch[-2] != 2 or ch[-3] != 1 or ch[-4] != 0:
-                    valid_event.append(False)
+                for index_valid_event in range((len(ch) + 3) // 4):
+                    if len(ch) - index_valid_event * 4 < 4:
+                        valid_event.append(False)
+                    else:
+                        if ch[index_valid_event * 4] == 0 and ch[index_valid_event * 4 + 1] == 1 and ch[
+                            index_valid_event * 4 + 2] == 2 and ch[index_valid_event * 4 + 3] == 3:
+                            valid_event.append(True)
+                        else:
+                            valid_event.append(False)
 
             result.append({
                 'channels': ch,
@@ -422,9 +458,9 @@ def find_consecutive_sequences(start_counter, channel, time_data, high_voltage, 
         print(f"Length of 2 channel: {lenght_result_2}, {lenght_result_2 * 2 / len(start_counter) * 100} %")
         print(f"Length of 1 channel: {lenght_result_1}, {lenght_result_1 * 1 / len(start_counter) * 100} %")
         print(
-            f"Length of groups of four channel (multihit) (multihit): {lenght_result_other_even}, {lenght_result_other_even / len(start_counter) * 100} %")
+            f"Length of groups of four channel (multi hit): {lenght_result_other_even}, {lenght_result_other_even / len(start_counter) * 100} %")
         print(
-            f"Length of not group of four channel (multihit): {lenght_result_other_odd}, {lenght_result_other_odd / len(start_counter) * 100} %")
+            f"Length of not group of four and one less than 4 channel (multi hit): {lenght_result_other_odd}, {lenght_result_other_odd / len(start_counter) * 100} %")
 
         # Check the conditions
         total_length = (lenght_result_4 * 4 + lenght_result_3 * 3 + lenght_result_2 * 2 + lenght_result_1 * 1 +
@@ -476,3 +512,24 @@ def find_nth_max_repeated_indices(nums, n):
 
     return start_index, end_index, max_count, max_number
 
+
+if __name__ == '__main__':
+    # surface concept tdc specific binning and factors
+    TOFFACTOR = 27.432 / (1000 * 4)  # 27.432 ps/bin, tof in ns, data is TDC time sum
+    TOFFACTOR2 = 27.432 / (1000 * 2)
+    DETBINS = 4900
+    BINNINGFAC = 2
+    XYFACTOR = 80 / DETBINS * BINNINGFAC  # XXX mm/bin
+    XYBINSHIFT = DETBINS / BINNINGFAC / 2  # to center detector
+    filename = 'D:/pyccapt/tests/data/data_1642_Aug-30-2023_16-05_Al_test4.h5'
+    # extract raw data from hdf file
+    from pyccapt.calibration.data_tools import data_loadcrop
+
+    df_tdc = data_loadcrop.fetch_dataset_from_dld_grp(filename, extract_mode='tdc_sc')
+    channel = df_tdc['channel'].to_numpy()
+    start_counter = df_tdc['start_counter'].to_numpy()
+    time_data = df_tdc['time_data'].to_numpy()
+    high_voltage = df_tdc['high_voltage (V)'].to_numpy()
+    pulse = df_tdc['pulse'].to_numpy()
+    result_total = find_consecutive_sequences(start_counter, channel, time_data, high_voltage,
+                                              pulse, print_stats=True)

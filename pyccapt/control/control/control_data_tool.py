@@ -83,7 +83,8 @@ def copy_npy_to_hdf_surface_concept(path, hdf5_file_name):
 
     hdf5_file_path = path + hdf5_file_name
     high_voltage = np.load(path + 'voltage_data.npy')
-    pulse = np.load(path + 'pulse_data.npy')
+    voltage_pulse = np.load(path + 'voltage_pulse_data.npy')
+    laser_pulse = np.load(path + 'laser_pulse_data.npy')
     start_counter = np.load(path + 'start_counter.npy')
     t = np.load(path + 't_data.npy')
     x_det = np.load(path + 'x_data.npy')
@@ -91,7 +92,8 @@ def copy_npy_to_hdf_surface_concept(path, hdf5_file_name):
 
     channel = np.load(path + 'channel_data.npy')
     high_voltage_tdc = np.load(path + 'voltage_data_tdc.npy')
-    pulse_tdc = np.load(path + 'pulse_data_tdc.npy')
+    voltage_pulse_tdc = np.load(path + 'voltage_pulse_data_tdc.npy')
+    laser_pulse_tdc = np.load(path + 'laser_pulse_data_tdc.npy')
     start_counter_tdc = np.load(path + 'tdc_start_counter.npy')
     time_data = np.load(path + 'time_data.npy')
 
@@ -103,31 +105,35 @@ def copy_npy_to_hdf_surface_concept(path, hdf5_file_name):
         del file['dld/t']
         del file['dld/x']
         del file['dld/y']
-        del file['dld/pulse']
+        del file['dld/voltage_pulse']
+        del file['dld/laser_pulse']
         del file['dld/high_voltage']
         del file['dld/start_counter']
         file.create_dataset('dld/t', data=tt_tmp, dtype=np.float64)
         file.create_dataset('dld/x', data=xx_tmp, dtype=np.float64)
         file.create_dataset('dld/y', data=yy_tmp, dtype=np.float64)
-        file.create_dataset('dld/pulse', data=pulse, dtype=np.float64)
+        file.create_dataset('dld/voltage_pulse', data=voltage_pulse, dtype=np.float64)
+        file.create_dataset('dld/laser_pulse', data=laser_pulse, dtype=np.float64)
         file.create_dataset('dld/high_voltage', data=high_voltage, dtype=np.float64)
         file.create_dataset('dld/start_counter', data=start_counter, dtype=np.uint64)
 
         del file['tdc/channel']
         del file['tdc/high_voltage']
-        del file['tdc/pulse']
+        del file['tdc/voltage_pulse']
+        del file['tdc/laser_pulse']
         del file['tdc/start_counter']
         del file['tdc/time_data']
         file.create_dataset('tdc/channel', data=channel, dtype=np.uint32)
         file.create_dataset('tdc/high_voltage', data=high_voltage_tdc, dtype=np.float64)
-        file.create_dataset('tdc/pulse', data=pulse_tdc, dtype=np.float64)
+        file.create_dataset('tdc/voltage_pulse', data=voltage_pulse_tdc, dtype=np.float64)
+        file.create_dataset('tdc/voltage_laser', data=laser_pulse_tdc, dtype=np.float64)
         file.create_dataset('tdc/start_counter', data=start_counter_tdc, dtype=np.uint64)
         file.create_dataset('tdc/time_data', data=time_data, dtype=np.uint64)
 
 
 if __name__ == '__main__':
-	path = 'D:/pyccapt/pyccapt/data/1798_Mar-28-2024_10-02_Al_test1/'
-	name = '1798_Mar-28-2024_10-02_Al_test1.h5'
+    path = 'D:/pyccapt/pyccapt/data/1887_Jul-03-2024_15-12_Al/'
+    name = '1887_Jul-03-2024_15-12_Al.h5'
     # copy_npy_to_hdf(path, name)
 
     # rename_subcategory(path + name, old_name='dld', new_name='dld_1')

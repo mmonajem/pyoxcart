@@ -337,10 +337,9 @@ class APT_Exp_Control:
                 # here we check if tdc is failed or not by checking if the total number of ions is
                 # constant for 100 iteration
                 if total_ions_tmp == self.total_ions:
-                    pass
-                    # index_tdc_failure += 1
-                    # if index_tdc_failure > 100:
-                    #     self.variables.flag_tdc_failure = True
+                    index_tdc_failure += 1
+                    if index_tdc_failure > 100:
+                        self.variables.flag_tdc_failure = True
                 else:
                     index_tdc_failure = 0
                     total_ions_tmp = copy.deepcopy(self.total_ions)
