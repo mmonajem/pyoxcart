@@ -217,28 +217,32 @@ def state_update(conf, variables, emitter):
 			try:
 				tpg = TPG362(port=variables.COM_PORT_gauge_mc)
 			except Exception as e:
-				print(f"Error initializing TPG362 on port {variables.COM_PORT_gauge_mc}: {e}")
+				print(f"{bcolors.FAIL}Error initializing analysis chamber on port {variables.COM_PORT_gauge_mc}: "
+				      f"{e}{bcolors.ENDC}")
 				tpg = None
 
 		if conf['COM_PORT_gauge_bc'] != "off":
 			try:
 				E_AGC_bc = EdwardsAGC(variables.COM_PORT_gauge_bc, variables)
 			except Exception as e:
-				print(f"Error initializing EdwardsAGC (BC) on port {variables.COM_PORT_gauge_bc}: {e}")
+				print(f"{bcolors.FAIL}Error initializing EdwardsAGC (BC) on port {variables.COM_PORT_gauge_bc}: "
+				      f"{e}{bcolors.ENDC}")
 				E_AGC_bc = None
 
 		if conf['COM_PORT_gauge_ll'] != "off":
 			try:
 				E_AGC_ll = EdwardsAGC(variables.COM_PORT_gauge_ll, variables)
 			except Exception as e:
-				print(f"Error initializing EdwardsAGC (LL) on port {variables.COM_PORT_gauge_ll}: {e}")
+				print(f"{bcolors.FAIL}Error initializing EdwardsAGC (LL) on port {variables.COM_PORT_gauge_ll}: "
+				      f"{e}{bcolors.ENDC}")
 				E_AGC_ll = None
 
 		if conf['COM_PORT_gauge_cll'] != "off":
 			try:
 				E_AGC_cll = EdwardsAGC(variables.COM_PORT_gauge_cll, variables)
 			except Exception as e:
-				print(f"Error initializing EdwardsAGC (CLL) on port {variables.COM_PORT_gauge_cll}: {e}")
+				print(f"{bcolors.FAIL}Error initializing EdwardsAGC (CLL) on port {variables.COM_PORT_gauge_cll}: "
+				      f"{e}{bcolors.ENDC}")
 				E_AGC_cll = None
 
 	if conf['cryo'] == "off":
@@ -269,7 +273,7 @@ def state_update(conf, variables, emitter):
 		vacuum_cryo_load_lock_backing = 'N/A'
 		set_temperature_tmp = 0
 		while emitter.bool_flag_while_loop:
-			if conf['cryo'] == "on":
+			if conf['cryo'] == "on" and com_port_cryovac is not None:
 				try:
 					output = command_cryovac('getOutput', com_port_cryovac)
 				except Exception as e:
@@ -280,6 +284,7 @@ def state_update(conf, variables, emitter):
 					temperature_stage = float(output.split()[0].replace(',', ''))
 					temperature_cryo_head = float(output.split()[2].replace(',', ''))
 				except Exception as e:
+					com_port_cryovac = None
 					temperature_cryo_head = -1
 					temperature_stage = -1
 					print(e)
@@ -302,7 +307,7 @@ def state_update(conf, variables, emitter):
 					res = command_cryovac(f'Out1.PID.Setpoint {variables.set_temperature}', com_port_cryovac)
 					variables.set_temperature_flag = None
 
-			if conf['COM_PORT_gauge_mc'] != "off":
+			if conf['COM_PORT_gauge_mc'] != "off" and tpg is not None:
 				value, _ = tpg.pressure_gauge(2)
 				try:
 					vacuum_main = '{}'.format(value)
@@ -317,33 +322,38 @@ def state_update(conf, variables, emitter):
 					vacuum_buffer = '{}'.format(value)
 				except Exception as e:
 					print(f"Error reading BC:{e}")
+					tpg = None
 					# Handle the case where response is not a valid float
 					vacuum_buffer = -1
 				emitter.vacuum_buffer.emit(float(vacuum_buffer))
-			if conf['pump_ll'] != "off":
+			if conf['pump_ll'] != "off" and E_AGC_ll is not None:
 				response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_ll, status='load_lock')
 
 				try:
 					vacuum_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
 				except Exception as e:
 					print(f"Error reading LL:{e}")
+					E_AGC_ll = None
 					# Handle the case where response is not a valid float
 					vacuum_load_lock = -1
 				try:
 					vacuum_load_lock_backing = float(response.replace(';', ' ').split()[4]) * 0.01
 				except Exception as e:
 					print(f"Error reading LL backing:{e}")
+					E_AGC_ll = None
 					# Handle the case where response is not a valid float
 					vacuum_load_lock_backing = -1
 				emitter.vacuum_load_lock.emit(vacuum_load_lock)
 				emitter.vacuum_load_lock_back.emit(vacuum_load_lock_backing)
-			if conf['pump_cll'] != "off":
+
+			if conf['pump_cll'] != "off" and E_AGC_cll is not None:
 				response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_cll, status='cryo_load_lock')
 
 				try:
 					vacuum_cryo_load_lock = float(response.replace(';', ' ').split()[2]) * 0.01
 				except Exception as e:
 					print(f"Error reading CLL:{e}")
+					E_AGC_cll = None
 					# Handle the case where response is not a valid float
 					vacuum_cryo_load_lock = -1
 				try:
@@ -355,7 +365,7 @@ def state_update(conf, variables, emitter):
 				emitter.vacuum_cryo_load_lock.emit(vacuum_cryo_load_lock)
 				emitter.vacuum_cryo_load_lock_back.emit(vacuum_cryo_load_lock_backing)
 
-			if conf['COM_PORT_gauge_bc'] != "off":
+			if conf['COM_PORT_gauge_bc'] != "off" and E_AGC_bc is not None:
 				response = command_edwards(conf, variables, 'pressure', E_AGC=E_AGC_bc)
 				try:
 					vacuum_buffer_backing = float(response.replace(';', ' ').split()[2]) * 0.01

@@ -346,7 +346,7 @@ class AptHistPlotter:
                     elif legend_mode == 'short':
                         txt = 'MRP(0.5): %s' % (mrp)
 
-        props = dict(boxstyle='round', facecolor='wheat', alpha=1)
+        props = dict(boxstyle='round', facecolor='#CCCCCC', alpha=1)
         if loc == 'left':
             self.ax.text(.01, .95, txt, va='top', ma='left', transform=self.ax.transAxes, bbox=props, fontsize=10,
                          alpha=1,

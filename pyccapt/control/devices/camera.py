@@ -76,6 +76,7 @@ class Cameras:
 
 		self.cameras.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
 		start_time = time.time()
+		error_index = 0
 		while self.cameras.IsGrabbing():
 			current_time = time.time()
 
@@ -88,7 +89,13 @@ class Cameras:
 				image1 = self.converter.Convert(grabResult1)
 				img1 = image1.GetArray()
 			except Exception as e:
-				print(f"Error in grabbing the images from the camera: {e}")
+				if error_index == 0:
+					print(f"Error in grabbing the images from the camera: {e}")
+				error_index += 1
+				if error_index > 10:
+					print(f"Error in grabbing the images from the camera: {e}")
+					break
+
 				continue
 
 

@@ -7,7 +7,7 @@
                 <x>0</x>
                 <y>0</y>
                 <width>905</width>
-                <height>873</height>
+                <height>900</height>
             </rect>
         </property>
         <property name="windowTitle">
@@ -211,6 +211,8 @@
                                         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
                                         margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                                         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
+                                        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
+                                        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
                                         margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
                                         font-family:'JetBrains Mono,monospace'; font-size:8pt; color:#000000;&quot;&gt;{ex_user=user1;&lt;/span&gt;&lt;span
                                         style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.875pt;&quot;&gt;ex_name=test1;&lt;/span&gt;
@@ -365,211 +367,7 @@
                         </item>
                         <item row="1" column="0">
                             <layout class="QGridLayout" name="gridLayout">
-                                <item row="25" column="5" colspan="2">
-                                    <widget class="QLineEdit" name="detection_rate">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QLineEdit{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string/>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="3" column="5">
-                                    <widget class="QCheckBox" name="criteria_time">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="font">
-                                            <font>
-                                                <italic>false</italic>
-                                            </font>
-                                        </property>
-                                        <property name="mouseTracking">
-                                            <bool>true</bool>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true"/>
-                                        </property>
-                                        <property name="text">
-                                            <string/>
-                                        </property>
-                                        <property name="checked">
-                                            <bool>true</bool>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="13" column="6">
-                                    <widget class="QLineEdit" name="vp_max">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QLineEdit{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string>3281</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="6" column="0" colspan="3">
-                                    <widget class="QLabel" name="label_179">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>DC Min. Voltage (V)</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="17" column="0">
-                                    <widget class="QLabel" name="label_189">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string># Hits Displayed</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="8" column="0">
-                                    <widget class="QLabel" name="label_181">
-                                        <property name="text">
-                                            <string>K_p Upwards</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="6" column="6">
-                                    <widget class="QLineEdit" name="vdc_min">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QLineEdit{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string>500</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="7" column="0" colspan="3">
-                                    <widget class="QLabel" name="label_180">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>DC Max. Voltage (V)</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="23" column="2" colspan="3">
-                                    <widget class="QPushButton" name="dc_hold">
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="text">
-                                            <string>Hold</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="20" column="0">
-                                    <widget class="QLabel" name="label_193">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="font">
-                                            <font>
-                                                <bold>true</bold>
-                                            </font>
-                                        </property>
-                                        <property name="text">
-                                            <string>Run Statistics</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="17" column="6">
-                                    <widget class="QLineEdit" name="hit_displayed">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QLineEdit{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string>20000</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="10" column="6">
+                                <item row="11" column="6">
                                     <widget class="QComboBox" name="control_algorithm">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -599,9 +397,52 @@
                                                 <string>PID</string>
                                             </property>
                                         </item>
+                                        <item>
+                                            <property name="text">
+                                                <string>PID aggressive</string>
+                                            </property>
+                                        </item>
                                     </widget>
                                 </item>
-                                <item row="24" column="5" colspan="2">
+                                <item row="2" column="0">
+                                    <widget class="QLabel" name="label_174">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>Experiment User</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="9" column="6">
+                                    <widget class="QLineEdit" name="vdc_steps_up">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QLineEdit{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string>1</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="25" column="5" colspan="2">
                                     <widget class="QLineEdit" name="pulse_voltage">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -626,8 +467,8 @@
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="23" column="0">
-                                    <widget class="QLabel" name="label_196">
+                                <item row="17" column="0">
+                                    <widget class="QLabel" name="label_188">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                                                 <horstretch>0</horstretch>
@@ -635,11 +476,111 @@
                                             </sizepolicy>
                                         </property>
                                         <property name="text">
-                                            <string>DC Voltage (V)</string>
+                                            <string>Detection Rate (%)</string>
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="2" column="6">
+                                <item row="8" column="4">
+                                    <widget class="QLabel" name="label_3">
+                                        <property name="text">
+                                            <string>Stop at</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="14" column="0" colspan="2">
+                                    <widget class="QLabel" name="label_185">
+                                        <property name="text">
+                                            <string>Pulse Max. Voltage (V)</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="17" column="6">
+                                    <widget class="QLineEdit" name="detection_rate_init">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QLineEdit{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string>1</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="18" column="1" colspan="3">
+                                    <widget class="QDoubleSpinBox" name="hitmap_plot_size">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QDoubleSpinBox{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="24" column="2" colspan="3">
+                                    <widget class="QPushButton" name="dc_hold">
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="text">
+                                            <string>Hold</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="23" column="0">
+                                    <widget class="QLabel" name="label_195">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>Total Ions</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="22" column="0">
+                                    <widget class="QLabel" name="label_194">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>Elapsed Time (s)</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="3" column="6">
                                     <widget class="QLineEdit" name="ex_name">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -670,33 +611,8 @@
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="18" column="6">
-                                    <widget class="QLineEdit" name="email">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QLineEdit{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string/>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="18" column="0">
-                                    <widget class="QLabel" name="label_190">
+                                <item row="8" column="0" colspan="3">
+                                    <widget class="QLabel" name="label_180">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                                                 <horstretch>0</horstretch>
@@ -704,11 +620,24 @@
                                             </sizepolicy>
                                         </property>
                                         <property name="text">
-                                            <string>Email</string>
+                                            <string>DC Max. Voltage (V)</string>
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="12" column="6">
+                                <item row="6" column="0" colspan="2">
+                                    <widget class="QLabel" name="label_178">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>Control refresh Freq.(Hz)</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="13" column="6">
                                     <widget class="QLineEdit" name="vp_min">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -733,7 +662,7 @@
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="7" column="5">
+                                <item row="8" column="5">
                                     <widget class="QCheckBox" name="criteria_vdc">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -760,154 +689,53 @@
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="11" column="0">
-                                    <widget class="QLabel" name="label_199">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>Pulse Mode</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="21" column="5" colspan="2">
-                                    <widget class="QLineEdit" name="elapsed_time">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QLineEdit{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string/>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="14" column="0">
-                                    <widget class="QLabel" name="label_186">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>Pulse Fraction (%)</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="14" column="6">
-                                    <widget class="QLineEdit" name="pulse_fraction">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QLineEdit{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string>20</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="4" column="0">
-                                    <widget class="QLabel" name="label_177">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>Max. Number of Ions</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="15" column="6">
-                                    <widget class="QLineEdit" name="pulse_frequency">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QLineEdit{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string>200</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="9" column="6">
-                                    <widget class="QLineEdit" name="vdc_steps_down">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QLineEdit{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string>1</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="4" column="4">
+                                <item row="5" column="4">
                                     <widget class="QLabel" name="label_2">
                                         <property name="text">
                                             <string>Stop at</string>
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="12" column="0">
-                                    <widget class="QLabel" name="label_184">
+                                <item row="2" column="6">
+                                    <widget class="QLineEdit" name="ex_user">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QLineEdit{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string>user</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="18" column="4" colspan="2">
+                                    <widget class="QPushButton" name="reset_heatmap">
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="text">
+                                            <string>Reset</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="20" column="0">
+                                    <widget class="QLabel" name="label_192">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                                                 <horstretch>0</horstretch>
@@ -915,12 +743,12 @@
                                             </sizepolicy>
                                         </property>
                                         <property name="text">
-                                            <string>Pulse Min. Voltage (V)</string>
+                                            <string>Detection Mode</string>
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="1" column="0">
-                                    <widget class="QLabel" name="label_174">
+                                <item row="3" column="0">
+                                    <widget class="QLabel" name="label_175">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                                                 <horstretch>0</horstretch>
@@ -928,11 +756,61 @@
                                             </sizepolicy>
                                         </property>
                                         <property name="text">
-                                            <string>Experiment User</string>
+                                            <string>Experiment Name</string>
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="19" column="6">
+                                <item row="7" column="6">
+                                    <widget class="QLineEdit" name="vdc_min">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QLineEdit{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string>500</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="5" column="6">
+                                    <widget class="QLineEdit" name="max_ions">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QLineEdit{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string>40000</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="20" column="6">
                                     <widget class="QComboBox" name="counter_source">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -964,7 +842,59 @@
                                         </item>
                                     </widget>
                                 </item>
-                                <item row="23" column="5" colspan="2">
+                                <item row="25" column="0">
+                                    <widget class="QLabel" name="label_197">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>Pulse Voltage (V)</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="7" column="3">
+                                    <widget class="QPushButton" name="set_min_voltage">
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="text">
+                                            <string>Set</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="12" column="0">
+                                    <widget class="QLabel" name="label_199">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>Pulse Mode</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="19" column="0">
+                                    <widget class="QLabel" name="label_190">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>Email</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="24" column="5" colspan="2">
                                     <widget class="QLineEdit" name="speciemen_voltage">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -989,8 +919,76 @@
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="15" column="0">
-                                    <widget class="QLabel" name="label_187">
+                                <item row="16" column="6">
+                                    <widget class="QLineEdit" name="pulse_frequency">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QLineEdit{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string>200</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="18" column="6">
+                                    <widget class="QLineEdit" name="hit_displayed">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QLineEdit{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string>20000</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="0" column="0">
+                                    <widget class="QLabel" name="label_173">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="font">
+                                            <font>
+                                                <bold>true</bold>
+                                            </font>
+                                        </property>
+                                        <property name="text">
+                                            <string>Setup Parameters</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="4" column="0" colspan="2">
+                                    <widget class="QLabel" name="label_176">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                                                 <horstretch>0</horstretch>
@@ -998,11 +996,36 @@
                                             </sizepolicy>
                                         </property>
                                         <property name="text">
-                                            <string>Pulse Frequency (KHz)</string>
+                                            <string>Max. Experiment Time (s)</string>
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="3" column="6">
+                                <item row="15" column="6">
+                                    <widget class="QLineEdit" name="pulse_fraction">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QLineEdit{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string>20</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="4" column="6">
                                     <widget class="QLineEdit" name="ex_time">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -1027,7 +1050,228 @@
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="22" column="5" colspan="2">
+                                <item row="9" column="0">
+                                    <widget class="QLabel" name="label_181">
+                                        <property name="text">
+                                            <string>K_p Upwards</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="15" column="0">
+                                    <widget class="QLabel" name="label_186">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>Pulse Fraction (%)</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="13" column="0">
+                                    <widget class="QLabel" name="label_184">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>Pulse Min. Voltage (V)</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="4" column="5">
+                                    <widget class="QCheckBox" name="criteria_time">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="font">
+                                            <font>
+                                                <italic>false</italic>
+                                            </font>
+                                        </property>
+                                        <property name="mouseTracking">
+                                            <bool>true</bool>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true"/>
+                                        </property>
+                                        <property name="text">
+                                            <string/>
+                                        </property>
+                                        <property name="checked">
+                                            <bool>true</bool>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="4" column="4">
+                                    <widget class="QLabel" name="label">
+                                        <property name="text">
+                                            <string>Stop at</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="16" column="0">
+                                    <widget class="QLabel" name="label_187">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>Pulse Frequency (KHz)</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="5" column="5">
+                                    <widget class="QCheckBox" name="criteria_ions">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="font">
+                                            <font>
+                                                <italic>false</italic>
+                                            </font>
+                                        </property>
+                                        <property name="mouseTracking">
+                                            <bool>true</bool>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true"/>
+                                        </property>
+                                        <property name="text">
+                                            <string/>
+                                        </property>
+                                        <property name="checked">
+                                            <bool>true</bool>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="18" column="0">
+                                    <widget class="QLabel" name="label_189">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string># Hits Displayed</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="24" column="0">
+                                    <widget class="QLabel" name="label_196">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>DC Voltage (V)</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="10" column="6">
+                                    <widget class="QLineEdit" name="vdc_steps_down">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QLineEdit{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string>1</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="14" column="6">
+                                    <widget class="QLineEdit" name="vp_max">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QLineEdit{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string>3281</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="6" column="6">
+                                    <widget class="QLineEdit" name="ex_freq">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QLineEdit{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string>5</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="7" column="0" colspan="3">
+                                    <widget class="QLabel" name="label_179">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>DC Min. Voltage (V)</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="23" column="5" colspan="2">
                                     <widget class="QLineEdit" name="total_ions">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -1052,7 +1296,128 @@
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="11" column="6">
+                                <item row="22" column="5" colspan="2">
+                                    <widget class="QLineEdit" name="elapsed_time">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QLineEdit{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string/>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="5" column="0">
+                                    <widget class="QLabel" name="label_177">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>Max. Number of Ions</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="10" column="0">
+                                    <widget class="QLabel" name="label_182">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>K_p Downwards</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="11" column="0">
+                                    <widget class="QLabel" name="label_191">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>Control Algorithm</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="0" column="6">
+                                    <widget class="QComboBox" name="parameters_source">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QComboBox{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <item>
+                                            <property name="text">
+                                                <string>TextBox</string>
+                                            </property>
+                                        </item>
+                                        <item>
+                                            <property name="text">
+                                                <string>TextLine</string>
+                                            </property>
+                                        </item>
+                                    </widget>
+                                </item>
+                                <item row="19" column="6">
+                                    <widget class="QLineEdit" name="email">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>0</width>
+                                                <height>20</height>
+                                            </size>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QLineEdit{
+                                                background: rgb(223,223,233)
+                                                }
+                                            </string>
+                                        </property>
+                                        <property name="text">
+                                            <string/>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="12" column="6">
                                     <widget class="QComboBox" name="pulse_mode">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -1089,186 +1454,8 @@
                                         </item>
                                     </widget>
                                 </item>
-                                <item row="5" column="6">
-                                    <widget class="QLineEdit" name="ex_freq">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QLineEdit{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string>5</string>
-                                        </property>
-                                    </widget>
-                                </item>
                                 <item row="21" column="0">
-                                    <widget class="QLabel" name="label_194">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>Elapsed Time (s)</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="4" column="5">
-                                    <widget class="QCheckBox" name="criteria_ions">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="font">
-                                            <font>
-                                                <italic>false</italic>
-                                            </font>
-                                        </property>
-                                        <property name="mouseTracking">
-                                            <bool>true</bool>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true"/>
-                                        </property>
-                                        <property name="text">
-                                            <string/>
-                                        </property>
-                                        <property name="checked">
-                                            <bool>true</bool>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="3" column="0" colspan="2">
-                                    <widget class="QLabel" name="label_176">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>Max. Experiment Time (S)</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="7" column="4">
-                                    <widget class="QLabel" name="label_3">
-                                        <property name="text">
-                                            <string>Stop at</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="17" column="1" colspan="3">
-                                    <widget class="QDoubleSpinBox" name="hitmap_plot_size">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QDoubleSpinBox{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="16" column="0">
-                                    <widget class="QLabel" name="label_188">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>Detection Rate (%)</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="13" column="0" colspan="2">
-                                    <widget class="QLabel" name="label_185">
-                                        <property name="text">
-                                            <string>Pulse Max. Voltage (V)</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="1" column="6">
-                                    <widget class="QLineEdit" name="ex_user">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QLineEdit{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string>user</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="17" column="4" colspan="2">
-                                    <widget class="QPushButton" name="reset_heatmap">
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="text">
-                                            <string>Reset</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="19" column="0">
-                                    <widget class="QLabel" name="label_192">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>Detection Mode</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="0" column="0">
-                                    <widget class="QLabel" name="label_173">
+                                    <widget class="QLabel" name="label_193">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                                                 <horstretch>0</horstretch>
@@ -1281,77 +1468,12 @@
                                             </font>
                                         </property>
                                         <property name="text">
-                                            <string>Setup Parameters</string>
+                                            <string>Run Statistics</string>
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="10" column="0">
-                                    <widget class="QLabel" name="label_191">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>Control Algorithm</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="2" column="0">
-                                    <widget class="QLabel" name="label_175">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>Experiment Name</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="3" column="4">
-                                    <widget class="QLabel" name="label">
-                                        <property name="text">
-                                            <string>Stop at</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="0" column="6">
-                                    <widget class="QComboBox" name="parameters_source">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QComboBox{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <item>
-                                            <property name="text">
-                                                <string>TextBox</string>
-                                            </property>
-                                        </item>
-                                        <item>
-                                            <property name="text">
-                                                <string>TextLine</string>
-                                            </property>
-                                        </item>
-                                    </widget>
-                                </item>
-                                <item row="4" column="6">
-                                    <widget class="QLineEdit" name="max_ions">
+                                <item row="26" column="5" colspan="2">
+                                    <widget class="QLineEdit" name="detection_rate">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                                                 <horstretch>0</horstretch>
@@ -1371,11 +1493,24 @@
                                             </string>
                                         </property>
                                         <property name="text">
-                                            <string>40000</string>
+                                            <string/>
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="7" column="6">
+                                <item row="26" column="0">
+                                    <widget class="QLabel" name="label_198">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="text">
+                                            <string>Detection Rate (%)</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="8" column="6">
                                     <widget class="QLineEdit" name="vdc_max">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -1400,8 +1535,8 @@
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="25" column="0">
-                                    <widget class="QLabel" name="label_198">
+                                <item row="1" column="0">
+                                    <widget class="QLabel" name="label_183">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                                                 <horstretch>0</horstretch>
@@ -1409,25 +1544,12 @@
                                             </sizepolicy>
                                         </property>
                                         <property name="text">
-                                            <string>Detection Rate (%)</string>
+                                            <string>Experiment Number</string>
                                         </property>
                                     </widget>
                                 </item>
-                                <item row="9" column="0">
-                                    <widget class="QLabel" name="label_182">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>K_p Downwards</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="8" column="6">
-                                    <widget class="QLineEdit" name="vdc_steps_up">
+                                <item row="1" column="6">
+                                    <widget class="QLineEdit" name="ex_number">
                                         <property name="sizePolicy">
                                             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                                                 <horstretch>0</horstretch>
@@ -1448,83 +1570,6 @@
                                         </property>
                                         <property name="text">
                                             <string>1</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="24" column="0">
-                                    <widget class="QLabel" name="label_197">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>Pulse Voltage (V)</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="5" column="0" colspan="2">
-                                    <widget class="QLabel" name="label_178">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>Control refresh Freq.(Hz)</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="16" column="6">
-                                    <widget class="QLineEdit" name="detection_rate_init">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="styleSheet">
-                                            <string notr="true">QLineEdit{
-                                                background: rgb(223,223,233)
-                                                }
-                                            </string>
-                                        </property>
-                                        <property name="text">
-                                            <string>1</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="22" column="0">
-                                    <widget class="QLabel" name="label_195">
-                                        <property name="sizePolicy">
-                                            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                                                <horstretch>0</horstretch>
-                                                <verstretch>0</verstretch>
-                                            </sizepolicy>
-                                        </property>
-                                        <property name="text">
-                                            <string>Total Ions</string>
-                                        </property>
-                                    </widget>
-                                </item>
-                                <item row="6" column="3">
-                                    <widget class="QPushButton" name="set_min_voltage">
-                                        <property name="minimumSize">
-                                            <size>
-                                                <width>0</width>
-                                                <height>20</height>
-                                            </size>
-                                        </property>
-                                        <property name="text">
-                                            <string>Set</string>
                                         </property>
                                     </widget>
                                 </item>
@@ -1605,16 +1650,18 @@
         <tabstop>start_button</tabstop>
         <tabstop>stop_button</tabstop>
         <tabstop>parameters_source</tabstop>
+        <tabstop>ex_number</tabstop>
         <tabstop>ex_user</tabstop>
         <tabstop>ex_name</tabstop>
-        <tabstop>ex_time</tabstop>
         <tabstop>criteria_time</tabstop>
-        <tabstop>max_ions</tabstop>
+        <tabstop>ex_time</tabstop>
         <tabstop>criteria_ions</tabstop>
+        <tabstop>max_ions</tabstop>
         <tabstop>ex_freq</tabstop>
+        <tabstop>set_min_voltage</tabstop>
         <tabstop>vdc_min</tabstop>
-        <tabstop>vdc_max</tabstop>
         <tabstop>criteria_vdc</tabstop>
+        <tabstop>vdc_max</tabstop>
         <tabstop>vdc_steps_up</tabstop>
         <tabstop>vdc_steps_down</tabstop>
         <tabstop>control_algorithm</tabstop>
@@ -1629,13 +1676,13 @@
         <tabstop>hit_displayed</tabstop>
         <tabstop>email</tabstop>
         <tabstop>counter_source</tabstop>
-        <tabstop>text_line</tabstop>
-        <tabstop>dc_hold</tabstop>
         <tabstop>elapsed_time</tabstop>
         <tabstop>total_ions</tabstop>
+        <tabstop>dc_hold</tabstop>
         <tabstop>speciemen_voltage</tabstop>
         <tabstop>pulse_voltage</tabstop>
         <tabstop>detection_rate</tabstop>
+        <tabstop>text_line</tabstop>
     </tabstops>
     <resources/>
     <connections/>

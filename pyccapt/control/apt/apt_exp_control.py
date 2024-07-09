@@ -5,6 +5,7 @@ import os
 import time
 
 import serial.tools.list_ports
+from simple_pid import PID
 
 from pyccapt.control.apt import apt_exp_control_func
 from pyccapt.control.control import experiment_statistics, hdf5_creator, loggi
@@ -21,6 +22,7 @@ class APT_Exp_Control:
 
     def __init__(self, variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot):
 
+        self.control_algorithm = None
         self.com_port_v_dc = None
         self.initialization_v_p = None
         self.initialization_v_dc = None
@@ -119,7 +121,7 @@ class APT_Exp_Control:
         # Calculate count_temp and update variables...
         # Save high voltage, pulse, and current iteration ions...
         # Calculate counts_measured and counts_error...
-        # Perform proportional control with averaging...
+        # Perform control algorithm with averaging...
         # Update v_dc and v_p...
         # Update other experiment variables...
 
@@ -134,18 +136,25 @@ class APT_Exp_Control:
         self.main_temperature.extend([self.variables.temperature])
         self.main_chamber_vacuum.extend([self.variables.vacuum_main])
 
-        error = self.detection_rate - self.variables.detection_rate_current
-        # simple proportional control with averaging
-        if error > 0.05:
-            voltage_step = error * self.variables.vdc_step_up * 10
-        elif error < -0.05:
-            voltage_step = error * self.variables.vdc_step_down * 10
-        else:
-            voltage_step = 0
+        if self.control_algorithm == 'Proportional':
+            error = self.detection_rate - self.variables.detection_rate_current
+            # simple proportional control with averaging
+            if error > 0.05:
+                voltage_step = error * self.variables.vdc_step_up * 10
+            elif error < -0.05:
+                voltage_step = error * self.variables.vdc_step_down * 10
+            else:
+                voltage_step = 0
 
-        if voltage_step > 40:
-            print('voltage step is too high: %s' % voltage_step)
-            voltage_step = 40
+            if voltage_step > 40:
+                print('voltage step is too high: %s' % voltage_step)
+                voltage_step = 40
+        elif self.control_algorithm == 'PID' or self.control_algorithm == 'PID aggressive':
+            error = self.detection_rate - self.variables.detection_rate_current
+            print('error: %s' % error)
+            voltage_step = self.pid(error) * 1000
+            print('voltage step: %s' % voltage_step)
+
 
         # update v_dc
         if not self.variables.vdc_hold and voltage_step != 0:
@@ -189,15 +198,16 @@ class APT_Exp_Control:
         """
         self.variables.flag_visualization_start = True
         self.pulse_mode = self.variables.pulse_mode
+        self.control_algorithm = self.variables.control_algorithm
 
-        if os.path.exists("./files/counter_experiments.txt"):
-            # Read the experiment counter
-            with open('./files/counter_experiments.txt') as f:
-                self.variables.counter = int(f.readlines()[0])
-        else:
-            # create a new txt file
-            with open('./files/counter_experiments.txt', 'w') as f:
-                f.write(str(1))  # Current time and date
+        # if os.path.exists("./files/counter_experiments.txt"):
+        #     # Read the experiment counter
+        #     with open('./files/counter_experiments.txt') as f:
+        #         self.variables.counter = int(f.readlines()[0])
+        # else:
+        #     # create a new txt file
+        #     with open('./files/counter_experiments.txt', 'w') as f:
+        #         f.write(str(1))  # Current time and date
         now = datetime.datetime.now()
         self.variables.exp_name = "%s_" % self.variables.counter + \
                                   now.strftime("%b-%d-%Y_%H-%M") + "_%s" % self.variables.hdf5_data_name
@@ -312,6 +322,14 @@ class APT_Exp_Control:
         if self.pulse_mode in ['Voltage', 'VoltageLaser']:
             self.pulse_voltage = self.variables.pulse_voltage
 
+        if self.control_algorithm == 'PID' or self.control_algorithm == 'PID aggressive':
+            self.pid = PID(1, 0.1, 0.05, setpoint=self.detection_rate)
+            self.pid.sample_time = 1 / self.variables.ex_freq
+            self.pid.output_limits = (0, 100)
+            self.pid.proportional_on_measurement = True
+            if self.control_algorithm == 'PID aggressive':
+                self.pid.tunings = (5, 0.1, 0.05)
+
         self.ex_freq = self.variables.ex_freq
 
         # Wait for 8 second to all devices get ready specially tdc
@@ -343,7 +361,11 @@ class APT_Exp_Control:
                 else:
                     index_tdc_failure = 0
                     total_ions_tmp = copy.deepcopy(self.total_ions)
-                self.detection_rate = self.variables.detection_rate
+                if self.detection_rate != self.variables.detection_rate:
+                    self.detection_rate = self.variables.detection_rate
+                    self.counts_target = self.pulse_frequency * self.detection_rate / 100
+                    if self.control_algorithm == 'PID' or self.control_algorithm == 'PID aggressive':
+                        self.pid.setpoint = self.detection_rate
 
                 if self.variables.vdc_hold:
                     self.pulse_mode = self.variables.pulse_mode
@@ -590,8 +612,9 @@ class APT_Exp_Control:
 
         # Save new value of experiment counter
         if os.path.exists("./files/counter_experiments.txt"):
+            self.variables.counter += 1
             with open('./files/counter_experiments.txt', 'w') as f:
-                f.write(str(self.variables.counter + 1))
+                f.write(str(self.variables.counter))
                 self.log_apt.info('Experiment counter is increased')
 
         # save setup parameters and run statistics in a txt file

@@ -126,18 +126,18 @@ def copy_npy_to_hdf_surface_concept(path, hdf5_file_name):
         file.create_dataset('tdc/channel', data=channel, dtype=np.uint32)
         file.create_dataset('tdc/high_voltage', data=high_voltage_tdc, dtype=np.float64)
         file.create_dataset('tdc/voltage_pulse', data=voltage_pulse_tdc, dtype=np.float64)
-        file.create_dataset('tdc/voltage_laser', data=laser_pulse_tdc, dtype=np.float64)
+        file.create_dataset('tdc/laser_pulse', data=laser_pulse_tdc, dtype=np.float64)
         file.create_dataset('tdc/start_counter', data=start_counter_tdc, dtype=np.uint64)
         file.create_dataset('tdc/time_data', data=time_data, dtype=np.uint64)
 
 
 if __name__ == '__main__':
-    path = 'D:/pyccapt/pyccapt/data/1887_Jul-03-2024_15-12_Al/'
-    name = '1887_Jul-03-2024_15-12_Al.h5'
+    path = 'D:/pyccapt/pyccapt/data/1891_Jul-05-2024_12-10_Al_test_50um_1/'
+    name = '1891_Jul-05-2024_12-10_Al_test_50um_1.h5'
     # copy_npy_to_hdf(path, name)
 
     # rename_subcategory(path + name, old_name='dld', new_name='dld_1')
     copy_npy_to_hdf_surface_concept(path, name)
-    # rename_subcategory(path + name, old_name='dld/AbsoluteTimeStamp', new_name='dld/start_counter')
+    # rename_subcategory(path + name, old_name='tdc/voltage_laser', new_name='tdc/laser_pulse')
     # rename_subcategory(path + name, old_name='dld/pulse_voltage', new_name='dld/pulse')
     print('Done')
