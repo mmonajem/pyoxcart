@@ -216,6 +216,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
     loop_time = 0
     loop_counter = 0
     save_data_time = time.time()
+    save_path = variables.path
     while not variables.flag_stop_tdc:
         start_time_loop = time.time()
         eventtype, data = bufdatacb.queue.get()
@@ -268,20 +269,20 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
                 laser_pulse_data_tdc.extend((np.tile(laser_pulse, len(channel_data_tmp))).tolist())
 
         if time.time() - save_data_time > 120:
-            np.save(variables.path + "/x_data.npy", np.array(xx_list))
-            np.save(variables.path + "/y_data.npy", np.array(yy_list))
-            np.save(variables.path + "/t_data.npy", np.array(tt_list))
-            np.save(variables.path + "/voltage_data.npy", np.array(voltage_data))
-            np.save(variables.path + "/voltage_pulse_data.npy", np.array(voltage_pulse_data))
-            np.save(variables.path + "/laser_pulse_data.npy", np.array(laser_pulse_data))
-            np.save(variables.path + "/start_counter.npy", np.array(start_counter))
-
-            np.save(variables.path + "/channel_data.npy", np.array(channel_data))
-            np.save(variables.path + "/time_data.npy", np.array(time_data))
-            np.save(variables.path + "/tdc_start_counter.npy", np.array(tdc_start_counter))
-            np.save(variables.path + "/voltage_data_tdc.npy", np.array(voltage_data_tdc))
-            np.save(variables.path + "/voltage_pulse_data_tdc.npy", np.array(voltage_pulse_data_tdc))
-            np.save(variables.path + "/laser_pulse_data_tdc.npy", np.array(laser_pulse_data_tdc))
+            np.save(save_path + "/x_data.npy", np.array(xx_list))
+            np.save(save_path + "/y_data.npy", np.array(yy_list))
+            np.save(save_path + "/t_data.npy", np.array(tt_list))
+            np.save(save_path + "/voltage_data.npy", np.array(voltage_data))
+            np.save(save_path + "/voltage_pulse_data.npy", np.array(voltage_pulse_data))
+            np.save(save_path + "/laser_pulse_data.npy", np.array(laser_pulse_data))
+            np.save(save_path + "/start_counter.npy", np.array(start_counter))
+            # raw tdc data
+            np.save(save_path + "/channel_data.npy", np.array(channel_data))
+            np.save(save_path + "/time_data.npy", np.array(time_data))
+            np.save(save_path + "/tdc_start_counter.npy", np.array(tdc_start_counter))
+            np.save(save_path + "/voltage_data_tdc.npy", np.array(voltage_data_tdc))
+            np.save(save_path + "/voltage_pulse_data_tdc.npy", np.array(voltage_pulse_data_tdc))
+            np.save(save_path + "/laser_pulse_data_tdc.npy", np.array(laser_pulse_data_tdc))
 
             save_data_time = time.time()
             print("Data saved.")
@@ -304,7 +305,6 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
             if retcode < 0:
                 print("Error during read (error code: %s - error msg: %s):" % (retcode,
                                                                                device.lib.sc_get_err_msg(retcode)))
-                # variables.flag_tdc_failure = True
                 break
 
         # else:  # unknown event
@@ -317,12 +317,21 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
     print("for %s times loop time took longer than 0.1 second" % loop_time, 'out of %s iteration' % loop_counter)
     variables.total_ions = events_detected
     print("TDC Measurement stopped")
-    np.save(variables.path + "/x_data.npy", np.array(xx_list))
-    np.save(variables.path + "/y_data.npy", np.array(yy_list))
-    np.save(variables.path + "/t_data.npy", np.array(tt_list))
-    np.save(variables.path + "/voltage_data.npy", np.array(voltage_data))
-    np.save(variables.path + "/voltage_pulse_data.npy", np.array(voltage_pulse_data))
-    np.save(variables.path + "/laser_pulse_data.npy", np.array(laser_pulse_data))
+    np.save(save_path + "/x_data.npy", np.array(xx_list))
+    np.save(save_path + "/y_data.npy", np.array(yy_list))
+    np.save(save_path + "/t_data.npy", np.array(tt_list))
+    np.save(save_path + "/voltage_data.npy", np.array(voltage_data))
+    np.save(save_path + "/voltage_pulse_data.npy", np.array(voltage_pulse_data))
+    np.save(save_path + "/laser_pulse_data.npy", np.array(laser_pulse_data))
+    np.save(save_path + "/start_counter.npy", np.array(start_counter))
+    # raw tdc data
+    np.save(save_path + "/channel_data.npy", np.array(channel_data))
+    np.save(save_path + "/time_data.npy", np.array(time_data))
+    np.save(save_path + "/tdc_start_counter.npy", np.array(tdc_start_counter))
+    np.save(save_path + "/voltage_data_tdc.npy", np.array(voltage_data_tdc))
+    np.save(save_path + "/voltage_pulse_data_tdc.npy", np.array(voltage_pulse_data_tdc))
+    np.save(save_path + "/laser_pulse_data_tdc.npy", np.array(laser_pulse_data_tdc))
+
     variables.extend_to('x', xx)
     variables.extend_to('y', yy)
     variables.extend_to('t', tt)

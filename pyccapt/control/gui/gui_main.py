@@ -16,7 +16,8 @@ from pyccapt.control.gui import gui_baking, gui_cameras, gui_gates, gui_laser_co
 
 class Ui_PyCCAPT(object):
 
-	def __init__(self, variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot):
+	def __init__(self, variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot,
+	             detection_rate_current_queue, detection_rate_current_plot_queue, total_ions_queue):
 		"""
 		Constructor for the PyCCAPT UI class.
 
@@ -41,6 +42,10 @@ class Ui_PyCCAPT(object):
 		self.visualization_closed_event = multiprocessing.Event()
 		self.camera_win_front = multiprocessing.Event()
 		self.visualization_win_front = multiprocessing.Event()
+		self.detection_rate_current_queue = detection_rate_current_queue
+		self.detection_rate_current_plot_queue = detection_rate_current_plot_queue
+		self.total_ions_queue = total_ions_queue
+
 
 	def setupUi(self, PyCCAPT):
 		PyCCAPT.setObjectName("PyCCAPT")

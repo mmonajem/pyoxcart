@@ -42,11 +42,15 @@ def main():
 	y_plot = multiprocessing.Queue()
 	t_plot = multiprocessing.Queue()
 	main_v_dc_plot = multiprocessing.Queue()
+	detection_rate_current_queue = multiprocessing.Queue()
+	detection_rate_current_plot_queue = multiprocessing.Queue()
+	total_ions_queue = multiprocessing.Queue()
 
 	app = QtWidgets.QApplication(sys.argv)
 	app.setStyle('Fusion')
 	pyccapt_window = QtWidgets.QMainWindow()
-	ui = gui_main.Ui_PyCCAPT(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot)
+	ui = gui_main.Ui_PyCCAPT(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot,
+	                         detection_rate_current_queue, detection_rate_current_plot_queue, total_ions_queue)
 	ui.setupUi(pyccapt_window)
 	pyccapt_window.show()
 	sys.exit(app.exec())

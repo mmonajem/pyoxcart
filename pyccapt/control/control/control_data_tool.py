@@ -132,8 +132,8 @@ def copy_npy_to_hdf_surface_concept(path, hdf5_file_name):
 
 
 if __name__ == '__main__':
-    path = 'D:/pyccapt/pyccapt/data/1891_Jul-05-2024_12-10_Al_test_50um_1/'
-    name = '1891_Jul-05-2024_12-10_Al_test_50um_1.h5'
+    path = 'D:/pyccapt/pyccapt/data/1911_Jul-09-2024_16-02_Al_4/'
+    name = '1911_Jul-09-2024_16-02_Al_4.h5'
     # copy_npy_to_hdf(path, name)
 
     # rename_subcategory(path + name, old_name='dld', new_name='dld_1')
