@@ -17,13 +17,17 @@ def logger_creator(script_name, variables, log_name, path):
 	Returns:
 		logging.Logger: The configured logger object.
 	"""
-	log_creator = logging.getLogger(script_name)
-	log_creator.setLevel(logging.INFO)
-	formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s',
-	                              '%m-%d-%Y %H:%M:%S')
+	try:
+		log_creator = logging.getLogger(script_name)
+		log_creator.setLevel(logging.INFO)
+		formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s',
+		                              '%m-%d-%Y %H:%M:%S')
 
-	file_handler_creator = logging.FileHandler(path + '\\' + log_name)
-	file_handler_creator.setLevel(logging.DEBUG)
-	file_handler_creator.setFormatter(formatter)
-	log_creator.addHandler(file_handler_creator)
-	return log_creator
+		file_handler_creator = logging.FileHandler(path + '\\' + log_name)
+		file_handler_creator.setLevel(logging.DEBUG)
+		file_handler_creator.setFormatter(formatter)
+		log_creator.addHandler(file_handler_creator)
+		return log_creator
+	except Exception as e:
+		print(f"Error creating logger: {e}")
+		return None

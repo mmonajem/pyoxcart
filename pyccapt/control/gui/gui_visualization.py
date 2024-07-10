@@ -17,7 +17,7 @@ from pyccapt.control.devices import initialize_devices
 
 class Ui_Visualization(object):
 
-    def __init__(self, variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot):
+    def __init__(self, variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot, detection_rate_current_plot_queue):
 
         """
         Constructor for the Visualization UI class.
@@ -29,6 +29,7 @@ class Ui_Visualization(object):
             y_plot (multiprocessing.Array): Array for storing the y-axis values of the mass spectrum.
             t_plot (multiprocessing.Array): Array for storing the time values of the mass spectrum.
             main_v_dc_plot (multiprocessing.Array): Array for storing the main voltage values of the mass spectrum.
+            detection_rate_current_plot_queue (multiprocessing.Queue): Queue for storing the detection rate values.
 
         """
         self.styles = None
@@ -44,6 +45,8 @@ class Ui_Visualization(object):
         self.y_plot = y_plot
         self.t_plot = t_plot
         self.main_v_dc_plot = main_v_dc_plot
+        self.detection_rate_current_plot_queue = detection_rate_current_plot_queue
+        self.detection_rate_current_plot = 0
         self.counter_source = ''
         self.index_plot_save = 0
         self.index_plot = 0
@@ -334,9 +337,9 @@ class Ui_Visualization(object):
         self.histogram.setLabel("left", "Event Counts", **self.styles)
         self.histogram.setLogMode(y=True)
         if self.conf["visualization"] == "tof":
-	        self.histogram.setLabel("bottom", "Time", units='ns', **self.styles)
+            self.histogram.setLabel("bottom", "Time", units='ns', **self.styles)
         elif self.conf["visualization"] == "mc":
-	        self.histogram.setLabel("bottom", "m/c", units='Da', **self.styles)
+            self.histogram.setLabel("bottom", "m/c", units='Da', **self.styles)
 
         self.visualization_window = Visualization  # Assign the attribute when setting up the UI
 
@@ -502,14 +505,16 @@ class Ui_Visualization(object):
                 self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
 
             # Detection Rate Visualization
+            while not self.detection_rate_current_plot_queue.empty():
+                self.detection_rate_current_plot = self.detection_rate_current_plot_queue.get()
             # with self.variables.lock_statistics:
             if self.index_plot < len(self.y_dtec):
-                self.y_dtec[self.index_plot] = self.variables.detection_rate_current_plot  # Add a new value.
+                self.y_dtec[self.index_plot] = self.detection_rate_current_plot  # Add a new value.
             else:
                 # self.x_dtec = self.x_dtec[1:]  # Remove the first element.
                 x_dtec_last = self.x_dtec[-1]
                 self.x_dtec.append(x_dtec_last + 0.5)  # Add a new value 1 higher than the last.
-                self.y_dtec.append(self.variables.detection_rate_current_plot)
+                self.y_dtec.append(self.detection_rate_current_plot)
 
             # self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
             # Set the maximum number of data points to display
@@ -531,19 +536,19 @@ class Ui_Visualization(object):
             self.index_plot += 1
             # mass spectrum
 
-            if self.counter_source == 'TDC' and self.variables.total_ions > 0 and \
-                    self.index_wait_on_plot_start > 16:
+            while not self.x_plot.empty() and not self.y_plot.empty() and not self.t_plot.empty() and \
+                    not self.main_v_dc_plot.empty():
+                data = self.x_plot.get()
+                self.xx.extend(data)
+                data = self.y_plot.get()
+                self.yy.extend(data)
+                data = self.t_plot.get()
+                self.tt.extend(data)
+                data = self.main_v_dc_plot.get()
+                self.main_v_dc_dld.extend(data)
 
-                while not self.x_plot.empty() and not self.y_plot.empty() and not self.t_plot.empty() and \
-                        not self.main_v_dc_plot.empty():
-                    data = self.x_plot.get()
-                    self.xx.extend(data)
-                    data = self.y_plot.get()
-                    self.yy.extend(data)
-                    data = self.t_plot.get()
-                    self.tt.extend(data)
-                    data = self.main_v_dc_plot.get()
-                    self.main_v_dc_dld.extend(data)
+            if self.counter_source == 'TDC' and self.main_v_dc_dld and \
+                    self.index_wait_on_plot_start > 16:
 
                 xx = np.array(self.xx)
                 yy = np.array(self.yy)
@@ -560,10 +565,10 @@ class Ui_Visualization(object):
                         main_v_dc_dld_max_lenght = main_v_dc_dld[:max_lenght]
 
                         if self.mc_tof_last_events_flag:
-	                        xx_max_lenght = xx_max_lenght[-self.num_event_mc_tof:]
-	                        yy_max_lenght = yy_max_lenght[-self.num_event_mc_tof:]
-	                        tt_max_lenght = tt_max_lenght[-self.num_event_mc_tof:]
-	                        main_v_dc_dld_max_lenght = main_v_dc_dld_max_lenght[-self.num_event_mc_tof:]
+                            xx_max_lenght = xx_max_lenght[-self.num_event_mc_tof:]
+                            yy_max_lenght = yy_max_lenght[-self.num_event_mc_tof:]
+                            tt_max_lenght = tt_max_lenght[-self.num_event_mc_tof:]
+                            main_v_dc_dld_max_lenght = main_v_dc_dld_max_lenght[-self.num_event_mc_tof:]
 
                         viz = tof2mc_simple.tof_2_mc(tt_max_lenght, self.conf["t_0"],
                                                      main_v_dc_dld_max_lenght,
@@ -571,9 +576,9 @@ class Ui_Visualization(object):
                                                      yy_max_lenght,
                                                      flightPathLength=self.conf["flight_path_length"])
                         if self.conf["visualization"] == "mc":
-	                        viz = viz[viz < self.conf["max_mass"]]
+                            viz = viz[viz < self.conf["max_mass"]]
                         elif self.conf["visualization"] == "tof":
-	                        viz = tt_max_lenght[tt_max_lenght < self.conf["max_tof"]]
+                            viz = tt_max_lenght[tt_max_lenght < self.conf["max_tof"]]
 
                     bin_size = self.conf["bin_size"]
                     # bins = np.linspace(np.min(viz), np.max(viz), round(np.max(viz) / bin_size))
@@ -651,53 +656,53 @@ class Ui_Visualization(object):
                 self.index_plot_save += 1
 
     def spectrum_switch_mc_tof(self):
-	    """
-		Switch between mass spectrum and time of flight spectrum
-		Args:
-			None
+        """
+        Switch between mass spectrum and time of flight spectrum
+        Args:
+            None
 
-		Return:
-			None
-		"""
-	    if self.conf["visualization"] == "tof":
-		    self.conf["visualization"] = "mc"
-		    self.histogram.setLabel("bottom", "m/c", units='Da', **self.styles)
-	    elif self.conf["visualization"] == "mc":
-		    self.conf["visualization"] = "tof"
-		    self.histogram.setLabel("bottom", "Time", units='ns', **self.styles)
+        Return:
+            None
+        """
+        if self.conf["visualization"] == "tof":
+            self.conf["visualization"] = "mc"
+            self.histogram.setLabel("bottom", "m/c", units='Da', **self.styles)
+        elif self.conf["visualization"] == "mc":
+            self.conf["visualization"] = "tof"
+            self.histogram.setLabel("bottom", "Time", units='ns', **self.styles)
 
     def spectrum_last_events(self):
-	    """
-		Display the last events in the mass spectrum
-		Args:
-			None
+        """
+        Display the last events in the mass spectrum
+        Args:
+            None
 
-		Return:
-			None
-		"""
-	    self.mc_tof_last_events_flag = not self.mc_tof_last_events_flag
-	    if self.mc_tof_last_events_flag:
-		    self.spectrum_last_events_switch.setStyleSheet("QPushButton{\n"
-		                                                   "background: rgb(0, 255, 26)\n"
-		                                                   "}")
-	    else:
-		    self.spectrum_last_events_switch.setStyleSheet(self.original_button_style)
+        Return:
+            None
+        """
+        self.mc_tof_last_events_flag = not self.mc_tof_last_events_flag
+        if self.mc_tof_last_events_flag:
+            self.spectrum_last_events_switch.setStyleSheet("QPushButton{\n"
+                                                           "background: rgb(0, 255, 26)\n"
+                                                           "}")
+        else:
+            self.spectrum_last_events_switch.setStyleSheet(self.original_button_style)
 
     def parameters_changes(self):
-	    """
-		Change the parameters for the mass spectrum
-		Args:
-			None
+        """
+        Change the parameters for the mass spectrum
+        Args:
+            None
 
-		Return:
-			None
-		"""
-	    if self.num_last_events.text().isdigit():
-		    self.num_event_mc_tof = int(self.num_last_events.text())
-	    if self.max_mc.text().isdigit():
-		    self.conf["max_mass"] = int(self.max_mc.text())
-	    if self.max_tof.text().isdigit():
-		    self.conf["max_tof"] = int(self.max_tof.text())
+        Return:
+            None
+        """
+        if self.num_last_events.text().isdigit():
+            self.num_event_mc_tof = int(self.num_last_events.text())
+        if self.max_mc.text().isdigit():
+            self.conf["max_mass"] = int(self.max_mc.text())
+        if self.max_tof.text().isdigit():
+            self.conf["max_tof"] = int(self.max_tof.text())
 
     def stop(self):
         """
@@ -791,7 +796,7 @@ class VisualizationWindow(QtWidgets.QWidget):
 
 
 def run_visualization_window(variables, conf, visualization_closed_event, visualization_win_front,
-                             x_plot, y_plot, t_plot, main_v_dc_plot):
+                             x_plot, y_plot, t_plot, main_v_dc_plot, detection_rate_current_plot_queue, ):
     """
     Run the Cameras window in a separate process.
 
@@ -811,7 +816,8 @@ def run_visualization_window(variables, conf, visualization_closed_event, visual
     app = QtWidgets.QApplication(sys.argv)  # <-- Create a new QApplication instance
     app.setStyle('Fusion')
 
-    gui_visualization = Ui_Visualization(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot)
+    gui_visualization = Ui_Visualization(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot,
+                                         detection_rate_current_plot_queue)
     Cameras_alignment = VisualizationWindow(variables, gui_visualization, visualization_closed_event,
                                             visualization_win_front, flags=QtCore.Qt.WindowType.Tool)
     gui_visualization.setupUi(Cameras_alignment)

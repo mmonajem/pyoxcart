@@ -1,4 +1,3 @@
-import copy
 import datetime
 import multiprocessing
 import os
@@ -20,7 +19,8 @@ class APT_Exp_Control:
     This class is responsible for controlling the experiment.
     """
 
-    def __init__(self, variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot):
+    def __init__(self, variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot,
+                 detection_rate_current_queue, detection_rate_current_plot_queue, total_ions_queue):
 
         self.control_algorithm = None
         self.com_port_v_dc = None
@@ -35,6 +35,12 @@ class APT_Exp_Control:
         self.y_plot = y_plot
         self.t_plot = t_plot
         self.main_v_dc_plot = main_v_dc_plot
+        self.detection_rate_current_queue = detection_rate_current_queue
+        self.detection_rate_current = 0
+        self.total_ions_queue = total_ions_queue
+        self.total_ions = 0
+        self.detection_rate_current_plot_queue = detection_rate_current_plot_queue
+
 
         self.com_port_v_p = None
         self.log_apt = None
@@ -82,7 +88,9 @@ class APT_Exp_Control:
             # Module used: multiprocessing
             self.tdc_process = multiprocessing.Process(target=tdc_surface_consept.experiment_measure,
                                                        args=(self.variables, self.x_plot, self.y_plot, self.t_plot,
-                                                             self.main_v_dc_plot,))
+                                                             self.main_v_dc_plot, self.detection_rate_current_queue,
+                                                             self.detection_rate_current_plot_queue,
+                                                             self.total_ions_queue))
 
             self.tdc_process.start()
 
@@ -125,6 +133,10 @@ class APT_Exp_Control:
         # Update v_dc and v_p...
         # Update other experiment variables...
 
+        while not self.detection_rate_current_queue.empty() and not self.total_ions_queue.empty():
+            self.detection_rate_current = self.detection_rate_current_queue.get()
+            self.total_ions = self.total_ions_queue.get()
+
         # with self.variables.lock_statistics:
         count_temp = self.total_ions - self.count_last
         self.count_last = self.total_ions
@@ -137,7 +149,7 @@ class APT_Exp_Control:
         self.main_chamber_vacuum.extend([self.variables.vacuum_main])
 
         if self.control_algorithm == 'Proportional':
-            error = self.detection_rate - self.variables.detection_rate_current
+            error = self.detection_rate - self.detection_rate_current
             # simple proportional control with averaging
             if error > 0.05:
                 voltage_step = error * self.variables.vdc_step_up * 10
@@ -150,7 +162,7 @@ class APT_Exp_Control:
                 print('voltage step is too high: %s' % voltage_step)
                 voltage_step = 40
         elif self.control_algorithm == 'PID' or self.control_algorithm == 'PID aggressive':
-            error = self.detection_rate - self.variables.detection_rate_current
+            error = self.detection_rate - self.detection_rate_current
             print('error: %s' % error)
             voltage_step = self.pid(error) * 1000
             print('voltage step: %s' % voltage_step)
@@ -185,6 +197,7 @@ class APT_Exp_Control:
         start_time = time.perf_counter()
         while time.perf_counter() - start_time < seconds:
             pass
+
 
     def run_experiment(self):
         """
@@ -238,7 +251,8 @@ class APT_Exp_Control:
             self.variables.flag_tdc_failure = False
             self.initialize_detector_process()
 
-        self.log_apt = loggi.logger_creator('apt', self.variables, 'apt.log', path=self.variables.log_path)
+        if not self.initialization_error:
+            self.log_apt = loggi.logger_creator('apt', self.variables, 'apt.log', path=self.variables.log_path)
         if self.conf['signal_generator'] == 'on' and self.pulse_mode in ['Voltage',
                                                                          'VoltageLaser'] and not self.initialization_error:
             self.initialization_error = apt_exp_control_func.initialization_signal_generator(self.variables,
@@ -348,10 +362,11 @@ class APT_Exp_Control:
                 start_time = time.perf_counter()
                 self.vdc_max = self.variables.vdc_max
                 self.vdc_min = self.variables.vdc_min
+                self.variables.total_ions = self.total_ions
                 if self.pulse_mode in ['Voltage', 'VoltageLaser']:
                     self.pulse_voltage_min = self.variables.v_p_min / self.pulse_amp_per_supply_voltage
                     self.pulse_voltage_max = self.variables.v_p_max / self.pulse_amp_per_supply_voltage
-                self.total_ions = self.variables.total_ions
+
                 # here we check if tdc is failed or not by checking if the total number of ions is
                 # constant for 100 iteration
                 if total_ions_tmp == self.total_ions:
@@ -360,7 +375,7 @@ class APT_Exp_Control:
                         self.variables.flag_tdc_failure = True
                 else:
                     index_tdc_failure = 0
-                    total_ions_tmp = copy.deepcopy(self.total_ions)
+                    total_ions_tmp = self.total_ions
                 if self.detection_rate != self.variables.detection_rate:
                     self.detection_rate = self.variables.detection_rate
                     self.counts_target = self.pulse_frequency * self.detection_rate / 100
@@ -462,8 +477,10 @@ class APT_Exp_Control:
 
                 if self.variables.flag_tdc_failure:
                     self.log_apt.info('Experiment is stopped because of tdc failure')
-                    print(f"{initialize_devices.bcolors.FAIL}Experiment is stopped because of TDC failure")
-                    print(f"{initialize_devices.bcolors.FAIL}Restart the TDC and start the experiment again")
+                    print(f"{initialize_devices.bcolors.FAIL}Experiment is stopped because of TDC failure"
+                          f"{initialize_devices.bcolors.ENDC}")
+                    print(f"{initialize_devices.bcolors.FAIL}Restart the TDC and start the experiment again"
+                          f"{initialize_devices.bcolors.ENDC}")
                     if self.conf['tdc'] == "on":
                         if self.variables.counter_source == 'TDC':
                             self.variables.stop_flag = True  # Set the STOP flag
@@ -667,6 +684,9 @@ class APT_Exp_Control:
                 dumy = self.y_plot.get()
                 dumy = self.t_plot.get()
                 dumy = self.main_v_dc_plot.get()
+                dumy = self.detection_rate_current_queue.get()
+                dumy = self.detection_rate_current_plot_queue.get()
+                dumy = self.total_ions_queue.get()
 
             self.variables.clear_to('x')
             self.variables.clear_to('y')
@@ -744,7 +764,8 @@ class APT_Exp_Control:
         self.log_apt.info('Cleanup is finished')
 
 
-def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot):
+def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot,
+                   detection_rate_current_queue, detection_rate_current_plot_queue, total_ions_queue):
     """
     Run the main experiment.
 
@@ -756,6 +777,9 @@ def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t
         y_plot:                     Array to store y data
         t_plot:                     Array to store t data
         main_v_dc_plot:             Array to store main_v_dc data
+        detection_rate_current_queue: Queue to store the current detection rate
+        detection_rate_current_plot_queue: Queue to store the current detection rate for plotting
+        total_ions_queue:           Queue to store the total number of ions
 
     Returns:
         None
@@ -780,6 +804,7 @@ def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t
     # lp1.dump_stats('run_experiment.lprof')
 
     apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot,
-                                      main_v_dc_plot)
+                                      main_v_dc_plot, detection_rate_current_queue, detection_rate_current_plot_queue,
+                                      total_ions_queue)
 
     apt_exp_control.run_experiment()

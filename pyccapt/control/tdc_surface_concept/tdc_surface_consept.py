@@ -126,7 +126,8 @@ def save_data_thread(variables, xx_list, yy_list, tt_list, voltage_data, pulse_d
         print("Data saved.")
 
 
-def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
+def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, detection_rate_current_queue,
+                           detection_rate_current_plot_queue, total_ions_queue):
     """
     Measurement function: This function is called in a process to read data from the queue.
 
@@ -136,6 +137,9 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
         y_plot (multiprocessing.Array): A multiprocessing.Array object.
         t_plot (multiprocessing.Array): A multiprocessing.Array object.
         main_v_dc_plot (multiprocessing.Array): A multiprocessing.Array object.
+        detection_rate_current_queue (multiprocessing.Queue): A multiprocessing.Queue object.
+        detection_rate_current_plot_queue (multiprocessing.Queue): A multiprocessing.Queue object.
+        total_ions_queue (multiprocessing.Queue): A multiprocessing.Queue object.
 
     Returns:
         int: Return code.
@@ -293,9 +297,10 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
         current_time = time.time()
         if current_time - start_time >= 0.5:
             detection_rate = events_detected_tmp * 100 / pulse_frequency
-            variables.detection_rate_current = detection_rate * 2  # to get the rate per second
-            variables.detection_rate_current_plot = detection_rate * 2  # to get the rate per second
-            variables.total_ions = events_detected
+            detection_rate_t = detection_rate * 2
+            detection_rate_current_queue.put(detection_rate_t)  # to get the rate per second
+            detection_rate_current_plot_queue.put(detection_rate_t)  # to get the rate per second
+            total_ions_queue.put(events_detected)
             # Reset the counter and timer
             events_detected_tmp = 0
             start_time = current_time
@@ -357,7 +362,8 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
     return 0
 
 
-def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
+def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot,
+                       detection_rate_current_queue, detection_rate_current_plot_queue, total_ions_queue):
     # from line_profiler import LineProfiler
     #
     # lp1 = LineProfiler()
@@ -369,4 +375,5 @@ def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot):
     # # Save the profiling result to a file
     # lp1.dump_stats('./../../experiment_measure.lprof')
 
-    run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot)
+    run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, detection_rate_current_queue,
+                           detection_rate_current_plot_queue, total_ions_queue)

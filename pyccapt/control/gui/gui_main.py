@@ -1408,7 +1408,10 @@ class Ui_PyCCAPT(object):
 		self.experiment_process = multiprocessing.Process(target=apt_exp_control.run_experiment,
 		                                                  args=(self.variables, self.conf,
 		                                                        self.experimetn_finished_event, self.x_plot,
-		                                                        self.y_plot, self.t_plot, self.main_v_dc_plot,))
+		                                                        self.y_plot, self.t_plot, self.main_v_dc_plot,
+		                                                        self.detection_rate_current_queue,
+		                                                        self.detection_rate_current_plot_queue,
+		                                                        self.total_ions_queue))
 		self.experiment_process.start()
 		self.statistics_timer.start()
 
@@ -1619,7 +1622,8 @@ class Ui_PyCCAPT(object):
 		                                                           self.visualization_closed_event,
 		                                                           self.visualization_win_front, self.x_plot,
 		                                                           self.y_plot,
-		                                                           self.t_plot, self.main_v_dc_plot))
+		                                                           self.t_plot, self.main_v_dc_plot,
+		                                                           self.detection_rate_current_plot_queue))
 		self.visualization_process.start()
 
 	def open_cameras_win(self):
