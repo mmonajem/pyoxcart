@@ -40,6 +40,9 @@ class APT_Exp_Control:
         self.total_ions_queue = total_ions_queue
         self.total_ions = 0
         self.detection_rate_current_plot_queue = detection_rate_current_plot_queue
+        self.specimen_voltage_queue = multiprocessing.Queue()
+        self.voltage_pulse_queue = multiprocessing.Queue()
+        self.laser_pulse_queue = multiprocessing.Queue()
 
 
         self.com_port_v_p = None
@@ -90,7 +93,9 @@ class APT_Exp_Control:
                                                        args=(self.variables, self.x_plot, self.y_plot, self.t_plot,
                                                              self.main_v_dc_plot, self.detection_rate_current_queue,
                                                              self.detection_rate_current_plot_queue,
-                                                             self.total_ions_queue))
+                                                             self.total_ions_queue,
+                                                             self.specimen_voltage_queue, self.voltage_pulse_queue,
+                                                             self.laser_pulse_queue))
 
             self.tdc_process.start()
 
@@ -167,7 +172,6 @@ class APT_Exp_Control:
             voltage_step = self.pid(error) * 1000
             print('voltage step: %s' % voltage_step)
 
-
         # update v_dc
         if not self.variables.vdc_hold and voltage_step != 0:
             specimen_voltage_temp = min(self.specimen_voltage + voltage_step, self.vdc_max)
@@ -177,12 +181,14 @@ class APT_Exp_Control:
                     self.specimen_voltage = specimen_voltage_temp
                     self.variables.specimen_voltage = self.specimen_voltage
                     self.variables.specimen_voltage_plot = self.specimen_voltage
+                    self.specimen_voltage_queue.put(self.specimen_voltage)
                 if self.pulse_mode in ['Voltage', 'VoltageLaser']:
                     new_vp = self.specimen_voltage * self.pulse_fraction * (1 / self.pulse_amp_per_supply_voltage)
                     if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
                         apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % new_vp)
                         self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
                         self.variables.pulse_voltage = self.pulse_voltage
+                        self.voltage_pulse_queue.put(self.pulse_voltage)
 
     def precise_sleep(self, seconds):
         """
@@ -355,6 +361,7 @@ class APT_Exp_Control:
         index_tdc_failure = 0
         last_pulse_mode = self.pulse_mode
         flag_change_pulse_mode = False
+        print('self.initialization_error', self.initialization_error)
         if self.initialization_error:
             pass
         else:
@@ -363,6 +370,8 @@ class APT_Exp_Control:
                 self.vdc_max = self.variables.vdc_max
                 self.vdc_min = self.variables.vdc_min
                 self.variables.total_ions = self.total_ions
+                self.laser_pulse_queue.put(self.variables.laser_pulse)
+
                 if self.pulse_mode in ['Voltage', 'VoltageLaser']:
                     self.pulse_voltage_min = self.variables.v_p_min / self.pulse_amp_per_supply_voltage
                     self.pulse_voltage_max = self.variables.v_p_max / self.pulse_amp_per_supply_voltage

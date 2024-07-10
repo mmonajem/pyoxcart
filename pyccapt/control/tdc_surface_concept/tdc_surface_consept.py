@@ -127,7 +127,8 @@ def save_data_thread(variables, xx_list, yy_list, tt_list, voltage_data, pulse_d
 
 
 def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, detection_rate_current_queue,
-                           detection_rate_current_plot_queue, total_ions_queue):
+                           detection_rate_current_plot_queue, total_ions_queue,
+                           specimen_voltage_queue, voltage_pulse_queue, laser_pulse_queue):
     """
     Measurement function: This function is called in a process to read data from the queue.
 
@@ -140,6 +141,9 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, de
         detection_rate_current_queue (multiprocessing.Queue): A multiprocessing.Queue object.
         detection_rate_current_plot_queue (multiprocessing.Queue): A multiprocessing.Queue object.
         total_ions_queue (multiprocessing.Queue): A multiprocessing.Queue object.
+        specimen_voltage_queue (multiprocessing.Queue): A multiprocessing.Queue object.
+        voltage_pulse_queue (multiprocessing.Queue): A multiprocessing.Queue object.
+        laser_pulse_queue (multiprocessing.Queue): A multiprocessing.Queue object.
 
     Returns:
         int: Return code.
@@ -221,13 +225,20 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, de
     loop_counter = 0
     save_data_time = time.time()
     save_path = variables.path
+    specimen_voltage = 0
+    voltage_pulse = 0
+    laser_pulse = 0
     while not variables.flag_stop_tdc:
         start_time_loop = time.time()
         eventtype, data = bufdatacb.queue.get()
         eventtype_raw, data_raw = bufdatacb_raw.queue.get()
-        specimen_voltage = variables.specimen_voltage
-        voltage_pulse = variables.pulse_voltage
-        laser_pulse = variables.laser_pulse_energy
+        while not specimen_voltage_queue.empty():
+            specimen_voltage = specimen_voltage_queue.get()
+        while not voltage_pulse_queue.empty():
+            voltage_pulse = voltage_pulse_queue.get()
+        while not laser_pulse_queue.empty():
+            laser_pulse = laser_pulse_queue.get()
+
         if eventtype == QUEUE_DATA:
             # correct for binning of surface concept
             xx_dif = data["dif1"]
@@ -363,7 +374,8 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, de
 
 
 def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot,
-                       detection_rate_current_queue, detection_rate_current_plot_queue, total_ions_queue):
+                       detection_rate_current_queue, detection_rate_current_plot_queue, total_ions_queue,
+                       specimen_voltage_queue, voltage_pulse_queue, laser_pulse_queue):
     # from line_profiler import LineProfiler
     #
     # lp1 = LineProfiler()
@@ -376,4 +388,5 @@ def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot,
     # lp1.dump_stats('./../../experiment_measure.lprof')
 
     run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, detection_rate_current_queue,
-                           detection_rate_current_plot_queue, total_ions_queue)
+                           detection_rate_current_plot_queue, total_ions_queue,
+                           specimen_voltage_queue, voltage_pulse_queue, laser_pulse_queue)
