@@ -19,6 +19,7 @@ def initialization_signal_generator(variables, log_apt):
 	try:
 		signal_generator.initialize_signal_generator(variables, variables.pulse_frequency)
 		log_apt.info('Signal generator is initialized')
+		initialization_error = False
 	except Exception as e:
 		log_apt.info('Signal generator is not initialized')
 		print('Can not initialize the signal generator')
@@ -27,7 +28,7 @@ def initialization_signal_generator(variables, log_apt):
 		variables.stop_flag = True
 		initialization_error = True
 		log_apt.info('Experiment is terminated')
-		return initialization_error
+	return initialization_error
 
 
 def command_v_p(com_port_v_p, cmd):
@@ -109,6 +110,7 @@ def initialization_v_dc(com_port_v_dc, log_apt, variables):
 			print("Couldn't open Port!")
 			exit()
 		log_apt.info('High voltage is initialized')
+		initialization_error = False
 	except Exception as e:
 		log_apt.info('High voltage is  not initialized')
 		print('Can not initialize the high voltage')
@@ -117,7 +119,7 @@ def initialization_v_dc(com_port_v_dc, log_apt, variables):
 		variables.stop_flag = True
 		initialization_error = True
 		log_apt.info('Experiment is terminated')
-		return initialization_error
+	return initialization_error
 
 
 def initialization_v_p(com_port_v_p, log_apt, variables):
@@ -137,6 +139,7 @@ def initialization_v_p(com_port_v_p, log_apt, variables):
 
 		command_v_p(com_port_v_p, '*RST')
 		log_apt.info('Pulser is initialized')
+		initialization_error = False
 	except Exception as e:
 		log_apt.info('Pulser is not initialized')
 		print('Can not initialize the pulser')
@@ -145,7 +148,7 @@ def initialization_v_p(com_port_v_p, log_apt, variables):
 		variables.stop_flag = True
 		initialization_error = True
 		log_apt.info('Experiment is terminated')
-		return initialization_error
+	return initialization_error
 
 
 def send_info_email(log_apt, variables):

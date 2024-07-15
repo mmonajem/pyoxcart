@@ -22,6 +22,7 @@ class APT_Exp_Control:
 
     def __init__(self, variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot):
 
+        self.stop_event = None
         self.control_algorithm = None
         self.com_port_v_dc = None
         self.initialization_v_p = None
@@ -80,9 +81,10 @@ class APT_Exp_Control:
 
             # Initialize and initiate a process(Refer to imported file 'tdc_new' for process function declaration )
             # Module used: multiprocessing
+            self.stop_event = multiprocessing.Event()
             self.tdc_process = multiprocessing.Process(target=tdc_surface_consept.experiment_measure,
                                                        args=(self.variables, self.x_plot, self.y_plot, self.t_plot,
-                                                             self.main_v_dc_plot,))
+                                                             self.main_v_dc_plot, self.stop_event))
 
             self.tdc_process.start()
 
@@ -296,7 +298,8 @@ class APT_Exp_Control:
 
         desired_rate = self.variables.ex_freq  # Hz
         desired_period = 1.0 / desired_rate  # seconds
-        self.counts_target = self.variables.pulse_frequency * 1000 * self.variables.detection_rate / 100
+        self.pulse_frequency = self.variables.pulse_frequency * 1000
+        self.counts_target = self.pulse_frequency * self.variables.detection_rate / 100
 
         # Turn on the v_dc and v_p
         if not self.initialization_error:
@@ -315,7 +318,7 @@ class APT_Exp_Control:
                 apt_exp_control_func.command_v_dc(self.com_port_v_dc, "F1")
                 time.sleep(0.1)
 
-        self.pulse_frequency = self.variables.pulse_frequency * 1000
+
         self.pulse_fraction = self.variables.pulse_fraction
         self.pulse_amp_per_supply_voltage = self.variables.pulse_amp_per_supply_voltage
         self.specimen_voltage = self.variables.specimen_voltage
@@ -341,6 +344,7 @@ class APT_Exp_Control:
         index_tdc_failure = 0
         last_pulse_mode = self.pulse_mode
         flag_change_pulse_mode = False
+        pulse_frequency_tmp = self.pulse_frequency
         if self.initialization_error:
             pass
         else:
@@ -348,24 +352,33 @@ class APT_Exp_Control:
                 start_time = time.perf_counter()
                 self.vdc_max = self.variables.vdc_max
                 self.vdc_min = self.variables.vdc_min
+                self.pulse_frequency = self.variables.pulse_frequency * 1000
                 if self.pulse_mode in ['Voltage', 'VoltageLaser']:
                     self.pulse_voltage_min = self.variables.v_p_min / self.pulse_amp_per_supply_voltage
                     self.pulse_voltage_max = self.variables.v_p_max / self.pulse_amp_per_supply_voltage
+                if pulse_frequency_tmp != self.pulse_frequency:
+                    self.pulse_frequency = self.variables.pulse_frequency * 1000
+                    pulse_frequency_tmp = self.pulse_frequency
+                    self.counts_target = self.pulse_frequency * self.detection_rate / 100
+                    signal_generator.change_frequency_signal_generator(self.variables, self.pulse_frequency / 1000)
+
+                if self.detection_rate != self.variables.detection_rate:
+                    self.detection_rate = self.variables.detection_rate
+                    self.counts_target = self.pulse_frequency * self.detection_rate / 100
+                    self.detection_rate = self.variables.detection_rate
+                    if self.control_algorithm == 'PID' or self.control_algorithm == 'PID aggressive':
+                        self.pid.setpoint = self.detection_rate
+
                 self.total_ions = self.variables.total_ions
                 # here we check if tdc is failed or not by checking if the total number of ions is
                 # constant for 100 iteration
                 if total_ions_tmp == self.total_ions:
                     index_tdc_failure += 1
-                    if index_tdc_failure > 100:
+                    if index_tdc_failure > 200:
                         self.variables.flag_tdc_failure = True
                 else:
                     index_tdc_failure = 0
                     total_ions_tmp = copy.deepcopy(self.total_ions)
-                if self.detection_rate != self.variables.detection_rate:
-                    self.detection_rate = self.variables.detection_rate
-                    self.counts_target = self.pulse_frequency * self.detection_rate / 100
-                    if self.control_algorithm == 'PID' or self.control_algorithm == 'PID aggressive':
-                        self.pid.setpoint = self.detection_rate
 
                 if self.variables.vdc_hold:
                     self.pulse_mode = self.variables.pulse_mode
@@ -457,6 +470,7 @@ class APT_Exp_Control:
                     if self.conf['tdc'] != "off":
                         if self.variables.counter_source == 'TDC':
                             self.variables.flag_stop_tdc = True
+                            self.stop_event.set()  # Signal the tdc to stop
                     time.sleep(1)
                     break
 
@@ -467,6 +481,7 @@ class APT_Exp_Control:
                     if self.conf['tdc'] == "on":
                         if self.variables.counter_source == 'TDC':
                             self.variables.stop_flag = True  # Set the STOP flag
+                            self.stop_event.set()  # Signal the tdc to stop
                     time.sleep(1)
                     break
 
@@ -477,6 +492,7 @@ class APT_Exp_Control:
                             if self.variables.counter_source == 'TDC':
                                 self.variables.flag_stop_tdc = True
                                 self.variables.stop_flag = True  # Set the STOP flag
+                                self.stop_event.set()  # Signal the tdc to stop
                         time.sleep(1)
                         break
                 if self.variables.criteria_vdc:
@@ -487,6 +503,7 @@ class APT_Exp_Control:
                                 if self.variables.counter_source == 'TDC':
                                     self.variables.flag_stop_tdc = True
                                     self.variables.stop_flag = True  # Set the STOP flag
+                                    self.stop_event.set()  # Signal the tdc to stop
                             time.sleep(1)
                             break
                         flag_achieved_high_voltage += 1
@@ -498,6 +515,7 @@ class APT_Exp_Control:
                             if self.variables.counter_source == 'TDC':
                                 self.variables.flag_stop_tdc = True
                                 self.variables.stop_flag = True
+                                self.stop_event.set()  # Signal the tdc to stop
 
                 end_time = time.perf_counter()
                 elapsed_time = end_time - start_time
@@ -522,7 +540,7 @@ class APT_Exp_Control:
             % (int(1000 / self.variables.ex_freq), index_time, steps))
 
         print('Waiting for TDC process to be finished for maximum 60 seconds...')
-        for i in range(10):
+        for i in range(60):
             if self.variables.flag_finished_tdc:
                 print('TDC process is finished')
                 break
@@ -551,27 +569,6 @@ class APT_Exp_Control:
         self.variables.extend_to('main_counter', self.main_counter)
         self.variables.extend_to('main_temperature', self.main_temperature)
         self.variables.extend_to('main_chamber_vacuum', self.main_chamber_vacuum)
-
-        time.sleep(1)
-        if self.conf['tdc'] != "off":
-            # Stop the TDC process
-            try:
-                if self.variables.counter_source == 'TDC':
-                    self.tdc_process.join(3)
-                    if self.tdc_process.is_alive():
-                        self.tdc_process.join(2)
-                        # Release all the resources of the TDC process
-                elif self.variables.counter_source == 'HSD':
-                    self.hsd_process.join(3)
-                    if self.hsd_process.is_alive():
-                        self.hsd_process.join(2)
-                        # Release all the resources of the TDC process
-                print('TDC process is joined')
-            except Exception as e:
-                print(
-                    f"{initialize_devices.bcolors.WARNING}Warning: The TDC or HSD process cannot be terminated "
-                    f"properly{initialize_devices.bcolors.ENDC}")
-                print(e)
 
         if self.conf['tdc'] == "off":
             if self.variables.counter_source == 'TDC':

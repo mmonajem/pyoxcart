@@ -5,6 +5,7 @@
   "t_0": 38.00,
   "max_vdc": 11000,
   "max_vp": 3281,
+  "pulse_fraction_max": 20,
   "pulse_amp_per_supply_voltage": 21.875,
   "bin_size": 0.1,
   "max_mass": 200,

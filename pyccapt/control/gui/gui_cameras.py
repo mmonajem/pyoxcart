@@ -223,10 +223,10 @@ class Ui_Cameras_Alignment(object):
 		# self.cam_s_o.addItem(arrow2)
 		# self.cam_s_o.addItem(arrow3)
 		# side camera zoom (x, y) zoom arrow
-		arrow1 = pg.ArrowItem(pos=(385, 105), angle=90, brush='r')
+		arrow1 = pg.ArrowItem(pos=(380, 115), angle=90, brush='r')
 		self.cam_s_d.addItem(arrow1)
 		# bottom camera zoom (x, y) zoom arrow
-		arrow1 = pg.ArrowItem(pos=(400, 100), angle=90, brush='r')
+		arrow1 = pg.ArrowItem(pos=(620, 265), angle=90, brush='r')
 		self.cam_b_d.addItem(arrow1)
 		###
 		self.light.clicked.connect(self.light_switch)

@@ -43,12 +43,11 @@ def main():
 	t_plot = multiprocessing.Queue()
 	main_v_dc_plot = multiprocessing.Queue()
 
+
 	app = QtWidgets.QApplication(sys.argv)
 	app.setStyle('Fusion')
-	pyccapt_window = QtWidgets.QMainWindow()
-	ui = gui_main.Ui_PyCCAPT(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot)
-	ui.setupUi(pyccapt_window)
-	pyccapt_window.show()
+	window = gui_main.MyPyCCAPT(variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot)
+	window.show()
 	sys.exit(app.exec())
 
 
