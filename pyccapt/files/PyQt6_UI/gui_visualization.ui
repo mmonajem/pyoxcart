@@ -355,7 +355,7 @@
                                         </string>
                                     </property>
                                     <property name="text">
-                                        <string>200</string>
+                                        <string>400</string>
                                     </property>
                                 </widget>
                             </item>
@@ -426,7 +426,6 @@
         <tabstop>spectrum_switch</tabstop>
         <tabstop>spectrum_last_events_switch</tabstop>
         <tabstop>num_last_events</tabstop>
-        <tabstop>max_mc</tabstop>
         <tabstop>max_tof</tabstop>
         <tabstop>vdc_time</tabstop>
         <tabstop>detection_rate_viz</tabstop>

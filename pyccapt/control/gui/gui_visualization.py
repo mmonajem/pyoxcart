@@ -2,7 +2,6 @@ import multiprocessing
 import os
 import sys
 import time
-from collections import deque
 
 import numpy as np
 import pyqtgraph as pg
@@ -32,10 +31,21 @@ class Ui_Visualization(object):
             main_v_dc_plot (multiprocessing.Array): Array for storing the main voltage values of the mass spectrum.
 
         """
-		self.last_100_thousand_t = deque(maxlen=50000)
-		self.last_100_thousand_v = deque(maxlen=50000)
-		self.last_100_thousand_x = deque(maxlen=50000)
-		self.last_100_thousand_y = deque(maxlen=50000)
+		self.bins_detector = (256, 256)
+		detector_diameter = conf["detector_diameter"]
+		detector_diameter = detector_diameter / 2
+		self.range = [[-detector_diameter, detector_diameter], [-detector_diameter, detector_diameter]]
+		self.hist_fdm, xedges, yedges = np.histogram2d([], [], bins=self.bins_detector, range=self.range)
+		self.index_hist_mc = None
+		self.index_hist_tof = None
+		self.max_tof_val = None
+		self.max_mc_val = None
+		self.last_100_thousand_det_x_heatmap = np.array([])
+		self.last_100_thousand_det_y_heatmap = np.array([])
+		self.last_100_thousand_t = np.array([])
+		self.last_100_thousand_v = np.array([])
+		self.last_100_thousand_det_x = np.array([])
+		self.last_100_thousand_det_y = np.array([])
 		self.length_events = 0
 		self.styles = None
 		self.num_event_mc_tof = None
@@ -62,14 +72,9 @@ class Ui_Visualization(object):
 		self.hist_mc = np.zeros(len(self.bins_mc) - 1)
 		self.hist_tof = np.zeros(len(self.bins_tof) - 1)
 
-		self.xx = []
-		self.yy = []
-		self.tt = []
-		self.main_v_dc_dld = []
 
 		self.update_timer = QTimer()  # Create a QTimer for updating graphs
 		self.update_timer.timeout.connect(self.update_graphs)  # Connect it to the update_graphs slot
-		self.index_plot_heatmap = 0  # Index for the heatmap plot
 		self.visualization_window = None  # In♠itialize the attribute
 
 	def setupUi(self, Visualization):
@@ -381,6 +386,12 @@ class Ui_Visualization(object):
 		self.legend.setParentItem(self.detector_heatmap.graphicsItem())
 		self.legend.addItem(self.scatter, 'Heatmap')  # This will display the text "FDM" in the legend
 
+		self.num_event_mc_tof = int(self.num_last_events.text())
+		self.max_mc_val = int(self.max_mc.text())
+		self.max_tof_val = int(self.max_tof.text())
+		self.index_hist_tof = np.where(self.bins_tof == self.max_tof_val)[0][0]
+		self.index_hist_mc = np.where(self.bins_mc == self.max_mc_val)[0][0]
+
 	def retranslateUi(self, Visualization):
 		"""
                         Set the text of the widgets
@@ -407,7 +418,7 @@ class Ui_Visualization(object):
 		self.spectrum_last_events_switch.setText(_translate("Visualization", "Last events"))
 		self.num_last_events.setText(_translate("Visualization", "10000"))
 		self.label_208.setText(_translate("Visualization", "Max mc (Da)"))
-		self.max_mc.setText(_translate("Visualization", "200"))
+		self.max_mc.setText(_translate("Visualization", "400"))
 		self.label_209.setText(_translate("Visualization", "Max tof (ns)"))
 		self.max_tof.setText(_translate("Visualization", "5000"))
 
@@ -508,14 +519,21 @@ class Ui_Visualization(object):
 			self.index_plot = 0
 			self.index_plot_start = 0
 			self.index_plot_save = 0
-			self.index_plot_heatmap = 0
 			self.start_time_metadata = 0
 			self.variables.detection_rate_current_plot = 0
 
-			self.xx = np.array([])
-			self.yy = np.array([])
-			self.tt = np.array([])
-			self.main_v_dc_dld = np.array([])
+			self.last_100_thousand_det_x_heatmap = np.array([])
+			self.last_100_thousand_det_x = np.array([])
+			self.last_100_thousand_det_y_heatmap = np.array([])
+			self.last_100_thousand_det_y = np.array([])
+			self.last_100_thousand_t = np.array([])
+			self.last_100_thousand_v = np.array([])
+			self.length_events = 0
+			self.hist_fdm, xedges, yedges = np.histogram2d([], [], bins=self.bins_detector, range=self.range)
+			self.hist_mc = np.zeros(len(self.bins_mc) - 1)
+			self.hist_tof = np.zeros(len(self.bins_tof) - 1)
+
+
 
 		# with self.variables.lock_statistics and self.variables.lock_setup_parameters:
 		if self.variables.start_flag and self.variables.flag_visualization_start:
@@ -584,86 +602,112 @@ class Ui_Visualization(object):
 			if self.counter_source == 'TDC' and self.variables.total_ions > 0 and \
 					self.index_wait_on_plot_start > 16:
 
+				xx = np.array([])
+				yy = np.array([])
+				tt = np.array([])
+				main_v_dc_dld = np.array([])
+
 				while not self.x_plot.empty() and not self.y_plot.empty() and not self.t_plot.empty() and \
 						not self.main_v_dc_plot.empty():
 					data = self.x_plot.get()
-					self.xx = np.append(self.xx, data)
+					xx = np.append(xx, data)
 					data = self.y_plot.get()
-					self.yy = np.append(self.yy, data)
+					yy = np.append(yy, data)
 					data = self.t_plot.get()
-					self.tt = np.append(self.tt, data)
+					tt = np.append(tt, data)
 					data = self.main_v_dc_plot.get()
-					self.main_v_dc_dld = np.append(self.main_v_dc_dld, data)
+					main_v_dc_dld = np.append(main_v_dc_dld, data)
 
 				# self.length_events += len(self.tt)
-				self.length_events = len(self.tt)
+				self.length_events += len(tt)
 
-				self.last_100_thousand_v.append(self.main_v_dc_dld)
-				self.last_100_thousand_t.append(self.tt)
-				self.last_100_thousand_x.append(self.xx)
-				self.last_100_thousand_y.append(self.yy)
+				if len(self.last_100_thousand_v) == 0:
+					self.last_100_thousand_det_x_heatmap = xx
+					self.last_100_thousand_det_y_heatmap = yy
+					mask_t = tt < self.conf["max_tof"]
+					self.last_100_thousand_v = main_v_dc_dld[mask_t]
+					self.last_100_thousand_det_x = xx[mask_t]
+					self.last_100_thousand_det_y = yy[mask_t]
+					self.last_100_thousand_t = tt[mask_t]
+				else:
+					self.last_100_thousand_det_x_heatmap = np.concatenate((self.last_100_thousand_det_x_heatmap, xx))
+					self.last_100_thousand_det_y_heatmap = np.concatenate((self.last_100_thousand_det_y_heatmap, yy))
+					mask_t = tt < self.conf["max_tof"]
+					self.last_100_thousand_v = np.concatenate((self.last_100_thousand_v, main_v_dc_dld[mask_t]))
+					self.last_100_thousand_det_x = np.concatenate((self.last_100_thousand_det_x, xx[mask_t]))
+					self.last_100_thousand_det_y = np.concatenate((self.last_100_thousand_det_y, yy[mask_t]))
+					self.last_100_thousand_t = np.concatenate((self.last_100_thousand_t, tt[mask_t]))
+				if len(self.last_100_thousand_v) > 100000:
+					self.last_100_thousand_v = self.last_100_thousand_v[-100000:]
+					self.last_100_thousand_det_x = self.last_100_thousand_det_x[-100000:]
+					self.last_100_thousand_det_x_heatmap = self.last_100_thousand_det_x_heatmap[-100000:]
+					self.last_100_thousand_det_y = self.last_100_thousand_det_y[-100000:]
+					self.last_100_thousand_det_y_heatmap = self.last_100_thousand_det_y_heatmap[-100000:]
+					self.last_100_thousand_t = self.last_100_thousand_t[-100000:]
+
 				try:
-
-					# tt = self.tt[self.tt < self.conf["max_tof"]]
-					if self.mc_tof_last_events_flag:
-						tt_last_events = np.concatenate(self.last_100_thousand_t)
-						tt_last_events = tt_last_events[-self.num_event_mc_tof:]
-
-					tt = self.tt[:]
-					tt = tt[tt < self.conf["max_tof"]]
-					# max_lenght = min(len(self.xx), len(self.yy), len(self.tt), len(self.main_v_dc_dld))
-					xx_max_lenght = self.xx[:]
-					yy_max_lenght = self.yy[:]
-					tt_max_lenght = self.tt[:]
-					main_v_dc_dld_max_lenght = self.main_v_dc_dld[:]
-
-					mc = tof2mc_simple.tof_2_mc(tt_max_lenght, self.conf["t_0"],
-					                            main_v_dc_dld_max_lenght,
-					                            xx_max_lenght,
-					                            yy_max_lenght,
-					                            flightPathLength=self.conf["flight_path_length"])
-
-					mc = mc[mc < self.conf["max_mass"]]
-
-					if self.mc_tof_last_events_flag:
-						x_last_events = np.concatenate(self.last_100_thousand_x)
-						y_last_events = np.concatenate(self.last_100_thousand_y)
-						t_last_events = np.concatenate(self.last_100_thousand_t)
-						main_v_dc_dld_last_events = np.concatenate(self.last_100_thousand_v)
-
-					# Efficient histogram computation
-					hist_mc, _ = np.histogram(mc, bins=self.bins_mc)
-					hist_mc[hist_mc == 0] = 1  # Avoid log(0) error
-					hist_tof, _ = np.histogram(tt, bins=self.bins_tof)
-					hist_tof[hist_tof == 0] = 1  # Avoid log(0) error
-					# self.hist_mc += hist_mc
-					# self.hist_tof += hist_tof
-					self.hist_mc = hist_mc
-					self.hist_tof = hist_tof
-
 					if self.mc_tof_last_events_flag and self.conf["visualization"] == "tof":
+						tt_last_events = self.last_100_thousand_t[-self.num_event_mc_tof:]
 						hist_tof_last_events, _ = np.histogram(tt_last_events, bins=self.bins_tof)
+
 					elif self.mc_tof_last_events_flag and self.conf["visualization"] == "mc":
+						t_last_events = self.last_100_thousand_t[-self.num_event_mc_tof:]
+						main_v_dc_dld_last_events = self.last_100_thousand_v[-self.num_event_mc_tof:]
+						x_last_events = self.last_100_thousand_det_x[-self.num_event_mc_tof:]
+						y_last_events = self.last_100_thousand_det_y[-self.num_event_mc_tof:]
 						mc_last_events = tof2mc_simple.tof_2_mc(t_last_events, self.conf["t_0"],
 						                                        main_v_dc_dld_last_events,
 						                                        x_last_events,
 						                                        y_last_events,
 						                                        flightPathLength=self.conf["flight_path_length"])
-						mc_last_events = mc_last_events[mc_last_events < self.conf["max_mass"]]
 						hist_mc_last_events, _ = np.histogram(mc_last_events, bins=self.bins_mc)
+
+					# hist_tof, _ = np.histogram(tt_max_lenght, bins=self.bins_tof)
+					# self.hist_tof = hist_tof
+					hist_tof, _ = np.histogram(tt[mask_t], bins=self.bins_tof)
+					self.hist_tof += hist_tof
+
+					# mc = tof2mc_simple.tof_2_mc(self.last_100_thousand_t, self.conf["t_0"],
+					#                             self.last_100_thousand_v,
+					#                             self.last_100_thousand_det_x,
+					#                             self.last_100_thousand_det_y,
+					#                             flightPathLength=self.conf["flight_path_length"])
+					# hist_mc, _ = np.histogram(mc, bins=self.bins_mc)
+					# self.hist_mc = hist_mc
+					mc = tof2mc_simple.tof_2_mc(tt[mask_t], self.conf["t_0"],
+					                            main_v_dc_dld[mask_t],
+					                            xx[mask_t],
+					                            yy[mask_t],
+					                            flightPathLength=self.conf["flight_path_length"])
+					hist_mc, _ = np.histogram(mc, bins=self.bins_mc)
+					self.hist_mc += hist_mc
 
 					self.histogram.clear()
 					if self.conf["visualization"] == "tof" and not self.mc_tof_last_events_flag:
-						self.histogram.plot(self.bins_tof[:], self.hist_tof, stepMode="center", fillLevel=0,
+						hist = np.copy(self.hist_tof[:self.index_hist_tof])
+						hist[hist == 0] = 1  # Avoid log(0) error
+						bins = self.bins_tof[:self.index_hist_tof + 1]
+						self.histogram.plot(bins, hist, stepMode="center", fillLevel=0,
 						                    fillOutline=True, brush='black', name="num events: %s" % self.length_events)
 					elif self.conf["visualization"] == "mc" and not self.mc_tof_last_events_flag:
-						self.histogram.plot(self.bins_mc[:], self.hist_mc, stepMode="center", fillLevel=0,
+						hist = np.copy(self.hist_mc[:self.index_hist_mc])
+						hist[hist == 0] = 1  # Avoid log(0) error
+						bins = self.bins_mc[:self.index_hist_mc + 1]
+						self.histogram.plot(bins, hist, stepMode="center", fillLevel=0,
 						                    fillOutline=True, brush='black', name="num events: %s" % self.length_events)
 					elif self.conf["visualization"] == "tof" and self.mc_tof_last_events_flag:
-						self.histogram.plot(self.bins_tof[:], hist_tof_last_events, stepMode="center", fillLevel=0,
+						# remobe the bins bigger than the max_tof
+						hist = np.copy(hist_tof_last_events[:self.index_hist_tof])
+						hist[hist == 0] = 1  # Avoid log(0) error
+						bins = self.bins_tof[:self.index_hist_tof + 1]
+						self.histogram.plot(bins, hist, stepMode="center", fillLevel=0,
 						                    fillOutline=True, brush='black', name="num events: %s" % self.length_events)
 					elif self.conf["visualization"] == "mc" and self.mc_tof_last_events_flag:
-						self.histogram.plot(self.bins_mc[:], hist_mc_last_events, stepMode="center", fillLevel=0,
+						# remobe the bins bigger than the max_mc
+						hist = np.copy(hist_mc_last_events[:self.index_hist_mc])
+						hist[hist == 0] = 1  # Avoid log(0) error
+						bins = self.bins_mc[:self.index_hist_mc + 1]
+						self.histogram.plot(bins, hist, stepMode="center", fillLevel=0,
 						                    fillOutline=True, brush='black', name="num events: %s" % self.length_events)
 
 				except Exception as e:
@@ -671,50 +715,58 @@ class Ui_Visualization(object):
 						f"{initialize_devices.bcolors.FAIL}Error: Cannot plot Histogram correctly{initialize_devices.bcolors.ENDC}")
 					print(e)
 				# Visualization
+				# try:
+				# calculate the fdm for the current data
+				hist, xedges, yedges = np.histogram2d(xx * 10, yy * 10, bins=self.bins_detector, range=self.range)
+				self.hist_fdm += np.log10(hist + 1)  # Avoid log(0) error
+				# self.hist_fdm += hist
 				if self.heatmap_fdm_switch_flag == 'heatmap':
-					try:
-						x_last_events = np.concatenate(self.last_100_thousand_x)
-						y_last_events = np.concatenate(self.last_100_thousand_y)
-						# adding points to the scatter plot
-						self.scatter.setSize(self.variables.hitmap_plot_size)
-						hit_display = self.variables.hit_display
+					if self.variables.reset_heatmap:
+						self.variables.reset_heatmap = False
+						self.last_100_thousand_det_x_heatmap = np.array([])
+						self.last_100_thousand_det_y_heatmap = np.array([])
+					x_last_events = self.last_100_thousand_det_x_heatmap[:]
+					y_last_events = self.last_100_thousand_det_y_heatmap[:]
+					# adding points to the scatter plot
+					self.scatter.setSize(self.variables.hitmap_plot_size)
+					hit_display = self.variables.hit_display
 
-						min_length = min(len(x_last_events), len(y_last_events))
-						x = x_last_events[-min_length:] * 10
-						y = y_last_events[-min_length:] * 10
-						if self.variables.reset_heatmap:
-							self.index_plot_heatmap = len(x)
-							self.variables.reset_heatmap = False
-						if self.index_plot_heatmap > 0:
-							x = x[self.index_plot_heatmap:]
-							y = y[self.index_plot_heatmap:]
+					x = x_last_events * 10
+					y = y_last_events * 10
 
-						x = x[-hit_display:]
-						y = y[-hit_display:]
+					x = x[-hit_display:]
+					y = y[-hit_display:]
 
-						self.scatter.clear()
-						self.scatter.setData(x=x, y=y)
-						# add item to plot window
-						# adding scatter plot item to the plot window
-						self.detector_heatmap.clear()
-						self.detector_heatmap.addItem(self.scatter)
-						self.detector_heatmap.addItem(self.detector_circle)
+					self.scatter.clear()
+					self.scatter.setData(x=x, y=y)
+					# add item to plot window
+					# adding scatter plot item to the plot window
+					self.detector_heatmap.clear()
+					self.detector_heatmap.addItem(self.scatter)
+					self.detector_heatmap.addItem(self.detector_circle)
 
-
-					except Exception as e:
-						print(
-							f"{initialize_devices.bcolors.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
-						print(e)
 				elif self.heatmap_fdm_switch_flag == 'fdm':
 					# plot fdm which is 2d hsogram of det_x and det_y
-					self.detector_heatmap.clear()
-				# Re-add the legend item
+					# Create a 2D histogram
 
-			# clear the array to avoid memory overflow
-			# self.xx = np.array([])
-			# self.yy = np.array([])
-			# self.tt = np.array([])
-			# self.main_v_dc_dld = np.array([])
+					img = pg.ImageItem()
+					img.setImage(self.hist_fdm.T)  # Transpose because pg.ImageItem assumes (row, col) format
+					img.setRect(QtCore.QRectF(xedges[0], yedges[0], xedges[-1] - xedges[0], yedges[-1] - yedges[0]))
+
+					# Apply a color map to the histogram
+					# Load a preset color map (e.g., 'grey', 'thermal', 'flame', viridis, etc.)
+					lut = pg.colormap.get('viridis').getLookupTable(start=0.0, stop=1.0, nPts=256)
+					img.setLookupTable(lut)
+					# add item to plot window
+					# adding scatter plot item to the plot window
+					self.detector_heatmap.clear()
+					self.detector_heatmap.addItem(img)
+					# Adjust the aspect ratio to match the data aspect ratio
+					self.detector_heatmap.getViewBox().setAspectLocked(True)
+			# except Exception as e:
+			# 	print(
+			# 		f"{initialize_devices.bcolors.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
+			# 	print(e)
 
 			# save plots to the file
 			if time.time() - self.start_time_metadata >= self.variables.save_meta_interval_visualization:
@@ -785,11 +837,32 @@ class Ui_Visualization(object):
             None
         """
 		if self.num_last_events.text().isdigit():
-			self.num_event_mc_tof = int(self.num_last_events.text())
+			num_last_event_tmp = int(self.num_last_events.text())
+			if num_last_event_tmp > 100000:
+				self.num_last_events_val = 100000
+				self.num_last_events.setText("100000")
+			else:
+				self.num_event_mc_tof = num_last_event_tmp
+
 		if self.max_mc.text().isdigit():
-			self.conf["max_mass"] = int(self.max_mc.text())
+			max_mc_tmp = int(self.max_mc.text())
+			if max_mc_tmp > self.conf["max_mass"]:
+				self.max_mc_val = self.conf["max_mass"]
+				self.max_mc.setText(str(self.conf["max_mass"]))
+				self.index_hist_mc = np.where(self.bins_mc == self.max_mc_val)[0][0]
+			else:
+				self.max_mc_val = max_mc_tmp
+				self.index_hist_mc = np.where(self.bins_mc == self.max_mc_val)[0][0]
 		if self.max_tof.text().isdigit():
-			self.conf["max_tof"] = int(self.max_tof.text())
+			max_tof_tmp = int(self.max_tof.text())
+			if max_tof_tmp > self.conf["max_tof"]:
+				self.max_tof_val = self.conf["max_tof"]
+				self.max_tof.setText(str(self.conf["max_tof"]))
+
+				self.index_hist_tof = np.where(self.bins_tof == self.max_tof_val)[0][0]
+			else:
+				self.max_tof_val = max_tof_tmp
+				self.index_hist_tof = np.where(self.bins_tof == self.max_tof_val)[0][0]
 
 	def stop(self):
 		"""

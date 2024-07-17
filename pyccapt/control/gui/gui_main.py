@@ -1097,7 +1097,7 @@ class Ui_PyCCAPT(object):
         self.pulse_mode.setItemText(2, _translate("PyCCAPT", "VoltageLaser"))
         self.label_193.setText(_translate("PyCCAPT", "Run Statistics"))
         self.label_198.setText(_translate("PyCCAPT", "Detection Rate (%)"))
-        self.vdc_max.setText(_translate("PyCCAPT", "4000"))
+        self.vdc_max.setText(_translate("PyCCAPT", "2000"))
         self.label_183.setText(_translate("PyCCAPT", "Experiment Number"))
         self.ex_number.setText(_translate("PyCCAPT", "1"))
         self.menuFile.setTitle(_translate("PyCCAPT", "File"))
@@ -1281,7 +1281,6 @@ class Ui_PyCCAPT(object):
                 self.variables.max_ions = int(float(self.max_ions.text()))
                 self.variables.vdc_min = int(float(self.vdc_min.text()))
                 self.variables.detection_rate = float(self.detection_rate_init.text())
-                self.variables.hit_display = int(float(self.hit_displayed.text()))
                 self.variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
                 self.variables.pulse_frequency = float(self.pulse_frequency.text())
                 self.variables.hdf5_data_name = self.ex_name.text()
@@ -1295,6 +1294,12 @@ class Ui_PyCCAPT(object):
                 self.variables.counter_source = str(self.counter_source.currentText())
                 self.variables.hitmap_plot_size = self.hitmap_plot_size.value()
 
+                if int(float(self.hit_displayed.text())) > 100000:
+                    self.error_message("Maximum possible number is 100000")
+                    _translate = QtCore.QCoreApplication.translate
+                    self.hit_displayed.setText(_translate("PyCCAPT", "100000"))
+                else:
+                    self.variables.hit_display = int(float(self.hit_displayed.text()))
                 if int(float(self.pulse_fraction.text())) > self.conf['pulse_fraction_max']:
                     self.error_message("Maximum possible number is " + str(self.conf['pulse_fraction_max']))
                     _translate = QtCore.QCoreApplication.translate
