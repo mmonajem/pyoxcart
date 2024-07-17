@@ -748,9 +748,19 @@ class Ui_Visualization(object):
 				elif self.heatmap_fdm_switch_flag == 'fdm':
 					# plot fdm which is 2d hsogram of det_x and det_y
 					# Create a 2D histogram
+					if self.mc_tof_last_events_flag:
+						x_last_events = self.last_100_thousand_det_x_heatmap[-self.num_event_mc_tof:]
+						y_last_events = self.last_100_thousand_det_y_heatmap[-self.num_event_mc_tof:]
+						hist_fdm_last_events, xedges, yedges = np.histogram2d(x_last_events * 10, y_last_events * 10,
+						                                                      bins=self.bins_detector, range=self.range)
+						hist_fdm_last_events = np.log10(hist_fdm_last_events + 1)
+					if self.mc_tof_last_events_flag:
+						hist_fdm_tmp = np.copy(hist_fdm_last_events)
+					else:
+						hist_fdm_tmp = np.copy(self.hist_fdm)
 
 					img = pg.ImageItem()
-					img.setImage(self.hist_fdm.T)  # Transpose because pg.ImageItem assumes (row, col) format
+					img.setImage(hist_fdm_tmp.T)  # Transpose because pg.ImageItem assumes (row, col) format
 					img.setRect(QtCore.QRectF(xedges[0], yedges[0], xedges[-1] - xedges[0], yedges[-1] - yedges[0]))
 
 					# Apply a color map to the histogram
