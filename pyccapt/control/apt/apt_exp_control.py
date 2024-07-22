@@ -318,7 +318,6 @@ class APT_Exp_Control:
                 apt_exp_control_func.command_v_dc(self.com_port_v_dc, "F1")
                 time.sleep(0.1)
 
-
         self.pulse_fraction = self.variables.pulse_fraction
         self.pulse_amp_per_supply_voltage = self.variables.pulse_amp_per_supply_voltage
         self.specimen_voltage = self.variables.specimen_voltage
@@ -372,7 +371,7 @@ class APT_Exp_Control:
                 self.total_ions = self.variables.total_ions
                 # here we check if tdc is failed or not by checking if the total number of ions is
                 # constant for 100 iteration
-                if total_ions_tmp == self.total_ions:
+                if total_ions_tmp == self.total_ions and not self.variables.vdc_hold:
                     index_tdc_failure += 1
                     if index_tdc_failure > 200:
                         self.variables.flag_tdc_failure = True
@@ -533,7 +532,7 @@ class APT_Exp_Control:
         time.sleep(1)
 
         self.log_apt.info('Experiment is finished')
-        print("Experiment loop took longer than %s Millisecond for %s times out of %s "
+        print("Experiment process: Experiment loop took longer than %s Millisecond for %s times out of %s "
               "iteration" % (int(1000 / self.variables.ex_freq), index_time, steps))
         self.log_apt.warning(
             'Experiment loop took longer than %s (ms) for %s times out of %s iteration.'

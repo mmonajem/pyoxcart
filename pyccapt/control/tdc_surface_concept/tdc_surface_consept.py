@@ -353,7 +353,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
             loop_delay_counter += 1
         loop_counter += 1
 
-    print("for %s times loop time took longer than %s second" % (loop_delay_counter, loop_time),
+    print("TDC process: for %s times loop time took longer than %s second" % (loop_delay_counter, loop_time),
           'out of %s iteration' % loop_counter)
     variables.total_ions = events_detected
     print("TDC Measurement stopped")

@@ -646,6 +646,10 @@ class Ui_Visualization(object):
 					self.last_100_thousand_t = self.last_100_thousand_t[-100000:]
 
 				try:
+					if self.variables.pulse_mode == 'Voltage':
+						t_0 = self.conf["t_0_voltage"]
+					elif self.variables.pulse_mode == 'Laser' or self.variables.pulse_mode == 'VoltageLaser':
+						t_0 = self.conf["t_0_laser"]
 					if self.mc_tof_last_events_flag and self.conf["visualization"] == "tof":
 						tt_last_events = self.last_100_thousand_t[-self.num_event_mc_tof:]
 						hist_tof_last_events, _ = np.histogram(tt_last_events, bins=self.bins_tof)
@@ -655,7 +659,8 @@ class Ui_Visualization(object):
 						main_v_dc_dld_last_events = self.last_100_thousand_v[-self.num_event_mc_tof:]
 						x_last_events = self.last_100_thousand_det_x[-self.num_event_mc_tof:]
 						y_last_events = self.last_100_thousand_det_y[-self.num_event_mc_tof:]
-						mc_last_events = tof2mc_simple.tof_2_mc(t_last_events, self.conf["t_0"],
+
+						mc_last_events = tof2mc_simple.tof_2_mc(t_last_events, t_0,
 						                                        main_v_dc_dld_last_events,
 						                                        x_last_events,
 						                                        y_last_events,
@@ -674,7 +679,7 @@ class Ui_Visualization(object):
 					#                             flightPathLength=self.conf["flight_path_length"])
 					# hist_mc, _ = np.histogram(mc, bins=self.bins_mc)
 					# self.hist_mc = hist_mc
-					mc = tof2mc_simple.tof_2_mc(tt[mask_t], self.conf["t_0"],
+					mc = tof2mc_simple.tof_2_mc(tt[mask_t], t_0,
 					                            main_v_dc_dld[mask_t],
 					                            xx[mask_t],
 					                            yy[mask_t],

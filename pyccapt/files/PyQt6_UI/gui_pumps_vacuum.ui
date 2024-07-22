@@ -6,8 +6,8 @@
             <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>695</width>
-                <height>381</height>
+                <width>658</width>
+                <height>365</height>
             </rect>
         </property>
         <property name="windowTitle">
@@ -62,7 +62,7 @@
                                         </font>
                                     </property>
                                     <property name="text">
-                                        <string>Temp. Cryo head (K)</string>
+                                        <string>Temp. Cryo Head (K)</string>
                                     </property>
                                 </widget>
                             </item>
@@ -216,7 +216,7 @@
                                         </font>
                                     </property>
                                     <property name="text">
-                                        <string>Cryo Load lock (mBar)</string>
+                                        <string>Cryo Load Lock (mBar)</string>
                                     </property>
                                 </widget>
                             </item>
@@ -288,7 +288,7 @@
                                         </font>
                                     </property>
                                     <property name="text">
-                                        <string>Load lock (mBar)</string>
+                                        <string>Load Lock (mBar)</string>
                                     </property>
                                 </widget>
                             </item>
@@ -521,6 +521,31 @@
                                     padding: 0 8px;
                                     }
                                 </string>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="2" column="0">
+                        <widget class="QPushButton" name="superuser">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>0</width>
+                                    <height>25</height>
+                                </size>
+                            </property>
+                            <property name="styleSheet">
+                                <string notr="true">QPushButton{
+                                    background: rgb(193, 193, 193)
+                                    }
+                                </string>
+                            </property>
+                            <property name="text">
+                                <string>Super User</string>
                             </property>
                         </widget>
                     </item>

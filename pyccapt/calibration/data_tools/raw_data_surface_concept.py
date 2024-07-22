@@ -512,24 +512,3 @@ def find_nth_max_repeated_indices(nums, n):
 
     return start_index, end_index, max_count, max_number
 
-
-if __name__ == '__main__':
-    # surface concept tdc specific binning and factors
-    TOFFACTOR = 27.432 / (1000 * 4)  # 27.432 ps/bin, tof in ns, data is TDC time sum
-    TOFFACTOR2 = 27.432 / (1000 * 2)
-    DETBINS = 4900
-    BINNINGFAC = 2
-    XYFACTOR = 80 / DETBINS * BINNINGFAC  # XXX mm/bin
-    XYBINSHIFT = DETBINS / BINNINGFAC / 2  # to center detector
-    filename = 'D:/pyccapt/tests/data/data_1642_Aug-30-2023_16-05_Al_test4.h5'
-    # extract raw data from hdf file
-    from pyccapt.calibration.data_tools import data_loadcrop
-
-    df_tdc = data_loadcrop.fetch_dataset_from_dld_grp(filename, extract_mode='tdc_sc')
-    channel = df_tdc['channel'].to_numpy()
-    start_counter = df_tdc['start_counter'].to_numpy()
-    time_data = df_tdc['time_data'].to_numpy()
-    high_voltage = df_tdc['high_voltage (V)'].to_numpy()
-    pulse = df_tdc['pulse'].to_numpy()
-    result_total = find_consecutive_sequences(start_counter, channel, time_data, high_voltage,
-                                              pulse, print_stats=True)
