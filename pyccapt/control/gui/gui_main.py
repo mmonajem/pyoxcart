@@ -1282,7 +1282,6 @@ class Ui_PyCCAPT(object):
                 self.variables.vdc_min = int(float(self.vdc_min.text()))
                 self.variables.detection_rate = float(self.detection_rate_init.text())
                 self.variables.pulse_fraction = int(float(self.pulse_fraction.text())) / 100
-                self.variables.pulse_frequency = float(self.pulse_frequency.text())
                 self.variables.hdf5_data_name = self.ex_name.text()
                 self.variables.email = self.email.text()
                 self.variables.vdc_step_up = float(self.vdc_steps_up.text())
@@ -1320,6 +1319,47 @@ class Ui_PyCCAPT(object):
                     self.vdc_max.setText(_translate("PyCCAPT", str(self.conf['max_vdc'])))
                 else:
                     self.variables.vdc_max = int(float(self.vdc_max.text()))
+
+                if self.variables.pulse_mode == 'Voltage':
+                    if int(self.pulse_frequency.text()) > self.conf['max_voltage_pulse_frequency']:
+                        self.error_message(
+                            "Maximum possible number is " + str(self.conf['max_voltage_pulse_frequency']))
+                        self.pulse_frequency.setText(str(self.conf['max_voltage_pulse_frequency']))
+                        self.variables.pulse_frequency = int(self.pulse_frequency.text())
+                    elif int(self.pulse_frequency.text()) < self.conf['min_voltage_pulse_frequency']:
+                        self.error_message(
+                            "Minimum possible number is " + str(self.conf['min_voltage_pulse_frequency']))
+                        self.pulse_frequency.setText(str(self.conf['min_voltage_pulse_frequency']))
+                        self.variables.pulse_frequency = int(self.pulse_frequency.text())
+                    else:
+                        self.variables.pulse_frequency = int(self.pulse_frequency.text())
+                elif self.variables.pulse_mode == 'Laser':
+                    if int(self.pulse_frequency.text()) > self.conf['max_laser_pulse_frequency']:
+                        self.error_message("Maximum possible number is " + str(self.conf['max_laser_pulse_frequency']))
+                        self.pulse_frequency.setText(str(self.conf['max_laser_pulse_frequency']))
+                        self.variables.pulse_frequency = int(self.pulse_frequency.text())
+                    elif int(self.pulse_frequency.text()) < self.conf['min_laser_pulse_frequency']:
+                        self.error_message("Minimum possible number is " + str(self.conf['min_laser_pulse_frequency']))
+                        self.pulse_frequency.setText(str(self.conf['min_laser_pulse_frequency']))
+                        self.variables.pulse_frequency = int(self.pulse_frequency.text())
+                    else:
+                        self.variables.pulse_frequency = int(self.pulse_frequency.text())
+                elif self.variables.pulse_mode == 'VoltageLaser':
+                    max_pulse_frequency = min(self.conf['max_voltage_pulse_frequency'],
+                                              self.conf['max_laser_pulse_frequency'])
+                    min_pulse_frequency = max(self.conf['min_voltage_pulse_frequency'],
+                                              self.conf['min_laser_pulse_frequency'])
+
+                    if int(self.pulse_frequency.text()) > max_pulse_frequency:
+                        self.error_message("Maximum possible number is " + str(max_pulse_frequency))
+                        self.pulse_frequency.setText(str(max_pulse_frequency))
+                        self.variables.pulse_frequency = int(self.pulse_frequency.text())
+                    elif int(self.pulse_frequency.text()) < min_pulse_frequency:
+                        self.error_message("Minimum possible number is " + str(min_pulse_frequency))
+                        self.pulse_frequency.setText(str(min_pulse_frequency))
+                        self.variables.pulse_frequency = int(self.pulse_frequency.text())
+                    else:
+                        self.variables.pulse_frequency = int(self.pulse_frequency.text())
 
                 if self.criteria_time.isChecked():
                     self.variables.criteria_time = True

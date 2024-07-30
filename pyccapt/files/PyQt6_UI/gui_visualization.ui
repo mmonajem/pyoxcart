@@ -205,7 +205,7 @@
                                                 </size>
                                             </property>
                                             <property name="text">
-                                                <string>Heatmap/FDM</string>
+                                                <string>Hitmap/FDM</string>
                                             </property>
                                         </widget>
                                     </item>

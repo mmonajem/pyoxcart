@@ -411,9 +411,9 @@ class Ui_Visualization(object):
 		self.label_207.setText(_translate("Visualization", "Spectrum"))
 		self.label_201.setText(_translate("Visualization", "Detection Rate"))
 		self.detection_rate_range_switch.setText(_translate("Visualization", "Short range"))
-		self.label_206.setText(_translate("Visualization", "Detector Heatmap"))
+		self.label_206.setText(_translate("Visualization", "Detector Hitmap"))
 		self.reset_heatmap_v.setText(_translate("Visualization", "Reset"))
-		self.heatmap_fdm_switch.setText(_translate("Visualization", "Heatmap/FDM"))
+		self.heatmap_fdm_switch.setText(_translate("Visualization", "Hitmap/FDM"))
 		self.spectrum_switch.setText(_translate("Visualization", "mc/tof"))
 		self.spectrum_last_events_switch.setText(_translate("Visualization", "Last events"))
 		self.num_last_events.setText(_translate("Visualization", "10000"))
@@ -434,13 +434,13 @@ class Ui_Visualization(object):
 		if self.heatmap_fdm_switch_flag == 'heatmap':
 			self.heatmap_fdm_switch_flag = 'fdm'
 			# Re-add the legend item
-			self.legend.clear()
-			self.legend.addItem(self.scatter, 'FDM')
+		# self.legend.clear()
+		# self.legend.addItem(self.scatter, 'FDM')
 		elif self.heatmap_fdm_switch_flag == 'fdm':
 			self.heatmap_fdm_switch_flag = 'heatmap'
 			# Re-add the legend item
-			self.legend.clear()
-			self.legend.addItem(self.scatter, 'Heatmap')
+		# self.legend.clear()
+		# self.legend.addItem(self.scatter, 'Heatmap')
 
 	def reset_heatmap(self):
 		"""

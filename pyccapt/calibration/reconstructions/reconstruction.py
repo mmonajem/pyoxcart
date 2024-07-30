@@ -256,9 +256,9 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
         if range_vol:
-	        mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
+            mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
         else:
-	        mask_vol = np.ones(len(variables.volume), dtype=bool)
+            mask_vol = np.ones(len(variables.volume), dtype=bool)
 
         mask_f = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
@@ -690,9 +690,9 @@ def projection(variables, element_percentage, range_sequence=[], range_mc=[], ra
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
         if range_vol:
-	        mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
+            mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
         else:
-	        mask_vol = np.ones(len(variables.volume), dtype=bool)
+            mask_vol = np.ones(len(variables.volume), dtype=bool)
         mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
@@ -809,9 +809,9 @@ def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
         if range_vol:
-	        mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
+            mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
         else:
-	        mask_vol = np.ones(len(variables.volume), dtype=bool)
+            mask_vol = np.ones(len(variables.volume), dtype=bool)
         mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
@@ -870,7 +870,7 @@ def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range
 
 def reconstruction_2d_histogram(variables, x, y, bins, percentage, range_sequence=[], range_mc=[], range_detx=[],
                                 range_dety=[], range_x=[], range_y=[], range_z=[], range_vol=[], xlabel='X-axis',
-                                ylabel='Y-axis', save=False, igure_name=None, figure_size=None):
+                                ylabel='Y-axis', save=False, figure_name=None, figure_size=None):
     """
     Generate a 2D histogram based on the provided data.
 
@@ -921,9 +921,9 @@ def reconstruction_2d_histogram(variables, x, y, bins, percentage, range_sequenc
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
         if range_vol:
-	        mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
+            mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
         else:
-	        mask_vol = np.ones(len(variables.volume), dtype=bool)
+            mask_vol = np.ones(len(variables.volume), dtype=bool)
         mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))

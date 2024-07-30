@@ -419,15 +419,5 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
 
 
 def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, stop_event):
-    # from line_profiler import LineProfiler
-    #
-    # lp1 = LineProfiler()
-    #
-    # lp1.add_function(run_experiment_measure)
-    #
-    # # Run the profiler
-    # lp1(run_experiment_measure)(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
-    # # Save the profiling result to a file
-    # lp1.dump_stats('./../../experiment_measure.lprof')
 
     run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, stop_event)

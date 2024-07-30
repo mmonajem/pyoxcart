@@ -2,6 +2,7 @@ import multiprocessing
 import os
 import re
 import sys
+import time
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QThread
@@ -493,6 +494,7 @@ class Ui_Laser_Control(object):
                 self.laser_device.Power(float(self.laser_power.value()))
                 self.laser_device.Freq(self.laser_rate.currentIndex() + 4)
                 self.laser_repetion_rate_disp.display(400)
+                self.variables.laser_freq = 400000
                 self.laser_repetion_rate_disp.display(int(self.laser_rate.currentText()))
                 self.laser_device.Div(float(self.laser_divition_factor.value()))
                 if databack.strip() == 'ly_oxp2_dev_status 9':
@@ -569,11 +571,10 @@ class Ui_Laser_Control(object):
         self.timer_hide_error = QtCore.QTimer()
         self.timer_hide_error.timeout.connect(self.hideMessage)
         self.laser_power.setMinimum(0.0)
-        self.laser_power.setMaximum(5.2)
+        self.laser_power.setMaximum(self.conf['max_laser_power'])
         self.laser_power.setSingleStep(0.1)
-        self.laser_divition_factor.setMinimum(0)
+        self.laser_divition_factor.setMinimum(1)
         self.laser_divition_factor.setMaximum(1000000)
-
 
     def laser_enable_clicked(self):
         """
@@ -586,7 +587,6 @@ class Ui_Laser_Control(object):
             """
         self.enable_ouput_mode = True
 
-
     def laser_on_clicked(self):
         """
             Handle the close event of the GatesWindow.
@@ -597,7 +597,6 @@ class Ui_Laser_Control(object):
                 None
             """
         self.on_mode = True
-
 
     def laser_standby_clicked(self):
         """
@@ -610,7 +609,6 @@ class Ui_Laser_Control(object):
             """
         self.standby_mode = True
 
-
     def laser_listen_clicked(self):
         """
             Handle the close event of the GatesWindow.
@@ -621,7 +619,6 @@ class Ui_Laser_Control(object):
                 None
             """
         self.listen_mode = True
-
 
     def laser_wavelegnth_changed(self):
         """
@@ -634,7 +631,6 @@ class Ui_Laser_Control(object):
             """
         self.change_laser_wavelegnth = True
 
-
     def laser_power_changed(self):
         """
             Handle the close event of the GatesWindow.
@@ -646,7 +642,6 @@ class Ui_Laser_Control(object):
             """
         self.change_laser_power = True
 
-
     def laser_rate_changed(self):
         """
             Handle the close event of the GatesWindow.
@@ -657,7 +652,6 @@ class Ui_Laser_Control(object):
                 None
             """
         self.change_laser_rate = True
-
 
     def laser_divition_factor_changed(self):
         """
@@ -699,6 +693,7 @@ class Ui_Laser_Control(object):
                     self.laser_listen.setEnabled(False)
                     databack = self.laser_device.Listen()
                 elif databack.strip() == 'ly_oxp2_dev_status 9':
+                    self.laser_device.AOM(0)
                     self.led_laser_listen.setPixmap(self.led_green)
                     self.led_laser_enable.setPixmap(self.led_red)
                     self.led_laser_on.setPixmap(self.led_red)
@@ -711,16 +706,12 @@ class Ui_Laser_Control(object):
                     self.listen_mode = False
                     self.laser_listen.setEnabled(True)
                     self.laser_standby.setEnabled(True)
-                    self.laser_divition_factor.setEnabled(True)
-                    self.laser_rate.setEnabled(True)
                     self.laser_wavelegnth.setEnabled(True)
 
             elif self.standby_mode:
                 if databack.strip() != 'ly_oxp2_dev_status 33':
                     if self.laser_standby.isEnabled():
                         self.laser_standby.setEnabled(False)
-                        self.laser_divition_factor.setEnabled(True)
-                        self.laser_rate.setEnabled(True)
                         self.laser_wavelegnth.setEnabled(True)
                         self.laser_on.setEnabled(False)
                         self.led_laser_listen.setPixmap(self.led_orange)
@@ -732,6 +723,7 @@ class Ui_Laser_Control(object):
                         elif self.led_laser_laser_standby.pixmap().toImage() == self.led_green.toImage():
                             self.led_laser_laser_standby.setPixmap(self.led_orange)
                 elif databack.strip() == 'ly_oxp2_dev_status 33':
+                    self.laser_device.AOM(0)
                     self.laser_on.setEnabled(True)
                     self.laser_standby.setEnabled(True)
                     self.led_laser_on.setPixmap(self.led_red)
@@ -744,8 +736,6 @@ class Ui_Laser_Control(object):
                     if self.laser_on.isEnabled():
                         self.laser_on.setEnabled(False)
                         self.laser_wavelegnth.setEnabled(False)
-                        self.laser_divition_factor.setEnabled(False)
-                        self.laser_rate.setEnabled(False)
                         self.led_laser_on.setPixmap(self.led_orange)
                         self.led_laser_laser_standby.setPixmap(self.led_orange)
                         self.laser_device.Enable()
@@ -755,6 +745,7 @@ class Ui_Laser_Control(object):
                     self.led_laser_laser_standby.setPixmap(self.led_orange)
                     self.led_laser_enable.setPixmap(self.led_green)
                     self.laser_enable.setEnabled(True)
+                    self.laser_device.AOM(4000)  # 4000 means AMO fully opeen
                     self.laser_device.AOMEnable()
                     self.on_mode = False
                 elif databack.strip() == 'ly_oxp2_dev_status 1':
@@ -768,12 +759,13 @@ class Ui_Laser_Control(object):
                 self.laser_enable.setEnabled(False)
                 if databack.strip() == 'ly_oxp2_dev_status 65':
                     self.laser_device.AOMEnable()
+                    self.laser_device.AOM(4000)  # 4000 means AMO fully opeen
                     self.enable_ouput_mode = False
                     self.led_laser_enable.setPixmap(self.led_green)
                     self.laser_enable.setEnabled(True)
-
                 elif databack.strip() == 'ly_oxp2_dev_status 129':
                     self.laser_device.AOMDisable()
+                    self.laser_device.AOM(0)
                     self.enable_ouput_mode = False
                     self.led_laser_enable.setPixmap(self.led_red)
                     self.laser_enable.setEnabled(True)
@@ -785,7 +777,7 @@ class Ui_Laser_Control(object):
                         dd = self.laser_device.wavelength_change(0)
                     elif self.laser_wavelegnth.currentText() == "Green":
                         dd = self.laser_device.wavelength_change(1)
-                    elif self.laser_wavelegnth.currentText() == "UV":
+                    elif self.laser_wavelegnth.currentText() == "DUV":
                         dd = self.laser_device.wavelength_change(3)
                     self.laser_wavelegnth.setEnabled(True)
                 else:
@@ -797,6 +789,10 @@ class Ui_Laser_Control(object):
                 # if databack.strip() == 'ly_oxp2_dev_status 129':
                 self.laser_power.setEnabled(False)
                 self.laser_device.Power(float(self.laser_power.value()))
+                if databack.strip() == 'ly_oxp2_dev_status 129':
+                    self.laser_device.AOM(4000)  # 4000 means AMO fully opeen
+                else:
+                    self.laser_device.AOM(0)
 
                 # Pulse energy in nJ
                 power_pe = self.laser_device.PowerRead()
@@ -830,11 +826,11 @@ class Ui_Laser_Control(object):
                 if freq != 'Nan':
                     laser_rate = self.get_frequency(int(freq))
                     self.variables.laser_freq = laser_rate
-                    self.laser_repetion_rate_disp.display(laser_rate / 1000)
+                    self.laser_repetion_rate_disp.display(
+                        (self.variables.laser_freq / 1000) / self.laser_divition_factor.value())
                 else:
                     self.variables.laser_freq = 0
                     self.laser_repetion_rate_disp.display('Error')
-                print(self.variables.laser_freq)
                 self.laser_rate.setEnabled(True)
                 self.change_laser_rate = False
 
@@ -842,35 +838,37 @@ class Ui_Laser_Control(object):
                 self.laser_divition_factor.setEnabled(False)
                 res = self.laser_device.Div(self.laser_divition_factor.value())
                 self.variables.laser_division_factor = self.laser_divition_factor.value()
+                print('dddddddddddddd', self.variables.laser_freq, self.laser_divition_factor.value())
                 self.laser_repetion_rate_disp.display(
-                    int(self.variables.laser_freq / self.variables.laser_division_factor))
+                    (self.variables.laser_freq / 1000) / self.laser_divition_factor.value())
                 self.laser_divition_factor.setEnabled(True)
                 self.change_laser_divition_factor = False
 
-            # if self.index == 5:
-            #     res_error = self.laser_device.StatusMode()
-            #     if "Error" in res_error:
-            #         self.listen_mode = True
-            #         self.error_message("Error:" + res_error)
+            if self.index == 5:
+                res_error = self.laser_device.StatusMode()
+                if "Error" in res_error:
+                    self.listen_mode = True
+                    self.error_message("Error:" + res_error)
         #
-        #     print('==============================================')
-        #     print("status is:", self.laser_device.StatusRead())
-        #     print('Mode is', self.laser_device.ModeRead())
-        #     print('status LED is:', self.laser_device.status_led())
-        #     print('Digital gate logic', self.laser_device.DigitalGateLogicRead())
-        #     print("status mode is:", res_error)
-        #     print('wavelength is:', self.laser_device.wavelength_read())
-        #     print("AMO status is:", self.laser_device.AOMState())
-        #     print('pulse energy nJ:', self.laser_device.PowerRead())
-        #     print('power (dv green) W', self.laser_device.power_read_dv_green())
-        #     print('avg power (mW):', self.laser_device.read_average_power())
-        #     print('amo power:', self.laser_device.AOMRead())
-        #     print('freq_o:', self.laser_device.FreqRead())
-        #     print('Div:', self.laser_device.DivRead())
-        #     # print("avaliable freq:", self.laser_device.freq_avaliable())
-        #     print('----------------------------------------------')
-            #     self.index = 0
-            # self.index += 1
+                print('==============================================')
+                print('laser status is:', databack.strip())
+                print("status mode is:", res_error)
+                print("status is:", self.laser_device.StatusRead())
+                print('Mode is', self.laser_device.ModeRead())  # 2: Internal power 3: External power 8: SPI power
+                print('status LED is:', self.laser_device.status_led())
+                print('wavelength is:', self.laser_device.wavelength_read())
+                print("AMO status is:", self.laser_device.AOMState())
+                print('pulse energy (mW):', self.laser_device.PowerRead())
+                print('power W', self.laser_device.power_read_dv_green())
+                print('avg power (mW):', self.laser_device.read_average_power())
+                print('amo power:', self.laser_device.AOMRead())
+                print('freq_o:', self.laser_device.FreqRead())
+                print('Div:', self.laser_device.DivRead())
+                # print("avaliable freq:", self.laser_device.freq_avaliable())
+                print('----------------------------------------------')
+                self.index = 0
+            self.index += 1
+            time.sleep(0.5)
 
     def switch_to_nktpbus_mode(self):
         """"

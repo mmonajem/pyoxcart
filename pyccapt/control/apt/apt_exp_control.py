@@ -157,22 +157,23 @@ class APT_Exp_Control:
             voltage_step = self.pid(error) * 1000
             print('voltage step: %s' % voltage_step)
 
-
         # update v_dc
         if not self.variables.vdc_hold and voltage_step != 0:
             specimen_voltage_temp = min(self.specimen_voltage + voltage_step, self.vdc_max)
-            if specimen_voltage_temp != self.specimen_voltage:
-                if self.conf['v_dc'] != "off":
-                    apt_exp_control_func.command_v_dc(self.com_port_v_dc, ">S0 %s" % specimen_voltage_temp)
-                    self.specimen_voltage = specimen_voltage_temp
-                    self.variables.specimen_voltage = self.specimen_voltage
-                    self.variables.specimen_voltage_plot = self.specimen_voltage
-                if self.pulse_mode in ['Voltage', 'VoltageLaser']:
-                    new_vp = self.specimen_voltage * self.pulse_fraction * (1 / self.pulse_amp_per_supply_voltage)
-                    if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
-                        apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % new_vp)
-                        self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
-                        self.variables.pulse_voltage = self.pulse_voltage
+            if specimen_voltage_temp > self.vdc_min:
+                if specimen_voltage_temp != self.specimen_voltage:
+                    if self.conf['v_dc'] != "off":
+                        apt_exp_control_func.command_v_dc(self.com_port_v_dc, ">S0 %s" % specimen_voltage_temp)
+                        self.specimen_voltage = specimen_voltage_temp
+                        self.variables.specimen_voltage = self.specimen_voltage
+                        self.variables.specimen_voltage_plot = self.specimen_voltage
+                    if self.pulse_mode in ['Voltage', 'VoltageLaser']:
+                        new_vp = (self.specimen_voltage * (self.pulse_fraction / 100) /
+                                  self.pulse_amp_per_supply_voltage)
+                        if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
+                            apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % new_vp)
+                            self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
+                            self.variables.pulse_voltage = self.pulse_voltage
 
     def precise_sleep(self, seconds):
         """
@@ -381,11 +382,13 @@ class APT_Exp_Control:
 
                 if self.variables.vdc_hold:
                     self.pulse_mode = self.variables.pulse_mode
+                    # if the vdc is hold, we need to check if the pulse mode is changed or not to initialize the
+                    # pulser and set the voltage
                     if last_pulse_mode != self.pulse_mode:
                         flag_change_pulse_mode = True
                         last_pulse_mode = self.pulse_mode
-                    if self.pulse_mode in ['Voltage', 'VoltageLaser']:
-
+                    if flag_change_pulse_mode and self.pulse_mode in ['Voltage', 'VoltageLaser']:
+                        # if the pulse mode is changed from laser to voltage, we need to initialize the pulser
                         if not self.initialization_v_p:
                             try:
                                 # Initialize pulser
@@ -399,28 +402,37 @@ class APT_Exp_Control:
                             except Exception as e:
                                 print('Can not open the COM port for V_p')
                                 print(e)
+                        # if the pulse mode is changed from voltage to laser, we need to turn on the signal generator
                         if not self.initialization_signal_generator:
                             self.initialization_error = apt_exp_control_func.initialization_signal_generator(
                                 self.variables,
                                 self.log_apt)
                             if not self.initialization_error:
                                 self.initialization_signal_generator = True
-                        if flag_change_pulse_mode:
-                            self.pulse_voltage_min = self.variables.v_p_min / self.pulse_amp_per_supply_voltage
-                            self.pulse_voltage_max = self.variables.v_p_max / self.pulse_amp_per_supply_voltage
-                            start_vp = (self.specimen_voltage * self.pulse_fraction *
-                                        (1 / self.pulse_amp_per_supply_voltage))
-                            if start_vp < self.pulse_voltage_min:
-                                start_vp = self.variables.v_p_min / self.variables.pulse_amp_per_supply_voltage
+                        # set the v_dc and v_p
+                        self.pulse_voltage_min = self.variables.v_p_min / self.pulse_amp_per_supply_voltage
+                        self.pulse_voltage_max = self.variables.v_p_max / self.pulse_amp_per_supply_voltage
+                        start_vp = (self.specimen_voltage * (self.pulse_fraction / 100) /
+                                    self.pulse_amp_per_supply_voltage)
+                        if start_vp < self.pulse_voltage_min:
+                            start_vp = self.variables.v_p_min / self.variables.pulse_amp_per_supply_voltage
 
-                            if self.pulse_voltage_max > start_vp > self.pulse_voltage_min - 1 and self.conf[
-                                'v_p'] != "off":
-                                apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % start_vp)
-                                self.pulse_voltage = start_vp * self.pulse_amp_per_supply_voltage
-                                self.variables.pulse_voltage = self.pulse_voltage
+                        if self.pulse_voltage_max > start_vp > self.pulse_voltage_min - 1 and self.conf[
+                            'v_p'] != "off":
+                            apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % start_vp)
+                            self.pulse_voltage = start_vp * self.pulse_amp_per_supply_voltage
+                            self.variables.pulse_voltage = self.pulse_voltage
+                        flag_change_pulse_mode = False
+                    elif flag_change_pulse_mode and self.pulse_mode in ['Laser']:
+                        if self.com_port_v_p is not None:
+                            # if switch to laser mode chamge the voltage to zero
+                            apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT 0')
+                            self.pulse_voltage = 0
+                            self.variables.pulse_voltage = self.pulse_voltage
                             flag_change_pulse_mode = False
 
-                        elif self.variables.flag_new_min_voltage:
+                    else:
+                        if self.variables.flag_new_min_voltage:
                             decrement_vol = (self.specimen_voltage - self.vdc_min) / 10
                             for _ in range(10):
                                 self.specimen_voltage -= decrement_vol
@@ -428,27 +440,19 @@ class APT_Exp_Control:
                                     apt_exp_control_func.command_v_dc(self.com_port_v_dc,
                                                                       ">S0 %s" % self.specimen_voltage)
                                 time.sleep(0.3)
-
-                            new_vp = self.specimen_voltage * self.pulse_fraction / self.pulse_amp_per_supply_voltage
-                            if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
-                                apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % new_vp)
-                            if self.pulse_mode in ['Voltage', 'VoltageLaser']:
-                                self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
+                            if self.conf['v_dc'] != "off" and self.pulse_mode in ['Voltage', 'VoltageLaser']:
+                                new_vp = (self.specimen_voltage * (self.pulse_fraction / 100) /
+                                          self.pulse_amp_per_supply_voltage)
+                                if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf[
+                                    'v_p'] != "off":
+                                    apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % new_vp)
+                                    self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
+                                    self.variables.pulse_voltage = self.pulse_voltage
 
                             self.variables.specimen_voltage = self.specimen_voltage
                             self.variables.specimen_voltage_plot = self.specimen_voltage
-                            if self.pulse_mode in ['Voltage', 'VoltageLaser']:
-                                self.variables.pulse_voltage = self.pulse_voltage
                             self.variables.flag_new_min_voltage = False
-                            if not self.initialization_error:
-                                self.initialization_v_p = True
 
-                    elif self.pulse_mode in ['Laser', 'VoltageLaser']:
-                        if self.com_port_v_p is not None:
-                            # if switch to laser mode chamge the voltage to zero
-                            apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT 0')
-                            self.pulse_voltage = 0 * self.pulse_amp_per_supply_voltage
-                            self.variables.pulse_voltage = self.pulse_voltage
 
                 # main loop function
                 self.main_ex_loop()
@@ -606,12 +610,6 @@ class APT_Exp_Control:
         self.log_apt.info('Total number of Ions is: %s' % self.variables.total_ions)
         self.log_apt.info('HDF5 file is created')
 
-        # Save new value of experiment counter
-        if os.path.exists("./files/counter_experiments.txt"):
-            self.variables.counter += 1
-            with open('./files/counter_experiments.txt', 'w') as f:
-                f.write(str(self.variables.counter))
-                self.log_apt.info('Experiment counter is increased')
 
         # save setup parameters and run statistics in a txt file
         experiment_statistics.save_statistics_apt(self.variables, self.conf)
@@ -619,6 +617,13 @@ class APT_Exp_Control:
         # send an email
         if len(self.variables.email) > 3:
             apt_exp_control_func.send_info_email(self.log_apt, self.variables)
+
+        # Save new value of experiment counter
+        if os.path.exists("./files/counter_experiments.txt"):
+            self.variables.counter += 1
+            with open('./files/counter_experiments.txt', 'w') as f:
+                f.write(str(self.variables.counter))
+                self.log_apt.info('Experiment counter is increased')
 
         self.experiment_finished_event.set()
         # Clear up all the variables and deinitialize devices
@@ -711,29 +716,29 @@ class APT_Exp_Control:
         self.log_apt.info('Starting cleanup')
 
         try:
-            if self.conf['v_dc'] == "on":
+            if self.conf['v_dc'] == "on" and self.initialization_v_dc:
                 # Turn off the v_dc
                 apt_exp_control_func.command_v_dc(self.com_port_v_dc, 'F0')
                 self.com_port_v_dc.close()
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
         try:
-            if self.conf['v_p'] == "on":
+            if self.conf['v_p'] == "on" and self.initialization_v_p:
                 # Turn off the v_p
                 apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT 0')
                 apt_exp_control_func.command_v_p(self.com_port_v_p, 'OUTPut OFF')
                 self.com_port_v_p.close()
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
         try:
-            if self.conf['signal_generator'] != "off":
+            if self.conf['signal_generator'] != "off" and self.initialization_signal_generator:
                 # Turn off the signal generator
                 signal_generator.turn_off_signal_generator()
 
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
         # Reset variables
         cleanup_variables()
@@ -757,23 +762,6 @@ def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t
         None
 
     """
-
-    # from line_profiler import LineProfiler
-    #
-    # lp1 = LineProfiler()
-    #
-    # # Run the experiment
-    # apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot,
-    #                                   main_v_dc_plot, counter_plot, lock)
-    #
-    # lp1.add_function(apt_exp_control.run_experiment)
-    #
-    # lp1.add_function(apt_exp_control.main_ex_loop)
-    #
-    # # Run the profiler
-    # lp1(apt_exp_control.run_experiment)()
-    # # Save the profiling result to a file
-    # lp1.dump_stats('run_experiment.lprof')
 
     apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot,
                                       main_v_dc_plot)

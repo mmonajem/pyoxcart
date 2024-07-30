@@ -1,15 +1,17 @@
+import threading
 import time
 
 import cv2
 import numpy as np
 from pypylon import pylon
+from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal
 
 
-class Cameras:
+class CameraWorker(QObject):
     """
     This class is used to control the BASLER Cameras.
     """
-
+    finished = pyqtSignal()  # Define the finished signal
     def __init__(self, variables, emitter):
         """
         Constructor function which initializes and setups all variables
@@ -22,9 +24,123 @@ class Cameras:
         Return:
             None
         """
-        self.variables = variables
+        super().__init__()
+        self.flag_default_exposure_time = None
+        self.exposure_auto = None
         self.emitter = emitter
+        self.variables = variables
+
+        self.running = False
         self.index_save_image = 0
+        self.exposure_time_cam_1 = 400000
+        self.exposure_time_cam_1_light = 10000
+        self.exposure_time_cam_2 = 1000000
+        self.exposure_time_cam_2_light = 20000
+        self.exposure_time_cam_3 = 400000
+        self.exposure_time_cam_3_light = 10000
+        self.emitter.cam_1_exposure_time = emitter.cam_1_exposure_time
+        self.emitter.cam_2_exposure_time = emitter.cam_2_exposure_time
+        self.emitter.cam_3_exposure_time = emitter.cam_3_exposure_time
+        self.emitter.default_exposure_time = emitter.default_exposure_time
+
+        self.emitter.cam_1_exposure_time.connect(self.set_exposure_time_1)
+        self.emitter.cam_2_exposure_time.connect(self.set_exposure_time_2)
+        self.emitter.cam_3_exposure_time.connect(self.set_exposure_time_3)
+        self.emitter.default_exposure_time.connect(self.set_default_exposure_time)
+        self.emitter.auto_exposure_time.connect(self.set_auto_exposure_time)
+
+        self.initialize_cameras()
+
+    def start_capturing(self):
+        self.running = True
+        self.thread = threading.Thread(target=self.update_cameras)
+        self.thread.start()
+
+    def stop_capturing(self):
+        self.running = False
+
+    @pyqtSlot(bool)
+    def set_default_exposure_time(self):
+        """
+        This class method sets
+
+        Args:
+            None
+
+        Return:
+            None
+        """
+        self.exposure_time_cam_1 = 400000
+        self.exposure_time_cam_1_light = 10000
+        self.exposure_time_cam_2 = 1000000
+        self.exposure_time_cam_2_light = 20000
+        self.exposure_time_cam_3 = 400000
+        self.exposure_time_cam_3_light = 10000
+
+        self.flag_default_exposure_time = True
+        if self.variables.light:
+            exposure_times = [self.exposure_time_cam_1_light, self.exposure_time_cam_2_light,
+                              self.exposure_time_cam_3_light]
+            self.emitter.cams_exposure_time_default.emit(exposure_times)
+        else:
+            exposure_times = [self.exposure_time_cam_1, self.exposure_time_cam_2,
+                              self.exposure_time_cam_3]
+            self.emitter.cams_exposure_time_default.emit(exposure_times)
+
+    @pyqtSlot(bool)
+    def set_auto_exposure_time(self):
+        """
+        This class method sets
+
+        Args:
+            None
+
+        Return:
+            None
+        """
+        if not self.exposure_auto:
+            self.exposure_mode = 'Continuous'
+        elif self.exposure_auto:
+            self.exposure_mode = 'Off'
+
+    @pyqtSlot(int)
+    def set_exposure_time_1(self, exposure_time):
+        """
+        This class method sets
+
+        Args:
+            exposure_time: The exposure time for the camera.
+
+        Return:
+            None
+        """
+        self.exposure_time_cam_1 = exposure_time
+
+    @pyqtSlot(int)
+    def set_exposure_time_2(self, exposure_time):
+        """
+        This class method sets
+
+        Args:
+            exposure_time: The exposure time for the camera.
+
+        Return:
+            None
+        """
+        self.exposure_time_cam_2 = exposure_time
+
+    @pyqtSlot(int)
+    def set_exposure_time_3(self, exposure_time):
+        """
+        This class method sets
+
+        Args:
+            exposure_time: The exposure time for the camera.
+
+        Return:
+            None
+        """
+        self.exposure_time_cam_3 = exposure_time
 
     def initialize_cameras(self):
         """
@@ -54,10 +170,14 @@ class Cameras:
 
             self.cameras[0].Open()
             self.cameras[0].ExposureAuto.SetValue('Off')
-            self.cameras[0].ExposureTime.SetValue(400000)
+            self.cameras[0].ExposureTime.SetValue(self.exposure_time_cam_1)
             self.cameras[1].Open()
             self.cameras[1].ExposureAuto.SetValue('Off')
-            self.cameras[1].ExposureTime.SetValue(1000000)
+            self.cameras[1].ExposureTime.SetValue(self.exposure_time_cam_2)
+            # self.cameras[2].Open()
+            # self.cameras[2].ExposureAuto.SetValue('Off')
+            # self.cameras[2].ExposureTime.SetValue(self.exposure_time_cam_3)
+            self.exposure_auto = False
         except Exception as e:
             print('Error in initializing the camera class')
             print(e)
@@ -73,12 +193,37 @@ class Cameras:
             None
         """
         retry_attempts = 5
+        tmp_exposure_time_cam_1 = self.exposure_time_cam_1
+        tmp_exposure_time_cam_2 = self.exposure_time_cam_2
+        # tmp_exposure_time_cam_3 = self.exposure_time_cam_3
+        # set the auto exposure mode off
+        self.exposure_mode = 'Off'
+        tmp_exposure_mode = self.exposure_mode
         for attempt in range(retry_attempts):
-            self.initialize_cameras()
             try:
                 self.cameras.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
                 start_time = time.time()
-                while self.cameras.IsGrabbing():
+                while self.cameras.IsGrabbing() and self.running:
+                    if tmp_exposure_mode != self.exposure_mode:
+                        tmp_exposure_mode = self.exposure_mode
+                        # self.cameras[0].open()
+                        self.cameras[0].ExposureAuto.SetValue(self.exposure_mode)
+                        # self.cameras[1].open()
+                        self.cameras[1].ExposureAuto.SetValue(self.exposure_mode)
+                        # self.cameras[2].open()
+                        # self.cameras[2].ExposureAuto.SetValue(self.exposure_mode)
+                    if tmp_exposure_time_cam_1 != self.exposure_time_cam_1:
+                        tmp_exposure_time_cam_1 = self.exposure_time_cam_1
+                        # self.cameras[0].open()
+                        self.cameras[0].ExposureTime.SetValue(self.exposure_time_cam_1)
+                    if tmp_exposure_time_cam_2 != self.exposure_time_cam_2:
+                        tmp_exposure_time_cam_2 = self.exposure_time_cam_2
+                        # self.cameras[1].open()
+                        self.cameras[1].ExposureTime.SetValue(self.exposure_time_cam_2)
+                    # if tmp_exposure_time_cam_3 != self.exposure_time_cam_3:
+                    #     tmp_exposure_time_cam_3 = self.exposure_time_cam_3
+                    #     self.cameras[2].open()
+                    #     self.cameras[2].ExposureTime.SetValue(self.exposure_time_cam_3)
                     current_time = time.time()
                     try:
                         grabResult0 = self.cameras[0].RetrieveResult(8000, pylon.TimeoutHandling_ThrowException)
@@ -92,22 +237,12 @@ class Cameras:
                         break
 
                     self.img0_orig = img0
-
-                    crop_region = (1100, 900, 500, 200)
-                    self.img0_zoom = self.img0_orig[crop_region[1]:crop_region[1] + crop_region[3],
-                                     crop_region[0]:crop_region[0] + crop_region[2]]
-
                     self.img1_orig = img1
-                    self.img1_orig = cv2.rotate(self.img1_orig, cv2.ROTATE_90_CLOCKWISE)
-                    crop_region = (800, 1370, 800, 400)
-                    self.img1_zoom = self.img1_orig[crop_region[1]:crop_region[1] + crop_region[3],
-                                     crop_region[0]:crop_region[0] + crop_region[2]]
-
-                    self.emitter.img0_zoom.emit(np.swapaxes(self.img0_zoom, 0, 1))
-                    self.emitter.img1_zoom.emit(np.swapaxes(self.img1_zoom, 0, 1))
+                    self.img2_orig = img0
 
                     self.emitter.img0_orig.emit(np.swapaxes(self.img0_orig, 0, 1))
                     self.emitter.img1_orig.emit(np.swapaxes(self.img1_orig, 0, 1))
+                    self.emitter.img2_orig.emit(np.swapaxes(self.img2_orig, 0, 1))
 
                     if self.variables.clear_index_save_image:
                         self.variables.clear_index_save_image = False
@@ -117,23 +252,20 @@ class Cameras:
                         start_time = time.time()
                         path_meta = self.variables.path_meta
                         cv2.imwrite(path_meta + "/camera_side_%s.png" % self.index_save_image, self.img0_orig)
-                        cv2.imwrite(path_meta + "/camera_side_zoom_%s.png" % self.index_save_image, self.img0_zoom)
-                        cv2.imwrite(path_meta + '/camera_bottom_%s.png' % self.index_save_image, self.img1_orig)
-                        cv2.imwrite(path_meta + '/camera_bottom_zoom_%s.png' % self.index_save_image, self.img1_zoom)
+                        cv2.imwrite(path_meta + '/camera_top_%s.png' % self.index_save_image, self.img1_orig)
+                        cv2.imwrite(path_meta + '/camera_45_%s.png' % self.index_save_image, self.img2_orig)
                         self.index_save_image += 1
                         time.sleep(0.5)
 
                     grabResult0.Release()
                     grabResult1.Release()
 
-                    if self.variables.light_switch:
+                    if self.variables.light_switch or self.flag_default_exposure_time:
                         self.light_switch()
                         self.variables.light_switch = False
+                        self.flag_default_exposure_time = False
 
-                    if self.variables.light:
-                        time.sleep(0.5)
-                    else:
-                        time.sleep(0.2)
+                    time.sleep(0.5)
 
                     if not self.variables.flag_camera_grab:
                         break
@@ -142,6 +274,7 @@ class Cameras:
                 print(f"Error during update_cameras attempt {attempt + 1}: {e}")
                 self.initialize_cameras()
                 time.sleep(1)
+        self.finished.emit()  # Emit the finished signal when done
 
     def light_switch(self):
         """
@@ -155,28 +288,15 @@ class Cameras:
         """
         try:
             if self.variables.light:
-                self.cameras[0].Open()
-                self.cameras[0].ExposureTime.SetValue(10000)
-                self.cameras[1].Open()
-                self.cameras[1].ExposureTime.SetValue(10000)
+                # self.cameras[0].Open()
+                self.cameras[0].ExposureTime.SetValue(self.exposure_time_cam_1_light)
+                # self.cameras[1].Open()
+                self.cameras[1].ExposureTime.SetValue(self.exposure_time_cam_2_light)
             else:
-                self.cameras[0].Open()
-                self.cameras[0].ExposureTime.SetValue(400000)
-                self.cameras[1].Open()
-                self.cameras[1].ExposureTime.SetValue(1000000)
+                # self.cameras[0].Open()
+                self.cameras[0].ExposureTime.SetValue(self.exposure_time_cam_1)
+                # self.cameras[1].Open()
+                self.cameras[1].ExposureTime.SetValue(self.exposure_time_cam_2)
         except Exception as e:
             print(f"Error in switching the light: {e}")
 
-
-def cameras_run(variable, emitter):
-    """
-    This function is used to run the cameras.
-
-    Args:
-        variable: The class object of the Variables class.
-        emitter: The class object of the Emitter class.
-    Return:
-        None
-    """
-    camera = Cameras(variable, emitter)
-    camera.update_cameras()
