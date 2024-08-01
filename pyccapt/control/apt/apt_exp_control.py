@@ -1,3 +1,4 @@
+import copy
 import datetime
 import multiprocessing
 import os
@@ -19,9 +20,9 @@ class APT_Exp_Control:
     This class is responsible for controlling the experiment.
     """
 
-    def __init__(self, variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot,
-                 detection_rate_current_queue, detection_rate_current_plot_queue, total_ions_queue):
+    def __init__(self, variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot):
 
+        self.stop_event = None
         self.control_algorithm = None
         self.com_port_v_dc = None
         self.initialization_v_p = None
@@ -35,15 +36,6 @@ class APT_Exp_Control:
         self.y_plot = y_plot
         self.t_plot = t_plot
         self.main_v_dc_plot = main_v_dc_plot
-        self.detection_rate_current_queue = detection_rate_current_queue
-        self.detection_rate_current = 0
-        self.total_ions_queue = total_ions_queue
-        self.total_ions = 0
-        self.detection_rate_current_plot_queue = detection_rate_current_plot_queue
-        self.specimen_voltage_queue = multiprocessing.Queue()
-        self.voltage_pulse_queue = multiprocessing.Queue()
-        self.laser_pulse_queue = multiprocessing.Queue()
-
 
         self.com_port_v_p = None
         self.log_apt = None
@@ -89,13 +81,10 @@ class APT_Exp_Control:
 
             # Initialize and initiate a process(Refer to imported file 'tdc_new' for process function declaration )
             # Module used: multiprocessing
+            self.stop_event = multiprocessing.Event()
             self.tdc_process = multiprocessing.Process(target=tdc_surface_consept.experiment_measure,
                                                        args=(self.variables, self.x_plot, self.y_plot, self.t_plot,
-                                                             self.main_v_dc_plot, self.detection_rate_current_queue,
-                                                             self.detection_rate_current_plot_queue,
-                                                             self.total_ions_queue,
-                                                             self.specimen_voltage_queue, self.voltage_pulse_queue,
-                                                             self.laser_pulse_queue))
+                                                             self.main_v_dc_plot, self.stop_event))
 
             self.tdc_process.start()
 
@@ -138,10 +127,6 @@ class APT_Exp_Control:
         # Update v_dc and v_p...
         # Update other experiment variables...
 
-        while not self.detection_rate_current_queue.empty() and not self.total_ions_queue.empty():
-            self.detection_rate_current = self.detection_rate_current_queue.get()
-            self.total_ions = self.total_ions_queue.get()
-
         # with self.variables.lock_statistics:
         count_temp = self.total_ions - self.count_last
         self.count_last = self.total_ions
@@ -154,7 +139,7 @@ class APT_Exp_Control:
         self.main_chamber_vacuum.extend([self.variables.vacuum_main])
 
         if self.control_algorithm == 'Proportional':
-            error = self.detection_rate - self.detection_rate_current
+            error = self.detection_rate - self.variables.detection_rate_current
             # simple proportional control with averaging
             if error > 0.05:
                 voltage_step = error * self.variables.vdc_step_up * 10
@@ -167,7 +152,7 @@ class APT_Exp_Control:
                 print('voltage step is too high: %s' % voltage_step)
                 voltage_step = 40
         elif self.control_algorithm == 'PID' or self.control_algorithm == 'PID aggressive':
-            error = self.detection_rate - self.detection_rate_current
+            error = self.detection_rate - self.variables.detection_rate_current
             print('error: %s' % error)
             voltage_step = self.pid(error) * 1000
             print('voltage step: %s' % voltage_step)
@@ -175,20 +160,20 @@ class APT_Exp_Control:
         # update v_dc
         if not self.variables.vdc_hold and voltage_step != 0:
             specimen_voltage_temp = min(self.specimen_voltage + voltage_step, self.vdc_max)
-            if specimen_voltage_temp != self.specimen_voltage:
-                if self.conf['v_dc'] != "off":
-                    apt_exp_control_func.command_v_dc(self.com_port_v_dc, ">S0 %s" % specimen_voltage_temp)
-                    self.specimen_voltage = specimen_voltage_temp
-                    self.variables.specimen_voltage = self.specimen_voltage
-                    self.variables.specimen_voltage_plot = self.specimen_voltage
-                    self.specimen_voltage_queue.put(self.specimen_voltage)
-                if self.pulse_mode in ['Voltage', 'VoltageLaser']:
-                    new_vp = self.specimen_voltage * self.pulse_fraction * (1 / self.pulse_amp_per_supply_voltage)
-                    if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
-                        apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % new_vp)
-                        self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
-                        self.variables.pulse_voltage = self.pulse_voltage
-                        self.voltage_pulse_queue.put(self.pulse_voltage)
+            if specimen_voltage_temp > self.vdc_min:
+                if specimen_voltage_temp != self.specimen_voltage:
+                    if self.conf['v_dc'] != "off":
+                        apt_exp_control_func.command_v_dc(self.com_port_v_dc, ">S0 %s" % specimen_voltage_temp)
+                        self.specimen_voltage = specimen_voltage_temp
+                        self.variables.specimen_voltage = self.specimen_voltage
+                        self.variables.specimen_voltage_plot = self.specimen_voltage
+                    if self.pulse_mode in ['Voltage', 'VoltageLaser']:
+                        new_vp = (self.specimen_voltage * (self.pulse_fraction / 100) /
+                                  self.pulse_amp_per_supply_voltage)
+                        if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
+                            apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % new_vp)
+                            self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
+                            self.variables.pulse_voltage = self.pulse_voltage
 
     def precise_sleep(self, seconds):
         """
@@ -203,7 +188,6 @@ class APT_Exp_Control:
         start_time = time.perf_counter()
         while time.perf_counter() - start_time < seconds:
             pass
-
 
     def run_experiment(self):
         """
@@ -257,8 +241,7 @@ class APT_Exp_Control:
             self.variables.flag_tdc_failure = False
             self.initialize_detector_process()
 
-        if not self.initialization_error:
-            self.log_apt = loggi.logger_creator('apt', self.variables, 'apt.log', path=self.variables.log_path)
+        self.log_apt = loggi.logger_creator('apt', self.variables, 'apt.log', path=self.variables.log_path)
         if self.conf['signal_generator'] == 'on' and self.pulse_mode in ['Voltage',
                                                                          'VoltageLaser'] and not self.initialization_error:
             self.initialization_error = apt_exp_control_func.initialization_signal_generator(self.variables,
@@ -316,7 +299,8 @@ class APT_Exp_Control:
 
         desired_rate = self.variables.ex_freq  # Hz
         desired_period = 1.0 / desired_rate  # seconds
-        self.counts_target = self.variables.pulse_frequency * 1000 * self.variables.detection_rate / 100
+        self.pulse_frequency = self.variables.pulse_frequency * 1000
+        self.counts_target = self.pulse_frequency * self.variables.detection_rate / 100
 
         # Turn on the v_dc and v_p
         if not self.initialization_error:
@@ -335,7 +319,6 @@ class APT_Exp_Control:
                 apt_exp_control_func.command_v_dc(self.com_port_v_dc, "F1")
                 time.sleep(0.1)
 
-        self.pulse_frequency = self.variables.pulse_frequency * 1000
         self.pulse_fraction = self.variables.pulse_fraction
         self.pulse_amp_per_supply_voltage = self.variables.pulse_amp_per_supply_voltage
         self.specimen_voltage = self.variables.specimen_voltage
@@ -361,7 +344,7 @@ class APT_Exp_Control:
         index_tdc_failure = 0
         last_pulse_mode = self.pulse_mode
         flag_change_pulse_mode = False
-        print('self.initialization_error', self.initialization_error)
+        pulse_frequency_tmp = self.pulse_frequency
         if self.initialization_error:
             pass
         else:
@@ -369,35 +352,43 @@ class APT_Exp_Control:
                 start_time = time.perf_counter()
                 self.vdc_max = self.variables.vdc_max
                 self.vdc_min = self.variables.vdc_min
-                self.variables.total_ions = self.total_ions
-                self.laser_pulse_queue.put(self.variables.laser_pulse)
-
+                self.pulse_frequency = self.variables.pulse_frequency * 1000
                 if self.pulse_mode in ['Voltage', 'VoltageLaser']:
                     self.pulse_voltage_min = self.variables.v_p_min / self.pulse_amp_per_supply_voltage
                     self.pulse_voltage_max = self.variables.v_p_max / self.pulse_amp_per_supply_voltage
+                if pulse_frequency_tmp != self.pulse_frequency:
+                    self.pulse_frequency = self.variables.pulse_frequency * 1000
+                    pulse_frequency_tmp = self.pulse_frequency
+                    self.counts_target = self.pulse_frequency * self.detection_rate / 100
+                    signal_generator.change_frequency_signal_generator(self.variables, self.pulse_frequency / 1000)
 
-                # here we check if tdc is failed or not by checking if the total number of ions is
-                # constant for 100 iteration
-                if total_ions_tmp == self.total_ions:
-                    index_tdc_failure += 1
-                    if index_tdc_failure > 100:
-                        self.variables.flag_tdc_failure = True
-                else:
-                    index_tdc_failure = 0
-                    total_ions_tmp = self.total_ions
                 if self.detection_rate != self.variables.detection_rate:
                     self.detection_rate = self.variables.detection_rate
                     self.counts_target = self.pulse_frequency * self.detection_rate / 100
+                    self.detection_rate = self.variables.detection_rate
                     if self.control_algorithm == 'PID' or self.control_algorithm == 'PID aggressive':
                         self.pid.setpoint = self.detection_rate
 
+                self.total_ions = self.variables.total_ions
+                # here we check if tdc is failed or not by checking if the total number of ions is
+                # constant for 100 iteration
+                if total_ions_tmp == self.total_ions and not self.variables.vdc_hold:
+                    index_tdc_failure += 1
+                    if index_tdc_failure > 200:
+                        self.variables.flag_tdc_failure = True
+                else:
+                    index_tdc_failure = 0
+                    total_ions_tmp = copy.deepcopy(self.total_ions)
+
                 if self.variables.vdc_hold:
                     self.pulse_mode = self.variables.pulse_mode
+                    # if the vdc is hold, we need to check if the pulse mode is changed or not to initialize the
+                    # pulser and set the voltage
                     if last_pulse_mode != self.pulse_mode:
                         flag_change_pulse_mode = True
                         last_pulse_mode = self.pulse_mode
-                    if self.pulse_mode in ['Voltage', 'VoltageLaser']:
-
+                    if flag_change_pulse_mode and self.pulse_mode in ['Voltage', 'VoltageLaser']:
+                        # if the pulse mode is changed from laser to voltage, we need to initialize the pulser
                         if not self.initialization_v_p:
                             try:
                                 # Initialize pulser
@@ -411,28 +402,37 @@ class APT_Exp_Control:
                             except Exception as e:
                                 print('Can not open the COM port for V_p')
                                 print(e)
+                        # if the pulse mode is changed from voltage to laser, we need to turn on the signal generator
                         if not self.initialization_signal_generator:
                             self.initialization_error = apt_exp_control_func.initialization_signal_generator(
                                 self.variables,
                                 self.log_apt)
                             if not self.initialization_error:
                                 self.initialization_signal_generator = True
-                        if flag_change_pulse_mode:
-                            self.pulse_voltage_min = self.variables.v_p_min / self.pulse_amp_per_supply_voltage
-                            self.pulse_voltage_max = self.variables.v_p_max / self.pulse_amp_per_supply_voltage
-                            start_vp = (self.specimen_voltage * self.pulse_fraction *
-                                        (1 / self.pulse_amp_per_supply_voltage))
-                            if start_vp < self.pulse_voltage_min:
-                                start_vp = self.variables.v_p_min / self.variables.pulse_amp_per_supply_voltage
+                        # set the v_dc and v_p
+                        self.pulse_voltage_min = self.variables.v_p_min / self.pulse_amp_per_supply_voltage
+                        self.pulse_voltage_max = self.variables.v_p_max / self.pulse_amp_per_supply_voltage
+                        start_vp = (self.specimen_voltage * (self.pulse_fraction / 100) /
+                                    self.pulse_amp_per_supply_voltage)
+                        if start_vp < self.pulse_voltage_min:
+                            start_vp = self.variables.v_p_min / self.variables.pulse_amp_per_supply_voltage
 
-                            if self.pulse_voltage_max > start_vp > self.pulse_voltage_min - 1 and self.conf[
-                                'v_p'] != "off":
-                                apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % start_vp)
-                                self.pulse_voltage = start_vp * self.pulse_amp_per_supply_voltage
-                                self.variables.pulse_voltage = self.pulse_voltage
+                        if self.pulse_voltage_max > start_vp > self.pulse_voltage_min - 1 and self.conf[
+                            'v_p'] != "off":
+                            apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % start_vp)
+                            self.pulse_voltage = start_vp * self.pulse_amp_per_supply_voltage
+                            self.variables.pulse_voltage = self.pulse_voltage
+                        flag_change_pulse_mode = False
+                    elif flag_change_pulse_mode and self.pulse_mode in ['Laser']:
+                        if self.com_port_v_p is not None:
+                            # if switch to laser mode chamge the voltage to zero
+                            apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT 0')
+                            self.pulse_voltage = 0
+                            self.variables.pulse_voltage = self.pulse_voltage
                             flag_change_pulse_mode = False
 
-                        elif self.variables.flag_new_min_voltage:
+                    else:
+                        if self.variables.flag_new_min_voltage:
                             decrement_vol = (self.specimen_voltage - self.vdc_min) / 10
                             for _ in range(10):
                                 self.specimen_voltage -= decrement_vol
@@ -440,27 +440,19 @@ class APT_Exp_Control:
                                     apt_exp_control_func.command_v_dc(self.com_port_v_dc,
                                                                       ">S0 %s" % self.specimen_voltage)
                                 time.sleep(0.3)
-
-                            new_vp = self.specimen_voltage * self.pulse_fraction / self.pulse_amp_per_supply_voltage
-                            if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf['v_p'] != "off":
-                                apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % new_vp)
-                            if self.pulse_mode in ['Voltage', 'VoltageLaser']:
-                                self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
+                            if self.conf['v_dc'] != "off" and self.pulse_mode in ['Voltage', 'VoltageLaser']:
+                                new_vp = (self.specimen_voltage * (self.pulse_fraction / 100) /
+                                          self.pulse_amp_per_supply_voltage)
+                                if self.pulse_voltage_max > new_vp > self.pulse_voltage_min and self.conf[
+                                    'v_p'] != "off":
+                                    apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT %s' % new_vp)
+                                    self.pulse_voltage = new_vp * self.pulse_amp_per_supply_voltage
+                                    self.variables.pulse_voltage = self.pulse_voltage
 
                             self.variables.specimen_voltage = self.specimen_voltage
                             self.variables.specimen_voltage_plot = self.specimen_voltage
-                            if self.pulse_mode in ['Voltage', 'VoltageLaser']:
-                                self.variables.pulse_voltage = self.pulse_voltage
                             self.variables.flag_new_min_voltage = False
-                            if not self.initialization_error:
-                                self.initialization_v_p = True
 
-                    elif self.pulse_mode in ['Laser', 'VoltageLaser']:
-                        if self.com_port_v_p is not None:
-                            # if switch to laser mode chamge the voltage to zero
-                            apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT 0')
-                            self.pulse_voltage = 0 * self.pulse_amp_per_supply_voltage
-                            self.variables.pulse_voltage = self.pulse_voltage
 
                 # main loop function
                 self.main_ex_loop()
@@ -481,18 +473,18 @@ class APT_Exp_Control:
                     if self.conf['tdc'] != "off":
                         if self.variables.counter_source == 'TDC':
                             self.variables.flag_stop_tdc = True
+                            self.stop_event.set()  # Signal the tdc to stop
                     time.sleep(1)
                     break
 
                 if self.variables.flag_tdc_failure:
                     self.log_apt.info('Experiment is stopped because of tdc failure')
-                    print(f"{initialize_devices.bcolors.FAIL}Experiment is stopped because of TDC failure"
-                          f"{initialize_devices.bcolors.ENDC}")
-                    print(f"{initialize_devices.bcolors.FAIL}Restart the TDC and start the experiment again"
-                          f"{initialize_devices.bcolors.ENDC}")
+                    print(f"{initialize_devices.bcolors.FAIL}Experiment is stopped because of TDC failure")
+                    print(f"{initialize_devices.bcolors.FAIL}Restart the TDC and start the experiment again")
                     if self.conf['tdc'] == "on":
                         if self.variables.counter_source == 'TDC':
                             self.variables.stop_flag = True  # Set the STOP flag
+                            self.stop_event.set()  # Signal the tdc to stop
                     time.sleep(1)
                     break
 
@@ -503,6 +495,7 @@ class APT_Exp_Control:
                             if self.variables.counter_source == 'TDC':
                                 self.variables.flag_stop_tdc = True
                                 self.variables.stop_flag = True  # Set the STOP flag
+                                self.stop_event.set()  # Signal the tdc to stop
                         time.sleep(1)
                         break
                 if self.variables.criteria_vdc:
@@ -513,6 +506,7 @@ class APT_Exp_Control:
                                 if self.variables.counter_source == 'TDC':
                                     self.variables.flag_stop_tdc = True
                                     self.variables.stop_flag = True  # Set the STOP flag
+                                    self.stop_event.set()  # Signal the tdc to stop
                             time.sleep(1)
                             break
                         flag_achieved_high_voltage += 1
@@ -524,6 +518,7 @@ class APT_Exp_Control:
                             if self.variables.counter_source == 'TDC':
                                 self.variables.flag_stop_tdc = True
                                 self.variables.stop_flag = True
+                                self.stop_event.set()  # Signal the tdc to stop
 
                 end_time = time.perf_counter()
                 elapsed_time = end_time - start_time
@@ -541,14 +536,14 @@ class APT_Exp_Control:
         time.sleep(1)
 
         self.log_apt.info('Experiment is finished')
-        print("Experiment loop took longer than %s Millisecond for %s times out of %s "
+        print("Experiment process: Experiment loop took longer than %s Millisecond for %s times out of %s "
               "iteration" % (int(1000 / self.variables.ex_freq), index_time, steps))
         self.log_apt.warning(
             'Experiment loop took longer than %s (ms) for %s times out of %s iteration.'
             % (int(1000 / self.variables.ex_freq), index_time, steps))
 
         print('Waiting for TDC process to be finished for maximum 60 seconds...')
-        for i in range(10):
+        for i in range(60):
             if self.variables.flag_finished_tdc:
                 print('TDC process is finished')
                 break
@@ -577,27 +572,6 @@ class APT_Exp_Control:
         self.variables.extend_to('main_counter', self.main_counter)
         self.variables.extend_to('main_temperature', self.main_temperature)
         self.variables.extend_to('main_chamber_vacuum', self.main_chamber_vacuum)
-
-        time.sleep(1)
-        if self.conf['tdc'] != "off":
-            # Stop the TDC process
-            try:
-                if self.variables.counter_source == 'TDC':
-                    self.tdc_process.join(3)
-                    if self.tdc_process.is_alive():
-                        self.tdc_process.join(2)
-                        # Release all the resources of the TDC process
-                elif self.variables.counter_source == 'HSD':
-                    self.hsd_process.join(3)
-                    if self.hsd_process.is_alive():
-                        self.hsd_process.join(2)
-                        # Release all the resources of the TDC process
-                print('TDC process is joined')
-            except Exception as e:
-                print(
-                    f"{initialize_devices.bcolors.WARNING}Warning: The TDC or HSD process cannot be terminated "
-                    f"properly{initialize_devices.bcolors.ENDC}")
-                print(e)
 
         if self.conf['tdc'] == "off":
             if self.variables.counter_source == 'TDC':
@@ -636,12 +610,6 @@ class APT_Exp_Control:
         self.log_apt.info('Total number of Ions is: %s' % self.variables.total_ions)
         self.log_apt.info('HDF5 file is created')
 
-        # Save new value of experiment counter
-        if os.path.exists("./files/counter_experiments.txt"):
-            self.variables.counter += 1
-            with open('./files/counter_experiments.txt', 'w') as f:
-                f.write(str(self.variables.counter))
-                self.log_apt.info('Experiment counter is increased')
 
         # save setup parameters and run statistics in a txt file
         experiment_statistics.save_statistics_apt(self.variables, self.conf)
@@ -649,6 +617,13 @@ class APT_Exp_Control:
         # send an email
         if len(self.variables.email) > 3:
             apt_exp_control_func.send_info_email(self.log_apt, self.variables)
+
+        # Save new value of experiment counter
+        if os.path.exists("./files/counter_experiments.txt"):
+            self.variables.counter += 1
+            with open('./files/counter_experiments.txt', 'w') as f:
+                f.write(str(self.variables.counter))
+                self.log_apt.info('Experiment counter is increased')
 
         self.experiment_finished_event.set()
         # Clear up all the variables and deinitialize devices
@@ -693,9 +668,6 @@ class APT_Exp_Control:
                 dumy = self.y_plot.get()
                 dumy = self.t_plot.get()
                 dumy = self.main_v_dc_plot.get()
-                dumy = self.detection_rate_current_queue.get()
-                dumy = self.detection_rate_current_plot_queue.get()
-                dumy = self.total_ions_queue.get()
 
             self.variables.clear_to('x')
             self.variables.clear_to('y')
@@ -744,37 +716,36 @@ class APT_Exp_Control:
         self.log_apt.info('Starting cleanup')
 
         try:
-            if self.conf['v_dc'] == "on":
+            if self.conf['v_dc'] == "on" and self.initialization_v_dc:
                 # Turn off the v_dc
                 apt_exp_control_func.command_v_dc(self.com_port_v_dc, 'F0')
                 self.com_port_v_dc.close()
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
         try:
-            if self.conf['v_p'] == "on":
+            if self.conf['v_p'] == "on" and self.initialization_v_p:
                 # Turn off the v_p
                 apt_exp_control_func.command_v_p(self.com_port_v_p, 'VOLT 0')
                 apt_exp_control_func.command_v_p(self.com_port_v_p, 'OUTPut OFF')
                 self.com_port_v_p.close()
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
         try:
-            if self.conf['signal_generator'] != "off":
+            if self.conf['signal_generator'] != "off" and self.initialization_signal_generator:
                 # Turn off the signal generator
                 signal_generator.turn_off_signal_generator()
 
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
         # Reset variables
         cleanup_variables()
         self.log_apt.info('Cleanup is finished')
 
 
-def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot,
-                   detection_rate_current_queue, detection_rate_current_plot_queue, total_ions_queue):
+def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot, main_v_dc_plot):
     """
     Run the main experiment.
 
@@ -786,34 +757,13 @@ def run_experiment(variables, conf, experiment_finished_event, x_plot, y_plot, t
         y_plot:                     Array to store y data
         t_plot:                     Array to store t data
         main_v_dc_plot:             Array to store main_v_dc data
-        detection_rate_current_queue: Queue to store the current detection rate
-        detection_rate_current_plot_queue: Queue to store the current detection rate for plotting
-        total_ions_queue:           Queue to store the total number of ions
 
     Returns:
         None
 
     """
 
-    # from line_profiler import LineProfiler
-    #
-    # lp1 = LineProfiler()
-    #
-    # # Run the experiment
-    # apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot,
-    #                                   main_v_dc_plot, counter_plot, lock)
-    #
-    # lp1.add_function(apt_exp_control.run_experiment)
-    #
-    # lp1.add_function(apt_exp_control.main_ex_loop)
-    #
-    # # Run the profiler
-    # lp1(apt_exp_control.run_experiment)()
-    # # Save the profiling result to a file
-    # lp1.dump_stats('run_experiment.lprof')
-
     apt_exp_control = APT_Exp_Control(variables, conf, experiment_finished_event, x_plot, y_plot, t_plot,
-                                      main_v_dc_plot, detection_rate_current_queue, detection_rate_current_plot_queue,
-                                      total_ions_queue)
+                                      main_v_dc_plot)
 
     apt_exp_control.run_experiment()

@@ -38,20 +38,26 @@ def send_email(email, subject, message):
 	intro_text = "Dear recipient,\n\n"
 	intro_text += "Below is the experiment information:\n\n"
 
-	# Attach the logo image
-	logo_path = './files/logo3.png'  # Path to your logo image
-	with open(logo_path, 'rb') as f:
-		logo_data = f.read()
-	logo_image = MIMEImage(logo_data, name='logo.png')
-	msg.attach(logo_image)
+	try:
+		# Attach the logo image
+		logo_path = './files/logo2.png'  # Path to the pyccapt logo image
+		with open(logo_path, 'rb') as f:
+			logo_data = f.read()
+		logo_image = MIMEImage(logo_data, name='logo.png')
+		msg.attach(logo_image)
+	except FileNotFoundError:
+		print("Logo image not found. Please check the path.")
 
 	# Attach the introduction text
 	intro = MIMEText(intro_text + message, 'plain')
 	msg.attach(intro)
 
-
-	# Send the email
-	context = ssl.create_default_context()
-	with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-		server.login(sender_email, password)
-		server.sendmail(sender_email, receiver_email, msg.as_string())
+	try:
+		# Send the email
+		context = ssl.create_default_context()
+		with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+			server.login(sender_email, password)
+			server.sendmail(sender_email, receiver_email, msg.as_string())
+	except Exception as e:
+		print(f"Error: {e}")
+		print("Email not sent.")

@@ -173,6 +173,7 @@ def send_info_email(log_apt, variables):
 
 	additional_info = 'Username: {}\n'.format(variables.user_name)
 	additional_info += 'Experiment Name: {}\n'.format(variables.ex_name)
+	additional_info += 'Experiment number: {}\n'.format(variables.counter)
 	additional_info += 'Detection Rate (%): {}\n'.format(variables.detection_rate)
 	additional_info += 'Maximum Number of Ions: {}\n'.format(variables.max_ions)
 	additional_info += 'Counter source: {}\n'.format(variables.counter_source)
@@ -185,7 +186,7 @@ def send_info_email(log_apt, variables):
 	additional_info += 'K_p Downwards: {}\n'.format(variables.vdc_step_down)
 	additional_info += 'Specimen start Voltage (V): {}\n'.format(variables.vdc_min)
 	additional_info += 'Specimen Stop Voltage (V): {}\n'.format(variables.vdc_max)
-	additional_info += 'Temperature (C): {}\n'.format(variables.temperature)
+	additional_info += 'Temperature (k): {}\n'.format(variables.temperature)
 	additional_info += 'Vacuum (mbar): {}\n'.format(variables.vacuum_main)
 
 	if variables.pulse_mode == 'Voltage':
@@ -196,6 +197,8 @@ def send_info_email(log_apt, variables):
 	elif variables.pulse_mode == 'Laser':
 		additional_info += 'Specimen Laser Pulsed Energy (pJ): {:.3f}\n\n'.format(
 			variables.laser_intensity)
+		additional_info += 'Specimen Max Laser Power (W): {:.3f}\n\n'.format(
+			variables.max_laser_power)
 	additional_info += 'StopCriteria:\n'
 	additional_info += 'Criteria Time:: {}\n'.format(variables.criteria_time)
 	additional_info += 'Criteria DC Voltage:: {}\n'.format(variables.criteria_vdc)

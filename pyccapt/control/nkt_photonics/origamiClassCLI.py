@@ -101,7 +101,7 @@ class origClass:
 		return dataBack.decode()
 
 	def AOM(self, power):
-		cmd = "e_power=xxxx" + str(power) + "\n"
+		cmd = "e_power=" + str(power) + "\n"
 		self.ser.write(cmd.encode())
 		sleep(0.1)
 		dataStore = []

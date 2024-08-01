@@ -1,3 +1,6 @@
+import copy
+import multiprocessing as mp
+import os
 import time
 from queue import Queue
 
@@ -9,7 +12,7 @@ from pyccapt.control.tdc_surface_concept import scTDC
 
 QUEUE_DATA = 0
 QUEUE_ENDOFMEAS = 1
-
+CHUNK_SIZE = 200000  # Adjust the chunk size as needed
 
 class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
     """
@@ -91,44 +94,65 @@ def errorcheck(device, bufdatacb, bufdatacb_raw, retcode):
         return 0
 
 
-def save_data_thread(variables, xx_list, yy_list, tt_list, voltage_data, pulse_data, flag_stop_data_thread):
-    """
-    This function saves the data in a separate thread.
+def save_chunk_worker(save_queue):
+    while True:
+        (chunk_id, path, xx_list, xx, yy_list, yy, tt_list, tt, voltage_data, voltage_pulse_data,
+         laser_pulse_data, start_counter, channel_data, time_data, tdc_start_counter,
+         voltage_data_tdc, voltage_pulse_data_tdc, laser_pulse_data_tdc) = save_queue.get()
+        if chunk_id is None:
+            break
+        np.save(f"{path}chunks//x_bin_chunk_{chunk_id}.npy", np.array(xx_list))
+        np.save(f"{path}chunks//x_data_chunk_{chunk_id}.npy", np.array(xx))
+        np.save(f"{path}chunks//y_bin_chunk_{chunk_id}.npy", np.array(yy_list))
+        np.save(f"{path}chunks//y_data_chunk_{chunk_id}.npy", np.array(yy))
+        np.save(f"{path}chunks//t_bin_chunk_{chunk_id}.npy", np.array(tt_list))
+        np.save(f"{path}chunks//t_data_chunk_{chunk_id}.npy", np.array(tt))
+        np.save(f"{path}chunks//voltage_data_chunk_{chunk_id}.npy", np.array(voltage_data))
+        np.save(f"{path}chunks//voltage_pulse_data_chunk_{chunk_id}.npy", np.array(voltage_pulse_data))
+        np.save(f"{path}chunks//laser_pulse_data_chunk_{chunk_id}.npy", np.array(laser_pulse_data))
+        np.save(f"{path}chunks//start_counter_chunk_{chunk_id}.npy", np.array(start_counter))
 
-    Args:
-        variables (share_variables.Variables): A share_variables.Variables object.
-        xx_list (list): A list of x coordinates.
-        yy_list (list): A list of y coordinates.
-        tt_list (list): A list of time coordinates.
-        voltage_data (list): A list of voltage values.
-        pulse_data (list): A list of pulse values.
-        flag_stop_data_thread (bool): A flag to stop the thread.
-
-    Returns:
-        None
-    """
-    while not flag_stop_data_thread:
-        # Sleep for 5 minutes
-        time.sleep(300)
-        xx = xx_list.copy()
-        yy = yy_list.copy()
-        tt = tt_list.copy()
-        voltage = voltage_data.copy()
-        pulse = pulse_data.copy()
-
-        # Acquire the lock before accessing the shared data
-        np.save(variables.path + "/x_data.npy", np.array(xx))
-        np.save(variables.path + "/y_data.npy", np.array(yy))
-        np.save(variables.path + "/t_data.npy", np.array(tt))
-        np.save(variables.path + "/voltage_data.npy", np.array(voltage))
-        np.save(variables.path + "/pulse_data.npy", np.array(pulse))
-
-        print("Data saved.")
+        np.save(f"{path}chunks//channel_data_chunk_{chunk_id}.npy", np.array(channel_data))
+        np.save(f"{path}chunks//time_data_chunk_{chunk_id}.npy", np.array(time_data))
+        np.save(f"{path}chunks//tdc_start_counter_chunk_{chunk_id}.npy", np.array(tdc_start_counter))
+        np.save(f"{path}chunks//voltage_data_tdc_chunk_{chunk_id}.npy", np.array(voltage_data_tdc))
+        np.save(f"{path}chunks//voltage_pulse_data_tdc_chunk_{chunk_id}.npy", np.array(voltage_pulse_data_tdc))
+        np.save(f"{path}chunks//laser_pulse_data_tdc_chunk_{chunk_id}.npy", np.array(laser_pulse_data_tdc))
+        print(f"Chunk {chunk_id} saved.")
+        time.sleep(2)
 
 
-def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, detection_rate_current_queue,
-                           detection_rate_current_plot_queue, total_ions_queue,
-                           specimen_voltage_queue, voltage_pulse_queue, laser_pulse_queue):
+def load_and_concatenate_chunks(path, chunk_id):
+    def load_data(attr_name):
+        all_data = []
+        for i in range(1, chunk_id + 1):
+            chunk_file = os.path.join(path, f"chunks/{attr_name}_chunk_{i}.npy")
+            if os.path.exists(chunk_file):
+                all_data.extend(np.load(chunk_file).tolist())
+            else:
+                print(f"File '{chunk_file}' not found.")
+        return all_data
+
+    xx_list = load_data("x_data")
+    yy_list = load_data("y_data")
+    tt_list = load_data("t_data")
+    voltage_data = load_data("voltage_data")
+    voltage_pulse_data = load_data("voltage_pulse_data")
+    laser_pulse_data = load_data("laser_pulse_data")
+    start_counter = load_data("start_counter")
+
+    channel_data = load_data("channel_data")
+    time_data = load_data("time_data")
+    tdc_start_counter = load_data("tdc_start_counter")
+    voltage_data_tdc = load_data("voltage_data_tdc")
+    voltage_pulse_data_tdc = load_data("voltage_pulse_data_tdc")
+    laser_pulse_data_tdc = load_data("laser_pulse_data_tdc")
+
+    return (xx_list, yy_list, tt_list, voltage_data, voltage_pulse_data, laser_pulse_data, start_counter,
+            channel_data, time_data, tdc_start_counter, voltage_data_tdc, voltage_pulse_data_tdc, laser_pulse_data_tdc)
+
+
+def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, stop_event):
     """
     Measurement function: This function is called in a process to read data from the queue.
 
@@ -138,17 +162,12 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, de
         y_plot (multiprocessing.Array): A multiprocessing.Array object.
         t_plot (multiprocessing.Array): A multiprocessing.Array object.
         main_v_dc_plot (multiprocessing.Array): A multiprocessing.Array object.
-        detection_rate_current_queue (multiprocessing.Queue): A multiprocessing.Queue object.
-        detection_rate_current_plot_queue (multiprocessing.Queue): A multiprocessing.Queue object.
-        total_ions_queue (multiprocessing.Queue): A multiprocessing.Queue object.
-        specimen_voltage_queue (multiprocessing.Queue): A multiprocessing.Queue object.
-        voltage_pulse_queue (multiprocessing.Queue): A multiprocessing.Queue object.
-        laser_pulse_queue (multiprocessing.Queue): A multiprocessing.Queue object.
+        stop_event (multiprocessing.Event): A multiprocessing.Event object.
 
     Returns:
         int: Return code.
     """
-
+    exposure_time = 100
     # surface concept tdc specific binning and factors
     TOFFACTOR = 27.432 / (1000 * 4)  # 27.432 ps/bin, tof in ns, data is TDC time sum
     DETBINS = 4900
@@ -199,46 +218,39 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, de
     voltage_pulse_data_tdc = []
     laser_pulse_data_tdc = []
 
-    retcode = bufdatacb.start_measurement(100)
+    retcode = bufdatacb.start_measurement(exposure_time)
     if errorcheck(device, bufdatacb, bufdatacb_raw, retcode) < 0:
         print("Error during read:", retcode, device.lib.sc_get_err_msg(retcode))
         print(f"{initialize_devices.bcolors.FAIL}Error: Restart the TDC manually "
               f"(Turn it On and Off){initialize_devices.bcolors.ENDC}")
         return -1
 
-    # Define a lock
-    # data_lock = threading.Lock()
-    # flag_stop_data_thread = False
-    # Create a thread
-    # data_thread = threading.Thread(target=save_data_thread, args=(variables, xx_list, yy_list, tt_list,
-    #                                                               voltage_data, pulse_data, flag_stop_data_thread))
-    # data_thread.daemon = True
-    #
-    # # Start the thread
-    # data_thread.start()
-
+    loop_time = 1 / variables.ex_freq
     events_detected = 0
     events_detected_tmp = 0
     start_time = time.time()
     pulse_frequency = variables.pulse_frequency * 1000
-    loop_time = 0
     loop_counter = 0
-    save_data_time = time.time()
-    save_path = variables.path
-    specimen_voltage = 0
-    voltage_pulse = 0
-    laser_pulse = 0
-    while not variables.flag_stop_tdc:
+    loop_delay_counter = 0
+
+    chunk_id = 0
+    save_queue = mp.Queue()
+    save_process = mp.Process(target=save_chunk_worker, args=(save_queue,))
+    save_process.start()
+    path = variables.path + "/temp_data/"
+    # Create folder to save the data
+    if not os.path.isdir(path):
+        os.makedirs(path, mode=0o777, exist_ok=True)
+    if not os.path.isdir(path + "chunks/"):
+        os.makedirs(path + "chunks/", mode=0o777, exist_ok=True)
+
+    while not stop_event.is_set():
         start_time_loop = time.time()
         eventtype, data = bufdatacb.queue.get()
-        eventtype_raw, data_raw = bufdatacb_raw.queue.get()
-        while not specimen_voltage_queue.empty():
-            specimen_voltage = specimen_voltage_queue.get()
-        while not voltage_pulse_queue.empty():
-            voltage_pulse = voltage_pulse_queue.get()
-        while not laser_pulse_queue.empty():
-            laser_pulse = laser_pulse_queue.get()
-
+        eventtype_raw, data_raw = bufdatacb_raw.queue.get()  # waits until element available
+        specimen_voltage = variables.specimen_voltage
+        voltage_pulse = variables.pulse_voltage
+        laser_pulse = variables.laser_pulse_energy
         if eventtype == QUEUE_DATA:
             # correct for binning of surface concept
             xx_dif = data["dif1"]
@@ -249,14 +261,25 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, de
                 yy_dif = data["dif2"]
                 tt_dif = data["time"]
                 start_counter.extend(data["start_counter"].tolist())
-                xx_tmp = (((xx_dif - XYBINSHIFT) * XYFACTOR) * 0.1).tolist()  # from mm to in cm by dividing by 10
-                yy_tmp = (((yy_dif - XYBINSHIFT) * XYFACTOR) * 0.1).tolist()  # from mm to in cm by dividing by 10
-                tt_tmp = (tt_dif * TOFFACTOR).tolist()  # in ns
+                xx_tmp = (((xx_dif - XYBINSHIFT) * XYFACTOR) * 0.1)  # from mm to in cm by dividing by 10
+                yy_tmp = (((yy_dif - XYBINSHIFT) * XYFACTOR) * 0.1)  # from mm to in cm by dividing by 10
+                tt_tmp = (tt_dif * TOFFACTOR)  # in ns
+
+                dc_voltage_tmp = np.tile(specimen_voltage, len(xx_tmp))
+
+                x_plot.put(xx_tmp)
+                y_plot.put(yy_tmp)
+                t_plot.put(tt_tmp)
+                main_v_dc_plot.put(dc_voltage_tmp)
+
+                xx_tmp = xx_tmp.tolist()
+                yy_tmp = yy_tmp.tolist()
+                tt_tmp = tt_tmp.tolist()
 
                 xx.extend(xx_tmp)
                 yy.extend(yy_tmp)
                 tt.extend(tt_tmp)
-                dc_voltage_tmp = np.tile(specimen_voltage, len(xx_tmp)).tolist()
+                dc_voltage_tmp = dc_voltage_tmp.tolist()
                 p_voltage_tmp = np.tile(voltage_pulse, len(xx_tmp)).tolist()
                 p_laser_tmp = np.tile(laser_pulse, len(xx_tmp)).tolist()
 
@@ -267,10 +290,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, de
                 voltage_pulse_data.extend(p_voltage_tmp)
                 laser_pulse_data.extend(p_laser_tmp)
 
-                x_plot.put(xx_tmp)
-                y_plot.put(yy_tmp)
-                t_plot.put(tt_tmp)
-                main_v_dc_plot.put(dc_voltage_tmp)
+
 
         if eventtype_raw == QUEUE_DATA:
             channel_data_tmp = data_raw["channel"].tolist()
@@ -283,74 +303,99 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, de
                 voltage_pulse_data_tdc.extend((np.tile(voltage_pulse, len(channel_data_tmp))).tolist())
                 laser_pulse_data_tdc.extend((np.tile(laser_pulse, len(channel_data_tmp))).tolist())
 
-        if time.time() - save_data_time > 120:
-            np.save(save_path + "/x_data.npy", np.array(xx_list))
-            np.save(save_path + "/y_data.npy", np.array(yy_list))
-            np.save(save_path + "/t_data.npy", np.array(tt_list))
-            np.save(save_path + "/voltage_data.npy", np.array(voltage_data))
-            np.save(save_path + "/voltage_pulse_data.npy", np.array(voltage_pulse_data))
-            np.save(save_path + "/laser_pulse_data.npy", np.array(laser_pulse_data))
-            np.save(save_path + "/start_counter.npy", np.array(start_counter))
-            # raw tdc data
-            np.save(save_path + "/channel_data.npy", np.array(channel_data))
-            np.save(save_path + "/time_data.npy", np.array(time_data))
-            np.save(save_path + "/tdc_start_counter.npy", np.array(tdc_start_counter))
-            np.save(save_path + "/voltage_data_tdc.npy", np.array(voltage_data_tdc))
-            np.save(save_path + "/voltage_pulse_data_tdc.npy", np.array(voltage_pulse_data_tdc))
-            np.save(save_path + "/laser_pulse_data_tdc.npy", np.array(laser_pulse_data_tdc))
-
-            save_data_time = time.time()
-            print("Data saved.")
-        # Update the counter
+        if eventtype == QUEUE_ENDOFMEAS:
+            retcode = bufdatacb.start_measurement(exposure_time, retries=10)  # retries is the number of times to retry
+            if retcode < 0:
+                print("Error during read (error code: %s - error msg: %s):" % (retcode,
+                                                                               device.lib.sc_get_err_msg(retcode)))
+                # variables.flag_tdc_failure = True
+                break
 
         # Calculate the detection rate
         # Check if the detection rate interval has passed
         current_time = time.time()
         if current_time - start_time >= 0.5:
             detection_rate = events_detected_tmp * 100 / pulse_frequency
-            detection_rate_t = detection_rate * 2
-            detection_rate_current_queue.put(detection_rate_t)  # to get the rate per second
-            detection_rate_current_plot_queue.put(detection_rate_t)  # to get the rate per second
-            total_ions_queue.put(events_detected)
+            variables.detection_rate_current = detection_rate * 2  # to get the rate per second
+            variables.detection_rate_current_plot = detection_rate * 2  # to get the rate per second
+            variables.total_ions = events_detected
             # Reset the counter and timer
             events_detected_tmp = 0
             start_time = current_time
 
-        elif eventtype == QUEUE_ENDOFMEAS:
-            retcode = bufdatacb.start_measurement(100, retries=10)  # retries is the number of times to retry
-            if retcode < 0:
-                print("Error during read (error code: %s - error msg: %s):" % (retcode,
-                                                                               device.lib.sc_get_err_msg(retcode)))
-                break
+        if len(xx_list) >= CHUNK_SIZE:
+            chunk_id += 1
+            save_queue.put(
+                (chunk_id, path, copy.deepcopy(xx_list), copy.deepcopy(xx), copy.deepcopy(yy_list), copy.deepcopy(yy),
+                 copy.deepcopy(tt_list), copy.deepcopy(tt), copy.deepcopy(voltage_data),
+                 copy.deepcopy(voltage_pulse_data), copy.deepcopy(laser_pulse_data),
+                 copy.deepcopy(start_counter), copy.deepcopy(channel_data), copy.deepcopy(time_data),
+                 copy.deepcopy(tdc_start_counter), copy.deepcopy(voltage_data_tdc),
+                 copy.deepcopy(voltage_pulse_data_tdc), copy.deepcopy(laser_pulse_data_tdc)))
+            xx_list.clear()
+            xx.clear()
+            yy_list.clear()
+            yy.clear()
+            tt_list.clear()
+            tt.clear()
+            voltage_data.clear()
+            voltage_pulse_data.clear()
+            laser_pulse_data.clear()
+            start_counter.clear()
+            channel_data.clear()
+            time_data.clear()
+            tdc_start_counter.clear()
+            voltage_data_tdc.clear()
+            voltage_pulse_data_tdc.clear()
+            laser_pulse_data_tdc.clear()
 
-        # else:  # unknown event
-        #     break
-
-        if time.time() - start_time_loop > 0.1:
-            loop_time += 1
+        if time.time() - start_time_loop > loop_time:
+            loop_delay_counter += 1
         loop_counter += 1
-    flag_stop_data_thread = True
-    print("for %s times loop time took longer than 0.1 second" % loop_time, 'out of %s iteration' % loop_counter)
+
+    print("TDC process: for %s times loop time took longer than %s second" % (loop_delay_counter, loop_time),
+          'out of %s iteration' % loop_counter)
     variables.total_ions = events_detected
     print("TDC Measurement stopped")
-    np.save(save_path + "/x_data.npy", np.array(xx_list))
-    np.save(save_path + "/y_data.npy", np.array(yy_list))
-    np.save(save_path + "/t_data.npy", np.array(tt_list))
-    np.save(save_path + "/voltage_data.npy", np.array(voltage_data))
-    np.save(save_path + "/voltage_pulse_data.npy", np.array(voltage_pulse_data))
-    np.save(save_path + "/laser_pulse_data.npy", np.array(laser_pulse_data))
-    np.save(save_path + "/start_counter.npy", np.array(start_counter))
-    # raw tdc data
-    np.save(save_path + "/channel_data.npy", np.array(channel_data))
-    np.save(save_path + "/time_data.npy", np.array(time_data))
-    np.save(save_path + "/tdc_start_counter.npy", np.array(tdc_start_counter))
-    np.save(save_path + "/voltage_data_tdc.npy", np.array(voltage_data_tdc))
-    np.save(save_path + "/voltage_pulse_data_tdc.npy", np.array(voltage_pulse_data_tdc))
-    np.save(save_path + "/laser_pulse_data_tdc.npy", np.array(laser_pulse_data_tdc))
 
-    variables.extend_to('x', xx)
-    variables.extend_to('y', yy)
-    variables.extend_to('t', tt)
+    if chunk_id > 0:
+        chunk_id += 1
+        # we don't need deepcopy here, we are not going to clear the data
+        save_queue.put(
+            (chunk_id, path, xx_list, xx, yy_list, yy, tt_list, tt, voltage_data, voltage_pulse_data,
+             laser_pulse_data, start_counter, channel_data, time_data, tdc_start_counter,
+             voltage_data_tdc, voltage_pulse_data_tdc, laser_pulse_data_tdc))
+        save_queue.put((None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
+                        None, None))  # Signal the save process to end
+        save_process.join()  # Wait for the save process to finish
+
+        # Load all chunks and extend variables
+        (xx_list, yy_list, tt_list, voltage_data, voltage_pulse_data, laser_pulse_data, start_counter, channel_data,
+         time_data, tdc_start_counter, voltage_data_tdc, voltage_pulse_data_tdc,
+         laser_pulse_data_tdc) = load_and_concatenate_chunks(path, chunk_id)
+
+    save_queue.put((None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
+                    None, None))  # Signal the save process to end
+    save_process.join()  # Wait for the save process to finish
+
+    np.save(variables.path + "/temp_data/x_data.npy", np.array(xx_list))
+    np.save(variables.path + "/temp_data/y_data.npy", np.array(yy_list))
+    np.save(variables.path + "/temp_data/t_data.npy", np.array(tt_list))
+    np.save(variables.path + "/temp_data/voltage_data.npy", np.array(voltage_data))
+    np.save(variables.path + "/temp_data/voltage_pulse_data.npy", np.array(voltage_pulse_data))
+    np.save(variables.path + "/temp_data/laser_pulse_data.npy", np.array(laser_pulse_data))
+    np.save(variables.path + "/temp_data/start_counter.npy", np.array(start_counter))
+
+    np.save(variables.path + "/temp_data/channel_data.npy", np.array(channel_data))
+    np.save(variables.path + "/temp_data/time_data.npy", np.array(time_data))
+    np.save(variables.path + "/temp_data/tdc_start_counter.npy", np.array(tdc_start_counter))
+    np.save(variables.path + "/temp_data/voltage_data_tdc.npy", np.array(voltage_data_tdc))
+    np.save(variables.path + "/temp_data/voltage_pulse_data_tdc.npy", np.array(voltage_pulse_data_tdc))
+    np.save(variables.path + "/temp_data/laser_pulse_data_tdc.npy", np.array(laser_pulse_data_tdc))
+
+    variables.extend_to('x', xx_list)
+    variables.extend_to('y', yy_list)
+    variables.extend_to('t', tt_list)
     variables.extend_to('dld_start_counter', start_counter)
     variables.extend_to('main_v_dc_dld', voltage_data)
     variables.extend_to('main_v_p_dld', voltage_pulse_data)
@@ -373,20 +418,6 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, de
     return 0
 
 
-def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot,
-                       detection_rate_current_queue, detection_rate_current_plot_queue, total_ions_queue,
-                       specimen_voltage_queue, voltage_pulse_queue, laser_pulse_queue):
-    # from line_profiler import LineProfiler
-    #
-    # lp1 = LineProfiler()
-    #
-    # lp1.add_function(run_experiment_measure)
-    #
-    # # Run the profiler
-    # lp1(run_experiment_measure)(variables, x_plot, y_plot, t_plot, main_v_dc_plot, counter_plot, lock)
-    # # Save the profiling result to a file
-    # lp1.dump_stats('./../../experiment_measure.lprof')
+def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, stop_event):
 
-    run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, detection_rate_current_queue,
-                           detection_rate_current_plot_queue, total_ions_queue,
-                           specimen_voltage_queue, voltage_pulse_queue, laser_pulse_queue)
+    run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, stop_event)
