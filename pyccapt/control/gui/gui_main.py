@@ -1055,7 +1055,7 @@ class Ui_PyCCAPT(object):
         self.label_194.setText(_translate("PyCCAPT", "Elapsed Time (s)"))
         self.ex_name.setText(_translate("PyCCAPT", "test"))
         self.label_180.setText(_translate("PyCCAPT", "DC Max. Voltage (V)"))
-        self.label_178.setText(_translate("PyCCAPT", "Control refresh Freq.(Hz)"))
+        self.label_178.setText(_translate("PyCCAPT", "Control Refresh Freq.(Hz)"))
         self.vp_min.setText(_translate("PyCCAPT", "328"))
         self.label_2.setText(_translate("PyCCAPT", "Stop at"))
         self.ex_user.setText(_translate("PyCCAPT", "user"))

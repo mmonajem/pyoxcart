@@ -394,13 +394,13 @@ class Ui_Visualization(object):
 
 	def retranslateUi(self, Visualization):
 		"""
-                        Set the text of the widgets
-                        Args:
-                           Visualization: The main window
+        Set the text of the widgets
+        Args:
+           Visualization: The main window
 
-                        Return:
-                           None
-                        """
+        Return:
+           None
+        """
 		_translate = QtCore.QCoreApplication.translate
 		###
 		# Visualization.setWindowTitle(_translate("Visualization", "Form"))
