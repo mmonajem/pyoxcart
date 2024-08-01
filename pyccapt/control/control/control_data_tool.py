@@ -1,3 +1,5 @@
+import os
+
 import h5py
 import numpy as np
 
@@ -75,11 +77,11 @@ def copy_npy_to_hdf_surface_concept(path, hdf5_file_name):
         Returns:
             None
     """
-    TOFFACTOR = 27.432 / (1000 * 4)  # 27.432 ps/bin, tof in ns, data is TDC time sum
-    DETBINS = 4900
-    BINNINGFAC = 2
-    XYFACTOR = 80 / DETBINS * BINNINGFAC  # XXX mm/bin
-    XYBINSHIFT = DETBINS / BINNINGFAC / 2  # to center detector
+    # TOFFACTOR = 27.432 / (1000 * 4)  # 27.432 ps/bin, tof in ns, data is TDC time sum
+    # DETBINS = 4900
+    # BINNINGFAC = 2
+    # XYFACTOR = 80 / DETBINS * BINNINGFAC  # XXX mm/bin
+    # XYBINSHIFT = DETBINS / BINNINGFAC / 2  # to center detector
 
     hdf5_file_path = path + hdf5_file_name
     high_voltage = np.load(path + 'voltage_data.npy')
@@ -97,9 +99,9 @@ def copy_npy_to_hdf_surface_concept(path, hdf5_file_name):
     start_counter_tdc = np.load(path + 'tdc_start_counter.npy')
     time_data = np.load(path + 'time_data.npy')
 
-    xx_tmp = (((x_det - XYBINSHIFT) * XYFACTOR) * 0.1)  # from mm to in cm by dividing by 10
-    yy_tmp = (((y_det - XYBINSHIFT) * XYFACTOR) * 0.1)  # from mm to in cm by dividing by 10
-    tt_tmp = (t * TOFFACTOR)  # in ns
+    # xx_tmp = (((x_det - XYBINSHIFT) * XYFACTOR) * 0.1)  # from mm to in cm by dividing by 10
+    # yy_tmp = (((y_det - XYBINSHIFT) * XYFACTOR) * 0.1)  # from mm to in cm by dividing by 10
+    # tt_tmp = (t * TOFFACTOR)  # in ns
 
     with h5py.File(hdf5_file_path, 'r+') as file:
         del file['dld/t']
@@ -109,9 +111,9 @@ def copy_npy_to_hdf_surface_concept(path, hdf5_file_name):
         del file['dld/laser_pulse']
         del file['dld/high_voltage']
         del file['dld/start_counter']
-        file.create_dataset('dld/t', data=tt_tmp, dtype=np.float64)
-        file.create_dataset('dld/x', data=xx_tmp, dtype=np.float64)
-        file.create_dataset('dld/y', data=yy_tmp, dtype=np.float64)
+        file.create_dataset('dld/t', data=t, dtype=np.float64)
+        file.create_dataset('dld/x', data=x_det, dtype=np.float64)
+        file.create_dataset('dld/y', data=y_det, dtype=np.float64)
         file.create_dataset('dld/voltage_pulse', data=voltage_pulse, dtype=np.float64)
         file.create_dataset('dld/laser_pulse', data=laser_pulse, dtype=np.float64)
         file.create_dataset('dld/high_voltage', data=high_voltage, dtype=np.float64)
@@ -126,18 +128,78 @@ def copy_npy_to_hdf_surface_concept(path, hdf5_file_name):
         file.create_dataset('tdc/channel', data=channel, dtype=np.uint32)
         file.create_dataset('tdc/high_voltage', data=high_voltage_tdc, dtype=np.float64)
         file.create_dataset('tdc/voltage_pulse', data=voltage_pulse_tdc, dtype=np.float64)
-        file.create_dataset('tdc/voltage_laser', data=laser_pulse_tdc, dtype=np.float64)
+        file.create_dataset('tdc/laser_pulse', data=laser_pulse_tdc, dtype=np.float64)
         file.create_dataset('tdc/start_counter', data=start_counter_tdc, dtype=np.uint64)
         file.create_dataset('tdc/time_data', data=time_data, dtype=np.uint64)
 
 
+def load_and_copy_chunks_to_hdf(path, hdf5_file_path, chunk_id):
+    def load_data(attr_name):
+        all_data = []
+        for i in range(1, chunk_id + 1):
+            chunk_file = path + f"/{attr_name}_chunk_{i}.npy"
+            if os.path.exists(chunk_file):
+                all_data.extend(np.load(chunk_file).tolist())
+            else:
+                print(f"File '{chunk_file}' not found.")
+        return all_data
+
+    xx_list = load_data("x_data")
+    yy_list = load_data("y_data")
+    tt_list = load_data("t_data")
+    voltage_data = load_data("voltage_data")
+    voltage_pulse_data = load_data("voltage_pulse_data")
+    laser_pulse_data = load_data("laser_pulse_data")
+    start_counter = load_data("start_counter")
+
+    channel_data = load_data("channel_data")
+    time_data = load_data("time_data")
+    tdc_start_counter = load_data("tdc_start_counter")
+    voltage_data_tdc = load_data("voltage_data_tdc")
+    voltage_pulse_data_tdc = load_data("voltage_pulse_data_tdc")
+    laser_pulse_data_tdc = load_data("laser_pulse_data_tdc")
+
+    with h5py.File(hdf5_file_path, 'r+') as file:
+        del file['dld/t']
+        del file['dld/x']
+        del file['dld/y']
+        del file['dld/voltage_pulse']
+        del file['dld/laser_pulse']
+        del file['dld/high_voltage']
+        del file['dld/start_counter']
+        file.create_dataset('dld/t', data=tt_list, dtype=np.float64)
+        file.create_dataset('dld/x', data=xx_list, dtype=np.float64)
+        file.create_dataset('dld/y', data=yy_list, dtype=np.float64)
+        file.create_dataset('dld/voltage_pulse', data=voltage_pulse_data, dtype=np.float64)
+        file.create_dataset('dld/laser_pulse', data=laser_pulse_data, dtype=np.float64)
+        file.create_dataset('dld/high_voltage', data=voltage_data, dtype=np.float64)
+        file.create_dataset('dld/start_counter', data=start_counter, dtype=np.uint64)
+
+        del file['tdc/channel']
+        del file['tdc/high_voltage']
+        del file['tdc/voltage_pulse']
+        del file['tdc/laser_pulse']
+        del file['tdc/start_counter']
+        del file['tdc/time_data']
+        file.create_dataset('tdc/channel', data=channel_data, dtype=np.uint32)
+        file.create_dataset('tdc/high_voltage', data=voltage_data_tdc, dtype=np.float64)
+        file.create_dataset('tdc/voltage_pulse', data=voltage_pulse_data_tdc, dtype=np.float64)
+        file.create_dataset('tdc/laser_pulse', data=laser_pulse_data_tdc, dtype=np.float64)
+        file.create_dataset('tdc/start_counter', data=tdc_start_counter, dtype=np.uint64)
+        file.create_dataset('tdc/time_data', data=time_data, dtype=np.uint64)
+
+
+
+
+
 if __name__ == '__main__':
-    path = 'D:/pyccapt/pyccapt/data/1887_Jul-03-2024_15-12_Al/'
-    name = '1887_Jul-03-2024_15-12_Al.h5'
+    name = '1951_Jul-12-2024_11-33_test'
+    path = 'D:/pyccapt/pyccapt/data/%s/' % name
+    name = '%s.h5' % name
     # copy_npy_to_hdf(path, name)
 
     # rename_subcategory(path + name, old_name='dld', new_name='dld_1')
-    copy_npy_to_hdf_surface_concept(path, name)
-    # rename_subcategory(path + name, old_name='dld/AbsoluteTimeStamp', new_name='dld/start_counter')
-    # rename_subcategory(path + name, old_name='dld/pulse_voltage', new_name='dld/pulse')
+    # copy_npy_to_hdf_surface_concept(path+'/temp_data/', name)
+    # rename_subcategory(path + name, old_name='tdc/voltage_laser', new_name='tdc/laser_pulse')
+    load_and_copy_chunks_to_hdf(path + '/temp_data/chunks/', path + name, 106)
     print('Done')

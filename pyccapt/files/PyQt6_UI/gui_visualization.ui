@@ -7,131 +7,131 @@
                 <x>0</x>
                 <y>0</y>
                 <width>808</width>
-                <height>558</height>
+                <height>559</height>
             </rect>
         </property>
         <property name="windowTitle">
             <string>Form</string>
         </property>
-        <layout class="QGridLayout" name="gridLayout_3">
+        <layout class="QGridLayout" name="gridLayout_2">
             <item row="0" column="0">
-                <layout class="QGridLayout" name="gridLayout_2">
+                <layout class="QGridLayout" name="gridLayout">
                     <item row="0" column="0">
-                        <layout class="QGridLayout" name="gridLayout">
-                            <item row="0" column="0">
-                                <layout class="QVBoxLayout" name="verticalLayout_3">
-                                    <item>
-                                        <widget class="QLabel" name="label_200">
-                                            <property name="font">
-                                                <font>
-                                                    <bold>true</bold>
-                                                </font>
-                                            </property>
-                                            <property name="text">
-                                                <string>Voltage</string>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                    <item>
-                                        <widget class="QGraphicsView" name="vdc_time">
-                                            <property name="sizePolicy">
-                                                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                                    <horstretch>1</horstretch>
-                                                    <verstretch>1</verstretch>
-                                                </sizepolicy>
-                                            </property>
-                                            <property name="minimumSize">
-                                                <size>
-                                                    <width>250</width>
-                                                    <height>250</height>
-                                                </size>
-                                            </property>
-                                            <property name="styleSheet">
-                                                <string notr="true">QWidget{
+                        <layout class="QVBoxLayout" name="verticalLayout_3">
+                            <item>
+                                <widget class="QLabel" name="label_200">
+                                    <property name="font">
+                                        <font>
+                                            <bold>true</bold>
+                                        </font>
+                                    </property>
+                                    <property name="text">
+                                        <string>Voltage</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QGraphicsView" name="vdc_time">
+                                    <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                            <horstretch>1</horstretch>
+                                            <verstretch>1</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>250</width>
+                                            <height>250</height>
+                                        </size>
+                                    </property>
+                                    <property name="styleSheet">
+                                        <string notr="true">QWidget{
                                                     border: 0.5px solid gray;
                                                     }
                                                 </string>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                    <item>
-                                        <widget class="QLabel" name="label_207">
-                                            <property name="minimumSize">
-                                                <size>
-                                                    <width>0</width>
-                                                    <height>25</height>
-                                                </size>
-                                            </property>
-                                            <property name="font">
-                                                <font>
-                                                    <bold>true</bold>
-                                                </font>
-                                            </property>
-                                            <property name="text">
-                                                <string>Spectrum</string>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                </layout>
+                                    </property>
+                                </widget>
                             </item>
-                            <item row="0" column="1">
-                                <layout class="QVBoxLayout" name="verticalLayout_2">
-                                    <item>
-                                        <widget class="QLabel" name="label_201">
-                                            <property name="font">
-                                                <font>
-                                                    <bold>true</bold>
-                                                </font>
-                                            </property>
-                                            <property name="text">
-                                                <string>Detection Rate</string>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                    <item>
-                                        <widget class="QGraphicsView" name="detection_rate_viz">
-                                            <property name="sizePolicy">
-                                                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                                    <horstretch>1</horstretch>
-                                                    <verstretch>1</verstretch>
-                                                </sizepolicy>
-                                            </property>
-                                            <property name="minimumSize">
-                                                <size>
-                                                    <width>250</width>
-                                                    <height>250</height>
-                                                </size>
-                                            </property>
-                                            <property name="styleSheet">
-                                                <string notr="true">QWidget{
+                            <item>
+                                <widget class="QLabel" name="label_207">
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>0</width>
+                                            <height>25</height>
+                                        </size>
+                                    </property>
+                                    <property name="font">
+                                        <font>
+                                            <bold>true</bold>
+                                        </font>
+                                    </property>
+                                    <property name="text">
+                                        <string>Spectrum</string>
+                                    </property>
+                                </widget>
+                            </item>
+                        </layout>
+                    </item>
+                    <item row="0" column="1">
+                        <layout class="QVBoxLayout" name="verticalLayout_2">
+                            <item>
+                                <widget class="QLabel" name="label_201">
+                                    <property name="font">
+                                        <font>
+                                            <bold>true</bold>
+                                        </font>
+                                    </property>
+                                    <property name="text">
+                                        <string>Detection Rate</string>
+                                    </property>
+                                </widget>
+                            </item>
+                            <item>
+                                <widget class="QGraphicsView" name="detection_rate_viz">
+                                    <property name="sizePolicy">
+                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                            <horstretch>1</horstretch>
+                                            <verstretch>1</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>250</width>
+                                            <height>250</height>
+                                        </size>
+                                    </property>
+                                    <property name="styleSheet">
+                                        <string notr="true">QWidget{
                                             border: 0.5px solid gray;
                                             }
                                         </string>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                    <item>
-                                        <widget class="QPushButton" name="detection_rate_range_switch">
-                                            <property name="minimumSize">
-                                                <size>
-                                                    <width>0</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                            <property name="maximumSize">
-                                                <size>
-                                                    <width>100</width>
-                                                    <height>16777215</height>
-                                                </size>
-                                            </property>
-                                            <property name="text">
-                                                <string>Short range</string>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                </layout>
+                                    </property>
+                                </widget>
                             </item>
-                            <item row="0" column="2">
+                            <item>
+                                <widget class="QPushButton" name="detection_rate_range_switch">
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>0</width>
+                                            <height>20</height>
+                                        </size>
+                                    </property>
+                                    <property name="maximumSize">
+                                        <size>
+                                            <width>100</width>
+                                            <height>16777215</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string>Short range</string>
+                                    </property>
+                                </widget>
+                            </item>
+                        </layout>
+                    </item>
+                    <item row="0" column="2">
+                        <layout class="QVBoxLayout" name="verticalLayout_4">
+                            <item>
                                 <layout class="QVBoxLayout" name="verticalLayout">
                                     <item>
                                         <widget class="QLabel" name="label_206">
@@ -141,7 +141,7 @@
                                                 </font>
                                             </property>
                                             <property name="text">
-                                                <string>Detector Heatmap</string>
+                                                <string>Detector</string>
                                             </property>
                                         </widget>
                                     </item>
@@ -167,6 +167,10 @@
                                             </property>
                                         </widget>
                                     </item>
+                                </layout>
+                            </item>
+                            <item>
+                                <layout class="QHBoxLayout" name="horizontalLayout_2">
                                     <item>
                                         <widget class="QPushButton" name="reset_heatmap_v">
                                             <property name="minimumSize">
@@ -186,36 +190,68 @@
                                             </property>
                                         </widget>
                                     </item>
+                                    <item>
+                                        <widget class="QPushButton" name="heatmap_fdm_switch">
+                                            <property name="minimumSize">
+                                                <size>
+                                                    <width>100</width>
+                                                    <height>20</height>
+                                                </size>
+                                            </property>
+                                            <property name="maximumSize">
+                                                <size>
+                                                    <width>60</width>
+                                                    <height>16777215</height>
+                                                </size>
+                                            </property>
+                                            <property name="text">
+                                                <string>Hitmap/FDM</string>
+                                            </property>
+                                        </widget>
+                                    </item>
+                                    <item>
+                                        <spacer name="horizontalSpacer_3">
+                                            <property name="orientation">
+                                                <enum>Qt::Horizontal</enum>
+                                            </property>
+                                            <property name="sizeHint" stdset="0">
+                                                <size>
+                                                    <width>40</width>
+                                                    <height>20</height>
+                                                </size>
+                                            </property>
+                                        </spacer>
+                                    </item>
                                 </layout>
-                            </item>
-                            <item row="1" column="0" colspan="3">
-                                <widget class="QGraphicsView" name="histogram">
-                                    <property name="sizePolicy">
-                                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                                            <horstretch>1</horstretch>
-                                            <verstretch>1</verstretch>
-                                        </sizepolicy>
-                                    </property>
-                                    <property name="minimumSize">
-                                        <size>
-                                            <width>750</width>
-                                            <height>150</height>
-                                        </size>
-                                    </property>
-                                    <property name="styleSheet">
-                                        <string notr="true">QWidget{
-                                            border: 0.5px solid gray;
-                                            }
-                                        </string>
-                                    </property>
-                                    <property name="frameShape">
-                                        <enum>QFrame::NoFrame</enum>
-                                    </property>
-                                </widget>
                             </item>
                         </layout>
                     </item>
-                    <item row="1" column="0">
+                    <item row="1" column="0" colspan="3">
+                        <widget class="QGraphicsView" name="histogram">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                    <horstretch>1</horstretch>
+                                    <verstretch>1</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>750</width>
+                                    <height>150</height>
+                                </size>
+                            </property>
+                            <property name="styleSheet">
+                                <string notr="true">QWidget{
+                                            border: 0.5px solid gray;
+                                            }
+                                        </string>
+                            </property>
+                            <property name="frameShape">
+                                <enum>QFrame::NoFrame</enum>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="2" column="0" colspan="3">
                         <layout class="QHBoxLayout" name="horizontalLayout">
                             <item>
                                 <widget class="QPushButton" name="spectrum_switch">
@@ -319,7 +355,7 @@
                                         </string>
                                     </property>
                                     <property name="text">
-                                        <string>200</string>
+                                        <string>400</string>
                                     </property>
                                 </widget>
                             </item>
@@ -387,11 +423,9 @@
     </widget>
     <tabstops>
         <tabstop>detection_rate_range_switch</tabstop>
-        <tabstop>reset_heatmap_v</tabstop>
         <tabstop>spectrum_switch</tabstop>
         <tabstop>spectrum_last_events_switch</tabstop>
         <tabstop>num_last_events</tabstop>
-        <tabstop>max_mc</tabstop>
         <tabstop>max_tof</tabstop>
         <tabstop>vdc_time</tabstop>
         <tabstop>detection_rate_viz</tabstop>

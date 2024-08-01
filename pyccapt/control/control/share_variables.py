@@ -56,6 +56,7 @@ class Variables:
         # You have to base on your own setup to change this value.
         self.ns.pulse_amp_per_supply_voltage = conf[
             'pulse_amp_per_supply_voltage']  # It is the pulse amplitude per supply voltage.
+        self.ns.max_laser_power = conf['max_laser_power']
         self.ns.hdf5_path = ''
         self.ns.flag_main_gate = False
         self.ns.flag_load_gate = False
@@ -447,6 +448,15 @@ class Variables:
     def pulse_amp_per_supply_voltage(self, value):
         with self.lock:
             self.ns.pulse_amp_per_supply_voltage = value
+
+    @property
+    def max_laser_power(self):
+        return self.ns.max_laser_power
+
+    @max_laser_power.setter
+    def max_laser_power(self, value):
+        with self.lock:
+            self.ns.max_laser_power = value
 
     @property
     def hdf5_path(self):

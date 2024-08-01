@@ -69,10 +69,10 @@ def fetch_dataset_from_dld_grp(filename: str, extract_mode='dld') -> pd.DataFram
             high_voltage = hdf5Data['tdc/high_voltage'].to_numpy()
             if 'tdc/pulse' in hdf5Data:
                 voltage_pulse = hdf5Data['tdc/pulse'].to_numpy()
-            elif 'tdc/pulse_voltage' in hdf5Data:
+            elif 'tdc/voltage_pulse' in hdf5Data:
                 voltage_pulse = hdf5Data['tdc/voltage_pulse'].to_numpy()
             else:
-                raise KeyError('Neither dld/pulse nor dld/voltage_pulse exists in the dataset')
+                raise KeyError('Neither tdc/pulse nor tdc/voltage_pulse exists in the dataset')
             if 'tdc/laser_pulse' in hdf5Data:
                 laser_pulse = hdf5Data['tdc/laser_pulse'].to_numpy()
             else:
@@ -246,7 +246,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
 
 def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_size=(5, 4), variables=None,
                   range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[],
-                  range_vol=[], data_crop=False, draw_circle=False, save=False, figname=''):
+                  range_vol=[], data_crop=False, draw_circle=False, mode_selector='circle', save=False, figname=''):
     """
     Plot and crop the FDM with the option to select a region of interest.
 
@@ -266,6 +266,7 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
         range_vol: Range of voltage
         figure_size: Size of the plot
         draw_circle: Flag to enable circular region of interest selection
+        mode_selector: Mode of selection (circle or ellipse)
         save: Flag to choose whether to save the plot or not
         data_crop: Flag to control whether only the plot is shown or cropping functionality is enabled
         figname: Name of the figure to be saved
@@ -353,7 +354,7 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
 
     if variables is not None:
         if data_crop:
-            elliptical_shape_selector(ax1, fig1, variables)
+            elliptical_shape_selector(ax1, fig1, variables, mode=mode_selector)
         if draw_circle:
             print('x:', variables.selected_x_fdm, 'y:', variables.selected_y_fdm, 'roi:', variables.roi_fdm)
             circ = Circle((variables.selected_x_fdm, variables.selected_y_fdm), variables.roi_fdm, fill=True,
@@ -420,7 +421,7 @@ def crop_dataset(dld_master_dataframe, variables):
     return data_crop
 
 
-def elliptical_shape_selector(axisObject, figureObject, variables):
+def elliptical_shape_selector(axisObject, figureObject, variables, mode='circle'):
     """
     Enable the creation of an elliptical box to select the region of interest.
 
@@ -428,11 +429,12 @@ def elliptical_shape_selector(axisObject, figureObject, variables):
         axisObject: Object to create the axis of the plot
         figureObject: Object to create the figure
         variables: Variables object
+        mode: Mode of selection (circle or ellipse)
 
     Returns:
         None
     """
-    try:
+    if mode == 'circle':
         selectors_data.toggle_selector.ES = selectors_data.CircleSelector(axisObject,
                                                                           lambda eclick,
                                                                                  erelease: selectors_data.onselect(
@@ -444,7 +446,7 @@ def elliptical_shape_selector(axisObject, figureObject, variables):
                                                                           minspanx=1, minspany=1,
                                                                           spancoords='pixels',
                                                                           interactive=True)
-    except AttributeError:
+    elif mode == 'ellipse':
         selectors_data.toggle_selector.ES = EllipseSelector(axisObject,
                                                             lambda eclick, erelease: selectors_data.onselect(eclick,
                                                                                                              erelease,

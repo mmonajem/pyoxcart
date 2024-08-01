@@ -48,7 +48,8 @@ Counter Source: {variables.counter_source}
 Email: {variables.email}
 -----------------------------------------------------
 Device name: {conf['device_name']}
-t_0 (Sec): {conf['t_0']}
+t_0_laser (Sec): {conf['t_0_laser']}
+t_0_voltage (Sec): {conf['t_0_voltage']}
 flight path distance (cm): {conf['flight_path_length']}
 TDC model: {conf['tdc_model']}
 """

@@ -36,6 +36,7 @@ control_deps = [
     "h5py",
     "tables",
     "mcculw",
+    "simple-pid",
 ]
 
 calibration_deps = [
