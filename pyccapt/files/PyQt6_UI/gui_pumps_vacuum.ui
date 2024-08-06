@@ -545,7 +545,7 @@
                                 </string>
                             </property>
                             <property name="text">
-                                <string>Super User</string>
+                                <string>Override Access</string>
                             </property>
                         </widget>
                     </item>

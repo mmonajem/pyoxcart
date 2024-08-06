@@ -66,6 +66,7 @@ class Ui_Baking(object):
 		Returns:
 			None
 		"""
+		Baking.setWindowIcon(QtGui.QIcon('./files/logo.png'))
 		Baking.setObjectName("Baking")
 		Baking.resize(820, 757)
 		self.gridLayout_2 = QtWidgets.QGridLayout(Baking)

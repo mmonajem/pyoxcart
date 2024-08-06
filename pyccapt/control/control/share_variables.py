@@ -44,6 +44,7 @@ class Variables:
         self.ns.max_ions = 0
         self.ns.ex_freq = 0
         self.ns.user_name = ''
+        self.ns.electrode = ''
         self.ns.vdc_min = 0
         self.ns.vdc_max = 0
         self.ns.vdc_step_up = 0
@@ -61,7 +62,6 @@ class Variables:
         self.ns.flag_main_gate = False
         self.ns.flag_load_gate = False
         self.ns.flag_cryo_gate = False
-        self.ns.hit_display = 0
         self.ns.email = ''
         self.ns.light = False
         self.ns.alignment_window = False
@@ -125,7 +125,6 @@ class Variables:
         self.ns.flag_tdc_failure = False
         self.ns.plot_clear_flag = False
         self.ns.clear_index_save_image = False
-        self.ns.hitmap_plot_size = 1.0
         self.ns.number_of_experiment_in_text_line = 0
         self.ns.index_experiment_in_text_line = 0
         self.ns.flag_cameras_take_screenshot = False
@@ -369,6 +368,15 @@ class Variables:
             self.ns.user_name = value
 
     @property
+    def electrode(self):
+        return self.ns.electrode
+
+    @electrode.setter
+    def electrode(self, value):
+        with self.lock:
+            self.ns.electrode = value
+
+    @property
     def vdc_min(self):
         return self.ns.vdc_min
 
@@ -494,14 +502,6 @@ class Variables:
         with self.lock:
             self.ns.flag_cryo_gate = value
 
-    @property
-    def hit_display(self):
-        return self.ns.hit_display
-
-    @hit_display.setter
-    def hit_display(self, value):
-        with self.lock:
-            self.ns.hit_display = value
 
     @property
     def email(self):
@@ -1043,14 +1043,6 @@ class Variables:
         with self.lock:
             self.ns.clear_index_save_image = value
 
-    @property
-    def hitmap_plot_size(self):
-        return self.ns.hitmap_plot_size
-
-    @hitmap_plot_size.setter
-    def hitmap_plot_size(self, value):
-        with self.lock:
-            self.ns.hitmap_plot_size = value
 
     @property
     def number_of_experiment_in_text_line(self):

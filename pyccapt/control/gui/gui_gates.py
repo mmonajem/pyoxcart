@@ -261,7 +261,6 @@ class Ui_Gates(object):
                     print('The gates control is off')
 
         # Main gate
-
         if self.flag_super_user or (
                 not self.variables.start_flag and gate_num == 1 and not self.variables.flag_load_gate \
                 and not self.variables.flag_cryo_gate and self.variables.flag_pump_load_lock):

@@ -566,7 +566,7 @@ Return:
 			self.vacuum_load_lock_back.display('Error')
 		else:
 			self.vacuum_load_lock_back.display('{:.2e}'.format(value))
-		if value > 0.01:
+		if value > 0.1:
 			self.label_213.setStyleSheet("color: red")
 		else:
 			self.label_213.setStyleSheet("color: black")

@@ -213,7 +213,8 @@ class APT_Exp_Control:
         #         f.write(str(1))  # Current time and date
         now = datetime.datetime.now()
         self.variables.exp_name = "%s_" % self.variables.counter + \
-                                  now.strftime("%b-%d-%Y_%H-%M") + "_%s" % self.variables.hdf5_data_name
+                                  now.strftime("%b-%d-%Y_%H-%M") + "_%s" % self.variables.electrode + "_%s" % \
+                                  self.variables.hdf5_data_name
         p = os.path.abspath(os.path.join(__file__, "../../.."))
         self.variables.path = os.path.join(p, 'data\\%s' % self.variables.exp_name)
         self.variables.path_meta = self.variables.path + '\\meta_data\\'
@@ -360,7 +361,10 @@ class APT_Exp_Control:
                     self.pulse_frequency = self.variables.pulse_frequency * 1000
                     pulse_frequency_tmp = self.pulse_frequency
                     self.counts_target = self.pulse_frequency * self.detection_rate / 100
-                    signal_generator.change_frequency_signal_generator(self.variables, self.pulse_frequency / 1000)
+                    if self.pulse_mode in ['Voltage', 'VoltageLaser']:
+                        signal_generator.change_frequency_signal_generator(self.variables, self.pulse_frequency / 1000)
+                    elif self.pulse_mode in ['Laser', 'VoltageLaser']:
+                        pass
 
                 if self.detection_rate != self.variables.detection_rate:
                     self.detection_rate = self.variables.detection_rate

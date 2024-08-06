@@ -70,22 +70,25 @@ class CameraWorker(QObject):
         Return:
             None
         """
-        self.exposure_time_cam_1 = 400000
-        self.exposure_time_cam_1_light = 10000
-        self.exposure_time_cam_2 = 1000000
-        self.exposure_time_cam_2_light = 20000
-        self.exposure_time_cam_3 = 400000
-        self.exposure_time_cam_3_light = 10000
+        if not self.exposure_auto:
+            self.exposure_time_cam_1 = 400000
+            self.exposure_time_cam_1_light = 10000
+            self.exposure_time_cam_2 = 1000000
+            self.exposure_time_cam_2_light = 20000
+            self.exposure_time_cam_3 = 400000
+            self.exposure_time_cam_3_light = 10000
 
-        self.flag_default_exposure_time = True
-        if self.variables.light:
-            exposure_times = [self.exposure_time_cam_1_light, self.exposure_time_cam_2_light,
-                              self.exposure_time_cam_3_light]
-            self.emitter.cams_exposure_time_default.emit(exposure_times)
+            self.flag_default_exposure_time = True
+            if self.variables.light:
+                exposure_times = [self.exposure_time_cam_1_light, self.exposure_time_cam_2_light,
+                                  self.exposure_time_cam_3_light]
+                self.emitter.cams_exposure_time_default.emit(exposure_times)
+            else:
+                exposure_times = [self.exposure_time_cam_1, self.exposure_time_cam_2,
+                                  self.exposure_time_cam_3]
+                self.emitter.cams_exposure_time_default.emit(exposure_times)
         else:
-            exposure_times = [self.exposure_time_cam_1, self.exposure_time_cam_2,
-                              self.exposure_time_cam_3]
-            self.emitter.cams_exposure_time_default.emit(exposure_times)
+            print('Cannot set the default exposure time when auto exposure is on')
 
     @pyqtSlot(bool)
     def set_auto_exposure_time(self):
@@ -100,8 +103,10 @@ class CameraWorker(QObject):
         """
         if not self.exposure_auto:
             self.exposure_mode = 'Continuous'
+            self.exposure_auto = True
         elif self.exposure_auto:
             self.exposure_mode = 'Off'
+            self.exposure_auto = False
 
     @pyqtSlot(int)
     def set_exposure_time_1(self, exposure_time):
@@ -286,17 +291,17 @@ class CameraWorker(QObject):
         Return:
             None
         """
-        try:
-            if self.variables.light:
-                # self.cameras[0].Open()
-                self.cameras[0].ExposureTime.SetValue(self.exposure_time_cam_1_light)
-                # self.cameras[1].Open()
-                self.cameras[1].ExposureTime.SetValue(self.exposure_time_cam_2_light)
-            else:
-                # self.cameras[0].Open()
-                self.cameras[0].ExposureTime.SetValue(self.exposure_time_cam_1)
-                # self.cameras[1].Open()
-                self.cameras[1].ExposureTime.SetValue(self.exposure_time_cam_2)
-        except Exception as e:
-            print(f"Error in switching the light: {e}")
-
+        if not self.exposure_auto:
+            try:
+                if self.variables.light:
+                    # self.cameras[0].Open()
+                    self.cameras[0].ExposureTime.SetValue(self.exposure_time_cam_1_light)
+                    # self.cameras[1].Open()
+                    self.cameras[1].ExposureTime.SetValue(self.exposure_time_cam_2_light)
+                else:
+                    # self.cameras[0].Open()
+                    self.cameras[0].ExposureTime.SetValue(self.exposure_time_cam_1)
+                    # self.cameras[1].Open()
+                    self.cameras[1].ExposureTime.SetValue(self.exposure_time_cam_2)
+            except Exception as e:
+                print(f"Error in switching the light: {e}")

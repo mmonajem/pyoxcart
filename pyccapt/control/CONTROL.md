@@ -13,6 +13,9 @@ applications.
 
 ![plot](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/advance_gui.png)
 
+The electrode Json file is a file that contains the list of avaliable electrodes in the instrument.
+This will be helpful to keep track of the electrode that user use for each experiment.
+
 ## Data structures
 
 For the data structure you can check the [data structure](DATA_STRUCTURE.md) file.

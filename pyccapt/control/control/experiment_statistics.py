@@ -22,6 +22,7 @@ Experiment Parameters and Statistics
 Experiment Timestamp: {current_datetime}
 Username: {variables.user_name}
 Experiment Name: {variables.ex_name}
+Electrode Name: {variables.electrode}
 Maximum Experiment Time: {variables.ex_time} seconds
 Maximum Number of Ions: {variables.max_ions}
 Control Refresh Frequency: {variables.ex_freq} Hz

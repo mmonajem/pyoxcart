@@ -18,19 +18,19 @@ from pyccapt.control.devices import initialize_devices
 class Ui_Visualization(object):
 
 	def __init__(self, variables, conf, x_plot, y_plot, t_plot, main_v_dc_plot):
+		"""
+		Constructor for the Visualization UI class.
+
+		Args:
+			variables (object): Global experiment variables.
+			conf (dict): Configuration settings.
+			x_plot (multiprocessing.Array): Array for storing the x-axis values of the mass spectrum.
+			y_plot (multiprocessing.Array): Array for storing the y-axis values of the mass spectrum.
+			t_plot (multiprocessing.Array): Array for storing the time values of the mass spectrum.
+			main_v_dc_plot (multiprocessing.Array): Array for storing the main voltage values of the mass spectrum.
 
 		"""
-        Constructor for the Visualization UI class.
-
-        Args:
-            variables (object): Global experiment variables.
-            conf (dict): Configuration settings.
-            x_plot (multiprocessing.Array): Array for storing the x-axis values of the mass spectrum.
-            y_plot (multiprocessing.Array): Array for storing the y-axis values of the mass spectrum.
-            t_plot (multiprocessing.Array): Array for storing the time values of the mass spectrum.
-            main_v_dc_plot (multiprocessing.Array): Array for storing the main voltage values of the mass spectrum.
-
-        """
+		self.num_hit_display = 0
 		self.bins_detector = (256, 256)
 		detector_diameter = conf["detector_diameter"]
 		detector_diameter = detector_diameter / 2
@@ -72,7 +72,6 @@ class Ui_Visualization(object):
 		self.hist_mc = np.zeros(len(self.bins_mc) - 1)
 		self.hist_tof = np.zeros(len(self.bins_tof) - 1)
 
-
 		self.update_timer = QTimer()  # Create a QTimer for updating graphs
 		self.update_timer.timeout.connect(self.update_graphs)  # Connect it to the update_graphs slot
 		self.visualization_window = None  # In♠itialize the attribute
@@ -82,25 +81,41 @@ class Ui_Visualization(object):
         Setup the UI for the Visualization window.
 
         Args:
-            Visualization (QMainWindow): Visualization window.
+        Visualization (QMainWindow): Visualization window.
 
         Return:
-            None
+        None
         """
 		Visualization.setObjectName("Visualization")
-		Visualization.resize(808, 559)
-		self.gridLayout_2 = QtWidgets.QGridLayout(Visualization)
-		self.gridLayout_2.setObjectName("gridLayout_2")
-		self.gridLayout = QtWidgets.QGridLayout()
-		self.gridLayout.setObjectName("gridLayout")
-		self.verticalLayout_3 = QtWidgets.QVBoxLayout()
-		self.verticalLayout_3.setObjectName("verticalLayout_3")
+		Visualization.resize(822, 647)
+		self.gridLayout_6 = QtWidgets.QGridLayout(Visualization)
+		self.gridLayout_6.setObjectName("gridLayout_6")
+		self.gridLayout_5 = QtWidgets.QGridLayout()
+		self.gridLayout_5.setObjectName("gridLayout_5")
+		self.gridLayout_4 = QtWidgets.QGridLayout()
+		self.gridLayout_4.setObjectName("gridLayout_4")
 		self.label_200 = QtWidgets.QLabel(parent=Visualization)
 		font = QtGui.QFont()
 		font.setBold(True)
 		self.label_200.setFont(font)
 		self.label_200.setObjectName("label_200")
-		self.verticalLayout_3.addWidget(self.label_200)
+		self.gridLayout_4.addWidget(self.label_200, 0, 0, 1, 1)
+		self.voltage = QtWidgets.QLineEdit(parent=Visualization)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.voltage.sizePolicy().hasHeightForWidth())
+		self.voltage.setSizePolicy(sizePolicy)
+		self.voltage.setMinimumSize(QtCore.QSize(100, 20))
+		self.voltage.setStyleSheet("QLineEdit{\n"
+		                           "                                            background: rgb(223,223,233)\n"
+		                           "                                            }\n"
+		                           "                                        ")
+		self.voltage.setObjectName("voltage")
+		self.gridLayout_4.addWidget(self.voltage, 0, 1, 1, 1)
+		spacerItem = QtWidgets.QSpacerItem(26, 17, QtWidgets.QSizePolicy.Policy.Expanding,
+		                                   QtWidgets.QSizePolicy.Policy.Minimum)
+		self.gridLayout_4.addItem(spacerItem, 0, 2, 1, 1)
 		####
 		# self.vdc_time = QtWidgets.QGraphicsView(parent=Visualization)
 		self.vdc_time = pg.PlotWidget(parent=Visualization)
@@ -118,23 +133,37 @@ class Ui_Visualization(object):
 		                            "                                                    }\n"
 		                            "                                                ")
 		self.vdc_time.setObjectName("vdc_time")
-		self.verticalLayout_3.addWidget(self.vdc_time)
-		self.label_207 = QtWidgets.QLabel(parent=Visualization)
-		self.label_207.setMinimumSize(QtCore.QSize(0, 25))
-		font = QtGui.QFont()
-		font.setBold(True)
-		self.label_207.setFont(font)
-		self.label_207.setObjectName("label_207")
-		self.verticalLayout_3.addWidget(self.label_207)
-		self.gridLayout.addLayout(self.verticalLayout_3, 0, 0, 1, 1)
-		self.verticalLayout_2 = QtWidgets.QVBoxLayout()
-		self.verticalLayout_2.setObjectName("verticalLayout_2")
+		self.gridLayout_4.addWidget(self.vdc_time, 1, 0, 1, 3)
+		self.dc_hold = QtWidgets.QPushButton(parent=Visualization)
+		self.dc_hold.setMinimumSize(QtCore.QSize(100, 20))
+		self.dc_hold.setMaximumSize(QtCore.QSize(100, 16777215))
+		self.dc_hold.setObjectName("dc_hold")
+		self.gridLayout_4.addWidget(self.dc_hold, 2, 0, 1, 2)
+		self.gridLayout_5.addLayout(self.gridLayout_4, 0, 0, 1, 1)
+		self.gridLayout = QtWidgets.QGridLayout()
+		self.gridLayout.setObjectName("gridLayout")
 		self.label_201 = QtWidgets.QLabel(parent=Visualization)
 		font = QtGui.QFont()
 		font.setBold(True)
 		self.label_201.setFont(font)
 		self.label_201.setObjectName("label_201")
-		self.verticalLayout_2.addWidget(self.label_201)
+		self.gridLayout.addWidget(self.label_201, 0, 0, 1, 1)
+		self.detection_rate = QtWidgets.QLineEdit(parent=Visualization)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.detection_rate.sizePolicy().hasHeightForWidth())
+		self.detection_rate.setSizePolicy(sizePolicy)
+		self.detection_rate.setMinimumSize(QtCore.QSize(100, 20))
+		self.detection_rate.setStyleSheet("QLineEdit{\n"
+		                                  "                                            background: rgb(223,223,233)\n"
+		                                  "                                            }\n"
+		                                  "                                        ")
+		self.detection_rate.setObjectName("detection_rate")
+		self.gridLayout.addWidget(self.detection_rate, 0, 1, 1, 1)
+		spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
+		                                    QtWidgets.QSizePolicy.Policy.Minimum)
+		self.gridLayout.addItem(spacerItem1, 0, 2, 1, 1)
 		####
 		# self.detection_rate_viz = QtWidgets.QGraphicsView(parent=Visualization)
 		self.detection_rate_viz = pg.PlotWidget(parent=Visualization)
@@ -152,23 +181,37 @@ class Ui_Visualization(object):
 		                                      "                                            }\n"
 		                                      "                                        ")
 		self.detection_rate_viz.setObjectName("detection_rate_viz")
-		self.verticalLayout_2.addWidget(self.detection_rate_viz)
+		self.gridLayout.addWidget(self.detection_rate_viz, 1, 0, 1, 3)
 		self.detection_rate_range_switch = QtWidgets.QPushButton(parent=Visualization)
 		self.detection_rate_range_switch.setMinimumSize(QtCore.QSize(0, 20))
 		self.detection_rate_range_switch.setMaximumSize(QtCore.QSize(100, 16777215))
 		self.detection_rate_range_switch.setObjectName("detection_rate_range_switch")
-		self.verticalLayout_2.addWidget(self.detection_rate_range_switch)
-		self.gridLayout.addLayout(self.verticalLayout_2, 0, 1, 1, 1)
-		self.verticalLayout_4 = QtWidgets.QVBoxLayout()
-		self.verticalLayout_4.setObjectName("verticalLayout_4")
-		self.verticalLayout = QtWidgets.QVBoxLayout()
-		self.verticalLayout.setObjectName("verticalLayout")
+		self.gridLayout.addWidget(self.detection_rate_range_switch, 2, 0, 1, 1)
+		self.gridLayout_5.addLayout(self.gridLayout, 0, 1, 1, 1)
+		self.gridLayout_3 = QtWidgets.QGridLayout()
+		self.gridLayout_3.setObjectName("gridLayout_3")
 		self.label_206 = QtWidgets.QLabel(parent=Visualization)
 		font = QtGui.QFont()
 		font.setBold(True)
 		self.label_206.setFont(font)
 		self.label_206.setObjectName("label_206")
-		self.verticalLayout.addWidget(self.label_206)
+		self.gridLayout_3.addWidget(self.label_206, 0, 0, 1, 1)
+		self.hitmap_count = QtWidgets.QLineEdit(parent=Visualization)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.hitmap_count.sizePolicy().hasHeightForWidth())
+		self.hitmap_count.setSizePolicy(sizePolicy)
+		self.hitmap_count.setMinimumSize(QtCore.QSize(100, 20))
+		self.hitmap_count.setStyleSheet("QLineEdit{\n"
+		                                "                                            background: rgb(223,223,233)\n"
+		                                "                                            }\n"
+		                                "                                        ")
+		self.hitmap_count.setObjectName("hitmap_count")
+		self.gridLayout_3.addWidget(self.hitmap_count, 0, 1, 1, 1)
+		spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
+		                                    QtWidgets.QSizePolicy.Policy.Minimum)
+		self.gridLayout_3.addItem(spacerItem2, 0, 2, 1, 1)
 		###
 		# self.detector_heatmap = QtWidgets.QGraphicsView(parent=Visualization)
 		self.detector_heatmap = pg.PlotWidget(parent=Visualization)
@@ -186,8 +229,7 @@ class Ui_Visualization(object):
 		                                    "                                            }\n"
 		                                    "                                        ")
 		self.detector_heatmap.setObjectName("detector_heatmap")
-		self.verticalLayout.addWidget(self.detector_heatmap)
-		self.verticalLayout_4.addLayout(self.verticalLayout)
+		self.gridLayout_3.addWidget(self.detector_heatmap, 1, 0, 1, 3)
 		self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
 		self.horizontalLayout_2.setObjectName("horizontalLayout_2")
 		self.reset_heatmap_v = QtWidgets.QPushButton(parent=Visualization)
@@ -195,16 +237,48 @@ class Ui_Visualization(object):
 		self.reset_heatmap_v.setMaximumSize(QtCore.QSize(60, 16777215))
 		self.reset_heatmap_v.setObjectName("reset_heatmap_v")
 		self.horizontalLayout_2.addWidget(self.reset_heatmap_v)
+		self.hitmap_plot_size = QtWidgets.QDoubleSpinBox(parent=Visualization)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.hitmap_plot_size.sizePolicy().hasHeightForWidth())
+		self.hitmap_plot_size.setSizePolicy(sizePolicy)
+		self.hitmap_plot_size.setMinimumSize(QtCore.QSize(0, 20))
+		self.hitmap_plot_size.setStyleSheet("QDoubleSpinBox{\n"
+		                                    "                                                background: rgb(223,223,233)\n"
+		                                    "                                                }\n"
+		                                    "                                            ")
+		self.hitmap_plot_size.setObjectName("hitmap_plot_size")
+		self.horizontalLayout_2.addWidget(self.hitmap_plot_size)
+		self.hit_displayed = QtWidgets.QLineEdit(parent=Visualization)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.hit_displayed.sizePolicy().hasHeightForWidth())
+		self.hit_displayed.setSizePolicy(sizePolicy)
+		self.hit_displayed.setMinimumSize(QtCore.QSize(50, 20))
+		self.hit_displayed.setStyleSheet("QLineEdit{\n"
+		                                 "                                            background: rgb(223,223,233)\n"
+		                                 "                                            }\n"
+		                                 "                                        ")
+		self.hit_displayed.setObjectName("hit_displayed")
+		self.horizontalLayout_2.addWidget(self.hit_displayed)
 		self.heatmap_fdm_switch = QtWidgets.QPushButton(parent=Visualization)
 		self.heatmap_fdm_switch.setMinimumSize(QtCore.QSize(100, 20))
 		self.heatmap_fdm_switch.setMaximumSize(QtCore.QSize(60, 16777215))
 		self.heatmap_fdm_switch.setObjectName("heatmap_fdm_switch")
 		self.horizontalLayout_2.addWidget(self.heatmap_fdm_switch)
-		spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
-		                                   QtWidgets.QSizePolicy.Policy.Minimum)
-		self.horizontalLayout_2.addItem(spacerItem)
-		self.verticalLayout_4.addLayout(self.horizontalLayout_2)
-		self.gridLayout.addLayout(self.verticalLayout_4, 0, 2, 1, 1)
+		self.gridLayout_3.addLayout(self.horizontalLayout_2, 2, 0, 1, 3)
+		self.gridLayout_5.addLayout(self.gridLayout_3, 0, 2, 1, 1)
+		self.gridLayout_2 = QtWidgets.QGridLayout()
+		self.gridLayout_2.setObjectName("gridLayout_2")
+		self.label_207 = QtWidgets.QLabel(parent=Visualization)
+		self.label_207.setMinimumSize(QtCore.QSize(0, 25))
+		font = QtGui.QFont()
+		font.setBold(True)
+		self.label_207.setFont(font)
+		self.label_207.setObjectName("label_207")
+		self.gridLayout_2.addWidget(self.label_207, 0, 0, 1, 1)
 		####
 		# self.histogram = QtWidgets.QGraphicsView(parent=Visualization)
 		self.histogram = pg.PlotWidget(parent=Visualization)
@@ -223,7 +297,7 @@ class Ui_Visualization(object):
 		                             "                                        ")
 		self.histogram.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
 		self.histogram.setObjectName("histogram")
-		self.gridLayout.addWidget(self.histogram, 1, 0, 1, 3)
+		self.gridLayout_2.addWidget(self.histogram, 1, 0, 1, 1)
 		self.horizontalLayout = QtWidgets.QHBoxLayout()
 		self.horizontalLayout.setObjectName("horizontalLayout")
 		self.spectrum_switch = QtWidgets.QPushButton(parent=Visualization)
@@ -289,15 +363,35 @@ class Ui_Visualization(object):
 		                           "                                        ")
 		self.max_tof.setObjectName("max_tof")
 		self.horizontalLayout.addWidget(self.max_tof)
-		spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
+		spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
 		                                    QtWidgets.QSizePolicy.Policy.Minimum)
-		self.horizontalLayout.addItem(spacerItem1)
-		self.gridLayout.addLayout(self.horizontalLayout, 2, 0, 1, 3)
-		self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
+		self.horizontalLayout.addItem(spacerItem3)
+		self.gridLayout_2.addLayout(self.horizontalLayout, 2, 0, 1, 1)
+		self.Error = QtWidgets.QLabel(parent=Visualization)
+		self.Error.setMinimumSize(QtCore.QSize(800, 30))
+		font = QtGui.QFont()
+		font.setPointSize(13)
+		font.setBold(True)
+		font.setStrikeOut(False)
+		self.Error.setFont(font)
+		self.Error.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+		self.Error.setTextInteractionFlags(QtCore.Qt.TextInteractionFlag.LinksAccessibleByMouse)
+		self.Error.setObjectName("Error")
+		self.gridLayout_2.addWidget(self.Error, 3, 0, 1, 1)
+		self.gridLayout_5.addLayout(self.gridLayout_2, 1, 0, 1, 3)
+		self.gridLayout_6.addLayout(self.gridLayout_5, 0, 0, 1, 1)
 
 		self.retranslateUi(Visualization)
 		QtCore.QMetaObject.connectSlotsByName(Visualization)
-		Visualization.setTabOrder(self.detection_rate_range_switch, self.spectrum_switch)
+		Visualization.setTabOrder(self.voltage, self.detection_rate)
+		Visualization.setTabOrder(self.detection_rate, self.hitmap_count)
+		Visualization.setTabOrder(self.hitmap_count, self.dc_hold)
+		Visualization.setTabOrder(self.dc_hold, self.detection_rate_range_switch)
+		Visualization.setTabOrder(self.detection_rate_range_switch, self.reset_heatmap_v)
+		Visualization.setTabOrder(self.reset_heatmap_v, self.hitmap_plot_size)
+		Visualization.setTabOrder(self.hitmap_plot_size, self.hit_displayed)
+		Visualization.setTabOrder(self.hit_displayed, self.heatmap_fdm_switch)
+		Visualization.setTabOrder(self.heatmap_fdm_switch, self.spectrum_switch)
 		Visualization.setTabOrder(self.spectrum_switch, self.spectrum_last_events_switch)
 		Visualization.setTabOrder(self.spectrum_last_events_switch, self.num_last_events)
 		Visualization.setTabOrder(self.num_last_events, self.max_mc)
@@ -348,7 +442,7 @@ class Ui_Visualization(object):
 
 		# detector heatmep #####################
 		self.scatter = pg.ScatterPlotItem(
-			size=self.variables.hitmap_plot_size, brush='black')
+			size=self.hitmap_plot_size.value(), brush='black')
 		self.detector_circle = QtWidgets.QGraphicsEllipseItem(-40, -40, 80, 80)  # x, y, width, height
 		self.detector_circle.setPen(pg.mkPen(color=(255, 0, 0), width=2))
 		self.detector_heatmap.addItem(self.detector_circle)
@@ -381,10 +475,6 @@ class Ui_Visualization(object):
 		self.num_event_mc_tof = int(self.num_last_events.text())
 
 		self.heatmap_fdm_switch.clicked.connect(self.heatmap_fdm_switch_change)
-		# Create and add the legend item
-		self.legend = pg.LegendItem(offset=(160, 0.1))
-		self.legend.setParentItem(self.detector_heatmap.graphicsItem())
-		self.legend.addItem(self.scatter, 'Heatmap')  # This will display the text "FDM" in the legend
 
 		self.num_event_mc_tof = int(self.num_last_events.text())
 		self.max_mc_val = int(self.max_mc.text())
@@ -392,14 +482,29 @@ class Ui_Visualization(object):
 		self.index_hist_tof = np.where(self.bins_tof == self.max_tof_val)[0][0]
 		self.index_hist_mc = np.where(self.bins_mc == self.max_mc_val)[0][0]
 
+		self.dc_hold.clicked.connect(self.dc_hold_clicked)
+
+		self.hitmap_count.setReadOnly(True)
+		self.voltage.setReadOnly(True)
+		self.detection_rate.setReadOnly(True)
+		self.hit_displayed.editingFinished.connect(self.parameters_changes)
+
+		# Create a QTimer to hide the warning message after 8 seconds
+		self.timer = QtCore.QTimer()
+		self.timer.timeout.connect(self.hideMessage)
+
+		self.hitmap_plot_size.setValue(1.0)
+		self.hitmap_plot_size.setSingleStep(0.1)
+		self.hitmap_plot_size.setDecimals(1)
+
 	def retranslateUi(self, Visualization):
 		"""
         Set the text of the widgets
         Args:
-           Visualization: The main window
+        Visualization: The main window
 
         Return:
-           None
+        None
         """
 		_translate = QtCore.QCoreApplication.translate
 		###
@@ -408,39 +513,60 @@ class Ui_Visualization(object):
 		Visualization.setWindowIcon(QtGui.QIcon('./files/logo.png'))
 		###
 		self.label_200.setText(_translate("Visualization", "Voltage"))
-		self.label_207.setText(_translate("Visualization", "Spectrum"))
+		self.voltage.setText(_translate("Visualization", "0"))
+		self.dc_hold.setText(_translate("Visualization", "Hold DC Voltage"))
 		self.label_201.setText(_translate("Visualization", "Detection Rate"))
-		self.detection_rate_range_switch.setText(_translate("Visualization", "Short range"))
-		self.label_206.setText(_translate("Visualization", "Detector Hitmap"))
+		self.detection_rate.setText(_translate("Visualization", "0"))
+		self.detection_rate_range_switch.setText(_translate("Visualization", "Short Range"))
+		self.label_206.setText(_translate("Visualization", "Detector"))
+		self.hitmap_count.setText(_translate("Visualization", "0"))
 		self.reset_heatmap_v.setText(_translate("Visualization", "Reset"))
+		self.hit_displayed.setText(_translate("Visualization", "2000"))
 		self.heatmap_fdm_switch.setText(_translate("Visualization", "Hitmap/FDM"))
+		self.label_207.setText(_translate("Visualization", "Spectrum"))
 		self.spectrum_switch.setText(_translate("Visualization", "mc/tof"))
-		self.spectrum_last_events_switch.setText(_translate("Visualization", "Last events"))
+		self.spectrum_last_events_switch.setText(_translate("Visualization", "Last Events"))
 		self.num_last_events.setText(_translate("Visualization", "10000"))
 		self.label_208.setText(_translate("Visualization", "Max mc (Da)"))
 		self.max_mc.setText(_translate("Visualization", "400"))
 		self.label_209.setText(_translate("Visualization", "Max tof (ns)"))
 		self.max_tof.setText(_translate("Visualization", "5000"))
+		self.Error.setText(_translate("Visualization", "<html><head/><body><p><br/></p></body></html>"))
+
+	def dc_hold_clicked(self):
+		"""
+            Hold the DC voltage
+
+            Args:
+                None
+
+            Return:
+                None
+        """
+		if self.variables.start_flag:
+			if not self.variables.vdc_hold:
+				self.variables.vdc_hold = True
+				self.dc_hold.setStyleSheet("QPushButton{\n"
+				                           "background: rgb(0, 255, 26)\n"
+				                           "}")
+			elif self.variables.vdc_hold:
+				self.variables.vdc_hold = False
+				self.dc_hold.setStyleSheet(self.original_button_style)
 
 	def heatmap_fdm_switch_change(self):
 		"""
-		Change the heatmap type
-		Args:
-			None
+        Change the heatmap type
+        Args:
+            None
 
-		Return:
-			None
-		"""
+        Return:
+            None
+        """
 		if self.heatmap_fdm_switch_flag == 'heatmap':
 			self.heatmap_fdm_switch_flag = 'fdm'
-			# Re-add the legend item
-		# self.legend.clear()
-		# self.legend.addItem(self.scatter, 'FDM')
+
 		elif self.heatmap_fdm_switch_flag == 'fdm':
 			self.heatmap_fdm_switch_flag = 'heatmap'
-			# Re-add the legend item
-		# self.legend.clear()
-		# self.legend.addItem(self.scatter, 'Heatmap')
 
 	def reset_heatmap(self):
 		"""
@@ -533,11 +659,10 @@ class Ui_Visualization(object):
 			self.hist_mc = np.zeros(len(self.bins_mc) - 1)
 			self.hist_tof = np.zeros(len(self.bins_tof) - 1)
 
-
-
 		# with self.variables.lock_statistics and self.variables.lock_setup_parameters:
 		if self.variables.start_flag and self.variables.flag_visualization_start:
 			if self.index_plot_start == 0:
+				self.num_hit_display = int(float(self.hit_displayed.text()))
 				self.start_main_exp = time.time()
 				self.start_time = time.time()
 				self.start_time_metadata = time.time()
@@ -550,13 +675,16 @@ class Ui_Visualization(object):
 				self.index_wait_on_plot_start += 1
 
 			# V_dc and V_p
+			current_voltage = self.variables.specimen_voltage_plot
 			if self.index_plot < len(self.y_vdc):
-				self.y_vdc[self.index_plot] = int(self.variables.specimen_voltage_plot)  # Add a new value.
+				self.y_vdc[self.index_plot] = int(current_voltage)  # Add a new value.
 
 			else:
 				x_vdc_last = self.x_vdc[-1]
 				self.x_vdc.append(x_vdc_last + 0.5)  # Add a new value 1 higher than the last.
-				self.y_vdc.append(int(self.variables.specimen_voltage_plot))
+				self.y_vdc.append(int(current_voltage))
+			# set the value of the voltage with two decimal places
+			self.voltage.setText(str("{:.2f}".format(current_voltage)))
 
 			# Set the maximum number of data points to display
 			max_display_points = 200
@@ -571,14 +699,15 @@ class Ui_Visualization(object):
 
 			# Detection Rate Visualization
 			# with self.variables.lock_statistics:
+			current_detection_rate = self.variables.detection_rate_current_plot
 			if self.index_plot < len(self.y_dtec):
-				self.y_dtec[self.index_plot] = self.variables.detection_rate_current_plot  # Add a new value.
+				self.y_dtec[self.index_plot] = current_detection_rate  # Add a new value.
 			else:
 				# self.x_dtec = self.x_dtec[1:]  # Remove the first element.
 				x_dtec_last = self.x_dtec[-1]
 				self.x_dtec.append(x_dtec_last + 0.5)  # Add a new value 1 higher than the last.
-				self.y_dtec.append(self.variables.detection_rate_current_plot)
-
+				self.y_dtec.append(current_detection_rate)
+			self.detection_rate.setText(str("{:.2f}".format(current_detection_rate)))
 			# self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
 			# Set the maximum number of data points to display
 			max_display_points = 200
@@ -733,15 +862,14 @@ class Ui_Visualization(object):
 					x_last_events = self.last_100_thousand_det_x_heatmap[:]
 					y_last_events = self.last_100_thousand_det_y_heatmap[:]
 					# adding points to the scatter plot
-					self.scatter.setSize(self.variables.hitmap_plot_size)
-					hit_display = self.variables.hit_display
+					self.scatter.setSize(self.hitmap_plot_size.value())
 
 					x = x_last_events * 10
 					y = y_last_events * 10
 
-					x = x[-hit_display:]
-					y = y[-hit_display:]
-
+					x = x[-self.num_hit_display:]
+					y = y[-self.num_hit_display:]
+					self.hitmap_count.setText(str(len(x)))  # number of points displayed
 					self.scatter.clear()
 					self.scatter.setData(x=x, y=y)
 					# add item to plot window
@@ -765,7 +893,8 @@ class Ui_Visualization(object):
 						hist_fdm_tmp = np.copy(self.hist_fdm)
 
 					img = pg.ImageItem()
-					img.setImage(hist_fdm_tmp.T)  # Transpose because pg.ImageItem assumes (row, col) format
+					img.setImage(hist_fdm_tmp)  # Transpose if needed because pg.ImageItem assumes (row, col) format
+					self.hitmap_count.setText(str(len(hist_fdm_tmp)))
 					img.setRect(QtCore.QRectF(xedges[0], yedges[0], xedges[-1] - xedges[0], yedges[-1] - yedges[0]))
 
 					# Apply a color map to the histogram
@@ -878,6 +1007,47 @@ class Ui_Visualization(object):
 			else:
 				self.max_tof_val = max_tof_tmp
 				self.index_hist_tof = np.where(self.bins_tof == self.max_tof_val)[0][0]
+		if self.hit_displayed.text().isdigit():
+			if int(float(self.hit_displayed.text())) > 100000:
+				self.error_message("Maximum possible number is 100000")
+				_translate = QtCore.QCoreApplication.translate
+				self.hit_displayed.setText(_translate("PyCCAPT", "100000"))
+			else:
+				self.num_hit_display = int(float(self.hit_displayed.text()))
+
+	def error_message(self, message):
+		"""
+		Display an error message and start a timer to hide it after 8 seconds
+
+		Args:
+			message (str): Error message to display
+
+		Return:
+			None
+		"""
+		_translate = QtCore.QCoreApplication.translate
+		self.Error.setText(_translate("OXCART",
+		                              "<html><head/><body><p><span style=\" color:#ff0000;\">"
+		                              + message + "</span></p></body></html>"))
+
+		self.timer.start(8000)
+
+	def hideMessage(self, ):
+		"""
+        Hide the message and stop the timer
+        Args:
+            None
+
+        Return:
+            None
+        """
+		# Hide the message and stop the timer
+		_translate = QtCore.QCoreApplication.translate
+		self.Error.setText(_translate("OXCART",
+		                              "<html><head/><body><p><span style=\" "
+		                              "color:#ff0000;\"></span></p></body></html>"))
+
+		self.timer.stop()
 
 	def stop(self):
 		"""
@@ -901,8 +1071,8 @@ def efficient_histogram(viz, bin_size):
 
 class VisualizationWindow(QtWidgets.QWidget):
 	"""
-    Widget for the Visualization window.
-    """
+	Widget for the Visualization window.
+	"""
 	closed = QtCore.pyqtSignal()  # Define a custom closed signal
 
 	def __init__(self, variables, gui_visualization, visualization_close_event,

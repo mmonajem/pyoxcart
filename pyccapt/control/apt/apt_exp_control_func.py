@@ -173,6 +173,7 @@ def send_info_email(log_apt, variables):
 
 	additional_info = 'Username: {}\n'.format(variables.user_name)
 	additional_info += 'Experiment Name: {}\n'.format(variables.ex_name)
+	additional_info += 'Electrode Name: {}\n'.format(variables.electrode)
 	additional_info += 'Experiment number: {}\n'.format(variables.counter)
 	additional_info += 'Detection Rate (%): {}\n'.format(variables.detection_rate)
 	additional_info += 'Maximum Number of Ions: {}\n'.format(variables.max_ions)
