@@ -414,7 +414,7 @@ class Ui_Cameras_Alignment(object):
 		# arrow1 = pg.ArrowItem(pos=(925, 770), angle=0)
 		# self.cam_b_o.addItem(arrow1)
 		# Side camera (x, y) main arrow for puck exchange (Blue arrow)
-		arrow1 = pg.ArrowItem(pos=(810, 790), angle=-90)
+		arrow1 = pg.ArrowItem(pos=(805, 735), angle=-90)
 		arrow2 = pg.ArrowItem(pos=(645, 760), angle=-90, brush='r')
 		# arrow3 = pg.ArrowItem(pos=(890, 1100), angle=0)
 		self.cam_s_o.addItem(arrow1)
@@ -448,6 +448,7 @@ class Ui_Cameras_Alignment(object):
 		self.emitter.cams_exposure_time_default.connect(self.set_default_exposure_time)
 		# switch off the light if it is one before opening the window
 		self.usb_lamp_switch.switch_off(16)
+
 	def retranslateUi(self, Cameras_Alignment):
 		"""
 

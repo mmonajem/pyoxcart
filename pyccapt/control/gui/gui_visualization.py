@@ -894,7 +894,8 @@ class Ui_Visualization(object):
 
 					img = pg.ImageItem()
 					img.setImage(hist_fdm_tmp)  # Transpose if needed because pg.ImageItem assumes (row, col) format
-					self.hitmap_count.setText(str(len(hist_fdm_tmp)))
+					# set the length of histogram
+					self.hitmap_count.setText(str(self.length_events))  # number of points displayed
 					img.setRect(QtCore.QRectF(xedges[0], yedges[0], xedges[-1] - xedges[0], yedges[-1] - yedges[0]))
 
 					# Apply a color map to the histogram

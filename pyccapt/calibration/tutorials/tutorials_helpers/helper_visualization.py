@@ -56,6 +56,8 @@ def call_visualization(variables):
     distance = widgets.IntText(value=50)
     mrp_all = widgets.Dropdown(options=[('False', False), ('True', True)], value=False)
     percent = widgets.IntText(value=50)
+    background_mc = widgets.Dropdown(options=[('aspls', 'aspls'), ('fabc', 'fabc'), ('manual@4', 'manual@4'),
+                                              ('manual@100', 'manual@100'), ('manual', 'manual')])
     figname_mc = widgets.Text(value='mc')
     figure_mc_size_x_mc = widgets.FloatText(value=9.0)
     figure_mc_size_y_mc = widgets.FloatText(value=5.0)
@@ -99,7 +101,7 @@ def call_visualization(variables):
                     range_y = []
                     range_z = []
                 if range_vol == [0, 0]:
-	                range_vol = []
+                    range_vol = []
 
             except json.JSONDecodeError:
                 # Handle invalid input
@@ -110,6 +112,7 @@ def call_visualization(variables):
                               figname=figname_mc.value, lim=lim_mc_pm.value, peaks_find=peaks_find.value,
                               peaks_find_plot=peak_find_plot.value, plot_ranged_colors=plot_ranged_colors.value,
                               plot_ranged_peak=plot_ranged_peak.value, mrp_all=mrp_all.value,
+                              background=background_mc.value,
                               range_sequence=range_sequence, range_mc=range_mc, range_detx=range_detx,
                               range_dety=range_dety, range_x=range_x, range_y=range_y, range_z=range_z,
                               range_vol=range_vol, print_info=print_info.value, figure_size=figure_size,
@@ -169,7 +172,7 @@ def call_visualization(variables):
                     range_y = []
                     range_z = []
                 if range_vol == [0, 0]:
-	                range_vol = []
+                    range_vol = []
             except json.JSONDecodeError:
                 # Handle invalid input
                 print(f"Invalid range input")
@@ -225,7 +228,7 @@ def call_visualization(variables):
                     range_y = []
                     range_z = []
                 if range_vol == [0, 0]:
-	                range_vol = []
+                    range_vol = []
             except json.JSONDecodeError:
                 # Handle invalid input
                 print(f"Invalid range input")
@@ -336,7 +339,7 @@ def call_visualization(variables):
                     range_y = []
                     range_z = []
                 if range_vol == [0, 0]:
-	                range_vol = []
+                    range_vol = []
             except json.JSONDecodeError:
                 # Handle invalid input
                 print(f"Invalid range input")
@@ -431,7 +434,7 @@ def call_visualization(variables):
                     range_y = []
                     range_z = []
                 if range_vol == [0, 0]:
-	                range_vol = []
+                    range_vol = []
             except json.JSONDecodeError:
                 # Handle invalid input
                 print(f"Invalid range input")
@@ -528,7 +531,7 @@ def call_visualization(variables):
                 range_y = []
                 range_z = []
             if range_vol == [0, 0]:
-	            range_vol = []
+                range_vol = []
         except json.JSONDecodeError:
             # Handle invalid input
             print(f"Invalid range input")
@@ -660,6 +663,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value="Legend mode:", layout=label_layout), legend_widget]),
         widgets.HBox([widgets.Label(value="Peak prominance:", layout=label_layout), prominence]),
         widgets.HBox([widgets.Label(value="Peak distance:", layout=label_layout), distance]),
+        widgets.HBox([widgets.Label(value="Background:", layout=label_layout), background_mc]),
         widgets.HBox([widgets.Label(value="Fig name:", layout=label_layout), figname_mc]),
         widgets.HBox([widgets.Label(value="Save fig:", layout=label_layout), save_mc]),
         widgets.HBox([widgets.Label(value="Fig size:", layout=label_layout),
@@ -671,7 +675,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value="x range:", layout=label_layout), range_x_mc]),
         widgets.HBox([widgets.Label(value="y range:", layout=label_layout), range_y_mc]),
         widgets.HBox([widgets.Label(value="z range:", layout=label_layout), range_z_mc]),
-	    widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_mc]),
+        widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_mc]),
         widgets.HBox([plot_mc_button, clear_button])])
 
     tab1 = widgets.VBox([
@@ -689,7 +693,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='x range:', layout=label_layout), range_x_fdm]),
         widgets.HBox([widgets.Label(value='y range:', layout=label_layout), range_y_fdm]),
         widgets.HBox([widgets.Label(value='z range:', layout=label_layout), range_z_fdm]),
-	    widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_fdm]),
+        widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_fdm]),
         widgets.HBox([plot_fdm_button, clear_button]),
     ])
     tab2 = widgets.VBox([
@@ -707,7 +711,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='Range x:', layout=label_layout), range_x_3d]),
         widgets.HBox([widgets.Label(value='Range y:', layout=label_layout), range_y_3d]),
         widgets.HBox([widgets.Label(value='Range z:', layout=label_layout), range_z_3d]),
-	    widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_3d]),
+        widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_3d]),
         widgets.HBox([plot_3d_button, clear_button]),
     ])
     tab3 = widgets.VBox([
@@ -737,7 +741,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='range x:', layout=label_layout), range_x_heatmap]),
         widgets.HBox([widgets.Label(value='range y:', layout=label_layout), range_y_heatmap]),
         widgets.HBox([widgets.Label(value='range z:', layout=label_layout), range_z_heatmap]),
-	    widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_heatmap]),
+        widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_heatmap]),
         widgets.HBox([plot_heatmap_button, clear_button]),
     ])
 
@@ -764,7 +768,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='range x:', layout=label_layout), range_x_pp]),
         widgets.HBox([widgets.Label(value='range y:', layout=label_layout), range_y_pp]),
         widgets.HBox([widgets.Label(value='range z:', layout=label_layout), range_z_pp]),
-	    widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_pp]),
+        widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_pp]),
         widgets.HBox([plot_projection_button, clear_button])
     ])
 
@@ -785,7 +789,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='x range:', layout=label_layout), range_x_2d_hist]),
         widgets.HBox([widgets.Label(value='y range:', layout=label_layout), range_y_2d_hist]),
         widgets.HBox([widgets.Label(value='z range:', layout=label_layout), range_z_2d_hist]),
-	    widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_2d_hist]),
+        widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_2d_hist]),
         widgets.HBox([plot_reconstruction_2d_hist_button, clear_button]),
     ])
     tab8 = widgets.VBox([
