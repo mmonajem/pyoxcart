@@ -261,8 +261,8 @@ class Ui_Gates(object):
                     print('The gates control is off')
 
         # Main gate
-        if self.flag_super_user or (
-                not self.variables.start_flag and gate_num == 1 and not self.variables.flag_load_gate \
+        if (self.flag_super_user or not self.variables.start_flag) and (
+                gate_num == 1 and not self.variables.flag_load_gate \
                 and not self.variables.flag_cryo_gate and self.variables.flag_pump_load_lock):
             if not self.variables.flag_main_gate:  # Open the main gate
                 if self.conf["gates"] == "on":
@@ -277,7 +277,7 @@ class Ui_Gates(object):
                 self.diagram.setPixmap(self.diagram_close_all)
                 self.variables.flag_main_gate = False
         # Buffer gate
-        elif self.flag_super_user or (not self.variables.start_flag and gate_num == 2
+        elif (self.flag_super_user or not self.variables.start_flag) and (gate_num == 2
                                       and not self.variables.flag_main_gate
                                       and not self.variables.flag_cryo_gate
                                       and self.variables.flag_pump_load_lock):
@@ -294,7 +294,7 @@ class Ui_Gates(object):
                 self.diagram.setPixmap(self.diagram_close_all)
                 self.variables.flag_load_gate = False
         # Cryo gate
-        elif self.flag_super_user or (not self.variables.start_flag and gate_num == 3
+        elif (self.flag_super_user or not self.variables.start_flag) and (gate_num == 3
                                       and not self.variables.flag_main_gate and not self.variables.flag_load_gate
                                       and self.variables.flag_pump_load_lock):
             if not self.variables.flag_cryo_gate:  # Open the main gate

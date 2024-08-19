@@ -288,6 +288,8 @@ def call_ion_selection(variables):
 
 	def next_peak(b, variables):
 		variables.peaks_index += 1
+		if variables.peaks_index >= len(variables.peaks_x_selected):
+			variables.peaks_index = 0
 		peak_val.value = variables.peaks_x_selected[variables.peaks_index]
 		print('peak idc:', variables.peaks_index, 'Peak location:', peak_val.value)
 		variables.AptHistPlotter.zoom_to_x_range(x_min=peak_val.value - 5, x_max=peak_val.value + 5, reset=False)

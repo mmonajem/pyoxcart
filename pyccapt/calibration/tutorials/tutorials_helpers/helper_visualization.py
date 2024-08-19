@@ -56,7 +56,8 @@ def call_visualization(variables):
     distance = widgets.IntText(value=50)
     mrp_all = widgets.Dropdown(options=[('False', False), ('True', True)], value=False)
     percent = widgets.IntText(value=50)
-    background_mc = widgets.Dropdown(options=[('aspls', 'aspls'), ('fabc', 'fabc'), ('manual@4', 'manual@4'),
+    background_mc = widgets.Dropdown(options=[('None', None), ('aspls', 'aspls'), ('fabc', 'fabc'),
+                                              ('manual@4', 'manual@4'),
                                               ('manual@100', 'manual@100'), ('manual', 'manual')])
     figname_mc = widgets.Text(value='mc')
     figure_mc_size_x_mc = widgets.FloatText(value=9.0)

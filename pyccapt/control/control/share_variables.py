@@ -68,6 +68,7 @@ class Variables:
         self.ns.light_switch = False
         self.ns.vdc_hold = False
         self.ns.reset_heatmap = False
+        self.ns.last_screen_shot = False
         self.ns.camera_0_ExposureTime = 2000
         self.ns.camera_1_ExposureTime = 2000
         self.ns.path = ''
@@ -556,6 +557,15 @@ class Variables:
     def reset_heatmap(self, value):
         with self.lock:
             self.ns.reset_heatmap = value
+
+    @property
+    def last_screen_shot(self):
+        return self.ns.last_screen_shot
+
+    @last_screen_shot.setter
+    def last_screen_shot(self, value):
+        with self.lock:
+            self.ns.last_screen_shot = value
 
     @property
     def camera_0_ExposureTime(self):

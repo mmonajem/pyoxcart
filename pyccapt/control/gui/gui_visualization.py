@@ -30,6 +30,7 @@ class Ui_Visualization(object):
 			main_v_dc_plot (multiprocessing.Array): Array for storing the main voltage values of the mass spectrum.
 
 		"""
+		self.path_meta = None
 		self.num_hit_display = 0
 		self.bins_detector = (256, 256)
 		detector_diameter = conf["detector_diameter"]
@@ -543,7 +544,7 @@ class Ui_Visualization(object):
             Return:
                 None
         """
-		if self.variables.start_flag:
+		if self.variables.start_flag or self.variables.last_screen_shot:
 			if not self.variables.vdc_hold:
 				self.variables.vdc_hold = True
 				self.dc_hold.setStyleSheet("QPushButton{\n"
@@ -600,6 +601,264 @@ class Ui_Visualization(object):
 		else:
 			self.detection_rate_range_switch.setStyleSheet(self.original_button_style)
 
+	def update_graphs_helper(self, ):
+		"""
+		Update the graphs
+
+		Args:
+			None
+
+		Return:
+			None
+		"""
+		if self.index_plot_start == 0:
+			self.num_hit_display = int(float(self.hit_displayed.text()))
+			self.start_main_exp = time.time()
+			self.start_time = time.time()
+			self.start_time_metadata = time.time()
+			self.index_plot_start += 1
+		self.variables.elapsed_time = time.time() - self.start_time
+		# with self.variables.lock_statistics:
+		if self.index_wait_on_plot_start <= 16:
+			if self.index_wait_on_plot_start == 0:
+				self.counter_source = self.variables.counter_source
+			self.index_wait_on_plot_start += 1
+
+		# V_dc and V_p
+		current_voltage = self.variables.specimen_voltage_plot
+		if self.index_plot < len(self.y_vdc):
+			self.y_vdc[self.index_plot] = int(current_voltage)  # Add a new value.
+
+		else:
+			x_vdc_last = self.x_vdc[-1]
+			self.x_vdc.append(x_vdc_last + 0.5)  # Add a new value 1 higher than the last.
+			self.y_vdc.append(int(current_voltage))
+		# set the value of the voltage with two decimal places
+		self.voltage.setText(str("{:.2f}".format(current_voltage)))
+
+		# Set the maximum number of data points to display
+		max_display_points = 200
+		# Downsample the data if needed
+		if len(self.x_vdc) > max_display_points:
+			step = len(self.x_vdc) // max_display_points
+			x_vdc_downsampled = self.x_vdc[::step]
+			y_vdc_downsampled = self.y_vdc[::step]
+			self.data_line_vdc.setData(x_vdc_downsampled, y_vdc_downsampled)
+		else:
+			self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
+
+		# Detection Rate Visualization
+		# with self.variables.lock_statistics:
+		current_detection_rate = self.variables.detection_rate_current_plot
+		if self.index_plot < len(self.y_dtec):
+			self.y_dtec[self.index_plot] = current_detection_rate  # Add a new value.
+		else:
+			# self.x_dtec = self.x_dtec[1:]  # Remove the first element.
+			x_dtec_last = self.x_dtec[-1]
+			self.x_dtec.append(x_dtec_last + 0.5)  # Add a new value 1 higher than the last.
+			self.y_dtec.append(current_detection_rate)
+		self.detection_rate.setText(str("{:.2f}".format(current_detection_rate)))
+		# self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+		# Set the maximum number of data points to display
+		max_display_points = 200
+		# Downsample the data if needed
+		if len(self.x_dtec) > max_display_points and not self.change_detection_rate_range:
+			step = len(self.x_dtec) // max_display_points
+			x_dtec_downsampled = self.x_dtec[::step]
+			y_dtec_downsampled = self.y_dtec[::step]
+			self.data_line_dtec.setData(x_dtec_downsampled, y_dtec_downsampled)
+		elif len(self.x_dtec) > max_display_points and self.change_detection_rate_range:
+			x_dtec_downsampled = self.x_dtec[-max_display_points:]
+			y_dtec_downsampled = self.y_dtec[-max_display_points:]
+			self.data_line_dtec.setData(x_dtec_downsampled, y_dtec_downsampled)
+		else:
+			self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
+		# Increase the index
+		# with self.variables.lock_statistics:
+		self.index_plot += 1
+		# mass spectrum
+
+		if self.counter_source == 'TDC' and self.variables.total_ions > 0 and \
+				self.index_wait_on_plot_start > 16:
+
+			xx = np.array([])
+			yy = np.array([])
+			tt = np.array([])
+			main_v_dc_dld = np.array([])
+
+			while not self.x_plot.empty() and not self.y_plot.empty() and not self.t_plot.empty() and \
+					not self.main_v_dc_plot.empty():
+				data = self.x_plot.get()
+				xx = np.append(xx, data)
+				data = self.y_plot.get()
+				yy = np.append(yy, data)
+				data = self.t_plot.get()
+				tt = np.append(tt, data)
+				data = self.main_v_dc_plot.get()
+				main_v_dc_dld = np.append(main_v_dc_dld, data)
+
+			# self.length_events += len(self.tt)
+			self.length_events += len(tt)
+
+			if len(self.last_100_thousand_v) == 0:
+				self.last_100_thousand_det_x_heatmap = xx
+				self.last_100_thousand_det_y_heatmap = yy
+				mask_t = tt < self.conf["max_tof"]
+				self.last_100_thousand_v = main_v_dc_dld[mask_t]
+				self.last_100_thousand_det_x = xx[mask_t]
+				self.last_100_thousand_det_y = yy[mask_t]
+				self.last_100_thousand_t = tt[mask_t]
+			else:
+				self.last_100_thousand_det_x_heatmap = np.concatenate((self.last_100_thousand_det_x_heatmap, xx))
+				self.last_100_thousand_det_y_heatmap = np.concatenate((self.last_100_thousand_det_y_heatmap, yy))
+				mask_t = tt < self.conf["max_tof"]
+				self.last_100_thousand_v = np.concatenate((self.last_100_thousand_v, main_v_dc_dld[mask_t]))
+				self.last_100_thousand_det_x = np.concatenate((self.last_100_thousand_det_x, xx[mask_t]))
+				self.last_100_thousand_det_y = np.concatenate((self.last_100_thousand_det_y, yy[mask_t]))
+				self.last_100_thousand_t = np.concatenate((self.last_100_thousand_t, tt[mask_t]))
+			if len(self.last_100_thousand_v) > 100000:
+				self.last_100_thousand_v = self.last_100_thousand_v[-100000:]
+				self.last_100_thousand_det_x = self.last_100_thousand_det_x[-100000:]
+				self.last_100_thousand_det_x_heatmap = self.last_100_thousand_det_x_heatmap[-100000:]
+				self.last_100_thousand_det_y = self.last_100_thousand_det_y[-100000:]
+				self.last_100_thousand_det_y_heatmap = self.last_100_thousand_det_y_heatmap[-100000:]
+				self.last_100_thousand_t = self.last_100_thousand_t[-100000:]
+
+			try:
+				if self.variables.pulse_mode == 'Voltage':
+					t_0 = self.conf["t_0_voltage"]
+				elif self.variables.pulse_mode == 'Laser' or self.variables.pulse_mode == 'VoltageLaser':
+					t_0 = self.conf["t_0_laser"]
+				if self.mc_tof_last_events_flag and self.conf["visualization"] == "tof":
+					tt_last_events = self.last_100_thousand_t[-self.num_event_mc_tof:]
+					hist_tof_last_events, _ = np.histogram(tt_last_events, bins=self.bins_tof)
+
+				elif self.mc_tof_last_events_flag and self.conf["visualization"] == "mc":
+					t_last_events = self.last_100_thousand_t[-self.num_event_mc_tof:]
+					main_v_dc_dld_last_events = self.last_100_thousand_v[-self.num_event_mc_tof:]
+					x_last_events = self.last_100_thousand_det_x[-self.num_event_mc_tof:]
+					y_last_events = self.last_100_thousand_det_y[-self.num_event_mc_tof:]
+
+					mc_last_events = tof2mc_simple.tof_2_mc(t_last_events, t_0,
+					                                        main_v_dc_dld_last_events,
+					                                        x_last_events,
+					                                        y_last_events,
+					                                        flightPathLength=self.conf["flight_path_length"])
+					hist_mc_last_events, _ = np.histogram(mc_last_events, bins=self.bins_mc)
+
+				# hist_tof, _ = np.histogram(tt_max_lenght, bins=self.bins_tof)
+				# self.hist_tof = hist_tof
+				hist_tof, _ = np.histogram(tt[mask_t], bins=self.bins_tof)
+				self.hist_tof += hist_tof
+
+				# mc = tof2mc_simple.tof_2_mc(self.last_100_thousand_t, self.conf["t_0"],
+				#                             self.last_100_thousand_v,
+				#                             self.last_100_thousand_det_x,
+				#                             self.last_100_thousand_det_y,
+				#                             flightPathLength=self.conf["flight_path_length"])
+				# hist_mc, _ = np.histogram(mc, bins=self.bins_mc)
+				# self.hist_mc = hist_mc
+				mc = tof2mc_simple.tof_2_mc(tt[mask_t], t_0,
+				                            main_v_dc_dld[mask_t],
+				                            xx[mask_t],
+				                            yy[mask_t],
+				                            flightPathLength=self.conf["flight_path_length"])
+				hist_mc, _ = np.histogram(mc, bins=self.bins_mc)
+				self.hist_mc += hist_mc
+
+				self.histogram.clear()
+				if self.conf["visualization"] == "tof" and not self.mc_tof_last_events_flag:
+					hist = np.copy(self.hist_tof[:self.index_hist_tof])
+					hist[hist == 0] = 1  # Avoid log(0) error
+					bins = self.bins_tof[:self.index_hist_tof + 1]
+					self.histogram.plot(bins, hist, stepMode="center", fillLevel=0,
+					                    fillOutline=True, brush='black', name="num events: %s" % self.length_events)
+				elif self.conf["visualization"] == "mc" and not self.mc_tof_last_events_flag:
+					hist = np.copy(self.hist_mc[:self.index_hist_mc])
+					hist[hist == 0] = 1  # Avoid log(0) error
+					bins = self.bins_mc[:self.index_hist_mc + 1]
+					self.histogram.plot(bins, hist, stepMode="center", fillLevel=0,
+					                    fillOutline=True, brush='black', name="num events: %s" % self.length_events)
+				elif self.conf["visualization"] == "tof" and self.mc_tof_last_events_flag:
+					# remobe the bins bigger than the max_tof
+					hist = np.copy(hist_tof_last_events[:self.index_hist_tof])
+					hist[hist == 0] = 1  # Avoid log(0) error
+					bins = self.bins_tof[:self.index_hist_tof + 1]
+					self.histogram.plot(bins, hist, stepMode="center", fillLevel=0,
+					                    fillOutline=True, brush='black', name="num events: %s" % self.length_events)
+				elif self.conf["visualization"] == "mc" and self.mc_tof_last_events_flag:
+					# remobe the bins bigger than the max_mc
+					hist = np.copy(hist_mc_last_events[:self.index_hist_mc])
+					hist[hist == 0] = 1  # Avoid log(0) error
+					bins = self.bins_mc[:self.index_hist_mc + 1]
+					self.histogram.plot(bins, hist, stepMode="center", fillLevel=0,
+					                    fillOutline=True, brush='black', name="num events: %s" % self.length_events)
+
+			except Exception as e:
+				print(
+					f"{initialize_devices.bcolors.FAIL}Error: Cannot plot Histogram correctly{initialize_devices.bcolors.ENDC}")
+				print(e)
+			# Visualization
+			# try:
+			# calculate the fdm for the current data
+			hist, xedges, yedges = np.histogram2d(xx * 10, yy * 10, bins=self.bins_detector, range=self.range)
+			self.hist_fdm += np.log10(hist + 1)  # Avoid log(0) error
+			# self.hist_fdm += hist
+			if self.heatmap_fdm_switch_flag == 'heatmap':
+				if self.variables.reset_heatmap:
+					self.variables.reset_heatmap = False
+					self.last_100_thousand_det_x_heatmap = np.array([])
+					self.last_100_thousand_det_y_heatmap = np.array([])
+				x_last_events = self.last_100_thousand_det_x_heatmap[:]
+				y_last_events = self.last_100_thousand_det_y_heatmap[:]
+				# adding points to the scatter plot
+				self.scatter.setSize(self.hitmap_plot_size.value())
+
+				x = x_last_events * 10
+				y = y_last_events * 10
+
+				x = x[-self.num_hit_display:]
+				y = y[-self.num_hit_display:]
+				self.hitmap_count.setText(str(len(x)))  # number of points displayed
+				self.scatter.clear()
+				self.scatter.setData(x=x, y=y)
+				# add item to plot window
+				# adding scatter plot item to the plot window
+				self.detector_heatmap.clear()
+				self.detector_heatmap.addItem(self.scatter)
+				self.detector_heatmap.addItem(self.detector_circle)
+
+			elif self.heatmap_fdm_switch_flag == 'fdm':
+				# plot fdm which is 2d hsogram of det_x and det_y
+				# Create a 2D histogram
+				if self.mc_tof_last_events_flag:
+					x_last_events = self.last_100_thousand_det_x_heatmap[-self.num_event_mc_tof:]
+					y_last_events = self.last_100_thousand_det_y_heatmap[-self.num_event_mc_tof:]
+					hist_fdm_last_events, xedges, yedges = np.histogram2d(x_last_events * 10, y_last_events * 10,
+					                                                      bins=self.bins_detector, range=self.range)
+					hist_fdm_last_events = np.log10(hist_fdm_last_events + 1)
+				if self.mc_tof_last_events_flag:
+					hist_fdm_tmp = np.copy(hist_fdm_last_events)
+				else:
+					hist_fdm_tmp = np.copy(self.hist_fdm)
+
+				img = pg.ImageItem()
+				img.setImage(hist_fdm_tmp)  # Transpose if needed because pg.ImageItem assumes (row, col) format
+				# set the length of histogram
+				self.hitmap_count.setText(str(self.length_events))  # number of points displayed
+				img.setRect(QtCore.QRectF(xedges[0], yedges[0], xedges[-1] - xedges[0], yedges[-1] - yedges[0]))
+
+				# Apply a color map to the histogram
+				# Load a preset color map (e.g., 'grey', 'thermal', 'flame', viridis, etc.)
+				lut = pg.colormap.get('viridis').getLookupTable(start=0.0, stop=1.0, nPts=256)
+				img.setLookupTable(lut)
+				# add item to plot window
+				# adding scatter plot item to the plot window
+				self.detector_heatmap.clear()
+				self.detector_heatmap.addItem(img)
+				# Adjust the aspect ratio to match the data aspect ratio
+				self.detector_heatmap.getViewBox().setAspectLocked(True)
+
 	def update_graphs(self, ):
 		"""
         Update the graphs
@@ -609,7 +868,7 @@ class Ui_Visualization(object):
         Return:
             None
         """
-		if self.index_auto_scale_graph == 30:
+		if self.index_auto_scale_graph == 30 and self.variables.start_flag:
 			self.vdc_time.enableAutoRange(axis='x')
 			self.histogram.enableAutoRange(axis='y')
 			self.detection_rate_viz.enableAutoRange(axis='x')
@@ -661,283 +920,70 @@ class Ui_Visualization(object):
 
 		# with self.variables.lock_statistics and self.variables.lock_setup_parameters:
 		if self.variables.start_flag and self.variables.flag_visualization_start:
-			if self.index_plot_start == 0:
-				self.num_hit_display = int(float(self.hit_displayed.text()))
-				self.start_main_exp = time.time()
-				self.start_time = time.time()
-				self.start_time_metadata = time.time()
-				self.index_plot_start += 1
-			self.variables.elapsed_time = time.time() - self.start_time
-			# with self.variables.lock_statistics:
-			if self.index_wait_on_plot_start <= 16:
-				if self.index_wait_on_plot_start == 0:
-					self.counter_source = self.variables.counter_source
-				self.index_wait_on_plot_start += 1
-
-			# V_dc and V_p
-			current_voltage = self.variables.specimen_voltage_plot
-			if self.index_plot < len(self.y_vdc):
-				self.y_vdc[self.index_plot] = int(current_voltage)  # Add a new value.
-
-			else:
-				x_vdc_last = self.x_vdc[-1]
-				self.x_vdc.append(x_vdc_last + 0.5)  # Add a new value 1 higher than the last.
-				self.y_vdc.append(int(current_voltage))
-			# set the value of the voltage with two decimal places
-			self.voltage.setText(str("{:.2f}".format(current_voltage)))
-
-			# Set the maximum number of data points to display
-			max_display_points = 200
-			# Downsample the data if needed
-			if len(self.x_vdc) > max_display_points:
-				step = len(self.x_vdc) // max_display_points
-				x_vdc_downsampled = self.x_vdc[::step]
-				y_vdc_downsampled = self.y_vdc[::step]
-				self.data_line_vdc.setData(x_vdc_downsampled, y_vdc_downsampled)
-			else:
-				self.data_line_vdc.setData(self.x_vdc, self.y_vdc)
-
-			# Detection Rate Visualization
-			# with self.variables.lock_statistics:
-			current_detection_rate = self.variables.detection_rate_current_plot
-			if self.index_plot < len(self.y_dtec):
-				self.y_dtec[self.index_plot] = current_detection_rate  # Add a new value.
-			else:
-				# self.x_dtec = self.x_dtec[1:]  # Remove the first element.
-				x_dtec_last = self.x_dtec[-1]
-				self.x_dtec.append(x_dtec_last + 0.5)  # Add a new value 1 higher than the last.
-				self.y_dtec.append(current_detection_rate)
-			self.detection_rate.setText(str("{:.2f}".format(current_detection_rate)))
-			# self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
-			# Set the maximum number of data points to display
-			max_display_points = 200
-			# Downsample the data if needed
-			if len(self.x_dtec) > max_display_points and not self.change_detection_rate_range:
-				step = len(self.x_dtec) // max_display_points
-				x_dtec_downsampled = self.x_dtec[::step]
-				y_dtec_downsampled = self.y_dtec[::step]
-				self.data_line_dtec.setData(x_dtec_downsampled, y_dtec_downsampled)
-			elif len(self.x_dtec) > max_display_points and self.change_detection_rate_range:
-				x_dtec_downsampled = self.x_dtec[-max_display_points:]
-				y_dtec_downsampled = self.y_dtec[-max_display_points:]
-				self.data_line_dtec.setData(x_dtec_downsampled, y_dtec_downsampled)
-			else:
-				self.data_line_dtec.setData(self.x_dtec, self.y_dtec)
-			# Increase the index
-			# with self.variables.lock_statistics:
-			self.index_plot += 1
-			# mass spectrum
-
-			if self.counter_source == 'TDC' and self.variables.total_ions > 0 and \
-					self.index_wait_on_plot_start > 16:
-
-				xx = np.array([])
-				yy = np.array([])
-				tt = np.array([])
-				main_v_dc_dld = np.array([])
-
-				while not self.x_plot.empty() and not self.y_plot.empty() and not self.t_plot.empty() and \
-						not self.main_v_dc_plot.empty():
-					data = self.x_plot.get()
-					xx = np.append(xx, data)
-					data = self.y_plot.get()
-					yy = np.append(yy, data)
-					data = self.t_plot.get()
-					tt = np.append(tt, data)
-					data = self.main_v_dc_plot.get()
-					main_v_dc_dld = np.append(main_v_dc_dld, data)
-
-				# self.length_events += len(self.tt)
-				self.length_events += len(tt)
-
-				if len(self.last_100_thousand_v) == 0:
-					self.last_100_thousand_det_x_heatmap = xx
-					self.last_100_thousand_det_y_heatmap = yy
-					mask_t = tt < self.conf["max_tof"]
-					self.last_100_thousand_v = main_v_dc_dld[mask_t]
-					self.last_100_thousand_det_x = xx[mask_t]
-					self.last_100_thousand_det_y = yy[mask_t]
-					self.last_100_thousand_t = tt[mask_t]
-				else:
-					self.last_100_thousand_det_x_heatmap = np.concatenate((self.last_100_thousand_det_x_heatmap, xx))
-					self.last_100_thousand_det_y_heatmap = np.concatenate((self.last_100_thousand_det_y_heatmap, yy))
-					mask_t = tt < self.conf["max_tof"]
-					self.last_100_thousand_v = np.concatenate((self.last_100_thousand_v, main_v_dc_dld[mask_t]))
-					self.last_100_thousand_det_x = np.concatenate((self.last_100_thousand_det_x, xx[mask_t]))
-					self.last_100_thousand_det_y = np.concatenate((self.last_100_thousand_det_y, yy[mask_t]))
-					self.last_100_thousand_t = np.concatenate((self.last_100_thousand_t, tt[mask_t]))
-				if len(self.last_100_thousand_v) > 100000:
-					self.last_100_thousand_v = self.last_100_thousand_v[-100000:]
-					self.last_100_thousand_det_x = self.last_100_thousand_det_x[-100000:]
-					self.last_100_thousand_det_x_heatmap = self.last_100_thousand_det_x_heatmap[-100000:]
-					self.last_100_thousand_det_y = self.last_100_thousand_det_y[-100000:]
-					self.last_100_thousand_det_y_heatmap = self.last_100_thousand_det_y_heatmap[-100000:]
-					self.last_100_thousand_t = self.last_100_thousand_t[-100000:]
-
-				try:
-					if self.variables.pulse_mode == 'Voltage':
-						t_0 = self.conf["t_0_voltage"]
-					elif self.variables.pulse_mode == 'Laser' or self.variables.pulse_mode == 'VoltageLaser':
-						t_0 = self.conf["t_0_laser"]
-					if self.mc_tof_last_events_flag and self.conf["visualization"] == "tof":
-						tt_last_events = self.last_100_thousand_t[-self.num_event_mc_tof:]
-						hist_tof_last_events, _ = np.histogram(tt_last_events, bins=self.bins_tof)
-
-					elif self.mc_tof_last_events_flag and self.conf["visualization"] == "mc":
-						t_last_events = self.last_100_thousand_t[-self.num_event_mc_tof:]
-						main_v_dc_dld_last_events = self.last_100_thousand_v[-self.num_event_mc_tof:]
-						x_last_events = self.last_100_thousand_det_x[-self.num_event_mc_tof:]
-						y_last_events = self.last_100_thousand_det_y[-self.num_event_mc_tof:]
-
-						mc_last_events = tof2mc_simple.tof_2_mc(t_last_events, t_0,
-						                                        main_v_dc_dld_last_events,
-						                                        x_last_events,
-						                                        y_last_events,
-						                                        flightPathLength=self.conf["flight_path_length"])
-						hist_mc_last_events, _ = np.histogram(mc_last_events, bins=self.bins_mc)
-
-					# hist_tof, _ = np.histogram(tt_max_lenght, bins=self.bins_tof)
-					# self.hist_tof = hist_tof
-					hist_tof, _ = np.histogram(tt[mask_t], bins=self.bins_tof)
-					self.hist_tof += hist_tof
-
-					# mc = tof2mc_simple.tof_2_mc(self.last_100_thousand_t, self.conf["t_0"],
-					#                             self.last_100_thousand_v,
-					#                             self.last_100_thousand_det_x,
-					#                             self.last_100_thousand_det_y,
-					#                             flightPathLength=self.conf["flight_path_length"])
-					# hist_mc, _ = np.histogram(mc, bins=self.bins_mc)
-					# self.hist_mc = hist_mc
-					mc = tof2mc_simple.tof_2_mc(tt[mask_t], t_0,
-					                            main_v_dc_dld[mask_t],
-					                            xx[mask_t],
-					                            yy[mask_t],
-					                            flightPathLength=self.conf["flight_path_length"])
-					hist_mc, _ = np.histogram(mc, bins=self.bins_mc)
-					self.hist_mc += hist_mc
-
-					self.histogram.clear()
-					if self.conf["visualization"] == "tof" and not self.mc_tof_last_events_flag:
-						hist = np.copy(self.hist_tof[:self.index_hist_tof])
-						hist[hist == 0] = 1  # Avoid log(0) error
-						bins = self.bins_tof[:self.index_hist_tof + 1]
-						self.histogram.plot(bins, hist, stepMode="center", fillLevel=0,
-						                    fillOutline=True, brush='black', name="num events: %s" % self.length_events)
-					elif self.conf["visualization"] == "mc" and not self.mc_tof_last_events_flag:
-						hist = np.copy(self.hist_mc[:self.index_hist_mc])
-						hist[hist == 0] = 1  # Avoid log(0) error
-						bins = self.bins_mc[:self.index_hist_mc + 1]
-						self.histogram.plot(bins, hist, stepMode="center", fillLevel=0,
-						                    fillOutline=True, brush='black', name="num events: %s" % self.length_events)
-					elif self.conf["visualization"] == "tof" and self.mc_tof_last_events_flag:
-						# remobe the bins bigger than the max_tof
-						hist = np.copy(hist_tof_last_events[:self.index_hist_tof])
-						hist[hist == 0] = 1  # Avoid log(0) error
-						bins = self.bins_tof[:self.index_hist_tof + 1]
-						self.histogram.plot(bins, hist, stepMode="center", fillLevel=0,
-						                    fillOutline=True, brush='black', name="num events: %s" % self.length_events)
-					elif self.conf["visualization"] == "mc" and self.mc_tof_last_events_flag:
-						# remobe the bins bigger than the max_mc
-						hist = np.copy(hist_mc_last_events[:self.index_hist_mc])
-						hist[hist == 0] = 1  # Avoid log(0) error
-						bins = self.bins_mc[:self.index_hist_mc + 1]
-						self.histogram.plot(bins, hist, stepMode="center", fillLevel=0,
-						                    fillOutline=True, brush='black', name="num events: %s" % self.length_events)
-
-				except Exception as e:
-					print(
-						f"{initialize_devices.bcolors.FAIL}Error: Cannot plot Histogram correctly{initialize_devices.bcolors.ENDC}")
-					print(e)
-				# Visualization
-				# try:
-				# calculate the fdm for the current data
-				hist, xedges, yedges = np.histogram2d(xx * 10, yy * 10, bins=self.bins_detector, range=self.range)
-				self.hist_fdm += np.log10(hist + 1)  # Avoid log(0) error
-				# self.hist_fdm += hist
-				if self.heatmap_fdm_switch_flag == 'heatmap':
-					if self.variables.reset_heatmap:
-						self.variables.reset_heatmap = False
-						self.last_100_thousand_det_x_heatmap = np.array([])
-						self.last_100_thousand_det_y_heatmap = np.array([])
-					x_last_events = self.last_100_thousand_det_x_heatmap[:]
-					y_last_events = self.last_100_thousand_det_y_heatmap[:]
-					# adding points to the scatter plot
-					self.scatter.setSize(self.hitmap_plot_size.value())
-
-					x = x_last_events * 10
-					y = y_last_events * 10
-
-					x = x[-self.num_hit_display:]
-					y = y[-self.num_hit_display:]
-					self.hitmap_count.setText(str(len(x)))  # number of points displayed
-					self.scatter.clear()
-					self.scatter.setData(x=x, y=y)
-					# add item to plot window
-					# adding scatter plot item to the plot window
-					self.detector_heatmap.clear()
-					self.detector_heatmap.addItem(self.scatter)
-					self.detector_heatmap.addItem(self.detector_circle)
-
-				elif self.heatmap_fdm_switch_flag == 'fdm':
-					# plot fdm which is 2d hsogram of det_x and det_y
-					# Create a 2D histogram
-					if self.mc_tof_last_events_flag:
-						x_last_events = self.last_100_thousand_det_x_heatmap[-self.num_event_mc_tof:]
-						y_last_events = self.last_100_thousand_det_y_heatmap[-self.num_event_mc_tof:]
-						hist_fdm_last_events, xedges, yedges = np.histogram2d(x_last_events * 10, y_last_events * 10,
-						                                                      bins=self.bins_detector, range=self.range)
-						hist_fdm_last_events = np.log10(hist_fdm_last_events + 1)
-					if self.mc_tof_last_events_flag:
-						hist_fdm_tmp = np.copy(hist_fdm_last_events)
-					else:
-						hist_fdm_tmp = np.copy(self.hist_fdm)
-
-					img = pg.ImageItem()
-					img.setImage(hist_fdm_tmp)  # Transpose if needed because pg.ImageItem assumes (row, col) format
-					# set the length of histogram
-					self.hitmap_count.setText(str(self.length_events))  # number of points displayed
-					img.setRect(QtCore.QRectF(xedges[0], yedges[0], xedges[-1] - xedges[0], yedges[-1] - yedges[0]))
-
-					# Apply a color map to the histogram
-					# Load a preset color map (e.g., 'grey', 'thermal', 'flame', viridis, etc.)
-					lut = pg.colormap.get('viridis').getLookupTable(start=0.0, stop=1.0, nPts=256)
-					img.setLookupTable(lut)
-					# add item to plot window
-					# adding scatter plot item to the plot window
-					self.detector_heatmap.clear()
-					self.detector_heatmap.addItem(img)
-					# Adjust the aspect ratio to match the data aspect ratio
-					self.detector_heatmap.getViewBox().setAspectLocked(True)
-			# except Exception as e:
-			# 	print(
-			# 		f"{initialize_devices.bcolors.FAIL}Error: Cannot plot Ions correctly{initialize_devices.bcolors.ENDC}")
-			# 	print(e)
+			self.update_graphs_helper()
 
 			# save plots to the file
 			if time.time() - self.start_time_metadata >= self.variables.save_meta_interval_visualization:
-				path_meta = self.variables.path_meta
+				self.path_meta = self.variables.path_meta
 				exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
 				exporter.params['width'] = 1000  # Set the width of the image
 				exporter.params['height'] = 800  # Set the height of the image
-				exporter.export(path_meta + '/visualization_v_dc_p_%s.png' % self.index_plot_save)
+				exporter.export(self.variables.path_meta + '/visualization_v_dc_p_%s.png' % self.index_plot_save)
 				exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
 				exporter.params['width'] = 1000  # Set the width of the image
 				exporter.params['height'] = 800  # Set the height of the image
-				exporter.export(path_meta + '/visualization_detection_rate_%s.png' % self.index_plot_save)
+				exporter.export(self.path_meta + '/visualization_detection_rate_%s.png' % self.index_plot_save)
 				exporter = pg.exporters.ImageExporter(self.detector_heatmap.plotItem)
 				exporter.params['width'] = 1000  # Set the width of the image
 				exporter.params['height'] = 800  # Set the height of the image
-				exporter.export(path_meta + '/visualization_detector_%s.png' % self.index_plot_save)
+				exporter.export(self.path_meta + '/visualization_detector_%s.png' % self.index_plot_save)
 				exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
 				exporter.params['width'] = 1000  # Set the width of the image
 				exporter.params['height'] = 800  # Set the height of the image
-				exporter.export(path_meta + '/visualization_mc_tof_%s.png' % self.index_plot_save)
+				exporter.export(self.path_meta + '/visualization_mc_tof_%s.png' % self.index_plot_save)
 
 				screenshot = QtWidgets.QApplication.primaryScreen().grabWindow(self.visualization_window.winId())
-				screenshot.save(path_meta + '/visualization_screenshot_%s.png' % self.index_plot_save, 'png')
+				screenshot.save(self.path_meta + '/visualization_screenshot_%s.png' % self.index_plot_save, 'png')
 				self.start_time_metadata = time.time()
 				# Increase the index
 				self.index_plot_save += 1
+
+		elif self.variables.last_screen_shot:
+			self.path_meta = self.variables.path_meta
+			if self.variables.vdc_hold:
+				self.dc_hold.click()
+			if self.heatmap_fdm_switch_flag == 'heatmap':
+				self.heatmap_fdm_switch.click()
+			if self.mc_tof_last_events_flag:
+				self.spectrum_last_events_switch.click()
+			if self.change_detection_rate_range:
+				self.detection_rate_range_switch.click()
+			if self.conf["visualization"] == "tof":
+				self.spectrum_switch.click()
+
+			self.update_graphs_helper()
+
+			exporter = pg.exporters.ImageExporter(self.vdc_time.plotItem)
+			exporter.params['width'] = 1000  # Set the width of the image
+			exporter.params['height'] = 800  # Set the height of the image
+			exporter.export(self.path_meta + '/visualization_v_dc_p_final.png')
+			exporter = pg.exporters.ImageExporter(self.detection_rate_viz.plotItem)
+			exporter.params['width'] = 1000  # Set the width of the image
+			exporter.params['height'] = 800  # Set the height of the image
+			exporter.export(self.path_meta + '/visualization_detection_rate_final.png')
+			exporter = pg.exporters.ImageExporter(self.detector_heatmap.plotItem)
+			exporter.params['width'] = 1000  # Set the width of the image
+			exporter.params['height'] = 800  # Set the height of the image
+			exporter.export(self.path_meta + '/visualization_detector_final.png')
+			exporter = pg.exporters.ImageExporter(self.histogram.plotItem)
+			exporter.params['width'] = 1000  # Set the width of the image
+			exporter.params['height'] = 800  # Set the height of the image
+			exporter.export(self.path_meta + '/visualization_mc_tof_final.png')
+
+			screenshot = QtWidgets.QApplication.primaryScreen().grabWindow(self.visualization_window.winId())
+			screenshot.save(self.path_meta + '/visualization_screenshot_final.png', 'png')
+
+			self.variables.last_screen_shot = False
 
 	def spectrum_switch_mc_tof(self):
 		"""

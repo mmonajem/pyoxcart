@@ -547,12 +547,15 @@ class APT_Exp_Control:
             % (int(1000 / self.variables.ex_freq), index_time, steps))
 
         print('Waiting for TDC process to be finished for maximum 60 seconds...')
-        for i in range(60):
+        for i in range(600):
             if self.variables.flag_finished_tdc:
                 print('TDC process is finished')
                 break
             print('%s seconds passed' % i)
             time.sleep(1)
+            if i == 599:
+                print('TDC process is not finished')
+                self.log_apt.warning('TDC process is not finished')
 
         if self.conf['tdc'] == "on":
             # Stop the TDC process
@@ -583,6 +586,8 @@ class APT_Exp_Control:
         elif self.variables.counter_source == 'HSD':
             pass
 
+        # This flag set to True to save the last screenshot of the experiment in the GUI visualization
+        self.variables.last_screen_shot = True
         # Check the length of arrays to be equal
         if self.variables.counter_source == 'TDC':
             if all(len(lst) == len(self.variables.x) for lst in [self.variables.x, self.variables.y,
@@ -653,7 +658,6 @@ class APT_Exp_Control:
             """
             Reset all the global variables.
             """
-            self.variables.vdc_hold = False
             self.variables.flag_finished_tdc = False
             self.variables.detection_rate_current = 0.0
             self.variables.count = 0

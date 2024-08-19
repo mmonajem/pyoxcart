@@ -142,6 +142,7 @@ def load_and_copy_chunks_to_hdf(path, hdf5_file_path, chunk_id):
                 all_data.extend(np.load(chunk_file).tolist())
             else:
                 print(f"File '{chunk_file}' not found.")
+        print(f"Loaded {attr_name} data from {len(all_data)} chunks")
         return all_data
 
     xx_list = load_data("x_data")
@@ -193,7 +194,7 @@ def load_and_copy_chunks_to_hdf(path, hdf5_file_path, chunk_id):
 
 
 if __name__ == '__main__':
-    name = '1951_Jul-12-2024_11-33_test'
+    name = '2164_Aug-15-2024_11-10_NiC2_Al_N_2'
     path = 'D:/pyccapt/pyccapt/data/%s/' % name
     name = '%s.h5' % name
     # copy_npy_to_hdf(path, name)
@@ -201,5 +202,5 @@ if __name__ == '__main__':
     # rename_subcategory(path + name, old_name='dld', new_name='dld_1')
     # copy_npy_to_hdf_surface_concept(path+'/temp_data/', name)
     # rename_subcategory(path + name, old_name='tdc/voltage_laser', new_name='tdc/laser_pulse')
-    load_and_copy_chunks_to_hdf(path + '/temp_data/chunks/', path + name, 106)
+    load_and_copy_chunks_to_hdf(path + '/temp_data/chunks/', path + name, 389)
     print('Done')

@@ -33,6 +33,7 @@ class Ui_PyCCAPT(object):
 		self.variables = variables
 		self.emitter = SignalEmitter()
 		self.flag_super_user = False
+		self.vdc_hold_old = False
 		self.x_plot = x_plot
 		self.y_plot = y_plot
 		self.t_plot = t_plot
@@ -1462,6 +1463,10 @@ class Ui_PyCCAPT(object):
 		if not self.variables.start_flag and self.variables.stop_flag:
 			self.stop_experiment_clicked()
 
+		if self.variables.vdc_hold != self.vdc_hold_old:
+			self.dc_hold_clicked()
+			self.vdc_hold_old = self.variables.vdc_hold
+
 	def stop_experiment_clicked(self):
 		"""
 											Stop the experiment worker thread
@@ -1578,7 +1583,6 @@ class Ui_PyCCAPT(object):
 			self.parameters_source.setEnabled(True)  # Enable the parameters source
 			self.pulse_fraction.setEnabled(True)  # Enable the pulse fraction
 			self.ex_freq.setEnabled(True)
-			self.variables.vdc_hold = False
 			self.ex_name.setEnabled(True)
 			self.electrode.setEnabled(True)
 			self.control_algorithm.setEnabled(True)
@@ -1623,26 +1627,19 @@ class Ui_PyCCAPT(object):
 
 	def dc_hold_clicked(self):
 		"""
-											Hold the DC voltage
+				Hold the DC voltage
 
-											Args:
-													None
+				Args:
+						None
 
-											Return:
-													None
-									"""
-		if self.variables.start_flag:
-			# with self.variables.lock_setup_parameters:
-			if not self.variables.vdc_hold:
-				self.variables.vdc_hold = True
-				self.pulse_mode.setEnabled(True)  # Disable the pulse mode
-				self.dc_hold.setStyleSheet("QPushButton{\n"
-				                           "background: rgb(0, 255, 26)\n"
-				                           "}")
-			elif self.variables.vdc_hold:
-				self.variables.vdc_hold = False
-				self.pulse_mode.setEnabled(False)  # Enable the pulse mode
-				self.dc_hold.setStyleSheet(self.original_button_style)
+				Return:
+						None
+		"""
+		if self.variables.vdc_hold:
+			self.pulse_mode.setEnabled(True)  # Disable the pulse mode
+
+		elif not self.variables.vdc_hold:
+			self.pulse_mode.setEnabled(False)  # Enable the pulse mode
 
 	def set_min_voltage_clicked(self):
 		"""
