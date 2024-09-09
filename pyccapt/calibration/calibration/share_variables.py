@@ -5,25 +5,25 @@ import pandas as pd
 
 
 def get_project_path():
-	"""
-	Get the absolute path of the current Python script
+    """
+    Get the absolute path of the current Python script
 
-	Args:
-		None
-	Returns:
-		script_path (str): The absolute path of the current Python script.
-	"""
-	script_path = os.path.abspath(__file__)
+    Args:
+        None
+    Returns:
+        script_path (str): The absolute path of the current Python script.
+    """
+    script_path = os.path.abspath(__file__)
 
-	# Traverse up the directory tree until reaching the project's main folder
-	while not os.path.isfile(os.path.join(script_path, 'setup.py')):
-		script_path = os.path.dirname(script_path)
+    # Traverse up the directory tree until reaching the project's main folder
+    while not os.path.isfile(os.path.join(script_path, 'setup.py')):
+        script_path = os.path.dirname(script_path)
 
-		# Break the loop if we reached the root directory
-		if script_path == os.path.dirname(script_path):
-			break
+        # Break the loop if we reached the root directory
+        if script_path == os.path.dirname(script_path):
+            break
 
-	return script_path
+    return script_path
 
 class Variables:
     """

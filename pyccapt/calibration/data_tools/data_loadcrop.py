@@ -285,10 +285,9 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
             mask_det_y = (variables.dld_y_det < range_dety[1]) & (variables.dld_y_det > range_dety[0])
             mask_det = mask_det_x & mask_det_y
         else:
-            print(variables.dld_x_det)
             mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
         if range_mc:
-            mask_mc = (variables.mc_uc < range_mc[1]) & (variables.mc_uc > range_mc[0])
+            mask_mc = (variables.mc <= range_mc[1]) & (variables.mc >= range_mc[0])
         else:
             mask_mc = np.ones(len(variables.mc), dtype=bool)
         if range_x and range_y and range_z:
@@ -299,9 +298,9 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
         if range_vol:
-            mask_vol = (variables.voltage < range_vol[1]) & (variables.voltage > range_vol[0])
+            mask_vol = (variables.dld_high_voltage < range_vol[1]) & (variables.dld_high_voltage > range_vol[0])
         else:
-            mask_vol = np.ones(len(variables.voltage), dtype=bool)
+            mask_vol = np.ones(len(variables.dld_high_voltage), dtype=bool)
         mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         variables.mask = mask
         print('The number of data mc:', len(mask_mc[mask_mc == True]))

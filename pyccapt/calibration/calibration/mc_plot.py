@@ -946,9 +946,9 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
         if range_vol:
-            mask_vol = (variables.vol < range_vol[1]) & (variables.vol > range_vol[0])
+            mask_vol = (variables.dld_high_voltage < range_vol[1]) & (variables.dld_high_voltage > range_vol[0])
         else:
-            mask_vol = np.ones(len(variables.vol), dtype=bool)
+            mask_vol = np.ones(len(variables.dld_high_voltage), dtype=bool)
         mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))

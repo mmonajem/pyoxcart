@@ -193,6 +193,7 @@ def call_visualization(variables):
     save_3d = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
     ions_individually_plots = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
     make_gif_p3 = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
+    make_evap_3d = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
     plot_3d_button.on_click(lambda b: plot_3d(b, variables, out))
     range_sequence_3d = widgets.Textarea(value='[0,0]')
     range_detx_3d = widgets.Textarea(value='[0,0]')
@@ -246,8 +247,8 @@ def call_visualization(variables):
 
             reconstruction.reconstruction_plot(variables, element_percentage_list, opacity.value,
                                                rotary_fig_save_p3.value, figname_3d.value,
-                                               save_3d.value, make_gif_p3.value, range_sequence, range_mc, range_detx,
-                                               range_dety, range_x, range_y, range_z, range_vol,
+                                               save_3d.value, make_gif_p3.value, make_evap_3d.value, range_sequence,
+                                               range_mc, range_detx, range_dety, range_x, range_y, range_z, range_vol,
                                                ions_individually_plots.value)
 
         plot_3d_button.disabled = False
@@ -703,6 +704,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_3d]),
         widgets.HBox([widgets.Label(value='Rotary save:', layout=label_layout), rotary_fig_save_p3]),
         widgets.HBox([widgets.Label(value='Save GIF:', layout=label_layout), make_gif_p3]),
+        widgets.HBox([widgets.Label(value='Save evaporation GIF:', layout=label_layout), make_evap_3d]),
         widgets.HBox([widgets.Label(value='Save fig:', layout=label_layout), save_3d]),
         widgets.HBox([widgets.Label(value='Ions individually plots:', layout=label_layout), ions_individually_plots]),
         widgets.HBox([widgets.Label(value="sequence range:", layout=label_layout), range_sequence_3d]),

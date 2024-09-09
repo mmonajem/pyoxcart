@@ -90,16 +90,20 @@ def atom_probe_recons_from_detector_Gault_et_al(detx, dety, hv, flight_path_leng
     x, y = pol2cart(d, ang)
 
     # Calculate z coordinate
-    dz_p = radius_evolution * (1 - np.cos(theta_a))
+    # the z shift with respect to the top of the cap is Rspec - zP
+    # z_p = radius_evolution * (1 - np.cos(theta_a))
+    z_p = radius_evolution - z_p
     omega = 1E-9 ** 3 / avg_dens
+
     # icf_2 = theta_a / theta_p
     # dz = (omega * ((flight_path_length * 1E-3) ** 2) * (kf ** 2) * ((field_evap / 1E-9) ** 2)) / (
     #         det_area * det_eff * (icf_2 ** 2) * (hv ** 2))
 
     dz = (omega * ((flight_path_length * 1E-3) ** 2) * (kf ** 2) * ((field_evap / 1E-9) ** 2)) / (
             det_area * det_eff * (icf ** 2) * (hv ** 2))
+
     cum_z = np.cumsum(dz)
-    z = cum_z + dz_p
+    z = cum_z + z_p
 
     return x * 1E9, y * 1E9, z * 1E9
 
@@ -204,9 +208,8 @@ def draw_qube(fig, range, col=None, row=None):
 
 
 def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save, make_gif=False,
-                        range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[],
-                        range_z=[], range_vol=[],
-                        ions_individually_plots=False):
+                        make_evaporation_gif=False, range_sequence=[], range_mc=[], range_detx=[], range_dety=[],
+                        range_x=[], range_y=[], range_z=[], range_vol=[], ions_individually_plots=False):
     """
     Generate a 3D plot for atom probe reconstruction data.
 
@@ -218,6 +221,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         figname (str): Name of the figure.
         save (bool): Whether to save the figure.
         make_gif (bool): Whether to make a GIF.
+        make_evaporation_gif (bool): Whether to make an evaporation GIF.
         range_sequence (list): Range of sequence
         range_mc: Range of mc
         range_detx: Range of detx
@@ -372,6 +376,62 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
             rotary_fig(go.Figure(fig), variables, rotary_fig_save, make_gif, figname)
         else:
             print('Rotary figure is not available for ions_individually_plots=True')
+
+    if make_evaporation_gif:
+        num_events = len(variables.dld_t)
+        figures = []
+        for k in range(0, 1, 20):
+            rotated_fig = go.Figure(fig)
+            rotated_fig.update_layout(showlegend=False)
+            xx = variables.x[k*num_events:(k+(1/20))*num_events]
+            yy = variables.y[k*num_events:(k+(1/20))*num_events]
+            zz = variables.z[k*num_events:(k+(1/20))*num_events]
+            mc_c = variables.mc[k*num_events:(k+(1/20))*num_events]
+            dld_t = variables.dld_t[k*num_events:(k+(1/20))*num_events]
+            for index, elemen in enumerate(ion):
+                mask = (mc_c > mc_low[index]) & (mc_c < mc_up[index])
+                mask = mask & mask_f
+                size = int(len(mask[mask == True]) * float(element_percentage[index]))
+                # Find indices where the original mask is True
+                true_indices = np.where(mask)[0]
+                # Randomly choose 100 indices from the true indices
+                random_true_indices = np.random.choice(true_indices, size=size, replace=False)
+                # Create a new mask with the same length as the original, initialized with False
+                new_mask = np.full(len(dld_t), False)
+                # Set the selected indices to True in the new mask
+                new_mask[random_true_indices] = True
+                # Apply the new mask to the original mask
+                mask = mask & new_mask
+
+                rotated_fig.add_trace(
+                    go.Scatter3d(
+                        x=xx[mask],
+                        y=yy[mask],
+                        z=zz[mask],
+                        mode='markers',
+                        name=ion[index],
+                        showlegend=True,
+                        marker=dict(
+                            size=1,
+                            color=colors[index],
+                            opacity=opacity,
+                        )
+                    )
+                )
+
+            fig = draw_qube(rotated_fig, range_cube)
+            figures.append(rotated_fig)
+
+        images = []
+        print('Starting to process the frames for the GIF')
+        print('The total number of frames is:', len(figures))
+        for index, frame in enumerate(figures):
+            images.append(plotly_fig2array(frame))
+            print('frame', index, 'is being processed')
+        print('The images are ready for the GIF')
+
+        # Save the images as a GIF using imageio
+        imageio.mimsave(variables.result_path + '\\rota_evaporation_{fn}.gif'.format(fn=figname), images, fps=2)
 
     fig.update_layout(
         legend=dict(

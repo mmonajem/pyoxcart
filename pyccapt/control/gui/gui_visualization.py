@@ -868,16 +868,6 @@ class Ui_Visualization(object):
         Return:
             None
         """
-		if self.index_auto_scale_graph == 30 and self.variables.start_flag:
-			self.vdc_time.enableAutoRange(axis='x')
-			self.histogram.enableAutoRange(axis='y')
-			self.detection_rate_viz.enableAutoRange(axis='x')
-			self.detection_rate_viz.enableAutoRange(axis='y')
-			self.detector_heatmap.enableAutoRange(axis='x')
-			self.detector_heatmap.enableAutoRange(axis='y')
-			self.index_auto_scale_graph = 0
-
-		self.index_auto_scale_graph += 1
 
 		if self.variables.plot_clear_flag:
 			self.x_vdc = [i * 0.5 for i in range(200)]  # 100 time points
@@ -918,8 +908,18 @@ class Ui_Visualization(object):
 			self.hist_mc = np.zeros(len(self.bins_mc) - 1)
 			self.hist_tof = np.zeros(len(self.bins_tof) - 1)
 
+		if self.index_auto_scale_graph == 30:
+			self.vdc_time.enableAutoRange(axis='x')
+			self.histogram.enableAutoRange(axis='y')
+			self.detection_rate_viz.enableAutoRange(axis='x')
+			self.detection_rate_viz.enableAutoRange(axis='y')
+			self.detector_heatmap.enableAutoRange(axis='x')
+			self.detector_heatmap.enableAutoRange(axis='y')
+			self.index_auto_scale_graph = 0
+
 		# with self.variables.lock_statistics and self.variables.lock_setup_parameters:
 		if self.variables.start_flag and self.variables.flag_visualization_start:
+			self.index_auto_scale_graph += 1
 			self.update_graphs_helper()
 
 			# save plots to the file
