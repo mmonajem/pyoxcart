@@ -68,14 +68,14 @@ class AptHistPlotter:
         self.mask_f = None
         self.legend_colors = []
 
-    def plot_histogram(self, bin_width=0.1, mode=None, label='mc', log=True, grid=False, steps='stepfilled',
+    def plot_histogram(self, bin_width=0.1, normalize=False, label='mc', log=True, grid=False, steps='stepfilled',
                        fig_size=(9, 5), plot_show=True):
         """
         Plot the histogram of the mc or tof data.
 
         Args:
             bin_width (float): The width of the bins.
-            mode (str): The mode of the histogram ('normalized' or 'absolute').
+            normalize (bool): Whether to normalize the histogram.
             label (str): The label of the x-axis ('mc' or 'tof').
             log (bool): Whether to use log scale for the y-axis.
             grid (bool): Whether to show the grid.
@@ -101,7 +101,7 @@ class AptHistPlotter:
             edgecolor = 'k'
             alpha = 0.9
 
-        if mode == 'normalized':
+        if normalize:
             self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=self.bins, alpha=alpha,
                                                         color='slategray', edgecolor=edgecolor, histtype=steps,
                                                         density=True)
@@ -127,6 +127,22 @@ class AptHistPlotter:
             self.variables.x_hist = self.x
             self.variables.y_hist = self.y
         return self.y, self.x
+
+    def plot_line_hist(self):
+        """
+        Plot the histogram as a line plot.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        bin_centers = (self.bins[:-1] + self.bins[1:]) / 2  # Compute bin centers
+        self.ax.plot(bin_centers, self.y, color='slategray')
+        # Step 2: Remove the histogram patches (bars)
+        for patch in self.patches:
+            patch.set_visible(False)
 
     def plot_range(self, range_data, legend=True, legend_loc='upper right'):
         """
@@ -859,7 +875,7 @@ class AptHistPlotter:
             self.fig.savefig(self.variables.result_path + "//tof_%s.png" % fig_name, format="png", dpi=600)
 
 
-def hist_plot(variables, bin_size, log, target, mode, prominence, distance, percent, selector, figname, lim,
+def hist_plot(variables, bin_size, log, target, normalize, prominence, distance, percent, selector, figname, lim,
               peaks_find=True, peaks_find_plot=False, plot_ranged_peak=False, plot_ranged_colors=False, mrp_all=False,
               background=None, ranging_mode=False, range_sequence=[], range_mc=[], range_detx=[], range_dety=[],
               range_x=[], range_y=[], range_z=[], range_vol=[], save_fig=True, print_info=True, legend_mode='long',
@@ -870,7 +886,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         variables (object): Variables object.
         bin_size (float): Bin size for the histogram.
         target (str): 'mc' for mass spectrum or 'tof' for tof spectrum.
-        mode (str): 'normal' for normal histogram or 'normalized' for normalized histogram.
+        normalize (bool): Normalized the histogram.
         prominence (float): Prominence for the peak_x finding.
         distance (float): Distance for the peak_x finding.
         percent (float): Percent for the peak_x finding.
@@ -935,7 +951,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         else:
             mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
         if range_mc:
-            mask_mc = (variables.mc_uc < range_mc[1]) & (variables.mc_uc > range_mc[0])
+            mask_mc = (variables.mc < range_mc[1]) & (variables.mc > range_mc[0])
         else:
             mask_mc = np.ones(len(variables.mc), dtype=bool)
         if range_x and range_y and range_z:
@@ -966,7 +982,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         steps = 'stepfilled'
 
     mc_hist = AptHistPlotter(hist[hist < lim], variables)
-    y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log,
+    y, x = mc_hist.plot_histogram(bin_width=bin_size, normalize=normalize, label=label, steps=steps, log=log,
                                   fig_size=figure_size, plot_show=plot_show)
 
     # copy the mc_hist to variables to use the methods of that class in other functions
@@ -978,7 +994,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         peak_widths = None
         prominences = None
 
-    elif mode != 'normalized' and peaks_find and not plot_ranged_peak and not plot_ranged_colors:
+    elif not normalize and peaks_find and not plot_ranged_peak and not plot_ranged_colors:
         peaks, properties, peak_widths, prominences = mc_hist.find_peaks_and_widths(prominence=prominence,
                                                                           distance=distance, percent=percent)
         if draw_calib_rect:

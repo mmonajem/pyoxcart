@@ -261,9 +261,9 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
                 yy_dif = data["dif2"]
                 tt_dif = data["time"]
                 start_counter.extend(data["start_counter"].tolist())
-                xx_tmp = (((xx_dif - XYBINSHIFT) * XYFACTOR) * 0.1)  # from mm to in cm by dividing by 10
-                yy_tmp = (((yy_dif - XYBINSHIFT) * XYFACTOR) * 0.1)  # from mm to in cm by dividing by 10
-                tt_tmp = (tt_dif * TOFFACTOR)  # in ns
+                xx_tmp = ((xx_dif - XYBINSHIFT) * XYFACTOR) * 0.1  # from mm to in cm by dividing by 10
+                yy_tmp = ((yy_dif - XYBINSHIFT) * XYFACTOR) * 0.1  # from mm to in cm by dividing by 10
+                tt_tmp = tt_dif * TOFFACTOR  # in ns
 
                 dc_voltage_tmp = np.tile(specimen_voltage, len(xx_tmp))
 

@@ -90,7 +90,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length):
             lim_tof.value = variables.max_tof
         elif calibration_mode.value == 'mc_calib':
             lim_tof.value = 400
-        mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value, mode='normal',
+        mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value, normalize=False,
                           prominence=prominence.value, distance=distance.value, percent=percent.value,
                           selector='rect', figname=index_fig.value, lim=lim_tof.value, save_fig=save.value,
                           peaks_find_plot=plot_peak.value, draw_calib_rect=True, print_info=False, mrp_all=False,
@@ -149,7 +149,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length):
         figure_size = (figure_mc_size_x.value, figure_mc_size_y.value)
         with out:
             out.clear_output()
-            mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value, mode='normal',
+            mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value, normalize=False,
                               prominence=prominence.value, distance=distance.value, percent=percent.value,
                               selector='rect', figname=index_fig.value, lim=lim_tof.value, save_fig=save.value,
                               peaks_find_plot=plot_peak.value, draw_calib_rect=True, print_info=True, mrp_all=True,
@@ -337,7 +337,8 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length):
                 print('=======================================================')
                 print('Starting calibration number %s' % counter)
                 figure_size = (figure_mc_size_x.value, figure_mc_size_y.value)
-                mrp = mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value, mode='normal',
+                mrp = mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value,
+                                        normalize=False,
                                   prominence=prominence.value, distance=distance.value, percent=percent.value,
                                         selector='rect', figname=index_fig_val, lim=lim_tof.value, save_fig=save.value,
                                   peaks_find_plot=plot_peak.value, print_info=False, figure_size=figure_size,

@@ -37,6 +37,8 @@ def fetch_dataset_from_dld_grp(filename: str, extract_mode='dld') -> pd.DataFram
                 dld_voltage_pulse = hdf5Data['dld/pulse'].to_numpy()
             elif 'dld/voltage_pulse' in hdf5Data:
                 dld_voltage_pulse = hdf5Data['dld/voltage_pulse'].to_numpy()
+            elif 'dld/pulse_voltage' in hdf5Data:
+                dld_voltage_pulse = hdf5Data['dld/pulse_voltage'].to_numpy()
             else:
                 raise KeyError('Neither dld/pulse nor dld/voltage_pulse exists in the dataset')
             if 'dld/laser_pulse' in hdf5Data:

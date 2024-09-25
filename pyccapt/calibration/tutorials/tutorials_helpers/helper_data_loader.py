@@ -9,24 +9,24 @@ from pyccapt.calibration.mc import tof_tools
 
 def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc, variables, processing_mode=True):
 	if tdc == 'pyccapt':
-		# check that the dataset is a valid pyccapt dataset with .h5 extension
-		if not dataset_path.endswith('.h5'):
+		# Check that the dataset is a valid pyccapt dataset with .h5 extension
+		if not dataset_path.endswith(('.h5', '.H5')):
 			raise ValueError('The dataset should be a valid pyccapt dataset with .h5 extension')
-	if tdc == 'leap_epos':
-		# check that the dataset is a valid leap_epos dataset with .h5 extension
-		if not dataset_path.endswith('.epos'):
+	elif tdc == 'leap_epos':
+		# Check that the dataset is a valid leap_epos dataset with .epos extension
+		if not dataset_path.endswith(('.epos', '.EPOS')):
 			raise ValueError('The dataset should be a valid leap_epos dataset with .epos extension')
-	if tdc == 'pos':
-		# check that the dataset is a valid pos dataset with .pos extension
-		if not dataset_path.endswith('.pos'):
+	elif tdc == 'pos':
+		# Check that the dataset is a valid pos dataset with .pos extension
+		if not dataset_path.endswith(('.pos', '.POS')):
 			raise ValueError('The dataset should be a valid pos dataset with .pos extension')
-	if tdc == 'leap_apt':
-		# check that the dataset is a valid lep_apt dataset with .lep extension
-		if not dataset_path.endswith('.apt'):
-			raise ValueError('The dataset should be a valid lep_apt dataset with .lep extension')
-	if tdc == 'ato_v6':
-		# check that the dataset is a valid ato_v6 dataset with .h5 extension
-		if not dataset_path.endswith('.ato'):
+	elif tdc == 'leap_apt':
+		# Check that the dataset is a valid leap_apt dataset with .apt extension
+		if not dataset_path.endswith(('.apt', '.APT')):
+			raise ValueError('The dataset should be a valid leap_apt dataset with .apt extension')
+	elif tdc == 'ato_v6':
+		# Check that the dataset is a valid ato_v6 dataset with .ato extension
+		if not dataset_path.endswith('.ato', '.ATO'):
 			raise ValueError('The dataset should be a valid ato_v6 dataset with .ato extension')
 
 	if processing_mode:
@@ -69,7 +69,16 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc, variables
 			dld_group_storage = data_tools.load_data(dataset_path, tdc)
 
 		if tdc == 'pyccapt' and mode == 'raw':
-			# Remove the data with tof greater than Max TOF or below 0 ns
+			# # Remove the data with tof greater than Max TOF or below 0 ns
+			# TOFFACTOR = 27.432 / (1000 * 4)  # 27.432 ps/bin, tof in ns, data is TDC time sum
+			# DETBINS = 4900
+			# BINNINGFAC = 2
+			# XYFACTOR = 80 / DETBINS * BINNINGFAC  # XXX mm/bin
+			# XYBINSHIFT = DETBINS / BINNINGFAC / 2  # to center detector
+			#
+			# dld_group_storage['t (ns)'] = dld_group_storage['t (ns)'] * TOFFACTOR
+			# dld_group_storage['x_det (cm)'] = (((dld_group_storage['x_det (cm)'] - XYBINSHIFT) * XYFACTOR) * 0.1)
+			# dld_group_storage['y_det (cm)'] = (((dld_group_storage['y_det (cm)'] - XYBINSHIFT) * XYFACTOR) * 0.1)
 			data = data_tools.remove_invalid_data(dld_group_storage, max_tof)
 			data = data_tools.pyccapt_raw_to_processed(data)
 		else:

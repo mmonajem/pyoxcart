@@ -49,6 +49,8 @@ def call_visualization(variables):
     plot_ranged_peak = widgets.Dropdown(options=[('False', False), ('True', True)])
     target_mode = widgets.Dropdown(options=[('mc', 'mc'), ('mc_uc', 'mc_uc'), ('tof_c', 'tof_c'), ('tof', 'tof')])
     print_info = widgets.Dropdown(options=[('False', False), ('True', True)])
+    log_widget = widgets.Dropdown(options=[('True', True), ('False', False)])
+    normalize = widgets.Dropdown(options=[('False', False), ('True', True)])
     legend_widget = widgets.Dropdown(options=[('long', 'long'), ('short', 'short')])
     bin_size_pm = widgets.FloatText(value=0.1)
     lim_mc_pm = widgets.IntText(value=150)
@@ -107,7 +109,8 @@ def call_visualization(variables):
             except json.JSONDecodeError:
                 # Handle invalid input
                 print(f"Invalid range input")
-            mc_plot.hist_plot(variables, bin_size_pm.value, log=True, target=target_mode.value, mode='normal',
+            mc_plot.hist_plot(variables, bin_size_pm.value, log=log_widget.value, target=target_mode.value,
+                              normalize=normalize.value,
                               prominence=prominence.value, distance=distance.value, percent=percent.value,
                               selector='rect',
                               figname=figname_mc.value, lim=lim_mc_pm.value, peaks_find=peaks_find.value,
@@ -660,6 +663,8 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value="Print info:", layout=label_layout), print_info]),
         widgets.HBox([widgets.Label(value="Bins size:", layout=label_layout), bin_size_pm]),
         widgets.HBox([widgets.Label(value="Limit mc:", layout=label_layout), lim_mc_pm]),
+        widgets.HBox([widgets.Label(value="log:", layout=label_layout), log_widget]),
+        widgets.HBox([widgets.Label(value="Normalize:", layout=label_layout), normalize]),
         widgets.HBox([widgets.Label(value="MRP all(1%, 10%, 50%):", layout=label_layout), mrp_all]),
         widgets.HBox([widgets.Label(value="MRP Percent:", layout=label_layout), percent]),
         widgets.HBox([widgets.Label(value="Legend mode:", layout=label_layout), legend_widget]),
