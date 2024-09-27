@@ -915,6 +915,10 @@ def hist_plot(variables, bin_size, log, target, normalize, prominence, distance,
         None
 
     """
+    assert target in ['mc', 'mc_uc', 'tof', 'tof_c', 'tof_calib', 'mc_calib'], 'Invalid target'
+    assert selector in ['peak', 'rect', 'range'], 'Invalid selector'
+    assert legend_mode in ['long', 'short'], 'Invalid legend mode'
+
     if target == 'mc':
         hist = variables.mc
         label = 'mc'
