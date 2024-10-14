@@ -52,6 +52,7 @@ def call_visualization(variables):
     log_widget = widgets.Dropdown(options=[('True', True), ('False', False)])
     normalize = widgets.Dropdown(options=[('False', False), ('True', True)])
     legend_widget = widgets.Dropdown(options=[('long', 'long'), ('short', 'short')])
+    # hist_steps = widgets.Dropdown(options=[('bar', 'bar'), ('stepfilled', 'stepfilled')])
     bin_size_pm = widgets.FloatText(value=0.1)
     lim_mc_pm = widgets.IntText(value=150)
     prominence = widgets.IntText(value=50)
