@@ -66,7 +66,7 @@ def tof2mc(t: int, t0: int, V: float, xDet: int, yDet: int,
     assert isinstance(yDet, np.ndarray), "yDet must be a NumPy array"
 
     try:
-        # cThe value of α is greater than one, accounting for the fact thatThe value of a
+        # The value of α is greater than one, accounting for the fact that The value of a
         # is slightly greater than one, accounting for the fact that the
         # evaporation pulse is slightly amplified due to reflections and
         # impedance mismatches along the pulse transmission line.

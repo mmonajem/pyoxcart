@@ -1,8 +1,10 @@
+import concurrent.futures
 import multiprocessing
 from copy import copy
 from itertools import product
 from math import ceil
 
+import fast_histogram
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import rcParams, colors
@@ -251,7 +253,6 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
 
     dld_highVoltage_peak_v = dld_highVoltage[mask_temporal]
 
-
     if noise_remove:
         data = np.column_stack((dld_highVoltage_peak_v, dld_peak_b))
         # Use DBSCAN to cluster the data
@@ -304,7 +305,9 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
     if maximum_cal_method == 'histogram':
         bins = np.linspace(np.min(dld_peak_b), np.max(dld_peak_b),
                            round(np.max(dld_peak_b) / 0.1))
-        y, x = np.histogram(dld_peak_b, bins=bins)
+        # y, x = np.histogram(dld_peak_b, bins=bins)
+        y = fast_histogram.histogram1d(dld_peak_b, bins=bins, range=(np.min(dld_peak_b), np.max(dld_peak_b)))
+        x = bins
         peaks, properties = find_peaks(y, height=0)
         index_peak_max_ini = np.argmax(properties['peak_heights'])
         max_peak = peaks[index_peak_max_ini]
@@ -402,6 +405,7 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
     print('The mean of tof/mc  after voltage calibration is:', np.mean(calibration_mc_tof[mask_temporal]))
     variables.dld_t_calib = calibration_mc_tof
 
+
 def bowl_corr(data_xy, a, b, c, d, e, f):
     """
     Compute the result of a quadratic equation based on the input data.
@@ -442,6 +446,64 @@ def hemisphere_corr(data_xy, a, b, c, r):
     return result
 
 
+def compute_sample(i, j, d, dld_x_bowl, dld_y_bowl, dld_t_bowl, maximum_location, sample_range_max):
+    """
+    Compute the sample for the given data.
+
+    Args:
+        i (int): Index i.
+        j (int): Index j.
+        d (int): Sample size.
+        dld_x_bowl (numpy.ndarray): X coordinates of the data points.
+        dld_y_bowl (numpy.ndarray): Y coordinates of the data points.
+        dld_t_bowl (numpy.ndarray): Time values of the data points.
+        maximum_location (float): Maximum location for normalization.
+        sample_range_max (str): Sample range maximum ('mean' or 'histogram').
+
+    Returns:
+        x_sample (float): X sample value.
+        y_sample (float): Y sample value.
+        dld_t_peak (float): Time peak value.
+    """
+    mask_x = np.logical_and((dld_x_bowl < j + d), (dld_x_bowl > j))
+    mask_y = np.logical_and((dld_y_bowl < i + d), (dld_y_bowl > i))
+    mask = np.logical_and(mask_x, mask_y)
+
+    if len(mask[mask]) > 0:
+        x_y_selected = np.vstack((dld_x_bowl[mask], dld_y_bowl[mask])).T
+        x_sample = np.median(x_y_selected[:, 0])
+        y_sample = np.median(x_y_selected[:, 1])
+
+        if sample_range_max == 'mean':
+            dld_t_peak = np.mean(dld_t_bowl[mask]) / maximum_location
+        elif sample_range_max == 'histogram':
+            try:
+                dld_t_bowl_selected = dld_t_bowl[mask]
+                if len(dld_t_bowl_selected) > 500000:
+                    dld_t_bowl_selected = np.random.choice(dld_t_bowl_selected, 500000, replace=False)
+
+                bins = np.linspace(np.min(dld_t_bowl_selected), np.max(dld_t_bowl_selected),
+                                   round(np.max(dld_t_bowl_selected) / 0.1))
+
+                y_hist = fast_histogram.histogram1d(dld_t_bowl_selected,
+                                                    bins=round(np.max(dld_t_bowl_selected) / 0.1) - 1,
+                                                    range=(np.min(dld_t_bowl_selected), np.max(dld_t_bowl_selected)))
+                peaks, properties = find_peaks(y_hist, height=0)
+
+                if len(peaks) > 0:
+                    index_peak_max_ini = np.argmax(properties['peak_heights'])
+                    max_peak = peaks[index_peak_max_ini]
+                    dld_t_peak = bins[max_peak] / maximum_location
+                else:
+                    dld_t_peak = np.mean(dld_t_bowl[mask]) / maximum_location
+            except ValueError:
+                print('cannot find the maximum')
+                dld_t_peak = np.mean(dld_t_bowl[mask]) / maximum_location
+
+            return x_sample, y_sample, dld_t_peak
+    return None, None, None  # Return None if no samples found
+
+
 def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, maximum_location, sample_range_max,
                     sample_size, calibration_mode, fit_mode, index_fig, plot, save, fig_size=(7, 5)):
     """
@@ -474,37 +536,23 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
     h1 = int(np.min(dld_y_bowl))
     h2 = int(np.max(dld_y_bowl))
 
-
     d = sample_size  # sample size is in mm - so we change it to cm
     grid = product(range(h1, h2 - h2 % d, d), range(w1, w2 - w2 % d, d))
-    x_y = np.vstack((dld_x_bowl, dld_y_bowl)).T
 
-    for i, j in grid:
-        # box = (j, i, j + d, i + d)   # box = (left, upper, right, lower)
-        mask_x = np.logical_and((dld_x_bowl < j + d), (dld_x_bowl > j))
-        mask_y = np.logical_and((dld_y_bowl < i + d), (dld_y_bowl > i))
-        mask = np.logical_and(mask_x, mask_y)
-        if len(mask[mask]) > 0:
-            x_y_selected = x_y[mask]
-            x_sample_list.append(np.median(x_y_selected[:, 0]))
-            y_sample_list.append(np.median(x_y_selected[:, 1]))
-            if sample_range_max == 'mean':
-                dld_t_peak_list.append(np.mean(dld_t_bowl[mask]) / maximum_location)
-            elif sample_range_max == 'histogram':
-                try:
-                    bins = np.linspace(np.min(dld_t_bowl[mask]), np.max(dld_t_bowl[mask]),
-                                       round(np.max(dld_t_bowl[mask]) / 0.1))
-                    y, x = np.histogram(dld_t_bowl[mask], bins=bins)
-                    peaks, properties = find_peaks(y, height=0)
-                    index_peak_max_ini = np.argmax(properties['peak_heights'])
-                    max_peak = peaks[index_peak_max_ini]
-                    dld_t_peak_list.append(x[max_peak] / maximum_location)
-                except ValueError:
-                    print('cannot find the maximum')
-                    dld_t_peak_list.append(np.mean(dld_t_bowl[mask]) / maximum_location)
+    # Use ThreadPoolExecutor or ProcessPoolExecutor
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(compute_sample, i, j, d, dld_x_bowl, dld_y_bowl, dld_t_bowl, maximum_location,
+                                   sample_range_max)
+                   for i, j in grid]
 
+        for future in concurrent.futures.as_completed(futures):
+            x_sample, y_sample, dld_t_peak = future.result()
+            if x_sample is not None:
+                x_sample_list.append(x_sample)
+                y_sample_list.append(y_sample)
+                dld_t_peak_list.append(dld_t_peak)
 
-
+    # The rest of your function remains unchanged
     if fit_mode == 'curve_fit':
         parameters, covariance = curve_fit(bowl_corr, [np.array(x_sample_list), np.array(y_sample_list)],
                                            np.array(dld_t_peak_list))
@@ -512,7 +560,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         # Initial guess for the parameters (a, b, c, r)
         initial_guess = [1.0, 0.0, 1.0, 1.0]
         parameters, covariance = curve_fit(hemisphere_corr, [np.array(x_sample_list), np.array(y_sample_list)],
-                                                             np.array(dld_t_peak_list), p0=initial_guess)
+                                           np.array(dld_t_peak_list), p0=initial_guess)
         print('The cx, cy, r, c0 are:', parameters)
 
     if plot or save:
@@ -529,7 +577,6 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
             Z = hemisphere_corr(np.array([X, Y]), *parameters)
 
         fig, ax = plt.subplots(figsize=fig_size, subplot_kw=dict(projection="3d"), constrained_layout=True)
-        # Adjust the subplot parameters to make the plot smaller
         box = ax.get_position()
         ax.set_position([box.x0 + 0.1, box.y0 + 0.1, box.width * 0.75, box.height * 0.75])
         scat = ax.scatter(model_x_data, model_y_data, zs=1 / np.array(dld_t_peak_list), color="forestgreen",
@@ -543,6 +590,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         ax.set_zlabel(r"${C_B}^{-1}$", fontsize=10, labelpad=5, color='red')
         ax.zaxis.set_major_formatter(plt.FormatStrFormatter('%.2f'))
         ax.zaxis.line.set_color('red')
+
         # Change z-axis tick label color
         for tick in ax.get_zaxis().get_ticklabels():
             tick.set_color('red')
@@ -585,7 +633,8 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         None
 
     """
-
+    import time
+    start = time.time()
     dld_x = dld_x * 10 # change the x position to mm from cm
     dld_y = dld_y * 10 # change the y position to mm from cm
 
@@ -604,11 +653,17 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
     # mask_2 = np.logical_and((dld_y[mask_temporal] > -8), (dld_y[mask_temporal] < 8))
     # mask = np.logical_and(mask_1, mask_2)
     # dld_peak_mid = dld_peak[mask]
-    dld_peak_mid = dld_peak
+    #
+    dld_peak_mid = np.copy(dld_peak)
+    if len(dld_peak_mid) > 1000000:
+        dld_peak_mid = np.random.choice(dld_peak_mid, 1000000, replace=False)
     if maximum_cal_method == 'histogram':
         try:
             bins = np.linspace(np.min(dld_peak_mid), np.max(dld_peak_mid), round(np.max(dld_peak_mid) / 0.1))
-            y, x = np.histogram(dld_peak_mid, bins=bins)
+            # y, x = np.histogram(dld_peak_mid, bins=bins)
+            y = fast_histogram.histogram1d(dld_peak_mid, bins=round(np.max(dld_peak_mid) / 0.1) - 1,
+                                           range=(np.min(dld_peak_mid), np.max(dld_peak_mid)))
+            x = bins
             peaks, properties = find_peaks(y, height=0)
             index_peak_max_ini = np.argmax(properties['peak_heights'])
             maximum_location = x[peaks[index_peak_max_ini]]
@@ -743,6 +798,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
     elif calibration_mode == 'mc':
         variables.mc_calib = calibration_mc_tof
 
+    print('The time for the bowl correction is:', time.time() - start)
 
 def plot_fdm(x, y, variables, save, bins_s, index_fig, figure_size=(5, 4)):
     """

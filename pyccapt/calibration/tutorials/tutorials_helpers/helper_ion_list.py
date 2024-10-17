@@ -100,35 +100,41 @@ def call_ion_list(variables, selector):
         options=[('mass_to_charge', 'mc_calib'), ('time_of_flight', 'tof_calib')])
 
     def parametric_fit(variables, calibration_mode, out_mc):
+
         button_fit.disabled = True
         peaks_chos = np.array(variables.peaks_x_selected)
-        if calibration_mode.value == 'tof_calib':
-            def parametric(t, t0, c, d):
-                return c * ((t - t0) ** 2) + d * t
 
-            def parametric_calib(t, mc_ideal):
-                fitresult, _ = curve_fit(parametric, t, mc_ideal, maxfev=2000)
-                return fitresult
+        if len(peaks_chos) != len(variables.list_material):
+	        with out_mc:
+		        print('Number of peaks and number of materials are not equal')
+        else:
+	        if calibration_mode.value == 'tof_calib':
+		        def parametric(t, t0, c, d):
+			        return c * ((t - t0) ** 2) + d * t
 
-            fitresult = parametric_calib(peaks_chos, variables.list_material)
+		        def parametric_calib(t, mc_ideal):
+			        fitresult, _ = curve_fit(parametric, t, mc_ideal, maxfev=2000)
+			        return fitresult
 
-            variables.mc_calib = parametric(variables.dld_t_calib, *fitresult)
+		        fitresult = parametric_calib(peaks_chos, variables.list_material)
 
-        elif calibration_mode.value == 'mc_calib':
-            def shift(mc, a, b, c):
-                return mc ** a + b * mc + c
-                # return a * mc + b
+		        variables.mc_calib = parametric(variables.dld_t_calib, *fitresult)
 
-            def shift_calib(mc, mc_ideal):
-                fitresult, _ = curve_fit(shift, mc, mc_ideal, maxfev=2000)
-                return fitresult
+	        elif calibration_mode.value == 'mc_calib':
+		        def shift(mc, a, b, c):
+			        return mc ** a + b * mc + c
+			        # return a * mc + b
 
-            fitresult = shift_calib(peaks_chos, variables.list_material)
-            variables.mc_calib = shift(variables.mc_calib_backup, *fitresult)
+		        def shift_calib(mc, mc_ideal):
+			        fitresult, _ = curve_fit(shift, mc, mc_ideal, maxfev=2000)
+			        return fitresult
 
-        button_fit.disabled = False
-        with out_mc:
-            print('parametric fit done')
+		        fitresult = shift_calib(peaks_chos, variables.list_material)
+		        variables.mc_calib = shift(variables.mc_calib_backup, *fitresult)
+
+	        button_fit.disabled = False
+	        with out_mc:
+		        print('parametric fit done')
 
     button_plot_result = widgets.Button(description="plot result")
 
