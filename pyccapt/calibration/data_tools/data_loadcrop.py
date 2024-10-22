@@ -9,6 +9,7 @@ from matplotlib.patches import Circle, Rectangle
 from matplotlib.widgets import RectangleSelector, EllipseSelector
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
+from numba.cpython.slicing import make_slice_from_constant
 
 from pyccapt.calibration.data_tools import data_tools, selectors_data
 
@@ -246,14 +247,15 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
     plt.show()
 
 
-def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_size=(5, 4), variables=None,
+def plot_crop_fdm(x, y, bins=(256, 256), frac=1.0, axis_mode='normal', figure_size=(5, 4), variables=None,
                   range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[],
                   range_vol=[], data_crop=False, draw_circle=False, mode_selector='circle', save=False, figname=''):
     """
     Plot and crop the FDM with the option to select a region of interest.
 
     Args:
-        data: Cropped dataset (type: list)
+        x: x-axis data
+        y: y-axis data
         bins: Number of bins for the histogram
         frac: Fraction of the data to be plotted
         axis_mode: Flag to choose whether to plot axis or scalebar: 'normal' or 'scalebar'
@@ -278,10 +280,10 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
     """
     if range_sequence or range_mc or range_detx or range_dety or range_x or range_y or range_z:
         if range_sequence:
-            mask_sequence = np.zeros_like(len(data), dtype=bool)
+            mask_sequence = np.zeros_like(len(x), dtype=bool)
             mask_sequence[range_sequence[0]:range_sequence[1]] = True
         else:
-            mask_sequence = np.ones(len(data), dtype=bool)
+            mask_sequence = np.ones(len(x), dtype=bool)
         if range_detx and range_dety:
             mask_det_x = (variables.dld_x_det < range_detx[1]) & (variables.dld_x_det > range_detx[0])
             mask_det_y = (variables.dld_y_det < range_dety[1]) & (variables.dld_y_det > range_dety[0])
@@ -310,22 +312,22 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
         print('The number of data 3d:', len(mask_3d[mask_3d == True]))
         print('The number of data after cropping:', len(mask[mask == True]))
     else:
-        mask = np.ones(len(data), dtype=bool)
+        mask = np.ones(len(x), dtype=bool)
 
-    data = data[mask]
+    x = x[mask]
+    y = y[mask]
 
     if frac < 1:
-        # set axis limits based on fraction of data
-        dldGroupStorage = data.sample(frac=frac, random_state=42)
-        dldGroupStorage.sort_index(inplace=True)
-    else:
-        dldGroupStorage = data
+        # set axis limits based on fraction of x and y data baded on fraction
+        mask_fraq = np.random.choice(len(x), int(len(x) * frac), replace=False)
+        x_t = np.copy(x)
+        y_t = np.copy(y)
+        x = x[mask_fraq]
+        y = y[mask_fraq]
+
 
     fig1, ax1 = plt.subplots(figsize=figure_size, constrained_layout=True)
 
-    # Plot and crop FDM
-    x = dldGroupStorage['x_det (cm)'].to_numpy()
-    y = dldGroupStorage['y_det (cm)'].to_numpy()
 
     # Check if the bin is a tuple
     if isinstance(bins, tuple):
@@ -347,8 +349,8 @@ def plot_crop_fdm(data, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
 
     if frac < 1:
         # extract tof
-        x_lim = dldGroupStorage['x_det (cm)'].to_numpy()
-        y_lim = dldGroupStorage['y_det (cm)'].to_numpy()
+        x_lim = x_t
+        y_lim = y_t
 
         ax1.set_xlim([min(x_lim), max(x_lim)])
         ax1.set_ylim([min(y_lim), max(y_lim)])

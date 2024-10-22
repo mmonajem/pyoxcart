@@ -73,7 +73,7 @@ def call_plot_crop_fdm(variables):
             out.clear_output()  # Clear any previous output
             # Call the function
             data = variables.data.copy()
-            data_loadcrop.plot_crop_fdm(data, bins, frac, axis_mode='normal', figure_size=figure_size,
+            data_loadcrop.plot_crop_fdm(data['x_det (cm)'].to_numpy(), data['y_det (cm)'].to_numpy(), bins, frac, axis_mode='normal', figure_size=figure_size,
                                         variables=variables, range_sequence=[], range_mc=[], range_detx=[],
                                         range_dety=[], range_x=[], range_y=[], range_z=[],
                                         data_crop=True, draw_circle=False, mode_selector=mode_selector,
