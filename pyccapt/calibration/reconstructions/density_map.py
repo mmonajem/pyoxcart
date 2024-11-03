@@ -1,5 +1,5 @@
 from copy import copy
-
+from matplotlib import cm
 import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,16 +11,18 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from pyccapt.calibration.data_tools.data_loadcrop import elliptical_shape_selector
 
 
-def plot_density_map(x, y, bins=(256, 256), frac=1.0, axis_mode='normal', figure_size=(5, 4), variables=None,
+
+def plot_density_map(x, y, z=False, bins=(256, 256), frac=1.0, axis_mode='normal', figure_size=(5, 4), variables=None,
                   range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[],
                   range_vol=[], data_crop=False, draw_circle=False, mode_selector='circle', axes=['x', 'y'],
-                     save=False, figname='',):
+                     save=False, figname='', cmap='plasma'):
     """
     Plot and crop the FDM with the option to select a region of interest.
 
     Args:
         x: x-axis data
         y: y-axis data
+        z: z weight data
         bins: Number of bins for the histogram
         frac: Fraction of the data to be plotted
         axis_mode: Flag to choose whether to plot axis or scalebar: 'normal' or 'scalebar'
@@ -40,6 +42,7 @@ def plot_density_map(x, y, bins=(256, 256), frac=1.0, axis_mode='normal', figure
         save: Flag to choose whether to save the plot or not
         data_crop: Flag to control whether only the plot is shown or cropping functionality is enabled
         figname: Name of the figure to be saved
+        cmap: Colormap for the plot
 
     Returns:
         None
@@ -103,13 +106,16 @@ def plot_density_map(x, y, bins=(256, 256), frac=1.0, axis_mode='normal', figure
         y_edges = np.arange(y.min(), y.max() + bins, bins)
         bins = [x_edges, y_edges]
 
-    FDM, xedges, yedges = np.histogram2d(x, y, bins=bins)
+    if z is False:
+        FDM, xedges, yedges = np.histogram2d(x, y, bins=bins)
+    else:
+        FDM, xedges, yedges = np.histogram2d(x, y, bins=bins, weights=z)
 
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 
-    cmap = copy(plt.cm.plasma)
-    cmap.set_bad(cmap(0))
-    pcm = ax1.pcolormesh(xedges, yedges, FDM.T, cmap=cmap, norm=colors.LogNorm(), rasterized=True)
+    cmap_instance = copy(cm.get_cmap(cmap))
+    cmap_instance.set_bad(cmap_instance(0))
+    pcm = ax1.pcolormesh(xedges, yedges, FDM.T, cmap=cmap_instance, norm=colors.LogNorm(), rasterized=True)
     cbar = fig1.colorbar(pcm, ax=ax1, pad=0)
     cbar.set_label('Event Counts', fontsize=10)
 
