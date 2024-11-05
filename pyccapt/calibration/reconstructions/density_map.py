@@ -14,7 +14,7 @@ from pyccapt.calibration.data_tools.data_loadcrop import elliptical_shape_select
 
 def plot_density_map(x, y, z=False, bins=(256, 256), frac=1.0, axis_mode='normal', figure_size=(5, 4), variables=None,
                   range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[],
-                  range_vol=[], data_crop=False, draw_circle=False, mode_selector='circle', axes=['x', 'y'],
+                  range_vol=[], data_crop=False, draw_circle=False, mode_selector='circle', axis=['x', 'y'],
                      save=False, figname='', cmap='plasma'):
     """
     Plot and crop the FDM with the option to select a region of interest.
@@ -38,7 +38,7 @@ def plot_density_map(x, y, z=False, bins=(256, 256), frac=1.0, axis_mode='normal
         figure_size: Size of the plot
         draw_circle: Flag to enable circular region of interest selection
         mode_selector: Mode of selection (circle or ellipse)
-        axes: Axes for the histogram
+        axis: Axes to be plotted
         save: Flag to choose whether to save the plot or not
         data_crop: Flag to control whether only the plot is shown or cropping functionality is enabled
         figname: Name of the figure to be saved
@@ -111,6 +111,9 @@ def plot_density_map(x, y, z=False, bins=(256, 256), frac=1.0, axis_mode='normal
     else:
         FDM, xedges, yedges = np.histogram2d(x, y, bins=bins, weights=z)
 
+    # Ensure that yedges are reversed for correct z direction
+    yedges = yedges[::-1]
+
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 
     cmap_instance = copy(cm.get_cmap(cmap))
@@ -148,13 +151,13 @@ def plot_density_map(x, y, z=False, bins=(256, 256), frac=1.0, axis_mode='normal
         ax1.add_artist(scalebar)
         plt.axis('off')  # Turn off both x and y axes
     elif axis_mode == 'normal':
-        if 'x' in axes and 'y' in axes:
+        if 'x' in axis and 'y' in axis:
             ax1.set_xlabel(r"$x (nm)$", fontsize=10)
             ax1.set_ylabel(r"$y (nm)$", fontsize=10)
-        elif 'y' in axes and 'z' in axes:
+        elif 'y' in axis and 'z' in axis:
             ax1.set_xlabel(r"$y (nm)$", fontsize=10)
             ax1.set_ylabel(r"$z (nm)$", fontsize=10)
-        elif 'x' in axes and 'z' in axes:
+        elif 'x' in axis and 'z' in axis:
             ax1.set_xlabel(r"$x (nm)$", fontsize=10)
             ax1.set_ylabel(r"$z (nm)$", fontsize=10)
 
