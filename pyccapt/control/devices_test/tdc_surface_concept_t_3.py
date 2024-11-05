@@ -6,8 +6,8 @@ import numpy as np
 
 from pyccapt.control.tdc_surface_concept import scTDC
 
-NR_OF_MEASUREMENTS = 4
-EXPOSURE_MS = 3000
+NR_OF_MEASUREMENTS = 10
+EXPOSURE_MS = 1000
 
 QUEUE_DATA = 0
 QUEUE_ENDOFMEAS = 1

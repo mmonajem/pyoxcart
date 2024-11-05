@@ -617,6 +617,7 @@ class Ui_Visualization(object):
 			self.start_time = time.time()
 			self.start_time_metadata = time.time()
 			self.index_plot_start += 1
+			self.hitmap_count.setText(str(0))
 		self.variables.elapsed_time = time.time() - self.start_time
 		# with self.variables.lock_statistics:
 		if self.index_wait_on_plot_start <= 16:

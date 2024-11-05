@@ -8,7 +8,7 @@ from pyccapt.control.tdc_surface_concept import scTDC
 
 raw_mode = False
 NR_OF_MEASUREMENTS = 10
-EXPOSURE_MS = 3000
+EXPOSURE_MS = 1000
 
 if not raw_mode:
 	DATA_FIELD_SEL1 = (

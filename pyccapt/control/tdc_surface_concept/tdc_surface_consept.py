@@ -96,16 +96,16 @@ def errorcheck(device, bufdatacb, bufdatacb_raw, retcode):
 
 def save_chunk_worker(save_queue):
     while True:
-        (chunk_id, path, xx_list, xx, yy_list, yy, tt_list, tt, voltage_data, voltage_pulse_data,
+        (chunk_id, path, xx_list_bin, xx, yy_list_bin, yy, tt_list_bin, tt, voltage_data, voltage_pulse_data,
          laser_pulse_data, start_counter, channel_data, time_data, tdc_start_counter,
          voltage_data_tdc, voltage_pulse_data_tdc, laser_pulse_data_tdc) = save_queue.get()
         if chunk_id is None:
             break
-        np.save(f"{path}chunks//x_bin_chunk_{chunk_id}.npy", np.array(xx_list))
+        np.save(f"{path}chunks//x_bin_chunk_{chunk_id}.npy", np.array(xx_list_bin))
         np.save(f"{path}chunks//x_data_chunk_{chunk_id}.npy", np.array(xx))
-        np.save(f"{path}chunks//y_bin_chunk_{chunk_id}.npy", np.array(yy_list))
+        np.save(f"{path}chunks//y_bin_chunk_{chunk_id}.npy", np.array(yy_list_bin))
         np.save(f"{path}chunks//y_data_chunk_{chunk_id}.npy", np.array(yy))
-        np.save(f"{path}chunks//t_bin_chunk_{chunk_id}.npy", np.array(tt_list))
+        np.save(f"{path}chunks//t_bin_chunk_{chunk_id}.npy", np.array(tt_list_bin))
         np.save(f"{path}chunks//t_data_chunk_{chunk_id}.npy", np.array(tt))
         np.save(f"{path}chunks//voltage_data_chunk_{chunk_id}.npy", np.array(voltage_data))
         np.save(f"{path}chunks//voltage_pulse_data_chunk_{chunk_id}.npy", np.array(voltage_pulse_data))
@@ -133,9 +133,9 @@ def load_and_concatenate_chunks(path, chunk_id):
                 print(f"File '{chunk_file}' not found.")
         return all_data
 
-    xx_list = load_data("x_data")
-    yy_list = load_data("y_data")
-    tt_list = load_data("t_data")
+    xx_list_bin = load_data("x_data")
+    yy_list_bin = load_data("y_data")
+    tt_list_bin = load_data("t_data")
     voltage_data = load_data("voltage_data")
     voltage_pulse_data = load_data("voltage_pulse_data")
     laser_pulse_data = load_data("laser_pulse_data")
@@ -148,7 +148,7 @@ def load_and_concatenate_chunks(path, chunk_id):
     voltage_pulse_data_tdc = load_data("voltage_pulse_data_tdc")
     laser_pulse_data_tdc = load_data("laser_pulse_data_tdc")
 
-    return (xx_list, yy_list, tt_list, voltage_data, voltage_pulse_data, laser_pulse_data, start_counter,
+    return (xx_list_bin, yy_list_bin, tt_list_bin, voltage_data, voltage_pulse_data, laser_pulse_data, start_counter,
             channel_data, time_data, tdc_start_counter, voltage_data_tdc, voltage_pulse_data_tdc, laser_pulse_data_tdc)
 
 
@@ -200,9 +200,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
     bufdatacb = BufDataCB4(device.lib, device.dev_desc, DATA_FIELD_SEL, dld_events=True)
     bufdatacb_raw = BufDataCB4(device.lib, device.dev_desc, DATA_FIELD_SEL_raw, dld_events=False)
 
-    xx_list = []
-    yy_list = []
-    tt_list = []
+    # DLD data
     xx = []
     yy = []
     tt = []
@@ -211,6 +209,12 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
     laser_pulse_data = []
     start_counter = []
 
+    # The binning of DLD events
+    xx_list_bin = []
+    yy_list_bin = []
+    tt_list_bin = []
+
+    # TDC data (Raw data)
     channel_data = []
     time_data = []
     tdc_start_counter = []
@@ -264,31 +268,34 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
                 xx_tmp = ((xx_dif - XYBINSHIFT) * XYFACTOR) * 0.1  # from mm to in cm by dividing by 10
                 yy_tmp = ((yy_dif - XYBINSHIFT) * XYFACTOR) * 0.1  # from mm to in cm by dividing by 10
                 tt_tmp = tt_dif * TOFFACTOR  # in ns
-
                 dc_voltage_tmp = np.tile(specimen_voltage, len(xx_tmp))
 
+                # put data in shared memory for visualization
                 x_plot.put(xx_tmp)
                 y_plot.put(yy_tmp)
                 t_plot.put(tt_tmp)
                 main_v_dc_plot.put(dc_voltage_tmp)
 
+                # change to list
                 xx_tmp = xx_tmp.tolist()
                 yy_tmp = yy_tmp.tolist()
                 tt_tmp = tt_tmp.tolist()
 
+                # extend the main list with the new data
                 xx.extend(xx_tmp)
                 yy.extend(yy_tmp)
                 tt.extend(tt_tmp)
                 dc_voltage_tmp = dc_voltage_tmp.tolist()
                 p_voltage_tmp = np.tile(voltage_pulse, len(xx_tmp)).tolist()
                 p_laser_tmp = np.tile(laser_pulse, len(xx_tmp)).tolist()
-
-                xx_list.extend(xx_dif.tolist())
-                yy_list.extend(yy_dif.tolist())
-                tt_list.extend(tt_dif.tolist())
                 voltage_data.extend(dc_voltage_tmp)
                 voltage_pulse_data.extend(p_voltage_tmp)
                 laser_pulse_data.extend(p_laser_tmp)
+
+                # The binning of DLD events
+                xx_list_bin.extend(xx_dif.tolist())
+                yy_list_bin.extend(yy_dif.tolist())
+                tt_list_bin.extend(tt_dif.tolist())
 
 
 
@@ -323,20 +330,21 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
             events_detected_tmp = 0
             start_time = current_time
 
-        if len(xx_list) >= CHUNK_SIZE:
+        if len(xx_list_bin) >= CHUNK_SIZE:
             chunk_id += 1
             save_queue.put(
-                (chunk_id, path, copy.deepcopy(xx_list), copy.deepcopy(xx), copy.deepcopy(yy_list), copy.deepcopy(yy),
-                 copy.deepcopy(tt_list), copy.deepcopy(tt), copy.deepcopy(voltage_data),
+                (chunk_id, path, copy.deepcopy(xx_list_bin), copy.deepcopy(xx), copy.deepcopy(yy_list_bin),
+                 copy.deepcopy(yy),
+                 copy.deepcopy(tt_list_bin), copy.deepcopy(tt), copy.deepcopy(voltage_data),
                  copy.deepcopy(voltage_pulse_data), copy.deepcopy(laser_pulse_data),
                  copy.deepcopy(start_counter), copy.deepcopy(channel_data), copy.deepcopy(time_data),
                  copy.deepcopy(tdc_start_counter), copy.deepcopy(voltage_data_tdc),
                  copy.deepcopy(voltage_pulse_data_tdc), copy.deepcopy(laser_pulse_data_tdc)))
-            xx_list.clear()
+            xx_list_bin.clear()
             xx.clear()
-            yy_list.clear()
+            yy_list_bin.clear()
             yy.clear()
-            tt_list.clear()
+            tt_list_bin.clear()
             tt.clear()
             voltage_data.clear()
             voltage_pulse_data.clear()
@@ -362,7 +370,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
         chunk_id += 1
         # we don't need deepcopy here, we are not going to clear the data
         save_queue.put(
-            (chunk_id, path, xx_list, xx, yy_list, yy, tt_list, tt, voltage_data, voltage_pulse_data,
+            (chunk_id, path, xx_list_bin, xx, yy_list_bin, yy, tt_list_bin, tt, voltage_data, voltage_pulse_data,
              laser_pulse_data, start_counter, channel_data, time_data, tdc_start_counter,
              voltage_data_tdc, voltage_pulse_data_tdc, laser_pulse_data_tdc))
         save_queue.put((None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
@@ -370,7 +378,8 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
         save_process.join()  # Wait for the save process to finish
 
         # Load all chunks and extend variables
-        (xx_list, yy_list, tt_list, voltage_data, voltage_pulse_data, laser_pulse_data, start_counter, channel_data,
+        (xx_list_bin, yy_list_bin, tt_list_bin, voltage_data, voltage_pulse_data, laser_pulse_data, start_counter,
+         channel_data,
          time_data, tdc_start_counter, voltage_data_tdc, voltage_pulse_data_tdc,
          laser_pulse_data_tdc) = load_and_concatenate_chunks(path, chunk_id)
 
@@ -378,14 +387,21 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
                     None, None))  # Signal the save process to end
     save_process.join()  # Wait for the save process to finish
 
-    np.save(variables.path + "/temp_data/x_data.npy", np.array(xx_list))
-    np.save(variables.path + "/temp_data/y_data.npy", np.array(yy_list))
-    np.save(variables.path + "/temp_data/t_data.npy", np.array(tt_list))
+    # save DLD data
+    np.save(variables.path + "/temp_data/x_data.npy", np.array(xx))
+    np.save(variables.path + "/temp_data/y_data.npy", np.array(yy))
+    np.save(variables.path + "/temp_data/t_data.npy", np.array(tt))
     np.save(variables.path + "/temp_data/voltage_data.npy", np.array(voltage_data))
     np.save(variables.path + "/temp_data/voltage_pulse_data.npy", np.array(voltage_pulse_data))
     np.save(variables.path + "/temp_data/laser_pulse_data.npy", np.array(laser_pulse_data))
     np.save(variables.path + "/temp_data/start_counter.npy", np.array(start_counter))
 
+    # save DLD data binning
+    np.save(variables.path + "/temp_data/x_bin.npy", np.array(xx_list_bin))
+    np.save(variables.path + "/temp_data/y_bin.npy", np.array(yy_list_bin))
+    np.save(variables.path + "/temp_data/t_bin.npy", np.array(tt_list_bin))
+
+    # save TDC data
     np.save(variables.path + "/temp_data/channel_data.npy", np.array(channel_data))
     np.save(variables.path + "/temp_data/time_data.npy", np.array(time_data))
     np.save(variables.path + "/temp_data/tdc_start_counter.npy", np.array(tdc_start_counter))
@@ -393,9 +409,9 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
     np.save(variables.path + "/temp_data/voltage_pulse_data_tdc.npy", np.array(voltage_pulse_data_tdc))
     np.save(variables.path + "/temp_data/laser_pulse_data_tdc.npy", np.array(laser_pulse_data_tdc))
 
-    variables.extend_to('x', xx_list)
-    variables.extend_to('y', yy_list)
-    variables.extend_to('t', tt_list)
+    variables.extend_to('x', xx)
+    variables.extend_to('y', yy)
+    variables.extend_to('t', tt)
     variables.extend_to('dld_start_counter', start_counter)
     variables.extend_to('main_v_dc_dld', voltage_data)
     variables.extend_to('main_v_p_dld', voltage_pulse_data)
