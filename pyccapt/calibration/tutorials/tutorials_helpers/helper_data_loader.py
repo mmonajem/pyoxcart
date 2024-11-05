@@ -69,16 +69,6 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc, variables
 			dld_group_storage = data_tools.load_data(dataset_path, tdc)
 
 		if tdc == 'pyccapt' and mode == 'raw':
-			# # Remove the data with tof greater than Max TOF or below 0 ns
-			# TOFFACTOR = 27.432 / (1000 * 4)  # 27.432 ps/bin, tof in ns, data is TDC time sum
-			# DETBINS = 4900
-			# BINNINGFAC = 2
-			# XYFACTOR = 80 / DETBINS * BINNINGFAC  # XXX mm/bin
-			# XYBINSHIFT = DETBINS / BINNINGFAC / 2  # to center detector
-			#
-			# dld_group_storage['t (ns)'] = dld_group_storage['t (ns)'] * TOFFACTOR
-			# dld_group_storage['x_det (cm)'] = (((dld_group_storage['x_det (cm)'] - XYBINSHIFT) * XYFACTOR) * 0.1)
-			# dld_group_storage['y_det (cm)'] = (((dld_group_storage['y_det (cm)'] - XYBINSHIFT) * XYFACTOR) * 0.1)
 			data = data_tools.remove_invalid_data(dld_group_storage, max_tof)
 			data = data_tools.pyccapt_raw_to_processed(data)
 		else:

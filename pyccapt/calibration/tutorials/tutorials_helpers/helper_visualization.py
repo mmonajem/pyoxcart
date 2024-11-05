@@ -181,7 +181,7 @@ def call_visualization(variables):
             except json.JSONDecodeError:
                 # Handle invalid input
                 print(f"Invalid range input")
-            data_loadcrop.plot_crop_fdm(data, bins, frac_fdm_widget.value, axis_mode_fdm.value, figure_size,
+            data_loadcrop.plot_crop_fdm(data['x_det (cm)'].to_numpy(), data['y_det (cm)'].to_numpy(), bins, frac_fdm_widget.value, axis_mode_fdm.value, figure_size,
                                         variables, range_sequence,
                                         range_mc, range_detx, range_dety, range_x, range_y, range_z, range_vol,
                                         False, False, save_fdm_widget.value, figname_fdm_widget.value)
