@@ -221,7 +221,10 @@ def apply_noise_to_structure(structure, noise_levels=(0.5, 0.5, 0.2)):
     # Apply random displacements to each site in the structure
     for site in noisy_structure.sites:
         # Generate random displacements for x, y, and z based on the given noise levels
-        displacement = np.random.uniform(-noise_levels, noise_levels)
+        displacement = np.random.uniform(
+            [-noise_levels[0], -noise_levels[1], -noise_levels[2]],
+            [noise_levels[0], noise_levels[1], noise_levels[2]]
+        )
         site.coords += displacement
 
     return noisy_structure
