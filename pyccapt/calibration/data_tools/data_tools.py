@@ -161,13 +161,14 @@ def remove_invalid_data(dld_group_storage, max_tof):
     return dld_group_storage
 
 
-def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, csv=False, temp=False):
+def save_data(data, variables, name=None, hdf=True, epos=False, pos=False, ato_6v=False, csv=False, temp=False):
     """
     save data in different formats
 
     Args:
         data (pandas.DataFrame): DataFrame containing the data.
         vsriables (class): class containing the variables.
+        name (string): name of the dataset.
         hdf (bool): save data as hdf5 file.
         epos (bool): save data as epos file.
         pos (bool): save data as pos file.
@@ -179,10 +180,14 @@ def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, cs
         None. The DataFrame is modified in-place.
 
     """
-    if temp:
-        data_name = variables.result_data_name + '_temp'
+    if name is not None:
+        data_name = name
     else:
-        data_name = variables.result_data_name
+        if temp:
+            data_name = variables.result_data_name + '_temp'
+        else:
+            data_name = variables.data_name
+
     if hdf:
         # save the dataset to hdf5 file
         hierarchyName = 'df'

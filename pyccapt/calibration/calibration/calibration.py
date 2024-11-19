@@ -199,7 +199,7 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
 
         ax2 = ax1.twinx()
         f_v = voltage_corr(np.array(high_voltage_mean_list), *fitresult)
-        y = ax2.plot(np.array(high_voltage_mean_list) / 1000, f_v, color='r', label=r"$C_V$")
+        y = ax2.plot(np.array(high_voltage_mean_list) / 1000, np.sqrt(f_v), color='r', label=r"$C_V$")
         ax2.set_ylabel(r"$C_V$", color="red", fontsize=10)  # Get the current axis
         ax2.tick_params(axis='y', colors='red')  # Change color and thickness of tick labels on y-axis
         ax2.spines['right'].set_color('red')  # Change color of right border
@@ -219,7 +219,7 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
 
 def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration_mode, index_fig, plot, save,
                       apply_local='all', noise_remove=True, maximum_cal_method='mean',
-                      maximum_sample_method='mean', fig_size=(5, 5)):
+                      maximum_sample_method='mean', fig_size=(5, 5), fast_calibration=False):
     """
     Perform voltage correction on the given data.
 
@@ -236,6 +236,7 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
         maximum_cal_method (str, optional): Maximum calculation method ('mean', 'histogram', 'median').
         maximum_sample_method (str, optional): Sample range maximum ('mean', 'histogram', 'median').
         fig_size (tuple, optional): Size of the figure. Defaults to (5, 5).
+        fast_calibration (bool, optional): Whether to perform fast calibration. Defaults to False.
     """
     print('The left and right side of the main peak is:', variables.selected_x1, variables.selected_x2)
     if calibration_mode == 'tof':
@@ -303,10 +304,13 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
     print('The number of samples is:', int(len(dld_highVoltage_peak_v) / sample_size))
 
     if maximum_cal_method == 'histogram':
+        if fast_calibration:
+            dld_peak_b = np.random.choice(dld_peak_b, int(len(dld_peak_b) * 0.1), replace=False)
         bins = np.linspace(np.min(dld_peak_b), np.max(dld_peak_b),
                            round(np.max(dld_peak_b) / 0.1))
         # y, x = np.histogram(dld_peak_b, bins=bins)
-        y = fast_histogram.histogram1d(dld_peak_b, bins=bins, range=(np.min(dld_peak_b), np.max(dld_peak_b)))
+        y = fast_histogram.histogram1d(dld_peak_b, bins=round(np.max(dld_peak_b) / 0.1) - 1,
+                                       range=(np.min(dld_peak_b), np.max(dld_peak_b)))
         x = bins
         peaks, properties = find_peaks(y, height=0)
         index_peak_max_ini = np.argmax(properties['peak_heights'])
@@ -341,7 +345,7 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
 
     f_v = voltage_corr(dld_highVoltage[mask_fv], *fitresult)
 
-    calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] / f_v
+    calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] / np.sqrt(f_v)
 
     if plot or save:
         # Plot how correction factor for selected peak_x
@@ -362,9 +366,8 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
         # Plot high voltage curve
         ax2 = ax1.twinx()
         f_v_plot = voltage_corr(dld_highVoltage_peak_v, *fitresult)
-        f_v_list_plot = f_v_plot
 
-        y = ax2.plot(dld_highVoltage_peak_v / 1000, 1 / f_v_plot, color='r', label=r"$C_{V}^{-1}$")
+        y = ax2.plot(dld_highVoltage_peak_v / 1000, 1 / np.sqrt(f_v_plot), color='r', label=r"$C_{V}^{-1}$")
         ax2.set_ylabel(r"$C_{V}^{-1}$", color="red", fontsize=10)
         ax2.tick_params(axis='y', colors='red')  # Change color and thickness of tick labels on y-axis
         ax2.spines['right'].set_color('red')  # Change color of right border
@@ -387,7 +390,7 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
         ax1.set_xlabel("Voltage (kV)", fontsize=10)
         plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
 
-        dld_t_plot = dld_peak_b * (1 / f_v_plot)
+        dld_t_plot = dld_peak_b * (1 / np.sqrt(f_v_plot))
 
         y = plt.scatter(dld_highVoltage_peak_v[mask] / 1000, dld_t_plot[mask], color="red", label=r"$t_{C_{V}}$",
                         s=1)
@@ -403,7 +406,10 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
             plt.show()
 
     print('The mean of tof/mc  after voltage calibration is:', np.mean(calibration_mc_tof[mask_temporal]))
-    variables.dld_t_calib = calibration_mc_tof
+    if calibration_mode == 'tof':
+        variables.dld_t_calib = calibration_mc_tof
+    elif calibration_mode == 'mc':
+        variables.mc_calib = calibration_mc_tof
 
 
 def bowl_corr(data_xy, a, b, c, d, e, f):
@@ -531,10 +537,10 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
     y_sample_list = []
     dld_t_peak_list = []
 
-    w1 = int(np.min(dld_x_bowl))
-    w2 = int(np.max(dld_x_bowl))
-    h1 = int(np.min(dld_y_bowl))
-    h2 = int(np.max(dld_y_bowl))
+    w1 = int(np.floor(np.min(dld_x_bowl)))
+    w2 = int(np.ceil(np.max(dld_x_bowl)))
+    h1 = int(np.floor(np.min(dld_y_bowl)))
+    h2 = int(np.ceil(np.max(dld_y_bowl)))
 
     d = sample_size  # sample size is in mm - so we change it to cm
     grid = product(range(h1, h2 - h2 % d, d), range(w1, w2 - w2 % d, d))
@@ -649,19 +655,20 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
     print('The number of ions is:', len(dld_peak))
 
     dld_peak_mid = np.copy(dld_peak)
-    if len(dld_peak_mid) > 4000000 and fast_calibration:
-        dld_peak_mid = np.random.choice(dld_peak_mid, 4000000, replace=False)
+    if fast_calibration:
+        dld_peak_mid = np.random.choice(dld_peak_mid, int(len(dld_peak_mid) * 0.1), replace=False)
     if maximum_cal_method == 'histogram':
         try:
             bins = np.linspace(np.min(dld_peak_mid), np.max(dld_peak_mid), round(np.max(dld_peak_mid) / 0.1))
             # y, x = np.histogram(dld_peak_mid, bins=bins)
             y = fast_histogram.histogram1d(dld_peak_mid, bins=round(np.max(dld_peak_mid) / 0.1) - 1,
-                                           range=(np.min(dld_peak_mid), np.max(dld_peak_mid)))
+                                             range=(np.min(dld_peak_mid), np.max(dld_peak_mid)))
             x = bins
             peaks, properties = find_peaks(y, height=0)
             index_peak_max_ini = np.argmax(properties['peak_heights'])
             maximum_location = x[peaks[index_peak_max_ini]]
-        except:
+        except ValueError as e:
+            print(e)
             print('The histogram max calculation method failed, using mean instead.')
             maximum_location = np.mean(dld_peak_mid)
     elif maximum_cal_method == 'mean':

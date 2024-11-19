@@ -879,7 +879,7 @@ def hist_plot(variables, bin_size, log, target, normalize, prominence, distance,
               peaks_find=True, peaks_find_plot=False, plot_ranged_peak=False, plot_ranged_colors=False, mrp_all=False,
               background=None, ranging_mode=False, range_sequence=[], range_mc=[], range_detx=[], range_dety=[],
               range_x=[], range_y=[], range_z=[], range_vol=[], save_fig=True, print_info=True, legend_mode='long',
-              draw_calib_rect=False, figure_size=(9, 5), plot_show=True):
+              draw_calib_rect=False, figure_size=(9, 5), plot_show=True, fast_calibration=False):
     """
     Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
     Args:
@@ -911,6 +911,7 @@ def hist_plot(variables, bin_size, log, target, normalize, prominence, distance,
         draw_calib_rect (bool): Draw the calibration rectangle.
         figure_size (tuple): Figure size.
         plot_show (bool): Show the plot.
+        fast_calibration (bool): Fast calibration.
     Returns:
         None
 
@@ -980,6 +981,10 @@ def hist_plot(variables, bin_size, log, target, normalize, prominence, distance,
 
     hist = hist[mask]
 
+    # only calculate for 10 percent of the data
+    if fast_calibration:
+        hist = np.random.choice(hist, int(len(hist) * 0.1), replace=False)
+
     if plot_ranged_peak or plot_ranged_colors:
         steps = 'bar'
     else:
@@ -1045,8 +1050,9 @@ def hist_plot(variables, bin_size, log, target, normalize, prominence, distance,
         index_max_ini = np.argmax(prominences[0])
         mrp = x[int(peaks[index_max_ini])] / (
                 x[round(peak_widths[3][index_max_ini])] - x[round(peak_widths[2][index_max_ini])])
-        print('Mass resolving power for the highest peak at index %a (MRP --> m/m_2-m_1):' % index_max_ini,
+        print('Mass resolving power for the highest peak number %s (MRP --> m/m_2-m_1):' % int(index_max_ini + 1),
               mrp)
+        print('-----------------------------------------------------------------------------')
         for i in range(len(peaks)):
             if not mrp_all:
                 print('Peaks ', i + 1,

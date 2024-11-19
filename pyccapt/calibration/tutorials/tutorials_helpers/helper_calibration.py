@@ -146,7 +146,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                               prominence=prominence.value, distance=distance.value, percent=percent.value,
                               selector='rect', figname=index_fig.value, lim=lim_tof.value, save_fig=save.value,
                               peaks_find_plot=plot_peak.value, draw_calib_rect=True, print_info=True, mrp_all=True,
-                              figure_size=figure_size)
+                              figure_size=figure_size, fast_calibration=False)
         plot_button.disabled = False
 
     plot_button.click()
@@ -231,7 +231,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                                                   maximum_cal_method=maximum_cal_method_p,
                                                   noise_remove=noise_remove_p,
                                                   maximum_sample_method=maximum_sample_method_p,
-                                                  fig_size=figure_size)
+                                                  fig_size=figure_size, fast_calibration=fast_calibration.value)
             pb_vol.value = "<b>Finished</b>"
         vol_button.disabled = False
 
@@ -260,7 +260,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         description='save fig:',
         layout=label_layout
     )
-    fast_calibration_b = widgets.Dropdown(
+    fast_calibration = widgets.Dropdown(
         options=[('False', False), ('True', True)],
         description='fast calibration:',
         layout=label_layout
@@ -320,7 +320,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                                                      maximum_sample_method=maximum_sample_method_p,
                                                      apply_local=apply_b.value, fig_size=figure_size,
                                                      calibration_mode=calibration_mode_t, index_fig=index_fig_p,
-                                                     plot=plot_p, save=save_p, fast_calibration=fast_calibration_b.value)
+                                                     plot=plot_p, save=save_p, fast_calibration=fast_calibration.value)
 
             pb_bowl.value = "<b>Finished</b>"
         bowl_button.disabled = False
@@ -419,7 +419,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                                   prominence=prominence.value, distance=distance.value, percent=percent.value,
                                         selector='rect', figname=index_fig_val, lim=lim_tof.value, save_fig=save.value,
                                   peaks_find_plot=plot_peak.value, print_info=False, figure_size=figure_size,
-                                  plot_show=False)
+                                  plot_show=False, fast_calibration=fast_calibration.value)
                 print('The MRPs at (0.5, 0.1, 0.01) are:', mrp)
 
                 counter += 1
@@ -428,7 +428,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                     try_counter += 1
                     if try_counter == 2:
                         print('*********************************************************')
-                        print('Calibration is not improving, stopping', try_counter)
+                        print('Calibration is not improving, stopping')
                         print('*********************************************************')
                         continue_calibration = False
                         if calibration_mode.value == 'tof_calib':
@@ -446,7 +446,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                                     prominence=prominence.value, distance=distance.value, percent=percent.value,
                                     selector='rect', figname=index_fig_val, lim=lim_tof.value, save_fig=save.value,
                                     peaks_find_plot=plot_peak.value, print_info=False, figure_size=figure_size,
-                                    plot_show=False)
+                                    plot_show=False, fast_calibration=fast_calibration.value)
             bowl_correction(b, variables, out, out_status, calibration_mode, pulse_mode)
             index_fig_val += 1
 
@@ -456,7 +456,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                 elif calibration_mode.value == 'mc_calib':
                     back_tof_mc = np.copy(variables.mc_calib)
 
-            mrp_last = mrp[0]
+                mrp_last = mrp[0]
 
 
         index_fig_v.value = 1
@@ -487,12 +487,12 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
     column12 = widgets.VBox([plot_button, auto_button, auto_button_bowl, initial_calib_button, save_button,
                              reset_back_button, clear_plot, plot_stat_button])
     column22 = widgets.VBox([sample_size_b, fit_mode_b, index_fig_b, maximum_cal_method_b, maximum_sample_method_b,
-                             apply_b, plot_b, save_b, figure_b_size_x, figure_b_size_y, fast_calibration_b])
+                             apply_b, plot_b, save_b, figure_b_size_x, figure_b_size_y])
     column21 = widgets.VBox([bowl_button, pb_bowl])
     column33 = widgets.VBox([sample_size_v, index_fig_v, mode_v, apply_v, noise_remove_v, maximum_cal_method_v,
                              maximum_sample_method_v, plot_v, save_v, figure_v_size_x, figure_v_size_y])
     column32 = widgets.VBox([vol_button, pb_vol])
-    column34 = widgets.VBox([calibration_mode])
+    column34 = widgets.VBox([calibration_mode, fast_calibration])
 
     # Create the overall layout by arranging the columns side by side
     layout1 = widgets.HBox([column11, column22, column33, column34])
