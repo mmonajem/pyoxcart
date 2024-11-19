@@ -609,7 +609,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
 
 def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sample_size, fit_mode, calibration_mode,
                          index_fig, plot, save, apply_local='all', maximum_cal_method='mean', maximum_sample_method='mean',
-                         fig_size=(5, 5)):
+                         fig_size=(5, 5), fast_calibration=False):
     """
     Perform bowl correction on the input data and plot the results.
 
@@ -628,13 +628,12 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         maximum_cal_method (str, optional): Maximum calculation method ('mean' or 'histogram').
         maximum_sample_method (str, optional): Sample range maximum ('mean' or 'histogram').
         fig_size (tuple, optional): Figure size.
+        fast_calibration (bool, optional): Flag indicating whether to perform fast calibration.
 
     Returns:
         None
 
     """
-    import time
-    start = time.time()
     dld_x = dld_x * 10 # change the x position to mm from cm
     dld_y = dld_y * 10 # change the y position to mm from cm
 
@@ -649,14 +648,9 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
     dld_peak = variables.dld_t_calib[mask_temporal] if calibration_mode == 'tof' else variables.mc_calib[mask_temporal]
     print('The number of ions is:', len(dld_peak))
 
-    # mask_1 = np.logical_and((dld_x[mask_temporal] > -8), (dld_x[mask_temporal] < 8))
-    # mask_2 = np.logical_and((dld_y[mask_temporal] > -8), (dld_y[mask_temporal] < 8))
-    # mask = np.logical_and(mask_1, mask_2)
-    # dld_peak_mid = dld_peak[mask]
-    #
     dld_peak_mid = np.copy(dld_peak)
-    if len(dld_peak_mid) > 1000000:
-        dld_peak_mid = np.random.choice(dld_peak_mid, 1000000, replace=False)
+    if len(dld_peak_mid) > 4000000 and fast_calibration:
+        dld_peak_mid = np.random.choice(dld_peak_mid, 4000000, replace=False)
     if maximum_cal_method == 'histogram':
         try:
             bins = np.linspace(np.min(dld_peak_mid), np.max(dld_peak_mid), round(np.max(dld_peak_mid) / 0.1))
@@ -798,8 +792,6 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
     elif calibration_mode == 'mc':
         variables.mc_calib = calibration_mc_tof
 
-    print('The time for the bowl correction is:', time.time() - start)
-
 def plot_fdm(x, y, variables, save, bins_s, index_fig, figure_size=(5, 4)):
     """
     Plot the File Desorption Map (FDM) based on the given x and y data and tof vs high voltage and x_det, and y_det.
@@ -833,6 +825,27 @@ def plot_fdm(x, y, variables, save, bins_s, index_fig, figure_size=(5, 4)):
         plt.savefig(variables.result_path + "fdm_%s.svg" % index_fig, format="svg", dpi=600)
     plt.show()
 
+
+def initial_calibration(data, flight_path_length):
+    """
+    Perform the initial calibration based on the given variables and flight path length
+    Args:
+        data: The data frame containing the data
+        flight_path_length:  The flight path length.
+
+    Returns:
+        dld_t_calib: The calibrated time-of-flight values.
+    """
+    v_dc = data['high_voltage (V)'].to_numpy()
+    t = data['t (ns)'].to_numpy()
+    xDet = data['x_det (cm)'].to_numpy() * 1E-2
+    yDet = data['y_det (cm)'].to_numpy() * 1E-2
+    flightPathLength = flight_path_length * 1E-3
+    flightPathLength = xDet ** 2 + yDet ** 2 + flightPathLength ** 2
+    ini_calib_factor_flight_path = flightPathLength / np.mean(flightPathLength)
+    ini_calib_factor_voltage = np.sqrt(v_dc / np.median(v_dc))
+    dld_t_calib = t * ini_calib_factor_flight_path * ini_calib_factor_voltage
+    return dld_t_calib
 
 def plot_selected_statistic(variables, bin_fdm, index_fig, calibration_mode, save, fig_size=(5, 4)):
     """

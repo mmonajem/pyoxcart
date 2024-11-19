@@ -72,7 +72,7 @@ package_list_calibration = ['pyccapt', 'tests', 'pyccapt.calibration', 'pyccapt.
                             'pyccapt.calibration.reconstructions', 'pyccapt.calibration.tutorials',
                             'pyccapt.calibration.tutorials.tutorials_helpers']
 
-dependency_list = common_deps + control_deps + calibration_deps
+dependency_list = control_deps + calibration_deps + common_deps
 package_list = package_list_control + package_list_calibration
 
 setup(

@@ -11,11 +11,11 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from pyccapt.calibration.data_tools.data_loadcrop import elliptical_shape_selector
 
 
-
-def plot_density_map(x, y, z=False, bins=(256, 256), frac=1.0, axis_mode='normal', figure_size=(5, 4), variables=None,
-                  range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[],
-                  range_vol=[], data_crop=False, draw_circle=False, mode_selector='circle', axes=['x', 'y'],
-                     save=False, figname='', cmap='plasma'):
+def plot_density_map(x, y, z=False, log=True, bins=(256, 256), frac=1.0, axis_mode='normal', figure_size=(5, 4),
+                     variables=None,
+                     range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[],
+                     range_vol=[], data_crop=False, draw_circle=False, mode_selector='circle', axis=['x', 'y'],
+                     save=False, figname='', cmap='plasma', normalize=False, normalize_axes=False):
     """
     Plot and crop the FDM with the option to select a region of interest.
 
@@ -23,6 +23,7 @@ def plot_density_map(x, y, z=False, bins=(256, 256), frac=1.0, axis_mode='normal
         x: x-axis data
         y: y-axis data
         z: z weight data
+        log: Flag to choose whether to plot the log of the data
         bins: Number of bins for the histogram
         frac: Fraction of the data to be plotted
         axis_mode: Flag to choose whether to plot axis or scalebar: 'normal' or 'scalebar'
@@ -38,11 +39,13 @@ def plot_density_map(x, y, z=False, bins=(256, 256), frac=1.0, axis_mode='normal
         figure_size: Size of the plot
         draw_circle: Flag to enable circular region of interest selection
         mode_selector: Mode of selection (circle or ellipse)
-        axes: Axes for the histogram
+        axis: Axes to be plotted
         save: Flag to choose whether to save the plot or not
         data_crop: Flag to control whether only the plot is shown or cropping functionality is enabled
         figname: Name of the figure to be saved
         cmap: Colormap for the plot
+        normalize: Flag to normalize the histogram (default False).
+        normalize_axes: Flag to normalize the axis limits (default False).
 
     Returns:
         None
@@ -87,16 +90,14 @@ def plot_density_map(x, y, z=False, bins=(256, 256), frac=1.0, axis_mode='normal
     y = y[mask]
 
     if frac < 1:
-        # set axis limits based on fraction of x and y data baded on fraction
+        # set axis limits based on fraction of x and y data based on fraction
         mask_fraq = np.random.choice(len(x), int(len(x) * frac), replace=False)
         x_t = np.copy(x)
         y_t = np.copy(y)
         x = x[mask_fraq]
         y = y[mask_fraq]
 
-
     fig1, ax1 = plt.subplots(figsize=figure_size, constrained_layout=True)
-
 
     # Check if the bin is a tuple
     if isinstance(bins, tuple):
@@ -111,11 +112,29 @@ def plot_density_map(x, y, z=False, bins=(256, 256), frac=1.0, axis_mode='normal
     else:
         FDM, xedges, yedges = np.histogram2d(x, y, bins=bins, weights=z)
 
+    # Ensure that yedges are reversed for correct z direction
+    yedges = yedges[::-1]
+
+    # Normalize the histogram if requested
+    if normalize:
+        FDM = FDM / np.sum(FDM)
+
+    # Normalize the axes if requested
+    if normalize_axes:
+        xedges = (xedges - np.min(xedges)) / (np.max(xedges) - np.min(xedges))
+        yedges = (yedges - np.min(yedges)) / (np.max(yedges) - np.min(yedges))
+
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 
     cmap_instance = copy(cm.get_cmap(cmap))
     cmap_instance.set_bad(cmap_instance(0))
-    pcm = ax1.pcolormesh(xedges, yedges, FDM.T, cmap=cmap_instance, norm=colors.LogNorm(), rasterized=True)
+
+    if log and not normalize:
+        FDM = np.log1p(FDM)
+        pcm = ax1.pcolormesh(xedges, yedges, FDM.T, cmap=cmap_instance, norm=colors.LogNorm(), rasterized=True)
+    else:
+        pcm = ax1.pcolormesh(xedges, yedges, FDM.T, cmap=cmap_instance, rasterized=True)
+
     cbar = fig1.colorbar(pcm, ax=ax1, pad=0)
     cbar.set_label('Event Counts', fontsize=10)
 
@@ -123,7 +142,6 @@ def plot_density_map(x, y, z=False, bins=(256, 256), frac=1.0, axis_mode='normal
         # extract tof
         x_lim = x_t
         y_lim = y_t
-
         ax1.set_xlim([min(x_lim), max(x_lim)])
         ax1.set_ylim([min(y_lim), max(y_lim)])
 
@@ -148,13 +166,13 @@ def plot_density_map(x, y, z=False, bins=(256, 256), frac=1.0, axis_mode='normal
         ax1.add_artist(scalebar)
         plt.axis('off')  # Turn off both x and y axes
     elif axis_mode == 'normal':
-        if 'x' in axes and 'y' in axes:
+        if 'x' in axis and 'y' in axis:
             ax1.set_xlabel(r"$x (nm)$", fontsize=10)
             ax1.set_ylabel(r"$y (nm)$", fontsize=10)
-        elif 'y' in axes and 'z' in axes:
+        elif 'y' in axis and 'z' in axis:
             ax1.set_xlabel(r"$y (nm)$", fontsize=10)
             ax1.set_ylabel(r"$z (nm)$", fontsize=10)
-        elif 'x' in axes and 'z' in axes:
+        elif 'x' in axis and 'z' in axis:
             ax1.set_xlabel(r"$x (nm)$", fontsize=10)
             ax1.set_ylabel(r"$z (nm)$", fontsize=10)
 
@@ -163,4 +181,3 @@ def plot_density_map(x, y, z=False, bins=(256, 256), frac=1.0, axis_mode='normal
         rcParams['svg.fonttype'] = 'none'
         plt.savefig("%s.png" % (variables.result_path + figname), format="png", dpi=600)
         plt.savefig("%s.svg" % (variables.result_path + figname), format="svg", dpi=600)
-    plt.show()
