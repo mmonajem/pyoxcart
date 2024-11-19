@@ -53,9 +53,10 @@ def read_epos(file_path):
     """
     with open(file_path, 'rb') as file:
         data = file.read()
-        n = len(data) // 4
-        rs = n // 11
-        d = struct.unpack('>' + 'fffffffffII' * rs, data)
+
+    n = len(data) // 4
+    rs = n // 11
+    d = struct.unpack('>' + 'fffffffffII' * rs, data)
     epos = pd.DataFrame({
         'x (nm)': d[0::11],
         'y (nm)': d[1::11],

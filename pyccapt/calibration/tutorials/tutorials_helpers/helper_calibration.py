@@ -63,6 +63,10 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         description='auto calibration',
         layout=label_layout
     )
+    auto_button_bowl = widgets.Button(
+        description='auto bowl calibration',
+        layout=label_layout
+    )
     initial_calib_button = widgets.Button(
         description='initial calibration',
         layout=label_layout
@@ -109,6 +113,8 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
     bowl_button.on_click(lambda b: bowl_correction(b, variables, out, out_status, calibration_mode, pulse_mode))
     clear_plot.on_click(lambda b: clear_plot_on_click(out))
     auto_button.on_click(lambda b: automatic_calibration(b, variables, out, out_status, calibration_mode, pulse_mode))
+    auto_button_bowl.on_click(lambda b: automatic_bowl_calibration(b, variables, out, out_status, calibration_mode,
+                                                                   pulse_mode))
     initial_calib_button.on_click(lambda b: initial_calibration(b, variables, calibration_mode, flight_path_length))
 
     # Define widgets and labels for histplot function
@@ -254,6 +260,11 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         description='save fig:',
         layout=label_layout
     )
+    fast_calibration_b = widgets.Dropdown(
+        options=[('False', False), ('True', True)],
+        description='fast calibration:',
+        layout=label_layout
+    )
     apply_b = widgets.Dropdown(
         options=[('all', 'all'), ('temporal', 'temporal'), ],
         description='apply mode:',
@@ -267,15 +278,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         initial_calib_button.disabled = True
         with out:
             if calibration_mode.value == 'tof_calib':
-                v_dc = variables.data['high_voltage (V)'].to_numpy()
-                t = variables.data['t (ns)'].to_numpy()
-                xDet = variables.data['x_det (cm)'].to_numpy() * 1E-2
-                yDet = variables.data['y_det (cm)'].to_numpy() * 1E-2
-                flightPathLength = flight_path_length * 1E-3
-                flightPathLength = xDet ** 2 + yDet ** 2 + flightPathLength ** 2
-                ini_calib_factor_flight_path = flightPathLength / np.mean(flightPathLength)
-                ini_calib_factor_voltage = np.sqrt(v_dc / np.median(v_dc))
-                variables.dld_t_calib = t * ini_calib_factor_flight_path * ini_calib_factor_voltage
+                variables.dld_t_calib = calibration.initial_calibration(variables.data, flight_path_length)
                 print('Initial calibration is done')
 
             elif calibration_mode.value == 'mc_calib':
@@ -317,7 +320,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                                                      maximum_sample_method=maximum_sample_method_p,
                                                      apply_local=apply_b.value, fig_size=figure_size,
                                                      calibration_mode=calibration_mode_t, index_fig=index_fig_p,
-                                                     plot=plot_p, save=save_p)
+                                                     plot=plot_p, save=save_p, fast_calibration=fast_calibration_b.value)
 
             pb_bowl.value = "<b>Finished</b>"
         bowl_button.disabled = False
@@ -331,6 +334,65 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
             clear_output(True)
             calibration.plot_selected_statistic(variables, bin_fdm.value, index_fig.value,
                                                 calibration_mode=calibration_mode_t, save=True)
+
+
+
+    def automatic_bowl_calibration(b, variables, out, out_status, calibration_mode, pulse_mode):
+        auto_button_bowl.disabled = True
+        counter = 1
+        try_counter = 0
+        index_fig_val = index_fig.value
+        continue_calibration = True
+        mrp_last = 0
+        if calibration_mode.value == 'tof_calib':
+            back_tof_mc = np.copy(variables.dld_t_calib)
+        elif calibration_mode.value == 'mc_calib':
+            back_tof_mc = np.copy(variables.mc_calib)
+        while continue_calibration:
+            with out:
+                print('=======================================================')
+                print('Starting calibration number %s' % counter)
+                figure_size = (figure_b_size_x.value, figure_b_size_y.value)
+                mrp = mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value,
+                                        normalize=False,
+                                        prominence=prominence.value, distance=distance.value, percent=percent.value,
+                                        selector='rect', figname=index_fig_val, lim=lim_tof.value, save_fig=save.value,
+                                        peaks_find_plot=plot_peak.value, print_info=False, figure_size=figure_size,
+                                        plot_show=False)
+                print('The MRPs at (0.5, 0.1, 0.01) are:', mrp)
+
+                counter += 1
+
+                if mrp_last - mrp[0] > 0 or counter > 15:
+                    try_counter += 1
+                    if try_counter == 2:
+                        print('*********************************************************')
+                        print('Calibration is not improving, stopping', try_counter)
+                        print('*********************************************************')
+                        continue_calibration = False
+                        if calibration_mode.value == 'tof_calib':
+                            variables.dld_t_calib = np.copy(back_tof_mc)
+                        elif calibration_mode.value == 'mc_calib':
+                            variables.mc_calib = np.copy(back_tof_mc)
+                        continue
+                else:
+                    try_counter = 0
+            index_fig_v.value = index_fig_val
+            index_fig_b.value = index_fig_val
+            bowl_correction(b, variables, out, out_status, calibration_mode, pulse_mode)
+            index_fig_val += 1
+
+            if mrp_last < mrp[0]:
+                if calibration_mode.value == 'tof_calib':
+                    back_tof_mc = np.copy(variables.dld_t_calib)
+                elif calibration_mode.value == 'mc_calib':
+                    back_tof_mc = np.copy(variables.mc_calib)
+
+            mrp_last = mrp[0]
+
+        index_fig_v.value = 1
+        index_fig_b.value = 1
+        auto_button_bowl.disabled = False
 
     def automatic_calibration(b, variables, out, out_status, calibration_mode, pulse_mode):
 
@@ -369,25 +431,33 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                         print('Calibration is not improving, stopping', try_counter)
                         print('*********************************************************')
                         continue_calibration = False
+                        if calibration_mode.value == 'tof_calib':
+                            variables.dld_t_calib = np.copy(back_tof_mc)
+                        elif calibration_mode.value == 'mc_calib':
+                            variables.mc_calib = np.copy(back_tof_mc)
                         continue
                 else:
                     try_counter = 0
             index_fig_v.value = index_fig_val
             index_fig_b.value = index_fig_val
             vol_correction(b, variables, out, out_status, calibration_mode, pulse_mode)
+            mrp = mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value,
+                                    normalize=False,
+                                    prominence=prominence.value, distance=distance.value, percent=percent.value,
+                                    selector='rect', figname=index_fig_val, lim=lim_tof.value, save_fig=save.value,
+                                    peaks_find_plot=plot_peak.value, print_info=False, figure_size=figure_size,
+                                    plot_show=False)
             bowl_correction(b, variables, out, out_status, calibration_mode, pulse_mode)
             index_fig_val += 1
 
             if mrp_last < mrp[0]:
                 if calibration_mode.value == 'tof_calib':
-                    variables.dld_t_calib = np.copy(back_tof_mc)
+                    back_tof_mc = np.copy(variables.dld_t_calib)
                 elif calibration_mode.value == 'mc_calib':
-                    variables.mc_calib = np.copy(back_tof_mc)
+                    back_tof_mc = np.copy(variables.mc_calib)
+
             mrp_last = mrp[0]
-            if calibration_mode.value == 'tof_calib':
-                back_tof_mc = np.copy(variables.dld_t_calib)
-            elif calibration_mode.value == 'mc_calib':
-                back_tof_mc = np.copy(variables.mc_calib)
+
 
         index_fig_v.value = 1
         index_fig_b.value = 1
@@ -414,10 +484,10 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
     # Create the layout with three columns
     column11 = widgets.VBox([bin_size, prominence, distance, lim_tof, percent, bin_fdm, plot_peak, index_fig, save,
                              figure_mc_size_x, figure_mc_size_y])
-    column12 = widgets.VBox([plot_button, auto_button, initial_calib_button, save_button, reset_back_button, clear_plot,
-                             plot_stat_button])
+    column12 = widgets.VBox([plot_button, auto_button, auto_button_bowl, initial_calib_button, save_button,
+                             reset_back_button, clear_plot, plot_stat_button])
     column22 = widgets.VBox([sample_size_b, fit_mode_b, index_fig_b, maximum_cal_method_b, maximum_sample_method_b,
-                             apply_b, plot_b, save_b, figure_b_size_x, figure_b_size_y])
+                             apply_b, plot_b, save_b, figure_b_size_x, figure_b_size_y, fast_calibration_b])
     column21 = widgets.VBox([bowl_button, pb_bowl])
     column33 = widgets.VBox([sample_size_v, index_fig_v, mode_v, apply_v, noise_remove_v, maximum_cal_method_v,
                              maximum_sample_method_v, plot_v, save_v, figure_v_size_x, figure_v_size_y])
