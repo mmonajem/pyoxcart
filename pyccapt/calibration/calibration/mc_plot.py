@@ -1,4 +1,5 @@
 import math
+import re
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -42,6 +43,7 @@ class AptHistPlotter:
             mc_tof (numpy.ndarray): Array for mc or tof data.
             variables (share_variables.Variables): The global experiment variables.
         """
+        self.line_manager = None
         self.distance = None
         self.prominence = None
         self.percent = None
@@ -205,8 +207,20 @@ class AptHistPlotter:
             self.ranged_line.remove()
         except AttributeError:
             pass
-        self.ranged_line = plt.axvline(x=peak_loc, color='red', linestyle='dashdot', linewidth=2,
-                                       ymax=self.y[bin_index])
+        # Ensure bin_index is within valid range
+        if bin_index < 0 or bin_index >= len(self.y):
+            raise IndexError(f"Bin index {bin_index} out of range for y array of length {len(self.y)}")
+
+        # Get the scalar value for ymax
+        ymax = float(self.y[bin_index])
+        # Plot the vertical line with the specified color and properties
+        self.ranged_line = plt.axvline(
+            x=peak_loc,
+            color=color,
+            linestyle='dashdot',
+            linewidth=2,
+            ymax=ymax
+        )
 
     def plot_peaks(self, range_data=None, mode='peaks'):
         """
@@ -253,7 +267,7 @@ class AptHistPlotter:
 
                     self.annotates.append(str(i + 1))
 
-    def plot_color_legend(self, loc):
+    def plot_color_legend(self, loc, detailed_isotope=False, detailed_charge=False):
         """
         Plot the color legend.
 
@@ -263,12 +277,45 @@ class AptHistPlotter:
         Returns:
             None
         """
+        # make a copy of the legend colors
+        legend_colors_edited = self.legend_colors.copy()
+        if not detailed_isotope or not detailed_charge:
+            # Regular expression pattern to remove isotope notation
+            pattern = r"\$\{\}\^\{\d+\}([A-Za-z]+.*)\$"
+            for i in range(len(legend_colors_edited)):
+                legend_colors_edited[i] = (re.sub(pattern, r"$\1$", legend_colors_edited[i][0]), legend_colors_edited[i][1])
+            # remove ununique labels
+            unique_tuples = {}
+            for key, value in legend_colors_edited:
+                if key not in unique_tuples:
+                    unique_tuples[key] = value
+
+            # Convert the dictionary back to a list of tuples
+            legend_colors_edited = list(unique_tuples.items())
+        if not detailed_charge:
+            # Regular expression pattern to remove isotope notation
+            pattern_1 =  r"\^{\d+\}|\{\+|\{-\}|\{\d+[+-]?\}"
+            # Regular expression pattern to remove the isotope notation, charge, and caret ^
+            pattern_2 = r"\{\d+\}|[\^{}+-]"
+            for i in range(len(legend_colors_edited)):
+                legend_colors_edited[i] = (re.sub(pattern_1, "", legend_colors_edited[i][0]), legend_colors_edited[i][1])
+                legend_colors_edited[i] = (re.sub(pattern_2, "", legend_colors_edited[i][0]), legend_colors_edited[i][1])
+            # remove ununique labels
+            # Using a set to track seen elements and filter out duplicates
+            seen = set()
+            unique_data = []
+
+            for item in legend_colors_edited:
+                if item[0] not in seen:
+                    seen.add(item[0])
+                    unique_data.append(item)
+            legend_colors_edited = unique_data
         # Adjust the layout
-        if len(self.legend_colors) > 5:
-            ncol = math.ceil(len(self.legend_colors) // 8)
+        if len(legend_colors_edited) > 5:
+            ncol = max(1, math.ceil(len(legend_colors_edited) / 8))
         else:
             ncol = 1
-        self.ax.legend([label[1] for label in self.legend_colors], [label[0] for label in self.legend_colors],
+        self.ax.legend([label[1] for label in legend_colors_edited], [label[0] for label in legend_colors_edited],
                        loc=loc, ncol=ncol)
 
     def plot_hist_info_legend(self, label='mc', mrp_all=False, background=None, legend_mode='long',
@@ -808,19 +855,19 @@ class AptHistPlotter:
 
         elif selector == 'range':
             # connect range selector
-            line_manager = plot_vline_draw.VerticalLineManager(self.variables, self.ax, self.fig, [], [])
+            self.line_manager = plot_vline_draw.VerticalLineManager(self.variables, self.ax, self.fig, [], [])
 
             self.fig.canvas.mpl_connect('button_press_event',
-                                        lambda event: line_manager.on_press(event))
+                                        lambda event: self.line_manager.on_press(event))
             self.fig.canvas.mpl_connect('button_release_event',
-                                        lambda event: line_manager.on_release(event))
+                                        lambda event: self.line_manager.on_release(event))
             self.fig.canvas.mpl_connect('motion_notify_event',
-                                        lambda event: line_manager.on_motion(event))
+                                        lambda event: self.line_manager.on_motion(event))
             self.fig.canvas.mpl_connect('key_press_event',
-                                        lambda event: line_manager.on_key_press(event))
-            self.fig.canvas.mpl_connect('scroll_event', lambda event: line_manager.on_scroll(event))
+                                        lambda event: self.line_manager.on_key_press(event))
+            self.fig.canvas.mpl_connect('scroll_event', lambda event: self.line_manager.on_scroll(event))
             self.fig.canvas.mpl_connect('key_release_event',
-                                        lambda event: line_manager.on_key_release(event))
+                                        lambda event: self.line_manager.on_key_release(event))
 
     def zoom_to_x_range(self, x_min, x_max, reset=False):
         """

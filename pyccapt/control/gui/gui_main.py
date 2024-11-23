@@ -1058,9 +1058,9 @@ class Ui_PyCCAPT(object):
 		self.vdc_max.setText(_translate("PyCCAPT", "4000"))
 		self.label_188.setText(_translate("PyCCAPT", "Detection Rate (%)"))
 		self.label_182.setText(_translate("PyCCAPT", "K_p Downwards"))
-		self.vp_max.setText(_translate("PyCCAPT", "3281"))
+		self.vp_max.setText(_translate("PyCCAPT", str(self.conf['max_vp'])))
 		self.pulse_fraction.setText(_translate("PyCCAPT", "20"))
-		self.vp_min.setText(_translate("PyCCAPT", "328"))
+		self.vp_min.setText(_translate("PyCCAPT", str(self.conf['min_vp'])))
 		self.label_200.setText(_translate("PyCCAPT", "Electrode"))
 		self.label_191.setText(_translate("PyCCAPT", "Control Algorithm"))
 		self.label_176.setText(_translate("PyCCAPT", "Max. Experiment Time (s)"))
@@ -1277,7 +1277,13 @@ class Ui_PyCCAPT(object):
 			self.variables.vdc_steps_down = self.result_list[index_line]['vdc_steps_down']
 			self.variables.control_algorithm = self.result_list[index_line]['control_algorithm']
 			self.variables.pulse_mode = self.result_list[index_line]['pulse_mode']
-			self.variables.vp_min = self.result_list[index_line]['vp_min']
+			if self.result_list[index_line]['vp_min'] < self.conf['min_vp']:
+				self.variables.vp_min = self.conf['min_vp']
+				self.error_message("Minimum possible V_p is " + str(self.conf['min_vp']))
+			elif self.result_list[index_line]['vp_min'] > self.conf['max_vp']:
+				self.error_message("Maximum possible V_p is " + str(self.conf['max_vp']))
+			else:
+				self.variables.vp_min = self.result_list[index_line]['vp_min']
 			if self.result_list[index_line]['vp_max'] < self.conf['max_vp']:
 				self.variables.vp_max = self.result_list[index_line]['vp_max']
 			elif self.result_list[index_line]['vp_max'] > self.conf['max_vp']:

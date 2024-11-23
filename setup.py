@@ -58,6 +58,7 @@ calibration_deps = [
     "jupyterlab",
     "tqdm",
     "fast-histogram",
+    "pyvista",
 ]
 
 package_list_control = ['pyccapt', 'tests', 'pyccapt.control', 'pyccapt.control.apt', 'pyccapt.control.control',
