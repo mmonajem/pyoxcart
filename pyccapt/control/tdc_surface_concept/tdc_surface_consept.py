@@ -12,7 +12,7 @@ from pyccapt.control.tdc_surface_concept import scTDC
 
 QUEUE_DATA = 0
 QUEUE_ENDOFMEAS = 1
-CHUNK_SIZE = 200000  # Adjust the chunk size as needed
+CHUNK_SIZE = 200_000  # Adjust the chunk size as needed
 
 class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
     """
@@ -20,17 +20,17 @@ class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
     """
 
     def __init__(self, lib, dev_desc, data_field_selection, dld_events,
-                 max_buffered_data_len=500000):
-        '''
-        Initialize the base class: scTDC.buffered_data_callbacks_pipe
+                 max_buffered_data_len=500_000):
+        """
+		Initialize the base class: scTDC.buffered_data_callbacks_pipe
 
-        Args:
-            lib (scTDClib): A scTDClib object.
-            dev_desc (int): Device descriptor as returned by sc_tdc_init_inifile(...).
-            data_field_selection (int): A 'bitwise or' combination of SC_DATA_FIELD_xyz constants.
-            dld_events (bool): True to receive DLD events, False to receive TDC events.
-            max_buffered_data_len (int): Number of events buffered before invoking callbacks.
-        '''
+		Args:
+			lib (scTDClib): A scTDClib object.
+			dev_desc (int): Device descriptor as returned by sc_tdc_init_inifile(...).
+			data_field_selection (int): A 'bitwise or' combination of SC_DATA_FIELD_xyz constants.
+			dld_events (bool): True to receive DLD events, False to receive TDC events.
+			max_buffered_data_len (int): Number of events buffered before invoking callbacks.
+		"""
         super().__init__(lib, dev_desc, data_field_selection, max_buffered_data_len, dld_events)
 
         self.queue = Queue()
@@ -133,9 +133,12 @@ def load_and_concatenate_chunks(path, chunk_id):
                 print(f"File '{chunk_file}' not found.")
         return all_data
 
-    xx_list_bin = load_data("x_data")
-    yy_list_bin = load_data("y_data")
-    tt_list_bin = load_data("t_data")
+    xx_list_bin = load_data("x_bin")
+    xx_list = load_data("x_data")
+    yy_list_bin = load_data("y_bin")
+    yy_list = load_data("y_data")
+    tt_list_bin = load_data("t_bin")
+    tt_list = load_data("t_data")
     voltage_data = load_data("voltage_data")
     voltage_pulse_data = load_data("voltage_pulse_data")
     laser_pulse_data = load_data("laser_pulse_data")
@@ -148,8 +151,9 @@ def load_and_concatenate_chunks(path, chunk_id):
     voltage_pulse_data_tdc = load_data("voltage_pulse_data_tdc")
     laser_pulse_data_tdc = load_data("laser_pulse_data_tdc")
 
-    return (xx_list_bin, yy_list_bin, tt_list_bin, voltage_data, voltage_pulse_data, laser_pulse_data, start_counter,
-            channel_data, time_data, tdc_start_counter, voltage_data_tdc, voltage_pulse_data_tdc, laser_pulse_data_tdc)
+    return (xx_list_bin, xx_list, yy_list_bin, yy_list, tt_list_bin, tt_list, voltage_data, voltage_pulse_data,
+            laser_pulse_data, start_counter, channel_data, time_data, tdc_start_counter, voltage_data_tdc,
+            voltage_pulse_data_tdc, laser_pulse_data_tdc)
 
 
 def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, stop_event):
@@ -297,8 +301,6 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
                 yy_list_bin.extend(yy_dif.tolist())
                 tt_list_bin.extend(tt_dif.tolist())
 
-
-
         if eventtype_raw == QUEUE_DATA:
             channel_data_tmp = data_raw["channel"].tolist()
             if len(channel_data_tmp) > 0:
@@ -378,8 +380,8 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
         save_process.join()  # Wait for the save process to finish
 
         # Load all chunks and extend variables
-        (xx_list_bin, yy_list_bin, tt_list_bin, voltage_data, voltage_pulse_data, laser_pulse_data, start_counter,
-         channel_data,
+        (xx_list_bin, xx, yy_list_bin, yy, tt_list_bin, tt, voltage_data, voltage_pulse_data,
+         laser_pulse_data, start_counter, channel_data,
          time_data, tdc_start_counter, voltage_data_tdc, voltage_pulse_data_tdc,
          laser_pulse_data_tdc) = load_and_concatenate_chunks(path, chunk_id)
 
