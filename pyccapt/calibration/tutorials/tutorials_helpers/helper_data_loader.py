@@ -111,7 +111,6 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc, variables
 	variables.flight_path_length = flightPathLength
 	variables.pulse_mode = pulse_mode
 
-	return variables
 
 
 def add_columns(variables, max_mc):

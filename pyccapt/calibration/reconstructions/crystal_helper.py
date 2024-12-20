@@ -202,7 +202,7 @@ def rotate_structure(structure, theta_deg, phi_deg):
 #
 #     return rotated_structure
 
-def apply_noise_to_structure(structure, noise_levels=(0.5, 0.5, 0.2)):
+def apply_noise_to_structure(structure, noise_levels=(5, 5, 2), noise_type='correlative'):
     """
     Applies random displacements to the atomic positions in a structure.
 
@@ -211,23 +211,41 @@ def apply_noise_to_structure(structure, noise_levels=(0.5, 0.5, 0.2)):
     noise_levels (tuple of floats): Noise levels for the x, y, and z coordinates in Ångstroms.
                                     For example, (0.5, 0.3, 0.1) will add up to 0.5 Å noise in x,
                                     0.3 Å noise in y, and 0.1 Å noise in z.
+    noise_type (str): Type of noise to apply. Options are 'correlative' or 'noncorrelative'.
 
     Returns:
-    Structure: A new Structure object with noise applied to each atomic position.
+    tuple:
+        - Structure: A new Structure object with noise applied to each atomic position.
+        - np.ndarray: The noise array applied to each atom (for debugging or visualization purposes).
     """
     # Create a copy of the structure to avoid modifying the original structure
     noisy_structure = structure.copy()
 
-    # Apply random displacements to each site in the structure
-    for site in noisy_structure.sites:
-        # Generate random displacements for x, y, and z based on the given noise levels
-        displacement = np.random.uniform(
-            [-noise_levels[0], -noise_levels[1], -noise_levels[2]],
-            [noise_levels[0], noise_levels[1], noise_levels[2]]
-        )
-        site.coords += displacement
+    # Initialize the noise array
+    all_noise = []
 
-    return noisy_structure
+    # Generate noise based on the type
+    if noise_type == 'correlative':
+        # Correlated noise: Same displacement scaled by noise levels
+        correlated_noise = np.random.normal(0, 1, size=(3,))
+        correlated_noise = correlated_noise / np.linalg.norm(correlated_noise)  # Normalize direction
+        for site in noisy_structure.sites:
+            displacement = correlated_noise * np.array(noise_levels)
+            site.coords += displacement
+            all_noise.append(displacement)
+    elif noise_type == 'noncorrelative':
+        # Uncorrelated noise: Independent displacement for each atom and axis
+        for site in noisy_structure.sites:
+            displacement = np.random.uniform(-1, 1, size=(3,)) * noise_levels
+            site.coords += displacement
+            all_noise.append(displacement)
+    else:
+        raise ValueError("Invalid noise_type. Choose 'correlative' or 'noncorrelative'.")
+
+    # Convert the noise list to a NumPy array
+    all_noise = np.array(all_noise)
+
+    return noisy_structure, all_noise
 
 
 def project_to_surface(structure):
@@ -269,6 +287,48 @@ def project_to_surface(structure):
     projected_structure = Structure(structure.lattice, structure.species, normalized_coords)
 
     return projected_structure
+
+def stereographic_projection(structure, d_z=0):
+    """
+    Projects all atomic positions onto the surface
+
+    Parameters:
+    structure (Structure): A pymatgen Structure object with atomic positions.
+    d_z (float): The distance of the projection plane from the origin.
+
+    Returns:
+    Structure: A new Structure object with all atomic positions projected onto the hemisphere surface.
+    """
+    # Copy the structure to avoid modifying the original
+    projected_structure = structure.copy()
+
+    # Extract atomic coordinates
+    coords = projected_structure.cart_coords
+
+    # # Find the midpoints of x and y
+    min_x, max_x = np.min(coords[:, 0]), np.max(coords[:, 0])
+    min_y, max_y = np.min(coords[:, 1]), np.max(coords[:, 1])
+
+    mid_x = (max_x - min_x) / 2
+    mid_y = (max_y - min_y) / 2
+
+    coords[:, 0] = coords[:, 0] - mid_x
+    coords[:, 1] = coords[:, 1] - mid_y
+
+    coords[:, 0] = coords[:, 0] / (1 - coords[:, 2] + 1e-6)
+    coords[:, 1] = coords[:, 1] / (1 - coords[:, 2] +  1e-6)
+    coords[:, 2] = 0
+    print(coords.shape)
+    print(np.max(coords[:, 0]), np.min(coords[:, 0]))
+    print(np.max(coords[:, 1]), np.min(coords[:, 1]))
+    print(np.max(coords[:, 2]), np.min(coords[:, 2]))
+
+
+    # Create a new structure with the projected coordinates
+    projected_structure = Structure(structure.lattice, structure.species, coords)
+
+    return projected_structure
+
 
 def pyccapt_to_pymatgen(data, range):
     """

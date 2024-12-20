@@ -7,6 +7,7 @@ import scipy.io
 from pyccapt.calibration.data_tools import ato_tools, data_loadcrop, data_tools
 from pyccapt.calibration.leap_tools import ccapt_tools
 from pyccapt.calibration.mc import tof_tools
+from pyccapt.calibration.leap_tools import leap_tools
 
 
 def read_hdf5(filename: "type: string - Path to hdf5(.h5) file") -> "type: dataframe":
@@ -39,7 +40,7 @@ def read_hdf5(filename: "type: string - Path to hdf5(.h5) file") -> "type: dataf
         print("[*] No Group keys could be found in HDF5 File")
 
 
-def read_hdf5_through_pandas(filename: "type:string - Path to hdf5(.h5) file") -> "type: dataframe - Pandas Dataframe":
+def read_range(filename: "type:string - Path to hdf5(.h5) file") -> "type: dataframe - Pandas Dataframe":
     """
     This function is different from read_hdf5 function. As it assumes, the content 
     of the HDF5 file passed as argument was created using the Pandas library.
@@ -50,8 +51,12 @@ def read_hdf5_through_pandas(filename: "type:string - Path to hdf5(.h5) file") -
             hdf5_file_response:  content of hdf5 file (type: dataframe)       
     """
     try:
-        hdf5_file_response = pd.read_hdf(filename, mode='r')
-        return hdf5_file_response
+        # check the file extension
+        if filename.endswith('.h5'):
+            range_data = pd.read_hdf(filename, mode='r')
+        elif filename.endswith('.rrng'):
+            range_data = leap_tools.read_rrng(filename)
+        return range_data
     except FileNotFoundError as error:
         print("[*] HDF5 File could not be found")
 
@@ -224,7 +229,7 @@ def load_data(dataset_path, data_type, mode='processed'):
         if data_type == 'leap_epos':
             data = ccapt_tools.epos_to_ccapt(dataset_path)
         else:
-            print('The file has to be epos. With pos information this tutorial cannot be run')
+            print('The dataset should contains at least epos information to use all possible analysis')
             data = ccapt_tools.pos_to_ccapt(dataset_path)
     elif data_type == 'leap_apt':
         data = ccapt_tools.apt_to_ccapt(dataset_path)

@@ -314,7 +314,8 @@ def call_ion_selection(variables):
 	all_peaks_button.on_click(lambda b: select_all_peaks(b, variables))
 
 	def select_all_peaks(b, variables):
-		variables.peaks_idx = variables.peak_x
+		variables.peaks_x_selected = variables.peak_x
+		variables.peaks_index_list = [i for i in range(len(variables.peak_x))]
 
 	tab1 = widgets.VBox(children=[bin_size, index_fig, prominence, distance, lim_tof, percent, plot_peak, save_fig,
 	                              widgets.HBox(children=[plot_button_p, all_peaks_button])])

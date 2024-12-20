@@ -432,7 +432,7 @@ def molecule_create(element_list, max_complexity, charge, abundance_threshold, v
         pd.DataFrame: A DataFrame containing the list of isotopes with their weights and abundances.
     """
     isotopeTableFile = '../../../files/isotopeTable.h5'
-    dataframe = data_tools.read_hdf5_through_pandas(isotopeTableFile)
+    dataframe = data_tools.read_range(isotopeTableFile)
     elements = dataframe['element'].to_numpy()
     isotope_number = dataframe['isotope'].to_numpy()
     abundance = dataframe['abundance'].to_numpy()
@@ -569,10 +569,10 @@ def ranging_dataset_create(variables, row_index, mass_ion):
         selected_row = variables.range_data_backup.iloc[row_index].tolist()
         selected_row = selected_row[:-1]
     else:
-        selected_row = ['unranged', mass_ion, 'unranged', 0, 0, 0]
+        selected_row = ['unranged', mass_ion, ['unranged'], [0], [0], 0]
     fake = Factory.create()
     data_table = '../../../files/color_scheme.h5'
-    dataframe = data_tools.read_hdf5_through_pandas(data_table)
+    dataframe = data_tools.read_range(data_table)
     element_selec = selected_row[2]
     if len(element_selec) == 1:
         element_selec = element_selec[0]
