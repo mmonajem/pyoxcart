@@ -51,7 +51,7 @@ interest (ROI) selection, voltage and bowl calibration, and 3D reconstruction te
 ![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/mc.png)
 aaaaaaaaaa
 
-![Alt Text](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/detecor.gif)
+![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/detector.gif)
 
 
 ddddd
