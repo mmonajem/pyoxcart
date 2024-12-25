@@ -147,12 +147,13 @@ class Variables:
         self.pulse_mode = None
         self.mask = None
         # Create an empty DataFrame with the specified columns
-        self.range_data = pd.DataFrame({"ion": ['unranged'], "mass": [0], "mc": [0], "mc_low": 0,
-                                        "mc_up": 400, "color": '#000000', "element": ['unranged'],
-                                        "complex": [0], "isotope": [0], "charge": [0]})
+        self.range_data = pd.DataFrame({"name": ["unranged0"], "ion": ['un'], "mass": [0], "mc": [0], "mc_low": 0,
+                                "mc_up": 400, "color": '#000000', "element": [['unranged']],
+                                "complex": [[0]], "isotope": [[0]], "charge": [0]})
 
         # Set data types for the columns
-        self.range_data = self.range_data.astype({'ion': 'object',
+        self.range_data = self.range_data.astype({'name': 'str',
+                                                  'ion': 'str',
                                                   'mass': 'float64',
                                                   'mc': 'float64',
                                                   'mc_low': 'float64',

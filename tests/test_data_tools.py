@@ -25,26 +25,6 @@ def test_read_hdf5_no_grp_keys():
     assert isinstance(response, dict)
 
 
-def test_read_hdf5_through_pandas_check_returnType():
-
-    file_name = path + 'isotopeTable.h5'
-    response = data_tools.read_hdf5_through_pandas(file_name)
-    assert isinstance(response, pd.core.frame.DataFrame)
-
-
-@patch.object(data_tools.logger, "critical")
-def test_read_hdf5_through_pandas_file_not_found(mock):
-    file_name = path + 'not_existing_file.h5'
-    response = data_tools.read_hdf5_through_pandas(file_name)
-    mock.assert_called_with("[*] HDF5 File could not be found")
-
-
-def test_read_hdf5_through_pandas_check_response():
-    filename = path + 'isotopeTable.h5'
-    test_response = pd.read_hdf(filename, mode='r')
-    response = data_tools.read_hdf5_through_pandas(filename)
-    assert test_response.equals(response)
-
 
 @patch.object(data_tools.logger, "critical")
 def test_read_mat_files_file_not_found(mock):
@@ -81,5 +61,5 @@ def test_store_df_to_hdf_check_response():
     pdDataframe = pd.DataFrame(matFileResponse['None'])
     filename = path + 'unittests_dummy.h5'
     data_tools.store_df_to_hdf(filename, pdDataframe, 'data')
-    response = data_tools.read_hdf5_through_pandas(filename)
+    response = pd.read_hdf(filename, mode='r')
     assert pdDataframe.equals(response)

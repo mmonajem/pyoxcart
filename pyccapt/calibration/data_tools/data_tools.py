@@ -12,7 +12,7 @@ from pyccapt.calibration.leap_tools import leap_tools
 
 def read_hdf5(filename: "type: string - Path to hdf5(.h5) file") -> "type: dataframe":
     """
-    This function differs from read_hdf5_through_pandas as it does not assume that
+    This function differs from reading pandas dataframe as it does not assume that
     the contents of the HDF5 file as argument was created using pandas. It could have been
     created using other tools like h5py/MATLAB.
     """
@@ -166,7 +166,7 @@ def remove_invalid_data(dld_group_storage, max_tof):
     return dld_group_storage
 
 
-def save_data(data, variables, name=None, hdf=True, epos=False, pos=False, ato_6v=False, csv=False, temp=False):
+def save_data(data, variables, name=None, hdf=True, epos=False, pos=False, csv=False, temp=False):
     """
     save data in different formats
 
@@ -177,7 +177,6 @@ def save_data(data, variables, name=None, hdf=True, epos=False, pos=False, ato_6
         hdf (bool): save data as hdf5 file.
         epos (bool): save data as epos file.
         pos (bool): save data as pos file.
-        ato_6v (bool): save data as ato file.
         csv (bool): save data as csv file.
         temp (bool): save data as temporary file.
 
@@ -204,9 +203,6 @@ def save_data(data, variables, name=None, hdf=True, epos=False, pos=False, ato_6
     if pos:
         # save data in pos format
         ccapt_tools.ccapt_to_pos(data, path=variables.result_path, name=data_name + '.pos')
-    if ato_6v:
-        # save data as ato file in  ersion 6
-        ato_tools.ccapt_to_ato(data, path=variables.result_path, name=data_name + '.ato')
     if csv:
         # save data in csv format
         store_df_to_csv(data, variables.result_path + variables.result_data_name + '.csv')
@@ -238,7 +234,7 @@ def load_data(dataset_path, data_type, mode='processed'):
     elif data_type == 'pyccapt' and mode == 'raw':
         data = data_loadcrop.fetch_dataset_from_dld_grp(dataset_path)
     elif data_type == 'pyccapt' and mode == 'processed':
-        data = data_tools.read_hdf5_through_pandas(dataset_path)
+        data = pd.read_hdf(dataset_path, mode='r')
     return data
 
 
@@ -280,9 +276,6 @@ def extract_data(data, variables, flightPathLength_d, max_mc):
         variables.y = data['y (nm)'].to_numpy()
         variables.z = data['z (nm)'].to_numpy()
     print('The maximum possible time of flight is:', variables.max_tof)
-    # ion_distance = np.sqrt(flightPathLength_d**2 + (variables.dld_x_det*10)**2 + (variables.dld_y_det*10)**2)
-    # ion_distance = flightPathLength_d / ion_distance
-    # variables.dld_t = variables.dld_t * ion_distance
 
 
 def pyccapt_raw_to_processed(data):
@@ -308,8 +301,8 @@ def pyccapt_raw_to_processed(data):
     data_processed['t_c (ns)'] = np.zeros(len(data))
     data_processed['x_det (cm)'] = data['x_det (cm)'].to_numpy()
     data_processed['y_det (cm)'] = data['y_det (cm)'].to_numpy()
-    data_processed['pulse_pi'] = np.zeros(len(data))
-    data_processed['ion_pp'] = np.zeros(len(data))
+    data_processed['delta_p'] = np.zeros(len(data))
+    data_processed['multi'] = np.zeros(len(data))
     data_processed['start_counter'] = data['start_counter'].to_numpy()
 
     return data_processed

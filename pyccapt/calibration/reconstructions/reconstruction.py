@@ -209,7 +209,8 @@ def draw_qube(fig, range, col=None, row=None):
 
 def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save, make_gif=False,
                         make_evaporation_gif=False, range_sequence=[], range_mc=[], range_detx=[], range_dety=[],
-                        range_x=[], range_y=[], range_z=[], range_vol=[], ions_individually_plots=False):
+                        range_x=[], range_y=[], range_z=[], range_vol=[], ions_individually_plots=False,
+                        detailed_isotope_charge=False):
     """
     Generate a 3D plot for atom probe reconstruction data.
 
@@ -231,17 +232,17 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         range_z: Range of z-axis
         range_vol: Range of volume
         ions_individually_plots (bool): Whether to plot ions individually.
+        detailed_isotope_charge (bool): Whether to plot detailed isotope and charge information.
 
     Returns:
         None
     """
     if range_sequence or range_detx or range_dety or range_mc or range_x or range_y or range_z:
         if range_sequence:
-            if range_sequence:
-                mask_sequence = np.zeros_like(variables.dld_x_det, dtype=bool)
-                mask_sequence[range_sequence[0]:range_sequence[1]] = True
-            else:
-                mask_sequence = np.ones_like(variables.dld_x_det, dtype=bool)
+            mask_sequence = np.zeros_like(variables.dld_x_det, dtype=bool)
+            mask_sequence[range_sequence[0]:range_sequence[1]] = True
+        else:
+            mask_sequence = np.ones_like(variables.dld_x_det, dtype=bool)
         if range_detx and range_dety:
             mask_det_x = (variables.dld_x_det < range_detx[1]) & (variables.dld_x_det > range_detx[0])
             mask_det_y = (variables.dld_y_det < range_dety[1]) & (variables.dld_y_det > range_dety[0])
@@ -380,24 +381,27 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     if make_evaporation_gif:
         num_events = len(variables.dld_t)
         figures = []
-        for k in range(0, 1, 20):
-            rotated_fig = go.Figure(fig)
+        for k in range(0, num_events, 100_000):
+            rotated_fig = go.Figure()
+            rotated_fig = draw_qube(rotated_fig, range_cube)
             rotated_fig.update_layout(showlegend=False)
-            xx = variables.x[k*num_events:(k+(1/20))*num_events]
-            yy = variables.y[k*num_events:(k+(1/20))*num_events]
-            zz = variables.z[k*num_events:(k+(1/20))*num_events]
-            mc_c = variables.mc[k*num_events:(k+(1/20))*num_events]
-            dld_t = variables.dld_t[k*num_events:(k+(1/20))*num_events]
+
+            if k + 100_000 > num_events:
+                q = num_events - 1
+            else:
+                q = k + 100_000
+            mask_evap = (variables.dld_t > variables.dld_t[k]) & (variables.dld_t < variables.dld_t[q])
+
             for index, elemen in enumerate(ion):
-                mask = (mc_c > mc_low[index]) & (mc_c < mc_up[index])
-                mask = mask & mask_f
+                mask = (variables.mc > mc_low[index]) & (variables.mc < mc_up[index])
+                mask = mask & mask_f & mask_evap
                 size = int(len(mask[mask == True]) * float(element_percentage[index]))
                 # Find indices where the original mask is True
                 true_indices = np.where(mask)[0]
                 # Randomly choose 100 indices from the true indices
                 random_true_indices = np.random.choice(true_indices, size=size, replace=False)
                 # Create a new mask with the same length as the original, initialized with False
-                new_mask = np.full(len(dld_t), False)
+                new_mask = np.full(len(variables.dld_t), False)
                 # Set the selected indices to True in the new mask
                 new_mask[random_true_indices] = True
                 # Apply the new mask to the original mask
@@ -405,9 +409,9 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
 
                 rotated_fig.add_trace(
                     go.Scatter3d(
-                        x=xx[mask],
-                        y=yy[mask],
-                        z=zz[mask],
+                        x=variables.x[mask],
+                        y=variables.y[mask],
+                        z=variables.z[mask],
                         mode='markers',
                         name=ion[index],
                         showlegend=True,
@@ -418,8 +422,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
                         )
                     )
                 )
-
-            fig = draw_qube(rotated_fig, range_cube)
+            print(' Plotted the ions up to the event:', q)
             figures.append(rotated_fig)
 
         images = []
@@ -460,8 +463,9 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     # Show the plot in the Jupyter cell output
     variables.plotly_3d_reconstruction = go.FigureWidget(fig)
 
-    plotly.offline.init_notebook_mode()
-    fig.show()
+    fig.show(config=config)
+    pio.renderers.default = 'browser'
+    fig.show(config=config)
 
     if save:
         try:
@@ -739,7 +743,7 @@ def projection(variables, element_percentage, range_sequence=[], range_mc=[], ra
         else:
             mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
         if range_mc:
-            mask_mc = (variables.mc_uc < range_mc[1]) & (variables.mc_uc > range_mc[0])
+            mask_mc = (variables.mc < range_mc[1]) & (variables.mc > range_mc[0])
         else:
             mask_mc = np.ones(len(variables.mc), dtype=bool)
         if range_x and range_y and range_z:
@@ -776,7 +780,7 @@ def projection(variables, element_percentage, range_sequence=[], range_mc=[], ra
 
 
     for index, elemen in enumerate(ions):
-        mask_spacial = (variables.mc_uc > mc_low[index]) & (variables.mc_uc < mc_up[index])
+        mask_spacial = (variables.mc > mc_low[index]) & (variables.mc < mc_up[index])
         mask = mask & mask_spacial
         size = int(len(mask[mask == True]) * float(element_percentage[index]))
         # Find indices where the original mask is True
@@ -879,8 +883,7 @@ def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range
         print('The number of data 3d:', len(mask_3d[mask_3d == True]))
         print('The number of data after cropping:', len(mask[mask == True]))
     else:
-        mask = np.ones(len(variables.mc_uc), dtype=bool)
-
+        mask = np.ones(len(variables.mc), dtype=bool)
 
     ions = variables.range_data['ion'].tolist()
     colors = variables.range_data['color'].tolist()
@@ -893,25 +896,26 @@ def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range
         print('element_percentage should be a list')
 
     for index, elemen in enumerate(ions):
-        mask_spacial = (variables.mc_uc > mc_low[index]) & (variables.mc_uc < mc_up[index])
-        mask = mask & mask_spacial
-        size = int(len(mask[mask == True]) * float(element_percentage[index]))
+        mask_spacial = (variables.mc > mc_low[index]) & (variables.mc < mc_up[index])
+        mask_s = mask & mask_spacial
+        size = int(len(mask_s[mask_s == True]) * float(element_percentage[index]))
         # Find indices where the original mask is True
-        true_indices = np.where(mask)[0]
+        true_indices = np.where(mask_s)[0]
         # Randomly choose 100 indices from the true indices
         random_true_indices = np.random.choice(true_indices, size=size, replace=False)
         # Create a new mask with the same length as the original, initialized with False
-        new_mask = np.full(len(variables.dld_t), False)
+        new_mask = np.full(len(variables.mc), False)
+
         # Set the selected indices to True in the new mask
         new_mask[random_true_indices] = True
         # Apply the new mask to the original mask
-        mask = mask & new_mask
+        new_mask = mask_s & new_mask
         if ions[index] == 'unranged':
             name_element = 'unranged'
         else:
             name_element = '%s' % ions[index]
 
-        ax.scatter(variables.dld_x_det[mask] * 10, variables.dld_y_det[mask] * 10, s=2, label=name_element,
+        ax.scatter(variables.dld_x_det[new_mask] * 10, variables.dld_y_det[new_mask] * 10, s=2, label=name_element,
                    color=colors[index], alpha=0.1)
 
     ax.set_xlabel("det_x (cm)", color="red", fontsize=10)
@@ -1067,7 +1071,7 @@ def detector_animation(variables, points_per_frame, ranged, selected_area_specia
                          (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
         mask_spacial = mask_specially & mask_temporally
     else:
-        mask_spacial = np.ones(len(variables.dld_t), dtype=bool)
+        mask_spacial = np.ones(len(variables.mc), dtype=bool)
 
     if ranged == True:
         ions = variables.range_data['ion'].tolist()
@@ -1097,7 +1101,7 @@ def detector_animation(variables, points_per_frame, ranged, selected_area_specia
         ax.clear()
         start_idx = frame * points_per_frame
         end_idx = (frame + 1) * points_per_frame
-        mc = variables.mc_uc[start_idx:end_idx]
+        mc = variables.mc[start_idx:end_idx]
         for index, elemen in enumerate(ions):
             mask = (mc > mc_low[index]) & (mc < mc_up[index])
             mask = mask & mask_spacial[start_idx:end_idx]

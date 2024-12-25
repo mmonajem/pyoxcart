@@ -22,8 +22,8 @@ This HDF5 file in PyCCAPT contains data with the following columns:
 - `t (ns)`: (n,) (ns, float64) Uncalibrated time-of-flight in nanosecond.
 - `x_det (cm)`: (n,) (cm, float64) Detector x hit position of ions.
 - `y_det (cm)`: (n,) (cm, float64) Detector y hit position of ions.
-- `pulse_pi`: (n,) (N/A, uint32) Number of pulse since the last detected event pulse.
-- `ion_pp`: (n,) (N/A, uint32) Detected ions for each pulse.
+- `delta_p`: (n,) (N/A, uint32) Number of pulse since the last detected event pulse.
+- `multi`: (n,) (N/A, uint32) Detected ions for each pulse.
 
 There is also possibility to convert the PyCCAPT HDF5 file data to EPOS, POS, ATO, and CSV file. You can find the
 example code in the tutorial section. A screenshot of the PyCCAPT HDF5 file is shown below.

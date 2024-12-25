@@ -48,11 +48,11 @@ def ccapt_to_epos(data, path=None, name=None):
     """
     dd = data[
         ['x (nm)', 'y (nm)', 'z (nm)', 'mc (Da)', 't (ns)', 'high_voltage (V)', 'pulse', 'x_det (cm)',
-         'y_det (cm)', 'pulse_pi', 'ion_pp']]
+         'y_det (cm)', 'delta_p', 'multi']]
 
     dd = dd.astype(np.single)
-    dd = dd.astype({'pulse_pi': np.uintc})
-    dd = dd.astype({'ion_pp': np.uintc})
+    dd = dd.astype({'delta_p': np.uintc})
+    dd = dd.astype({'multi': np.uintc})
 
     records = dd.to_records(index=False)
     list_records = list(records)
@@ -89,8 +89,8 @@ def pos_to_ccapt(file_path):
                           't_c (ns)': np.zeros(length),
                           'x_det (cm)': np.zeros(length),
                           'y_det (cm)': np.zeros(length),
-                          'pulse_pi': np.zeros(length, dtype=int),
-                          'ion_pp': np.zeros(length, dtype=int),
+                          'delta_p': np.zeros(length, dtype=int),
+                          'multi': np.zeros(length, dtype=int),
                           'start_counter': np.zeros(length, dtype=int),
                           })
     return ccapt
@@ -120,8 +120,8 @@ def epos_to_ccapt(file_path):
                           't_c (ns)': np.zeros(length),
                           'x_det (cm)': epos['det_x (mm)'].to_numpy() / 10,
                           'y_det (cm)': epos['det_y (mm)'].to_numpy() / 10,
-                          'pulse_pi': epos['pslep'].to_numpy(),
-                          'ion_pp': epos['ipp'].to_numpy(),
+                          'delta_p': epos['pslep'].to_numpy(),
+                          'multi': epos['ipp'].to_numpy(),
                           'start_counter': np.zeros(length, dtype=int),
                           })
     return ccapt
@@ -153,8 +153,8 @@ def apt_to_ccapt(file_path):
         'Epos ToF': 't (ns)',
         'det_x': 'x_det (cm)',
         'det_y': 'y_det (cm)',
-        'Delta Pulse': 'pulse_pi',
-        'Multiplicity': 'ion_pp',
+        'Delta Pulse': 'delta_p',
+        'Multiplicity': 'multi',
     }
 
     # Create a dictionary with zero-filled arrays for missing keys

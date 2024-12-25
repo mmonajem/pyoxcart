@@ -8,7 +8,6 @@ from warnings import warn
 import matplotlib.colors as cols
 import numpy as np
 import pandas as pd
-from ase.io.x3d import element
 from vispy import app, scene
 
 
@@ -109,14 +108,6 @@ def read_rrng(file_path):
             else:
                 rrngs.append(m.groups()[2:])
 
-    # Convert ions list to a DataFrame with columns 'number' and 'name', and set 'number' as the index
-    # ions = pd.DataFrame(ions, columns=['number', 'name'])
-    # ions.set_index('number', inplace=True)
-
-    # Convert rrngs list to a DataFrame with columns 'number', 'lower', 'upper', 'vol', 'comp', and 'colour', and set 'number' as the index
-    # rrngs = pd.DataFrame(rrngs, columns=['number', 'lower', 'upper', 'vol', 'comp', 'colour'])
-    # rrngs.set_index('number', inplace=True)
-
     mc_low = [float(i[1].replace(',', '.')) for i in rrngs]
     mc_up = [float(i[2].replace(',', '.')) for i in rrngs]
     mc = [(float(i[1].replace(',', '.')) + float(i[2].replace(',', '.'))) / 2 for i in rrngs]
@@ -168,11 +159,11 @@ def read_rrng(file_path):
         isotope.append(isotope_s)
         ion_list.append(formula)
 
-    print(len(mc_low), len(mc_up), len(mc), len(colors), len(isotope), len(elements), len(complex), len(charge))
+    name = ".".join(f"{element}{count}" for element, count in zip(element_list, complex))
     # Return the pyccapt_ranges DataFrame
-    range_data = pd.DataFrame({'ion': ion_list, 'mass': mc, 'mc': mc, 'mc_low': mc_low,
+    range_data = pd.DataFrame({'name': name, 'mass': mc, 'mc': mc, 'mc_low': mc_low,
                                     'mc_up': mc_up, 'color': colors, 'element': element_list,
-                                    'complex': complex, 'isotope': isotope, 'charge': charge})
+                                    'complex': complex, 'isotope': isotope, 'charge': charge, 'ion': ion_list})
     return range_data
 
 

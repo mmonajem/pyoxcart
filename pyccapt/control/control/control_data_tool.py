@@ -194,8 +194,8 @@ def load_and_copy_chunks_to_hdf(path, hdf5_file_path, chunk_id):
 
 
 if __name__ == '__main__':
-    name = '2164_Aug-15-2024_11-10_NiC2_Al_N_2'
-    path = 'D:/pyccapt/pyccapt/data/%s/' % name
+    name = '2263_Nov-22-2024_11-01_CuC1_AlTestDetector'
+    path = 'C:/Users/mehrp/Desktop//%s/' % name
     name = '%s.h5' % name
     # copy_npy_to_hdf(path, name)
 

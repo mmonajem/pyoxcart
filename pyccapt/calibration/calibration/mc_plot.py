@@ -924,9 +924,9 @@ class AptHistPlotter:
 
 def hist_plot(variables, bin_size, log, target, normalize, prominence, distance, percent, selector, figname, lim,
               peaks_find=True, peaks_find_plot=False, plot_ranged_peak=False, plot_ranged_colors=False, mrp_all=False,
-              background=None, ranging_mode=False, range_sequence=[], range_mc=[], range_detx=[], range_dety=[],
-              range_x=[], range_y=[], range_z=[], range_vol=[], save_fig=True, print_info=True, legend_mode='long',
-              draw_calib_rect=False, figure_size=(9, 5), plot_show=True, fast_calibration=False):
+              background=None, grid=False, ranging_mode=False, range_sequence=[], range_mc=[], range_detx=[],
+              range_dety=[], range_x=[], range_y=[], range_z=[], range_vol=[], save_fig=True, print_info=True,
+              legend_mode='long', draw_calib_rect=False, figure_size=(9, 5), plot_show=True, fast_calibration=False):
     """
     Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
     Args:
@@ -944,6 +944,7 @@ def hist_plot(variables, bin_size, log, target, normalize, prominence, distance,
         peaks_find_plot (bool): Plot the peaks.
         mrp_all (bool): Calculate the MRP for 0.1 and 0.01 and 0.5
         background (str): Background mode.
+        grid (bool): Show the grid.
         ranging_mode (bool): Ranging mode.
         legend_mode (str): long or short legend info
         print_info (bool): Print the information about the peaks.
@@ -1039,7 +1040,7 @@ def hist_plot(variables, bin_size, log, target, normalize, prominence, distance,
 
     mc_hist = AptHistPlotter(hist[hist < lim], variables)
     y, x = mc_hist.plot_histogram(bin_width=bin_size, normalize=normalize, label=label, steps=steps, log=log,
-                                  fig_size=figure_size, plot_show=plot_show)
+                                    grid=grid, fig_size=figure_size, plot_show=plot_show)
 
     # copy the mc_hist to variables to use the methods of that class in other functions
     variables.AptHistPlotter = mc_hist

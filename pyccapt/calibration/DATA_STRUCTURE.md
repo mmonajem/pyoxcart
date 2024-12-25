@@ -36,7 +36,8 @@ example code in the tutorial section. A screenshot of the PyCCAPT HDF5 file is s
 
 The range file contains the range of the mass-to-charge ratio. The range file is a HDF5 file with the following:
 
-- `ion`: (n,) (N/A, string) Ions name in latex format.
+- `name`: (n,) (N/A, string) Ion name in simple format.
+- `ion`: (n,) (N/A, string) Ion name in latex format.delta_p
 - `mass`: (n,) (Da, float64) The mass-to-charge ratio of the element base on the elements weight and complexity.
 - `mc`: (n,) (Da, float64) Peak location of mass-to-charge ratio in the dataset.
 - `mc_low`: (n,) (Da, float64) The lower bound of the mass-to-charge ratio in the dataset for the peak.

@@ -283,6 +283,8 @@ def call_ion_selection(variables):
 		print('peak idc:', variables.peaks_index, 'Peak location:', peak_val.value)
 		variables.AptHistPlotter.zoom_to_x_range(x_min=peak_val.value - 5, x_max=peak_val.value + 5, reset=False)
 		variables.AptHistPlotter.change_peak_color(peak_val.value, dx=0.2)
+		# reset the range data backup
+		variables.range_data_backup = pd.DataFrame()
 
 	next_button.on_click(lambda b: next_peak(b, variables))
 
@@ -295,6 +297,8 @@ def call_ion_selection(variables):
 		variables.AptHistPlotter.zoom_to_x_range(x_min=peak_val.value - 5, x_max=peak_val.value + 5, reset=False)
 		variables.AptHistPlotter.change_peak_color(peak_val.value, dx=0.2)
 		variables.AptHistPlotter.line_manager.remove_all_lines()
+		# reset the range data backup
+		variables.range_data_backup = pd.DataFrame()
 
 	prev_button.on_click(lambda b: prev_peak(b, variables))
 

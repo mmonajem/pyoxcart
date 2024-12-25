@@ -1,5 +1,6 @@
 import ast
 import json
+import re
 
 import ipywidgets as widgets
 import matplotlib.colors as mcolors
@@ -10,6 +11,7 @@ from ipywidgets import Output
 from pyccapt.calibration.calibration import mc_plot, ion_selection
 from pyccapt.calibration.data_tools import data_loadcrop
 from pyccapt.calibration.reconstructions import reconstruction, sdm, rdf
+from pyccapt.calibration.reconstructions import iso_surface
 
 # Define a layout for labels to make them a fixed width
 label_layout = widgets.Layout(width='200px')
@@ -18,6 +20,7 @@ label_layout = widgets.Layout(width='200px')
 def call_visualization(variables):
     plot_mc_button = widgets.Button(description='plot mc')
     plot_3d_button = widgets.Button(description='plot 3D')
+    plot_3d_button_iso = widgets.Button(description='plot 3D iso surface')
     plot_heatmap_button = widgets.Button(description='plot heatmap')
     plot_projection_button = widgets.Button(description='plot projection')
     clear_button = widgets.Button(description='Clear plots')
@@ -66,7 +69,7 @@ def call_visualization(variables):
     figure_mc_size_x_mc = widgets.FloatText(value=9.0)
     figure_mc_size_y_mc = widgets.FloatText(value=5.0)
     save_mc = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
-
+    grid_mc = widgets.Dropdown(options=[('False', False), ('True', True)])
     range_sequence_mc = widgets.Textarea(value='[0,0]')
     range_detx_mc = widgets.Textarea(value='[0,0]')
     range_dety_mc = widgets.Textarea(value='[0,0]')
@@ -117,7 +120,7 @@ def call_visualization(variables):
                               figname=figname_mc.value, lim=lim_mc_pm.value, peaks_find=peaks_find.value,
                               peaks_find_plot=peak_find_plot.value, plot_ranged_colors=plot_ranged_colors.value,
                               plot_ranged_peak=plot_ranged_peak.value, mrp_all=mrp_all.value,
-                              background=background_mc.value,
+                              background=background_mc.value, grid=grid_mc.value,
                               range_sequence=range_sequence, range_mc=range_mc, range_detx=range_detx,
                               range_dety=range_dety, range_x=range_x, range_y=range_y, range_z=range_z,
                               range_vol=range_vol, print_info=print_info.value, figure_size=figure_size,
@@ -181,10 +184,12 @@ def call_visualization(variables):
             except json.JSONDecodeError:
                 # Handle invalid input
                 print(f"Invalid range input")
-            data_loadcrop.plot_crop_fdm(data['x_det (cm)'].to_numpy(), data['y_det (cm)'].to_numpy(), bins, frac_fdm_widget.value, axis_mode_fdm.value, figure_size,
+            data_loadcrop.plot_crop_fdm(data['x_det (cm)'].to_numpy(), data['y_det (cm)'].to_numpy(), bins,
+                                        frac_fdm_widget.value, axis_mode_fdm.value, figure_size,
                                         variables, range_sequence,
                                         range_mc, range_detx, range_dety, range_x, range_y, range_z, range_vol,
-                                        False, False, save_fdm_widget.value, figname_fdm_widget.value)
+                                        False, False, 'circle',
+                                        save_fdm_widget.value, figname_fdm_widget.value)
 
         # Enable the button when the code is finished
         plot_fdm_button.disabled = False
@@ -303,7 +308,7 @@ def call_visualization(variables):
 
     #############
     element_percentage_ph = widgets.Textarea(value=element_percentage)
-    figname_heatmap = widgets.Text(value='heatmap')
+    figname_heatmap = widgets.Text(value='hitmap')
     save_heatmap = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
     figure_mc_size_x_heatmap = widgets.FloatText(value=5.0)
     figure_mc_size_y_heatmap = widgets.FloatText(value=5.0)
@@ -634,6 +639,83 @@ def call_visualization(variables):
         plot_rdf_button.disabled = False
 
     #############
+    figname_3d_iso = widgets.Text(value='3d_plot_iso')
+    rotary_fig_save_p3_iso = widgets.Dropdown(options=[('False', False), ('True', True)])
+    element_percentage_p3_iso = widgets.Textarea(value=element_percentage)
+    opacity_iso = widgets.FloatText(value=0.5, min=0, max=1, step=0.1)
+    save_3d_iso = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
+    ions_individually_plots_iso = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
+    make_gif_p3_iso = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
+    plot_3d_button_iso.on_click(lambda b: plot_3d_iso(b, variables, out))
+    isosurface_dic_p3_iso = widgets.Textarea(value="{Al: [3,3,3]}")
+    detailed_isotope_charge_3d_iso = widgets.Dropdown(options=[('False', False), ('True', True)], value=False)
+    range_sequence_3d_iso = widgets.Textarea(value='[0,0]')
+    range_detx_3d_iso = widgets.Textarea(value='[0,0]')
+    range_dety_3d_iso = widgets.Textarea(value='[0,0]')
+    range_mc_3d_iso = widgets.Textarea(value='[0,0]')
+    range_x_3d_iso = widgets.Textarea(value='[0,0]')
+    range_y_3d_iso = widgets.Textarea(value='[0,0]')
+    range_z_3d_iso = widgets.Textarea(value='[0,0]')
+    range_vol_3d_iso = widgets.Textarea(value='[0,0]')
+
+    def plot_3d_iso(b, variables, out):
+        plot_3d_button_iso.disabled = True
+        with out:
+            try:
+                # Use json.loads to convert the entered string to a list
+                range_sequence = json.loads(range_sequence_3d_iso.value)
+                range_mc = json.loads(range_mc_3d_iso.value)
+                range_detx = json.loads(range_detx_3d_iso.value)
+                range_dety = json.loads(range_dety_3d_iso.value)
+                range_x = json.loads(range_x_3d_iso.value)
+                range_y = json.loads(range_y_3d_iso.value)
+                range_z = json.loads(range_z_3d_iso.value)
+                range_vol = json.loads(range_vol_3d_iso.value)
+                if range_sequence == [0, 0]:
+                    range_sequence = []
+                if range_mc == [0, 0]:
+                    range_mc = []
+                if range_detx == [0, 0] or range_dety == [0, 0]:
+                    range_detx = []
+                    range_dety = []
+
+                if range_x == [0, 0] or range_y == [] or range_z == [0, 0]:
+                    range_x = []
+                    range_y = []
+                    range_z = []
+                if range_vol == [0, 0]:
+                    range_vol = []
+            except json.JSONDecodeError:
+                # Handle invalid input
+                print(f"Invalid range input")
+            # Use regular expressions to add quotes around keys
+            formatted_string = re.sub(r'(\w+):', r'"\1":', isosurface_dic_p3_iso.value)
+            # Convert to dictionary
+            isosurface_dic_p3_iso_value = ast.literal_eval(formatted_string)
+
+            element_percentage_dic = ast.literal_eval(element_percentage_p3_iso.value)
+            # Iterate through the 'element' column
+            element_percentage_list_iso = []
+            for row_elements in variables.range_data['element']:
+                max_value = 0.1  # Default value if no matching element is found
+                for element in row_elements:
+                    if element in element_percentage_dic:
+                        max_value = element_percentage_dic[element]
+                element_percentage_list_iso.append(max_value)
+
+            iso_surface.reconstruction_plot(variables, element_percentage_list_iso, opacity_iso.value,
+                                               rotary_fig_save_p3_iso.value, figname_3d_iso.value,
+                                               save_3d_iso.value, make_gif_p3_iso.value,
+                                               range_sequence,
+                                               range_mc, range_detx, range_dety, range_x, range_y, range_z, range_vol,
+                                               ions_individually_plots_iso.value,
+                                               max_num_ions=None, min_num_ions=None,
+                                               isosurface_dic=isosurface_dic_p3_iso_value,
+                                               detailed_isotope_charge=detailed_isotope_charge_3d_iso.value)
+
+        plot_3d_button_iso.disabled = False
+
+    #############
     row_index = widgets.IntText(value=0, description='index row:')
     color_picker = widgets.ColorPicker(description='Select a color:')
     change_color.on_click(lambda b: change_color_m(b, variables, out))
@@ -672,6 +754,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value="Peak prominance:", layout=label_layout), prominence]),
         widgets.HBox([widgets.Label(value="Peak distance:", layout=label_layout), distance]),
         widgets.HBox([widgets.Label(value="Background:", layout=label_layout), background_mc]),
+        widgets.HBox([widgets.Label(value="Grid:", layout=label_layout), grid_mc]),
         widgets.HBox([widgets.Label(value="Fig name:", layout=label_layout), figname_mc]),
         widgets.HBox([widgets.Label(value="Save fig:", layout=label_layout), save_mc]),
         widgets.HBox([widgets.Label(value="Fig size:", layout=label_layout),
@@ -834,29 +917,53 @@ def call_visualization(variables):
     ])
 
     tab10 = widgets.VBox([
-        widgets.HBox([clear_button]),
+        widgets.HBox([widgets.Label(value='Element percentage:', layout=label_layout), element_percentage_p3_iso]),
+        widgets.HBox([widgets.Label(value='Opacity:', layout=label_layout), opacity_iso]),
+        widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_3d_iso]),
+        widgets.HBox([widgets.Label(value='Rotary save:', layout=label_layout), rotary_fig_save_p3_iso]),
+        widgets.HBox([widgets.Label(value='Save:', layout=label_layout), save_3d_iso]),
+        widgets.HBox([widgets.Label(value='Ions individually plots:', layout=label_layout), ions_individually_plots_iso]),
+        widgets.HBox([widgets.Label(value='Make GIF:', layout=label_layout), make_gif_p3_iso]),
+        widgets.HBox([widgets.Label(value='Isosurface dic:', layout=label_layout), isosurface_dic_p3_iso]),
+        widgets.HBox([widgets.Label(value='Detailed isotope charge:', layout=label_layout),
+                        detailed_isotope_charge_3d_iso]),
+        widgets.HBox([widgets.Label(value="sequence range:", layout=label_layout), range_sequence_3d_iso]),
+        widgets.HBox([widgets.Label(value='range mc:', layout=label_layout), range_mc_3d_iso]),
+        widgets.HBox([widgets.Label(value='range detx:', layout=label_layout), range_detx_3d_iso]),
+        widgets.HBox([widgets.Label(value='range dety:', layout=label_layout), range_dety_3d_iso]),
+        widgets.HBox([widgets.Label(value='range x:', layout=label_layout), range_x_3d_iso]),
+        widgets.HBox([widgets.Label(value='range y:', layout=label_layout), range_y_3d_iso]),
+        widgets.HBox([widgets.Label(value='range z:', layout=label_layout), range_z_3d_iso]),
+        widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_3d_iso]),
+        widgets.HBox([plot_3d_button_iso, clear_button]),
     ])
 
     tab11 = widgets.VBox([
+        widgets.HBox([clear_button]),
+    ])
+
+    tab12 = widgets.VBox([
         widgets.HBox([widgets.Label(value='Index row:', layout=label_layout), row_index]),
         widgets.HBox([widgets.Label(value='Color:', layout=label_layout), color_picker]),
         widgets.VBox([show_color, change_color, clear_button]),
     ])
 
-    tab = widgets.Tab(children=[tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11])
+    tab = widgets.Tab(children=[tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11,
+                                tab12])
     tab.set_title(0, 'mc')
     tab.set_title(1, 'FDM')
     tab.set_title(2, '3D')
     tab.set_title(3, 'Experiment history')
-    tab.set_title(4, 'Heatmap')
-    tab.set_title(5, 'Animated heatmap')
+    tab.set_title(4, 'Hitmap')
+    tab.set_title(5, 'Animated hitmap')
     tab.set_title(6, 'Projection')
 
-    tab.set_title(7, '2D reconstruction histogram')
+    tab.set_title(7, 'Disparity map')
     tab.set_title(8, 'SDM')
     tab.set_title(9, 'RDF')
-    tab.set_title(10, 'Clustering')
-    tab.set_title(11, 'Change Color')
+    tab.set_title(10, 'Iso surface')
+    tab.set_title(11, 'Clustering')
+    tab.set_title(12, 'Change Color')
 
     out = Output()
 

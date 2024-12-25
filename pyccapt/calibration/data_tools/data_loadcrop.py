@@ -249,7 +249,7 @@ def plot_crop_experiment_history(data: pd.DataFrame, variables, max_tof, frac=1.
 
 def plot_crop_fdm(x, y, bins=(256, 256), frac=1.0, axis_mode='normal', figure_size=(5, 4), variables=None,
                   range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[], range_z=[],
-                  range_vol=[], data_crop=False, draw_circle=False, mode_selector='circle', save=False, figname=''):
+                  range_vol=[], data_crop=False, draw_circle=False, mode_selector='circle', save=False, figname='FDM'):
     """
     Plot and crop the FDM with the option to select a region of interest.
 
@@ -527,7 +527,7 @@ def calculate_ppi_and_ipp(data, max_start_counter):
         max_start_counter (int): The maximum start counter value.
 
     Returns:
-        tuple: A tuple containing two numpy arrays: pulse_pi and ion_pp.
+        tuple: A tuple containing two numpy arrays: delta_p and multi.
 
     Raises:
         IndexError: If the length of counter is less than 1.
@@ -535,8 +535,8 @@ def calculate_ppi_and_ipp(data, max_start_counter):
     """
 
     counter = data['start_counter'].to_numpy()
-    pulse_pi = np.zeros(len(counter))
-    ion_pp = np.zeros(len(counter))
+    delta_p = np.zeros(len(counter))
+    multi = np.zeros(len(counter))
 
     multi_hit_count = 1
 
@@ -545,7 +545,7 @@ def calculate_ppi_and_ipp(data, max_start_counter):
 
     for i, current_counter in enumerate(counter):
         if i == 0:
-            pulse_pi[i] = 0
+            delta_p[i] = 0
             previous_counter = current_counter
         else:
             sc = current_counter - previous_counter
@@ -554,24 +554,24 @@ def calculate_ppi_and_ipp(data, max_start_counter):
                 sc_b = current_counter
                 sc = sc_a + sc_b
 
-            pulse_pi[i] = sc
+            delta_p[i] = sc
 
             if current_counter == previous_counter:
                 multi_hit_count += 1
             else:
                 for j in range(multi_hit_count):
                     if i + j <= len(counter):
-                        ion_pp[i - j - 1] = multi_hit_count
+                        multi[i - j - 1] = multi_hit_count
 
                 multi_hit_count = 1
                 previous_counter = current_counter
         # for the last event
         if i == len(counter) - 1:
-            ion_pp[i] = multi_hit_count
+            multi[i] = multi_hit_count
 
         # Print progress at each 20% interval
         if i % twenty_percent == 0:
             progress_percent = int((i / total_iterations) * 100)
             print(f"Progress: {progress_percent}% complete")
 
-    return pulse_pi, ion_pp
+    return delta_p, multi
