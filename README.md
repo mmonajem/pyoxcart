@@ -54,11 +54,13 @@ You can see some of the features of the calibration module in the following imag
   <img width = "50%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/detector.gif">
 </div>
 
-![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/mc.png)
+<div align="center">
+  <img width = "50%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/mc.png">
+</div>
 
 Html link below can be used to show a 3d reconstruction of Nimonic 90 sample:
 
-![3D reconstruction](https://rawcdn.githack.com/mmonajem/pyccapt/52835bc47735ef12bffcf7e18ce90b556b07d12f/pyccapt/files/readme_images/3d_o.html)
+[3D reconstruction](https://rawcdn.githack.com/mmonajem/pyccapt/52835bc47735ef12bffcf7e18ce90b556b07d12f/pyccapt/files/readme_images/3d_o.html)
 
 <div align="center">
   <img width = "50%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/roto.gif">
