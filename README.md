@@ -21,7 +21,7 @@ analysis.
 
 ----------
 
-# Presentation
+# Overview
 
 PyCCAPT was initially developed and rigorously tested on the OXCART atom probe, an in-house atom probe system situated
 within the Department of Materials Science & Engineering at the University of Erlangen-Nürnberg. Distinguished by its
@@ -32,16 +32,24 @@ capabilities to effectively manage diverse atom probe systems.
 
 ![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/oxcart.jpg)
 
-The package is designed with modularity in mind, making it highly adaptable to a diverse array of instruments. This
+The package is designed with modularity in mind, making it highly adaptable to new instruments. This
 adaptability extends to instruments like Pfeifer gauges, Fug power supplies, and Siglent signal generators. Notably, the
 PyCCAPT package has already demonstrated its proficiency in collecting data from Surface Concept and ReoenDek TDC
-systems, showcasing its versatility across various setups and applications.
+systems.
 
 The PyCCAPT package forms the foundation of a fully FAIR atom probe data collection and processing chain. This
 repository includes the graphical user interface (GUI) and control program, which enable experiment control,
 visualization, and data acquisition. The following images provide an overview of the user interface:
 
 ![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/advance_gui.png)
+
+The calibration module is another component of the PyCCAPT, providing essential tools for data calibration and
+interpretation. This module includes functionalities such as t<sub>0</sub> and flight path calculation, region of
+interest (ROI) selection, voltage and bowl calibration, and 3D reconstruction techniques. 
+
+![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/mc.png)
+![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/detecor.png)
+<iframe src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/gt_3d_o.html" width="100%" height="500px"></iframe>
 
  ---------------------
 
@@ -135,7 +143,7 @@ on [documentation](https://pyccapt.readthedocs.io/en/latest/configuration.html).
 For calibration, review the [tutorial](https://pyccapt.readthedocs.io/en/latest/tutorials.html) to understand package
 features.
 
-To test the code on google colab, you can use the following links:
+To test the code on Google colab, you can use the following links:
 [data processing](https://colab.research.google.com/github/mmonajem/pyccapt/blob/develop/pyccapt/calibration/tutorials/colab/data_processing.ipynb) and 
 [data visualization](https://colab.research.google.com/github/mmonajem/pyccapt/blob/develop/pyccapt/calibration/tutorials/colab/visualization.ipynb)
 
@@ -160,7 +168,7 @@ link also contain the range file (HDF5) that is calculated by the calibration mo
 # Bug reports
 
 Report bugs, issues, ask for help, or provide feedback on
-the [github section](https://github.com/mmonajem/pyccapt/issues).
+the [Github section](https://github.com/mmonajem/pyccapt/issues).
 
 Qestions/comments:
   - Mehrpad Monajem, mehrpad.monajem@fau.de
