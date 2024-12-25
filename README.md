@@ -52,7 +52,7 @@ You can see some of the features of the calibration module in the following imag
 The FDM and detecotor hitmap as Gif images for an Aluminium sample:
 
 <div align="center">
-  <img width = "37%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/fdm.png">
+  <img width = "36%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/fdm.png">
   <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/detector.gif">
 </div>
 
