@@ -50,7 +50,7 @@ interest (ROI) selection, voltage and bowl calibration, and 3D reconstruction te
 You can see some of the features of the calibration module in the following images:
 
 <div align="center">
-  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/fdm.png">
+  <img width = "40%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/fdm.png">
   <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/detector.gif">
 </div>
 
@@ -63,8 +63,8 @@ Html link below can be used to show a 3d reconstruction of Nimonic 90 sample:
 [3D reconstruction](https://rawcdn.githack.com/mmonajem/pyccapt/52835bc47735ef12bffcf7e18ce90b556b07d12f/pyccapt/files/readme_images/3d_o.html)
 
 <div align="center">
-  <img width = "50%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/roto.gif">
-<img width = "50%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/iso.gif">
+  <img width = "40%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/roto.gif">
+<img width = "40%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/iso.gif">
 </div>
 
 
