@@ -47,20 +47,25 @@ The calibration module is another component of the PyCCAPT, providing essential 
 interpretation. This module includes functionalities such as t<sub>0</sub> and flight path calculation, region of
 interest (ROI) selection, voltage and bowl calibration, and 3D reconstruction techniques. 
 
-You can see some of the features of the calibration module in the following images:
+You can see some of the features of the calibration module in the following images.
+
+The FDM and detecotor hitmap as Gif images for an Aluminium sample:
 
 <div align="center">
-  <img width = "38%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/fdm.png">
+  <img width = "37%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/fdm.png">
   <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/detector.gif">
 </div>
+
+A ranged mass spectrum for a Nimonic® 90 sample:
 
 <div align="center">
   <img width = "90%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/mc.png">
 </div>
 
-Html link below can be used to show a 3d reconstruction of Nimonic 90 sample:
 
-[3D reconstruction](https://rawcdn.githack.com/mmonajem/pyccapt/52835bc47735ef12bffcf7e18ce90b556b07d12f/pyccapt/files/readme_images/3d_o.html)
+Html link below can be used to show a 3d reconstruction of Nimonic® 90 sample: [3D reconstruction](https://rawcdn.githack.com/mmonajem/pyccapt/52835bc47735ef12bffcf7e18ce90b556b07d12f/pyccapt/files/readme_images/3d_o.html)
+
+The 3d reconstruction of Nimonic® 90 and precipitates can be seen in the following Gifs:
 
 <div align="center">
   <img width = "40%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/roto.gif">

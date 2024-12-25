@@ -649,6 +649,7 @@ def call_visualization(variables):
     plot_3d_button_iso.on_click(lambda b: plot_3d_iso(b, variables, out))
     isosurface_dic_p3_iso = widgets.Textarea(value="{Al: [3,3,3]}")
     detailed_isotope_charge_3d_iso = widgets.Dropdown(options=[('False', False), ('True', True)], value=False)
+    only_iso_3d_iso = widgets.Dropdown(options=[('False', False), ('True', True)], value=False)
     range_sequence_3d_iso = widgets.Textarea(value='[0,0]')
     range_detx_3d_iso = widgets.Textarea(value='[0,0]')
     range_dety_3d_iso = widgets.Textarea(value='[0,0]')
@@ -711,7 +712,8 @@ def call_visualization(variables):
                                                ions_individually_plots_iso.value,
                                                max_num_ions=None, min_num_ions=None,
                                                isosurface_dic=isosurface_dic_p3_iso_value,
-                                               detailed_isotope_charge=detailed_isotope_charge_3d_iso.value)
+                                               detailed_isotope_charge=detailed_isotope_charge_3d_iso.value,
+                                               only_iso=only_iso_3d_iso.value)
 
         plot_3d_button_iso.disabled = False
 
@@ -927,6 +929,7 @@ def call_visualization(variables):
         widgets.HBox([widgets.Label(value='Isosurface dic:', layout=label_layout), isosurface_dic_p3_iso]),
         widgets.HBox([widgets.Label(value='Detailed isotope charge:', layout=label_layout),
                         detailed_isotope_charge_3d_iso]),
+        widgets.HBox([widgets.Label(value='Only iso:', layout=label_layout), only_iso_3d_iso]),
         widgets.HBox([widgets.Label(value="sequence range:", layout=label_layout), range_sequence_3d_iso]),
         widgets.HBox([widgets.Label(value='range mc:', layout=label_layout), range_mc_3d_iso]),
         widgets.HBox([widgets.Label(value='range detx:', layout=label_layout), range_detx_3d_iso]),
