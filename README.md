@@ -50,7 +50,7 @@ interest (ROI) selection, voltage and bowl calibration, and 3D reconstruction te
 You can see some of the features of the calibration module in the following images:
 
 <div align="center">
-  <img width = "40%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/fdm.png">
+  <img width = "38%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/fdm.png">
   <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/detector.gif">
 </div>
 
