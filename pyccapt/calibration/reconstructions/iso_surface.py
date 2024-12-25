@@ -19,7 +19,8 @@ from pyccapt.calibration.reconstructions import reconstruction
 def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save, make_gif=False,
                         range_sequence=[], range_mc=[], range_detx=[], range_dety=[],
                         range_x=[], range_y=[], range_z=[], range_vol=[], ions_individually_plots=False,
-                        max_num_ions=None, min_num_ions=None, isosurface_dic=None, detailed_isotope_charge=False):
+                        max_num_ions=None, min_num_ions=None, isosurface_dic=None, detailed_isotope_charge=False,
+                        only_iso=False):
     """
     Generate a 3D plot for atom probe reconstruction data.
 
@@ -44,6 +45,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         min_num_ions (int): Minimum number of ions to plot.
         isosurface_dic (dic): Dictionary with the isosurface elements and their values.
         detailed_isotope_charge (bool): Whether to plot the range of each isotopes and charge state.
+        only_iso (bool): Whether to plot only the isosurface.
 
     Returns:
         None
@@ -342,23 +344,24 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
                     )
                     fig.add_trace(mesh)
 
-                ion_name = ion[index].rsplit('$', 1)[0]
-                ion_name = ion_name + '~' + '(%s)' % (element_percentage[index]) + '$'
-                fig.add_trace(
-                    go.Scatter3d(
-                        x=variables.x[mask],
-                        y=variables.y[mask],
-                        z=variables.z[mask],
-                        mode='markers',
-                        name=ion_name,
-                        showlegend=True,
-                        marker=dict(
-                            size=1,
-                            color=colors[index],
-                            opacity=opacity,
+                if not only_iso:
+                    ion_name = ion[index].rsplit('$', 1)[0]
+                    ion_name = ion_name + '~' + '(%s)' % (element_percentage[index]) + '$'
+                    fig.add_trace(
+                        go.Scatter3d(
+                            x=variables.x[mask],
+                            y=variables.y[mask],
+                            z=variables.z[mask],
+                            mode='markers',
+                            name=ion_name,
+                            showlegend=True,
+                            marker=dict(
+                                size=1,
+                                color=colors[index],
+                                opacity=opacity,
+                            )
                         )
                     )
-                )
 
             fig = reconstruction.draw_qube(fig, range_cube)
     else:
