@@ -256,7 +256,7 @@ def plot_crop_fdm(x, y, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
     Args:
         x: x-axis data
         y: y-axis data
-        bins: Number of bins for the histogram
+        bins: Number of bins for the histogram as a tuple or a single float as the bin size
         frac: Fraction of the data to be plotted
         axis_mode: Flag to choose whether to plot axis or scalebar: 'normal' or 'scalebar'
         variables: Variables object
@@ -329,13 +329,13 @@ def plot_crop_fdm(x, y, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
     fig1, ax1 = plt.subplots(figsize=figure_size, constrained_layout=True)
 
 
-    # Check if the bin is a tuple
-    if isinstance(bins, tuple):
-        pass
-    else:
-        x_edges = np.arange(x.min(), x.max() + bins, bins)
-        y_edges = np.arange(y.min(), y.max() + bins, bins)
-        bins = [x_edges, y_edges]
+    # Check if the bin is a list
+    if isinstance(bins, list):
+        print('bins:', bins)
+        if len(bins) == 1:
+            x_edges = np.arange(x.min(), x.max() + bins, bins)
+            y_edges = np.arange(y.min(), y.max() + bins, bins)
+            bins = [x_edges, y_edges]
 
     FDM, xedges, yedges = np.histogram2d(x, y, bins=bins)
 

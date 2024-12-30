@@ -317,7 +317,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
                     vox = pos_to_voxel(dist, grid_vec)
                     vox_ion = pos_to_voxel(dist, grid_vec, species=mask_s)
                     conc = np.divide(vox_ion, vox, out=np.zeros_like(vox_ion, dtype=float), where=vox != 0)
-                    iso_value = calculate_iso_value(conc, save_path=None)
+                    iso_value = calculate_iso_value(conc, save_path=variables.result_path)
                     isosurf = isosurface(grid_vec, conc, isovalue=iso_value)
                     # import pyvista as pv
                     # plotter = pv.Plotter()

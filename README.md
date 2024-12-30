@@ -23,12 +23,11 @@ analysis.
 
 # Overview
 
-PyCCAPT was initially developed and rigorously tested on the OXCART atom probe, an in-house atom probe system situated
-within the Department of Materials Science & Engineering at the University of Erlangen-Nürnberg. Distinguished by its
-unique attribute, the OXCART atom probe boasts a titanium-based measuring chamber that facilitates an ultra-low hydrogen 
+PyCCAPT was initially developed and tested on the OXCART atom probe, an in-house atom probe system situated
+within the Department of Materials Science & Engineering at the University of Erlangen-Nürnberg. The OXCART atom probe boasts a titanium-based measuring chamber that facilitates an ultra-low hydrogen 
 vacuum environment. This system also features a state-of-the-art detector with a high detection
 efficiency of approximately 80%. While tailor-made for the OXCART, the PyCCAPT package offers versatility, extending its
-capabilities to effectively manage diverse atom probe systems.
+capabilities to effectively control atom probe systems.
 
 ![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/oxcart.jpg)
 
@@ -49,12 +48,20 @@ interest (ROI) selection, voltage and bowl calibration, and 3D reconstruction te
 
 You can see some of the features of the calibration module in the following images.
 
-The FDM and detecotor hitmap as Gif images for an Aluminium sample:
+The FDM and detector hitmap as Gif images for an Aluminium sample:
 
 <div align="center">
   <img width = "37%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/fdm.png">
   <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/detector.gif">
 </div>
+
+Bowl and voltage calibration:
+
+<div align="center">
+  <img width = "37%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/fdm.png">
+  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/detector.gif">
+</div>
+
 
 A ranged mass spectrum for a Nimonic® 90 sample:
 
@@ -63,7 +70,7 @@ A ranged mass spectrum for a Nimonic® 90 sample:
 </div>
 
 
-Html link below can be used to show a 3d reconstruction of Nimonic® 90 sample: [3D reconstruction](https://rawcdn.githack.com/mmonajem/pyccapt/52835bc47735ef12bffcf7e18ce90b556b07d12f/pyccapt/files/readme_images/3d_o.html)
+Html link below can be used to show a 3d reconstruction of Nimonic® 90 sample: [Nimonic® 3D reconstruction](https://rawcdn.githack.com/mmonajem/pyccapt/52835bc47735ef12bffcf7e18ce90b556b07d12f/pyccapt/files/readme_images/3d_o.html)
 
 The 3d reconstruction of Nimonic® 90 and precipitates can be seen in the following Gifs:
 

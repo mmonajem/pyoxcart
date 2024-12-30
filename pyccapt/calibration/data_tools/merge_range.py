@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def merge_by_range(data_df, range_df):
+def merge_by_range(data_df, range_df, full=False):
     """
     Optimized merging function based on the 'mc' column value falling within the 'mc_low' and 'mc_up' range.
     Uses vectorized operations for performance.
@@ -9,6 +9,7 @@ def merge_by_range(data_df, range_df):
     Parameters:
         data_df (pd.DataFrame): The dataframe containing the data to be merged.
         range_df (pd.DataFrame): The dataframe containing the range values 'mc_low' and 'mc_up'.
+        full (bool): If True, the merged dataframe will contain all columns from the range_df. Default is False.
 
     Returns:
         pd.DataFrame: The merged dataframe with the range data attached.
@@ -43,8 +44,13 @@ def merge_by_range(data_df, range_df):
         'isotope': [np.nan],
         'charge': np.nan
     }
-    # For valid matches, update with the corresponding values
-    for col in ['name', 'ion', 'mass', 'mc', 'mc_low', 'mc_up', 'color', 'element', 'complex', 'isotope', 'charge']:
-        merged_df[col] = np.where(valid_matches, range_df[col].values[matched_idx], default_values[col])
+    if full:
+        # For valid matches, update with the corresponding values
+        for col in ['name', 'ion', 'mass', 'mc', 'mc_low', 'mc_up', 'color', 'element', 'complex', 'isotope', 'charge']:
+            merged_df[col] = np.where(valid_matches, range_df[col].values[matched_idx], default_values[col])
+    else:
+        # only add the columns name and ion
+        for col in ['name', 'ion']:
+            merged_df[col] = np.where(valid_matches, range_df[col].values[matched_idx], default_values[col])
 
     return merged_df

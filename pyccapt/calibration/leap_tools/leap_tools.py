@@ -159,11 +159,14 @@ def read_rrng(file_path):
         isotope.append(isotope_s)
         ion_list.append(formula)
 
-    name = ".".join(f"{element}{count}" for element, count in zip(element_list, complex))
+    name = []
+    for i in range(len(element_list)):
+        name.append(".".join(f"{element_list[i][j]}{complex[i][j]}" for j in range(len(element_list[i]))))
+
     # Return the pyccapt_ranges DataFrame
-    range_data = pd.DataFrame({'name': name, 'mass': mc, 'mc': mc, 'mc_low': mc_low,
+    range_data = pd.DataFrame({'name': name, 'ion': ion_list, 'mass': mc, 'mc': mc, 'mc_low': mc_low,
                                     'mc_up': mc_up, 'color': colors, 'element': element_list,
-                                    'complex': complex, 'isotope': isotope, 'charge': charge, 'ion': ion_list})
+                                    'complex': complex, 'isotope': isotope, 'charge': charge})
     return range_data
 
 
