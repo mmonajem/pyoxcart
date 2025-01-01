@@ -11,6 +11,12 @@ from matplotlib import rcParams, colors
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 from sklearn.cluster import KMeans, DBSCAN
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import RANSACRegressor
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
+from sklearn.ensemble import GradientBoostingRegressor
 
 
 def cluster_tof(dld_highVoltage_peak, dld_t_peak, calibration_mode, num_cluster, plot=True, fig_size=(5, 5)):
@@ -79,10 +85,83 @@ def voltage_corr(x, a, b, c):
     # y = a / ((b * x) + c)
     return y
 
+def hybrid_voltage_calibration(dld_highVoltage, dld_t):
+    """
+    Train a hybrid machine learning model for voltage correction.
+
+    Args:
+        dld_highVoltage (numpy.ndarray): High voltage values.
+        dld_t (numpy.ndarray): Time of flight or mass-to-charge values.
+
+    Returns:
+        model: Trained machine learning model.
+    """
+    X = dld_highVoltage.reshape(-1, 1)  # High voltage as the input
+    y = dld_t  # TOF or mc as the target
+
+    # Train a Gradient Boosting Regressor
+    model = GradientBoostingRegressor(n_estimators=100, max_depth=5, random_state=42)
+    model.fit(X, y)
+
+    print(f"Hybrid voltage calibration R² score: {model.score(X, y):.3f}")
+    return model
+
+def robust_voltage_fit(dld_highVoltage, dld_t):
+    """
+    Perform robust polynomial fitting using RANSAC for voltage correction.
+
+    Args:
+        dld_highVoltage (numpy.ndarray): High voltage values.
+        dld_t (numpy.ndarray): Time of flight or mc values.
+
+    Returns:
+        model: Fitted RANSAC model.
+    """
+    X = dld_highVoltage.reshape(-1, 1)  # High voltage as the input
+    y = dld_t  # TOF or mc as the target
+
+    # Polynomial pipeline with RANSAC
+    model = make_pipeline(PolynomialFeatures(degree=2), RANSACRegressor())
+    model.fit(X, y)
+    return model
+
+def adaptive_voltage_sampling(dld_highVoltage, dld_t, variability_threshold=0.05, min_samples=10):
+    """
+    Perform adaptive sampling based on variability for voltage correction.
+
+    Args:
+        dld_highVoltage (numpy.ndarray): High voltage values.
+        dld_t (numpy.ndarray): Time of flight or mc values.
+        variability_threshold (float): Threshold for variability.
+        min_samples (int): Minimum number of samples.
+
+    Returns:
+        sampled_voltage, sampled_t: Adaptively sampled high voltage and TOF values.
+    """
+    sampled_voltage, sampled_t = [], []
+    bin_edges = np.linspace(dld_highVoltage.min(), dld_highVoltage.max(), 50)  # Divide into bins
+
+    for i in range(len(bin_edges) - 1):
+        mask = (dld_highVoltage >= bin_edges[i]) & (dld_highVoltage < bin_edges[i + 1])
+        points = dld_t[mask]
+
+        if len(points) > min_samples:
+            variability = np.std(points) / np.mean(points)
+            if variability > variability_threshold:
+                indices = np.random.choice(np.where(mask)[0], size=min_samples, replace=False)
+                sampled_voltage.extend(dld_highVoltage[indices])
+                sampled_t.extend(dld_t[indices])
+            else:
+                sampled_voltage.extend(dld_highVoltage[mask])
+                sampled_t.extend(dld_t[mask])
+
+    return np.array(sampled_voltage), np.array(sampled_t)
+
+
 
 def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_location, index_fig, figname, sample_size,
                        mode, calibration_mode, sample_range_max, plot=True, save=False,
-                       fig_size=(5, 5)):
+                       fig_size=(5, 5), model='poly'):
     """
     Performs voltage correction and plots the graph based on the passed arguments.
 
@@ -100,6 +179,7 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
     - plot (bool): Indicates whether to plot the graph. Default is True.
     - save (bool): Indicates whether to save the plot. Default is False.
     - fig_size (tuple): Figure size in inches. Default is (7, 5).
+    - model (string): Type of model ('poly'/'hybrid'). Default is 'poly'.
 
     Returns:
     - fitresult (array): Corrected voltage array.
@@ -114,15 +194,15 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
             if sample_range_max == 'histogram':
                 try:
                     bins = np.linspace(np.min(dld_t_peak_selected), np.max(dld_t_peak_selected),
-                                       round(np.max(dld_t_peak_selected) / 0.1))
+                                       round(np.max(dld_t_peak_selected) / 0.01))
                     y, x = np.histogram(dld_t_peak_selected, bins=bins)
                     peaks, properties = find_peaks(y, height=0)
                     index_peak_max_ini = np.argmax(properties['peak_heights'])
                     max_peak = peaks[index_peak_max_ini]
                     dld_t_peak_list.append(x[max_peak] / maximum_location)
 
-                    mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - 0.1)
-                                            , (dld_t_peak_selected <= x[max_peak] + 0.1))
+                    mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - 0.01)
+                                            , (dld_t_peak_selected <= x[max_peak] + 0.01))
                     high_voltage_mean_list.append(np.mean(dld_highVoltage_peak_selected[mask_v]))
                 except ValueError:
                     print('cannot find the maximum')
@@ -151,15 +231,15 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
             if sample_range_max == 'histogram':
                 try:
                     bins = np.linspace(np.min(dld_t_peak_selected), np.max(dld_t_peak_selected),
-                                       round(np.max(dld_t_peak_selected) / 0.1))
+                                       round(np.max(dld_t_peak_selected) / 0.01))
                     y, x = np.histogram(dld_t_peak_selected, bins=bins)
                     peaks, properties = find_peaks(y, height=0)
                     index_peak_max_ini = np.argmax(properties['peak_heights'])
                     max_peak = peaks[index_peak_max_ini]
                     dld_t_peak_list.append(x[max_peak] / maximum_location)
 
-                    mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - 0.2)
-                                            , (dld_t_peak_selected <= x[max_peak] + 0.2))
+                    mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - 0.02)
+                                            , (dld_t_peak_selected <= x[max_peak] + 0.02))
                     high_voltage_mean_list.append(np.mean(dld_highVoltage_peak_selected[mask_v]))
                 except ValueError:
                     print('cannot find the maximum')
@@ -181,7 +261,19 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
                 high_voltage_mean = np.median(dld_highVoltage_peak_selected)
                 high_voltage_mean_list.append(high_voltage_mean)
 
-    fitresult, _ = curve_fit(voltage_corr, np.array(high_voltage_mean_list), np.array(dld_t_peak_list))
+    elif mode == 'adaptive':
+        dld_highVoltage_peak, dld_t_peak = adaptive_voltage_sampling(dld_highVoltage_peak, dld_t_peak)
+        for i in range(len(dld_highVoltage_peak)):
+            dld_t_peak_list.append(dld_t_peak[i] / maximum_location)
+            high_voltage_mean_list.append(dld_highVoltage_peak[i])
+    if model == 'poly':
+        fitresult, _ = curve_fit(voltage_corr, np.array(high_voltage_mean_list), np.array(dld_t_peak_list))
+    elif model == 'hybrid':
+        model = hybrid_voltage_calibration(np.array(high_voltage_mean_list), np.array(dld_t_peak_list))
+        #f_v = model.predict(np.array(high_voltage_mean_list).reshape(-1, 1))
+    elif model == 'robust':
+        model = robust_voltage_fit(np.array(high_voltage_mean_list), np.array(dld_t_peak_list))
+        #f_v = model.predict(np.array(high_voltage_mean_list).reshape(-1, 1))
 
     if plot or save:
         fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
@@ -307,9 +399,9 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
         if fast_calibration:
             dld_peak_b = np.random.choice(dld_peak_b, int(len(dld_peak_b) * 0.1), replace=False)
         bins = np.linspace(np.min(dld_peak_b), np.max(dld_peak_b),
-                           round(np.max(dld_peak_b) / 0.1))
+                           round(np.max(dld_peak_b) / 0.01))
         # y, x = np.histogram(dld_peak_b, bins=bins)
-        y = fast_histogram.histogram1d(dld_peak_b, bins=round(np.max(dld_peak_b) / 0.1) - 1,
+        y = fast_histogram.histogram1d(dld_peak_b, bins=round(np.max(dld_peak_b) / 0.01) - 1,
                                        range=(np.min(dld_peak_b), np.max(dld_peak_b)))
         x = bins
         peaks, properties = find_peaks(y, height=0)
@@ -451,6 +543,55 @@ def hemisphere_corr(data_xy, a, b, c, r):
     result = a * (x - b) ** 2 + c * (y - b) ** 2 + r ** 2
     return result
 
+def hybrid_calibration_model(dld_x, dld_y, dld_t, sample_range_max, sample_size):
+    """
+    Train a hybrid machine learning model for bowl correction.
+
+    Args:
+        dld_x (numpy.ndarray): X coordinates of the data points.
+        dld_y (numpy.ndarray): Y coordinates of the data points.
+        dld_t (numpy.ndarray): Time values of the data points.
+        sample_range_max (str): Sampling range method.
+        sample_size (int): Size of each sample.
+
+    Returns:
+        model: Trained machine learning model.
+    """
+    # Prepare data for ML model
+    X = np.column_stack((dld_x, dld_y))
+    y = 1 / dld_t  # Inverse of TOF for regression
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Train a random forest regressor
+    model = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42)
+    model.fit(X_train, y_train)
+
+    # Evaluate the model
+    score = model.score(X_test, y_test)
+    print(f"Machine learning model R² score: {score:.3f}")
+
+    return model
+
+def robust_fit(dld_x, dld_y, dld_t):
+    """
+    Perform robust polynomial fitting using RANSAC.
+
+    Args:
+        dld_x (numpy.ndarray): X coordinates.
+        dld_y (numpy.ndarray): Y coordinates.
+        dld_t (numpy.ndarray): Time values.
+
+    Returns:
+        model: Fitted RANSAC model.
+    """
+    X = np.column_stack((dld_x, dld_y))
+    y = dld_t
+
+    # Polynomial pipeline with RANSAC
+    model = make_pipeline(PolynomialFeatures(degree=2), RANSACRegressor())
+    model.fit(X, y)
+
+    return model
 
 def compute_sample(i, j, d, dld_x_bowl, dld_y_bowl, dld_t_bowl, maximum_location, sample_range_max):
     """
@@ -485,14 +626,14 @@ def compute_sample(i, j, d, dld_x_bowl, dld_y_bowl, dld_t_bowl, maximum_location
         elif sample_range_max == 'histogram':
             try:
                 dld_t_bowl_selected = dld_t_bowl[mask]
-                if len(dld_t_bowl_selected) > 500000:
-                    dld_t_bowl_selected = np.random.choice(dld_t_bowl_selected, 500000, replace=False)
+                if len(dld_t_bowl_selected) > 200000:
+                    dld_t_bowl_selected = np.random.choice(dld_t_bowl_selected, 200000, replace=False)
 
                 bins = np.linspace(np.min(dld_t_bowl_selected), np.max(dld_t_bowl_selected),
-                                   round(np.max(dld_t_bowl_selected) / 0.1))
+                                   round(np.max(dld_t_bowl_selected) / 0.01))
 
                 y_hist = fast_histogram.histogram1d(dld_t_bowl_selected,
-                                                    bins=round(np.max(dld_t_bowl_selected) / 0.1) - 1,
+                                                    bins=round(np.max(dld_t_bowl_selected) / 0.01) - 1,
                                                     range=(np.min(dld_t_bowl_selected), np.max(dld_t_bowl_selected)))
                 peaks, properties = find_peaks(y_hist, height=0)
 
@@ -506,7 +647,7 @@ def compute_sample(i, j, d, dld_x_bowl, dld_y_bowl, dld_t_bowl, maximum_location
                 print('cannot find the maximum')
                 dld_t_peak = np.mean(dld_t_bowl[mask]) / maximum_location
 
-            return x_sample, y_sample, dld_t_peak
+        return x_sample, y_sample, dld_t_peak
     return None, None, None  # Return None if no samples found
 
 
@@ -522,7 +663,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         det_diam (float): Diameter of the detector.
         maximum_location (float): Maximum location for normalization.
         sample_range_max (str, optional): Sample range maximum ('mean' or 'histogram').
-        sample_size (int): Size of each sample.
+        sample_size (int): Size of each rectangle in mm.
         calibration_mode (str): Calibration mode ('tof' or 'mc').
         fit_mode (str): Fit mode ('curve_fit' or 'hemisphere_fit').
         index_fig (int): Index for figure naming.
@@ -568,6 +709,10 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         parameters, covariance = curve_fit(hemisphere_corr, [np.array(x_sample_list), np.array(y_sample_list)],
                                            np.array(dld_t_peak_list), p0=initial_guess)
         print('The cx, cy, r, c0 are:', parameters)
+    elif fit_mode == 'ml_fit':
+        parameters = hybrid_calibration_model(np.array(x_sample_list), np.array(y_sample_list), np.array(dld_t_peak_list))
+    elif fit_mode == 'robust_fit':
+        parameters = robust_fit(np.array(x_sample_list), np.array(y_sample_list), np.array(dld_t_peak_list))
 
     if plot or save:
         if calibration_mode == 'tof':
@@ -581,6 +726,10 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
             Z = bowl_corr(np.array([X, Y]), *parameters)
         elif fit_mode == 'hemisphere_fit':
             Z = hemisphere_corr(np.array([X, Y]), *parameters)
+        elif fit_mode == 'ml_fit':
+            Z = parameters.predict(np.column_stack((X, Y)))
+        elif fit_mode == 'robust_fit':
+            Z = parameters.predict(np.column_stack((X, Y)))
 
         fig, ax = plt.subplots(figsize=fig_size, subplot_kw=dict(projection="3d"), constrained_layout=True)
         box = ax.get_position()
@@ -659,9 +808,9 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         dld_peak_mid = np.random.choice(dld_peak_mid, int(len(dld_peak_mid) * 0.1), replace=False)
     if maximum_cal_method == 'histogram':
         try:
-            bins = np.linspace(np.min(dld_peak_mid), np.max(dld_peak_mid), round(np.max(dld_peak_mid) / 0.1))
+            bins = np.linspace(np.min(dld_peak_mid), np.max(dld_peak_mid), round(np.max(dld_peak_mid) / 0.01))
             # y, x = np.histogram(dld_peak_mid, bins=bins)
-            y = fast_histogram.histogram1d(dld_peak_mid, bins=round(np.max(dld_peak_mid) / 0.1) - 1,
+            y = fast_histogram.histogram1d(dld_peak_mid, bins=round(np.max(dld_peak_mid) / 0.01) - 1,
                                              range=(np.min(dld_peak_mid), np.max(dld_peak_mid)))
             x = bins
             peaks, properties = find_peaks(y, height=0)
@@ -694,6 +843,10 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         f_bowl = bowl_corr([dld_x[mask_fv], dld_y[mask_fv]], *parameters)
     elif fit_mode == 'hemisphere_fit':
         f_bowl = hemisphere_corr([dld_x[mask_fv], dld_y[mask_fv]], *parameters)
+    elif fit_mode == 'ml_fit':
+        f_bowl = parameters.predict(np.column_stack((dld_x[mask_fv], dld_y[mask_fv])))
+    elif fit_mode == 'robust_fit':
+        f_bowl = parameters.predict(np.column_stack((dld_x[mask_fv], dld_y[mask_fv])))
 
     calibration_mc_tof = np.copy(variables.dld_t_calib) if calibration_mode == 'tof' else np.copy(variables.mc_calib)
 
@@ -720,6 +873,10 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
             f_bowl_plot = bowl_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
         elif fit_mode == 'hemisphere_fit':
             f_bowl_plot = hemisphere_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
+        elif fit_mode == 'ml_fit':
+            f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
+        elif fit_mode == 'robust_fit':
+            f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
         dld_t_plot = dld_peak[mask] / f_bowl_plot
 
         y = plt.scatter(dld_highVoltage_peak[mask] / 1000, dld_t_plot, color="red", label=r"$t_{C_{B}}$", s=1)
@@ -742,6 +899,10 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
             f_bowl_plot = bowl_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
         elif fit_mode == 'hemisphere_fit':
             f_bowl_plot = hemisphere_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
+        elif fit_mode == 'ml_fit':
+            f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
+        elif fit_mode == 'robust_fit':
+            f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
         dld_t_plot = dld_peak[mask] / f_bowl_plot
 
         x = plt.scatter(dld_x_peak[mask], dld_peak[mask], color="blue", label=r"$t$", s=1)
@@ -773,6 +934,10 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
             f_bowl_plot = bowl_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
         elif fit_mode == 'hemisphere_fit':
             f_bowl_plot = hemisphere_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
+        elif fit_mode == 'ml_fit':
+            f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
+        elif fit_mode == 'robust_fit':
+            f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
         dld_t_plot = dld_peak[mask] / f_bowl_plot
 
         scat_1 = ax.scatter(dld_x_peak[mask], dld_y_peak[mask], zs=dld_peak[mask], color="blue",
