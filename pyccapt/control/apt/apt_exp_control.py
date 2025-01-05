@@ -55,7 +55,6 @@ class APT_Exp_Control:
         self.total_ions = 0
         self.ex_freq = 0
 
-        self.main_v_dc = []
         self.main_v_pulse = []
         self.main_l_pulse = []
         self.main_counter = []
@@ -133,7 +132,6 @@ class APT_Exp_Control:
 
         # saving the values of high dc voltage, pulse, and current iteration ions
         # with self.variables.lock_experiment_variables:
-        self.main_v_dc.extend([self.specimen_voltage])
         self.main_counter.extend([count_temp])
         self.main_temperature.extend([self.variables.temperature])
         self.main_chamber_vacuum.extend([self.variables.vacuum_main])
@@ -575,7 +573,7 @@ class APT_Exp_Control:
                     f"properly{initialize_devices.bcolors.ENDC}")
                 print(e)
 
-        self.variables.extend_to('main_v_dc', self.main_v_dc)
+
         self.variables.extend_to('main_counter', self.main_counter)
         self.variables.extend_to('main_temperature', self.main_temperature)
         self.variables.extend_to('main_chamber_vacuum', self.main_chamber_vacuum)
@@ -706,9 +704,9 @@ class APT_Exp_Control:
             self.variables.clear_to('ch3_time')
             self.variables.clear_to('ch3_wave')
 
-            self.variables.clear_to('main_v_dc')
             self.variables.clear_to('main_v_p')
             self.variables.clear_to('main_counter')
+            self.variables.clear_to('main_raw_counter')
             self.variables.clear_to('main_temperature')
             self.variables.clear_to('main_chamber_vacuum')
             self.variables.clear_to('main_v_dc_dld')

@@ -18,11 +18,11 @@ def hdf_creator(variables, conf, time_counter, time_ex):
 	path = variables.path + '\\%s.h5' % variables.exp_name
 	# Save HDF5 file
 	with h5py.File(path, "w") as f:
-		f.create_dataset("apt/high_voltage", data=variables.main_v_dc, dtype='f8')
+		f.create_dataset("apt/id", data=time_counter, dtype='u8')
 		f.create_dataset("apt/num_events", data=variables.main_counter, dtype='u4')
+		f.create_dataset("apt/num_raw_signals", data=variables.main_raw_counter, dtype='u4')
 		f.create_dataset('apt/temperature', data=variables.main_temperature, dtype='f8')
 		f.create_dataset('apt/experiment_chamber_vacuum', data=variables.main_chamber_vacuum, dtype='f8')
-		f.create_dataset("apt/time_counter", data=time_counter, dtype='u8')
 		f.create_dataset("apt/timestamps", data=time_ex, dtype='f8')
 
 		if conf['tdc'] == "on" and conf['tdc_model'] == 'Surface_Consept' \
@@ -30,10 +30,10 @@ def hdf_creator(variables, conf, time_counter, time_ex):
 			f.create_dataset("dld/x", data=variables.x, dtype='f8')
 			f.create_dataset("dld/y", data=variables.y, dtype='f8')
 			f.create_dataset("dld/t", data=variables.t, dtype='f8')
-			f.create_dataset("dld/start_counter", data=variables.dld_start_counter, dtype='u8')
 			f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld, dtype='f8')
 			f.create_dataset("dld/voltage_pulse", data=variables.main_v_p_dld, dtype='f8')
 			f.create_dataset("dld/laser_pulse", data=variables.main_l_p_dld, dtype='f8')
+			f.create_dataset("dld/start_counter", data=variables.dld_start_counter, dtype='u8')
 
 			# raw data
 			f.create_dataset("tdc/start_counter", data=variables.tdc_start_counter, dtype='u8')
@@ -48,10 +48,10 @@ def hdf_creator(variables, conf, time_counter, time_ex):
 			f.create_dataset("dld/x", data=variables.x, dtype='f8')
 			f.create_dataset("dld/y", data=variables.y, dtype='f8')
 			f.create_dataset("dld/t", data=variables.t, dtype='f8')
-			f.create_dataset("dld/start_counter", data=variables.time_stamp, dtype='u8')
 			f.create_dataset("dld/high_voltage", data=variables.main_v_dc_dld, dtype='f8')
 			f.create_dataset("dld/voltage_pulse", data=variables.main_v_p_dld, dtype='f8')
 			f.create_dataset("dld/laser_pulse", data=variables.main_l_p_dld, dtype='f8')
+			f.create_dataset("dld/start_counter", data=variables.time_stamp, dtype='u8')
 			# raw data
 			f.create_dataset("tdc/ch0", data=variables.ch0, dtype='u8')
 			f.create_dataset("tdc/ch1", data=variables.ch1, dtype='u8')

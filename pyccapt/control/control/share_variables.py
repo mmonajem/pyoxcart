@@ -140,8 +140,8 @@ class Variables:
 
         ### Experiment variables
         # self.lock_experiment_variables = threading.Lock()
-        self.ns.main_v_dc = []
         self.ns.main_counter = []
+        self.ns.main_raw_counter = []
         self.ns.main_temperature = []
         self.ns.main_chamber_vacuum = []
         self.ns.laser_degree = []
@@ -1154,16 +1154,6 @@ class Variables:
         with self.lock_vacuum_tmp:
             self.ns.vacuum_load_lock_backing = value
 
-    @property
-    def main_v_dc(self):
-        with self.lock_lists:
-            return self.ns.main_v_dc
-
-    @main_v_dc.setter
-    def main_v_dc(self, value):
-        with self.lock_lists:
-            self.ns.main_v_dc = value
-
 
     @property
     def main_counter(self):
@@ -1174,6 +1164,16 @@ class Variables:
     def main_counter(self, value):
         with self.lock_lists:
             self.ns.main_counter = value
+
+    @property
+    def main_raw_counter(self):
+        with self.lock_lists:
+            return self.ns.main_raw_counter
+
+    @main_raw_counter.setter
+    def main_raw_counter(self, value):
+        with self.lock_lists:
+            self.ns.main_raw_counter = value
 
     @property
     def main_temperature(self):

@@ -1,9 +1,8 @@
-import concurrent.futures
-import multiprocessing
 from copy import copy
 from itertools import product
 from math import ceil
-
+import concurrent.futures
+import multiprocessing
 import fast_histogram
 import matplotlib.pyplot as plt
 import numpy as np
@@ -160,7 +159,7 @@ def adaptive_voltage_sampling(dld_highVoltage, dld_t, variability_threshold=0.05
 
 
 def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_location, index_fig, figname, sample_size,
-                       mode, calibration_mode, sample_range_max, plot=True, save=False,
+                       mode, calibration_mode, sample_range_max, bin_size, plot=True, save=False,
                        fig_size=(5, 5), model='poly'):
     """
     Performs voltage correction and plots the graph based on the passed arguments.
@@ -180,6 +179,7 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
     - save (bool): Indicates whether to save the plot. Default is False.
     - fig_size (tuple): Figure size in inches. Default is (7, 5).
     - model (string): Type of model ('poly'/'hybrid'). Default is 'poly'.
+    - bin_size (float): Size of the bin.
 
     Returns:
     - fitresult (array): Corrected voltage array.
@@ -194,15 +194,15 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
             if sample_range_max == 'histogram':
                 try:
                     bins = np.linspace(np.min(dld_t_peak_selected), np.max(dld_t_peak_selected),
-                                       round(np.max(dld_t_peak_selected) / 0.01))
+                                       round(np.max(dld_t_peak_selected) / bin_size))
                     y, x = np.histogram(dld_t_peak_selected, bins=bins)
                     peaks, properties = find_peaks(y, height=0)
                     index_peak_max_ini = np.argmax(properties['peak_heights'])
                     max_peak = peaks[index_peak_max_ini]
                     dld_t_peak_list.append(x[max_peak] / maximum_location)
 
-                    mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - 0.01)
-                                            , (dld_t_peak_selected <= x[max_peak] + 0.01))
+                    mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - bin_size)
+                                            , (dld_t_peak_selected <= x[max_peak] + bin_size))
                     high_voltage_mean_list.append(np.mean(dld_highVoltage_peak_selected[mask_v]))
                 except ValueError:
                     print('cannot find the maximum')
@@ -231,15 +231,15 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
             if sample_range_max == 'histogram':
                 try:
                     bins = np.linspace(np.min(dld_t_peak_selected), np.max(dld_t_peak_selected),
-                                       round(np.max(dld_t_peak_selected) / 0.01))
+                                       round(np.max(dld_t_peak_selected) / bin_size))
                     y, x = np.histogram(dld_t_peak_selected, bins=bins)
                     peaks, properties = find_peaks(y, height=0)
                     index_peak_max_ini = np.argmax(properties['peak_heights'])
                     max_peak = peaks[index_peak_max_ini]
                     dld_t_peak_list.append(x[max_peak] / maximum_location)
 
-                    mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - 0.02)
-                                            , (dld_t_peak_selected <= x[max_peak] + 0.02))
+                    mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - bin_size)
+                                            , (dld_t_peak_selected <= x[max_peak] + bin_size))
                     high_voltage_mean_list.append(np.mean(dld_highVoltage_peak_selected[mask_v]))
                 except ValueError:
                     print('cannot find the maximum')
@@ -311,7 +311,7 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
 
 def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration_mode, index_fig, plot, save,
                       apply_local='all', noise_remove=True, maximum_cal_method='mean',
-                      maximum_sample_method='mean', fig_size=(5, 5), fast_calibration=False):
+                      maximum_sample_method='mean', fig_size=(5, 5), fast_calibration=False, bin_size=0.01):
     """
     Perform voltage correction on the given data.
 
@@ -329,6 +329,7 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
         maximum_sample_method (str, optional): Sample range maximum ('mean', 'histogram', 'median').
         fig_size (tuple, optional): Size of the figure. Defaults to (5, 5).
         fast_calibration (bool, optional): Whether to perform fast calibration. Defaults to False.
+        bin_size (float, optional): Size of the bin. Defaults to 0.01.
     """
     print('The left and right side of the main peak is:', variables.selected_x1, variables.selected_x2)
     if calibration_mode == 'tof':
@@ -399,9 +400,9 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
         if fast_calibration:
             dld_peak_b = np.random.choice(dld_peak_b, int(len(dld_peak_b) * 0.1), replace=False)
         bins = np.linspace(np.min(dld_peak_b), np.max(dld_peak_b),
-                           round(np.max(dld_peak_b) / 0.01))
+                           round(np.max(dld_peak_b) / bin_size))
         # y, x = np.histogram(dld_peak_b, bins=bins)
-        y = fast_histogram.histogram1d(dld_peak_b, bins=round(np.max(dld_peak_b) / 0.01) - 1,
+        y = fast_histogram.histogram1d(dld_peak_b, bins=round(np.max(dld_peak_b) / bin_size) - 1,
                                        range=(np.min(dld_peak_b), np.max(dld_peak_b)))
         x = bins
         peaks, properties = find_peaks(y, height=0)
@@ -421,7 +422,8 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
                                    maximum_location, index_fig=index_fig,
                                    figname='voltage_corr',
                                    sample_size=sample_size, mode=mode, calibration_mode=calibration_mode,
-                                   sample_range_max=maximum_sample_method, plot=plot, save=save, fig_size=fig_size)
+                                   sample_range_max=maximum_sample_method, bin_size=bin_size,
+                                   plot=plot, save=save, fig_size=fig_size)
 
     calibration_mc_tof = np.copy(variables.dld_t_calib) if calibration_mode == 'tof' else np.copy(variables.mc_calib)
 
@@ -572,7 +574,7 @@ def hybrid_calibration_model(dld_x, dld_y, dld_t, sample_range_max, sample_size)
 
     return model
 
-def robust_fit(dld_x, dld_y, dld_t):
+def robust_fit(dld_x, dld_y, dld_t, degree=2):
     """
     Perform robust polynomial fitting using RANSAC.
 
@@ -580,6 +582,7 @@ def robust_fit(dld_x, dld_y, dld_t):
         dld_x (numpy.ndarray): X coordinates.
         dld_y (numpy.ndarray): Y coordinates.
         dld_t (numpy.ndarray): Time values.
+        degree (int): Degree of the polynomial.
 
     Returns:
         model: Fitted RANSAC model.
@@ -588,12 +591,12 @@ def robust_fit(dld_x, dld_y, dld_t):
     y = dld_t
 
     # Polynomial pipeline with RANSAC
-    model = make_pipeline(PolynomialFeatures(degree=2), RANSACRegressor())
+    model = make_pipeline(PolynomialFeatures(degree=degree), RANSACRegressor())
     model.fit(X, y)
 
     return model
 
-def compute_sample(i, j, d, dld_x_bowl, dld_y_bowl, dld_t_bowl, maximum_location, sample_range_max):
+def compute_sample(i, j, d, dld_x_bowl, dld_y_bowl, dld_t_bowl, maximum_location, sample_range_max, bin_size):
     """
     Compute the sample for the given data.
 
@@ -606,6 +609,7 @@ def compute_sample(i, j, d, dld_x_bowl, dld_y_bowl, dld_t_bowl, maximum_location
         dld_t_bowl (numpy.ndarray): Time values of the data points.
         maximum_location (float): Maximum location for normalization.
         sample_range_max (str): Sample range maximum ('mean' or 'histogram').
+        bin_size (float): Size of the bin.
 
     Returns:
         x_sample (float): X sample value.
@@ -630,10 +634,10 @@ def compute_sample(i, j, d, dld_x_bowl, dld_y_bowl, dld_t_bowl, maximum_location
                     dld_t_bowl_selected = np.random.choice(dld_t_bowl_selected, 200000, replace=False)
 
                 bins = np.linspace(np.min(dld_t_bowl_selected), np.max(dld_t_bowl_selected),
-                                   round(np.max(dld_t_bowl_selected) / 0.01))
+                                   round(np.max(dld_t_bowl_selected) / bin_size))
 
                 y_hist = fast_histogram.histogram1d(dld_t_bowl_selected,
-                                                    bins=round(np.max(dld_t_bowl_selected) / 0.01) - 1,
+                                                    bins=round(np.max(dld_t_bowl_selected) / bin_size) - 1,
                                                     range=(np.min(dld_t_bowl_selected), np.max(dld_t_bowl_selected)))
                 peaks, properties = find_peaks(y_hist, height=0)
 
@@ -764,7 +768,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
 
 def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sample_size, fit_mode, calibration_mode,
                          index_fig, plot, save, apply_local='all', maximum_cal_method='mean', maximum_sample_method='mean',
-                         fig_size=(5, 5), fast_calibration=False):
+                         fig_size=(5, 5), fast_calibration=False, bin_size=0.01):
     """
     Perform bowl correction on the input data and plot the results.
 
@@ -784,6 +788,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         maximum_sample_method (str, optional): Sample range maximum ('mean' or 'histogram').
         fig_size (tuple, optional): Figure size.
         fast_calibration (bool, optional): Flag indicating whether to perform fast calibration.
+        bin_size (float, optional): Size of the bin.
 
     Returns:
         None
@@ -808,9 +813,9 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         dld_peak_mid = np.random.choice(dld_peak_mid, int(len(dld_peak_mid) * 0.1), replace=False)
     if maximum_cal_method == 'histogram':
         try:
-            bins = np.linspace(np.min(dld_peak_mid), np.max(dld_peak_mid), round(np.max(dld_peak_mid) / 0.01))
+            bins = np.linspace(np.min(dld_peak_mid), np.max(dld_peak_mid), round(np.max(dld_peak_mid) / bin_size))
             # y, x = np.histogram(dld_peak_mid, bins=bins)
-            y = fast_histogram.histogram1d(dld_peak_mid, bins=round(np.max(dld_peak_mid) / 0.01) - 1,
+            y = fast_histogram.histogram1d(dld_peak_mid, bins=round(np.max(dld_peak_mid) / bin_size) - 1,
                                              range=(np.min(dld_peak_mid), np.max(dld_peak_mid)))
             x = bins
             peaks, properties = find_peaks(y, height=0)
