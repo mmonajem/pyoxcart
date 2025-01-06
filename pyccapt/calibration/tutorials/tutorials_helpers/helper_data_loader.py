@@ -76,8 +76,6 @@ def load_data(dataset_path, max_mc, flightPathLength, pulse_mode, tdc, variables
 
 	elif not processing_mode:
 		max_tof = int(tof_tools.mc2tof(max_mc, 1000, 0, 0, flightPathLength))
-		# create an instance of the Variables opject
-		variables = share_variables.Variables()
 		variables.pulse_mode = pulse_mode
 		dataset_main_path = os.path.dirname(dataset_path)
 		dataset_name_with_extention = os.path.basename(dataset_path)

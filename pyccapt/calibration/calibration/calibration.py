@@ -124,7 +124,8 @@ def robust_voltage_fit(dld_highVoltage, dld_t):
     model.fit(X, y)
     return model
 
-def adaptive_voltage_sampling(dld_highVoltage, dld_t, variability_threshold=0.05, min_samples=10):
+def adaptive_voltage_sampling(dld_highVoltage, dld_t, variability_threshold=0.05, min_samples=10,
+                              sample_size=100):
     """
     Perform adaptive sampling based on variability for voltage correction.
 
@@ -133,12 +134,13 @@ def adaptive_voltage_sampling(dld_highVoltage, dld_t, variability_threshold=0.05
         dld_t (numpy.ndarray): Time of flight or mc values.
         variability_threshold (float): Threshold for variability.
         min_samples (int): Minimum number of samples.
+        sample_size (int): Size of the sample.
 
     Returns:
         sampled_voltage, sampled_t: Adaptively sampled high voltage and TOF values.
     """
     sampled_voltage, sampled_t = [], []
-    bin_edges = np.linspace(dld_highVoltage.min(), dld_highVoltage.max(), 50)  # Divide into bins
+    bin_edges = np.linspace(dld_highVoltage.min(), dld_highVoltage.max(), sample_size)  # Divide into bins
 
     for i in range(len(bin_edges) - 1):
         mask = (dld_highVoltage >= bin_edges[i]) & (dld_highVoltage < bin_edges[i + 1])
@@ -155,7 +157,6 @@ def adaptive_voltage_sampling(dld_highVoltage, dld_t, variability_threshold=0.05
                 sampled_t.extend(dld_t[mask])
 
     return np.array(sampled_voltage), np.array(sampled_t)
-
 
 
 def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_location, index_fig, figname, sample_size,
@@ -200,21 +201,29 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
                     index_peak_max_ini = np.argmax(properties['peak_heights'])
                     max_peak = peaks[index_peak_max_ini]
                     dld_t_peak_list.append(x[max_peak] / maximum_location)
-
                     mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - bin_size)
                                             , (dld_t_peak_selected <= x[max_peak] + bin_size))
+                    if len(dld_highVoltage_peak_selected[mask_v]) == 0:
+                        mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - 2 * bin_size)
+                                                , (dld_t_peak_selected <= x[max_peak] + 2 * bin_size))
+                        if len(dld_highVoltage_peak_selected[mask_v]) == 0:
+                            print('length of mask voltage', len(dld_highVoltage_peak_selected[mask_v]))
+                            mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - 4 * bin_size)
+                                                    , (dld_t_peak_selected <= x[max_peak] + 4 * bin_size))
+                            print('length of mask voltage after increase the window',
+                                  len(dld_highVoltage_peak_selected[mask_v]))
                     high_voltage_mean_list.append(np.mean(dld_highVoltage_peak_selected[mask_v]))
                 except ValueError:
                     print('cannot find the maximum')
                     dld_t_mean = np.median(dld_t_peak_selected)
                     dld_t_peak_list.append(dld_t_mean / maximum_location)
-
                     high_voltage_mean = np.mean(dld_highVoltage_peak_selected)
                     high_voltage_mean_list.append(high_voltage_mean)
             elif sample_range_max == 'mean':
                 dld_t_mean = np.mean(dld_t_peak_selected)
                 dld_t_peak_list.append(dld_t_mean / maximum_location)
                 high_voltage_mean = np.mean(dld_highVoltage_peak_selected)
+                high_voltage_mean_list.append(high_voltage_mean)
             elif sample_range_max == 'median':
                 dld_t_mean = np.median(dld_t_peak_selected)
                 dld_t_peak_list.append(dld_t_mean / maximum_location)
@@ -245,13 +254,11 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
                     print('cannot find the maximum')
                     dld_t_mean = np.median(dld_t_peak_selected)
                     dld_t_peak_list.append(dld_t_mean / maximum_location)
-
                     high_voltage_mean = np.mean(dld_highVoltage_peak_selected)
                     high_voltage_mean_list.append(high_voltage_mean)
             elif sample_range_max == 'mean':
                 dld_t_mean = np.mean(dld_t_peak_selected)
                 dld_t_peak_list.append(dld_t_mean / maximum_location)
-
                 high_voltage_mean = np.mean(dld_highVoltage_peak_selected)
                 high_voltage_mean_list.append(high_voltage_mean)
             elif sample_range_max == 'median':
@@ -262,18 +269,21 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
                 high_voltage_mean_list.append(high_voltage_mean)
 
     elif mode == 'adaptive':
-        dld_highVoltage_peak, dld_t_peak = adaptive_voltage_sampling(dld_highVoltage_peak, dld_t_peak)
+        sample_size_d = int(len(dld_highVoltage_peak) / sample_size) + 1
+        dld_highVoltage_peak, dld_t_peak = adaptive_voltage_sampling(dld_highVoltage_peak, dld_t_peak,
+                                                                     variability_threshold=0.05,
+                                                                     min_samples=10,
+                                                                     sample_size=100)
         for i in range(len(dld_highVoltage_peak)):
             dld_t_peak_list.append(dld_t_peak[i] / maximum_location)
             high_voltage_mean_list.append(dld_highVoltage_peak[i])
-    if model == 'poly':
+
+    if model == 'curve_fit':
         fitresult, _ = curve_fit(voltage_corr, np.array(high_voltage_mean_list), np.array(dld_t_peak_list))
-    elif model == 'hybrid':
-        model = hybrid_voltage_calibration(np.array(high_voltage_mean_list), np.array(dld_t_peak_list))
-        #f_v = model.predict(np.array(high_voltage_mean_list).reshape(-1, 1))
-    elif model == 'robust':
-        model = robust_voltage_fit(np.array(high_voltage_mean_list), np.array(dld_t_peak_list))
-        #f_v = model.predict(np.array(high_voltage_mean_list).reshape(-1, 1))
+    elif model == 'hybrid_fit':
+        fitresult = hybrid_voltage_calibration(np.array(high_voltage_mean_list), np.array(dld_t_peak_list))
+    elif model == 'robust_fit':
+        fitresult = robust_voltage_fit(np.array(high_voltage_mean_list), np.array(dld_t_peak_list))
 
     if plot or save:
         fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
@@ -290,7 +300,12 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
         plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
 
         ax2 = ax1.twinx()
-        f_v = voltage_corr(np.array(high_voltage_mean_list), *fitresult)
+        if model == 'curve_fit':
+            f_v = voltage_corr(np.array(high_voltage_mean_list), *fitresult)
+        elif model == 'hybrid_fit':
+            f_v = fitresult.predict(np.array(high_voltage_mean_list).reshape(-1, 1))
+        elif model == 'robust_fit':
+            f_v = fitresult.predict(np.array(high_voltage_mean_list).reshape(-1, 1))
         y = ax2.plot(np.array(high_voltage_mean_list) / 1000, np.sqrt(f_v), color='r', label=r"$C_V$")
         ax2.set_ylabel(r"$C_V$", color="red", fontsize=10)  # Get the current axis
         ax2.tick_params(axis='y', colors='red')  # Change color and thickness of tick labels on y-axis
@@ -311,7 +326,8 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
 
 def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration_mode, index_fig, plot, save,
                       apply_local='all', noise_remove=True, maximum_cal_method='mean',
-                      maximum_sample_method='mean', fig_size=(5, 5), fast_calibration=False, bin_size=0.01):
+                      maximum_sample_method='mean', fig_size=(5, 5), fast_calibration=False, bin_size=0.01,
+                      model='poly'):
     """
     Perform voltage correction on the given data.
 
@@ -417,13 +433,14 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
 
     print('The maximum/mean/median of histogram is located at:', maximum_location)
     print('The high voltage ranges are:', np.min(dld_highVoltage_peak_v), np.max(dld_highVoltage_peak_v))
-    print('The mean of tof/mc  before voltage calibration is:', np.mean(dld_peak_b))
+    mean_before = np.mean(dld_peak_b)
+    print('The mean of tof/mc  before voltage calibration is:', mean_before)
     fitresult = voltage_correction(dld_highVoltage_peak_v, dld_peak_b, variables,
                                    maximum_location, index_fig=index_fig,
                                    figname='voltage_corr',
                                    sample_size=sample_size, mode=mode, calibration_mode=calibration_mode,
                                    sample_range_max=maximum_sample_method, bin_size=bin_size,
-                                   plot=plot, save=save, fig_size=fig_size)
+                                   plot=plot, save=save, fig_size=fig_size, model=model)
 
     calibration_mc_tof = np.copy(variables.dld_t_calib) if calibration_mode == 'tof' else np.copy(variables.mc_calib)
 
@@ -437,7 +454,12 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
     elif apply_local == 'all':
         mask_fv = np.ones_like(dld_highVoltage, dtype=bool)
 
-    f_v = voltage_corr(dld_highVoltage[mask_fv], *fitresult)
+    if model == 'curve_fit':
+        f_v = voltage_corr(dld_highVoltage[mask_fv], *fitresult)
+    elif model == 'hybrid_fit':
+        f_v = fitresult.predict(dld_highVoltage[mask_fv].reshape(-1, 1))
+    elif model == 'robust_fit':
+        f_v = fitresult.predict(dld_highVoltage[mask_fv].reshape(-1, 1))
 
     calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] / np.sqrt(f_v)
 
@@ -459,7 +481,12 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
 
         # Plot high voltage curve
         ax2 = ax1.twinx()
-        f_v_plot = voltage_corr(dld_highVoltage_peak_v, *fitresult)
+        if model == 'curve_fit':
+            f_v_plot = voltage_corr(dld_highVoltage_peak_v, *fitresult)
+        elif model == 'hybrid_fit':
+            f_v_plot = fitresult.predict(dld_highVoltage_peak_v.reshape(-1, 1))
+        elif model == 'robust_fit':
+            f_v_plot = fitresult.predict(dld_highVoltage_peak_v.reshape(-1, 1))
 
         y = ax2.plot(dld_highVoltage_peak_v / 1000, 1 / np.sqrt(f_v_plot), color='r', label=r"$C_{V}^{-1}$")
         ax2.set_ylabel(r"$C_{V}^{-1}$", color="red", fontsize=10)
@@ -498,8 +525,10 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
             plt.savefig(variables.result_path + "//peak_tof_V_corr_%s.png" % index_fig, format="png", dpi=600)
         if plot:
             plt.show()
-
-    print('The mean of tof/mc  after voltage calibration is:', np.mean(calibration_mc_tof[mask_temporal]))
+    mean_after = np.mean(calibration_mc_tof[mask_temporal])
+    print('The mean of tof/mc  after voltage calibration is:', mean_after)
+    print('The difference between the mean of tof/mc before and after voltage calibration is:',
+          mean_after - mean_before)
     if calibration_mode == 'tof':
         variables.dld_t_calib = calibration_mc_tof
     elif calibration_mode == 'mc':
@@ -523,29 +552,7 @@ def bowl_corr(data_xy, a, b, c, d, e, f):
     return result
 
 
-def hemisphere_corr(data_xy, a, b, c, r):
-    """
-    Objective function for the bowl correction.
-
-    Args:
-        data_xy (list): Tuple containing the x and y data points.
-        a (float): Coefficient controlling the curvature in the x-direction.
-        b (float): x-coordinate of the center of the hemisphere in the xy-plane.
-        c (float): Coefficient controlling the curvature in the y-direction.
-        r (float): Radius of the hemisphere.
-        hemisphere. In the provided function hemisphere_fit, these coefficients are associated with the squared terms
-        (x - b)^2 and (y - b)^2.
-        r (float): The radius of the hemisphere.
-
-    Returns:
-        result (numpy.ndarray): Result of the quadratic equation.
-    """
-    x = data_xy[0]
-    y = data_xy[1]
-    result = a * (x - b) ** 2 + c * (y - b) ** 2 + r ** 2
-    return result
-
-def hybrid_calibration_model(dld_x, dld_y, dld_t, sample_range_max, sample_size):
+def hybrid_calibration_model(dld_x, dld_y, dld_t):
     """
     Train a hybrid machine learning model for bowl correction.
 
@@ -553,8 +560,6 @@ def hybrid_calibration_model(dld_x, dld_y, dld_t, sample_range_max, sample_size)
         dld_x (numpy.ndarray): X coordinates of the data points.
         dld_y (numpy.ndarray): Y coordinates of the data points.
         dld_t (numpy.ndarray): Time values of the data points.
-        sample_range_max (str): Sampling range method.
-        sample_size (int): Size of each sample.
 
     Returns:
         model: Trained machine learning model.
@@ -656,7 +661,7 @@ def compute_sample(i, j, d, dld_x_bowl, dld_y_bowl, dld_t_bowl, maximum_location
 
 
 def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, maximum_location, sample_range_max,
-                    sample_size, calibration_mode, fit_mode, index_fig, plot, save, fig_size=(7, 5)):
+                    sample_size, calibration_mode, fit_mode, index_fig, plot, save, fig_size=(7, 5), bin_size=0.01):
     """
     Perform bowl correction on the input data.
 
@@ -674,6 +679,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         plot (bool): Flag indicating whether to plot the surface.
         save (bool): Flag indicating whether to save the plot.
         fig_size (tuple): Size of the figure.
+        bin_size (float): Size of the bin.
 
     Returns:
         parameters (numpy.ndarray): Optimized parameters of the bowl correction.
@@ -693,7 +699,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
     # Use ThreadPoolExecutor or ProcessPoolExecutor
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(compute_sample, i, j, d, dld_x_bowl, dld_y_bowl, dld_t_bowl, maximum_location,
-                                   sample_range_max)
+                                   sample_range_max, bin_size)
                    for i, j in grid]
 
         for future in concurrent.futures.as_completed(futures):
@@ -707,14 +713,9 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
     if fit_mode == 'curve_fit':
         parameters, covariance = curve_fit(bowl_corr, [np.array(x_sample_list), np.array(y_sample_list)],
                                            np.array(dld_t_peak_list))
-    elif fit_mode == 'hemisphere_fit':
-        # Initial guess for the parameters (a, b, c, r)
-        initial_guess = [1.0, 0.0, 1.0, 1.0]
-        parameters, covariance = curve_fit(hemisphere_corr, [np.array(x_sample_list), np.array(y_sample_list)],
-                                           np.array(dld_t_peak_list), p0=initial_guess)
-        print('The cx, cy, r, c0 are:', parameters)
     elif fit_mode == 'ml_fit':
-        parameters = hybrid_calibration_model(np.array(x_sample_list), np.array(y_sample_list), np.array(dld_t_peak_list))
+        parameters = hybrid_calibration_model(np.array(x_sample_list), np.array(y_sample_list),
+                                              np.array(dld_t_peak_list))
     elif fit_mode == 'robust_fit':
         parameters = robust_fit(np.array(x_sample_list), np.array(y_sample_list), np.array(dld_t_peak_list))
 
@@ -728,12 +729,10 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         X, Y = np.meshgrid(model_x_data, model_y_data)
         if fit_mode == 'curve_fit':
             Z = bowl_corr(np.array([X, Y]), *parameters)
-        elif fit_mode == 'hemisphere_fit':
-            Z = hemisphere_corr(np.array([X, Y]), *parameters)
         elif fit_mode == 'ml_fit':
-            Z = parameters.predict(np.column_stack((X, Y)))
+            Z = parameters.predict(np.column_stack((X.ravel(), Y.ravel()))).reshape(X.shape)
         elif fit_mode == 'robust_fit':
-            Z = parameters.predict(np.column_stack((X, Y)))
+            Z = parameters.predict(np.column_stack((X.ravel(), Y.ravel()))).reshape(X.shape)
 
         fig, ax = plt.subplots(figsize=fig_size, subplot_kw=dict(projection="3d"), constrained_layout=True)
         box = ax.get_position()
@@ -778,7 +777,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         dld_highVoltage (numpy.ndarray): High voltage values.
         det_diam (float): Detector diameter.
         sample_size (int): Sample size.
-        fit_mode (str): Fit mode ('curve_fit' or 'hemisphere_fit').
+        fit_mode (str): Fit mode ('curve_fit', 'ml_fit', or 'robust_fit').
         calibration_mode (str): Calibration mode ('tof' or 'mc').
         index_fig (int): Index figure.
         plot (bool): Flag indicating whether to plot the results.
@@ -833,10 +832,12 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
     dld_y_peak = dld_y[mask_temporal]
     dld_highVoltage_peak = dld_highVoltage[mask_temporal]
 
-    print('The mean of tof  before bowl calibration is:', np.mean(dld_peak))
+    mean_before = np.mean(dld_peak)
+    print('The mean of tof  before bowl calibration is:', mean_before)
     parameters = bowl_correction(dld_x_peak, dld_y_peak, dld_peak, variables, det_diam, maximum_location,
                                  maximum_sample_method, sample_size=sample_size, calibration_mode=calibration_mode,
-                                 fit_mode=fit_mode, index_fig=index_fig, plot=plot, save=save, fig_size=fig_size)
+                                 fit_mode=fit_mode, index_fig=index_fig, plot=plot, save=save, fig_size=fig_size,
+                                 bin_size=bin_size)
     print('The fit result is:', parameters)
 
     if apply_local == 'all':
@@ -846,8 +847,6 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
 
     if fit_mode == 'curve_fit':
         f_bowl = bowl_corr([dld_x[mask_fv], dld_y[mask_fv]], *parameters)
-    elif fit_mode == 'hemisphere_fit':
-        f_bowl = hemisphere_corr([dld_x[mask_fv], dld_y[mask_fv]], *parameters)
     elif fit_mode == 'ml_fit':
         f_bowl = parameters.predict(np.column_stack((dld_x[mask_fv], dld_y[mask_fv])))
     elif fit_mode == 'robust_fit':
@@ -857,7 +856,10 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
 
     calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] / f_bowl
 
-    print('The mean of tof  before bowl calibration is:', np.mean(calibration_mc_tof[mask_temporal]))
+    mean_after = np.mean(calibration_mc_tof[mask_temporal])
+    print('The mean of tof  before bowl calibration is:', mean_after)
+    print('The difference between the mean of tof before and after bowl calibration is:',
+          mean_after - mean_before)
 
     if plot or save:
         # Plot how bowl correct tof/mc vs high voltage
@@ -876,8 +878,6 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
 
         if fit_mode == 'curve_fit':
             f_bowl_plot = bowl_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
-        elif fit_mode == 'hemisphere_fit':
-            f_bowl_plot = hemisphere_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
         elif fit_mode == 'ml_fit':
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
         elif fit_mode == 'robust_fit':
@@ -902,8 +902,6 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         mask = np.random.randint(0, len(dld_highVoltage_peak), 10000)
         if fit_mode == 'curve_fit':
             f_bowl_plot = bowl_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
-        elif fit_mode == 'hemisphere_fit':
-            f_bowl_plot = hemisphere_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
         elif fit_mode == 'ml_fit':
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
         elif fit_mode == 'robust_fit':
@@ -937,8 +935,6 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         mask = np.random.randint(0, len(dld_highVoltage_peak), 500)
         if fit_mode == 'curve_fit':
             f_bowl_plot = bowl_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
-        elif fit_mode == 'hemisphere_fit':
-            f_bowl_plot = hemisphere_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
         elif fit_mode == 'ml_fit':
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
         elif fit_mode == 'robust_fit':
@@ -953,7 +949,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
 
         ax.set_xlabel(r'$X_{det}$ (mm)', fontsize=10, labelpad=10)
         ax.set_ylabel(r'$Y_{det}$ (mm)', fontsize=10, labelpad=10)
-        ax.set_zlabel(r"$t_{C_{B}}}$", fontsize=10, labelpad=5)
+        ax.set_zlabel(r"$t_{C_{B}}$", fontsize=10, labelpad=5)
         ax.view_init(elev=7, azim=-41)
 
         if save:

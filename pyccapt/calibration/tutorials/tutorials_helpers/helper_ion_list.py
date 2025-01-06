@@ -131,10 +131,9 @@ def call_ion_list(variables, selector):
 
                 fitresult = shift_calib(peaks_chos, variables.list_material)
                 variables.mc_calib = shift(variables.mc_calib_backup, *fitresult)
-
-            button_fit.disabled = False
             with out_mc:
                 print('parametric fit done')
+        button_fit.disabled = False
 
     button_plot_result = widgets.Button(description="plot result")
 
