@@ -172,12 +172,12 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         layout=label_layout
     )
     maximum_cal_method_v = widgets.Dropdown(
-        options=[('mean', 'mean'), ('histogram', 'histogram'), ('median', 'median')],
+        options=[('histogram', 'histogram'), ('mean', 'mean'), ('median', 'median')],
         description='peak max:',
         layout=label_layout
     )
     model_v = widgets.Dropdown(
-        options=[('curve_fit', 'curve_fit'), ('hybrid_fit', 'hybrid_fit'), ('robust_fit', 'robust_fit')],
+        options=[('robust_fit', 'robust_fit'), ('curve_fit', 'curve_fit'), ('hybrid_fit', 'hybrid_fit')],
         description='fit mode:',
         layout=label_layout
     )
@@ -245,8 +245,8 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         vol_button.disabled = False
 
     sample_size_b = widgets.IntText(value=5, description='sample size:', layout=label_layout)
-    fit_mode_b = widgets.Dropdown(options=[('curve_fit', 'curve_fit'), ('ml_fit', 'ml_fit'),
-                                           ('robust_fit', 'robust_fit')],
+    fit_mode_b = widgets.Dropdown(options=[('robust_fit', 'robust_fit'), ('curve_fit', 'curve_fit'),
+                                           ('ml_fit', 'ml_fit')],
                                   description='fit mode:', layout=label_layout)
     index_fig_b = widgets.IntText(value=1, description='fig index:', layout=label_layout)
     bin_size_b = widgets.FloatText(value=0.01, description='bin size:', layout=label_layout)
@@ -298,7 +298,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
 
     def bowl_correction(b, variables, out, out_status, calibration_mode, pulse_mode):
         bowl_button.disabled = True
-        with out_status:
+        with out:
             out_status.clear_output()
             pb_bowl.value = "<b>Starting...</b>"
             if variables.selected_x1 == 0 or variables.selected_x2 == 0:
