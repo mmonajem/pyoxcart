@@ -1,6 +1,6 @@
 import ipywidgets as widgets
 import numpy as np
-from IPython.display import display, clear_output
+from IPython.display import display
 from ipywidgets import Output
 
 from pyccapt.calibration.calibration import calibration, mc_plot
@@ -9,6 +9,11 @@ from pyccapt.calibration.calibration import calibration, mc_plot
 label_layout = widgets.Layout(width='300px')
 
 
+def reset_on_click(variables, calibration_mode):
+    if calibration_mode.value == 'tof_calib':
+        variables.dld_t_calib = variables.data['t (ns)'].to_numpy()
+    elif calibration_mode.value == 'mc_calib':
+        variables.mc_calib = variables.data['mc_uc (Da)'].to_numpy()
 
 
 def reset_back_on_click(variables, calibration_mode):
@@ -25,9 +30,11 @@ def save_on_click(variables, calibration_mode):
         variables.mc_calib_backup = np.copy(variables.mc_calib)
 
 
-def clear_plot_on_click(out):
+def clear_plot_on_click(out, out_status):
     with out:
         out.clear_output()
+    with out_status:
+        out_status.clear_output()
 
 
 def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse_mode):
@@ -43,7 +50,11 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         layout=label_layout
     )
     reset_back_button = widgets.Button(
-        description='reset back correction',
+        description='back to saved',
+        layout=label_layout
+    )
+    reset_button = widgets.Button(
+        description='reset correction',
         layout=label_layout
     )
     save_button = widgets.Button(
@@ -108,10 +119,11 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
     plot_button.on_click(lambda b: hist_plot(b, variables, out, calibration_mode))
     plot_stat_button.on_click(lambda b: stat_plot(b, variables, calibration_mode, out))
     reset_back_button.on_click(lambda b: reset_back_on_click(variables, calibration_mode))
+    reset_button.on_click(lambda b: reset_on_click(variables, calibration_mode))
     save_button.on_click(lambda b: save_on_click(variables, calibration_mode))
     vol_button.on_click(lambda b: vol_correction(b, variables, out, out_status, calibration_mode, pulse_mode))
     bowl_button.on_click(lambda b: bowl_correction(b, variables, out, out_status, calibration_mode, pulse_mode))
-    clear_plot.on_click(lambda b: clear_plot_on_click(out))
+    clear_plot.on_click(lambda b: clear_plot_on_click(out, out_status))
     auto_button.on_click(lambda b: automatic_calibration(b, variables, out, out_status, calibration_mode, pulse_mode))
     auto_button_bowl.on_click(lambda b: automatic_bowl_calibration(b, variables, out, out_status, calibration_mode,
                                                                    pulse_mode))
@@ -140,6 +152,8 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
     def hist_plot(b, variables, out, calibration_mode):
         plot_button.disabled = True
         figure_size = (figure_mc_size_x.value, figure_mc_size_y.value)
+        with out_status:
+            out_status.clear_output()
         with out:
             out.clear_output()
             mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value, normalize=False,
@@ -172,7 +186,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         layout=label_layout
     )
     maximum_cal_method_v = widgets.Dropdown(
-        options=[('histogram', 'histogram'), ('mean', 'mean'), ('median', 'median')],
+        options=[('mean', 'mean'), ('histogram', 'histogram'), ('median', 'median')],
         description='peak max:',
         layout=label_layout
     )
@@ -205,42 +219,41 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
 
     def vol_correction(b, variables, out, out_status, calibration_mode, pulse_mode):
         vol_button.disabled = True
-        with out:
-            out_status.clear_output()
+        with out_status:
             pb_vol.value = "<b>Starting...</b>"
             if variables.selected_x1 == 0 or variables.selected_x2 == 0:
                 print('Please first select a peak')
             else:
                 print('Selected mc ranges are: (%s, %s)' % (variables.selected_x1, variables.selected_x2))
-                with out:
-                    print('----------------Voltage Calibration-------------------')
-                    figure_size = (figure_v_size_x.value, figure_v_size_y.value)
-                    sample_size_p = sample_size_v.value
-                    index_fig_p = index_fig_v.value
-                    plot_p = plot_v.value
-                    save_p = save_v.value
-                    mode_p = mode_v.value
-                    maximum_cal_method_p = maximum_cal_method_v.value
-                    maximum_sample_method_p = maximum_sample_method_v.value
-                    noise_remove_p = noise_remove_v.value
-                    if calibration_mode.value == 'tof_calib':
-                        calibration_mode_t = 'tof'
-                    elif calibration_mode.value == 'mc_calib':
-                        calibration_mode_t = 'mc'
-                    if pulse_mode == 'voltage':
-                        voltage = variables.dld_high_voltage + (0.7 * variables.dld_pulse)
-                    elif pulse_mode == 'laser':
-                        voltage = variables.dld_high_voltage
+                print('----------------Voltage Calibration-------------------')
+                figure_size = (figure_v_size_x.value, figure_v_size_y.value)
+                sample_size_p = sample_size_v.value
+                index_fig_p = index_fig_v.value
+                plot_p = plot_v.value
+                save_p = save_v.value
+                mode_p = mode_v.value
+                maximum_cal_method_p = maximum_cal_method_v.value
+                maximum_sample_method_p = maximum_sample_method_v.value
+                noise_remove_p = noise_remove_v.value
+                if calibration_mode.value == 'tof_calib':
+                    calibration_mode_t = 'tof'
+                elif calibration_mode.value == 'mc_calib':
+                    calibration_mode_t = 'mc'
+                if pulse_mode == 'voltage':
+                    voltage = variables.dld_high_voltage + (0.7 * variables.dld_pulse)
+                elif pulse_mode == 'laser':
+                    voltage = variables.dld_high_voltage
 
-                    calibration.voltage_corr_main(voltage, variables, sample_size=sample_size_p,
-                                                  calibration_mode=calibration_mode_t,
-                                                  index_fig=index_fig_p, plot=plot_p, save=save_p,
-                                                  apply_local=apply_v.value, mode=mode_p,
-                                                  maximum_cal_method=maximum_cal_method_p,
-                                                  noise_remove=noise_remove_p,
-                                                  maximum_sample_method=maximum_sample_method_p,
-                                                  fig_size=figure_size, fast_calibration=fast_calibration.value,
-                                                  model=model_v.value, bin_size=bin_size_v.value)
+                calibration.voltage_corr_main(voltage, variables, sample_size=sample_size_p,
+                                              calibration_mode=calibration_mode_t,
+                                              index_fig=index_fig_p, plot=plot_p, save=save_p,
+                                              apply_local=apply_v.value, mode=mode_p,
+                                              maximum_cal_method=maximum_cal_method_p,
+                                              noise_remove=noise_remove_p,
+                                              maximum_sample_method=maximum_sample_method_p,
+                                              fig_size=figure_size, fast_calibration=fast_calibration.value,
+                                              model=model_v.value, bin_size=bin_size_v.value,
+                                              peak_maximum=peak_val.value)
             pb_vol.value = "<b>Finished</b>"
         vol_button.disabled = False
 
@@ -276,6 +289,12 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         description='fast calibration:',
         layout=label_layout
     )
+    automatic_window_update = widgets.Dropdown(
+        options=[('False', False), ('True', True)],
+        description='auto window update:',
+        layout=label_layout
+    )
+    peak_val = widgets.FloatText(value=0, description='peak value:', layout=label_layout)
     apply_b = widgets.Dropdown(
         options=[('all', 'all'), ('temporal', 'temporal'), ],
         description='apply mode:',
@@ -298,8 +317,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
 
     def bowl_correction(b, variables, out, out_status, calibration_mode, pulse_mode):
         bowl_button.disabled = True
-        with out:
-            out_status.clear_output()
+        with out_status:
             pb_bowl.value = "<b>Starting...</b>"
             if variables.selected_x1 == 0 or variables.selected_x2 == 0:
                 print('Please first select a peak')
@@ -317,22 +335,22 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                     calibration_mode_t = 'tof'
                 elif calibration_mode.value == 'mc_calib':
                     calibration_mode_t = 'mc'
-                with out:
-                    if pulse_mode == 'voltage':
-                        voltage = variables.dld_high_voltage + (0.7 * variables.dld_pulse)
-                    elif pulse_mode == 'laser':
-                        voltage = variables.dld_high_voltage
-                    print('------------------Bowl Calibration---------------------')
-                    calibration.bowl_correction_main(variables.dld_x_det, variables.dld_y_det,
-                                                     voltage,
-                                                     variables, det_diam,
-                                                     sample_size=sample_size_p, fit_mode=fit_mode_p,
-                                                     maximum_cal_method=maximum_cal_method_p,
-                                                     maximum_sample_method=maximum_sample_method_p,
-                                                     apply_local=apply_b.value, fig_size=figure_size,
-                                                     calibration_mode=calibration_mode_t, index_fig=index_fig_p,
-                                                     plot=plot_p, save=save_p, fast_calibration=fast_calibration.value,
-                                                     bin_size=bin_size_b.value)
+                if pulse_mode == 'voltage':
+                    voltage = variables.dld_high_voltage + (0.7 * variables.dld_pulse)
+                elif pulse_mode == 'laser':
+                    voltage = variables.dld_high_voltage
+                print('------------------Bowl Calibration---------------------')
+                calibration.bowl_correction_main(variables.dld_x_det, variables.dld_y_det,
+                                                 voltage,
+                                                 variables, det_diam,
+                                                 sample_size=sample_size_p, fit_mode=fit_mode_p,
+                                                 maximum_cal_method=maximum_cal_method_p,
+                                                 maximum_sample_method=maximum_sample_method_p,
+                                                 apply_local=apply_b.value, fig_size=figure_size,
+                                                 calibration_mode=calibration_mode_t, index_fig=index_fig_p,
+                                                 plot=plot_p, save=save_p, fast_calibration=fast_calibration.value,
+                                                 bin_size=bin_size_b.value,
+                                                 peak_maximum=peak_val.value)
 
             pb_bowl.value = "<b>Finished</b>"
         bowl_button.disabled = False
@@ -343,7 +361,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         elif calibration_mode.value == 'mc_calib':
             calibration_mode_t = 'mc'
         with out:
-            clear_output(True)
+            out.clear_output()
             calibration.plot_selected_statistic(variables, bin_fdm.value, index_fig.value,
                                                 calibration_mode=calibration_mode_t, save=True)
 
@@ -362,7 +380,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         elif calibration_mode.value == 'mc_calib':
             back_tof_mc = np.copy(variables.mc_calib)
         while continue_calibration:
-            with out:
+            with out_status:
                 print('=======================================================')
                 print('Starting calibration number %s' % counter)
                 mrp = mc_plot.hist_plot(variables, bin_size.value, log=True, target=calibration_mode.value,
@@ -370,7 +388,8 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                                         prominence=prominence.value, distance=distance.value, percent=percent.value,
                                         selector='rect', figname=index_fig_val, lim=lim_tof.value, save_fig=save.value,
                                         peaks_find_plot=plot_peak.value, print_info=False, figure_size=figure_size,
-                                        plot_show=False)
+                                        plot_show=False, fast_calibration=fast_calibration.value,
+                                        draw_calib_rect=automatic_window_update.value, mrp_all=True)
                 print('The MRPs at (0.5, 0.1, 0.01) are:', mrp)
 
                 counter += 1
@@ -425,7 +444,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         elif calibration_mode.value == 'mc_calib':
             back_tof_mc = np.copy(variables.mc_calib)
         while continue_calibration:
-            with out:
+            with out_status:
                 print('=======================================================')
                 print('Starting calibration number %s' % counter)
 
@@ -434,7 +453,8 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                                   prominence=prominence.value, distance=distance.value, percent=percent.value,
                                         selector='rect', figname=index_fig_val, lim=lim_tof.value, save_fig=save.value,
                                   peaks_find_plot=plot_peak.value, print_info=False, figure_size=figure_size,
-                                  plot_show=False, fast_calibration=fast_calibration.value)
+                                  plot_show=False, fast_calibration=fast_calibration.value,
+                                        draw_calib_rect=automatic_window_update.value, mrp_all=True)
                 print('The MRPs at (0.5, 0.1, 0.01) are:', mrp)
                 counter += 1
 
@@ -469,7 +489,8 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                 #                         prominence=prominence.value, distance=distance.value, percent=percent.value,
                 #                         selector='rect', figname=index_fig_val, lim=lim_tof.value, save_fig=save.value,
                 #                         peaks_find_plot=plot_peak.value, print_info=False, figure_size=figure_size,
-                #                         plot_show=False, fast_calibration=fast_calibration.value)
+                #                         plot_show=False, fast_calibration=fast_calibration.value,
+                #                         draw_calib_rect=automatic_window_update.value, mrp_all=True)
                 bowl_correction(b, variables, out, out_status, calibration_mode, pulse_mode)
                 index_fig_val += 1
 
@@ -505,7 +526,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
     column11 = widgets.VBox([bin_size, lim_tof, prominence, distance, percent, bin_fdm, plot_peak, index_fig, save,
                              figure_mc_size_x, figure_mc_size_y])
     column12 = widgets.VBox([plot_button, auto_button, auto_button_bowl, initial_calib_button, save_button,
-                             reset_back_button, clear_plot, plot_stat_button])
+                             reset_back_button, reset_button, clear_plot, plot_stat_button])
     column22 = widgets.VBox([sample_size_b, bin_size_b, fit_mode_b, maximum_cal_method_b, maximum_sample_method_b,
                              apply_b, plot_b,
                              index_fig_b, save_b, figure_b_size_x, figure_b_size_y])
@@ -515,7 +536,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                              plot_v, index_fig_v,
                              save_v, figure_v_size_x, figure_v_size_y])
     column32 = widgets.VBox([vol_button, pb_vol])
-    column34 = widgets.VBox([calibration_mode, fast_calibration])
+    column34 = widgets.VBox([calibration_mode, fast_calibration, automatic_window_update, peak_val])
 
     # Create the overall layout by arranging the columns side by side
     layout1 = widgets.HBox([column11, column22, column33, column34])
@@ -526,5 +547,5 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
     # Display the layout
     display(layout)
 
-    out = Output()
-    display(out)
+    out_put_layout = widgets.VBox([out, out_status])
+    display(out_put_layout)

@@ -200,7 +200,8 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
                     peaks, properties = find_peaks(y, height=0)
                     index_peak_max_ini = np.argmax(properties['peak_heights'])
                     max_peak = peaks[index_peak_max_ini]
-                    dld_t_peak_list.append(x[max_peak] / maximum_location)
+                    # dld_t_peak_list.append(x[max_peak] / maximum_location)
+                    dld_t_peak_list.append(maximum_location / x[max_peak])
                     mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - bin_size)
                                             , (dld_t_peak_selected <= x[max_peak] + bin_size))
                     if len(dld_highVoltage_peak_selected[mask_v]) == 0:
@@ -214,19 +215,22 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
                                   len(dld_highVoltage_peak_selected[mask_v]))
                     high_voltage_mean_list.append(np.mean(dld_highVoltage_peak_selected[mask_v]))
                 except ValueError:
-                    print('cannot find the maximum')
-                    dld_t_mean = np.median(dld_t_peak_selected)
-                    dld_t_peak_list.append(dld_t_mean / maximum_location)
+                    # print('cannot find the maximum')
+                    dld_t_mean = np.mean(dld_t_peak_selected)
+                    # dld_t_peak_list.append(dld_t_mean / maximum_location)
+                    dld_t_peak_list.append(maximum_location / dld_t_mean)
                     high_voltage_mean = np.mean(dld_highVoltage_peak_selected)
                     high_voltage_mean_list.append(high_voltage_mean)
             elif sample_range_max == 'mean':
                 dld_t_mean = np.mean(dld_t_peak_selected)
-                dld_t_peak_list.append(dld_t_mean / maximum_location)
+                # dld_t_peak_list.append(dld_t_mean / maximum_location)
+                dld_t_peak_list.append(maximum_location / dld_t_mean)
                 high_voltage_mean = np.mean(dld_highVoltage_peak_selected)
                 high_voltage_mean_list.append(high_voltage_mean)
             elif sample_range_max == 'median':
                 dld_t_mean = np.median(dld_t_peak_selected)
-                dld_t_peak_list.append(dld_t_mean / maximum_location)
+                # dld_t_peak_list.append(dld_t_mean / maximum_location)
+                dld_t_peak_list.append(maximum_location / dld_t_mean)
                 high_voltage_mean = np.median(dld_highVoltage_peak_selected)
                 high_voltage_mean_list.append(high_voltage_mean)
 
@@ -245,37 +249,40 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
                     peaks, properties = find_peaks(y, height=0)
                     index_peak_max_ini = np.argmax(properties['peak_heights'])
                     max_peak = peaks[index_peak_max_ini]
-                    dld_t_peak_list.append(x[max_peak] / maximum_location)
-
+                    # dld_t_peak_list.append(x[max_peak] / maximum_location)
+                    dld_t_peak_list.append(maximum_location / x[max_peak])
                     mask_v = np.logical_and((dld_t_peak_selected >= x[max_peak] - bin_size)
                                             , (dld_t_peak_selected <= x[max_peak] + bin_size))
                     high_voltage_mean_list.append(np.mean(dld_highVoltage_peak_selected[mask_v]))
                 except ValueError:
-                    print('cannot find the maximum')
-                    dld_t_mean = np.median(dld_t_peak_selected)
-                    dld_t_peak_list.append(dld_t_mean / maximum_location)
+                    # print('cannot find the maximum')
+                    dld_t_mean = np.mean(dld_t_peak_selected)
+                    # dld_t_peak_list.append(dld_t_mean / maximum_location)
+                    dld_t_peak_list.append(maximum_location / dld_t_mean)
                     high_voltage_mean = np.mean(dld_highVoltage_peak_selected)
                     high_voltage_mean_list.append(high_voltage_mean)
             elif sample_range_max == 'mean':
                 dld_t_mean = np.mean(dld_t_peak_selected)
-                dld_t_peak_list.append(dld_t_mean / maximum_location)
+                # dld_t_peak_list.append(dld_t_mean / maximum_location)
+                dld_t_peak_list.append(maximum_location / dld_t_mean)
                 high_voltage_mean = np.mean(dld_highVoltage_peak_selected)
                 high_voltage_mean_list.append(high_voltage_mean)
             elif sample_range_max == 'median':
                 dld_t_mean = np.median(dld_t_peak_selected)
-                dld_t_peak_list.append(dld_t_mean / maximum_location)
-
+                # dld_t_peak_list.append(dld_t_mean / maximum_location)
+                dld_t_peak_list.append(maximum_location / dld_t_mean)
                 high_voltage_mean = np.median(dld_highVoltage_peak_selected)
                 high_voltage_mean_list.append(high_voltage_mean)
 
     elif mode == 'adaptive':
-        sample_size_d = int(len(dld_highVoltage_peak) / sample_size) + 1
+        # sample_size_d = int(len(dld_highVoltage_peak) / sample_size) + 1
         dld_highVoltage_peak, dld_t_peak = adaptive_voltage_sampling(dld_highVoltage_peak, dld_t_peak,
                                                                      variability_threshold=0.05,
                                                                      min_samples=10,
                                                                      sample_size=100)
         for i in range(len(dld_highVoltage_peak)):
-            dld_t_peak_list.append(dld_t_peak[i] / maximum_location)
+            # dld_t_peak_list.append(dld_t_peak[i] / maximum_location)
+            dld_t_peak_list.append(maximum_location / dld_t_peak[i])
             high_voltage_mean_list.append(dld_highVoltage_peak[i])
 
     if model == 'curve_fit':
@@ -294,7 +301,9 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
             ax1.set_ylabel("mc (Da)", fontsize=10)
             label = 'mc'
 
-        x = plt.scatter(np.array(high_voltage_mean_list) / 1000, np.array(dld_t_peak_list) * maximum_location,
+        # x = plt.scatter(np.array(high_voltage_mean_list) / 1000, np.array(dld_t_peak_list) * maximum_location,
+        #                 color="forestgreen", label=r"$%s_{wp}$" % label, s=5)
+        x = plt.scatter(np.array(high_voltage_mean_list) / 1000, maximum_location / np.array(dld_t_peak_list),
                         color="forestgreen", label=r"$%s_{wp}$" % label, s=5)
         ax1.set_xlabel("Voltage (kV)", fontsize=10)
         plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
@@ -306,7 +315,8 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
             f_v = fitresult.predict(np.array(high_voltage_mean_list).reshape(-1, 1))
         elif model == 'robust_fit':
             f_v = fitresult.predict(np.array(high_voltage_mean_list).reshape(-1, 1))
-        y = ax2.plot(np.array(high_voltage_mean_list) / 1000, np.sqrt(f_v), color='r', label=r"$C_V$")
+        # y = ax2.plot(np.array(high_voltage_mean_list) / 1000, np.sqrt(f_v), color='r', label=r"$C_V$")
+        y = ax2.plot(np.array(high_voltage_mean_list) / 1000, f_v, color='r', label=r"$C_V$")
         ax2.set_ylabel(r"$C_V$", color="red", fontsize=10)  # Get the current axis
         ax2.tick_params(axis='y', colors='red')  # Change color and thickness of tick labels on y-axis
         ax2.spines['right'].set_color('red')  # Change color of right border
@@ -327,7 +337,7 @@ def voltage_correction(dld_highVoltage_peak, dld_t_peak, variables, maximum_loca
 def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration_mode, index_fig, plot, save,
                       apply_local='all', noise_remove=True, maximum_cal_method='mean',
                       maximum_sample_method='mean', fig_size=(5, 5), fast_calibration=False, bin_size=0.01,
-                      model='poly'):
+                      model='poly', peak_maximum=0):
     """
     Perform voltage correction on the given data.
 
@@ -412,23 +422,26 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
 
     print('The number of samples is:', int(len(dld_highVoltage_peak_v) / sample_size))
 
-    if maximum_cal_method == 'histogram':
-        if fast_calibration:
-            dld_peak_b = np.random.choice(dld_peak_b, int(len(dld_peak_b) * 0.1), replace=False)
-        bins = np.linspace(np.min(dld_peak_b), np.max(dld_peak_b),
-                           round(np.max(dld_peak_b) / bin_size))
-        # y, x = np.histogram(dld_peak_b, bins=bins)
-        y = fast_histogram.histogram1d(dld_peak_b, bins=round(np.max(dld_peak_b) / bin_size) - 1,
-                                       range=(np.min(dld_peak_b), np.max(dld_peak_b)))
-        x = bins
-        peaks, properties = find_peaks(y, height=0)
-        index_peak_max_ini = np.argmax(properties['peak_heights'])
-        max_peak = peaks[index_peak_max_ini]
-        maximum_location = x[max_peak]
-    elif maximum_cal_method == 'mean':
-        maximum_location = np.mean(dld_peak_b)
-    elif maximum_cal_method == 'median':
-        maximum_location = np.median(dld_peak_b)
+    if peak_maximum == 0:
+        if maximum_cal_method == 'histogram':
+            if fast_calibration:
+                dld_peak_b = np.random.choice(dld_peak_b, int(len(dld_peak_b) * 0.1), replace=False)
+            bins = np.linspace(np.min(dld_peak_b), np.max(dld_peak_b),
+                               round(np.max(dld_peak_b) / bin_size))
+            # y, x = np.histogram(dld_peak_b, bins=bins)
+            y = fast_histogram.histogram1d(dld_peak_b, bins=round(np.max(dld_peak_b) / bin_size) - 1,
+                                           range=(np.min(dld_peak_b), np.max(dld_peak_b)))
+            x = bins
+            peaks, properties = find_peaks(y, height=0)
+            index_peak_max_ini = np.argmax(properties['peak_heights'])
+            max_peak = peaks[index_peak_max_ini]
+            maximum_location = x[max_peak]
+        elif maximum_cal_method == 'mean':
+            maximum_location = np.mean(dld_peak_b)
+        elif maximum_cal_method == 'median':
+            maximum_location = np.median(dld_peak_b)
+    else:
+        maximum_location = peak_maximum
 
 
     print('The maximum/mean/median of histogram is located at:', maximum_location)
@@ -461,7 +474,11 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
     elif model == 'robust_fit':
         f_v = fitresult.predict(dld_highVoltage[mask_fv].reshape(-1, 1))
 
-    calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] / np.sqrt(f_v)
+    print("Maximum value of f_v:", np.max(f_v))
+    print("Minimum value of f_v:", np.min(f_v))
+
+    # calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] * np.sqrt(f_v)
+    calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] * f_v
 
     if plot or save:
         # Plot how correction factor for selected peak_x
@@ -488,7 +505,8 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
         elif model == 'robust_fit':
             f_v_plot = fitresult.predict(dld_highVoltage_peak_v.reshape(-1, 1))
 
-        y = ax2.plot(dld_highVoltage_peak_v / 1000, 1 / np.sqrt(f_v_plot), color='r', label=r"$C_{V}^{-1}$")
+        # y = ax2.plot(dld_highVoltage_peak_v / 1000, 1 / np.sqrt(f_v_plot), color='r', label=r"$C_{V}^{-1}$")
+        y = ax2.plot(dld_highVoltage_peak_v / 1000, f_v_plot, color='r', label=r"$C_{V}^{-1}$")
         ax2.set_ylabel(r"$C_{V}^{-1}$", color="red", fontsize=10)
         ax2.tick_params(axis='y', colors='red')  # Change color and thickness of tick labels on y-axis
         ax2.spines['right'].set_color('red')  # Change color of right border
@@ -511,7 +529,8 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
         ax1.set_xlabel("Voltage (kV)", fontsize=10)
         plt.grid(alpha=0.3, linestyle='-.', linewidth=0.4)
 
-        dld_t_plot = dld_peak_b * (1 / np.sqrt(f_v_plot))
+        # dld_t_plot = dld_peak_b * (1 / np.sqrt(f_v_plot))
+        dld_t_plot = dld_peak_b * f_v_plot
 
         y = plt.scatter(dld_highVoltage_peak_v[mask] / 1000, dld_t_plot[mask], color="red", label=r"$t_{C_{V}}$",
                         s=1)
@@ -631,12 +650,13 @@ def compute_sample(i, j, d, dld_x_bowl, dld_y_bowl, dld_t_bowl, maximum_location
         y_sample = np.median(x_y_selected[:, 1])
 
         if sample_range_max == 'mean':
-            dld_t_peak = np.mean(dld_t_bowl[mask]) / maximum_location
+            # dld_t_peak = np.mean(dld_t_bowl[mask]) / maximum_location
+            dld_t_peak = maximum_location / np.mean(dld_t_bowl[mask])
         elif sample_range_max == 'histogram':
             try:
                 dld_t_bowl_selected = dld_t_bowl[mask]
-                if len(dld_t_bowl_selected) > 200000:
-                    dld_t_bowl_selected = np.random.choice(dld_t_bowl_selected, 200000, replace=False)
+                # if len(dld_t_bowl_selected) > 2000000:
+                #     dld_t_bowl_selected = np.random.choice(dld_t_bowl_selected, 2000000, replace=False)
 
                 bins = np.linspace(np.min(dld_t_bowl_selected), np.max(dld_t_bowl_selected),
                                    round(np.max(dld_t_bowl_selected) / bin_size))
@@ -649,11 +669,13 @@ def compute_sample(i, j, d, dld_x_bowl, dld_y_bowl, dld_t_bowl, maximum_location
                 if len(peaks) > 0:
                     index_peak_max_ini = np.argmax(properties['peak_heights'])
                     max_peak = peaks[index_peak_max_ini]
-                    dld_t_peak = bins[max_peak] / maximum_location
+                    # dld_t_peak = bins[max_peak] / maximum_location
+                    dld_t_peak = maximum_location / bins[max_peak]
                 else:
-                    dld_t_peak = np.mean(dld_t_bowl[mask]) / maximum_location
+                    # dld_t_peak = np.mean(dld_t_bowl[mask]) / maximum_location
+                    dld_t_peak = maximum_location / np.mean(dld_t_bowl[mask])
             except ValueError:
-                print('cannot find the maximum')
+                # print('cannot find the maximum')
                 dld_t_peak = np.mean(dld_t_bowl[mask]) / maximum_location
 
         return x_sample, y_sample, dld_t_peak
@@ -693,7 +715,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
     h1 = int(np.floor(np.min(dld_y_bowl)))
     h2 = int(np.ceil(np.max(dld_y_bowl)))
 
-    d = sample_size  # sample size is in mm - so we change it to cm
+    d = sample_size  # sample size is in mm
     grid = product(range(h1, h2 - h2 % d, d), range(w1, w2 - w2 % d, d))
 
     # Use ThreadPoolExecutor or ProcessPoolExecutor
@@ -767,7 +789,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
 
 def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sample_size, fit_mode, calibration_mode,
                          index_fig, plot, save, apply_local='all', maximum_cal_method='mean', maximum_sample_method='mean',
-                         fig_size=(5, 5), fast_calibration=False, bin_size=0.01):
+                         fig_size=(5, 5), fast_calibration=False, bin_size=0.01, peak_maximum=0):
     """
     Perform bowl correction on the input data and plot the results.
 
@@ -810,22 +832,25 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
     dld_peak_mid = np.copy(dld_peak)
     if fast_calibration:
         dld_peak_mid = np.random.choice(dld_peak_mid, int(len(dld_peak_mid) * 0.1), replace=False)
-    if maximum_cal_method == 'histogram':
-        try:
-            bins = np.linspace(np.min(dld_peak_mid), np.max(dld_peak_mid), round(np.max(dld_peak_mid) / bin_size))
-            # y, x = np.histogram(dld_peak_mid, bins=bins)
-            y = fast_histogram.histogram1d(dld_peak_mid, bins=round(np.max(dld_peak_mid) / bin_size) - 1,
-                                             range=(np.min(dld_peak_mid), np.max(dld_peak_mid)))
-            x = bins
-            peaks, properties = find_peaks(y, height=0)
-            index_peak_max_ini = np.argmax(properties['peak_heights'])
-            maximum_location = x[peaks[index_peak_max_ini]]
-        except ValueError as e:
-            print(e)
-            print('The histogram max calculation method failed, using mean instead.')
+    if peak_maximum == 0:
+        if maximum_cal_method == 'histogram':
+            try:
+                bins = np.linspace(np.min(dld_peak_mid), np.max(dld_peak_mid), round(np.max(dld_peak_mid) / bin_size))
+                # y, x = np.histogram(dld_peak_mid, bins=bins)
+                y = fast_histogram.histogram1d(dld_peak_mid, bins=round(np.max(dld_peak_mid) / bin_size) - 1,
+                                                 range=(np.min(dld_peak_mid), np.max(dld_peak_mid)))
+                x = bins
+                peaks, properties = find_peaks(y, height=0)
+                index_peak_max_ini = np.argmax(properties['peak_heights'])
+                maximum_location = x[peaks[index_peak_max_ini]]
+            except ValueError as e:
+                print(e)
+                print('The histogram max calculation method failed, using mean instead.')
+                maximum_location = np.mean(dld_peak_mid)
+        elif maximum_cal_method == 'mean':
             maximum_location = np.mean(dld_peak_mid)
-    elif maximum_cal_method == 'mean':
-        maximum_location = np.mean(dld_peak_mid)
+    else:
+        maximum_location = peak_maximum
     print('The maximum/mean of peak is located at:', maximum_location)
 
     dld_x_peak = dld_x[mask_temporal]
@@ -854,7 +879,9 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
 
     calibration_mc_tof = np.copy(variables.dld_t_calib) if calibration_mode == 'tof' else np.copy(variables.mc_calib)
 
-    calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] / f_bowl
+    print("Maximum value of f_bowl:", np.max(f_bowl))
+    print("Minimum value of f_bowl:", np.min(f_bowl))
+    calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] * f_bowl
 
     mean_after = np.mean(calibration_mc_tof[mask_temporal])
     print('The mean of tof  before bowl calibration is:', mean_after)
@@ -882,7 +909,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
         elif fit_mode == 'robust_fit':
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
-        dld_t_plot = dld_peak[mask] / f_bowl_plot
+        dld_t_plot = dld_peak[mask] * f_bowl_plot
 
         y = plt.scatter(dld_highVoltage_peak[mask] / 1000, dld_t_plot, color="red", label=r"$t_{C_{B}}$", s=1)
 
@@ -906,10 +933,10 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
         elif fit_mode == 'robust_fit':
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
-        dld_t_plot = dld_peak[mask] / f_bowl_plot
+        dld_t_plot = dld_peak[mask] * f_bowl_plot
 
-        x = plt.scatter(dld_x_peak[mask], dld_peak[mask], color="blue", label=r"$t$", s=1)
-        y = plt.scatter(dld_x_peak[mask], dld_t_plot, color="red", label=r"$t_{C_{B}}$", s=1)
+        x = plt.scatter(dld_x_peak[mask], dld_peak[mask], color="blue", label=r"$t$", s=1, alpha=0.5)
+        y = plt.scatter(dld_x_peak[mask], dld_t_plot, color="red", label=r"$t_{C_{B}}$", s=1, alpha=0.5)
 
         if calibration_mode == 'tof':
             ax1.set_ylabel("Time of Flight (ns)", fontsize=10)
@@ -923,8 +950,39 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         if save:
             # Enable rendering for text elements
             rcParams['svg.fonttype'] = 'none'
-            plt.savefig(variables.result_path + "//peak_tof_bowl_corr_p_%s.svg" % index_fig, format="svg", dpi=600)
-            plt.savefig(variables.result_path + "//peak_tof_bowl_corr_p_%s.png" % index_fig, format="png", dpi=600)
+            plt.savefig(variables.result_path + "//peak_tof_bowl_corr_p_x_det_%s.svg" % index_fig, format="svg", dpi=600)
+            plt.savefig(variables.result_path + "//peak_tof_bowl_corr_p_x_det_%s.png" % index_fig, format="png", dpi=600)
+        if plot:
+            plt.show()
+
+        # Plot how bowl correction correct tof/mc vs dld_x position
+        fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
+        mask = np.random.randint(0, len(dld_highVoltage_peak), 10000)
+        if fit_mode == 'curve_fit':
+            f_bowl_plot = bowl_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
+        elif fit_mode == 'ml_fit':
+            f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
+        elif fit_mode == 'robust_fit':
+            f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
+        dld_t_plot = dld_peak[mask] * f_bowl_plot
+
+        x = plt.scatter(dld_y_peak[mask], dld_peak[mask], color="blue", label=r"$t$", s=1, alpha=0.5)
+        y = plt.scatter(dld_y_peak[mask], dld_t_plot, color="red", label=r"$t_{C_{B}}$", s=1, alpha=0.5)
+
+        if calibration_mode == 'tof':
+            ax1.set_ylabel("Time of Flight (ns)", fontsize=10)
+        elif calibration_mode == 'mc':
+            ax1.set_ylabel("mc (Da)", fontsize=10)
+
+        ax1.set_xlabel(r"$y_{det}$ (mm)", fontsize=10)
+        plt.grid(color='aqua', alpha=0.3, linestyle='-.', linewidth=0.4)
+        plt.legend(handles=[x, y], loc='upper right', markerscale=5., prop={'size': 10})
+
+        if save:
+            # Enable rendering for text elements
+            rcParams['svg.fonttype'] = 'none'
+            plt.savefig(variables.result_path + "//peak_tof_bowl_corr_p_y_det_%s.svg" % index_fig, format="svg", dpi=600)
+            plt.savefig(variables.result_path + "//peak_tof_bowl_corr_p_y_det_%s.png" % index_fig, format="png", dpi=600)
         if plot:
             plt.show()
 
@@ -939,7 +997,7 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
         elif fit_mode == 'robust_fit':
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
-        dld_t_plot = dld_peak[mask] / f_bowl_plot
+        dld_t_plot = dld_peak[mask] * f_bowl_plot
 
         scat_1 = ax.scatter(dld_x_peak[mask], dld_y_peak[mask], zs=dld_peak[mask], color="blue",
                             label=r"$t$", s=1)
@@ -1013,11 +1071,12 @@ def initial_calibration(data, flight_path_length):
     t = data['t (ns)'].to_numpy()
     xDet = data['x_det (cm)'].to_numpy() * 1E-2
     yDet = data['y_det (cm)'].to_numpy() * 1E-2
-    flightPathLength = flight_path_length * 1E-3
-    flightPathLength = xDet ** 2 + yDet ** 2 + flightPathLength ** 2
-    ini_calib_factor_flight_path = flightPathLength / np.mean(flightPathLength)
-    ini_calib_factor_voltage = np.sqrt(v_dc / np.median(v_dc))
+    flight_path_length = flight_path_length * 1E-3
+    d = np.sqrt(xDet ** 2 + yDet ** 2 + flight_path_length ** 2)
+    ini_calib_factor_flight_path = flight_path_length / d
+    ini_calib_factor_voltage = np.sqrt(v_dc / np.mean(v_dc))
     dld_t_calib = t * ini_calib_factor_flight_path * ini_calib_factor_voltage
+    # dld_t_calib = t * ini_calib_factor_voltage
     return dld_t_calib
 
 def plot_selected_statistic(variables, bin_fdm, index_fig, calibration_mode, save, fig_size=(5, 4)):

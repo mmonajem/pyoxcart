@@ -68,6 +68,7 @@ class AptHistPlotter:
         self.peak_widths = None
         self.prominences = None
         self.mask_f = None
+        self.plot_show = True
         self.legend_colors = []
 
     def plot_histogram(self, bin_width=0.1, normalize=False, label='mc', log=True, grid=False, steps='stepfilled',
@@ -91,6 +92,7 @@ class AptHistPlotter:
         """
         # Define the bins
         self.bin_width = bin_width
+        self.plot_show = plot_show
         self.bins = np.linspace(np.min(self.mc_tof), np.max(self.mc_tof), round(np.max(self.mc_tof) / bin_width))
 
         # Plot the histogram directly
@@ -242,17 +244,19 @@ class AptHistPlotter:
                 # Find the bin that contains the mc[i]
                 bin_index = np.searchsorted(self.x, mc[i])
                 peak_height = self.y[bin_index] * ((mc[i] - self.x[bin_index - 1]) / self.bin_width)
-                self.peak_annotates.append(plt.text(mc[i] + x_offset, peak_height + y_offset,
-                                                    r'%s' % ion[i], color='black', size=10, alpha=1))
-                self.annotates.append(str(i + 1))
+                if self.plot_show:
+                    self.peak_annotates.append(plt.text(mc[i] + x_offset, peak_height + y_offset,
+                                                        r'%s' % ion[i], color='black', size=10, alpha=1))
+                    self.annotates.append(str(i + 1))
         else:
             if mode == 'peaks':
                 for i in range(len(self.peaks)):
-                    self.peak_annotates.append(
-                        plt.text(self.x[self.peaks][i] + x_offset, self.y[self.peaks][i] + y_offset,
-                                 '%s' % '{:.2f}'.format(self.x[self.peaks][i]), color='black', size=10, alpha=1))
+                    if self.plot_show:
+                        self.peak_annotates.append(
+                            plt.text(self.x[self.peaks][i] + x_offset, self.y[self.peaks][i] + y_offset,
+                                     '%s' % '{:.2f}'.format(self.x[self.peaks][i]), color='black', size=10, alpha=1))
 
-                    self.annotates.append(str(i + 1))
+                        self.annotates.append(str(i + 1))
 
             elif mode == 'range':
                 for i in range(len(self.variables.peaks_x_selected)):
@@ -260,12 +264,13 @@ class AptHistPlotter:
                     bin_index = np.searchsorted(self.x, self.variables.peaks_x_selected[i])
                     peak_height = self.y[bin_index] * ((self.variables.peaks_x_selected[i] -
                                                         self.x[bin_index - 1]) / self.bin_width)
-                    self.peak_annotates.append(
-                        plt.text(self.variables.peaks_x_selected[i] + x_offset, peak_height + y_offset,
-                                 '%s' % '{:.2f}'.format(self.variables.peaks_x_selected[i]), color='black', size=10,
-                                 alpha=1))
+                    if self.plot_show:
+                        self.peak_annotates.append(
+                            plt.text(self.variables.peaks_x_selected[i] + x_offset, peak_height + y_offset,
+                                     '%s' % '{:.2f}'.format(self.variables.peaks_x_selected[i]), color='black', size=10,
+                                     alpha=1))
 
-                    self.annotates.append(str(i + 1))
+                        self.annotates.append(str(i + 1))
 
     def plot_color_legend(self, loc, detailed_isotope=False, detailed_charge=False):
         """
