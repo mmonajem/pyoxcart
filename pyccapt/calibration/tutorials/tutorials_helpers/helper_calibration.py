@@ -2,6 +2,7 @@ import ipywidgets as widgets
 import numpy as np
 from IPython.display import display
 from ipywidgets import Output
+from IPython.display import clear_output
 
 from pyccapt.calibration.calibration import calibration, mc_plot
 
@@ -35,7 +36,7 @@ def clear_plot_on_click(out, out_status):
         out.clear_output()
     with out_status:
         out_status.clear_output()
-
+    clear_output(wait=True)
 
 def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse_mode):
     out = Output()
@@ -152,6 +153,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
     def hist_plot(b, variables, out, calibration_mode):
         plot_button.disabled = True
         figure_size = (figure_mc_size_x.value, figure_mc_size_y.value)
+        clear_output(wait=True)
         with out_status:
             out_status.clear_output()
         with out:
