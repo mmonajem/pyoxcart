@@ -791,7 +791,7 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         ax.set_xlabel(r'$X_{det}$ (mm)', fontsize=10, labelpad=10)
         ax.set_ylabel(r'$Y_{det}$ (mm)', fontsize=10, labelpad=10)
         ax.set_zlabel(r"${C_B}^{-1}$", fontsize=10, labelpad=5, color='red')
-        plt.ticklabel_format(style='sci', axis='z', scilimits=(6, 6))
+        plt.ticklabel_format(style='sci', axis='z', scilimits=(1, 1))
         ax.zaxis.line.set_color('red')
 
         # Change z-axis tick label color
@@ -957,14 +957,13 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
 
         # Plot how bowl correction correct tof/mc vs dld_x position
         fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
-        mask = np.random.randint(0, len(dld_highVoltage_peak), 10000)
         if fit_mode == 'curve_fit':
             f_bowl_plot = bowl_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
         elif fit_mode == 'ml_fit':
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
         elif fit_mode == 'robust_fit':
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
-        dld_t_plot = dld_peak[mask] * f_bowl_plot
+        dld_t_plot = dld_peak[mask] / f_bowl_plot
 
         x = plt.scatter(dld_x_peak[mask], dld_peak[mask], color="blue", label=r"$t$", s=1, alpha=0.5)
         y = plt.scatter(dld_x_peak[mask], dld_t_plot, color="red", label=r"$t_{C_{B}}$", s=1, alpha=0.5)
@@ -988,14 +987,13 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
 
         # Plot how bowl correction correct tof/mc vs dld_x position
         fig1, ax1 = plt.subplots(figsize=fig_size, constrained_layout=True)
-        mask = np.random.randint(0, len(dld_highVoltage_peak), 10000)
         if fit_mode == 'curve_fit':
             f_bowl_plot = bowl_corr([dld_x_peak[mask], dld_y_peak[mask]], *parameters)
         elif fit_mode == 'ml_fit':
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
         elif fit_mode == 'robust_fit':
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
-        dld_t_plot = dld_peak[mask] * f_bowl_plot
+        dld_t_plot = dld_peak[mask] / f_bowl_plot
 
         x = plt.scatter(dld_y_peak[mask], dld_peak[mask], color="blue", label=r"$t$", s=1, alpha=0.5)
         y = plt.scatter(dld_y_peak[mask], dld_t_plot, color="red", label=r"$t_{C_{B}}$", s=1, alpha=0.5)
@@ -1028,12 +1026,12 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
         elif fit_mode == 'robust_fit':
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
-        dld_t_plot = dld_peak[mask] * f_bowl_plot
+        dld_t_plot = dld_peak[mask] / f_bowl_plot
 
         scat_1 = ax.scatter(dld_x_peak[mask], dld_y_peak[mask], zs=dld_peak[mask], color="blue",
                             label=r"$t$", s=1)
         scat_2 = ax.scatter(dld_x_peak[mask], dld_y_peak[mask], zs=dld_t_plot, color="red",
-                            label=r"$t_{C_{B}}$", s=1)
+                            label=r"$TOF$", s=1)
         plt.legend(handles=[scat_1, scat_2], loc='upper left', markerscale=5., prop={'size': 10})
 
         ax.set_xlabel(r'$X_{det}$ (mm)', fontsize=10, labelpad=10)

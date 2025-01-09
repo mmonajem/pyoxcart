@@ -115,22 +115,34 @@ def call_ion_list(variables, selector):
                 def parametric_calib(t, mc_ideal):
                     fitresult, _ = curve_fit(parametric, t, mc_ideal, maxfev=2000)
                     return fitresult
+                if len(peaks_chos) > 2:
+                    fitresult = parametric_calib(peaks_chos, variables.list_material)
 
-                fitresult = parametric_calib(peaks_chos, variables.list_material)
-
-                variables.mc_calib = parametric(variables.dld_t_calib, *fitresult)
+                    variables.mc_calib = parametric(variables.dld_t_calib, *fitresult)
+                else:
+                    print('Number of peaks is less than 3. Select more peaks at least 3 peaks')
 
             elif calibration_mode.value == 'mc_calib':
-                def shift(mc, a, b, c):
+                def shift_3(mc, a, b, c):
                     return mc ** a + b * mc + c
                     # return a * mc + b
-
-                def shift_calib(mc, mc_ideal):
-                    fitresult, _ = curve_fit(shift, mc, mc_ideal, maxfev=2000)
+                def shift_calib_3(mc, mc_ideal):
+                    fitresult, _ = curve_fit(shift_3, mc, mc_ideal, maxfev=2000)
                     return fitresult
+                def shift_2(mc, a, b):
+                    return mc ** a + b
+                def shift_calib_2(mc, mc_ideal):
+                    fitresult, _ = curve_fit(shift_2, mc, mc_ideal, maxfev=2000)
+                    return fitresult
+                if len(peaks_chos) > 2:
+                    fitresult = shift_calib_3(peaks_chos, variables.list_material)
+                    variables.mc_calib = shift_3(variables.mc_calib_backup, *fitresult)
+                elif len(peaks_chos) == 2:
+                    fitresult = shift_calib_2(peaks_chos, variables.list_material)
+                    variables.mc_calib = shift_2(variables.mc_calib_backup, *fitresult)
+                else:
+                    print('Number of peaks is less than 2. Select more peaks at least 2 peaks')
 
-                fitresult = shift_calib(peaks_chos, variables.list_material)
-                variables.mc_calib = shift(variables.mc_calib_backup, *fitresult)
             with out_mc:
                 print('parametric fit done')
         button_fit.disabled = False
