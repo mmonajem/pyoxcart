@@ -98,7 +98,7 @@ def save_chunk_worker(save_queue):
     while True:
         (chunk_id, path, xx_list_bin, xx, yy_list_bin, yy, tt_list_bin, tt, voltage_data, voltage_pulse_data,
          laser_pulse_data, start_counter, channel_data, time_data, tdc_start_counter,
-         voltage_data_tdc, tdc_raw_signals_num, voltage_pulse_data_tdc, laser_pulse_data_tdc) = save_queue.get()
+         voltage_data_tdc, voltage_pulse_data_tdc, laser_pulse_data_tdc) = save_queue.get()
         if chunk_id is None:
             break
         np.save(f"{path}chunks//x_bin_chunk_{chunk_id}.npy", np.array(xx_list_bin))
@@ -116,7 +116,6 @@ def save_chunk_worker(save_queue):
         np.save(f"{path}chunks//time_data_chunk_{chunk_id}.npy", np.array(time_data))
         np.save(f"{path}chunks//tdc_start_counter_chunk_{chunk_id}.npy", np.array(tdc_start_counter))
         np.save(f"{path}chunks//voltage_data_tdc_chunk_{chunk_id}.npy", np.array(voltage_data_tdc))
-        np.save(f"{path}chunks//num_raw_signal_chunk_{chunk_id}.npy", np.array(tdc_raw_signals_num))
         np.save(f"{path}chunks//voltage_pulse_data_tdc_chunk_{chunk_id}.npy", np.array(voltage_pulse_data_tdc))
         np.save(f"{path}chunks//laser_pulse_data_tdc_chunk_{chunk_id}.npy", np.array(laser_pulse_data_tdc))
         print(f"Chunk {chunk_id} saved.")
@@ -149,13 +148,12 @@ def load_and_concatenate_chunks(path, chunk_id):
     time_data = load_data("time_data")
     tdc_start_counter = load_data("tdc_start_counter")
     voltage_data_tdc = load_data("voltage_data_tdc")
-    tdc_raw_signals_num = load_data("num_raw_signal")
     voltage_pulse_data_tdc = load_data("voltage_pulse_data_tdc")
     laser_pulse_data_tdc = load_data("laser_pulse_data_tdc")
 
     return (xx_list_bin, xx_list, yy_list_bin, yy_list, tt_list_bin, tt_list, voltage_data, voltage_pulse_data,
             laser_pulse_data, start_counter, channel_data, time_data, tdc_start_counter, voltage_data_tdc,
-            tdc_raw_signals_num, voltage_pulse_data_tdc, laser_pulse_data_tdc)
+            voltage_pulse_data_tdc, laser_pulse_data_tdc)
 
 
 def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, stop_event):
@@ -224,7 +222,6 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
     channel_data = []
     time_data = []
     tdc_start_counter = []
-    tdc_raw_signals_num = []
     voltage_data_tdc = []
     voltage_pulse_data_tdc = []
     laser_pulse_data_tdc = []
@@ -239,6 +236,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
     loop_time = 1 / variables.ex_freq
     events_detected = 0
     events_detected_tmp = 0
+    raw_signal_detected = 0
     start_time = time.time()
     pulse_frequency = variables.pulse_frequency * 1000
     loop_counter = 0
@@ -307,9 +305,9 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
         if eventtype_raw == QUEUE_DATA:
             channel_data_tmp = data_raw["channel"].tolist()
             if len(channel_data_tmp) > 0:
+                raw_signal_detected += len(channel_data_tmp)
                 tdc_start_counter.extend(data_raw["start_counter"].tolist())
                 time_data.extend(data_raw["time"].tolist())
-                tdc_raw_signals_num.append(len(channel_data_tmp))
                 # raw data
                 channel_data.extend(channel_data_tmp)
                 voltage_data_tdc.extend((np.tile(specimen_voltage, len(channel_data_tmp))).tolist())
@@ -332,6 +330,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
             variables.detection_rate_current = detection_rate * 2  # to get the rate per second
             variables.detection_rate_current_plot = detection_rate * 2  # to get the rate per second
             variables.total_ions = events_detected
+            variables.total_raw_signals = raw_signal_detected
             # Reset the counter and timer
             events_detected_tmp = 0
             start_time = current_time
@@ -344,7 +343,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
                  copy.deepcopy(tt_list_bin), copy.deepcopy(tt), copy.deepcopy(voltage_data),
                  copy.deepcopy(voltage_pulse_data), copy.deepcopy(laser_pulse_data),
                  copy.deepcopy(start_counter), copy.deepcopy(channel_data), copy.deepcopy(time_data),
-                 copy.deepcopy(tdc_start_counter), copy.deepcopy(voltage_data_tdc), copy.deepcopy(tdc_raw_signals_num),
+                 copy.deepcopy(tdc_start_counter), copy.deepcopy(voltage_data_tdc),
                  copy.deepcopy(voltage_pulse_data_tdc), copy.deepcopy(laser_pulse_data_tdc)))
             xx_list_bin.clear()
             xx.clear()
@@ -359,7 +358,6 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
             channel_data.clear()
             time_data.clear()
             tdc_start_counter.clear()
-            tdc_raw_signals_num.clear()
             voltage_data_tdc.clear()
             voltage_pulse_data_tdc.clear()
             laser_pulse_data_tdc.clear()
@@ -371,6 +369,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
     print("TDC process: for %s times loop time took longer than %s second" % (loop_delay_counter, loop_time),
           'out of %s iteration' % loop_counter)
     variables.total_ions = events_detected
+    variables.total_raw_signals = raw_signal_detected
     print("TDC Measurement stopped")
 
     if chunk_id > 0:
@@ -379,7 +378,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
         save_queue.put(
             (chunk_id, path, xx_list_bin, xx, yy_list_bin, yy, tt_list_bin, tt, voltage_data, voltage_pulse_data,
              laser_pulse_data, start_counter, channel_data, time_data, tdc_start_counter,
-             voltage_data_tdc, tdc_raw_signals_num, voltage_pulse_data_tdc, laser_pulse_data_tdc))
+             voltage_data_tdc, voltage_pulse_data_tdc, laser_pulse_data_tdc))
         save_queue.put((None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
                         None, None))  # Signal the save process to end
         save_process.join()  # Wait for the save process to finish
@@ -387,7 +386,7 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
         # Load all chunks and extend variables
         (xx_list_bin, xx, yy_list_bin, yy, tt_list_bin, tt, voltage_data, voltage_pulse_data,
          laser_pulse_data, start_counter, channel_data,
-         time_data, tdc_start_counter, voltage_data_tdc, tdc_raw_signals_num, voltage_pulse_data_tdc,
+         time_data, tdc_start_counter, voltage_data_tdc, voltage_pulse_data_tdc,
          laser_pulse_data_tdc) = load_and_concatenate_chunks(path, chunk_id)
 
     save_queue.put((None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
@@ -412,7 +411,6 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
     np.save(variables.path + "/temp_data/channel_data.npy", np.array(channel_data))
     np.save(variables.path + "/temp_data/time_data.npy", np.array(time_data))
     np.save(variables.path + "/temp_data/main_raw_counter.npy", np.array(tdc_start_counter))
-    np.save(variables.path + "/temp_data/num_raw_signal.npy", np.array(tdc_raw_signals_num))
     np.save(variables.path + "/temp_data/voltage_data_tdc.npy", np.array(voltage_data_tdc))
     np.save(variables.path + "/temp_data/voltage_pulse_data_tdc.npy", np.array(voltage_pulse_data_tdc))
     np.save(variables.path + "/temp_data/laser_pulse_data_tdc.npy", np.array(laser_pulse_data_tdc))
@@ -428,7 +426,6 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
     variables.extend_to('channel', channel_data)
     variables.extend_to('time_data', time_data)
     variables.extend_to('tdc_start_counter', tdc_start_counter)
-    variables.extend_to('main_raw_counter', tdc_raw_signals_num)
     variables.extend_to('main_v_dc_tdc', voltage_data_tdc)
     variables.extend_to('main_v_p_tdc', voltage_pulse_data_tdc)
     variables.extend_to('main_l_p_tdc', laser_pulse_data_tdc)

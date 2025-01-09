@@ -53,11 +53,14 @@ class APT_Exp_Control:
         self.pulse_voltage_max = 0
         self.pulse_voltage_min = 0
         self.total_ions = 0
+        self.total_raw_signals = 0
+        self.count_raw_signals_last = 0
         self.ex_freq = 0
 
         self.main_v_pulse = []
         self.main_l_pulse = []
         self.main_counter = []
+        self.main_raw_counter = []
         self.main_temperature = []
         self.main_chamber_vacuum = []
 
@@ -130,9 +133,13 @@ class APT_Exp_Control:
         count_temp = self.total_ions - self.count_last
         self.count_last = self.total_ions
 
+        count_raw_signals_temp = self.total_raw_signals - self.count_raw_signals_last
+        self.count_raw_signals_last = self.total_raw_signals
+
         # saving the values of high dc voltage, pulse, and current iteration ions
         # with self.variables.lock_experiment_variables:
         self.main_counter.extend([count_temp])
+        self.main_raw_counter.extend([count_raw_signals_temp])
         self.main_temperature.extend([self.variables.temperature])
         self.main_chamber_vacuum.extend([self.variables.vacuum_main])
 
@@ -372,6 +379,7 @@ class APT_Exp_Control:
                         self.pid.setpoint = self.detection_rate
 
                 self.total_ions = self.variables.total_ions
+                self.total_raw_signals = self.variables.total_raw_signals
                 # here we check if tdc is failed or not by checking if the total number of ions is
                 # constant for 100 iteration
                 if total_ions_tmp == self.total_ions and not self.variables.vdc_hold:
@@ -575,6 +583,7 @@ class APT_Exp_Control:
 
 
         self.variables.extend_to('main_counter', self.main_counter)
+        self.variables.extend_to('main_raw_counter', self.main_raw_counter)
         self.variables.extend_to('main_temperature', self.main_temperature)
         self.variables.extend_to('main_chamber_vacuum', self.main_chamber_vacuum)
 
