@@ -790,8 +790,8 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         )
         ax.set_xlabel(r'$X_{det}$ (mm)', fontsize=10, labelpad=10)
         ax.set_ylabel(r'$Y_{det}$ (mm)', fontsize=10, labelpad=10)
-        ax.set_zlabel(r"${C_B}^{-1}$", fontsize=10, labelpad=5, color='red')
-        plt.ticklabel_format(style='sci', axis='z', scilimits=(1, 1))
+        ax.set_zlabel(r"${C_B}$", fontsize=10, labelpad=5, color='red')
+        # plt.ticklabel_format(style='sci', axis='z', scilimits=(1, 1))
         ax.zaxis.line.set_color('red')
 
         # Change z-axis tick label color
@@ -1031,12 +1031,12 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         scat_1 = ax.scatter(dld_x_peak[mask], dld_y_peak[mask], zs=dld_peak[mask], color="blue",
                             label=r"$t$", s=1)
         scat_2 = ax.scatter(dld_x_peak[mask], dld_y_peak[mask], zs=dld_t_plot, color="red",
-                            label=r"$TOF$", s=1)
+                            label=r"$t_{C_{B}}$", s=1)
         plt.legend(handles=[scat_1, scat_2], loc='upper left', markerscale=5., prop={'size': 10})
 
         ax.set_xlabel(r'$X_{det}$ (mm)', fontsize=10, labelpad=10)
         ax.set_ylabel(r'$Y_{det}$ (mm)', fontsize=10, labelpad=10)
-        ax.set_zlabel(r"$t_{C_{B}}$", fontsize=10, labelpad=5)
+        ax.set_zlabel(r"Time of Flight (ns)", fontsize=10, labelpad=5)
         ax.view_init(elev=7, azim=-41)
 
         if save:
@@ -1100,12 +1100,10 @@ def initial_calibration(data, flight_path_length):
     """
     v_dc = data['high_voltage (V)'].to_numpy()
     t = data['t (ns)'].to_numpy()
-    xDet = data['x_det (cm)'].to_numpy() * 1E-2
-    yDet = data['y_det (cm)'].to_numpy() * 1E-2
-    flight_path_length = flight_path_length * 1E-3
-    flightPathLength = xDet ** 2 + yDet ** 2 + flight_path_length ** 2
-    ini_calib_factor_flight_path = np.mean(flightPathLength) / flightPathLength
-    # d = np.sqrt(xDet ** 2 + yDet ** 2 + flight_path_length ** 2)
+    xDet = data['x_det (cm)'].to_numpy() * 10
+    yDet = data['y_det (cm)'].to_numpy() * 10
+    d = np.sqrt(xDet ** 2 + yDet ** 2 + flight_path_length ** 2)
+    ini_calib_factor_flight_path = d / np.mean(d) # this keeps the peak at the same position
     # ini_calib_factor_flight_path = flight_path_length / d
     ini_calib_factor_voltage = np.sqrt(v_dc / np.mean(v_dc))
     dld_t_calib = t * ini_calib_factor_flight_path * ini_calib_factor_voltage
