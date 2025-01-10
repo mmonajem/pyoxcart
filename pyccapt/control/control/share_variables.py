@@ -105,6 +105,7 @@ class Variables:
         self.ns.start_time = ''
         self.ns.end_time = ''
         self.ns.total_ions = 0
+        self.ns.total_raw_signals = 0
         self.ns.specimen_voltage = 0.0
         self.ns.specimen_voltage_plot = 0.0
         self.ns.detection_rate = 0.0
@@ -863,6 +864,15 @@ class Variables:
     def total_ions(self, value):
         with self.lock_exp:
             self.ns.total_ions = value
+
+    @property
+    def total_raw_signals(self):
+        return self.ns.total_raw_signals
+
+    @total_raw_signals.setter
+    def total_raw_signals(self, value):
+        with self.lock_exp:
+            self.ns.total_raw_signals = value
 
     @property
     def specimen_voltage(self):
