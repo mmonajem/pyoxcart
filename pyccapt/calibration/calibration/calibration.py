@@ -19,6 +19,8 @@ from sklearn.pipeline import make_pipeline
 from sklearn.ensemble import GradientBoostingRegressor
 from matplotlib.tri import Triangulation
 
+from pyccapt.control.tdc_surface_concept.scTDC import dld_event_t
+
 
 def cluster_tof(dld_highVoltage_peak, dld_t_peak, calibration_mode, num_cluster, plot=True, fig_size=(5, 5)):
     data = np.concatenate((dld_highVoltage_peak.reshape(-1, 1), dld_t_peak.reshape(-1, 1)), axis=1)
@@ -1102,9 +1104,11 @@ def initial_calibration(data, flight_path_length):
     t = data['t (ns)'].to_numpy()
     xDet = data['x_det (cm)'].to_numpy() * 10
     yDet = data['y_det (cm)'].to_numpy() * 10
-    d = np.sqrt(xDet ** 2 + yDet ** 2 + flight_path_length ** 2)
-    ini_calib_factor_flight_path = d / np.mean(d) # this keeps the peak at the same position
+    d = xDet ** 2 + yDet ** 2 + flight_path_length ** 2
+
+    ini_calib_factor_flight_path = np.mean(d) / d
     # ini_calib_factor_flight_path = flight_path_length / d
+
     ini_calib_factor_voltage = np.sqrt(v_dc / np.mean(v_dc))
     dld_t_calib = t * ini_calib_factor_flight_path * ini_calib_factor_voltage
     return dld_t_calib
