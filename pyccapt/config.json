@@ -30,7 +30,7 @@
   "pump_cll": "on",
   "gates": "on",
   "v_dc": "on",
-  "v_p": "on",
+  "v_p": "off",
   "signal_generator": "on",
   "cryo": "on",
   "gauges": "on",
