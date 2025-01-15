@@ -46,7 +46,7 @@ The calibration module is another component of the PyCCAPT, providing essential 
 interpretation. This module includes functionalities such as t<sub>0</sub> and flight path calculation, region of
 interest (ROI) selection, voltage and bowl calibration, and 3D reconstruction techniques. 
 
-![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/visualization.gif)
+![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/visualization_gif.gif)
 
 You can see some of the features of the calibration module in the following images.
 
@@ -63,7 +63,7 @@ Bowl and voltage calibration:
 
 <div align="center">
   <img width = "37%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/vol_corr.png">
-  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/bowl_corr">
+  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/bowl_corr.png">
 </div>
 
 
