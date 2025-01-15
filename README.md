@@ -40,19 +40,19 @@ The PyCCAPT package forms the foundation of a fully FAIR atom probe data collect
 repository includes the graphical user interface (GUI) and control program, which enable experiment control,
 visualization, and data acquisition. The following images provide an overview of the user interface:
 
-![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/main_gui.png)
+![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/main_gui.png)
 
 The calibration module is another component of the PyCCAPT, providing essential tools for data calibration and
 interpretation. This module includes functionalities such as t<sub>0</sub> and flight path calculation, region of
 interest (ROI) selection, voltage and bowl calibration, and 3D reconstruction techniques. 
 
-![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/visualization.gif)
+![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/visualization.gif)
 
 You can see some of the features of the calibration module in the following images.
 
 The FDM and detector hitmap as Gif images for an Aluminium sample:
 
-![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/hist.png)
+![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/hist.png)
 
 <div align="center">
   <img width = "37%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/fdm.png">
