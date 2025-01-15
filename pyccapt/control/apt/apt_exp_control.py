@@ -443,6 +443,8 @@ class APT_Exp_Control:
 
                     else:
                         if self.variables.flag_new_min_voltage:
+                            if self.vdc_min > self.vdc_max:
+                                self.vdc_min = self.vdc_max
                             decrement_vol = (self.specimen_voltage - self.vdc_min) / 10
                             for _ in range(10):
                                 self.specimen_voltage -= decrement_vol

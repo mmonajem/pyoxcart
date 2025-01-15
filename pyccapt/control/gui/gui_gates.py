@@ -76,7 +76,7 @@ class Ui_Gates(object):
         self.led_cryo.setMaximumSize(QtCore.QSize(50, 50))
         self.led_cryo.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.led_cryo.setObjectName("led_cryo")
-        self.verticalLayout_3.addWidget(self.led_cryo)
+        self.verticalLayout_3.addWidget(self.led_cryo, 0, QtCore.Qt.AlignmentFlag.AlignHCenter)
         self.cryo_switch = QtWidgets.QPushButton(parent=Gates)
         self.cryo_switch.setMinimumSize(QtCore.QSize(0, 25))
         self.cryo_switch.setStyleSheet("QPushButton{\n"
@@ -164,6 +164,10 @@ class Ui_Gates(object):
         self.diagram_main_open = QPixmap('./files/main_open.png')
         self.diagram_load_open = QPixmap('./files/load_open.png')
         self.diagram_cryo_open = QPixmap('./files/cryo_open.png')
+        self.diagram_load_main_open = QPixmap('./files/load_main_open.png')
+        self.diagram_cryo_main_open = QPixmap('./files/cryo_main_open.png')
+        self.diagram_cryo_load_open = QPixmap('./files/cryo_load_open.png')
+        self.diagram_all_open = QPixmap('./files/cryo_load_main_open.png')
         self.led_red = QPixmap('./files/led-red-on.png')
         self.led_green = QPixmap('./files/green-led-on.png')
 
@@ -260,63 +264,96 @@ class Ui_Gates(object):
                 else:
                     print('The gates control is off')
 
-        # Main gate
-        if (self.flag_super_user or not self.variables.start_flag) and (
-                gate_num == 1 and not self.variables.flag_load_gate \
-                and not self.variables.flag_cryo_gate and self.variables.flag_pump_load_lock):
-            if not self.variables.flag_main_gate:  # Open the main gate
-                if self.conf["gates"] == "on":
-                    switch_gate(0)
-                self.led_main_chamber.setPixmap(self.led_green)
-                self.diagram.setPixmap(self.diagram_main_open)
-                self.variables.flag_main_gate = True
-            elif self.variables.flag_main_gate:  # Close the main gate
-                if self.conf["gates"] == "on":
-                    switch_gate(1)
-                self.led_main_chamber.setPixmap(self.led_red)
-                self.diagram.setPixmap(self.diagram_close_all)
-                self.variables.flag_main_gate = False
-        # Buffer gate
-        elif (self.flag_super_user or not self.variables.start_flag) and (gate_num == 2
-                                      and not self.variables.flag_main_gate
-                                      and not self.variables.flag_cryo_gate
-                                      and self.variables.flag_pump_load_lock):
-            if not self.variables.flag_load_gate:  # Open the main gate
-                if self.conf["gates"] == "on":
-                    switch_gate(2)
-                self.led_load_lock.setPixmap(self.led_green)
-                self.diagram.setPixmap(self.diagram_load_open)
-                self.variables.flag_load_gate = True
-            elif self.variables.flag_load_gate:  # Close the main gate
-                if self.conf["gates"] == "on":
-                    switch_gate(3)
-                self.led_load_lock.setPixmap(self.led_red)
-                self.diagram.setPixmap(self.diagram_close_all)
-                self.variables.flag_load_gate = False
-        # Cryo gate
-        elif (self.flag_super_user or not self.variables.start_flag) and (gate_num == 3
-                                      and not self.variables.flag_main_gate and not self.variables.flag_load_gate
-                                      and self.variables.flag_pump_load_lock):
-            if not self.variables.flag_cryo_gate:  # Open the main gate
-                if self.conf["gates"] == "on":
-                    switch_gate(4)
-                self.led_cryo.setPixmap(self.led_green)
-                self.diagram.setPixmap(self.diagram_cryo_open)
-                self.variables.flag_cryo_gate = True
-            elif self.variables.flag_cryo_gate:  # Close the main gate
-                if self.conf["gates"] == "on":
-                    switch_gate(5)
-                self.led_cryo.setPixmap(self.led_red)
-                self.diagram.setPixmap(self.diagram_close_all)
-                self.variables.flag_cryo_gate = False
-        # Show the error message in the GUI
-        else:
+        def error_gate():
+            """
+            The function for showing the error message in the GUI
+
+            Args:
+                None
+
+            Returns:
+                None
+            """
             if self.variables.start_flag:
                 self.error_message("!!! An experiment is running !!!")
             else:
                 self.error_message("!!! Close the previous opened gate first !!!")
-
             self.timer.start(8000)
+        # Main gate
+        if gate_num == 1:
+            if ((not self.variables.start_flag and (
+                    not self.variables.flag_load_gate
+                    and not self.variables.flag_cryo_gate and self.variables.flag_pump_load_lock))
+                    or self.flag_super_user):
+                if not self.variables.flag_main_gate:  # Open the main gate
+                    if self.conf["gates"] == "on":
+                        switch_gate(0)
+                    self.led_main_chamber.setPixmap(self.led_green)
+                    self.variables.flag_main_gate = True
+                elif self.variables.flag_main_gate:  # Close the main gate
+                    if self.conf["gates"] == "on":
+                        switch_gate(1)
+                    self.led_main_chamber.setPixmap(self.led_red)
+                    self.variables.flag_main_gate = False
+            else:
+                error_gate()
+        # Buffer gate
+        elif gate_num == 2:
+            if ((not self.variables.start_flag and (not self.variables.flag_main_gate
+                                      and not self.variables.flag_cryo_gate
+                                                    and self.variables.flag_pump_load_lock))
+                    or self.flag_super_user):
+                if not self.variables.flag_load_gate:  # Open the main gate
+                    if self.conf["gates"] == "on":
+                        switch_gate(2)
+                    self.led_load_lock.setPixmap(self.led_green)
+                    self.variables.flag_load_gate = True
+                elif self.variables.flag_load_gate:  # Close the main gate
+                    if self.conf["gates"] == "on":
+                        switch_gate(3)
+                    self.led_load_lock.setPixmap(self.led_red)
+                    self.variables.flag_load_gate = False
+            else:
+                error_gate()
+        # Cryo gate
+        elif gate_num == 3:
+            if ((not self.variables.start_flag and (
+                    not self.variables.flag_main_gate and not self.variables.flag_load_gate
+                    and self.variables.flag_pump_load_lock))
+                    or self.flag_super_user):
+                if not self.variables.flag_cryo_gate:  # Open the main gate
+                    if self.conf["gates"] == "on":
+                        switch_gate(4)
+                    self.led_cryo.setPixmap(self.led_green)
+                    self.variables.flag_cryo_gate = True
+                elif self.variables.flag_cryo_gate:  # Close the main gate
+                    if self.conf["gates"] == "on":
+                        switch_gate(5)
+                    self.led_cryo.setPixmap(self.led_red)
+                    self.variables.flag_cryo_gate = False
+            else:
+                error_gate()
+
+        else:
+            print('The gate number is not correct')
+
+        # change the diagram and the LEDs
+        if self.variables.flag_main_gate and self.variables.flag_load_gate and self.variables.flag_cryo_gate:
+            self.diagram.setPixmap(self.diagram_all_open)
+        elif self.variables.flag_main_gate and self.variables.flag_load_gate and not self.variables.flag_cryo_gate:
+            self.diagram.setPixmap(self.diagram_load_main_open)
+        elif self.variables.flag_main_gate and not self.variables.flag_load_gate and self.variables.flag_cryo_gate:
+            self.diagram.setPixmap(self.diagram_cryo_main_open)
+        elif not self.variables.flag_main_gate and self.variables.flag_load_gate and self.variables.flag_cryo_gate:
+            self.diagram.setPixmap(self.diagram_cryo_load_open)
+        elif not self.variables.flag_main_gate and not self.variables.flag_load_gate and self.variables.flag_cryo_gate:
+            self.diagram.setPixmap(self.diagram_cryo_open)
+        elif not self.variables.flag_main_gate and self.variables.flag_load_gate and not self.variables.flag_cryo_gate:
+            self.diagram.setPixmap(self.diagram_load_open)
+        elif self.variables.flag_main_gate and not self.variables.flag_load_gate and not self.variables.flag_cryo_gate:
+            self.diagram.setPixmap(self.diagram_main_open)
+        else:
+            self.diagram.setPixmap(self.diagram_close_all)
 
     def error_message(self, message):
         """
