@@ -63,7 +63,7 @@ Bowl and voltage calibration:
 
 
 <div align="center">
-  <img width = "37%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/vol_corr.png">
+  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/vol_corr.png">
   <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/bowl_corr.png">
 </div>
 
