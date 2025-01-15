@@ -11,6 +11,10 @@ nanoscale world of materials or conducting cutting-edge research, PyCCAPT proves
 control and data management, enhancing the capabilities of atom probe tomography systems for a wide range of scientific
 applications.
 
+## Data structures
+
+For the data structure you can check the [data structure](DATA_STRUCTURE.md) file.
+
 ![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/main_gui.png)
 
 ![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/gates_gui.png)
@@ -34,7 +38,5 @@ This will be helpful to keep track of the electrode that user use for each exper
 
 ![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/json.png)
 
-## Data structures
 
-For the data structure you can check the [data structure](DATA_STRUCTURE.md) file.
 
