@@ -46,7 +46,7 @@
                         <layout class="QGridLayout" name="gridLayout">
                             <item row="0" column="2">
                                 <layout class="QVBoxLayout" name="verticalLayout_3">
-                                    <item>
+                                    <item alignment="Qt::AlignHCenter">
                                         <widget class="QLabel" name="led_cryo">
                                             <property name="minimumSize">
                                                 <size>
