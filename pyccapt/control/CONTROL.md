@@ -11,28 +11,28 @@ nanoscale world of materials or conducting cutting-edge research, PyCCAPT proves
 control and data management, enhancing the capabilities of atom probe tomography systems for a wide range of scientific
 applications.
 
-![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/main_gui.png)
+![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/main_gui.png)
 
-![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/gates_gui.png)
+![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/gates_gui.png)
 
-![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/pumps_gui.png)
+![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/pumps_gui.png)
 
-![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/cameras_gui.png)
+![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/cameras_gui.png)
 
-![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/laser_gui.png)
+![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/laser_gui.png)
 
-![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/stage_gui.png)
+![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/stage_gui.png)
 
-![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/visualization_gui.png)
+![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/visualization_gui.png)
 
-![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/baking_gui.png)
+![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/baking_gui.png)
 
 
 
 The electrode Json file is a file that contains the list of avaliable electrodes in the instrument.
 This will be helpful to keep track of the electrode that user use for each experiment.
 
-![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/json.png)
+![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/json.png)
 
 ## Data structures
 
