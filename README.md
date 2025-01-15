@@ -63,8 +63,8 @@ Bowl and voltage calibration:
 
 
 <div align="center">
-  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/vol_corr.png">
-  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/bowl_corr.png">
+  <img style="margin-right: 20px;" width="30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/vol_corr.png">
+  <img style="margin-left: 20px;" width="30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/bowl_corr.png">
 </div>
 <div align="center">
   <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/tof_V_corr.png">
