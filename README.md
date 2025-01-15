@@ -61,7 +61,6 @@ The FDM and detector hitmap as Gif images for an Aluminium sample:
 
 Bowl and voltage calibration:
 
-![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/vol_corr.png)
 
 <div align="center">
   <img width = "37%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/vol_corr.png">
