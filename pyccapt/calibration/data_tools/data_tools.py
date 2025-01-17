@@ -59,6 +59,8 @@ def read_range(filename: "type:string - Path to hdf5(.h5) file") -> "type: dataf
         return range_data
     except FileNotFoundError as error:
         print("[*] HDF5 File could not be found")
+        print(error)
+        raise FileNotFoundError
 
 
 def read_mat_files(filename: "type:string - Path to .mat file") -> " type: dict - Returns the content .mat file":
