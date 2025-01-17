@@ -60,9 +60,7 @@ extensions = [
                 'recommonmark',
                 'sphinx_markdown_tables',
                 'sphinxcontrib.bibtex',
-	"nbsphinx",
-
-]
+	            'nbsphinx',]
 
 # The html index document.
 bibtex_bibfiles = ['references.bib']

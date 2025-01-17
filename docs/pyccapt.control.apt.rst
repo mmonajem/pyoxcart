@@ -12,6 +12,14 @@ pyccapt.control.apt.apt\_exp\_control module
    :undoc-members:
    :show-inheritance:
 
+pyccapt.control.apt.apt\_exp\_control\_func module
+--------------------------------------------------
+
+.. automodule:: pyccapt.control.apt.apt_exp_control_func
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

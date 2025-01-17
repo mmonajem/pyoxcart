@@ -350,7 +350,6 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                                                 calibration_mode=calibration_mode_t, save=True)
 
 
-
     def automatic_bowl_calibration(b, variables, out, out_status, calibration_mode, pulse_mode):
         auto_button_bowl.disabled = True
         counter = 1

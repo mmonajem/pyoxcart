@@ -856,7 +856,21 @@ def call_visualization(variables):
         ])
         ])
 
-    tab1 = (widgets.HBox([
+    tab1 = widgets.VBox([
+        widgets.HBox([widgets.Label(value='Max TOF:', layout=label_layout), max_tof_mc_widget]),
+        widgets.HBox([widgets.Label(value='Fraction:', layout=label_layout), frac_mc_widget]),
+        widgets.HBox([widgets.Label(value='Bins:', layout=label_layout), widgets.HBox([bins_x_mc, bins_y_mc])]),
+        widgets.HBox([widgets.Label(value='Pulse Plot:', layout=label_layout), pulse_plot_mc_widget]),
+        widgets.HBox([widgets.Label(value='DC Plot:', layout=label_layout), dc_plot_mc_widget]),
+        widgets.HBox([widgets.Label(value='Pulse Mode:', layout=label_layout), pulse_mode_mc_widget]),
+        widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_mc_widget]),
+        widgets.HBox([widgets.Label(value='Save:', layout=label_layout), save_mc_widget]),
+        widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
+                      widgets.HBox([figure_size_x_mc, figure_size_y_mc])]),
+        widgets.HBox([plot_experiment_button, clear_button]),
+    ])
+
+    tab2 = (widgets.HBox([
         widgets.VBox([
             widgets.HBox([widgets.Label(value='Fraction:', layout=label_layout), frac_fdm_widget]),
             widgets.HBox([widgets.Label(value='Bins:', layout=label_layout), bins_fdm]),
@@ -879,7 +893,7 @@ def call_visualization(variables):
         ])
     ]))
 
-    tab2 = (widgets.HBox([
+    tab3 = (widgets.HBox([
         widgets.VBox([
             widgets.HBox([widgets.Label(value='Element percentage:', layout=label_layout), element_percentage_p3]),
             widgets.HBox([widgets.Label(value='Opacity:', layout=label_layout), opacity]),
@@ -903,19 +917,6 @@ def call_visualization(variables):
             widgets.HBox([widgets.Label(value="voltage range:", layout=label_layout), range_vol_3d]),
         ])
     ]))
-    tab3 = widgets.VBox([
-        widgets.HBox([widgets.Label(value='Max TOF:', layout=label_layout), max_tof_mc_widget]),
-        widgets.HBox([widgets.Label(value='Fraction:', layout=label_layout), frac_mc_widget]),
-        widgets.HBox([widgets.Label(value='Bins:', layout=label_layout), widgets.HBox([bins_x_mc, bins_y_mc])]),
-        widgets.HBox([widgets.Label(value='Pulse Plot:', layout=label_layout), pulse_plot_mc_widget]),
-        widgets.HBox([widgets.Label(value='DC Plot:', layout=label_layout), dc_plot_mc_widget]),
-        widgets.HBox([widgets.Label(value='Pulse Mode:', layout=label_layout), pulse_mode_mc_widget]),
-        widgets.HBox([widgets.Label(value='Fig name:', layout=label_layout), figname_mc_widget]),
-        widgets.HBox([widgets.Label(value='Save:', layout=label_layout), save_mc_widget]),
-        widgets.HBox([widgets.Label(value='Fig size:', layout=label_layout),
-                      widgets.HBox([figure_size_x_mc, figure_size_y_mc])]),
-        widgets.HBox([plot_experiment_button, clear_button]),
-    ])
 
     tab4 = (widgets.HBox([
         widgets.VBox([
@@ -1099,9 +1100,9 @@ def call_visualization(variables):
     tab = widgets.Tab(children=[tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11,
                                 tab12])
     tab.set_title(0, 'mc')
-    tab.set_title(1, 'FDM')
-    tab.set_title(2, '3D')
-    tab.set_title(3, 'Experiment history')
+    tab.set_title(1, 'Experiment history')
+    tab.set_title(2, 'FDM')
+    tab.set_title(3, '3D')
     tab.set_title(4, 'Hitmap')
     tab.set_title(5, 'Animated hitmap')
     tab.set_title(6, 'Projection')

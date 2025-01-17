@@ -306,3 +306,20 @@ def pyccapt_raw_to_processed(data):
     data_processed['start_counter'] = data['start_counter'].to_numpy()
 
     return data_processed
+
+def save_range(variables):
+    """
+    Save the range data to the file.
+
+    Args:
+        variables:
+
+    Returns:
+        None
+    """
+    # save the new data
+    name_save_file = variables.result_data_path + '/' + variables.dataset_name + '_range' + '.h5'
+    data_tools.store_df_to_hdf(variables.range_data, 'df', name_save_file)
+    # save data in csv format
+    name_save_file = variables.result_data_path + '/' + variables.dataset_name + '_range' + '.csv'
+    data_tools.store_df_to_csv(variables.range_data, name_save_file)

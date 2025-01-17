@@ -190,17 +190,68 @@ def load_and_copy_chunks_to_hdf(path, hdf5_file_path, chunk_id):
         file.create_dataset('tdc/time_data', data=time_data, dtype=np.uint64)
 
 
+def crop_dataset_to_new_file(original_path, new_path, num_of_samples):
+    """
+    Crop dataset and save to a new file.
+
+    Args:
+        original_path: Path to the original dataset.
+        new_path: Path to save the cropped dataset.
+        num_of_samples: Number of samples to keep.
+
+    Returns:
+        None
+    """
+    with h5py.File(original_path, 'r') as original_file, h5py.File(new_path, 'w') as new_file:
+        num_events = original_file['apt/num_events']
+        num_raw_signals = original_file['apt/num_raw_signals']
+        assert len(num_events) == len(num_raw_signals), "Length of num_events and num_raw_signals should be the same."
+
+        count = 0
+        count_raw = 0
+        index = None
+        index_event = None
+        index_raw = None
+
+        for i in range(len(num_events)):
+            count += num_events[i]
+            count_raw += num_raw_signals[i]
+            if count > num_of_samples:
+                index = i
+                index_event = count
+                index_raw = count_raw
+                break
+
+        if index is not None:
+            # Copy cropped data to the new file
+            for key in original_file['apt']:
+                cropped_data = original_file['apt/%s' % key][:index + 1]
+                new_file.create_dataset(f'apt/{key}', data=cropped_data, dtype=original_file['apt/%s' % key].dtype)
+
+            for key in original_file['dld']:
+                cropped_data = original_file['dld/%s' % key][:index_event + 1]
+                new_file.create_dataset(f'dld/{key}', data=cropped_data, dtype=original_file['dld/%s' % key].dtype)
+
+            for key in original_file['tdc']:
+                cropped_data = original_file['tdc/%s' % key][:index_raw + 1]
+                new_file.create_dataset(f'tdc/{key}', data=cropped_data, dtype=original_file['tdc/%s' % key].dtype)
+
+            print("Cropped dataset written to the new file.")
+        else:
+            print("Number of samples requested exceeds the dataset size. No cropping performed.")
 
 
 
 if __name__ == '__main__':
-    name = '2263_Nov-22-2024_11-01_CuC1_AlTestDetector'
-    path = 'C:/Users/mehrp/Desktop//%s/' % name
+    name = '2382_Jan-10-2025_15-12_NiC9_Al.h5'
+    path = 'C:/Users/LokalAdmin/Downloads//%s' % name
+    new_path = 'C:/Users/LokalAdmin/Downloads//%s' % 'cropped_' + name
     name = '%s.h5' % name
     # copy_npy_to_hdf(path, name)
 
     # rename_subcategory(path + name, old_name='dld', new_name='dld_1')
     # copy_npy_to_hdf_surface_concept(path+'/temp_data/', name)
     # rename_subcategory(path + name, old_name='tdc/voltage_laser', new_name='tdc/laser_pulse')
-    load_and_copy_chunks_to_hdf(path + '/temp_data/chunks/', path + name, 389)
+    # load_and_copy_chunks_to_hdf(path + '/temp_data/chunks/', path + name, 389)
+    crop_dataset_to_new_file(path, new_path, 500000)
     print('Done')

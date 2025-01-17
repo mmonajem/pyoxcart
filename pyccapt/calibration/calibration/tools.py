@@ -379,3 +379,5 @@ def mc_hist_plot(variables, bin_size, mode, prominence, distance, percent, selec
                   'peak_x window sides ({:.1f}-maximum) are: ({:.2f}, {:.2f})'.format(percent, peak_widths_p_ini[i][1],
                                                                                       peak_widths_p_ini[i][2]),
                   '-> {:.2f}'.format(peak_widths_p_ini[i][2] - peak_widths_p_ini[i][1]))
+
+

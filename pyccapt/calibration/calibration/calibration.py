@@ -313,8 +313,6 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
 
     if model == 'curve_fit':
         f_v = voltage_corr(dld_highVoltage[mask_fv], *fitresult)
-    elif model == 'hybrid_fit':
-        f_v = fitresult.predict(dld_highVoltage[mask_fv].reshape(-1, 1))
     elif model == 'robust_fit':
         f_v = fitresult.predict(dld_highVoltage[mask_fv].reshape(-1, 1))
 
@@ -322,7 +320,6 @@ def voltage_corr_main(dld_highVoltage, variables, sample_size, mode, calibration
     print("Maximum value of f_v:", np.max(f_v))
     print("Minimum value of f_v:", np.min(f_v))
     calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] / f_v
-    # calibration_mc_tof[mask_fv] = calibration_mc_tof[mask_fv] * f_v
 
     if plot or save:
         # Plot how correction factor for selected peak_x
@@ -625,7 +622,6 @@ def bowl_correction(dld_x_bowl, dld_y_bowl, dld_t_bowl, variables, det_diam, max
         ax.set_xlabel(r'$X_{det}$ (mm)', fontsize=10, labelpad=10)
         ax.set_ylabel(r'$Y_{det}$ (mm)', fontsize=10, labelpad=10)
         ax.set_zlabel(r"${C_B}$", fontsize=10, labelpad=5, color='red')
-        # plt.ticklabel_format(style='sci', axis='z', scilimits=(1, 1))
         ax.zaxis.line.set_color('red')
 
         # Change z-axis tick label color
@@ -770,7 +766,6 @@ def bowl_correction_main(dld_x, dld_y, dld_highVoltage, variables, det_diam, sam
         elif fit_mode == 'robust_fit':
             f_bowl_plot = parameters.predict(np.column_stack((dld_x_peak[mask], dld_y_peak[mask])))
         dld_t_plot = dld_peak[mask] / f_bowl_plot
-        # dld_t_plot = dld_peak[mask] * f_bowl_plot
 
         y = plt.scatter(dld_highVoltage_peak[mask] / 1000, dld_t_plot, color="red", label=r"$t_{C_{B}}$", s=1)
 

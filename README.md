@@ -203,7 +203,7 @@ contains
 the output file from the calibration module, which contains the calibrated data as well as the reconstructed data. The
 link also contain the range file (HDF5) that is calculated by the calibration module.
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10131887.svg)](https://doi.org/10.5281/zenodo.10131887)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14673955.svg)](https://doi.org/10.5281/zenodo.14673955)
 
 ------------------
 # Bug reports
