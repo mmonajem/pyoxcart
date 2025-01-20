@@ -1097,7 +1097,7 @@ def call_visualization(variables):
         widgets.VBox([show_color, change_color, clear_button]),
     ])
 
-    tab = widgets.Tab(children=[tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11,
+    tab = widgets.Tab([tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11,
                                 tab12])
     tab.set_title(0, 'mc')
     tab.set_title(1, 'Experiment history')

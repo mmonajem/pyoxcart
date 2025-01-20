@@ -1168,4 +1168,4 @@ def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, 
     variables.x = px
     variables.y = py
     variables.z = pz
-    reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save, colab)
+    reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save, colab=colab)
