@@ -185,8 +185,9 @@ For calibration, review the [tutorial](https://pyccapt.readthedocs.io/en/latest/
 features.
 
 To test the code on Google colab, you can use the following links:
-[data processing](https://colab.research.google.com/github/mmonajem/pyccapt/blob/develop/pyccapt/calibration/tutorials/colab/data_processing.ipynb) and 
-[data visualization](https://colab.research.google.com/github/mmonajem/pyccapt/blob/develop/pyccapt/calibration/tutorials/colab/visualization.ipynb)
+[data processing](https://colab.research.google.com/github/mmonajem/pyccapt/blob/develop/pyccapt/calibration/tutorials/colab/data_processing.ipynb), 
+[data visualization](https://colab.research.google.com/github/mmonajem/pyccapt/blob/develop/pyccapt/calibration/tutorials/colab/visualization.ipynb), and
+[t<sub>0</sub> and flight path calculation](https://colab.research.google.com/github/mmonajem/pyccapt/blob/develop/pyccapt/calibration/tutorials/colab/L_and_t0_determination.ipynb).
 
 ---------------------
 # Data structure

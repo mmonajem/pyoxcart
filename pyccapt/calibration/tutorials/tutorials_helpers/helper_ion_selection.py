@@ -321,21 +321,21 @@ def call_ion_selection(variables):
 		variables.peaks_x_selected = variables.peak_x
 		variables.peaks_index_list = [i for i in range(len(variables.peak_x))]
 
-	tab1 = widgets.VBox(children=[bin_size, index_fig, prominence, distance, lim_tof, percent, plot_peak, save_fig,
-	                              widgets.HBox(children=[plot_button_p, all_peaks_button])])
-	tab2 = widgets.VBox(children=[bin_size, index_fig, prominence, distance, lim_tof, percent, widgets.HBox(
-		children=[widgets.VBox(children=[plot_button_r, start_button, next_button, prev_button, reset_zoom_button])])])
-	tab4 = widgets.VBox(children=[widgets.HBox(children=[widgets.VBox(
-		children=[peak_val, charge, aboundance_threshold, mass_difference, num_element, formula_com, complexity,
+	tab1 = widgets.VBox([bin_size, index_fig, prominence, distance, lim_tof, percent, plot_peak, save_fig,
+	                              widgets.HBox([plot_button_p, all_peaks_button])])
+	tab2 = widgets.VBox([bin_size, index_fig, prominence, distance, lim_tof, percent, widgets.HBox(
+		[widgets.VBox([plot_button_r, start_button, next_button, prev_button, reset_zoom_button])])])
+	tab4 = widgets.VBox([widgets.HBox([widgets.VBox(
+		[peak_val, charge, aboundance_threshold, mass_difference, num_element, formula_com, complexity,
 		          find_elem_button, plot_element]),
-		widgets.VBox(children=[formula_m, molecule_charge, formula_button]),
-		widgets.VBox(children=[row_index, color_picker, add_ion_button, romove_ion_button,
+		widgets.VBox([formula_m, molecule_charge, formula_button]),
+		widgets.VBox([row_index, color_picker, add_ion_button, romove_ion_button,
 		                       show_color, change_color]),
-		widgets.VBox(children=[row_index_source, row_index_dest, change_row])
+		widgets.VBox([row_index_source, row_index_dest, change_row])
 	])])
 
-	tabs1 = widgets.Tab(children=[tab1, tab2])
-	tabs2 = widgets.Tab(children=[tab4])
+	tabs1 = widgets.Tab([tab1, tab2])
+	tabs2 = widgets.Tab([tab4])
 	tabs1.set_title(0, 'peak finder')
 	tabs1.set_title(1, 'rangging')
 	tabs2.set_title(0, 'element finder')

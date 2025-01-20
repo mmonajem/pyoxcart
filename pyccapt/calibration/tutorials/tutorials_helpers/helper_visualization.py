@@ -1116,5 +1116,5 @@ def call_visualization(variables):
 
     out = Output()
 
-    display(widgets.VBox(children=[tab]))
+    display(widgets.VBox([tab, out]))
     display(out)
