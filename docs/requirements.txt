@@ -4,6 +4,6 @@ recommonmark
 sphinx-markdown-tables
 sphinx_rtd_theme
 sphinxcontrib-bibtex
-jinja2
+jinja2==3.0.3
 myst-parser
 numpy
