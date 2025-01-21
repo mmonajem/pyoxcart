@@ -116,9 +116,17 @@ def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, ch
     Returns:
         pd.DataFrame: DataFrame containing closest elements and their properties.
     """
-    data_table = '../../../files/isotopeTable.h5'
-    # Read data from the HDF5 file
-    dataframe = pd.read_hdf(data_table)
+    try:
+        data_table = '../../../files/isotopeTable.h5'
+        dataframe = pd.read_hdf(data_table)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        print("Trying to load the file from the default path")
+        try:
+            data_table = './pyccapt/files/isotopeTable.h5'
+            dataframe = pd.read_hdf(data_table)
+        except Exception as e:
+            print("Error loading the file", e)
 
     # Expand elements based on charge
     elements = dataframe['element'].to_numpy()
@@ -214,9 +222,17 @@ def load_elements(target_elements, abundance_threshold=0.0, charge=4, variables=
     Returns:
         pd.DataFrame: DataFrame containing closest elements and their properties.
     """
-    data_table = '../../../files/isotopeTable.h5'
-    # Read data from the HDF5 file
-    dataframe = pd.read_hdf(data_table)
+    try:
+        data_table = '../../../files/isotopeTable.h5'
+        dataframe = pd.read_hdf(data_table)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        print("Trying to load the file from the default path")
+        try:
+            data_table = './pyccapt/files/isotopeTable.h5'
+            dataframe = pd.read_hdf(data_table)
+        except Exception as e:
+            print("Error loading the file", e)
 
     # Expand elements based on charge
     elements = dataframe['element'].to_numpy()
@@ -431,8 +447,17 @@ def molecule_create(element_list, max_complexity, charge, abundance_threshold, v
     Returns:
         pd.DataFrame: A DataFrame containing the list of isotopes with their weights and abundances.
     """
-    isotopeTableFile = '../../../files/isotopeTable.h5'
-    dataframe = data_tools.read_range(isotopeTableFile)
+    try:
+        isotopeTableFile = '../../../files/isotopeTable.h5'
+        dataframe = data_tools.read_range(isotopeTableFile)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        print("Trying to load the file from the default path")
+        try:
+            isotopeTableFile = './pyccapt/files/isotopeTable.h5'
+            dataframe = data_tools.read_range(isotopeTableFile)
+        except Exception as e:
+            print("Error loading the file", e)
     elements = dataframe['element'].to_numpy()
     isotope_number = dataframe['isotope'].to_numpy()
     abundance = dataframe['abundance'].to_numpy()
