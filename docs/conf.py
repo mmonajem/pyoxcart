@@ -21,7 +21,7 @@ import os
 import os.path as op
 import sys
 
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../..'))
 
 # include parent directory
 pdir = op.dirname(op.dirname(op.abspath(__file__)))

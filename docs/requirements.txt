@@ -6,3 +6,4 @@ sphinx_rtd_theme
 sphinxcontrib-bibtex
 jinja2
 myst-parser
+numpy
