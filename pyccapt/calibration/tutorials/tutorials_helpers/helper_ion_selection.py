@@ -7,7 +7,7 @@ from ipywidgets import Output
 from pyccapt.calibration.calibration import ion_selection, mc_plot
 
 
-def call_ion_selection(variables):
+def call_ion_selection(variables, colab=False):
 	out = Output()
 	output2 = Output()
 	output3 = Output()
@@ -334,24 +334,66 @@ def call_ion_selection(variables):
 		widgets.VBox([row_index_source, row_index_dest, change_row])
 	])])
 
-	tabs1 = widgets.Tab([tab1, tab2])
-	tabs2 = widgets.Tab([tab4])
-	tabs1.set_title(0, 'peak finder')
-	tabs1.set_title(1, 'rangging')
-	tabs2.set_title(0, 'element finder')
-	# Create two Output widgets to capture the output of each plot
-	out = Output()
-	output2 = Output()
-	output3 = Output()
+	if not colab:
+		tabs1 = widgets.Tab([tab1, tab2])
+		tabs2 = widgets.Tab([tab4])
+		tabs1.set_title(0, 'peak finder')
+		tabs1.set_title(1, 'rangging')
+		tabs2.set_title(0, 'element finder')
+		# Create two Output widgets to capture the output of each plot
+		out = Output()
+		output2 = Output()
+		output3 = Output()
 
-	# Create an HBox to display the buttons side by side
-	buttons_layout = widgets.HBox([tabs1, tabs2])
+		# Create an HBox to display the buttons side by side
+		buttons_layout = widgets.HBox([tabs1, tabs2])
 
-	# Create a VBox to display the output widgets below the buttons
-	output_layout = widgets.HBox([out, widgets.VBox([output3, output2])])
+		# Create a VBox to display the output widgets below the buttons
+		output_layout = widgets.HBox([out, widgets.VBox([output3, output2])])
 
-	# Display the buttons and the output widgets
-	display(buttons_layout, output_layout)
+		# Display the buttons and the output widgets
+		display(buttons_layout, output_layout)
 
-	with output3:
-		display(variables.range_data)
+		with output3:
+			display(variables.range_data)
+	else:
+		# Define the content for each tab
+		tab_contents = {
+			"Peak Finder": tab1,
+			"Rangging": tab2,
+			"Element Finder": tab4
+		}
+
+		# Create buttons for each "tab"
+		buttons = [widgets.Button(description=title) for title in tab_contents.keys()]
+
+		# Output widgets to display the corresponding content
+		out = widgets.Output()
+		output2 = widgets.Output()
+		output3 = widgets.Output()
+
+		# Function to handle button clicks
+		def on_button_click(title):
+			def handler(change):
+				with out:
+					clear_output(wait=True)
+					display(tab_contents[title])
+
+			return handler
+
+		# Attach handlers to buttons
+		for button in buttons:
+			button.on_click(on_button_click(button.description))
+
+		# Layout for buttons and outputs
+		buttons_layout = widgets.HBox(buttons)
+		output_layout = widgets.HBox([out, widgets.VBox([output3, output2])])
+
+		# Display the buttons and output areas
+		display(buttons_layout, output_layout)
+
+		# Initial display
+		with out:
+			display(tab_contents["Peak Finder"])  # Default to the first "tab" content
+		with output3:
+			display(variables.range_data)

@@ -17,7 +17,7 @@ from pyccapt.calibration.reconstructions import iso_surface
 label_layout = widgets.Layout(width='200px')
 
 
-def call_visualization(variables):
+def call_visualization(variables, colab=False):
     plot_mc_button = widgets.Button(description='plot mc')
     plot_3d_button = widgets.Button(description='plot 3D')
     plot_3d_button_iso = widgets.Button(description='plot 3D iso surface')
@@ -1097,24 +1097,55 @@ def call_visualization(variables):
         widgets.VBox([show_color, change_color, clear_button]),
     ])
 
-    tab = widgets.Tab([tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11,
-                                tab12])
-    tab.set_title(0, 'mc')
-    tab.set_title(1, 'Experiment history')
-    tab.set_title(2, 'FDM')
-    tab.set_title(3, '3D')
-    tab.set_title(4, 'Hitmap')
-    tab.set_title(5, 'Animated hitmap')
-    tab.set_title(6, 'Projection')
+    if not colab:
+        tab = widgets.Tab([tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11,
+                                    tab12])
+        tab.set_title(0, 'mc')
+        tab.set_title(1, 'Experiment history')
+        tab.set_title(2, 'FDM')
+        tab.set_title(3, '3D')
+        tab.set_title(4, 'Hitmap')
+        tab.set_title(5, 'Animated hitmap')
+        tab.set_title(6, 'Projection')
 
-    tab.set_title(7, 'Disparity map')
-    tab.set_title(8, 'SDM')
-    tab.set_title(9, 'RDF')
-    tab.set_title(10, 'Iso surface')
-    tab.set_title(11, 'Clustering')
-    tab.set_title(12, 'Change Color')
+        tab.set_title(7, 'Disparity map')
+        tab.set_title(8, 'SDM')
+        tab.set_title(9, 'RDF')
+        tab.set_title(10, 'Iso surface')
+        tab.set_title(11, 'Clustering')
+        tab.set_title(12, 'Change Color')
 
-    out = Output()
+        out = Output()
 
-    display(widgets.VBox([tab, out]))
-    display(out)
+        display(widgets.VBox([tab, out]))
+        display(out)
+
+    else:
+        # Define the content for each tab
+        content = [tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11,
+                                          tab12]
+
+        # Create buttons for each tab
+        buttons = [widgets.Button(description=title) for title in [
+            'mc', 'Experiment history', 'FDM', '3D', 'Hitmap', 'Animated hitmap',
+            'Projection', 'Disparity map', 'SDM', 'RDF', 'Iso surface', 'Clustering', 'Change Color'
+        ]]
+
+        # Output widget to display the content
+        out = widgets.Output()
+
+        def on_button_click(index):
+            def handler(change):
+                with out:
+                    clear_output(wait=True)
+                    display(content[index])
+    
+            return handler
+
+        # Attach click handlers to each button
+        for i, button in enumerate(buttons):
+            button.on_click(on_button_click(i))
+
+        # Display buttons and the output widget
+        display(widgets.HBox(buttons))
+        display(out)
