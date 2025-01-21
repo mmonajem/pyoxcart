@@ -1118,7 +1118,6 @@ def call_visualization(variables, colab=False):
         out = Output()
 
         display(widgets.VBox([tab, out]))
-        display(out)
 
     else:
         # Define the content for each tab
@@ -1139,7 +1138,7 @@ def call_visualization(variables, colab=False):
                 with out:
                     clear_output(wait=True)
                     display(content[index])
-    
+
             return handler
 
         # Attach click handlers to each button

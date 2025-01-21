@@ -120,8 +120,6 @@ def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, ch
         data_table = '../../../files/isotopeTable.h5'
         dataframe = pd.read_hdf(data_table)
     except Exception as e:
-        print(f"An error occurred: {e}")
-        print("Trying to load the file from the default path")
         try:
             data_table = './pyccapt/files/isotopeTable.h5'
             dataframe = pd.read_hdf(data_table)
