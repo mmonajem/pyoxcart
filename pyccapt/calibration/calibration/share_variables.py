@@ -5,25 +5,25 @@ import pandas as pd
 
 
 def get_project_path():
-	"""
-	Get the absolute path of the current Python script
+    """
+    Get the absolute path of the current Python script
 
-	Args:
-		None
-	Returns:
-		script_path (str): The absolute path of the current Python script.
-	"""
-	script_path = os.path.abspath(__file__)
+    Args:
+        None
+    Returns:
+        script_path (str): The absolute path of the current Python script.
+    """
+    script_path = os.path.abspath(__file__)
 
-	# Traverse up the directory tree until reaching the project's main folder
-	while not os.path.isfile(os.path.join(script_path, 'setup.py')):
-		script_path = os.path.dirname(script_path)
+    # Traverse up the directory tree until reaching the project's main folder
+    while not os.path.isfile(os.path.join(script_path, 'setup.py')):
+        script_path = os.path.dirname(script_path)
 
-		# Break the loop if we reached the root directory
-		if script_path == os.path.dirname(script_path):
-			break
+        # Break the loop if we reached the root directory
+        if script_path == os.path.dirname(script_path):
+            break
 
-	return script_path
+    return script_path
 
 class Variables:
     """
@@ -147,12 +147,13 @@ class Variables:
         self.pulse_mode = None
         self.mask = None
         # Create an empty DataFrame with the specified columns
-        self.range_data = pd.DataFrame({"ion": ['unranged'], "mass": [0], "mc": [0], "mc_low": 0,
-                                        "mc_up": 400, "color": '#000000', "element": ['unranged'],
-                                        "complex": [0], "isotope": [0], "charge": [0]})
+        self.range_data = pd.DataFrame({"name": ["unranged0"], "ion": ['un'], "mass": [0], "mc": [0], "mc_low": 0,
+                                "mc_up": 400, "color": '#000000', "element": [['unranged']],
+                                "complex": [[0]], "isotope": [[0]], "charge": [0]})
 
         # Set data types for the columns
-        self.range_data = self.range_data.astype({'ion': 'object',
+        self.range_data = self.range_data.astype({'name': 'str',
+                                                  'ion': 'str',
                                                   'mass': 'float64',
                                                   'mc': 'float64',
                                                   'mc_low': 'float64',

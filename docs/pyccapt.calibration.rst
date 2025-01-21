@@ -7,7 +7,8 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   pyccapt.calibration.calibration_tools
+   pyccapt.calibration.calibration
+   pyccapt.calibration.clustering
    pyccapt.calibration.data_tools
    pyccapt.calibration.leap_tools
    pyccapt.calibration.mc

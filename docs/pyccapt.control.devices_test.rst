@@ -60,6 +60,14 @@ pyccapt.control.devices\_test.lamp\_usb\_switch module
    :undoc-members:
    :show-inheritance:
 
+pyccapt.control.devices\_test.laser\_nkt\_origami module
+--------------------------------------------------------
+
+.. automodule:: pyccapt.control.devices_test.laser_nkt_origami
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pyccapt.control.devices\_test.serial\_com\_cryovac module
 ---------------------------------------------------------
 

@@ -60,6 +60,32 @@ def initialize_signal_generator(variables, freq):
 	wave_generator.write('C2:OUTP ON')  # Turn on channel 2
 
 
+def change_frequency_signal_generator(variables, freq):
+	"""
+	Change the frequency of the signal generator.
+
+	Args:
+		variables: Instance of variables class.
+		freq: Frequency at which signal needs to be generated.
+
+	Returns:
+		None
+	"""
+	resources = pyvisa.ResourceManager()
+
+	freq1_command = 'C1:BSWV FRQ,%s' % (freq * 1000)
+	freq2_command = 'C2:BSWV FRQ,%s' % (freq * 1000)
+
+	device_resource = variables.COM_PORT_signal_generator
+	wave_generator = resources.open_resource(device_resource)
+	wave_generator.write(freq1_command)  # Set output frequency on channel 1
+	time.sleep(0.01)
+	wave_generator.write(freq2_command)  # Set output frequency on channel 2
+	time.sleep(0.01)
+
+	print(f"Frequency changed to {freq} kHz")
+
+
 def turn_off_signal_generator():
 	"""
 	Turn off the signal generator.

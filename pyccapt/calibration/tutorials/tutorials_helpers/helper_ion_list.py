@@ -13,18 +13,19 @@ from pyccapt.calibration.data_tools import data_tools
 label_layout = widgets.Layout(width='200px')
 
 
-def call_ion_list(variables, selector):
-	try:
-		isotopeTableFile = '../../../files/isotopeTable.h5'
-	except Exception as e:
-		print(f"Error in loading the isotopeTable file: {e}")
-		print("Trying to load the isotopeTable file from the pyccapt package")
-		try:
-			isotopeTableFile = './pyccapt/files/isotopeTable.h5'
-		except Exception as e:
-			print(f"Error in loading the isotopeTable file: {e}")
+def call_ion_list(variables, selector, path='../../../files/'):
+    try:
+        isotopeTableFile = path + 'isotopeTable.h5'
+        dataframe = data_tools.read_range(isotopeTableFile)
+    except Exception as e:
+        print(f"Error in loading the isotopeTable file: {e}")
+        print("Trying to load the isotopeTable file from the pyccapt package")
+        try:
+            isotopeTableFile = './pyccapt/files/isotopeTable.h5'
+            dataframe = data_tools.read_range(isotopeTableFile)
+        except Exception as e:
+            print(f"Error in loading the isotopeTable file: {e}")
 
-    dataframe = data_tools.read_hdf5_through_pandas(isotopeTableFile)
     elementsList = dataframe['element']
     elementIsotopeList = dataframe['isotope']
     elementMassList = dataframe['weight']
@@ -79,7 +80,7 @@ def call_ion_list(variables, selector):
     # Define widgets for fine_tune_t_0 function
     bin_size_widget = widgets.FloatText(value=0.1)
     log_widget = widgets.Dropdown(options=[('True', True), ('False', False)])
-    mode_widget = widgets.Dropdown(options=[('normal', 'normal'), ('normalized', 'normalized')])
+    mode_widget = widgets.Dropdown(options=[('False', False), ('True', True)])
     prominence_widget = widgets.IntText(value=80)
     distance_widget = widgets.IntText(value=100)
     lim_widget = widgets.IntText(value=10000)
@@ -99,35 +100,52 @@ def call_ion_list(variables, selector):
         options=[('mass_to_charge', 'mc_calib'), ('time_of_flight', 'tof_calib')])
 
     def parametric_fit(variables, calibration_mode, out_mc):
+
         button_fit.disabled = True
         peaks_chos = np.array(variables.peaks_x_selected)
-        if calibration_mode.value == 'tof_calib':
-            def parametric(t, t0, c, d):
-                return c * ((t - t0) ** 2) + d * t
 
-            def parametric_calib(t, mc_ideal):
-                fitresult, _ = curve_fit(parametric, t, mc_ideal, maxfev=2000)
-                return fitresult
+        if len(peaks_chos) != len(variables.list_material):
+            with out_mc:
+                print('Number of peaks and number of materials are not equal')
+        else:
+            if calibration_mode.value == 'tof_calib':
+                def parametric(t, t0, c, d):
+                    return c * ((t - t0) ** 2) + d * t
 
-            fitresult = parametric_calib(peaks_chos, variables.list_material)
+                def parametric_calib(t, mc_ideal):
+                    fitresult, _ = curve_fit(parametric, t, mc_ideal, maxfev=2000)
+                    return fitresult
+                if len(peaks_chos) > 2:
+                    fitresult = parametric_calib(peaks_chos, variables.list_material)
 
-            variables.mc_calib = parametric(variables.dld_t_calib, *fitresult)
+                    variables.mc_calib = parametric(variables.dld_t_calib, *fitresult)
+                else:
+                    print('Number of peaks is less than 3. Select more peaks at least 3 peaks')
 
-        elif calibration_mode.value == 'mc_calib':
-            def shift(mc, a, b, c):
-                return mc ** a + b * mc + c
-                # return a * mc + b
+            elif calibration_mode.value == 'mc_calib':
+                def shift_3(mc, a, b, c):
+                    return mc ** a + b * mc + c
+                    # return a * mc + b
+                def shift_calib_3(mc, mc_ideal):
+                    fitresult, _ = curve_fit(shift_3, mc, mc_ideal, maxfev=2000)
+                    return fitresult
+                def shift_2(mc, a, b):
+                    return mc ** a + b
+                def shift_calib_2(mc, mc_ideal):
+                    fitresult, _ = curve_fit(shift_2, mc, mc_ideal, maxfev=2000)
+                    return fitresult
+                if len(peaks_chos) > 2:
+                    fitresult = shift_calib_3(peaks_chos, variables.list_material)
+                    variables.mc_calib = shift_3(variables.mc_calib_backup, *fitresult)
+                elif len(peaks_chos) == 2:
+                    fitresult = shift_calib_2(peaks_chos, variables.list_material)
+                    variables.mc_calib = shift_2(variables.mc_calib_backup, *fitresult)
+                else:
+                    print('Number of peaks is less than 2. Select more peaks at least 2 peaks')
 
-            def shift_calib(mc, mc_ideal):
-                fitresult, _ = curve_fit(shift, mc, mc_ideal, maxfev=2000)
-                return fitresult
-
-            fitresult = shift_calib(peaks_chos, variables.list_material)
-            variables.mc_calib = shift(variables.mc_calib_backup, *fitresult)
-
+            with out_mc:
+                print('parametric fit done')
         button_fit.disabled = False
-        with out_mc:
-            print('parametric fit done')
 
     button_plot_result = widgets.Button(description="plot result")
 
@@ -147,7 +165,7 @@ def call_ion_list(variables, selector):
         with out_mc:  # Capture the output within the 'out' widget
             # Call the function
             mc_hist = mc_plot.AptHistPlotter(variables.mc_calib[variables.mc_calib < lim_value], variables)
-            mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='mc', steps='stepfilled',
+            mc_hist.plot_histogram(bin_width=bin_size_value, normalize=mode_value, label='mc', steps='stepfilled',
                                    log=log_value, fig_size=figure_size)
 
             if mode_value != 'normalized':
@@ -181,14 +199,14 @@ def call_ion_list(variables, selector):
             # Call the function
             if target_value == 'mc_calib':
                 mc_hist = mc_plot.AptHistPlotter(variables.mc_calib[variables.mc_calib < lim_value], variables)
-                mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='mc', steps='stepfilled',
+                mc_hist.plot_histogram(bin_width=bin_size_value, normalize=mode_value, label='mc', steps='stepfilled',
                                        log=log_value, fig_size=figure_size)
             elif target_value == 'tof_calib':
                 mc_hist = mc_plot.AptHistPlotter(variables.dld_t_calib[variables.dld_t_calib < lim_value], variables)
-                mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='tof', steps='stepfilled',
+                mc_hist.plot_histogram(bin_width=bin_size_value, normalize=mode_value, label='tof', steps='stepfilled',
                                        log=log_value, fig_size=figure_size)
 
-            if mode_value != 'normalized':
+            if not mode_value:
                 mc_hist.find_peaks_and_widths(prominence=prominence_value, distance=distance_value,
                                               percent=percent_value)
                 mc_hist.plot_peaks()
@@ -209,7 +227,7 @@ def call_ion_list(variables, selector):
         widgets.HBox([widgets.Label(value="Calibration mde:", layout=label_layout), calibration_mode]),
         widgets.HBox([widgets.Label(value="Bin Size:", layout=label_layout), bin_size_widget]),
         widgets.HBox([widgets.Label(value="Log:", layout=label_layout), log_widget]),
-        widgets.HBox([widgets.Label(value="Mode:", layout=label_layout), mode_widget]),
+        widgets.HBox([widgets.Label(value="Normalize:", layout=label_layout), mode_widget]),
         widgets.HBox([widgets.Label(value="Prominence:", layout=label_layout), prominence_widget]),
         widgets.HBox([widgets.Label(value="Distance:", layout=label_layout), distance_widget]),
         widgets.HBox([widgets.Label(value="Lim:", layout=label_layout), lim_widget]),

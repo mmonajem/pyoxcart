@@ -53,9 +53,10 @@ def read_epos(file_path):
     """
     with open(file_path, 'rb') as file:
         data = file.read()
-        n = len(data) // 4
-        rs = n // 11
-        d = struct.unpack('>' + 'fffffffffII' * rs, data)
+
+    n = len(data) // 4
+    rs = n // 11
+    d = struct.unpack('>' + 'fffffffffII' * rs, data)
     epos = pd.DataFrame({
         'x (nm)': d[0::11],
         'y (nm)': d[1::11],
@@ -107,20 +108,66 @@ def read_rrng(file_path):
             else:
                 rrngs.append(m.groups()[2:])
 
-    # Convert ions list to a DataFrame with columns 'number' and 'name', and set 'number' as the index
-    ions = pd.DataFrame(ions, columns=['number', 'name'])
-    ions.set_index('number', inplace=True)
+    mc_low = [float(i[1].replace(',', '.')) for i in rrngs]
+    mc_up = [float(i[2].replace(',', '.')) for i in rrngs]
+    mc = [(float(i[1].replace(',', '.')) + float(i[2].replace(',', '.'))) / 2 for i in rrngs]
+    elements = [i[4] for i in rrngs]
+    colors = [i[5] for i in rrngs]
+    charge = [1] * len(rrngs)
+    # Output lists
+    complex = []
+    element_list = []
+    ion_list = []
+    # Process each item in the input list
+    for item in elements:
+        # Split by space if there are multiple elements (e.g., 'Mo:1 O:3')
+        parts = item.split()
 
-    # Convert rrngs list to a DataFrame with columns 'number', 'lower', 'upper', 'vol', 'comp', and 'colour', and set 'number' as the index
-    rrngs = pd.DataFrame(rrngs, columns=['number', 'lower', 'upper', 'vol', 'comp', 'colour'])
-    rrngs.set_index('number', inplace=True)
+        # Initialize lists for complexity and elements
+        complexities = []
+        elements_s = []
+        for part in parts:
+            # Split by colon to separate element and complexity
+            element, complexity = part.split(':')
+            if element == 'Name':
+                element = 'unranged'
+                complexity = 0
+            # Append element and complexity
+            elements_s.append(element)
+            complexities.append(int(complexity))
+        # Append the result for each item
+        complex.append(complexities)
+        element_list.append(elements_s)
 
-    # Convert 'lower', 'upper', and 'vol' columns in rrngs DataFrame to float data type
-    rrngs[['lower', 'upper', 'vol']] = rrngs[['lower', 'upper', 'vol']].astype(float)
-    rrngs[['comp', 'colour']] = rrngs[['comp', 'colour']].astype(str)
+    # make isotope list of list base on element list
+    isotope = []
 
-    # Return the ions and rrngs DataFrames
-    return ions, rrngs
+    for i in range(len(element_list)):
+        isotope_s = []
+        for j in range(len(element_list[i])):
+            formula = r'$'
+            formula += '{}^'
+            formula += '{%s}' % 1
+            formula += '%s' % element_list[i][0]
+            if complex[i][j] > 1:
+                formula += '_{%s}' % complex[i][j]
+            isotope_s.append(1)
+        if charge[i] > 1:
+            formula += '^{%s+}$' % charge[i]
+        else:
+            formula += '^{+}$'
+        isotope.append(isotope_s)
+        ion_list.append(formula)
+
+    name = []
+    for i in range(len(element_list)):
+        name.append(".".join(f"{element_list[i][j]}{complex[i][j]}" for j in range(len(element_list[i]))))
+
+    # Return the pyccapt_ranges DataFrame
+    range_data = pd.DataFrame({'name': name, 'ion': ion_list, 'mass': mc, 'mc': mc, 'mc_low': mc_low,
+                                    'mc_up': mc_up, 'color': colors, 'element': element_list,
+                                    'complex': complex, 'isotope': isotope, 'charge': charge})
+    return range_data
 
 
 def write_rrng(file_path, ions, rrngs):

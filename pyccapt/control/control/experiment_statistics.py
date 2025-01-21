@@ -22,6 +22,7 @@ Experiment Parameters and Statistics
 Experiment Timestamp: {current_datetime}
 Username: {variables.user_name}
 Experiment Name: {variables.ex_name}
+Electrode Name: {variables.electrode}
 Maximum Experiment Time: {variables.ex_time} seconds
 Maximum Number of Ions: {variables.max_ions}
 Control Refresh Frequency: {variables.ex_freq} Hz
@@ -48,7 +49,8 @@ Counter Source: {variables.counter_source}
 Email: {variables.email}
 -----------------------------------------------------
 Device name: {conf['device_name']}
-t_0 (Sec): {conf['t_0']}
+t_0_laser (Sec): {conf['t_0_laser']}
+t_0_voltage (Sec): {conf['t_0_voltage']}
 flight path distance (cm): {conf['flight_path_length']}
 TDC model: {conf['tdc_model']}
 """

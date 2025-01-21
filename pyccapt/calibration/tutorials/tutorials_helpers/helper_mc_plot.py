@@ -12,7 +12,7 @@ def call_mc_plot(variables, selector):
     bin_size_widget = widgets.FloatText(value=0.1)
     log_widget = widgets.Dropdown(options=[('True', True), ('False', False)])
     grid_widget = widgets.Dropdown(options=[('True', True), ('False', False)])
-    mode_widget = widgets.Dropdown(options=[('normal', 'normal'), ('normalized', 'normalized')])
+    mode_widget = widgets.Dropdown(options=[('False', False), ('True', True)])
     mrp_all_widget = widgets.Dropdown(options=[('True', True), ('False', False)])
     prominence_widget = widgets.IntText(value=10)
     distance_widget = widgets.IntText(value=100)
@@ -56,7 +56,7 @@ def call_mc_plot(variables, selector):
             elif target_value == 'tof':
                 hist = variables.data['t (ns)']
             mc_hist = mc_plot.AptHistPlotter(hist[hist < lim_value], variables)
-            mc_hist.plot_histogram(bin_width=bin_size_value, mode=mode_value, label='mc', steps='stepfilled',
+            mc_hist.plot_histogram(bin_width=bin_size_value, normalize=mode_value, label='mc', steps='stepfilled',
                                    log=log_value, grid=grid_value, fig_size=figure_size)
             if mode_value != 'normalized':
                 mc_hist.find_peaks_and_widths(prominence=prominence_value, distance=distance_value,
@@ -79,7 +79,7 @@ def call_mc_plot(variables, selector):
         widgets.HBox([widgets.Label(value="Bin Size:", layout=label_layout), bin_size_widget]),
         widgets.HBox([widgets.Label(value="Log:", layout=label_layout), log_widget]),
         widgets.HBox([widgets.Label(value="Grid:", layout=label_layout), grid_widget]),
-        widgets.HBox([widgets.Label(value="Mode:", layout=label_layout), mode_widget]),
+        widgets.HBox([widgets.Label(value="Normalize:", layout=label_layout), mode_widget]),
         widgets.HBox([widgets.Label(value="Prominence:", layout=label_layout), prominence_widget]),
         widgets.HBox([widgets.Label(value="Distance:", layout=label_layout), distance_widget]),
         widgets.HBox([widgets.Label(value="Lim:", layout=label_layout), lim_widget]),

@@ -22,21 +22,22 @@ This HDF5 file in PyCCAPT contains data with the following columns:
 - `t_c (ns)`: (n,) (ns, float64) Bowl and voltage calibrated time-of-flight in nanosecond.
 - `x_det (cm)`: (n,) (cm, float64) Detector x hit position of ions.
 - `y_det (cm)`: (n,) (cm, float64) Detector y hit position of ions.
-- `pulse_pi`: (n,) (N/A, uint32) Number of pulse since the last detected event pulse.
-- `ion_pp`: (n,) (N/A, uint32) Detected ions for each pulse.
+- `delta_p`: (n,) (N/A, uint32) Number of pulse since the last detected event pulse.
+- `multi`: (n,) (N/A, uint32) Detected ions for each pulse.
 - `start_counter`: (n,) (N/A, float64) The TDC counter value
 
 There is also possibility to convert the PyCCAPT HDF5 file data to EPOS, POS, ATO, and CSV file. You can find the
 example code in the tutorial section. A screenshot of the PyCCAPT HDF5 file is shown below.
 
-![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/dataset.png)
+![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/dataset.png)
 
 
 ### Range HDF5 file structure of PyCCAPT 
 
 The range file contains the range of the mass-to-charge ratio. The range file is a HDF5 file with the following:
 
-- `ion`: (n,) (N/A, string) Ions name in latex format.
+- `name`: (n,) (N/A, string) Ion name in simple format.
+- `ion`: (n,) (N/A, string) Ion name in latex format.delta_p
 - `mass`: (n,) (Da, float64) The mass-to-charge ratio of the element base on the elements weight and complexity.
 - `mc`: (n,) (Da, float64) Peak location of mass-to-charge ratio in the dataset.
 - `mc_low`: (n,) (Da, float64) The lower bound of the mass-to-charge ratio in the dataset for the peak.
@@ -49,5 +50,5 @@ The range file contains the range of the mass-to-charge ratio. The range file is
 
 A screenshot of the range HDF5 file is shown below.
 
-![plot](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/range_data.png)
+![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/range_data.png)
 

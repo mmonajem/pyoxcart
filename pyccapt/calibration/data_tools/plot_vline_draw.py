@@ -89,6 +89,15 @@ class VerticalLineManager:
 			self.ax.set_xlim(left, right)
 			self.fig.canvas.draw()
 
+	# remove the vertical line
+	def remove_all_lines(self):
+		if self.lines:
+			for line in self.lines:
+				line.remove()
+			self.lines.clear()
+			self.variables.h_line_pos.clear()
+			self.fig.canvas.draw()
+
 
 class HorizontalZoom:
 	def __init__(self, ax, fig):

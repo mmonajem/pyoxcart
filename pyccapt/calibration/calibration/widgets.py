@@ -1,6 +1,7 @@
 import re
 
 import ipywidgets as widgets
+import pandas as pd
 
 from pyccapt.calibration.data_tools import data_tools
 
@@ -267,13 +268,13 @@ def density_field_selection():
     """
     try:
         TableFile = '../../../files/field_density_table.h5'
-        dataframe = data_tools.read_hdf5_through_pandas(TableFile)
+        dataframe = pd.read_hdf(TableFile, mode='r')
     except Exception as e:
         print("Error: ", e)
         print("Trying to load the file from the default path")
         try:
             TableFile = './pyccapt/files/field_density_table.h5'
-            dataframe = data_tools.read_hdf5_through_pandas(TableFile)
+            dataframe = pd.read_hdf(TableFile, mode='r')
         except Exception as e:
             print("Error: ", e)
             

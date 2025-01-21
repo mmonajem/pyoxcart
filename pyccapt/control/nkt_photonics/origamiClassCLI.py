@@ -101,7 +101,7 @@ class origClass:
 		return dataBack.decode()
 
 	def AOM(self, power):
-		cmd = "e_power=xxxx" + str(power) + "\n"
+		cmd = "e_power=" + str(power) + "\n"
 		self.ser.write(cmd.encode())
 		sleep(0.1)
 		dataStore = []
@@ -200,6 +200,17 @@ class origClass:
 		sleep(0.1)
 		return dataBack.decode()
 
+	def StatusMode(self):
+		cmd = "ly_oxp2_mode\n"
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			dataBack = self.ser.readline()
+			dataStore.append(dataBack.decode())
+		sleep(0.1)
+		return dataBack.decode()
+
 	def ServiceMode(self):
 		cmd = "ly_oxp2_service_mode\n"
 		self.ser.write(cmd.encode())
@@ -279,8 +290,19 @@ class origClass:
 			sleep(0.1)
 			return dataBack.decode()
 
-	def change_wavelength(self, wavelength):
+	def wavelength_change(self, wavelength):
 		cmd = "ls_wavelength=" + str(wavelength) + "\n"
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			data_back = self.ser.readline()
+			dataStore.append(data_back.decode())
+		sleep(0.1)
+		return data_back.decode()
+
+	def wavelength_read(self):
+		cmd = "ls_wavelength?\n"
 		self.ser.write(cmd.encode())
 		sleep(0.1)
 		dataStore = []
@@ -292,6 +314,40 @@ class origClass:
 
 	def read_average_power(self):
 		cmd = "e_mlp?\n"
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			data_back = self.ser.readline()
+			dataStore.append(data_back.decode())
+		sleep(0.1)
+		return data_back.decode()
+
+	def freq_avaliable(self):
+		cmd = "e_freq_available?\n"
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			data_back = self.ser.readline()
+			print(data_back.decode())
+			dataStore.append(data_back.decode())
+		sleep(0.1)
+		return data_back.decode()
+
+	def power_read_dv_green(self):
+		cmd = "ls_output_power?\n"
+		self.ser.write(cmd.encode())
+		sleep(0.1)
+		dataStore = []
+		while self.ser.in_waiting:
+			data_back = self.ser.readline()
+			dataStore.append(data_back.decode())
+		sleep(0.1)
+		return data_back.decode()
+
+	def status_led(self):
+		cmd = "ly_oxp2_mode?\n"
 		self.ser.write(cmd.encode())
 		sleep(0.1)
 		dataStore = []

@@ -7,11 +7,12 @@ import scipy.io
 from pyccapt.calibration.data_tools import ato_tools, data_loadcrop, data_tools
 from pyccapt.calibration.leap_tools import ccapt_tools
 from pyccapt.calibration.mc import tof_tools
+from pyccapt.calibration.leap_tools import leap_tools
 
 
 def read_hdf5(filename: "type: string - Path to hdf5(.h5) file") -> "type: dataframe":
     """
-    This function differs from read_hdf5_through_pandas as it does not assume that
+    This function differs from reading pandas dataframe as it does not assume that
     the contents of the HDF5 file as argument was created using pandas. It could have been
     created using other tools like h5py/MATLAB.
     """
@@ -39,7 +40,7 @@ def read_hdf5(filename: "type: string - Path to hdf5(.h5) file") -> "type: dataf
         print("[*] No Group keys could be found in HDF5 File")
 
 
-def read_hdf5_through_pandas(filename: "type:string - Path to hdf5(.h5) file") -> "type: dataframe - Pandas Dataframe":
+def read_range(filename: "type:string - Path to hdf5(.h5) file") -> "type: dataframe - Pandas Dataframe":
     """
     This function is different from read_hdf5 function. As it assumes, the content 
     of the HDF5 file passed as argument was created using the Pandas library.
@@ -50,10 +51,16 @@ def read_hdf5_through_pandas(filename: "type:string - Path to hdf5(.h5) file") -
             hdf5_file_response:  content of hdf5 file (type: dataframe)       
     """
     try:
-        hdf5_file_response = pd.read_hdf(filename, mode='r')
-        return hdf5_file_response
+        # check the file extension
+        if filename.endswith('.h5'):
+            range_data = pd.read_hdf(filename, mode='r')
+        elif filename.endswith('.rrng'):
+            range_data = leap_tools.read_rrng(filename)
+        return range_data
     except FileNotFoundError as error:
         print("[*] HDF5 File could not be found")
+        print(error)
+        raise FileNotFoundError
 
 
 def read_mat_files(filename: "type:string - Path to .mat file") -> " type: dict - Returns the content .mat file":
@@ -161,17 +168,17 @@ def remove_invalid_data(dld_group_storage, max_tof):
     return dld_group_storage
 
 
-def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, csv=False, temp=False):
+def save_data(data, variables, name=None, hdf=True, epos=False, pos=False, csv=False, temp=False):
     """
     save data in different formats
 
     Args:
         data (pandas.DataFrame): DataFrame containing the data.
         vsriables (class): class containing the variables.
+        name (string): name of the dataset.
         hdf (bool): save data as hdf5 file.
         epos (bool): save data as epos file.
         pos (bool): save data as pos file.
-        ato_6v (bool): save data as ato file.
         csv (bool): save data as csv file.
         temp (bool): save data as temporary file.
 
@@ -179,10 +186,14 @@ def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, cs
         None. The DataFrame is modified in-place.
 
     """
-    if temp:
-        data_name = variables.result_data_name + '_temp'
+    if name is not None:
+        data_name = name
     else:
-        data_name = variables.result_data_name
+        if temp:
+            data_name = variables.result_data_name + '_temp'
+        else:
+            data_name = variables.data_name
+
     if hdf:
         # save the dataset to hdf5 file
         hierarchyName = 'df'
@@ -194,9 +205,6 @@ def save_data(data, variables, hdf=True, epos=False, pos=False, ato_6v=False, cs
     if pos:
         # save data in pos format
         ccapt_tools.ccapt_to_pos(data, path=variables.result_path, name=data_name + '.pos')
-    if ato_6v:
-        # save data as ato file in  ersion 6
-        ato_tools.ccapt_to_ato(data, path=variables.result_path, name=data_name + '.ato')
     if csv:
         # save data in csv format
         store_df_to_csv(data, variables.result_path + variables.result_data_name + '.csv')
@@ -219,7 +227,7 @@ def load_data(dataset_path, data_type, mode='processed'):
         if data_type == 'leap_epos':
             data = ccapt_tools.epos_to_ccapt(dataset_path)
         else:
-            print('The file has to be epos. With pos information this tutorial cannot be run')
+            print('The dataset should contains at least epos information to use all possible analysis')
             data = ccapt_tools.pos_to_ccapt(dataset_path)
     elif data_type == 'leap_apt':
         data = ccapt_tools.apt_to_ccapt(dataset_path)
@@ -228,7 +236,7 @@ def load_data(dataset_path, data_type, mode='processed'):
     elif data_type == 'pyccapt' and mode == 'raw':
         data = data_loadcrop.fetch_dataset_from_dld_grp(dataset_path)
     elif data_type == 'pyccapt' and mode == 'processed':
-        data = data_tools.read_hdf5_through_pandas(dataset_path)
+        data = pd.read_hdf(dataset_path, mode='r')
     return data
 
 
@@ -270,9 +278,6 @@ def extract_data(data, variables, flightPathLength_d, max_mc):
         variables.y = data['y (nm)'].to_numpy()
         variables.z = data['z (nm)'].to_numpy()
     print('The maximum possible time of flight is:', variables.max_tof)
-    # ion_distance = np.sqrt(flightPathLength_d**2 + (variables.dld_x_det*10)**2 + (variables.dld_y_det*10)**2)
-    # ion_distance = flightPathLength_d / ion_distance
-    # variables.dld_t = variables.dld_t * ion_distance
 
 
 def pyccapt_raw_to_processed(data):
@@ -298,8 +303,25 @@ def pyccapt_raw_to_processed(data):
     data_processed['t_c (ns)'] = np.zeros(len(data))
     data_processed['x_det (cm)'] = data['x_det (cm)'].to_numpy()
     data_processed['y_det (cm)'] = data['y_det (cm)'].to_numpy()
-    data_processed['pulse_pi'] = np.zeros(len(data))
-    data_processed['ion_pp'] = np.zeros(len(data))
+    data_processed['delta_p'] = np.zeros(len(data))
+    data_processed['multi'] = np.zeros(len(data))
     data_processed['start_counter'] = data['start_counter'].to_numpy()
 
     return data_processed
+
+def save_range(variables):
+    """
+    Save the range data to the file.
+
+    Args:
+        variables:
+
+    Returns:
+        None
+    """
+    # save the new data
+    name_save_file = variables.result_data_path + '/' + variables.dataset_name + '_range' + '.h5'
+    data_tools.store_df_to_hdf(variables.range_data, 'df', name_save_file)
+    # save data in csv format
+    name_save_file = variables.result_data_path + '/' + variables.dataset_name + '_range' + '.csv'
+    data_tools.store_df_to_csv(variables.range_data, name_save_file)

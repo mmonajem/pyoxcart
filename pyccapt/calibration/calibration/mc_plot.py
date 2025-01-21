@@ -1,4 +1,5 @@
 import math
+import re
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -42,11 +43,11 @@ class AptHistPlotter:
             mc_tof (numpy.ndarray): Array for mc or tof data.
             variables (share_variables.Variables): The global experiment variables.
         """
+        self.line_manager = None
         self.distance = None
         self.prominence = None
         self.percent = None
         self.rectangle = None
-        self.ax1 = None
         self.bins = None
         self.plotted_circles = []
         self.plotted_lines = []
@@ -67,16 +68,17 @@ class AptHistPlotter:
         self.peak_widths = None
         self.prominences = None
         self.mask_f = None
+        self.plot_show = True
         self.legend_colors = []
 
-    def plot_histogram(self, bin_width=0.1, mode=None, label='mc', log=True, grid=False, steps='stepfilled',
+    def plot_histogram(self, bin_width=0.1, normalize=False, label='mc', log=True, grid=False, steps='stepfilled',
                        fig_size=(9, 5), plot_show=True):
         """
         Plot the histogram of the mc or tof data.
 
         Args:
             bin_width (float): The width of the bins.
-            mode (str): The mode of the histogram ('normalized' or 'absolute').
+            normalize (bool): Whether to normalize the histogram.
             label (str): The label of the x-axis ('mc' or 'tof').
             log (bool): Whether to use log scale for the y-axis.
             grid (bool): Whether to show the grid.
@@ -90,7 +92,8 @@ class AptHistPlotter:
         """
         # Define the bins
         self.bin_width = bin_width
-        bins = np.linspace(np.min(self.mc_tof), np.max(self.mc_tof), round(np.max(self.mc_tof) / bin_width))
+        self.plot_show = plot_show
+        self.bins = np.linspace(np.min(self.mc_tof), np.max(self.mc_tof), round(np.max(self.mc_tof) / bin_width))
 
         # Plot the histogram directly
         self.fig, self.ax = plt.subplots(figsize=fig_size)
@@ -102,12 +105,12 @@ class AptHistPlotter:
             edgecolor = 'k'
             alpha = 0.9
 
-        if mode == 'normalized':
-            self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=bins, alpha=alpha,
+        if normalize:
+            self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=self.bins, alpha=alpha,
                                                         color='slategray', edgecolor=edgecolor, histtype=steps,
                                                         density=True)
         else:
-            self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=bins, alpha=alpha, color='slategray',
+            self.y, self.x, self.patches = self.ax.hist(self.mc_tof, bins=self.bins, alpha=alpha, color='slategray',
                                                         edgecolor=edgecolor, histtype=steps)
         self.ax.set_xlabel('Mass/Charge [Da]' if label == 'mc' else 'Time of Flight [ns]')
         self.ax.set_ylabel('Event Counts')
@@ -128,6 +131,22 @@ class AptHistPlotter:
             self.variables.x_hist = self.x
             self.variables.y_hist = self.y
         return self.y, self.x
+
+    def plot_line_hist(self):
+        """
+        Plot the histogram as a line plot.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        bin_centers = (self.bins[:-1] + self.bins[1:]) / 2  # Compute bin centers
+        self.ax.plot(bin_centers, self.y, color='slategray')
+        # Step 2: Remove the histogram patches (bars)
+        for patch in self.patches:
+            patch.set_visible(False)
 
     def plot_range(self, range_data, legend=True, legend_loc='upper right'):
         """
@@ -158,15 +177,36 @@ class AptHistPlotter:
 
             for i in range(len(ion)):
                 self.legend_colors.append((r'%s' % ion[i], plt.Rectangle((0, 0), 1, 1, fc=colors[i])))
-                x_offset = 0.5  # Adjust this value as needed
-                y_offset = 0.5  # Adjust this value as needed
+                x_offset = 0.0  # Adjust this value as needed
 
                 # Find the bin that contains the mc[i]
-                bin_index = np.searchsorted(self.x, mc[i])
-                peak_height = self.y[bin_index] * ((mc[i] - self.x[bin_index - 1]) / self.bin_width)
-                self.peak_annotates.append(plt.text(mc[i] + x_offset, peak_height + y_offset,
-                                                    r'%s' % ion[i], color='black', size=10, alpha=1))
-                self.annotates.append(str(i + 1))
+                bin_index = np.searchsorted(self.x, mc[i]) - 1
+                if 0 <= bin_index < len(self.y):
+                    # Define a small range around the bin to search for the local maximum
+                    search_range = slice(max(0, bin_index - 1), min(len(self.y), bin_index + 2))
+                    local_bins = self.y[search_range]
+                    local_x = self.x[search_range.start:search_range.stop]
+
+                    # Find the local maximum and its position
+                    max_idx = np.argmax(local_bins)
+                    peak_height = local_bins[max_idx]
+                    peak_position = local_x[max_idx]
+
+                    # Dynamic y_offset based on log scale
+                    y_offset = peak_height * 0.05
+                    if self.ax.get_yscale() == 'log':
+                        y_offset = 10 ** (np.log10(peak_height) + 0.1) - peak_height
+
+                    self.peak_annotates.append(plt.text(
+                        peak_position + x_offset,
+                        peak_height + y_offset,
+                        r'%s' % ion[i],
+                        color='black',
+                        size=10,
+                        alpha=1,
+                        rotation=90
+                    ))
+                    self.annotates.append(str(i + 1))
 
             if legend:
                 self.plot_color_legend(loc=legend_loc)
@@ -190,8 +230,20 @@ class AptHistPlotter:
             self.ranged_line.remove()
         except AttributeError:
             pass
-        self.ranged_line = plt.axvline(x=peak_loc, color='red', linestyle='dashdot', linewidth=2,
-                                       ymax=self.y[bin_index])
+        # Ensure bin_index is within valid range
+        if bin_index < 0 or bin_index >= len(self.y):
+            raise IndexError(f"Bin index {bin_index} out of range for y array of length {len(self.y)}")
+
+        # Get the scalar value for ymax
+        ymax = float(self.y[bin_index])
+        # Plot the vertical line with the specified color and properties
+        self.ranged_line = plt.axvline(
+            x=peak_loc,
+            color=color,
+            linestyle='dashdot',
+            linewidth=2,
+            ymax=ymax
+        )
 
     def plot_peaks(self, range_data=None, mode='peaks'):
         """
@@ -204,41 +256,70 @@ class AptHistPlotter:
         Returns:
             None
         """
-        x_offset = 0.5  # Adjust this value as needed
-        y_offset = 0.5  # Adjust this value as needed
+        x_offset = 0.0  # Adjust this value as needed
         if range_data is not None:
             ion = range_data['ion'].tolist()
             mc = range_data['mc'].tolist()
             for i in range(len(ion)):
                 # Find the bin that contains the mc[i]
-                bin_index = np.searchsorted(self.x, mc[i])
-                peak_height = self.y[bin_index] * ((mc[i] - self.x[bin_index - 1]) / self.bin_width)
-                self.peak_annotates.append(plt.text(mc[i] + x_offset, peak_height + y_offset,
-                                                    r'%s' % ion[i], color='black', size=10, alpha=1))
-                self.annotates.append(str(i + 1))
+                bin_index = np.searchsorted(self.x, mc[i]) - 1
+                if 0 <= bin_index < len(self.y):
+                    # Define a small range around the bin to search for the local maximum
+                    search_range = slice(max(0, bin_index - 1), min(len(self.y), bin_index + 2))
+                    local_bins = self.y[search_range]
+                    local_x = self.x[search_range.start:search_range.stop]
+
+                    # Find the local maximum and its position
+                    max_idx = np.argmax(local_bins)
+                    peak_height = local_bins[max_idx]
+                    peak_position = local_x[max_idx]
+
+                    # Dynamic y_offset based on log scale
+                    y_offset = peak_height * 0.05
+                    if self.ax.get_yscale() == 'log':
+                        y_offset = 10 ** (np.log10(peak_height) + 0.1) - peak_height
+                else:
+                    peak_position = mc[i]
+                    peak_height = self.y[np.searchsorted(self.x, mc[i]) - 1]
+                if self.plot_show:
+                    self.peak_annotates.append(plt.text(peak_position + x_offset, peak_height + y_offset,
+                                                        r'%s' % ion[i], color='black', size=10, alpha=1,
+                                                        rotation=90))
+                    self.annotates.append(str(i + 1))
         else:
+            y_offset = 0.0  # Adjust this value as needed
             if mode == 'peaks':
                 for i in range(len(self.peaks)):
-                    self.peak_annotates.append(
-                        plt.text(self.x[self.peaks][i] + x_offset, self.y[self.peaks][i] + y_offset,
-                                 '%s' % '{:.2f}'.format(self.x[self.peaks][i]), color='black', size=10, alpha=1))
+                    if self.plot_show:
+                        # Dynamic y_offset based on log scale
+                        peak_height = self.y[self.peaks][i]
+                        y_offset = peak_height * 0.05
+                        if self.ax.get_yscale() == 'log':
+                            y_offset = 10 ** (np.log10(peak_height) + 0.1) - peak_height
 
-                    self.annotates.append(str(i + 1))
+                        self.peak_annotates.append(
+                            plt.text(self.x[self.peaks][i] + x_offset, peak_height + y_offset,
+                                     '%s' % '{:.2f}'.format(self.x[self.peaks][i]), color='black', size=10, alpha=1,
+                                     rotation=90))
+
+                        self.annotates.append(str(i + 1))
 
             elif mode == 'range':
+                y_offset = 0.0  # Adjust this value as needed
                 for i in range(len(self.variables.peaks_x_selected)):
                     # Find the bin that contains the mc[i]
                     bin_index = np.searchsorted(self.x, self.variables.peaks_x_selected[i])
                     peak_height = self.y[bin_index] * ((self.variables.peaks_x_selected[i] -
                                                         self.x[bin_index - 1]) / self.bin_width)
-                    self.peak_annotates.append(
-                        plt.text(self.variables.peaks_x_selected[i] + x_offset, peak_height + y_offset,
-                                 '%s' % '{:.2f}'.format(self.variables.peaks_x_selected[i]), color='black', size=10,
-                                 alpha=1))
+                    if self.plot_show:
+                        self.peak_annotates.append(
+                            plt.text(self.variables.peaks_x_selected[i] + x_offset, peak_height + y_offset,
+                                     '%s' % '{:.2f}'.format(self.variables.peaks_x_selected[i]), color='black', size=10,
+                                     alpha=1, rotation=90))
 
-                    self.annotates.append(str(i + 1))
+                        self.annotates.append(str(i + 1))
 
-    def plot_color_legend(self, loc):
+    def plot_color_legend(self, loc, detailed_isotope=False, detailed_charge=False):
         """
         Plot the color legend.
 
@@ -248,12 +329,45 @@ class AptHistPlotter:
         Returns:
             None
         """
+        # make a copy of the legend colors
+        legend_colors_edited = self.legend_colors.copy()
+        if not detailed_isotope or not detailed_charge:
+            # Regular expression pattern to remove isotope notation
+            pattern = r"\$\{\}\^\{\d+\}([A-Za-z]+.*)\$"
+            for i in range(len(legend_colors_edited)):
+                legend_colors_edited[i] = (re.sub(pattern, r"$\1$", legend_colors_edited[i][0]), legend_colors_edited[i][1])
+            # remove ununique labels
+            unique_tuples = {}
+            for key, value in legend_colors_edited:
+                if key not in unique_tuples:
+                    unique_tuples[key] = value
+
+            # Convert the dictionary back to a list of tuples
+            legend_colors_edited = list(unique_tuples.items())
+        if not detailed_charge:
+            # Regular expression pattern to remove isotope notation
+            pattern_1 =  r"\^{\d+\}|\{\+|\{-\}|\{\d+[+-]?\}"
+            # Regular expression pattern to remove the isotope notation, charge, and caret ^
+            pattern_2 = r"\{\d+\}|[\^{}+-]"
+            for i in range(len(legend_colors_edited)):
+                legend_colors_edited[i] = (re.sub(pattern_1, "", legend_colors_edited[i][0]), legend_colors_edited[i][1])
+                legend_colors_edited[i] = (re.sub(pattern_2, "", legend_colors_edited[i][0]), legend_colors_edited[i][1])
+            # remove ununique labels
+            # Using a set to track seen elements and filter out duplicates
+            seen = set()
+            unique_data = []
+
+            for item in legend_colors_edited:
+                if item[0] not in seen:
+                    seen.add(item[0])
+                    unique_data.append(item)
+            legend_colors_edited = unique_data
         # Adjust the layout
-        if len(self.legend_colors) > 5:
-            ncol = math.ceil(len(self.legend_colors) // 8)
+        if len(legend_colors_edited) > 5:
+            ncol = max(1, math.ceil(len(legend_colors_edited) / 8))
         else:
             ncol = 1
-        self.ax.legend([label[1] for label in self.legend_colors], [label[0] for label in self.legend_colors],
+        self.ax.legend([label[1] for label in legend_colors_edited], [label[0] for label in legend_colors_edited],
                        loc=loc, ncol=ncol)
 
     def plot_hist_info_legend(self, label='mc', mrp_all=False, background=None, legend_mode='long',
@@ -281,34 +395,34 @@ class AptHistPlotter:
             if background is not None:
                 if mrp_all:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
+                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nMRP(0.5): %s\nMRP(0.1): %s\nMRP(0.01): %s' \
                               % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp_list[0],
                                  mrp_list[1], mrp_list[2])
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s\nFW10%%M: %s\nFW1%%M: %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
+                        txt = 'MRP(0.5): %s\nMRP(0.1): %s\nMRP(0.01): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
 
                 else:
                     if legend_mode == 'long':
                         txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nbackG: %s ppm/Da\nFW%d%%M: %s' \
                               % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp)
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s' % (mrp)
+                        txt = 'MRP(0.5): %s' % (mrp)
             else:
                 # annotation with range stats
 
                 if mrp_all:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
+                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nMRP(0.5): %s\nMRP(0.1): %s\nMRP(0.01): %s' \
                               % (self.bin_width, len(self.mc_tof) / 1000000, mrp_list[0], mrp_list[1],
                                  mrp_list[2])
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s\nFW10%%M: %s\nFW1%%M: %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
+                        txt = 'MRP(0.5): %s\nMRP(0.1): %s\nMRP(0.01): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
                 else:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nFW%d%%M: %s' \
-                              % (self.bin_width, (len(self.mc_tof) / 1000000), self.percent, mrp)
+                        txt = 'bin width: %s Da\nnum atoms: %.2f$e^6$\nMRP(%s): %s' \
+                              % (self.bin_width, (len(self.mc_tof) / 1000000), self.percent / 100, mrp)
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s' % (mrp)
+                        txt = 'MRP(0.5): %s' % (mrp)
 
         elif label == 'tof' or label == 'tof_c':
             mrp = '{:.2f}'.format(
@@ -319,33 +433,34 @@ class AptHistPlotter:
             if background is not None:
                 if mrp_all:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
+                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nMRP(0.5): %s\nMRP(0.1): %s\nMRP(0.01): %s' \
                               % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm), mrp_list[0],
                                  mrp_list[1], mrp_list[2])
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s\nFW10%%M: %s\nFW1%%M: %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
+                        txt = 'MRP(0.5): %s\nMRP(0.1): %s\nMRP(0.01): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
                 else:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nFW%d%%M: %s' \
-                              % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm), self.percent, mrp)
+                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nbackG: %s ppm/ns\nMRP(%s): %s' \
+                              % (self.bin_width, len(self.mc_tof) / 1000000, round(self.background_ppm),
+                                 self.percent / 100, mrp)
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s' % (mrp)
+                        txt = 'MRP(0.5): %s' % (mrp)
             else:
                 if mrp_all:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nFW50%%M: %s\nFW10%%M: %s\nFW1%%M: %s' \
+                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$\nMRP(0.5): %s\nMRP(0.1): %s\nMRP(0.01): %s' \
                               % (self.bin_width, len(self.mc_tof) / 1000000, mrp_list[0], mrp_list[1],
                                  mrp_list[2])
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s\nFW10%%M: %s\nFW1%%M: %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
+                        txt = 'MRP(0.5): %s\nMRP(0.1): %s\nMRP(0.01): %s' % (mrp_list[0], mrp_list[1], mrp_list[2])
                 else:
                     if legend_mode == 'long':
-                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nFW%d%%M: %s' \
-                              % (self.bin_width, len(self.mc_tof) / 1000000, self.percent, mrp)
+                        txt = 'bin width: %s ns\nnum atoms: %.2f$e^6$ \nMRP(%s): %s' \
+                              % (self.bin_width, len(self.mc_tof) / 1000000, self.percent / 100, mrp)
                     elif legend_mode == 'short':
-                        txt = 'FWHM: %s' % (mrp)
+                        txt = 'MRP(0.5): %s' % (mrp)
 
-        props = dict(boxstyle='round', facecolor='wheat', alpha=1)
+        props = dict(boxstyle='round', facecolor='#CCCCCC', alpha=1)
         if loc == 'left':
             self.ax.text(.01, .95, txt, va='top', ma='left', transform=self.ax.transAxes, bbox=props, fontsize=10,
                          alpha=1,
@@ -415,14 +530,13 @@ class AptHistPlotter:
             if np.max(self.mc_tof) + 10 > self.variables.h_line_pos[i] > np.max(self.mc_tof) - 10:
                 plt.axvline(x=self.variables.h_line_pos[i], color='b', linestyle='--', linewidth=2)
 
-    def plot_background(self, mode, non_peaks=None, lam=5e10, tol=1e-1, max_iter=100, num_std=3, poly_order=5,
-                        plot_no_back=True, plot=True, patch=True):
+    def plot_background(self, mode, non_peaks=None, lam=1e6, tol=1e-1, max_iter=100, num_std=3.0, plot=True,
+                        patch=True):
         """
         Plot the background of the histogram.
 
         Args:
-            mode (str): The mode of the background ('aspls', 'fabc', 'dietrich', 'cwt_br', 'selective_mask_t', or
-                        'selective_mask_mc').
+            mode (str): The mode of the background ('aspls', 'fabc', 'manual@4', or 'manual@100').
             non_peaks (numpy.ndarray): The non-peaks data.
             lam (float): The lambda value for the background fitting.
             tol (float): The tolerance value for the background fitting.
@@ -430,7 +544,7 @@ class AptHistPlotter:
             num_std (int): The number of standard deviations for the background fitting.
             poly_order (int): The polynomial order for the background fitting.
             plot_no_back (bool): Whether to plot the background.
-            plot (bool): Whether to plot the background.
+            plot (bool): Whether to plot the background fit.
             patch (bool): Whether to plot the patch.
 
         Returns:
@@ -438,67 +552,213 @@ class AptHistPlotter:
         """
         if mode == 'aspls':
             baseline_fitter = Baseline(x_data=self.bins[:-1])
-            fit_1, params_1 = baseline_fitter.aspls(self.y, lam=lam, tol=tol, max_iter=max_iter)
+            fit_2, params_2 = baseline_fitter.aspls(self.y, lam=lam, tol=tol, max_iter=max_iter)
 
         if mode == 'fabc':
             fit_2, params_2 = pybaselines.classification.fabc(self.y, lam=lam,
                                                               num_std=num_std,
                                                               pad_kwargs='edges')
-        if mode == 'dietrich':
-            fit_2, params_2 = pybaselines.classification.dietrich(self.y, num_std=num_std)
-        if mode == 'cwt_br':
-            fit_2, params_2 = pybaselines.classification.cwt_br(self.y, poly_order=poly_order,
-                                                                num_std=num_std,
-                                                                tol=tol)
+
         if mode == 'manual@4':
             upperLim = 4.5  # Da
             lowerLim = 3.5  # Da
             mask = np.logical_and((self.x >= lowerLim), (self.x <= upperLim))
             BG4 = np.sum(self.y[np.array(mask[:-1])]) / (upperLim - lowerLim)
             self.background_ppm = BG4 / len(self.mc_tof) * 1E6
+            self.background_ppm = round(self.background_ppm, 2)
+            # print only the ppm of the noise up to two decimal places
+            handles, labels = plt.gca().get_legend_handles_labels()
+            handles.append(plt.Line2D([], [], linestyle='none'))
+            labels.append('Noise ppm: ' + str(self.background_ppm))
+            plt.legend(handles, labels, frameon=False, loc='upper left')
+
         if mode == 'manual@100':
             upperLim = 100.5
             lowerLim = 99.5
             mask = np.logical_and((self.x >= lowerLim), (self.x <= upperLim))
             BG100 = np.sum(self.y[np.array(mask[:-1])]) / (upperLim - lowerLim)
             self.background_ppm = BG100 / len(self.mc_tof) * 1E6
+            self.background_ppm = round(self.background_ppm, 2)
+            # print only the ppm of the noise up to two decimal places
+            handles, labels = plt.gca().get_legend_handles_labels()
+            handles.append(plt.Line2D([], [], linestyle='none'))
+            labels.append('Noise ppm: ' + str(self.background_ppm))
+            plt.legend(handles, labels, frameon=False, loc='upper left')
 
-        if mode == 'selective_mask_t':
-            if non_peaks is None:
-                print('Please give the non peaks')
-            else:
-                p = np.poly1d(np.polyfit(non_peaks[:, 0], non_peaks[:, 1], 5))
-                baseline_handle = self.ax1.plot(self.x, p(self.x), '--')
-        if mode == 'selective_mask_mc':
-            if non_peaks is None:
-                print('Please give the non peaks')
-            else:
-                fitresult, _ = curve_fit(fit_background, non_peaks[:, 0], non_peaks[:, 1])
-                yy = fit_background(self.x, *fitresult)
-                self.ax1.plot(self.x, yy, '--')
+        if plot:
+            if mode == 'fabc':
+                keys = list(params_2.keys())
+                if 'mask' in keys:
+                    mask_2 = params_2['mask']
+                    noise = 0
+                    for i in range(len(mask_2)):
+                        if mask_2[i]:
+                            noise += self.y[i]
+                    # print only the ppm of the noise up to two decimal places
+                    handles, labels = plt.gca().get_legend_handles_labels()
+                    handles.append(plt.Line2D([], [], linestyle='none'))
+                    self.background_ppm = round(noise / len(self.mc_tof) * 1E6 / np.max(self.mc_tof), 2)
+                    labels.append('Noise ppm: ' + str(self.background_ppm))
+                    plt.legend(handles, labels, frameon=False, loc='upper left')
 
-        if plot_no_back:
-            mask_2 = params_2['mask']
-            self.mask_f = np.full((len(self.mc_tof)), False)
-            for i in range(len(mask_2)):
-                if mask_2[i]:
-                    step_loc = np.min(self.mc_tof) + bin * i
-                    mask_t = np.logical_and((self.mc_tof < step_loc + bin), (self.mc_tof > step_loc))
-                    self.mask_f = np.logical_or(self.mask_f, mask_t)
-            self.background_ppm = (len(self.mask_f[self.mask_f == True]) * 1e6 / len(self.mask_f)) / np.max(self.mc_tof)
+                    if patch:
+                        self.ax.plot(self.bins[:-1][mask_2], self.y[mask_2], 'o', color='orange')[0]
+            elif mode == 'aspls':
+                # Calculate the effective height of each bin
+                effective_heights = []
+                for i in range(len(self.bins) - 1):
+                    # Get the curve height at each bin's x position
+                    background_height = fit_2[i]
 
-        if plot_no_back:
-            if plot:
-                self.ax1.plot(self.bins[:-1], fit_2, label='class', color='r')
-                ax3 = self.ax1.twiny()
-                ax3.axis("off")
-                ax3.plot(fit_1, label='aspls', color='black')
+                    # Bin height
+                    bin_height = self.y[i]
 
-            mask_2 = params_2['mask']
-            if patch:
-                self.ax1.plot(self.bins[:-1][mask_2], self.y[mask_2], 'o', color='orange')[0]
+                    # The effective height is the minimum of the bin height and the background line height
+                    effective_height = min(bin_height, background_height)
+                    effective_heights.append(effective_height)
+
+                effective_heights = np.array(effective_heights)
+                # print only the ppm of the noise up to two decimal places
+                handles, labels = plt.gca().get_legend_handles_labels()
+                handles.append(plt.Line2D([], [], linestyle='none'))
+                self.background_ppm = round(np.sum(effective_heights) / len(self.mc_tof) * 1E6
+                                            / np.max(self.mc_tof), 2)
+                labels.append('Noise ppm: ' + str(self.background_ppm))
+                plt.legend(handles, labels, frameon=False, loc='upper left')
+
+        if plot and mode != 'manual@4' and mode != 'manual@100':
+            self.ax.plot(self.bins[:-1], fit_2, label='class')
+            ax3 = self.ax.twiny()
+            ax3.axis("off")
+            ax3.plot(fit_2, label='aspls', color='blue')
 
         return self.mask_f
+
+    def exponential_decay_with_linear_and_dc(self, x, a, b, c, d):
+        """Exponential decay function with a linear term and DC offset for fitting."""
+        return a * np.exp(-b * x) + c * x + d
+
+    def manual_background_fit(self, ):
+        """
+        Let the user interactively select points on the histogram plot with the left click and fit an exponential decay
+        function with a linear term and a DC offset to the selected points using the right click. Points are removed
+        after the line is plotted.
+        """
+
+        # Check if a histogram has been plotted
+        if self.fig is None or self.ax is None:
+            raise RuntimeError("No histogram plotted. Please run plot_histogram first.")
+
+        selected_points = []
+        point_markers = []  # List to store the plotted points for later removal
+
+        def onclick(event):
+            # Left click to select points
+            if event.button == 1 and event.inaxes == self.ax:
+                x, y = event.xdata, event.ydata
+                selected_points.append((x, y))
+                marker, = self.ax.plot(x, y, 'ro')  # Plot the selected point in red and store the marker
+                point_markers.append(marker)
+                self.fig.canvas.draw()
+
+            # Right click to fit and plot exponential decay function with linear term and DC offset
+            elif event.button == 3:
+                self.fig.canvas.mpl_disconnect(cid)
+                fit_and_plot_exponential_with_linear_and_dc()
+
+        def fit_and_plot_exponential_with_linear_and_dc():
+
+            if len(selected_points) < 2:
+                print("At least 2 points are required to fit an exponential decay with a linear term and DC offset.")
+                return
+
+            # Extract x and y coordinates from the selected points
+            x_points, y_points = zip(*selected_points)
+
+            # Fit the exponential decay function with linear term and DC offset to the selected points
+            self.popt, _ = curve_fit(self.exponential_decay_with_linear_and_dc, x_points, y_points, maxfev=10000)
+            a, b, c, d = self.popt
+
+            # Plot the fitted exponential decay function with linear term and DC offset
+            x_vals = np.linspace(min(self.x), max(self.x), 500)
+            y_vals = self.exponential_decay_with_linear_and_dc(x_vals, a, b, c, d)
+            self.ax.plot(x_vals, y_vals, 'b-')
+
+            # Remove the selected points from the plot
+            for marker in point_markers:
+                marker.remove()
+            point_markers.clear()  # Clear the list of point markers
+
+            # Redraw the plot with the fitted function
+            self.fig.canvas.draw()
+
+            self.calculate_noise(plot_without_noise=False)
+
+        # Connect the click event to the onclick function
+        cid = self.fig.canvas.mpl_connect('button_press_event', onclick)
+
+        print("Left-click to select points on the plot. Right-click to fit the exponential decay with linear "
+              "term and DC offset.")
+
+    def calculate_noise(self, fig_size=(9, 5), plot_without_noise=False):
+        """
+        Create a mask by subtracting the fitted background from the original data,
+        and calculate the noise ppm.
+        """
+        if self.popt is None:
+            raise RuntimeError("No background fitted. Please fit the background first.")
+        else:
+            a, b, c, d = self.popt
+            bin_edges = self.bins[:]
+
+            effective_heights = []
+
+            for i in range(len(bin_edges) - 1):
+                # Get the curve height at bin edges
+                y_left = self.exponential_decay_with_linear_and_dc(bin_edges[i], a, b, c, d)
+                y_right = self.exponential_decay_with_linear_and_dc(bin_edges[i + 1], a, b, c, d)
+
+                # Bin height
+                bin_height = self.y[i]
+
+                # The height of the bin covered by the curve (clamp to bin height if necessary)
+                height_under_curve = min(max(y_left, y_right), bin_height)
+
+                effective_heights.append(height_under_curve)
+
+            # Convert effective_heights to numpy array
+            effective_heights = np.array(effective_heights)
+
+            # Subtract the effective heights (background) from the actual bin heights (self.y)
+            y_noise_removed = self.y - effective_heights
+
+            # print only the ppm of the noise up to two decimal places
+            handles, labels = plt.gca().get_legend_handles_labels()
+            handles.append(plt.Line2D([], [], linestyle='none'))
+            self.background_ppm = round(np.sum(effective_heights) / len(self.mc_tof) * 1E6 /
+                                        np.max(self.mc_tof), 2)
+            labels.append('Noise ppm: ' + str(self.background_ppm))
+            plt.legend(handles, labels, frameon=False, loc='upper left')
+
+            if plot_without_noise:
+                # Create a new figure and axis for the updated plot
+                new_fig, new_ax = plt.subplots(figsize=fig_size)
+
+                # Plot the histogram with the adjusted bin heights
+                new_ax.hist(self.x[:-1], self.x, weights=y_noise_removed, alpha=0.9, color='slategray',
+                            edgecolor='k', histtype='stepfilled')
+
+                # Restore plot properties
+                new_ax.set_xlabel(
+                    'Mass/Charge [Da]' if self.ax.get_xlabel() == 'Mass/Charge [Da]' else 'Time of Flight [ns]')
+                new_ax.set_ylabel('Event Counts')
+                new_ax.set_yscale('log' if self.ax.get_yscale() == 'log' else 'linear')
+                if self.original_x_limits is not None:
+                    new_ax.set_xlim(self.original_x_limits)
+
+                new_ax.legend()
+                plt.tight_layout()
+                plt.show()
 
     def plot_founded_range_loc(self, df, remove_lines=False):
         """
@@ -647,19 +907,19 @@ class AptHistPlotter:
 
         elif selector == 'range':
             # connect range selector
-            line_manager = plot_vline_draw.VerticalLineManager(self.variables, self.ax, self.fig, [], [])
+            self.line_manager = plot_vline_draw.VerticalLineManager(self.variables, self.ax, self.fig, [], [])
 
             self.fig.canvas.mpl_connect('button_press_event',
-                                        lambda event: line_manager.on_press(event))
+                                        lambda event: self.line_manager.on_press(event))
             self.fig.canvas.mpl_connect('button_release_event',
-                                        lambda event: line_manager.on_release(event))
+                                        lambda event: self.line_manager.on_release(event))
             self.fig.canvas.mpl_connect('motion_notify_event',
-                                        lambda event: line_manager.on_motion(event))
+                                        lambda event: self.line_manager.on_motion(event))
             self.fig.canvas.mpl_connect('key_press_event',
-                                        lambda event: line_manager.on_key_press(event))
-            self.fig.canvas.mpl_connect('scroll_event', lambda event: line_manager.on_scroll(event))
+                                        lambda event: self.line_manager.on_key_press(event))
+            self.fig.canvas.mpl_connect('scroll_event', lambda event: self.line_manager.on_scroll(event))
             self.fig.canvas.mpl_connect('key_release_event',
-                                        lambda event: line_manager.on_key_release(event))
+                                        lambda event: self.line_manager.on_key_release(event))
 
     def zoom_to_x_range(self, x_min, x_max, reset=False):
         """
@@ -714,18 +974,18 @@ class AptHistPlotter:
             self.fig.savefig(self.variables.result_path + "//tof_%s.png" % fig_name, format="png", dpi=600)
 
 
-def hist_plot(variables, bin_size, log, target, mode, prominence, distance, percent, selector, figname, lim,
+def hist_plot(variables, bin_size, log, target, normalize, prominence, distance, percent, selector, figname, lim,
               peaks_find=True, peaks_find_plot=False, plot_ranged_peak=False, plot_ranged_colors=False, mrp_all=False,
-              ranging_mode=False, range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[],
-              range_z=[], save_fig=True, print_info=True, legend_mode='long', draw_calib_rect=False, figure_size=(9, 5),
-              plot_show=True):
+              background=None, grid=False, ranging_mode=False, range_sequence=[], range_mc=[], range_detx=[],
+              range_dety=[], range_x=[], range_y=[], range_z=[], range_vol=[], save_fig=True, print_info=True,
+              legend_mode='long', draw_calib_rect=False, figure_size=(9, 5), plot_show=True, fast_calibration=False):
     """
     Plot the mass spectrum or tof spectrum. It is helper function for tutorials.
     Args:
         variables (object): Variables object.
         bin_size (float): Bin size for the histogram.
         target (str): 'mc' for mass spectrum or 'tof' for tof spectrum.
-        mode (str): 'normal' for normal histogram or 'normalized' for normalized histogram.
+        normalize (bool): Normalized the histogram.
         prominence (float): Prominence for the peak_x finding.
         distance (float): Distance for the peak_x finding.
         percent (float): Percent for the peak_x finding.
@@ -735,6 +995,8 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         peaks_find (bool): Find the peaks.
         peaks_find_plot (bool): Plot the peaks.
         mrp_all (bool): Calculate the MRP for 0.1 and 0.01 and 0.5
+        background (str): Background mode.
+        grid (bool): Show the grid.
         ranging_mode (bool): Ranging mode.
         legend_mode (str): long or short legend info
         print_info (bool): Print the information about the peaks.
@@ -749,10 +1011,15 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         draw_calib_rect (bool): Draw the calibration rectangle.
         figure_size (tuple): Figure size.
         plot_show (bool): Show the plot.
+        fast_calibration (bool): Fast calibration.
     Returns:
         None
 
     """
+    assert target in ['mc', 'mc_uc', 'tof', 'tof_c', 'tof_calib', 'mc_calib'], 'Invalid target'
+    assert selector in ['peak', 'rect', 'range'], 'Invalid selector'
+    assert legend_mode in ['long', 'short'], 'Invalid legend mode'
+
     if target == 'mc':
         hist = variables.mc
         label = 'mc'
@@ -776,7 +1043,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         variables.peak_widths = []
         variables.peaks_index_list = []
 
-    if range_sequence or range_mc or range_detx or range_dety or range_x or range_y or range_z:
+    if range_sequence or range_mc or range_detx or range_dety or range_x or range_y or range_z or range_vol:
         if range_sequence:
             mask_sequence = np.zeros_like(hist, dtype=bool)
             mask_sequence[range_sequence[0]:range_sequence[1]] = True
@@ -789,7 +1056,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         else:
             mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
         if range_mc:
-            mask_mc = (variables.mc_uc < range_mc[1]) & (variables.mc_uc > range_mc[0])
+            mask_mc = (variables.mc < range_mc[1]) & (variables.mc > range_mc[0])
         else:
             mask_mc = np.ones(len(variables.mc), dtype=bool)
         if range_x and range_y and range_z:
@@ -799,7 +1066,11 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
             mask_3d = mask_x & mask_y & mask_z
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
-        mask = mask_sequence & mask_det & mask_mc & mask_3d
+        if range_vol:
+            mask_vol = (variables.dld_high_voltage < range_vol[1]) & (variables.dld_high_voltage > range_vol[0])
+        else:
+            mask_vol = np.ones(len(variables.dld_high_voltage), dtype=bool)
+        mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
         print('The number of data det:', len(mask_det[mask_det == True]))
@@ -810,14 +1081,18 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
 
     hist = hist[mask]
 
+    # only calculate for 10 percent of the data
+    if fast_calibration:
+        hist = np.random.choice(hist, int(len(hist) * 0.1), replace=False)
+
     if plot_ranged_peak or plot_ranged_colors:
         steps = 'bar'
     else:
         steps = 'stepfilled'
 
     mc_hist = AptHistPlotter(hist[hist < lim], variables)
-    y, x = mc_hist.plot_histogram(bin_width=bin_size, mode=mode, label=label, steps=steps, log=log,
-                                  fig_size=figure_size, plot_show=plot_show)
+    y, x = mc_hist.plot_histogram(bin_width=bin_size, normalize=normalize, label=label, steps=steps, log=log,
+                                    grid=grid, fig_size=figure_size, plot_show=plot_show)
 
     # copy the mc_hist to variables to use the methods of that class in other functions
     variables.AptHistPlotter = mc_hist
@@ -828,7 +1103,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
         peak_widths = None
         prominences = None
 
-    elif mode != 'normalized' and peaks_find and not plot_ranged_peak and not plot_ranged_colors:
+    elif not normalize and peaks_find and not plot_ranged_peak and not plot_ranged_colors:
         peaks, properties, peak_widths, prominences = mc_hist.find_peaks_and_widths(prominence=prominence,
                                                                           distance=distance, percent=percent)
         if draw_calib_rect:
@@ -852,7 +1127,7 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
                                       loc='right')
 
     elif plot_ranged_colors and plot_ranged_peak:
-        print('Please select only one of the plot_ranged_peak and plot_ranged_colors')
+        raise ValueError('Please select only one of the plot_ranged_peak and plot_ranged_colors')
 
     else:
         peaks = None
@@ -866,12 +1141,18 @@ def hist_plot(variables, bin_size, log, target, mode, prominence, distance, perc
 
     mrp_list, mrp_list_all_peak = mc_hist.mrp_calculation()
 
+    if background is not None:
+        if background in ['aspls', 'fabc', 'manual@4', 'manual@100']:
+            mc_hist.plot_background(mode=background)
+        elif background == 'user':
+            mc_hist.manual_background_fit()
     if peaks is not None and print_info:
         index_max_ini = np.argmax(prominences[0])
         mrp = x[int(peaks[index_max_ini])] / (
                 x[round(peak_widths[3][index_max_ini])] - x[round(peak_widths[2][index_max_ini])])
-        print('Mass resolving power for the highest peak at index %a (MRP --> m/m_2-m_1):' % index_max_ini,
+        print('Mass resolving power for the highest peak number %s (MRP --> m/m_2-m_1):' % int(index_max_ini + 1),
               mrp)
+        print('-----------------------------------------------------------------------------')
         for i in range(len(peaks)):
             if not mrp_all:
                 print('Peaks ', i + 1,

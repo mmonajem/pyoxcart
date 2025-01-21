@@ -1,10 +1,10 @@
 import pytest
 from unittest.mock import patch
 import os
-
+import pandas as pd
 # Local module and scripts
-from pyccapt.calibration.calibration import tools, share_variables
-from data_tools import data_tools
+from pyccapt.calibration.calibration import tools
+from pyccapt.calibration.data_tools import data_tools
 
 p = os.path.abspath(os.path.join("", "."))
 path = p + '//data//data_tests//'
@@ -13,28 +13,28 @@ test_dataset_2 = 'AL_data_b.h5'
 @pytest.fixture()
 def mc():
     file_name = path + 'mc_seb_array.h5'
-    mc = data_tools.read_hdf5_through_pandas(file_name).to_numpy()[0][0]
+    mc = pd.read_hdf(file_name, mode='r').to_numpy()[0][0]
     return mc
 
 
 @pytest.fixture()
 def mc_voltage_corr():
     file_name = path + 'mc_seb_latest.h5'
-    mc_voltage_corr = data_tools.read_hdf5_through_pandas(file_name).to_numpy()[0][0]
+    mc_voltage_corr = pd.read_hdf(file_name, mode='r').to_numpy()[0][0]
     return mc_voltage_corr
 
 
 @pytest.fixture()
 def fitpeak():
     file_name = path + 'fitPeak_latest.h5'
-    fitpeak = data_tools.read_hdf5_through_pandas(file_name).to_numpy()[0][0]
+    fitpeak = pd.read_hdf(file_name, mode='r').to_numpy()[0][0]
     return fitpeak
 
 
 @pytest.fixture()
 def dld_data():
     file_name = path + 'AL_data_b_cropped.h5'
-    data = data_tools.read_hdf5_through_pandas(file_name)
+    data = pd.read_hdf(file_name, mode='r').to_numpy()[0][0]
     return data
 
 

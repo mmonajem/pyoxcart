@@ -1,6 +1,5 @@
 import itertools
 import re
-
 import matplotlib
 import numpy as np
 import pandas as pd
@@ -117,9 +116,15 @@ def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, ch
     Returns:
         pd.DataFrame: DataFrame containing closest elements and their properties.
     """
-    data_table = '../../../files/isotopeTable.h5'
-    # Read data from the HDF5 file
-    dataframe = pd.read_hdf(data_table)
+    try:
+        data_table = '../../../files/isotopeTable.h5'
+        dataframe = pd.read_hdf(data_table)
+    except Exception as e:
+        try:
+            data_table = './pyccapt/files/isotopeTable.h5'
+            dataframe = pd.read_hdf(data_table)
+        except:
+            print("Error loading the file", e)
 
     # Expand elements based on charge
     elements = dataframe['element'].to_numpy()
@@ -215,9 +220,15 @@ def load_elements(target_elements, abundance_threshold=0.0, charge=4, variables=
     Returns:
         pd.DataFrame: DataFrame containing closest elements and their properties.
     """
-    data_table = '../../../files/isotopeTable.h5'
-    # Read data from the HDF5 file
-    dataframe = pd.read_hdf(data_table)
+    try:
+        data_table = '../../../files/isotopeTable.h5'
+        dataframe = pd.read_hdf(data_table)
+    except:
+        try:
+            data_table = './pyccapt/files/isotopeTable.h5'
+            dataframe = pd.read_hdf(data_table)
+        except Exception as e:
+            print("Error loading the file", e)
 
     # Expand elements based on charge
     elements = dataframe['element'].to_numpy()
@@ -317,9 +328,15 @@ def molecule_manual(target_element, charge, latex=True, variables=None):
         pd.DataFrame: A DataFrame containing the list of isotopes with their weights and abundances.
 
     """
-
-    isotopeTableFile = '../../../files/isotopeTable.h5'
-    dataframe = data_tools.read_hdf5_through_pandas(isotopeTableFile)
+    try:
+        isotopeTableFile = '../../../files/isotopeTable.h5'
+        dataframe = pd.read_hdf(isotopeTableFile, mode='r')
+    except:
+        try:
+            isotopeTableFile = './pyccapt/files/isotopeTable.h5'
+            dataframe = pd.read_hdf(isotopeTableFile, mode='r')
+        except Exception as e:
+            print("Error loading the file", e)
     target_element = fix_parentheses(target_element)
 
     elements = dataframe['element'].to_numpy()
@@ -374,6 +391,7 @@ def molecule_manual(target_element, charge, latex=True, variables=None):
     df = pd.DataFrame({'ion': formula, 'mass': total_weight, 'element': element_list,
                        'complex': complexity_list, 'isotope': isotope_list, 'charge': charge,
                        'abundance': abundance_c, })
+
 
     # Round the abundance column to 4 decimal places
     df['abundance'] = df['abundance'].round(4)
@@ -431,8 +449,15 @@ def molecule_create(element_list, max_complexity, charge, abundance_threshold, v
     Returns:
         pd.DataFrame: A DataFrame containing the list of isotopes with their weights and abundances.
     """
-    isotopeTableFile = '../../../files/isotopeTable.h5'
-    dataframe = data_tools.read_hdf5_through_pandas(isotopeTableFile)
+    try:
+        isotopeTableFile = '../../../files/isotopeTable.h5'
+        dataframe = data_tools.read_range(isotopeTableFile)
+    except:
+        try:
+            isotopeTableFile = './pyccapt/files/isotopeTable.h5'
+            dataframe = data_tools.read_range(isotopeTableFile)
+        except Exception as e:
+            print("Error loading the file", e)
     elements = dataframe['element'].to_numpy()
     isotope_number = dataframe['isotope'].to_numpy()
     abundance = dataframe['abundance'].to_numpy()
@@ -565,47 +590,61 @@ def ranging_dataset_create(variables, row_index, mass_ion):
         Returns:
             None
     """
-    if row_index >= 0:
-        selected_row = variables.range_data_backup.iloc[row_index].tolist()
-        selected_row = selected_row[:-1]
+    if len(variables.range_data_backup) == 0:
+        print('The dataframe of elements is empty')
+        print('First press the button to find the closest elements')
     else:
-        selected_row = ['unranged', mass_ion, 'unranged', 0, 0, 0]
-    fake = Factory.create()
-    data_table = '../../../files/color_scheme.h5'
-    dataframe = data_tools.read_hdf5_through_pandas(data_table)
-    element_selec = selected_row[2]
-    if len(element_selec) == 1:
-        element_selec = element_selec[0]
+        if row_index >= 0:
+            selected_row = variables.range_data_backup.iloc[row_index].tolist()
+            selected_row = selected_row[:-1]
+        else:
+            selected_row = ['un', mass_ion, ['unranged'], [0], [0], 0]
+        fake = Factory.create()
         try:
-            color_rgb = dataframe[dataframe['ion'].str.contains(element_selec, na=False)].to_numpy().tolist()
-            color = matplotlib.colors.to_hex([color_rgb[0][1], color_rgb[0][2], color_rgb[0][3]])
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            print('The element is not color list')
+            data_table = '../../../files/color_scheme.h5'
+            dataframe = data_tools.read_range(data_table)
+        except:
+            try:
+                data_table = './pyccapt/files/color_scheme.h5'
+                dataframe = data_tools.read_range(data_table)
+            except Exception as e:
+                print("Error loading the file", e)
+        element_selec = selected_row[2]
+        if len(element_selec) == 1:
+            element_selec = element_selec[0]
+            try:
+                color_rgb = dataframe[dataframe['ion'].str.contains(element_selec, na=False)].to_numpy().tolist()
+                color = matplotlib.colors.to_hex([color_rgb[0][1], color_rgb[0][2], color_rgb[0][3]])
+                print(f"Color: {color}")
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                print('The element is not color list')
+                color = fake.hex_color()
+        else:
             color = fake.hex_color()
-    else:
-        color = fake.hex_color()
+        if not variables.h_line_pos:
+            print('The h_line_pos is empty')
+            print('First specify the left and right boundary for the selected peak')
+        else:
+            # Find the closest h_line that is smaller than mass
+            smaller_h_line = max(filter(lambda x: x < mass_ion, variables.h_line_pos))
+            # Find the closest h_line that is bigger than mass
+            bigger_h_line = min(filter(lambda x: x > mass_ion, variables.h_line_pos))
 
-    mass = selected_row[1]
-    if not variables.h_line_pos:
-        print('The h_line_pos is empty')
-        print('first do the ranging then add the selected ion to the ranging dataset')
-        range = [0, 0]
-    else:
-        # Find the closest h_line that is smaller than mass
-        smaller_h_line = max(filter(lambda x: x < mass_ion, variables.h_line_pos))
-        # Find the closest h_line that is bigger than mass
-        bigger_h_line = min(filter(lambda x: x > mass_ion, variables.h_line_pos))
+            def generate_name(elements, counts):
+                return ".".join(f"{el}{ct}" for el, ct in zip(elements, counts))
 
-    selected_row.insert(2, mass_ion)
-    selected_row.insert(3, smaller_h_line)
-    selected_row.insert(4, bigger_h_line)
-    selected_row.insert(5, color)
+            name = generate_name(selected_row[2], selected_row[3])
+            selected_row.insert(0, name)
+            selected_row.insert(3, mass_ion)
+            selected_row.insert(4, smaller_h_line)
+            selected_row.insert(5, bigger_h_line)
+            selected_row.insert(6, color)
 
-    # Add the row to the DataFrame using the .loc method
-    selected_row[9] = np.uint32(selected_row[9])
-
-    variables.range_data.loc[len(variables.range_data)] = selected_row
+            # Add the row to the DataFrame using the .loc method
+            selected_row[9] = np.uint32(selected_row[9])
+            print(f"Selected row: {selected_row}")
+            variables.range_data.loc[len(variables.range_data)] = selected_row
 
 def display_color(color):
     """

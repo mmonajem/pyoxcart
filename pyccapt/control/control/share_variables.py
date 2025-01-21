@@ -44,6 +44,7 @@ class Variables:
         self.ns.max_ions = 0
         self.ns.ex_freq = 0
         self.ns.user_name = ''
+        self.ns.electrode = ''
         self.ns.vdc_min = 0
         self.ns.vdc_max = 0
         self.ns.vdc_step_up = 0
@@ -54,18 +55,20 @@ class Variables:
         self.ns.pulse_frequency = 0
         # It is the pulse amplitude per supply voltage.
         # You have to base on your own setup to change this value.
-        self.ns.pulse_amp_per_supply_voltage = 3500 / 160  # It is the pulse amplitude per supply voltage.
+        self.ns.pulse_amp_per_supply_voltage = conf[
+            'pulse_amp_per_supply_voltage']  # It is the pulse amplitude per supply voltage.
+        self.ns.max_laser_power = conf['max_laser_power']
         self.ns.hdf5_path = ''
         self.ns.flag_main_gate = False
         self.ns.flag_load_gate = False
         self.ns.flag_cryo_gate = False
-        self.ns.hit_display = 0
         self.ns.email = ''
         self.ns.light = False
         self.ns.alignment_window = False
         self.ns.light_switch = False
         self.ns.vdc_hold = False
         self.ns.reset_heatmap = False
+        self.ns.last_screen_shot = False
         self.ns.camera_0_ExposureTime = 2000
         self.ns.camera_1_ExposureTime = 2000
         self.ns.path = ''
@@ -102,15 +105,15 @@ class Variables:
         self.ns.start_time = ''
         self.ns.end_time = ''
         self.ns.total_ions = 0
+        self.ns.total_raw_signals = 0
         self.ns.specimen_voltage = 0.0
         self.ns.specimen_voltage_plot = 0.0
         self.ns.detection_rate = 0.0
         self.ns.detection_rate_current = 0.0
         self.ns.detection_rate_current_plot = 0.0
         self.ns.pulse_voltage = 0.0
-        self.ns.pulse_voltage_min = 0.0
-        self.ns.pulse_voltage_max = 0.0
-        self.ns.control_algorithm = 'proportional'
+        self.ns.control_algorithm = ''
+        self.ns.pulse_mode = ''
         self.ns.count_last = 0
         self.ns.count_temp = 0
         self.ns.avg_n_count = 0
@@ -124,7 +127,6 @@ class Variables:
         self.ns.flag_tdc_failure = False
         self.ns.plot_clear_flag = False
         self.ns.clear_index_save_image = False
-        self.ns.hitmap_plot_size = 1.0
         self.ns.number_of_experiment_in_text_line = 0
         self.ns.index_experiment_in_text_line = 0
         self.ns.flag_cameras_take_screenshot = False
@@ -139,12 +141,10 @@ class Variables:
 
         ### Experiment variables
         # self.lock_experiment_variables = threading.Lock()
-        self.ns.main_v_dc = []
-        self.ns.main_v_p = []
         self.ns.main_counter = []
+        self.ns.main_raw_counter = []
         self.ns.main_temperature = []
         self.ns.main_chamber_vacuum = []
-        self.ns.main_v_p_hsd = []
         self.ns.laser_degree = []
 
         ### Data for saving
@@ -162,11 +162,14 @@ class Variables:
         self.ns.laser_average_power = 0
 
         self.ns.main_v_dc_dld = []
-        self.ns.main_p_dld = []
+        self.ns.main_v_p_dld = []
+        self.ns.main_l_p_dld = []
         self.ns.main_v_dc_tdc = []
-        self.ns.main_p_tdc = []
+        self.ns.main_v_p_tdc = []
+        self.ns.main_l_p_tdc = []
         self.ns.main_v_dc_hsd = []
-        self.ns.main_p_hsd = []
+        self.ns.main_v_p_hsd = []
+        self.ns.main_l_p_hsd = []
 
         self.ns.channel = []
         self.ns.time_data = []
@@ -367,6 +370,15 @@ class Variables:
             self.ns.user_name = value
 
     @property
+    def electrode(self):
+        return self.ns.electrode
+
+    @electrode.setter
+    def electrode(self, value):
+        with self.lock:
+            self.ns.electrode = value
+
+    @property
     def vdc_min(self):
         return self.ns.vdc_min
 
@@ -448,6 +460,15 @@ class Variables:
             self.ns.pulse_amp_per_supply_voltage = value
 
     @property
+    def max_laser_power(self):
+        return self.ns.max_laser_power
+
+    @max_laser_power.setter
+    def max_laser_power(self, value):
+        with self.lock:
+            self.ns.max_laser_power = value
+
+    @property
     def hdf5_path(self):
         return self.ns.hdf5_path
 
@@ -483,14 +504,6 @@ class Variables:
         with self.lock:
             self.ns.flag_cryo_gate = value
 
-    @property
-    def hit_display(self):
-        return self.ns.hit_display
-
-    @hit_display.setter
-    def hit_display(self, value):
-        with self.lock:
-            self.ns.hit_display = value
 
     @property
     def email(self):
@@ -545,6 +558,15 @@ class Variables:
     def reset_heatmap(self, value):
         with self.lock:
             self.ns.reset_heatmap = value
+
+    @property
+    def last_screen_shot(self):
+        return self.ns.last_screen_shot
+
+    @last_screen_shot.setter
+    def last_screen_shot(self, value):
+        with self.lock:
+            self.ns.last_screen_shot = value
 
     @property
     def camera_0_ExposureTime(self):
@@ -844,6 +866,15 @@ class Variables:
             self.ns.total_ions = value
 
     @property
+    def total_raw_signals(self):
+        return self.ns.total_raw_signals
+
+    @total_raw_signals.setter
+    def total_raw_signals(self, value):
+        with self.lock_exp:
+            self.ns.total_raw_signals = value
+
+    @property
     def specimen_voltage(self):
         return self.ns.specimen_voltage
 
@@ -898,24 +929,6 @@ class Variables:
             self.ns.pulse_voltage = value
 
     @property
-    def pulse_voltage_min(self):
-        return self.ns.pulse_voltage_min
-
-    @pulse_voltage_min.setter
-    def pulse_voltage_min(self, value):
-        with self.lock:
-            self.ns.pulse_voltage_min = value
-
-    @property
-    def pulse_voltage_max(self):
-        return self.ns.pulse_voltage_max
-
-    @pulse_voltage_max.setter
-    def pulse_voltage_max(self, value):
-        with self.lock:
-            self.ns.pulse_voltage_max = value
-
-    @property
     def control_algorithm(self):
         return self.ns.control_algorithm
 
@@ -923,6 +936,15 @@ class Variables:
     def control_algorithm(self, value):
         with self.lock:
             self.ns.control_algorithm = value
+
+    @property
+    def pulse_mode(self):
+        return self.ns.pulse_mode
+
+    @pulse_mode.setter
+    def pulse_mode(self, value):
+        with self.lock:
+            self.ns.pulse_mode = value
 
     @property
     def count_last(self):
@@ -1041,14 +1063,6 @@ class Variables:
         with self.lock:
             self.ns.clear_index_save_image = value
 
-    @property
-    def hitmap_plot_size(self):
-        return self.ns.hitmap_plot_size
-
-    @hitmap_plot_size.setter
-    def hitmap_plot_size(self, value):
-        with self.lock:
-            self.ns.hitmap_plot_size = value
 
     @property
     def number_of_experiment_in_text_line(self):
@@ -1150,25 +1164,6 @@ class Variables:
         with self.lock_vacuum_tmp:
             self.ns.vacuum_load_lock_backing = value
 
-    @property
-    def main_v_dc(self):
-        with self.lock_lists:
-            return self.ns.main_v_dc
-
-    @main_v_dc.setter
-    def main_v_dc(self, value):
-        with self.lock_lists:
-            self.ns.main_v_dc = value
-
-    @property
-    def main_v_p(self):
-        with self.lock_lists:
-            return self.ns.main_v_p
-
-    @main_v_p.setter
-    def main_v_p(self, value):
-        with self.lock_lists:
-            self.ns.main_v_p = value
 
     @property
     def main_counter(self):
@@ -1179,6 +1174,16 @@ class Variables:
     def main_counter(self, value):
         with self.lock_lists:
             self.ns.main_counter = value
+
+    @property
+    def main_raw_counter(self):
+        with self.lock_lists:
+            return self.ns.main_raw_counter
+
+    @main_raw_counter.setter
+    def main_raw_counter(self, value):
+        with self.lock_lists:
+            self.ns.main_raw_counter = value
 
     @property
     def main_temperature(self):
@@ -1209,6 +1214,16 @@ class Variables:
     def main_v_p_hsd(self, value):
         with self.lock_lists:
             self.ns.main_v_p_hsd = value
+
+    @property
+    def main_l_p_hsd(self):
+        with self.lock_lists:
+            return self.ns.main_l_p_hsd
+
+    @main_l_p_hsd.setter
+    def main_l_p_hsd(self, value):
+        with self.lock_lists:
+            self.ns.main_l_p_hsd = value
 
     @property
     def laser_degree(self):
@@ -1342,14 +1357,24 @@ class Variables:
             self.ns.main_v_dc_dld = value
 
     @property
-    def main_p_dld(self):
+    def main_v_p_dld(self):
         with self.lock_lists:
-            return self.ns.main_p_dld
+            return self.ns.main_v_p_dld
 
-    @main_p_dld.setter
-    def main_p_dld(self, value):
+    @main_v_p_dld.setter
+    def main_v_p_dld(self, value):
         with self.lock_lists:
-            self.ns.main_p_dld = value
+            self.ns.main_v_p_dld = value
+
+    @property
+    def main_l_p_dld(self):
+        with self.lock_lists:
+            return self.ns.main_l_p_dld
+
+    @main_l_p_dld.setter
+    def main_l_p_dld(self, value):
+        with self.lock_lists:
+            self.ns.main_l_p_dld = value
 
     @property
     def main_v_dc_tdc(self):
@@ -1362,14 +1387,24 @@ class Variables:
             self.ns.main_v_dc_tdc = value
 
     @property
-    def main_p_tdc(self):
+    def main_v_p_tdc(self):
         with self.lock_lists:
-            return self.ns.main_p_tdc
+            return self.ns.main_v_p_tdc
 
-    @main_p_tdc.setter
-    def main_p_tdc(self, value):
+    @main_v_p_tdc.setter
+    def main_v_p_tdc(self, value):
         with self.lock_lists:
-            self.ns.main_p_tdc = value
+            self.ns.main_v_p_tdc = value
+
+    @property
+    def main_l_p_tdc(self):
+        with self.lock_lists:
+            return self.ns.main_l_p_tdc
+
+    @main_l_p_tdc.setter
+    def main_l_p_tdc(self, value):
+        with self.lock_lists:
+            self.ns.main_l_p_tdc = value
 
     @property
     def main_v_dc_hsd(self):
@@ -1380,16 +1415,6 @@ class Variables:
     def main_v_dc_hsd(self, value):
         with self.lock_lists:
             self.ns.main_v_dc_hsd = value
-
-    @property
-    def main_p_hsd(self):
-        with self.lock_lists:
-            return self.ns.main_p_hsd
-
-    @main_p_hsd.setter
-    def main_p_hsd(self, value):
-        with self.lock_lists:
-            self.ns.main_p_hsd = value
 
 
     @property

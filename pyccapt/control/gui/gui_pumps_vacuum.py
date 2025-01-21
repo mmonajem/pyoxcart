@@ -16,17 +16,19 @@ from pyccapt.control.devices import initialize_devices
 class Ui_Pumps_Vacuum(object):
 	def __init__(self, variables, conf, SignalEmitter, parent=None):
 		"""
-        Constructor for the Pumps and Vacuum UI class.
+		Constructor for the Pumps and Vacuum UI class.
 
-        Args:
-                variables (object): Global experiment variables.
-                conf (dict): Configuration settings.
-                SignalEmitter (object): Emitter for signals.
-                parent: Parent widget (optional).
+		Args:
+				variables (object): Global experiment variables.
+				conf (dict): Configuration settings.
+				SignalEmitter (object): Emitter for signals.
+				parent: Parent widget (optional).
 
-        Return:
-                None
-        """
+		Return:
+				None
+		"""
+		self.flag_super_user = None
+		self.default_color = None
 		self.variables = variables
 		self.conf = conf
 		self.parent = parent
@@ -34,15 +36,15 @@ class Ui_Pumps_Vacuum(object):
 
 	def setupUi(self, Pumps_Vacuum):
 		"""
-        Sets up the UI for the Pumps and Vacuum tab.
-        Args:
-                Pumps_Vacuum (object): Pumps and Vacuum tab widget.
+		Sets up the UI for the Pumps and Vacuum tab.
+		Args:
+			Pumps_Vacuum (object): Pumps and Vacuum tab widget.
 
-        Return:
-                None
-        """
+		Return:
+			None
+		"""
 		Pumps_Vacuum.setObjectName("Pumps_Vacuum")
-		Pumps_Vacuum.resize(620, 381)
+		Pumps_Vacuum.resize(658, 365)
 		self.gridLayout_4 = QtWidgets.QGridLayout(Pumps_Vacuum)
 		self.gridLayout_4.setObjectName("gridLayout_4")
 		self.gridLayout_2 = QtWidgets.QGridLayout()
@@ -86,7 +88,7 @@ class Ui_Pumps_Vacuum(object):
 		self.temp_cryo_head.setSizePolicy(sizePolicy)
 		self.temp_cryo_head.setMinimumSize(QtCore.QSize(100, 50))
 		self.temp_cryo_head.setStyleSheet("QLCDNumber{\n"
-		                                  "                                                            border: 2px solid orange;\n"
+		                                  "                                            border: 2px solid orange;\n"
 		                                  "                                                            border-radius: 10px;\n"
 		                                  "                                                            padding: 0 8px;\n"
 		                                  "                                                            }\n"
@@ -111,7 +113,7 @@ class Ui_Pumps_Vacuum(object):
 		font.setPointSize(8)
 		self.vacuum_buffer_back.setFont(font)
 		self.vacuum_buffer_back.setStyleSheet("QLCDNumber{\n"
-		                                      "                                                            border: 2px solid brown;\n"
+		                                      "                                            border: 2px solid brown;\n"
 		                                      "                                                            border-radius: 10px;\n"
 		                                      "                                                            padding: 0 8px;\n"
 		                                      "                                                            }\n"
@@ -158,11 +160,11 @@ class Ui_Pumps_Vacuum(object):
 		self.vacuum_cryo_load_lock_back.setSizePolicy(sizePolicy)
 		self.vacuum_cryo_load_lock_back.setMinimumSize(QtCore.QSize(100, 50))
 		self.vacuum_cryo_load_lock_back.setStyleSheet("QLCDNumber{\n"
-		                                              "                                                            border: 2px solid magenta;\n"
-		                                              "                                                            border-radius: 10px;\n"
-		                                              "                                                            padding: 0 8px;\n"
-		                                              "                                                            }\n"
-		                                              "                                                        ")
+		                                              "                                            border: 2px solid magenta;\n"
+		                                              "                                            border-radius: 10px;\n"
+		                                              "                                            padding: 0 8px;\n"
+		                                              "                                            }\n"
+		                                              "                                        ")
 		self.vacuum_cryo_load_lock_back.setObjectName("vacuum_cryo_load_lock_back")
 		self.gridLayout.addWidget(self.vacuum_cryo_load_lock_back, 2, 1, 1, 1)
 		self.label_216 = QtWidgets.QLabel(parent=Pumps_Vacuum)
@@ -202,10 +204,10 @@ class Ui_Pumps_Vacuum(object):
 		self.vacuum_load_lock_back.setSizePolicy(sizePolicy)
 		self.vacuum_load_lock_back.setMinimumSize(QtCore.QSize(100, 50))
 		self.vacuum_load_lock_back.setStyleSheet("QLCDNumber{\n"
-		                                         "                                                            border: 2px solid blue;\n"
-		                                         "                                                            border-radius: 10px;\n"
-		                                         "                                                            padding: 0 8px;\n"
-		                                         "                                                            }\n"
+		                                         "                                            border: 2px solid blue;\n"
+		                                         "                                            border-radius: 10px;\n"
+		                                         "                                            padding: 0 8px;\n"
+		                                         "                                            }\n"
 		                                         "                                        ")
 		self.vacuum_load_lock_back.setObjectName("vacuum_load_lock_back")
 		self.gridLayout.addWidget(self.vacuum_load_lock_back, 3, 1, 1, 1)
@@ -294,25 +296,6 @@ class Ui_Pumps_Vacuum(object):
 		self.pump_cryo_load_lock_switch.setObjectName("pump_cryo_load_lock_switch")
 		self.gridLayout_3.addWidget(self.pump_cryo_load_lock_switch, 1, 1, 1, 1)
 		self.gridLayout_2.addLayout(self.gridLayout_3, 1, 2, 2, 1)
-		self.vacuum_main = QtWidgets.QLCDNumber(parent=Pumps_Vacuum)
-		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
-		                                   QtWidgets.QSizePolicy.Policy.Preferred)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.vacuum_main.sizePolicy().hasHeightForWidth())
-		self.vacuum_main.setSizePolicy(sizePolicy)
-		self.vacuum_main.setMinimumSize(QtCore.QSize(100, 50))
-		font = QtGui.QFont()
-		font.setPointSize(9)
-		self.vacuum_main.setFont(font)
-		self.vacuum_main.setStyleSheet("QLCDNumber{\n"
-		                               "                                            border: 2px solid green;\n"
-		                               "                                            border-radius: 10px;\n"
-		                               "                                            padding: 0 8px;\n"
-		                               "                                            }\n"
-		                               "                                        ")
-		self.vacuum_main.setObjectName("vacuum_main")
-		self.gridLayout_2.addWidget(self.vacuum_main, 1, 4, 2, 1)
 		self.label_212 = QtWidgets.QLabel(parent=Pumps_Vacuum)
 		font = QtGui.QFont()
 		font.setBold(True)
@@ -330,6 +313,38 @@ class Ui_Pumps_Vacuum(object):
 		self.Error.setTextInteractionFlags(QtCore.Qt.TextInteractionFlag.LinksAccessibleByMouse)
 		self.Error.setObjectName("Error")
 		self.gridLayout_2.addWidget(self.Error, 3, 0, 1, 5)
+		self.vacuum_main = QtWidgets.QLCDNumber(parent=Pumps_Vacuum)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
+		                                   QtWidgets.QSizePolicy.Policy.Preferred)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.vacuum_main.sizePolicy().hasHeightForWidth())
+		self.vacuum_main.setSizePolicy(sizePolicy)
+		self.vacuum_main.setMinimumSize(QtCore.QSize(200, 50))
+		font = QtGui.QFont()
+		font.setPointSize(9)
+		self.vacuum_main.setFont(font)
+		self.vacuum_main.setStyleSheet("QLCDNumber{\n"
+		                               "                                    border: 2px solid green;\n"
+		                               "                                    border-radius: 10px;\n"
+		                               "                                    padding: 0 8px;\n"
+		                               "                                    }\n"
+		                               "                                ")
+		self.vacuum_main.setObjectName("vacuum_main")
+		self.gridLayout_2.addWidget(self.vacuum_main, 1, 4, 2, 1)
+		self.superuser = QtWidgets.QPushButton(parent=Pumps_Vacuum)
+		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.superuser.sizePolicy().hasHeightForWidth())
+		self.superuser.setSizePolicy(sizePolicy)
+		self.superuser.setMinimumSize(QtCore.QSize(0, 25))
+		self.superuser.setStyleSheet("QPushButton{\n"
+		                             "                                                    background: rgb(193, 193, 193)\n"
+		                             "                                                    }\n"
+		                             "                                                ")
+		self.superuser.setObjectName("superuser")
+		self.gridLayout_2.addWidget(self.superuser, 2, 0, 1, 1)
 		self.gridLayout_4.addLayout(self.gridLayout_2, 0, 0, 1, 1)
 
 		self.retranslateUi(Pumps_Vacuum)
@@ -389,15 +404,23 @@ class Ui_Pumps_Vacuum(object):
 		self.timer.timeout.connect(self.hideMessage)
 
 		self.original_button_style = self.set_temperature.styleSheet()
+
+		# default Qlcd color
+		self.default_color = self.vacuum_buffer_back.style().standardPalette().color(
+			QtGui.QPalette.ColorRole.WindowText)
+
+		self.superuser.clicked.connect(self.super_user_access)
+		self.original_button_style = self.superuser.styleSheet()
+
 	def retranslateUi(self, Pumps_Vacuum):
 		"""
-           Set the text and title of the widgets
-           Args:
-               Pumps_Vacuum: the main window
+		Set the text and title of the widgets
+		Args:
+		   Pumps_Vacuum: the main window
 
-           Return:
-               None
-           """
+		Return:
+		   None
+		"""
 		_translate = QtCore.QCoreApplication.translate
 		###
 		# Pumps_Vacuum.setWindowTitle(_translate("Pumps_Vacuum", "Form"))
@@ -405,13 +428,13 @@ class Ui_Pumps_Vacuum(object):
 		Pumps_Vacuum.setWindowIcon(QtGui.QIcon('./files/logo.png'))
 		###
 		self.label_215.setText(_translate("Pumps_Vacuum", "Temp. Stage (K)"))
-		self.label_218.setText(_translate("Pumps_Vacuum", "Temp. Cryo head (K)"))
+		self.label_218.setText(_translate("Pumps_Vacuum", "Temp. Cryo Head (K)"))
 		self.label_214.setText(_translate("Pumps_Vacuum", "Buffer Chamber Pre (mBar)"))
 		self.label_211.setText(_translate("Pumps_Vacuum", "Buffer Chamber (mBar)"))
 		self.label_217.setText(_translate("Pumps_Vacuum", "CryoLoad Lock Pre(mBar)"))
-		self.label_216.setText(_translate("Pumps_Vacuum", "Cryo Load lock (mBar)"))
+		self.label_216.setText(_translate("Pumps_Vacuum", "Cryo Load Lock (mBar)"))
 		self.label_213.setText(_translate("Pumps_Vacuum", "Load Lock Pre(mBar)"))
-		self.label_210.setText(_translate("Pumps_Vacuum", "Load lock (mBar)"))
+		self.label_210.setText(_translate("Pumps_Vacuum", "Load Lock (mBar)"))
 		self.set_temperature.setText(_translate("Pumps_Vacuum", "Set Temperature"))
 		self.led_pump_load_lock.setText(_translate("Pumps_Vacuum", "pump"))
 		self.led_pump_cryo_load_lock.setText(_translate("Pumps_Vacuum", "pump"))
@@ -419,16 +442,17 @@ class Ui_Pumps_Vacuum(object):
 		self.pump_cryo_load_lock_switch.setText(_translate("Pumps_Vacuum", "Vent CLL"))
 		self.label_212.setText(_translate("Pumps_Vacuum", "Main Chamber (mBar)"))
 		self.Error.setText(_translate("Pumps_Vacuum", "<html><head/><body><p><br/></p></body></html>"))
+		self.superuser.setText(_translate("Pumps_Vacuum", "Override Access"))
 
 	def update_temperature_stage(self, value):
 		"""
-        Update the temperature value in the GUI
-        Args:
-            value: the temperature value of stage
+Update the temperature value in the GUI
+Args:
+	value: the temperature value of stage
 
-        Return:
-            None
-        """
+Return:
+	None
+"""
 		if value == -1:
 			self.temp_stage.display('Error')
 		else:
@@ -436,13 +460,13 @@ class Ui_Pumps_Vacuum(object):
 
 	def update_temperature_cryo(self, value):
 		"""
-        Update the temperature value in the GUI
-        Args:
-            value: the temperature value of cryo head
+Update the temperature value in the GUI
+Args:
+	value: the temperature value of cryo head
 
-        Return:
-            None
-        """
+Return:
+	None
+"""
 		if value == -1:
 			self.temp_cryo_head.display('Error')
 		else:
@@ -452,10 +476,10 @@ class Ui_Pumps_Vacuum(object):
 		"""
 		Update the temperature value in the GUI
 		Args:
-			None
+				None
 
 		Return:
-			None
+				None
 		"""
 
 		if self.target_tempreature.value() > self.conf['max_temperature']:
@@ -475,114 +499,164 @@ class Ui_Pumps_Vacuum(object):
 				self.variables.set_temperature_flag = False
 				self.set_temperature.setStyleSheet(self.original_button_style)
 
-
 	def update_vacuum_main(self, value):
 		"""
-        Update the vacuum value in the GUI
-        Args:
-            value: the temperature value
+		Update the vacuum value in the GUI
+		Args:
+			value: the temperature value
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		if value == -1:
 			self.vacuum_main.display('Error')
 		else:
 			self.vacuum_main.display('{:.2e}'.format(value))
+		if value > 0.000000001:
+			self.label_212.setStyleSheet("color: red")
+		else:
+			self.label_212.setStyleSheet("color: black")
 
 	def update_vacuum_buffer(self, value):
 		"""
-        Update the vacuum value in the GUI
-        Args:
-            value: the temperature value
+		Update the vacuum value in the GUI
+		Args:
+			value: the temperature value
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		if value == -1:
 			self.vacuum_buffer.display('Error')
 		else:
 			self.vacuum_buffer.display('{:.2e}'.format(value))
+		if value > 0.000000001:
+			self.label_211.setStyleSheet("color: red")
+		else:
+			self.label_211.setStyleSheet("color: black")
 
 	def update_vacuum_buffer_back(self, value):
 		"""
-        Update the vacuum value in the GUI
-        Args:
-            value: the temperature value
+		Update the vacuum value in the GUI
+		Args:
+			value: the temperature value
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		if value == -1:
 			self.vacuum_buffer_back.display('Error')
 		else:
 			self.vacuum_buffer_back.display('{:.2e}'.format(value))
+		if value > 0.01:
+			self.label_214.setStyleSheet("color: red")
+		else:
+			self.label_214.setStyleSheet("color: black")
 
 	def update_vacuum_load_back(self, value):
 		"""
-        Update the vacuum value in the GUI
-        Args:
-            value: the temperature value
+		Update the vacuum value in the GUI
+		Args:
+			value: the temperature value
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		if value == -1:
 			self.vacuum_load_lock_back.display('Error')
 		else:
 			self.vacuum_load_lock_back.display('{:.2e}'.format(value))
+		if value > 0.1:
+			self.label_213.setStyleSheet("color: red")
+		else:
+			self.label_213.setStyleSheet("color: black")
 
 	def update_vacuum_load(self, value):
 		"""
-        Update the vacuum value in the GUI
-        Args:
-            value: the temperature value
+		Update the vacuum value in the GUI
+		Args:
+			value: the temperature value
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		if value == -1:
 			self.vacuum_load_lock.display('Error')
 		else:
 			self.vacuum_load_lock.display('{:.2e}'.format(value))
+		if value > 0.00001:
+			self.label_210.setStyleSheet("color: red")
+		else:
+			self.label_210.setStyleSheet("color: black")
 
 	def update_vacuum_cryo_load_lock(self, value):
 		"""
-        Update the vacuum value in the GUI
-        Args:
-            value: the temperature value
+		Update the vacuum value in the GUI
+		Args:
+			value: the temperature value
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		if value == -1:
 			self.vacuum_cryo_load_lock.display('Error')  # Or any other message you prefer
 		else:
 			self.vacuum_cryo_load_lock.display('{:.2e}'.format(value))
 
+		if value > 0.00001:
+			self.label_216.setStyleSheet("color: red")
+		else:
+			self.label_216.setStyleSheet("color: black")
+
 	def update_vacuum_cryo_load_lock_back(self, value):
 		"""
-        Update the vacuum value in the GUI
-        Args:
-            value: the temperature value
+		Update the vacuum value in the GUI
+		Args:
+			value: the temperature value
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		if value == -1:
 			self.vacuum_cryo_load_lock_back.display('Error')
 		else:
 			self.vacuum_cryo_load_lock_back.display('{:.2e}'.format(value))
+		if value > 0.1:
+			self.label_217.setStyleSheet("color: red")
+		else:
+			self.label_217.setStyleSheet("color: black")
+
+	def super_user_access(self):
+		"""
+		The function for override access
+
+		Args:
+			None
+
+		Returns:
+			None
+		"""
+		if not self.flag_super_user:
+			self.flag_super_user = True
+			self.superuser.setStyleSheet("QPushButton{\n"
+			                             "background: rgb(0, 255, 26)\n"
+			                             "}")
+			self.error_message("!!! Override Access Granted !!!")
+		elif self.flag_super_user:
+			self.flag_super_user = False
+			self.superuser.setStyleSheet(self.original_button_style)
+			self.error_message("!!! Override Access deactivated !!!")
+			self.timer.start(8000)
 
 	def hideMessage(self):
 		"""
-        Hide the warning message
-        Args:
-            None
+		Hide the warning message
+		Args:
+			None
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		# Hide the message and stop the timer
 		_translate = QtCore.QCoreApplication.translate
 		self.Error.setText(_translate("OXCART",
@@ -593,16 +667,16 @@ class Ui_Pumps_Vacuum(object):
 
 	def pump_switch_ll(self):
 		"""
-        Switch the pump on or off
-        Args:
-            None
+		Switch the pump on or off
+		Args:
+			None
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		try:
-			if not self.variables.start_flag and not self.variables.flag_main_gate \
-					and not self.variables.flag_cryo_gate and not self.variables.flag_load_gate:
+			if self.flag_super_user or (not self.variables.start_flag and not self.variables.flag_main_gate \
+			                            and not self.variables.flag_cryo_gate and not self.variables.flag_load_gate):
 				if self.variables.flag_pump_load_lock:
 					self.variables.flag_pump_load_lock_click = True
 					self.led_pump_load_lock.setPixmap(self.led_red)
@@ -628,9 +702,18 @@ class Ui_Pumps_Vacuum(object):
 			pass
 
 	def pump_switch_cryo_ll(self):
+		"""
+		Switch the pump on or off
+
+		Args:
+			None
+
+		Return:
+			None
+		"""
 		try:
-			if not self.variables.start_flag and not self.variables.flag_main_gate \
-					and not self.variables.flag_cryo_gate and not self.variables.flag_load_gate:
+			if self.flag_super_user or (not self.variables.start_flag and not self.variables.flag_main_gate \
+			                            and not self.variables.flag_cryo_gate and not self.variables.flag_load_gate):
 				if self.variables.flag_pump_cryo_load_lock:
 					self.variables.flag_pump_cryo_load_lock_click = True
 					self.led_pump_cryo_load_lock.setPixmap(self.led_red)
@@ -657,13 +740,13 @@ class Ui_Pumps_Vacuum(object):
 
 	def error_message(self, message):
 		"""
-        Show the warning message
-        Args:
-            message: the message to be shown
+		Show the warning message
+		Args:
+			message: the message to be shown
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		_translate = QtCore.QCoreApplication.translate
 		self.Error.setText(_translate("OXCART",
 		                              "<html><head/><body><p><span style=\" color:#ff0000;\">"
@@ -671,13 +754,13 @@ class Ui_Pumps_Vacuum(object):
 
 	def stop(self):
 		"""
-        Stop the timer
-        Args:
-            None
+		Stop the timer
+		Args:
+			None
 
-        Return:
-            None
-        """
+		Return:
+			None
+		"""
 		# Stop any background processes, timers, or threads here
 		self.timer.stop()  # If you want to stop this timer when closing
 

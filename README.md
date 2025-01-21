@@ -21,27 +21,76 @@ analysis.
 
 ----------
 
-# Presentation
+# Overview
 
-PyCCAPT was initially developed and rigorously tested on the OXCART atom probe, an in-house atom probe system situated
-within the Department of Materials Science & Engineering at the University of Erlangen-Nürnberg. Distinguished by its
-unique attribute, the OXCART atom probe boasts a titanium-based measuring chamber that facilitates an ultra-low hydrogen 
+PyCCAPT was initially developed and tested on the OXCART atom probe, an in-house atom probe system situated
+within the Department of Materials Science & Engineering at the University of Erlangen-Nürnberg. The OXCART atom probe boasts a titanium-based measuring chamber that facilitates an ultra-low hydrogen 
 vacuum environment. This system also features a state-of-the-art detector with a high detection
 efficiency of approximately 80%. While tailor-made for the OXCART, the PyCCAPT package offers versatility, extending its
-capabilities to effectively manage diverse atom probe systems.
+capabilities to effectively control atom probe systems.
 
 ![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/oxcart.jpg)
 
-The package is designed with modularity in mind, making it highly adaptable to a diverse array of instruments. This
+The package is designed with modularity in mind, making it highly adaptable to new instruments. This
 adaptability extends to instruments like Pfeifer gauges, Fug power supplies, and Siglent signal generators. Notably, the
 PyCCAPT package has already demonstrated its proficiency in collecting data from Surface Concept and ReoenDek TDC
-systems, showcasing its versatility across various setups and applications.
+systems.
 
 The PyCCAPT package forms the foundation of a fully FAIR atom probe data collection and processing chain. This
 repository includes the graphical user interface (GUI) and control program, which enable experiment control,
 visualization, and data acquisition. The following images provide an overview of the user interface:
 
-![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/advance_gui.png)
+![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/main_gui.png)
+
+The calibration module is another component of the PyCCAPT, providing essential tools for data calibration and
+interpretation. This module includes functionalities such as t<sub>0</sub> and flight path calculation, region of
+interest (ROI) selection, voltage and bowl calibration, and 3D reconstruction techniques. 
+
+![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/visualization_gif.gif)
+
+You can see some of the features of the calibration module in the following images.
+
+The FDM and detector hitmap as Gif images for an Aluminium sample:
+
+![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/hist.png)
+
+<div align="center">
+  <img width = "37%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/fdm.png">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img width = "33%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/detector.gif">
+</div>
+
+Bowl and voltage calibration:
+
+
+<div align="center">
+  <img width="30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/vol_corr.png">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img width="30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/bowl_corr.png">
+</div>
+<div align="center">
+  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/tof_V_corr.png">
+  &nbsp;&nbsp;&nbsp;&nbsp;  
+  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/tof_bowl_corr_y_det.png">
+</div>
+
+
+A ranged mass spectrum for a Nimonic® 90 sample:
+
+<div align="center">
+  <img width = "90%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/mc.png">
+</div>
+
+
+Html link below can be used to show a 3d reconstruction of Nimonic® 90 sample: [Nimonic® 3D reconstruction](https://rawcdn.githack.com/mmonajem/pyccapt/52835bc47735ef12bffcf7e18ce90b556b07d12f/pyccapt/files/readme_images/3d_o.html)
+
+The 3d reconstruction of Nimonic® 90 and precipitates can be seen in the following Gifs:
+
+<div align="center">
+  <img width = "40%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/roto.gif">
+<img width = "40%" src="https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/iso.gif">
+</div>
+
 
  ---------------------
 
@@ -135,11 +184,10 @@ on [documentation](https://pyccapt.readthedocs.io/en/latest/configuration.html).
 For calibration, review the [tutorial](https://pyccapt.readthedocs.io/en/latest/tutorials.html) to understand package
 features.
 
-To test the code on google colab, you can use the following links:
-[data processing](https://colab.research.google.com/github/mmonajem/pyccapt/blob/main/pyccapt/calibration/tutorials/colab/data_processing.ipynb)
-and
-[data visualization](https://colab.research.google.com/github/mmonajem/pyccapt/blob/main/pyccapt/calibration/tutorials/colab/visualization.ipynb)
-
+To test the code on Google colab, you can use the following links:
+[data processing](https://colab.research.google.com/github/mmonajem/pyccapt/blob/develop/pyccapt/calibration/tutorials/colab/data_processing.ipynb), 
+[data visualization](https://colab.research.google.com/github/mmonajem/pyccapt/blob/develop/pyccapt/calibration/tutorials/colab/visualization.ipynb), and
+[t<sub>0</sub> and flight path calculation](https://colab.research.google.com/github/mmonajem/pyccapt/blob/develop/pyccapt/calibration/tutorials/colab/L_and_t0_determination.ipynb).
 
 ---------------------
 # Data structure
@@ -156,13 +204,13 @@ contains
 the output file from the calibration module, which contains the calibrated data as well as the reconstructed data. The
 link also contain the range file (HDF5) that is calculated by the calibration module.
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10131887.svg)](https://doi.org/10.5281/zenodo.10131887)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14673955.svg)](https://doi.org/10.5281/zenodo.14673955)
 
 ------------------
 # Bug reports
 
 Report bugs, issues, ask for help, or provide feedback on
-the [github section](https://github.com/mmonajem/pyccapt/issues).
+the [Github section](https://github.com/mmonajem/pyccapt/issues).
 
 Qestions/comments:
   - Mehrpad Monajem, mehrpad.monajem@fau.de

@@ -7,7 +7,7 @@ from setuptools import setup
 try:
     from pyccapt import version
 except BaseException:
-    version = "0.0.35"
+    version = "0.1.0"
 
 colab_deps = [
 ]
@@ -36,6 +36,7 @@ control_deps = [
     "h5py",
     "tables",
     "mcculw",
+    "simple-pid",
 ]
 
 calibration_deps = [
@@ -56,6 +57,8 @@ calibration_deps = [
     "nglview",
     "jupyterlab",
     "tqdm",
+    "fast-histogram",
+    "pyvista",
 ]
 
 package_list_control = ['pyccapt', 'tests', 'pyccapt.control', 'pyccapt.control.apt', 'pyccapt.control.control',
@@ -70,7 +73,7 @@ package_list_calibration = ['pyccapt', 'tests', 'pyccapt.calibration', 'pyccapt.
                             'pyccapt.calibration.reconstructions', 'pyccapt.calibration.tutorials',
                             'pyccapt.calibration.tutorials.tutorials_helpers']
 
-dependency_list = common_deps + control_deps + calibration_deps
+dependency_list = control_deps + calibration_deps + common_deps
 package_list = package_list_control + package_list_calibration
 
 setup(

@@ -90,16 +90,20 @@ def atom_probe_recons_from_detector_Gault_et_al(detx, dety, hv, flight_path_leng
     x, y = pol2cart(d, ang)
 
     # Calculate z coordinate
-    dz_p = radius_evolution * (1 - np.cos(theta_a))
+    # the z shift with respect to the top of the cap is Rspec - zP
+    # z_p = radius_evolution * (1 - np.cos(theta_a))
+    z_p = radius_evolution - z_p
     omega = 1E-9 ** 3 / avg_dens
+
     # icf_2 = theta_a / theta_p
     # dz = (omega * ((flight_path_length * 1E-3) ** 2) * (kf ** 2) * ((field_evap / 1E-9) ** 2)) / (
     #         det_area * det_eff * (icf_2 ** 2) * (hv ** 2))
 
     dz = (omega * ((flight_path_length * 1E-3) ** 2) * (kf ** 2) * ((field_evap / 1E-9) ** 2)) / (
             det_area * det_eff * (icf ** 2) * (hv ** 2))
+
     cum_z = np.cumsum(dz)
-    z = cum_z + dz_p
+    z = cum_z + z_p
 
     return x * 1E9, y * 1E9, z * 1E9
 
@@ -204,9 +208,9 @@ def draw_qube(fig, range, col=None, row=None):
 
 
 def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save, make_gif=False,
-                        range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[], range_y=[],
-                        range_z=[],
-                        ions_individually_plots=False):
+                        make_evaporation_gif=False, range_sequence=[], range_mc=[], range_detx=[], range_dety=[],
+                        range_x=[], range_y=[], range_z=[], range_vol=[], ions_individually_plots=False,
+                        detailed_isotope_charge=False, colab=False):
     """
     Generate a 3D plot for atom probe reconstruction data.
 
@@ -218,6 +222,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         figname (str): Name of the figure.
         save (bool): Whether to save the figure.
         make_gif (bool): Whether to make a GIF.
+        make_evaporation_gif (bool): Whether to make an evaporation GIF.
         range_sequence (list): Range of sequence
         range_mc: Range of mc
         range_detx: Range of detx
@@ -225,18 +230,19 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         range_x: Range of x-axis
         range_y: Range of y-axis
         range_z: Range of z-axis
+        range_vol: Range of volume
         ions_individually_plots (bool): Whether to plot ions individually.
-
+        detailed_isotope_charge (bool): Whether to plot detailed isotope and charge information.
+        colab (bool): Whether to run in Google Colab.
     Returns:
         None
     """
     if range_sequence or range_detx or range_dety or range_mc or range_x or range_y or range_z:
         if range_sequence:
-            if range_sequence:
-                mask_sequence = np.zeros_like(variables.dld_x_det, dtype=bool)
-                mask_sequence[range_sequence[0]:range_sequence[1]] = True
-            else:
-                mask_sequence = np.ones_like(variables.dld_x_det, dtype=bool)
+            mask_sequence = np.zeros_like(variables.dld_x_det, dtype=bool)
+            mask_sequence[range_sequence[0]:range_sequence[1]] = True
+        else:
+            mask_sequence = np.ones_like(variables.dld_x_det, dtype=bool)
         if range_detx and range_dety:
             mask_det_x = (variables.dld_x_det < range_detx[1]) & (variables.dld_x_det > range_detx[0])
             mask_det_y = (variables.dld_y_det < range_dety[1]) & (variables.dld_y_det > range_dety[0])
@@ -254,8 +260,12 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
             mask_3d = mask_x & mask_y & mask_z
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
+        if range_vol:
+            mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
+        else:
+            mask_vol = np.ones(len(variables.volume), dtype=bool)
 
-        mask_f = mask_sequence & mask_det & mask_mc & mask_3d
+        mask_f = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
         print('The number of data det:', len(mask_det[mask_det == True]))
@@ -297,7 +307,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
                 index = col + row * 3
                 if index == len(ion):
                     break
-                mask = (variables.mc_uc > mc_low[index]) & (variables.mc_uc < mc_up[index])
+                mask = (variables.mc > mc_low[index]) & (variables.mc < mc_up[index])
                 mask = mask & mask_f
                 size = int(len(mask[mask == True]) * float(element_percentage[index]))
                 # Find indices where the original mask is True
@@ -368,6 +378,64 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         else:
             print('Rotary figure is not available for ions_individually_plots=True')
 
+    if make_evaporation_gif:
+        num_events = len(variables.dld_t)
+        figures = []
+        for k in range(0, num_events, 100_000):
+            rotated_fig = go.Figure()
+            rotated_fig = draw_qube(rotated_fig, range_cube)
+            rotated_fig.update_layout(showlegend=False)
+
+            if k + 100_000 > num_events:
+                q = num_events - 1
+            else:
+                q = k + 100_000
+            mask_evap = (variables.dld_t > variables.dld_t[k]) & (variables.dld_t < variables.dld_t[q])
+
+            for index, elemen in enumerate(ion):
+                mask = (variables.mc > mc_low[index]) & (variables.mc < mc_up[index])
+                mask = mask & mask_f & mask_evap
+                size = int(len(mask[mask == True]) * float(element_percentage[index]))
+                # Find indices where the original mask is True
+                true_indices = np.where(mask)[0]
+                # Randomly choose 100 indices from the true indices
+                random_true_indices = np.random.choice(true_indices, size=size, replace=False)
+                # Create a new mask with the same length as the original, initialized with False
+                new_mask = np.full(len(variables.dld_t), False)
+                # Set the selected indices to True in the new mask
+                new_mask[random_true_indices] = True
+                # Apply the new mask to the original mask
+                mask = mask & new_mask
+
+                rotated_fig.add_trace(
+                    go.Scatter3d(
+                        x=variables.x[mask],
+                        y=variables.y[mask],
+                        z=variables.z[mask],
+                        mode='markers',
+                        name=ion[index],
+                        showlegend=True,
+                        marker=dict(
+                            size=1,
+                            color=colors[index],
+                            opacity=opacity,
+                        )
+                    )
+                )
+            print(' Plotted the ions up to the event:', q)
+            figures.append(rotated_fig)
+
+        images = []
+        print('Starting to process the frames for the GIF')
+        print('The total number of frames is:', len(figures))
+        for index, frame in enumerate(figures):
+            images.append(plotly_fig2array(frame))
+            print('frame', index, 'is being processed')
+        print('The images are ready for the GIF')
+
+        # Save the images as a GIF using imageio
+        imageio.mimsave(variables.result_path + '\\rota_evaporation_{fn}.gif'.format(fn=figname), images, fps=2)
+
     fig.update_layout(
         legend=dict(
             yanchor="top",
@@ -395,8 +463,10 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     # Show the plot in the Jupyter cell output
     variables.plotly_3d_reconstruction = go.FigureWidget(fig)
 
-    plotly.offline.init_notebook_mode()
-    fig.show()
+    fig.show(config=config)
+    if not colab:
+        pio.renderers.default = 'browser'
+        fig.show(config=config)
 
     if save:
         try:
@@ -637,7 +707,7 @@ def scatter_plot(data, range_data, variables, element_percentage, selected_area,
 
 
 def projection(variables, element_percentage, range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[],
-               range_y=[], range_z=[], x_or_y='x', figname='projection', figure_size=(5, 5), save=False):
+               range_y=[], range_z=[], range_vol=[], x_or_y='x', figname='projection', figure_size=(5, 5), save=False):
     """
     Generate a projection plot based on the provided data.
 
@@ -651,6 +721,7 @@ def projection(variables, element_percentage, range_sequence=[], range_mc=[], ra
         range_x: Range of x-axis
         range_y: Range of y-axis
         range_z: Range of z-axis
+        range_vol: Range of volume
         x_or_y (str): Either 'x' or 'y' indicating the axis to plot.
         figname (str): The name of the figure.
     Returns:
@@ -673,7 +744,7 @@ def projection(variables, element_percentage, range_sequence=[], range_mc=[], ra
         else:
             mask_det = np.ones(len(variables.dld_x_det), dtype=bool)
         if range_mc:
-            mask_mc = (variables.mc_uc < range_mc[1]) & (variables.mc_uc > range_mc[0])
+            mask_mc = (variables.mc < range_mc[1]) & (variables.mc > range_mc[0])
         else:
             mask_mc = np.ones(len(variables.mc), dtype=bool)
         if range_x and range_y and range_z:
@@ -683,7 +754,11 @@ def projection(variables, element_percentage, range_sequence=[], range_mc=[], ra
             mask_3d = mask_x & mask_y & mask_z
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
-        mask = mask_sequence & mask_det & mask_mc & mask_3d
+        if range_vol:
+            mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
+        else:
+            mask_vol = np.ones(len(variables.volume), dtype=bool)
+        mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
         print('The number of data det:', len(mask_det[mask_det == True]))
@@ -706,7 +781,7 @@ def projection(variables, element_percentage, range_sequence=[], range_mc=[], ra
 
 
     for index, elemen in enumerate(ions):
-        mask_spacial = (variables.mc_uc > mc_low[index]) & (variables.mc_uc < mc_up[index])
+        mask_spacial = (variables.mc > mc_low[index]) & (variables.mc < mc_up[index])
         mask = mask & mask_spacial
         size = int(len(mask[mask == True]) * float(element_percentage[index]))
         # Find indices where the original mask is True
@@ -749,7 +824,7 @@ def projection(variables, element_percentage, range_sequence=[], range_mc=[], ra
 
 
 def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range_detx=[], range_dety=[], range_x=[],
-            range_y=[], range_z=[], figure_name='hetmap', figure_sie=(5, 5), save=False):
+            range_y=[], range_z=[], range_vol=[], figure_name='hetmap', figure_sie=(5, 5), save=False):
     """
     Generate a heatmap based on the provided data.
 
@@ -763,6 +838,7 @@ def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range
         range_x: Range of x-axis
         range_y: Range of y-axis
         range_z: Range of z-axis
+        range_vol: Range of volume
         figure_name (str): The name of the figure.
         figure_sie: The size of the figure.
         save (bool): True to save the plot, False to display it.
@@ -797,15 +873,18 @@ def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range
             mask_3d = mask_x & mask_y & mask_z
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
-        mask = mask_sequence & mask_det & mask_mc & mask_3d
+        if range_vol:
+            mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
+        else:
+            mask_vol = np.ones(len(variables.volume), dtype=bool)
+        mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
         print('The number of data det:', len(mask_det[mask_det == True]))
         print('The number of data 3d:', len(mask_3d[mask_3d == True]))
         print('The number of data after cropping:', len(mask[mask == True]))
     else:
-        mask = np.ones(len(variables.mc_uc), dtype=bool)
-
+        mask = np.ones(len(variables.mc), dtype=bool)
 
     ions = variables.range_data['ion'].tolist()
     colors = variables.range_data['color'].tolist()
@@ -818,25 +897,26 @@ def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range
         print('element_percentage should be a list')
 
     for index, elemen in enumerate(ions):
-        mask_spacial = (variables.mc_uc > mc_low[index]) & (variables.mc_uc < mc_up[index])
-        mask = mask & mask_spacial
-        size = int(len(mask[mask == True]) * float(element_percentage[index]))
+        mask_spacial = (variables.mc > mc_low[index]) & (variables.mc < mc_up[index])
+        mask_s = mask & mask_spacial
+        size = int(len(mask_s[mask_s == True]) * float(element_percentage[index]))
         # Find indices where the original mask is True
-        true_indices = np.where(mask)[0]
+        true_indices = np.where(mask_s)[0]
         # Randomly choose 100 indices from the true indices
         random_true_indices = np.random.choice(true_indices, size=size, replace=False)
         # Create a new mask with the same length as the original, initialized with False
-        new_mask = np.full(len(variables.dld_t), False)
+        new_mask = np.full(len(variables.mc), False)
+
         # Set the selected indices to True in the new mask
         new_mask[random_true_indices] = True
         # Apply the new mask to the original mask
-        mask = mask & new_mask
+        new_mask = mask_s & new_mask
         if ions[index] == 'unranged':
             name_element = 'unranged'
         else:
             name_element = '%s' % ions[index]
 
-        ax.scatter(variables.dld_x_det[mask] * 10, variables.dld_y_det[mask] * 10, s=2, label=name_element,
+        ax.scatter(variables.dld_x_det[new_mask] * 10, variables.dld_y_det[new_mask] * 10, s=2, label=name_element,
                    color=colors[index], alpha=0.1)
 
     ax.set_xlabel("det_x (cm)", color="red", fontsize=10)
@@ -854,8 +934,8 @@ def heatmap(variables, element_percentage, range_sequence=[], range_mc=[], range
 
 
 def reconstruction_2d_histogram(variables, x, y, bins, percentage, range_sequence=[], range_mc=[], range_detx=[],
-                                range_dety=[], range_x=[], range_y=[], range_z=[], xlabel='X-axis', ylabel='Y-axis',
-                                save=False, igure_name=None, figure_size=None):
+                                range_dety=[], range_x=[], range_y=[], range_z=[], range_vol=[], xlabel='X-axis',
+                                ylabel='Y-axis', save=False, figure_name=None, figure_size=None):
     """
     Generate a 2D histogram based on the provided data.
 
@@ -872,6 +952,7 @@ def reconstruction_2d_histogram(variables, x, y, bins, percentage, range_sequenc
         range_x: Range of x-axis
         range_y: Range of y-axis
         range_z: Range of z-axis
+        range_vol: Range of volume
         xlabel (str): The label of the x-axis.
         ylabel (str): The label of the y-axis.
         save (bool): True to save the plot, False to display it.
@@ -904,7 +985,11 @@ def reconstruction_2d_histogram(variables, x, y, bins, percentage, range_sequenc
             mask_3d = mask_x & mask_y & mask_z
         else:
             mask_3d = np.ones(len(variables.x), dtype=bool)
-        mask = mask_sequence & mask_det & mask_mc & mask_3d
+        if range_vol:
+            mask_vol = (variables.volume < range_vol[1]) & (variables.volume > range_vol[0])
+        else:
+            mask_vol = np.ones(len(variables.volume), dtype=bool)
+        mask = mask_sequence & mask_det & mask_mc & mask_3d & mask_vol
         print('The number of data sequence:', len(mask_sequence[mask_sequence == True]))
         print('The number of data mc:', len(mask_mc[mask_mc == True]))
         print('The number of data det:', len(mask_det[mask_det == True]))
@@ -987,7 +1072,7 @@ def detector_animation(variables, points_per_frame, ranged, selected_area_specia
                          (variables.z >= variables.selected_z1) & (variables.z <= variables.selected_z2)
         mask_spacial = mask_specially & mask_temporally
     else:
-        mask_spacial = np.ones(len(variables.dld_t), dtype=bool)
+        mask_spacial = np.ones(len(variables.mc), dtype=bool)
 
     if ranged == True:
         ions = variables.range_data['ion'].tolist()
@@ -1017,7 +1102,7 @@ def detector_animation(variables, points_per_frame, ranged, selected_area_specia
         ax.clear()
         start_idx = frame * points_per_frame
         end_idx = (frame + 1) * points_per_frame
-        mc = variables.mc_uc[start_idx:end_idx]
+        mc = variables.mc[start_idx:end_idx]
         for index, elemen in enumerate(ions):
             mask = (mc > mc_low[index]) & (mc < mc_up[index])
             mask = mask & mask_spacial[start_idx:end_idx]
@@ -1045,7 +1130,8 @@ def detector_animation(variables, points_per_frame, ranged, selected_area_specia
         animation.save(variables.result_path + figure_name + ".gif", writer='imagemagick')
     plt.close()
 def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, field_evap,
-                               avg_dens, flight_path_length, rotary_fig_save, mode, opacity, figname, save):
+                               avg_dens, flight_path_length, rotary_fig_save, mode, opacity, figname, save,
+                               colab=False):
     """
     Calculate the x, y, z coordinates of the atoms and plot them.
 
@@ -1063,6 +1149,7 @@ def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, 
             opacity (float): The opacity of the markers.
             figname (str): The name of the figure.
             save (bool): True to save the plot, False to display it.
+            colab (bool): True if the code is running in Google Colab, False otherwise.
 
         Returns:
             None
@@ -1081,4 +1168,4 @@ def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, 
     variables.x = px
     variables.y = py
     variables.z = pz
-    reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save)
+    reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save, colab=colab)

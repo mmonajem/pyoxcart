@@ -42,6 +42,8 @@ def call_plot_crop_fdm(variables):
 
     save_widget = widgets.Dropdown(options=[('True', True), ('False', False)], value=False)
     save_label = widgets.Label(value="Save:", layout=label_layout)
+    mode_selector_widget = widgets.Dropdown(options=[('circle', 'circle'), ('ellipse', 'ellipse')], value='circle')
+    mode_selector_label = widgets.Label(value="Selector:", layout=label_layout)
 
     figname_widget = widgets.Text(value='fdm_ini')
     figname_label = widgets.Label(value="Figure Name:", layout=label_layout)
@@ -65,15 +67,17 @@ def call_plot_crop_fdm(variables):
         figure_size = (figure_size_x.value, figure_size_y.value)
         save = save_widget.value
         figname = figname_widget.value
+        mode_selector = mode_selector_widget.value
 
         with out:  # Capture the output within the 'out' widget
             out.clear_output()  # Clear any previous output
             # Call the function
             data = variables.data.copy()
-            data_loadcrop.plot_crop_fdm(data, bins, frac, axis_mode='normal', figure_size=figure_size,
+            data_loadcrop.plot_crop_fdm(data['x_det (cm)'].to_numpy(), data['y_det (cm)'].to_numpy(), bins, frac, axis_mode='normal', figure_size=figure_size,
                                         variables=variables, range_sequence=[], range_mc=[], range_detx=[],
                                         range_dety=[], range_x=[], range_y=[], range_z=[],
-                                        data_crop=True, draw_circle=False, save=save, figname=figname)
+                                        data_crop=True, draw_circle=False, mode_selector=mode_selector,
+                                        save=save, figname=figname)
 
         # Enable the button when the code is finished
         button_plot.disabled = False
@@ -86,6 +90,7 @@ def call_plot_crop_fdm(variables):
         widgets.HBox([frac_label, frac_widget]),
         widgets.HBox([bins_label, widgets.HBox([bins_x, bins_y])]),
         widgets.HBox([figure_size_label, widgets.HBox([figure_size_x, figure_size_y])]),
+	    widgets.HBox([mode_selector_label, mode_selector_widget]),
         widgets.HBox([save_label, save_widget]),
         widgets.HBox([figname_label, figname_widget]),
         widgets.HBox([button_plot, button_apply, button_rest]),

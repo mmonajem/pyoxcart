@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-PyCCAPT:  A modular, FAIR open-source Python package for controlling and calibrating atom probe tomography
+PyCCAPT:  A Modular, FAIR Open-source Python Package for Controlling and Calibrating Atom Probe Tomography
 ===================================
 
 Historically, atom probe tomography (APT) detection systems have used compiled systems with hardware-software co-design to deal with the high data rates generated at the detector.
@@ -17,18 +17,23 @@ This control system therefore provides the basis of a fully FAIR atom probe data
 
 Documentation
 ========================
-The documentation webpage of PyCCAPT modules can be found `here <https://pyccapt.readthedocs.io/>`_.
+The webpage contains the documentation for the PyCCAPT package. The documentation is divided into several
+sections, including installation, control, calibration, tutorials, and modules.
+The documentation provides a comprehensive guide to the PyCCAPT package, including detailed descriptions of
+the control and calibration data structures, as well as tutorials on how to use the package. The documentation
+also includes information on how to install the package and how to configure it for use with different types of
+atom probe instruments.
 
 
 Most PyCCAPT software outputs are in the form of
 `Pandas DataFrames <https://pandas.pydata.org/pandas-docs/stable/reference/frame.html>`_, offering flexibility for seamless expansion with
 additional information across various levels of analysis. The control and calibration data structures can be referenced
-`here <https://pyccapt.readthedocs.io/>`_. and `here <https://pyccapt.readthedocs.io/>`_., respectively. Leveraging the capabilities of Pandas allows users to work with the analyzed data effortlessly,
-facilitating interoperability with software tools such as MATLAB and Microsoft Excel.
+`here <https://github.com/mmonajem/pyccapt/blob/main/pyccapt/control/DATA_STRUCTURE.md>`_. and `here <https://github.com/mmonajem/pyccapt/blob/main/pyccapt/calibration/DATA_STRUCTURE.md/>`_., respectively. Leveraging the capabilities of Pandas allows users to work with the analyzed data effortlessly,
+facilitating interoperability.
 
 The choice of HDF5 as a storage format is notable for its widespread readability across different programming languages.
 HDF5 adopts a file directory-like structure, enabling users to organize data systematically within the file. Moreover,
-HDF5 supports large, intricate, and heterogeneous datasets. Its inherent structure facilitates self-description,
+HDF5 supports large, intricate, and heterogeneous datasets. Its inherent structure is self-description,
 as users can embed metadata, enhancing the overall comprehensibility of the stored information.
 
 PyCCAPT:
@@ -39,9 +44,9 @@ PyCCAPT:
    :caption: Contents:
 
    installation
-   CONTROL.md
+   control_index
    configuration
-   CALIBRATION.md
+   calibration_index
    tutorials
    modules
    license
