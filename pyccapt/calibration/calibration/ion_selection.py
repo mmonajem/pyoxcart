@@ -125,7 +125,7 @@ def find_closest_elements(target_elem, num_elements, abundance_threshold=0.0, ch
         try:
             data_table = './pyccapt/files/isotopeTable.h5'
             dataframe = pd.read_hdf(data_table)
-        except Exception as e:
+        except:
             print("Error loading the file", e)
 
     # Expand elements based on charge
@@ -225,9 +225,7 @@ def load_elements(target_elements, abundance_threshold=0.0, charge=4, variables=
     try:
         data_table = '../../../files/isotopeTable.h5'
         dataframe = pd.read_hdf(data_table)
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        print("Trying to load the file from the default path")
+    except:
         try:
             data_table = './pyccapt/files/isotopeTable.h5'
             dataframe = pd.read_hdf(data_table)
@@ -332,9 +330,15 @@ def molecule_manual(target_element, charge, latex=True, variables=None):
         pd.DataFrame: A DataFrame containing the list of isotopes with their weights and abundances.
 
     """
-
-    isotopeTableFile = '../../../files/isotopeTable.h5'
-    dataframe = pd.read_hdf(isotopeTableFile, mode='r')
+    try:
+        isotopeTableFile = '../../../files/isotopeTable.h5'
+        dataframe = pd.read_hdf(isotopeTableFile, mode='r')
+    except:
+        try:
+            isotopeTableFile = './pyccapt/files/isotopeTable.h5'
+            dataframe = pd.read_hdf(isotopeTableFile, mode='r')
+        except Exception as e:
+            print("Error loading the file", e)
     target_element = fix_parentheses(target_element)
 
     elements = dataframe['element'].to_numpy()
@@ -450,9 +454,7 @@ def molecule_create(element_list, max_complexity, charge, abundance_threshold, v
     try:
         isotopeTableFile = '../../../files/isotopeTable.h5'
         dataframe = data_tools.read_range(isotopeTableFile)
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        print("Trying to load the file from the default path")
+    except:
         try:
             isotopeTableFile = './pyccapt/files/isotopeTable.h5'
             dataframe = data_tools.read_range(isotopeTableFile)
@@ -600,8 +602,15 @@ def ranging_dataset_create(variables, row_index, mass_ion):
         else:
             selected_row = ['un', mass_ion, ['unranged'], [0], [0], 0]
         fake = Factory.create()
-        data_table = '../../../files/color_scheme.h5'
-        dataframe = data_tools.read_range(data_table)
+        try:
+            data_table = '../../../files/color_scheme.h5'
+            dataframe = data_tools.read_range(data_table)
+        except:
+            try:
+                data_table = './pyccapt/files/color_scheme.h5'
+                dataframe = data_tools.read_range(data_table)
+            except Exception as e:
+                print("Error loading the file", e)
         element_selec = selected_row[2]
         if len(element_selec) == 1:
             element_selec = element_selec[0]
