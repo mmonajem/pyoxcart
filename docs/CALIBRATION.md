@@ -48,8 +48,7 @@ The workflows in PyCCAPT Calibration Sub-Module are designed to streamline the f
 ## Data structures
 
 For the data structure you can check the [data structure](Control_DATA_STRUCTURE.md) file. There is also possibility to
-convert
-the PyCCAPT HDF5 file data to EPOS, POS, ATO, and CSV file. You can find the
+convert the PyCCAPT HDF5 file data to EPOS, POS, and CSV file. You can find the
 example code in the [tutorial](tutorials.rst)  section.
 
 ## Additional Features
