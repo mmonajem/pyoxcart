@@ -47,7 +47,6 @@ PyCCAPT:
    control_index
    configuration
    calibration_index
-   tutorials
    modules
    license
    bibliography
