@@ -369,6 +369,7 @@ def call_ion_selection(variables, colab=False):
 
 		# Output widgets to display the corresponding content
 		out = widgets.Output()
+		out_tab = widgets.Output()
 		output2 = widgets.Output()
 		output3 = widgets.Output()
 
@@ -376,6 +377,8 @@ def call_ion_selection(variables, colab=False):
 		def on_button_click(title):
 			def handler(change):
 				with out:
+					clear_output(wait=True)
+				with out_tab:
 					clear_output(wait=True)
 					display(tab_contents[title])
 
@@ -387,13 +390,13 @@ def call_ion_selection(variables, colab=False):
 
 		# Layout for buttons and outputs
 		buttons_layout = widgets.HBox(buttons)
-		output_layout = widgets.HBox([out, widgets.VBox([output3, output2])])
+		output_layout = widgets.HBox([widgets.VBox([out_tab, out]), widgets.VBox([output3, output2])])
 
 		# Display the buttons and output areas
 		display(buttons_layout, output_layout)
 
 		# Initial display
-		with out:
+		with out_tab:
 			display(tab_contents["Peak Finder"])  # Default to the first "tab" content
 		with output3:
 			display(variables.range_data)
