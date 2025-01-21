@@ -1,4 +1,4 @@
-sphinx
+sphinx==7.4.7
 nbsphinx
 recommonmark
 sphinx-markdown-tables
