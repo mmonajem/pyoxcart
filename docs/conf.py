@@ -50,17 +50,17 @@ else:
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-                'sphinx.ext.napoleon',
-                'sphinx.ext.autodoc',
-                'sphinx.ext.autosummary',
-                'sphinx.ext.intersphinx',
-                'sphinx.ext.mathjax',
-                'sphinx.ext.viewcode',
-                'nbsphinx',
-                'recommonmark',
-                'sphinx_markdown_tables',
-                'sphinxcontrib.bibtex',
-	            'nbsphinx',]
+    'sphinx.ext.napoleon',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.viewcode',
+    'nbsphinx',
+    'recommonmark',
+    'sphinx_markdown_tables',
+    'sphinxcontrib.bibtex',
+    ]
 
 # The html index document.
 bibtex_bibfiles = ['references.bib']
@@ -102,3 +102,16 @@ html_theme_options = {
 }
 
 nbsphinx_allow_errors = True
+
+# Enable Markdown cross-references
+myst_enable_extensions = ["dollarmath", "amsmath", "deflist", "html_admonition", "html_image"]
+
+# Warn about unresolved references
+nitpicky = True
+nitpick_ignore = []
+
+# Add mappings for intersphinx to handle references to external libraries
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+}

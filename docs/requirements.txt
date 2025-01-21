@@ -1,7 +1,8 @@
-sphinx==7.4.7
+sphinx
 nbsphinx
 recommonmark
 sphinx-markdown-tables
 sphinx_rtd_theme
 sphinxcontrib-bibtex
 jinja2
+myst-parser
