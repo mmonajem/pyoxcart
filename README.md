@@ -29,7 +29,7 @@ vacuum environment. This system also features a state-of-the-art detector with a
 efficiency of approximately 80%. While tailor-made for the OXCART, the PyCCAPT package offers versatility, extending its
 capabilities to effectively control atom probe systems.
 
-![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/oxcart.jpg)
+![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/oxcart.jpg?raw=True)
 
 The package is designed with modularity in mind, making it highly adaptable to new instruments. This
 adaptability extends to instruments like Pfeifer gauges, Fug power supplies, and Siglent signal generators. Notably, the

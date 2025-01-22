@@ -87,7 +87,6 @@ setup(
                 'pyccapt=pyccapt.control.__main__:main',
                 }
     },
-    data_files=[('my_data', ['./tests/data'])],
     packages=package_list,
     license="GPL v3",
     description='A package for controlling APT experiment and calibrating the APT data',
