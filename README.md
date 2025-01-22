@@ -40,45 +40,45 @@ The PyCCAPT package forms the foundation of a fully FAIR atom probe data collect
 repository includes the graphical user interface (GUI) and control program, which enable experiment control,
 visualization, and data acquisition. The following images provide an overview of the user interface:
 
-![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/main_gui.png)
+![](https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/main_gui.png)
 
 The calibration module is another component of the PyCCAPT, providing essential tools for data calibration and
 interpretation. This module includes functionalities such as t<sub>0</sub> and flight path calculation, region of
 interest (ROI) selection, voltage and bowl calibration, and 3D reconstruction techniques. 
 
-![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/visualization_gif.gif)
+![](https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/visualization_gif.gif)
 
 You can see some of the features of the calibration module in the following images.
 
 The FDM and detector hitmap as Gif images for an Aluminium sample:
 
-![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/hist.png)
+![](https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/hist.png)
 
 <div align="center">
-  <img width = "37%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/fdm.png">
+  <img width = "37%" src="https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/fdm.png">
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img width = "33%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/detector.gif">
+  <img width = "33%" src="https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/detector.gif">
 </div>
 
 Bowl and voltage calibration:
 
 
 <div align="center">
-  <img width="30%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/vol_corr.png">
+  <img width="30%" src="https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/vol_corr.png">
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img width="30%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/bowl_corr.png">
+  <img width="30%" src="https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/bowl_corr.png">
 </div>
 <div align="center">
-  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/tof_V_corr.png">
+  <img width = "30%" src="https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/tof_V_corr.png">
   &nbsp;&nbsp;&nbsp;&nbsp;  
-  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/tof_bowl_corr_y_det.png">
+  <img width = "30%" src="https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/tof_bowl_corr_y_det.png">
 </div>
 
 
 A ranged mass spectrum for a Nimonic® 90 sample:
 
 <div align="center">
-  <img width = "90%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/mc.png">
+  <img width = "90%" src="https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/mc.png">
 </div>
 
 
