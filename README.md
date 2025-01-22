@@ -29,7 +29,7 @@ vacuum environment. This system also features a state-of-the-art detector with a
 efficiency of approximately 80%. While tailor-made for the OXCART, the PyCCAPT package offers versatility, extending its
 capabilities to effectively control atom probe systems.
 
-![](https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/oxcart.jpg?raw=True)
+![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/oxcart.jpg?raw=True)
 
 The package is designed with modularity in mind, making it highly adaptable to new instruments. This
 adaptability extends to instruments like Pfeifer gauges, Fug power supplies, and Siglent signal generators. Notably, the
@@ -40,45 +40,45 @@ The PyCCAPT package forms the foundation of a fully FAIR atom probe data collect
 repository includes the graphical user interface (GUI) and control program, which enable experiment control,
 visualization, and data acquisition. The following images provide an overview of the user interface:
 
-![](https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/main_gui.png)
+![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/main_gui.png?raw=True)
 
 The calibration module is another component of the PyCCAPT, providing essential tools for data calibration and
 interpretation. This module includes functionalities such as t<sub>0</sub> and flight path calculation, region of
 interest (ROI) selection, voltage and bowl calibration, and 3D reconstruction techniques. 
 
-![](https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/visualization_gif.gif)
+![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/visualization_gif.gif?raw=True)
 
 You can see some of the features of the calibration module in the following images.
 
 The FDM and detector hitmap as Gif images for an Aluminium sample:
 
-![](https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/hist.png)
+![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/hist.png?raw=True)
 
 <div align="center">
-  <img width = "37%" src="https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/fdm.png">
+  <img width = "37%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/fdm.png?raw=True">
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img width = "33%" src="https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/detector.gif">
+  <img width = "33%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/detector.gif?raw=True">
 </div>
 
 Bowl and voltage calibration:
 
 
 <div align="center">
-  <img width="30%" src="https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/vol_corr.png">
+  <img width="30%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/vol_corr.png?raw=True">
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img width="30%" src="https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/bowl_corr.png">
+  <img width="30%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/bowl_corr.png?raw=True">
 </div>
 <div align="center">
-  <img width = "30%" src="https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/tof_V_corr.png">
+  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/tof_V_corr.png?raw=True">
   &nbsp;&nbsp;&nbsp;&nbsp;  
-  <img width = "30%" src="https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/tof_bowl_corr_y_det.png">
+  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/tof_bowl_corr_y_det.png?raw=True">
 </div>
 
 
 A ranged mass spectrum for a Nimonic® 90 sample:
 
 <div align="center">
-  <img width = "90%" src="https://raw.githubusercontent.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/mc.png">
+  <img width = "90%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/mc.png?raw=True">
 </div>
 
 
