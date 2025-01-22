@@ -10,22 +10,30 @@ nanoscale world of materials or conducting cutting-edge research, PyCCAPT proves
 control and data management, enhancing the capabilities of atom probe tomography systems for a wide range of scientific
 applications.
 
+## Overview of the main GUI of the control module
 ![plot](../pyccapt/files/readme_images/main_gui.png)
 
 The following images show the GUI of the control module in detail.
 
+## Gates control GUI
 ![plot](../pyccapt/files/readme_images/gates_gui.png)
 
+## Pumps control, vacuum monitoring, temperature control GUI
 ![plot](../pyccapt/files/readme_images/pumps_gui.png)
 
+## Cameras control GUI
 ![plot](../pyccapt/files/readme_images/cameras_gui.png)
 
+## Laser control GUI
 ![plot](../pyccapt/files/readme_images/laser_gui.png)
 
+## Stage control GUI
 ![plot](../pyccapt/files/readme_images/stage_gui.png)
 
+## Visualization GUI
 ![plot](../pyccapt/files/readme_images/visualization_gui.png)
 
+## Baking process GUI
 ![plot](../pyccapt/files/readme_images/baking_gui.png)
 
 

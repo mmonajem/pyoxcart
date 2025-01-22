@@ -1,4 +1,4 @@
-# Data Structure Calibration Module and range file
+# Calibration and Range File Data Structure
 
 This document provides an overview of the data structure within the HDF5 files of the PyCCAPT calibration module.
 In the descriptions below, the notation "(n, )(unit, datatype)" is used to represent one-dimensional arrays with the
