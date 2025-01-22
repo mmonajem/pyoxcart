@@ -88,7 +88,7 @@ The 3d reconstruction of Nimonic® 90 and precipitates can be seen in the follow
 
 <div align="center">
   <img width = "40%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/roto.gif?raw=True)">
-<img width = "40%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/iso.gif?raw=True)">
+  <img width = "40%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/iso.gif?raw=True)">
 </div>
 
 
