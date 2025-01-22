@@ -7,7 +7,7 @@ from setuptools import setup
 try:
     from pyccapt import version
 except BaseException:
-    version = "0.1.1"
+    version = "0.1.2"
 
 colab_deps = [
 ]
