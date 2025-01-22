@@ -1,4 +1,4 @@
-# Data Structure Calibration Module and range file
+# Calibration and Range File Data Structure
 
 This document provides an overview of the data structure within the HDF5 files of the PyCCAPT calibration module.
 In the descriptions below, the notation "(n, )(unit, datatype)" is used to represent one-dimensional arrays with the
@@ -29,7 +29,7 @@ This HDF5 file in PyCCAPT contains data with the following columns:
 There is also possibility to convert the PyCCAPT HDF5 file data to EPOS, POS, ATO, and CSV file. You can find the
 example code in the tutorial section. A screenshot of the PyCCAPT HDF5 file is shown below.
 
-![](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/dataset.png)
+![](../pyccapt/files/readme_images/dataset.png)
 
 
 ### Range HDF5 file structure of PyCCAPT 
@@ -50,5 +50,5 @@ The range file contains the range of the mass-to-charge ratio. The range file is
 
 A screenshot of the range HDF5 file is shown below.
 
-![plot](https://github.com/mmonajem/pyccapt/blob/develop/pyccapt/files/readme_images/range_data.png)
+![plot](../pyccapt/files/readme_images/range_data.png)
 

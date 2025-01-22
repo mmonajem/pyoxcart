@@ -1,4 +1,4 @@
-# Data Structure Control Module
+# Control Dataset Structure
 
 This document provides an overview of the data structure within the HDF5 file of the control software of the PyCCAPT.
 In the descriptions below, the notation "(n, )(unit, datatype)" is used to represent one-dimensional arrays with the
