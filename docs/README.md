@@ -9,6 +9,7 @@ cd docs
 pip install -r requirements.txt
 ```
 ## Create rst files
+
 If there is no conf.py file, create one with `sphinx-quickstart`.
 
 Then create the rst files with `sphinx-apidoc`:

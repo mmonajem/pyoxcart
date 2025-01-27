@@ -183,7 +183,7 @@ valuable information.
 # Using PyCCAPT
 
 For control part of the package you can follow the steps
-on [documentation](https://pyccapt.readthedocs.io/en/latest/configuration.html).
+on [documentation](https://pyccapt.readthedocs.io/).
 
 For calibration, review the [tutorial](https://pyccapt.readthedocs.io/en/latest/tutorials.html) to understand package
 features.
