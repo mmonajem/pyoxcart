@@ -175,7 +175,7 @@ To start the tutorial, please follow these steps:
 # Documentation
 
 The latest documentation is available on
-[ReadTheDocs](https://pyccapt.readthedocs.io/en/latest/?#) page. It provides feature descriptions, tutorials, and
+[ReadTheDocs](https://pyccapt.readthedocs.io/) page. It provides feature descriptions, tutorials, and
 valuable information.
 
 
