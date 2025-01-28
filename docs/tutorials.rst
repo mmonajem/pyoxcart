@@ -1,12 +1,9 @@
 Tutorials for APT data processing
 ============================================================
 
-The data processing tutorial, number 0, is a simple user friendly guide to crop, calibrate, 3d reconstruct, range, and visualize the data.
-This tutorial is a good starting point for new users which use widgets to make it easy to process the data.
+The tutorials in this section provide a step-by-step guide to processing APT data using PyCCAPT.
+The tutorials cover data processing, 3D reconstruction, visualization, and propagation delay calculation.
 
-If you need more control over the data processing, you can use the other tutorials, number 1 to 5, which are more advanced.
-
-For propagation delay calculation you can use tutorial 6.
 
 -----------------
 Dataset download
@@ -28,13 +25,9 @@ Tutorials
     :maxdepth: 2
 
     tutorials/data_processing
-    tutorials/data_load_crop
-    tutorials/tof_voltage_bowl_calibration
-    tutorials/mc_voltage_bowl_calibration
-    tutorials/3d_reconstruction
-    tutorials/ranging
-    tutorials/visualization
     tutorials/propagation_delay_calculation
+    tutorials/visualization
+    tutorials/3d_reconstruction
 
 
 

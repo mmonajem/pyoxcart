@@ -21,7 +21,7 @@ import os
 import os.path as op
 import sys
 
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../..'))
 
 # include parent directory
 pdir = op.dirname(op.dirname(op.abspath(__file__)))
@@ -50,19 +50,17 @@ else:
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-                'sphinx.ext.napoleon',
-                'sphinx.ext.autodoc',
-                'sphinx.ext.autosummary',
-                'sphinx.ext.intersphinx',
-                'sphinx.ext.mathjax',
-                'sphinx.ext.viewcode',
-                'nbsphinx',
-                'recommonmark',
-                'sphinx_markdown_tables',
-                'sphinxcontrib.bibtex',
-	"nbsphinx",
-
-]
+    'sphinx.ext.napoleon',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.viewcode',
+    'nbsphinx',
+    'recommonmark',
+    'sphinx_markdown_tables',
+    'sphinxcontrib.bibtex',
+    ]
 
 # The html index document.
 bibtex_bibfiles = ['references.bib']
@@ -79,6 +77,7 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+myst_heading_anchors = 3  # Allows linking to headings in Markdown files
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -104,3 +103,16 @@ html_theme_options = {
 }
 
 nbsphinx_allow_errors = True
+
+# Enable Markdown cross-references
+myst_enable_extensions = ["dollarmath", "amsmath", "deflist", "html_admonition", "html_image"]
+
+# Warn about unresolved references
+nitpicky = True
+nitpick_ignore = []
+
+# Add mappings for intersphinx to handle references to external libraries
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+}

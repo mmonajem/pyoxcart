@@ -7,7 +7,7 @@ from setuptools import setup
 try:
     from pyccapt import version
 except BaseException:
-    version = "0.0.35"
+    version = "0.1.11"
 
 colab_deps = [
 ]
@@ -87,7 +87,6 @@ setup(
                 'pyccapt=pyccapt.control.__main__:main',
                 }
     },
-    data_files=[('my_data', ['./tests/data'])],
     packages=package_list,
     license="GPL v3",
     description='A package for controlling APT experiment and calibrating the APT data',

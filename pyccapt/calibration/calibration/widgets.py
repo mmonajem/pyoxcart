@@ -270,8 +270,6 @@ def density_field_selection():
         TableFile = '../../../files/field_density_table.h5'
         dataframe = pd.read_hdf(TableFile, mode='r')
     except Exception as e:
-        print("Error: ", e)
-        print("Trying to load the file from the default path")
         try:
             TableFile = './pyccapt/files/field_density_table.h5'
             dataframe = pd.read_hdf(TableFile, mode='r')

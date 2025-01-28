@@ -331,7 +331,6 @@ def plot_crop_fdm(x, y, bins=(256, 256), frac=1.0, axis_mode='normal', figure_si
 
     # Check if the bin is a list
     if isinstance(bins, list):
-        print('bins:', bins)
         if len(bins) == 1:
             x_edges = np.arange(x.min(), x.max() + bins, bins)
             y_edges = np.arange(y.min(), y.max() + bins, bins)

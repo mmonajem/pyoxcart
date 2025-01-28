@@ -183,7 +183,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         layout=label_layout
     )
     mode_v = widgets.Dropdown(
-        options=[('ion_seq', 'ion_seq'), ('voltage', 'voltage'), ('adaptive', 'adaptive')],
+        options=[('ion_seq', 'ion_seq'), ('voltage', 'voltage')],
         description='sample mode:',
         layout=label_layout
     )
@@ -193,24 +193,13 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         layout=label_layout
     )
     model_v = widgets.Dropdown(
-        options=[('robust_fit', 'robust_fit'), ('curve_fit', 'curve_fit'), ('hybrid_fit', 'hybrid_fit')],
+        options=[('robust_fit', 'robust_fit'), ('curve_fit', 'curve_fit')],
         description='fit mode:',
         layout=label_layout
     )
     maximum_sample_method_v = widgets.Dropdown(
         options=[('histogram', 'histogram'), ('mean', 'mean'), ('median', 'median')],
         description='sample max:',
-        layout=label_layout
-    )
-    apply_v = widgets.Dropdown(
-        options=[('all', 'all'), ('voltage', 'voltage'), ('voltage_temporal', 'voltage_temporal')],
-        description='apply mode:',
-        layout=label_layout
-    )
-
-    noise_remove_v = widgets.Dropdown(
-        options=[('False', False), ('True', True)],
-        description='noise remove:',
         layout=label_layout
     )
 
@@ -236,7 +225,6 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                 mode_p = mode_v.value
                 maximum_cal_method_p = maximum_cal_method_v.value
                 maximum_sample_method_p = maximum_sample_method_v.value
-                noise_remove_p = noise_remove_v.value
                 if calibration_mode.value == 'tof_calib':
                     calibration_mode_t = 'tof'
                 elif calibration_mode.value == 'mc_calib':
@@ -249,9 +237,8 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                 calibration.voltage_corr_main(voltage, variables, sample_size=sample_size_p,
                                               calibration_mode=calibration_mode_t,
                                               index_fig=index_fig_p, plot=plot_p, save=save_p,
-                                              apply_local=apply_v.value, mode=mode_p,
+                                              mode=mode_p,
                                               maximum_cal_method=maximum_cal_method_p,
-                                              noise_remove=noise_remove_p,
                                               maximum_sample_method=maximum_sample_method_p,
                                               fig_size=figure_size, fast_calibration=fast_calibration.value,
                                               model=model_v.value, bin_size=bin_size_v.value,
@@ -260,8 +247,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         vol_button.disabled = False
 
     sample_size_b = widgets.IntText(value=5, description='sample size:', layout=label_layout)
-    fit_mode_b = widgets.Dropdown(options=[('robust_fit', 'robust_fit'), ('curve_fit', 'curve_fit'),
-                                           ('ml_fit', 'ml_fit')],
+    fit_mode_b = widgets.Dropdown(options=[('robust_fit', 'robust_fit'), ('curve_fit', 'curve_fit')],
                                   description='fit mode:', layout=label_layout)
     index_fig_b = widgets.IntText(value=1, description='fig index:', layout=label_layout)
     bin_size_b = widgets.FloatText(value=0.01, description='bin size:', layout=label_layout)
@@ -297,11 +283,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
         layout=label_layout
     )
     peak_val = widgets.FloatText(value=0, description='peak value:', layout=label_layout)
-    apply_b = widgets.Dropdown(
-        options=[('all', 'all'), ('temporal', 'temporal'), ],
-        description='apply mode:',
-        layout=label_layout
-    )
+
 
     figure_b_size_x = widgets.FloatText(value=5.0, description="Fig. size W:", layout=label_layout)
     figure_b_size_y = widgets.FloatText(value=5.0, description="Fig. size H:", layout=label_layout)
@@ -348,7 +330,7 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
                                                  sample_size=sample_size_p, fit_mode=fit_mode_p,
                                                  maximum_cal_method=maximum_cal_method_p,
                                                  maximum_sample_method=maximum_sample_method_p,
-                                                 apply_local=apply_b.value, fig_size=figure_size,
+                                                 fig_size=figure_size,
                                                  calibration_mode=calibration_mode_t, index_fig=index_fig_p,
                                                  plot=plot_p, save=save_p, fast_calibration=fast_calibration.value,
                                                  bin_size=bin_size_b.value,
@@ -366,7 +348,6 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
             out.clear_output()
             calibration.plot_selected_statistic(variables, bin_fdm.value, index_fig.value,
                                                 calibration_mode=calibration_mode_t, save=True)
-
 
 
     def automatic_bowl_calibration(b, variables, out, out_status, calibration_mode, pulse_mode):
@@ -530,13 +511,11 @@ def call_voltage_bowl_calibration(variables, det_diam, flight_path_length, pulse
     column12 = widgets.VBox([plot_button, auto_button, auto_button_bowl, initial_calib_button, save_button,
                              reset_back_button, reset_button, clear_plot, plot_stat_button])
     column22 = widgets.VBox([sample_size_b, bin_size_b, fit_mode_b, maximum_cal_method_b, maximum_sample_method_b,
-                             apply_b, plot_b,
+                             plot_b,
                              index_fig_b, save_b, figure_b_size_x, figure_b_size_y])
     column21 = widgets.VBox([bowl_button, pb_bowl])
     column33 = widgets.VBox([sample_size_v, bin_size_v, model_v, maximum_cal_method_v, maximum_sample_method_v,
-                             apply_v, mode_v, noise_remove_v,
-                             plot_v, index_fig_v,
-                             save_v, figure_v_size_x, figure_v_size_y])
+                             mode_v, plot_v, index_fig_v, save_v, figure_v_size_x, figure_v_size_y])
     column32 = widgets.VBox([vol_button, pb_vol])
     column34 = widgets.VBox([calibration_mode, fast_calibration, automatic_window_update, peak_val])
 

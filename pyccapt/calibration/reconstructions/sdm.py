@@ -1,12 +1,12 @@
 from copy import copy
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from matplotlib import colors, rcParams
 from matplotlib import cm
 from scipy.signal import find_peaks
 
 from pyccapt.calibration.data_tools.merge_range import merge_by_range
-from pyccapt.calibration.reconstructions.density_map import plot_density_map
 
 
 def sdm(particles, bin_size, variables=None, roi=[0,0,0.5], z_cut=True, normalize=False, plot_mode='bar', plot=False,
@@ -144,11 +144,11 @@ def sdm(particles, bin_size, variables=None, roi=[0,0,0.5], z_cut=True, normaliz
             else:
                 if variables.range_data is None:
                     raise ValueError('Range data is not provided')
-                variables.data = merge_by_range(variables.data, variables.range_data, full=True)
+                data = merge_by_range(variables.data, variables.range_data, full=True)
             mask_i_comp = np.zeros(len(particles), dtype=bool)
             # Create a mask from the composition list of variables.data
             for comp in i_composition:
-                mask_i_comp = mask_i_comp | variables.data['name'].apply(lambda x: comp in x)
+                mask_i_comp = mask_i_comp | data['name'].apply(lambda x: comp in str(x) if not pd.isna(x) else False)
         else:
             raise ValueError('No list of i composition is provided')
         if j_composition and isinstance(j_composition, list):
@@ -157,11 +157,11 @@ def sdm(particles, bin_size, variables=None, roi=[0,0,0.5], z_cut=True, normaliz
             else:
                 if variables.range_data is None:
                     raise ValueError('Range data is not provided')
-                variables.data = merge_by_range(variables.data, variables.range_data, full=True)
+                data = merge_by_range(variables.data, variables.range_data, full=True)
             mask_j_comp = np.zeros(len(particles), dtype=bool)
             # Create a mask from the composition list of variables.data
             for comp in j_composition:
-                mask_j_comp = mask_j_comp | variables.data['name'].apply(lambda x: comp in x)
+                mask_j_comp = mask_j_comp | data['name'].apply(lambda x: comp in str(x) if not pd.isna(x) else False)
         else:
             raise ValueError('No list of j composition is provided')
 
@@ -441,50 +441,50 @@ def sdm(particles, bin_size, variables=None, roi=[0,0,0.5], z_cut=True, normaliz
     return histograms, edges_list
 
 
-def sdm_background(res, limit):
-    """
-    Performs iterative smoothing of a 1D array with a convergence condition.
-
-    Parameters:
-    - res (np.ndarray): 2D array where the first column represents data points.
-    - limit (float): Convergence threshold for the deviation percentage.
-
-    Returns:
-    - np0 (np.ndarray): The original input data after smoothing.
-    - dev (np.ndarray): Array of deviation values over each iteration.
-    """
-    # Initialize arrays and variables
-    np0 = res[:, 0]  # Original data points
-    np1 = np.zeros_like(np0)  # Array for the new smoothed values
-    dev = np.zeros((1000, 3))  # Pre-allocate deviation array (size can be adjusted)
-
-    # Find the index of the maximum value in the first column
-    id_center = np.argmax(np0)
-
-    # Initialize deviation
-    dev[0, 0] = 0
-    dev[0, 1] = np.inf
-    dev[0, 2] = np.inf
-
-    i = 0
-    while dev[i, 2] >= limit:
-        # Smoothing step: update np1 based on the average of neighboring values
-        for j in range(1, len(np0) - 1):
-            np1[j] = min(np0[j], (np0[j + 1] + np0[j - 1]) / 2)
-
-        # Compute the deviation in the current iteration
-        dev[i + 1, 0] = i + 1
-        dev[i + 1, 1] = res[id_center, 0] - np.max(np1)  # Deviation from max value
-        dev[i + 1, 2] = np.abs(dev[i + 1, 1] - dev[i, 1]) * 100 / res[id_center, 0]  # Relative change in deviation
-
-        # Update the np0 array for the next iteration
-        np0 = np1.copy()
-        np1.fill(0)  # Reset np1 for the next iteration
-
-        i += 1
-
-    # Truncate dev array to the actual number of iterations
-    dev = dev[:i + 1, :]
-
-    return np0, dev
+# def sdm_background(res, limit):
+#     """
+#     Performs iterative smoothing of a 1D array with a convergence condition.
+#
+#     Parameters:
+#     - res (np.ndarray): 2D array where the first column represents data points.
+#     - limit (float): Convergence threshold for the deviation percentage.
+#
+#     Returns:
+#     - np0 (np.ndarray): The original input data after smoothing.
+#     - dev (np.ndarray): Array of deviation values over each iteration.
+#     """
+#     # Initialize arrays and variables
+#     np0 = res[:, 0]  # Original data points
+#     np1 = np.zeros_like(np0)  # Array for the new smoothed values
+#     dev = np.zeros((1000, 3))  # Pre-allocate deviation array (size can be adjusted)
+#
+#     # Find the index of the maximum value in the first column
+#     id_center = np.argmax(np0)
+#
+#     # Initialize deviation
+#     dev[0, 0] = 0
+#     dev[0, 1] = np.inf
+#     dev[0, 2] = np.inf
+#
+#     i = 0
+#     while dev[i, 2] >= limit:
+#         # Smoothing step: update np1 based on the average of neighboring values
+#         for j in range(1, len(np0) - 1):
+#             np1[j] = min(np0[j], (np0[j + 1] + np0[j - 1]) / 2)
+#
+#         # Compute the deviation in the current iteration
+#         dev[i + 1, 0] = i + 1
+#         dev[i + 1, 1] = res[id_center, 0] - np.max(np1)  # Deviation from max value
+#         dev[i + 1, 2] = np.abs(dev[i + 1, 1] - dev[i, 1]) * 100 / res[id_center, 0]  # Relative change in deviation
+#
+#         # Update the np0 array for the next iteration
+#         np0 = np1.copy()
+#         np1.fill(0)  # Reset np1 for the next iteration
+#
+#         i += 1
+#
+#     # Truncate dev array to the actual number of iterations
+#     dev = dev[:i + 1, :]
+#
+#     return np0, dev
 

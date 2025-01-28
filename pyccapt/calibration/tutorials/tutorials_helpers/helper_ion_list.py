@@ -13,9 +13,9 @@ from pyccapt.calibration.data_tools import data_tools
 label_layout = widgets.Layout(width='200px')
 
 
-def call_ion_list(variables, selector):
+def call_ion_list(variables, selector, path='../../../files/'):
     try:
-        isotopeTableFile = '../../../files/isotopeTable.h5'
+        isotopeTableFile = path + 'isotopeTable.h5'
         dataframe = data_tools.read_range(isotopeTableFile)
     except Exception as e:
         print(f"Error in loading the isotopeTable file: {e}")

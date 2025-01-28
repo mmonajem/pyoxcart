@@ -3,7 +3,6 @@ import sys
 import pandas as pd
 from PyQt6.QtCore import Qt, QThread
 from PyQt6.QtGui import QFont, QGuiApplication
-from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 
 
@@ -165,17 +164,19 @@ class MyWindow(QMainWindow):
                     item.setSelected(False)
 
 
-def open_gui(df, variables):
-    app = 0  # This is the solution to prevent kernel crash of Jupyter lab
-    app = QApplication.instance()
-    if not app:
-        app = QApplication(sys.argv)
+if __name__ == '__main__':
 
-    window = MyWindow(df, variables)
-    window.show()
-    # Ensure that the app is deleted when we close it
-    app.aboutToQuit.connect(app.deleteLater)
-    try:
-        app.exec()
-    except SystemExit:
-        pass
+    def open_gui(df, variables):
+        app = 0  # This is the solution to prevent kernel crash of Jupyter lab
+        app = QApplication.instance()
+        if not app:
+            app = QApplication(sys.argv)
+
+        window = MyWindow(df, variables)
+        window.show()
+        # Ensure that the app is deleted when we close it
+        app.aboutToQuit.connect(app.deleteLater)
+        try:
+            app.exec()
+        except SystemExit:
+            pass

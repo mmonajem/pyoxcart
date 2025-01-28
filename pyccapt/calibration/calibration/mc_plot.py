@@ -177,15 +177,36 @@ class AptHistPlotter:
 
             for i in range(len(ion)):
                 self.legend_colors.append((r'%s' % ion[i], plt.Rectangle((0, 0), 1, 1, fc=colors[i])))
-                x_offset = 0.5  # Adjust this value as needed
-                y_offset = 0.5  # Adjust this value as needed
+                x_offset = 0.0  # Adjust this value as needed
 
                 # Find the bin that contains the mc[i]
-                bin_index = np.searchsorted(self.x, mc[i])
-                peak_height = self.y[bin_index] * ((mc[i] - self.x[bin_index - 1]) / self.bin_width)
-                self.peak_annotates.append(plt.text(mc[i] + x_offset, peak_height + y_offset,
-                                                    r'%s' % ion[i], color='black', size=10, alpha=1))
-                self.annotates.append(str(i + 1))
+                bin_index = np.searchsorted(self.x, mc[i]) - 1
+                if 0 <= bin_index < len(self.y):
+                    # Define a small range around the bin to search for the local maximum
+                    search_range = slice(max(0, bin_index - 1), min(len(self.y), bin_index + 2))
+                    local_bins = self.y[search_range]
+                    local_x = self.x[search_range.start:search_range.stop]
+
+                    # Find the local maximum and its position
+                    max_idx = np.argmax(local_bins)
+                    peak_height = local_bins[max_idx]
+                    peak_position = local_x[max_idx]
+
+                    # Dynamic y_offset based on log scale
+                    y_offset = peak_height * 0.05
+                    if self.ax.get_yscale() == 'log':
+                        y_offset = 10 ** (np.log10(peak_height) + 0.1) - peak_height
+
+                    self.peak_annotates.append(plt.text(
+                        peak_position + x_offset,
+                        peak_height + y_offset,
+                        r'%s' % ion[i],
+                        color='black',
+                        size=10,
+                        alpha=1,
+                        rotation=90
+                    ))
+                    self.annotates.append(str(i + 1))
 
             if legend:
                 self.plot_color_legend(loc=legend_loc)
@@ -235,30 +256,56 @@ class AptHistPlotter:
         Returns:
             None
         """
-        x_offset = 0.5  # Adjust this value as needed
-        y_offset = 0.5  # Adjust this value as needed
+        x_offset = 0.0  # Adjust this value as needed
         if range_data is not None:
             ion = range_data['ion'].tolist()
             mc = range_data['mc'].tolist()
             for i in range(len(ion)):
                 # Find the bin that contains the mc[i]
-                bin_index = np.searchsorted(self.x, mc[i])
-                peak_height = self.y[bin_index] * ((mc[i] - self.x[bin_index - 1]) / self.bin_width)
+                bin_index = np.searchsorted(self.x, mc[i]) - 1
+                if 0 <= bin_index < len(self.y):
+                    # Define a small range around the bin to search for the local maximum
+                    search_range = slice(max(0, bin_index - 1), min(len(self.y), bin_index + 2))
+                    local_bins = self.y[search_range]
+                    local_x = self.x[search_range.start:search_range.stop]
+
+                    # Find the local maximum and its position
+                    max_idx = np.argmax(local_bins)
+                    peak_height = local_bins[max_idx]
+                    peak_position = local_x[max_idx]
+
+                    # Dynamic y_offset based on log scale
+                    y_offset = peak_height * 0.05
+                    if self.ax.get_yscale() == 'log':
+                        y_offset = 10 ** (np.log10(peak_height) + 0.1) - peak_height
+                else:
+                    peak_position = mc[i]
+                    peak_height = self.y[np.searchsorted(self.x, mc[i]) - 1]
                 if self.plot_show:
-                    self.peak_annotates.append(plt.text(mc[i] + x_offset, peak_height + y_offset,
-                                                        r'%s' % ion[i], color='black', size=10, alpha=1))
+                    self.peak_annotates.append(plt.text(peak_position + x_offset, peak_height + y_offset,
+                                                        r'%s' % ion[i], color='black', size=10, alpha=1,
+                                                        rotation=90))
                     self.annotates.append(str(i + 1))
         else:
+            y_offset = 0.0  # Adjust this value as needed
             if mode == 'peaks':
                 for i in range(len(self.peaks)):
                     if self.plot_show:
+                        # Dynamic y_offset based on log scale
+                        peak_height = self.y[self.peaks][i]
+                        y_offset = peak_height * 0.05
+                        if self.ax.get_yscale() == 'log':
+                            y_offset = 10 ** (np.log10(peak_height) + 0.1) - peak_height
+
                         self.peak_annotates.append(
-                            plt.text(self.x[self.peaks][i] + x_offset, self.y[self.peaks][i] + y_offset,
-                                     '%s' % '{:.2f}'.format(self.x[self.peaks][i]), color='black', size=10, alpha=1))
+                            plt.text(self.x[self.peaks][i] + x_offset, peak_height + y_offset,
+                                     '%s' % '{:.2f}'.format(self.x[self.peaks][i]), color='black', size=10, alpha=1,
+                                     rotation=90))
 
                         self.annotates.append(str(i + 1))
 
             elif mode == 'range':
+                y_offset = 0.0  # Adjust this value as needed
                 for i in range(len(self.variables.peaks_x_selected)):
                     # Find the bin that contains the mc[i]
                     bin_index = np.searchsorted(self.x, self.variables.peaks_x_selected[i])
@@ -268,7 +315,7 @@ class AptHistPlotter:
                         self.peak_annotates.append(
                             plt.text(self.variables.peaks_x_selected[i] + x_offset, peak_height + y_offset,
                                      '%s' % '{:.2f}'.format(self.variables.peaks_x_selected[i]), color='black', size=10,
-                                     alpha=1))
+                                     alpha=1, rotation=90))
 
                         self.annotates.append(str(i + 1))
 
@@ -1080,7 +1127,7 @@ def hist_plot(variables, bin_size, log, target, normalize, prominence, distance,
                                       loc='right')
 
     elif plot_ranged_colors and plot_ranged_peak:
-        print('Please select only one of the plot_ranged_peak and plot_ranged_colors')
+        raise ValueError('Please select only one of the plot_ranged_peak and plot_ranged_colors')
 
     else:
         peaks = None

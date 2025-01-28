@@ -10,7 +10,7 @@ from pyccapt.calibration.reconstructions import reconstruction
 label_layout = widgets.Layout(width='200px')
 
 
-def call_x_y_z_calculation(variables, flight_path_length, element_selected):
+def call_x_y_z_calculation(variables, flight_path_length, element_selected, colab=False):
 	# Call the function or perform calculations here
 	# You can replace this with the actual implementation
 
@@ -88,7 +88,8 @@ def call_x_y_z_calculation(variables, flight_path_length, element_selected):
 				figname=figname_value,
 				mode=mode_value,
 				opacity=opacity_value,
-				save=save_value)
+				save=save_value,
+				colab=colab)
 
 		# Enable the button when the code is finished
 		button_calculate_plot.disabled = False

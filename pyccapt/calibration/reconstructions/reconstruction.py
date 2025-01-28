@@ -210,7 +210,7 @@ def draw_qube(fig, range, col=None, row=None):
 def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save, make_gif=False,
                         make_evaporation_gif=False, range_sequence=[], range_mc=[], range_detx=[], range_dety=[],
                         range_x=[], range_y=[], range_z=[], range_vol=[], ions_individually_plots=False,
-                        detailed_isotope_charge=False):
+                        detailed_isotope_charge=False, colab=False):
     """
     Generate a 3D plot for atom probe reconstruction data.
 
@@ -233,7 +233,7 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         range_vol: Range of volume
         ions_individually_plots (bool): Whether to plot ions individually.
         detailed_isotope_charge (bool): Whether to plot detailed isotope and charge information.
-
+        colab (bool): Whether to run in Google Colab.
     Returns:
         None
     """
@@ -464,8 +464,9 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
     variables.plotly_3d_reconstruction = go.FigureWidget(fig)
 
     fig.show(config=config)
-    pio.renderers.default = 'browser'
-    fig.show(config=config)
+    if not colab:
+        pio.renderers.default = 'browser'
+        fig.show(config=config)
 
     if save:
         try:
@@ -1129,7 +1130,8 @@ def detector_animation(variables, points_per_frame, ranged, selected_area_specia
         animation.save(variables.result_path + figure_name + ".gif", writer='imagemagick')
     plt.close()
 def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, field_evap,
-                               avg_dens, flight_path_length, rotary_fig_save, mode, opacity, figname, save):
+                               avg_dens, flight_path_length, rotary_fig_save, mode, opacity, figname, save,
+                               colab=False):
     """
     Calculate the x, y, z coordinates of the atoms and plot them.
 
@@ -1147,6 +1149,7 @@ def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, 
             opacity (float): The opacity of the markers.
             figname (str): The name of the figure.
             save (bool): True to save the plot, False to display it.
+            colab (bool): True if the code is running in Google Colab, False otherwise.
 
         Returns:
             None
@@ -1165,4 +1168,4 @@ def x_y_z_calculation_and_plot(variables, element_percentage, kf, det_eff, icf, 
     variables.x = px
     variables.y = py
     variables.z = pz
-    reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save)
+    reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save, figname, save, colab=colab)
