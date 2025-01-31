@@ -272,7 +272,8 @@ def state_update(conf, variables, emitter):
         vacuum_load_lock_backing = 'N/A'
         vacuum_cryo_load_lock = 'N/A'
         vacuum_cryo_load_lock_backing = 'N/A'
-        set_temperature_tmp = 0
+        set_temperature_tmp_cryo = 0
+        set_temperature_tmp_ll = 0
         while emitter.bool_flag_while_loop:
             if conf['cryo'] == "on" and com_port_cryovac is not None:
                 try:
@@ -284,6 +285,7 @@ def state_update(conf, variables, emitter):
                 try:
                     temperature_stage = float(output.split()[0].replace(',', ''))
                     temperature_cryo_head = float(output.split()[2].replace(',', ''))
+                    temperature_ll = float(output.split()[3].replace(',', ''))
                 except Exception as e:
                     com_port_cryovac = None
                     temperature_cryo_head = -1
@@ -294,20 +296,38 @@ def state_update(conf, variables, emitter):
                 variables.temperature = temperature_stage
                 emitter.temp_stage.emit(temperature_stage)
                 emitter.temp_cryo_head.emit(temperature_cryo_head)
+                emitter.temp_ll.emit(temperature_ll - 273.15)  # convert from kelvin to celcius
 
-                if variables.set_temperature_flag:
-                    if variables.set_temperature != set_temperature_tmp:
+                if variables.set_temperature_flag_cryo:
+                    if variables.set_temperature_cryo != set_temperature_tmp_cryo:
                         try:
-                            res = command_cryovac(f'Out1.PID.Setpoint {variables.set_temperature}', com_port_cryovac)
-                            set_temperature_tmp = variables.set_temperature
+                            res = command_cryovac(f'Out1Cryo.PID.Setpoint {variables.set_temperature_cryo}',
+                                                  com_port_cryovac)
+                            print(res)
+                            set_temperature_tmp_cryo = variables.set_temperature_cryo
                         except Exception as e:
                             print(e)
                             print("cannot set the cryo temperature")
-                elif variables.set_temperature_flag == False:
-                    variables.set_temperature = 0
-                    res = command_cryovac(f'Out1.PID.Setpoint {variables.set_temperature}', com_port_cryovac)
-                    variables.set_temperature_flag = None
+                elif variables.set_temperature_flag_cryo == False:
+                    variables.set_temperature_cryo = 0
+                    res = command_cryovac(f'Out1Cryo.PID.Setpoint {variables.set_temperature_cryo}', com_port_cryovac)
+                    variables.set_temperature_flag_cryo = None
 
+                if variables.set_temperature_flag_ll:
+                    if variables.set_temperature_ll != set_temperature_tmp_ll:
+                        try:
+                            # convert from celcius to kelvin
+                            set_temperature_ll = variables.set_temperature_ll + 273.15
+                            res = command_cryovac(f'Out2LL.PID.Setpoint {set_temperature_ll}', com_port_cryovac)
+                            print(res)
+                            set_temperature_tmp_ll = variables.set_temperature_ll
+                        except Exception as e:
+                            print(e)
+                            print("cannot set the load lock temperature")
+                elif variables.set_temperature_flag_ll == False:
+                    variables.set_temperature_ll = 0
+                    res = command_cryovac(f'Out2LL.PID.Setpoint {variables.set_temperature_ll}', com_port_cryovac)
+                    variables.set_temperature_flag_ll = None
             if conf['COM_PORT_gauge_mc'] != "off" and tpg is not None:
                 value, _ = tpg.pressure_gauge(2)
                 try:

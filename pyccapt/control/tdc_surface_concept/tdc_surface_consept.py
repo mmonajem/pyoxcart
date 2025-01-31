@@ -1,9 +1,6 @@
-import asyncio
-import concurrent.futures
 import multiprocessing as mp
 import os
 import time
-import atexit
 from queue import Queue
 
 import numpy as np
@@ -14,7 +11,7 @@ from pyccapt.control.tdc_surface_concept import scTDC
 
 QUEUE_DATA = 0
 QUEUE_ENDOFMEAS = 1
-CHUNK_SIZE = 200_000  # Adjust the chunk size as needed
+CHUNK_SIZE = 100_000  # Adjust the chunk size if needed
 
 class BufDataCB4(scTDC.buffered_data_callbacks_pipe):
     """
@@ -96,80 +93,47 @@ def errorcheck(device, bufdatacb, bufdatacb_raw, retcode):
         return 0
 
 
-def atexit_handler(executor):
-    executor.shutdown()
+def save_chunk_worker(save_queue):
+    while True:
+        task = save_queue.get()
+        if task is None:  # Stop signal
+            break
 
+        chunk_id, path, chunk_data = task  # Extract data
+        try:
+            for key, data in chunk_data.items():
+                np.save(os.path.join(path, f"chunks/{key}_chunk_{chunk_id}.npy"), np.array(data))
+            print(f"Chunk {chunk_id} saved.")
+        except Exception as e:
+            print(f"Error saving chunk {chunk_id}: {e}")
 
-async def async_save_chunk(chunk_id, path, data_dict, executor):
-    """Asynchronously saves a chunk of data to disk using memory mapping."""
-    loop = asyncio.get_running_loop()
-    def blocking_io():
-        for key, data in data_dict.items():
-             # Create a memory-mapped file
-            filename = os.path.join(path, f"chunks/{key}_chunk_{chunk_id}.npy")
-            with open(filename, 'wb') as f:
-                np.save(f, data)
-
-    await loop.run_in_executor(executor, blocking_io)
-    print(f"Chunk {chunk_id} saved.")
-
-def save_chunk_worker(save_queue, executor):
-    async def process_queue():
-        while True:
-            item = save_queue.get()
-            if item is None:
-                break
-            chunk_id, path, data_dict = item
-
-            await async_save_chunk(chunk_id, path, data_dict, executor)
-    asyncio.run(process_queue())
+        time.sleep(0.5)  # Reduce CPU usage in case of continuous requests
 
 
 def load_and_concatenate_chunks(path, chunk_id):
-    all_data = {
-        "x_bin": [], "x_data": [], "y_bin": [], "y_data": [], "t_bin": [], "t_data": [],
-        "voltage_data": [], "voltage_pulse_data": [], "laser_pulse_data": [], "start_counter": [],
-        "channel_data": [], "time_data": [], "tdc_start_counter": [], "voltage_data_tdc": [],
-        "voltage_pulse_data_tdc": [], "laser_pulse_data_tdc": []
-    }
+    attr_names = [
+        "x_bin", "x_data", "y_bin", "y_data", "t_bin", "t_data",
+        "voltage_data", "voltage_pulse_data", "laser_pulse_data",
+        "start_counter", "channel_data", "time_data", "tdc_start_counter",
+        "voltage_data_tdc", "voltage_pulse_data_tdc", "laser_pulse_data_tdc"
+    ]
 
-    total_sizes = {key: 0 for key in all_data}  # Store total sizes for memmap creation
+    all_data = {attr: [] for attr in attr_names}  # Initialize storage
 
     for i in range(1, chunk_id + 1):
-        for attr_name in all_data:
-            chunk_file = os.path.join(path, f"chunks/{attr_name}_chunk_{i}.npy")
+        for attr in attr_names:
+            chunk_file = os.path.join(path, f"chunks/{attr}_chunk_{i}.npy")
             if os.path.exists(chunk_file):
                 try:
-                    with open(chunk_file, 'rb') as f:
-                        arr = np.load(f, allow_pickle=False) # Important for memmap
-                        total_sizes[attr_name] += arr.shape[0]
-                        all_data[attr_name].append(arr)
+                    all_data[attr].append(np.load(chunk_file))  # Load NumPy array directly
                 except Exception as e:
                     print(f"Error loading {chunk_file}: {e}")
             else:
-                print(f"File '{chunk_file}' not found.")
+                print(f"Warning: File '{chunk_file}' not found.")
 
-    memmaped_data = {}
+    # Convert lists of arrays to single NumPy arrays (faster processing)
+    return tuple(np.concatenate(all_data[attr]) if all_data[attr] else np.array([]) for attr in attr_names)
 
-    for attr_name in all_data:
-        if total_sizes[attr_name] > 0:
-            dtype = all_data[attr_name][0].dtype
-            shape = (total_sizes[attr_name],) + all_data[attr_name][0].shape[1:]  # Calculate correct shape
-            memmap_filename = os.path.join(path, f"{attr_name}_memmap.npy")
-
-            try:
-                memmaped_data[attr_name] = np.memmap(memmap_filename, dtype=dtype, mode='w+', shape=shape)
-                current_index = 0
-                for arr in all_data[attr_name]:
-                    memmaped_data[attr_name][current_index:current_index + len(arr)] = arr
-                    current_index += len(arr)
-                memmaped_data[attr_name].flush() #flush to disk
-            except Exception as e:
-                print(f"Error creating memmap for {attr_name}: {e}")
-                return None
-        else:
-            memmaped_data[attr_name] = np.array([])
-    return tuple(memmaped_data.values())
 
 def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, stop_event):
     """
@@ -186,7 +150,6 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
     Returns:
         int: Return code.
     """
-
     exposure_time = 100
     # surface concept tdc specific binning and factors
     TOFFACTOR = 27.432 / (1000 * 4)  # 27.432 ps/bin, tof in ns, data is TDC time sum
@@ -258,224 +221,219 @@ def run_experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, st
     loop_counter = 0
     loop_delay_counter = 0
 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        chunk_id = 0
-        save_queue = mp.Queue()
-        save_process = mp.Process(target=save_chunk_worker, args=(save_queue, executor))
-        save_process.start()
-        path = variables.path + "/temp_data/"
-        # Create folder to save the data
-        if not os.path.isdir(path):
-            os.makedirs(path, mode=0o777, exist_ok=True)
-        if not os.path.isdir(path + "chunks/"):
-            os.makedirs(path + "chunks/", mode=0o777, exist_ok=True)
+    chunk_id = 0
+    save_queue = mp.Queue()
+    save_process = mp.Process(target=save_chunk_worker, args=(save_queue,))
+    save_process.start()
+    path = variables.path + "/temp_data/"
+    # Create folder to save the data
+    if not os.path.isdir(path):
+        os.makedirs(path, mode=0o777, exist_ok=True)
+    if not os.path.isdir(path + "chunks/"):
+        os.makedirs(path + "chunks/", mode=0o777, exist_ok=True)
 
-        while not stop_event.is_set():
-            start_time_loop = time.time()
-            eventtype, data = bufdatacb.queue.get()
-            eventtype_raw, data_raw = bufdatacb_raw.queue.get()  # waits until element available
-            specimen_voltage = variables.specimen_voltage
-            voltage_pulse = variables.pulse_voltage
-            laser_pulse = variables.laser_pulse_energy
-            if eventtype == QUEUE_DATA:
-                # correct for binning of surface concept
-                xx_dif = data["dif1"]
-                length = len(xx_dif)
-                if length > 0:
-                    events_detected_tmp += length
-                    events_detected += length
-                    yy_dif = data["dif2"]
-                    tt_dif = data["time"]
-                    start_counter.extend(data["start_counter"].tolist())
-                    xx_tmp = ((xx_dif - XYBINSHIFT) * XYFACTOR) * 0.1  # from mm to in cm by dividing by 10
-                    yy_tmp = ((yy_dif - XYBINSHIFT) * XYFACTOR) * 0.1  # from mm to in cm by dividing by 10
-                    tt_tmp = tt_dif * TOFFACTOR  # in ns
-                    dc_voltage_tmp = np.tile(specimen_voltage, len(xx_tmp))
+    while not stop_event.is_set():
+        start_time_loop = time.time()
+        eventtype, data = bufdatacb.queue.get()
+        eventtype_raw, data_raw = bufdatacb_raw.queue.get()  # waits until element available
+        specimen_voltage = variables.specimen_voltage
+        voltage_pulse = variables.pulse_voltage
+        laser_pulse = variables.laser_pulse_energy
+        if eventtype == QUEUE_DATA:
+            # correct for binning of surface concept
+            xx_dif = data["dif1"]
+            length = len(xx_dif)
+            if length > 0:
+                events_detected_tmp += length
+                events_detected += length
+                yy_dif = data["dif2"]
+                tt_dif = data["time"]
+                start_counter.extend(data["start_counter"].tolist())
+                xx_tmp = ((xx_dif - XYBINSHIFT) * XYFACTOR) * 0.1  # from mm to in cm by dividing by 10
+                yy_tmp = ((yy_dif - XYBINSHIFT) * XYFACTOR) * 0.1  # from mm to in cm by dividing by 10
+                tt_tmp = tt_dif * TOFFACTOR  # in ns
+                dc_voltage_tmp = np.tile(specimen_voltage, len(xx_tmp))
 
-                    # put data in shared memory for visualization
-                    x_plot.put(xx_tmp)
-                    y_plot.put(yy_tmp)
-                    t_plot.put(tt_tmp)
-                    main_v_dc_plot.put(dc_voltage_tmp)
+                # put data in shared memory for visualization
+                x_plot.put(xx_tmp)
+                y_plot.put(yy_tmp)
+                t_plot.put(tt_tmp)
+                main_v_dc_plot.put(dc_voltage_tmp)
 
-                    # change to list
-                    xx_tmp = xx_tmp.tolist()
-                    yy_tmp = yy_tmp.tolist()
-                    tt_tmp = tt_tmp.tolist()
+                # change to list
+                xx_tmp = xx_tmp.tolist()
+                yy_tmp = yy_tmp.tolist()
+                tt_tmp = tt_tmp.tolist()
 
-                    # extend the main list with the new data
-                    xx.extend(xx_tmp)
-                    yy.extend(yy_tmp)
-                    tt.extend(tt_tmp)
-                    dc_voltage_tmp = dc_voltage_tmp.tolist()
-                    p_voltage_tmp = np.tile(voltage_pulse, len(xx_tmp)).tolist()
-                    p_laser_tmp = np.tile(laser_pulse, len(xx_tmp)).tolist()
-                    voltage_data.extend(dc_voltage_tmp)
-                    voltage_pulse_data.extend(p_voltage_tmp)
-                    laser_pulse_data.extend(p_laser_tmp)
+                # extend the main list with the new data
+                xx.extend(xx_tmp)
+                yy.extend(yy_tmp)
+                tt.extend(tt_tmp)
+                dc_voltage_tmp = dc_voltage_tmp.tolist()
+                p_voltage_tmp = np.tile(voltage_pulse, len(xx_tmp)).tolist()
+                p_laser_tmp = np.tile(laser_pulse, len(xx_tmp)).tolist()
+                voltage_data.extend(dc_voltage_tmp)
+                voltage_pulse_data.extend(p_voltage_tmp)
+                laser_pulse_data.extend(p_laser_tmp)
 
-                    # The binning of DLD events
-                    xx_list_bin.extend(xx_dif.tolist())
-                    yy_list_bin.extend(yy_dif.tolist())
-                    tt_list_bin.extend(tt_dif.tolist())
+                # The binning of DLD events
+                xx_list_bin.extend(xx_dif.tolist())
+                yy_list_bin.extend(yy_dif.tolist())
+                tt_list_bin.extend(tt_dif.tolist())
 
-            if eventtype_raw == QUEUE_DATA:
-                channel_data_tmp = data_raw["channel"].tolist()
-                if len(channel_data_tmp) > 0:
-                    raw_signal_detected += len(channel_data_tmp)
-                    tdc_start_counter.extend(data_raw["start_counter"].tolist())
-                    time_data.extend(data_raw["time"].tolist())
-                    # raw data
-                    channel_data.extend(channel_data_tmp)
-                    voltage_data_tdc.extend((np.tile(specimen_voltage, len(channel_data_tmp))).tolist())
-                    voltage_pulse_data_tdc.extend((np.tile(voltage_pulse, len(channel_data_tmp))).tolist())
-                    laser_pulse_data_tdc.extend((np.tile(laser_pulse, len(channel_data_tmp))).tolist())
+        if eventtype_raw == QUEUE_DATA:
+            channel_data_tmp = data_raw["channel"].tolist()
+            if len(channel_data_tmp) > 0:
+                raw_signal_detected += len(channel_data_tmp)
+                tdc_start_counter.extend(data_raw["start_counter"].tolist())
+                time_data.extend(data_raw["time"].tolist())
+                # raw data
+                channel_data.extend(channel_data_tmp)
+                voltage_data_tdc.extend((np.tile(specimen_voltage, len(channel_data_tmp))).tolist())
+                voltage_pulse_data_tdc.extend((np.tile(voltage_pulse, len(channel_data_tmp))).tolist())
+                laser_pulse_data_tdc.extend((np.tile(laser_pulse, len(channel_data_tmp))).tolist())
 
-            if eventtype == QUEUE_ENDOFMEAS:
-                retcode = bufdatacb.start_measurement(exposure_time, retries=10)  # retries is the number of times to retry
-                if retcode < 0:
-                    print("Error during read (error code: %s - error msg: %s):" % (retcode,
-                                                                                   device.lib.sc_get_err_msg(retcode)))
-                    # variables.flag_tdc_failure = True
-                    break
+        if eventtype == QUEUE_ENDOFMEAS:
+            retcode = bufdatacb.start_measurement(exposure_time, retries=10)  # retries is the number of times to retry
+            if retcode < 0:
+                print("Error during read (error code: %s - error msg: %s):" % (retcode,
+                                                                               device.lib.sc_get_err_msg(retcode)))
+                # variables.flag_tdc_failure = True
+                break
 
-            # Calculate the detection rate
-            # Check if the detection rate interval has passed
-            current_time = time.time()
-            if current_time - start_time >= 0.5:
-                detection_rate = events_detected_tmp * 100 / pulse_frequency
-                variables.detection_rate_current = detection_rate * 2  # to get the rate per second
-                variables.detection_rate_current_plot = detection_rate * 2  # to get the rate per second
-                variables.total_ions = events_detected
-                variables.total_raw_signals = raw_signal_detected
-                # Reset the counter and timer
-                events_detected_tmp = 0
-                start_time = current_time
+        # Calculate the detection rate
+        # Check if the detection rate interval has passed
+        current_time = time.time()
+        if current_time - start_time >= 0.5:
+            detection_rate = events_detected_tmp * 100 / pulse_frequency
+            variables.detection_rate_current = detection_rate * 2  # to get the rate per second
+            variables.detection_rate_current_plot = detection_rate * 2  # to get the rate per second
+            variables.total_ions = events_detected
+            variables.total_raw_signals = raw_signal_detected
+            # Reset the counter and timer
+            events_detected_tmp = 0
+            start_time = current_time
 
-            if len(xx_list_bin) >= CHUNK_SIZE:
-                if len(xx_list_bin) >= CHUNK_SIZE:
-                    chunk_id += 1
-                    data_to_save = {
-                        "x_bin": np.array(xx_list_bin),
-                        "x_data": np.array(xx),
-                        "y_bin": np.array(yy_list_bin),
-                        "y_data": np.array(yy),
-                        "t_bin": np.array(tt_list_bin),
-                        "t_data": np.array(tt),
-                        "voltage_data": np.array(voltage_data),
-                        "voltage_pulse_data": np.array(voltage_pulse_data),
-                        "laser_pulse_data": np.array(laser_pulse_data),
-                        "start_counter": np.array(start_counter),
-                        "channel_data": np.array(channel_data),
-                        "time_data": np.array(time_data),
-                        "tdc_start_counter": np.array(tdc_start_counter),
-                        "voltage_data_tdc": np.array(voltage_data_tdc),
-                        "voltage_pulse_data_tdc": np.array(voltage_pulse_data_tdc),
-                        "laser_pulse_data_tdc": np.array(laser_pulse_data_tdc),
-                    }
-                    save_queue.put((chunk_id, path, data_to_save))
-                xx_list_bin.clear()
-                xx.clear()
-                yy_list_bin.clear()
-                yy.clear()
-                tt_list_bin.clear()
-                tt.clear()
-                voltage_data.clear()
-                voltage_pulse_data.clear()
-                laser_pulse_data.clear()
-                start_counter.clear()
-                channel_data.clear()
-                time_data.clear()
-                tdc_start_counter.clear()
-                voltage_data_tdc.clear()
-                voltage_pulse_data_tdc.clear()
-                laser_pulse_data_tdc.clear()
-
-            if time.time() - start_time_loop > loop_time:
-                loop_delay_counter += 1
-            loop_counter += 1
-
-        print("TDC process: for %s times loop time took longer than %s second" % (loop_delay_counter, loop_time),
-              'out of %s iteration' % loop_counter)
-        variables.total_ions = events_detected
-        variables.total_raw_signals = raw_signal_detected
-        print("TDC Measurement stopped")
-
-        if chunk_id > 0:
+        if len(xx) >= CHUNK_SIZE:
             chunk_id += 1
-            data_to_save = {
-                "x_bin": np.array(xx_list_bin),
-                "x_data": np.array(xx),
-                "y_bin": np.array(yy_list_bin),
-                "y_data": np.array(yy),
-                "t_bin": np.array(tt_list_bin),
-                "t_data": np.array(tt),
-                "voltage_data": np.array(voltage_data),
-                "voltage_pulse_data": np.array(voltage_pulse_data),
-                "laser_pulse_data": np.array(laser_pulse_data),
-                "start_counter": np.array(start_counter),
-                "channel_data": np.array(channel_data),
-                "time_data": np.array(time_data),
-                "tdc_start_counter": np.array(tdc_start_counter),
-                "voltage_data_tdc": np.array(voltage_data_tdc),
-                "voltage_pulse_data_tdc": np.array(voltage_pulse_data_tdc),
-                "laser_pulse_data_tdc": np.array(laser_pulse_data_tdc),
+            chunk_data = {
+                "x_bin": xx_list_bin[:CHUNK_SIZE],
+                "x_data": xx[:CHUNK_SIZE],
+                "y_bin": yy_list_bin[:CHUNK_SIZE],
+                "y_data": yy[:CHUNK_SIZE],
+                "t_bin": tt_list_bin[:CHUNK_SIZE],
+                "t_data": tt[:CHUNK_SIZE],
+                "voltage_data": voltage_data[:CHUNK_SIZE],
+                "voltage_pulse_data": voltage_pulse_data[:CHUNK_SIZE],
+                "laser_pulse_data": laser_pulse_data[:CHUNK_SIZE],
+                "start_counter": start_counter[:CHUNK_SIZE],
+                "channel_data": channel_data[:CHUNK_SIZE],
+                "time_data": time_data[:CHUNK_SIZE],
+                "tdc_start_counter": tdc_start_counter[:CHUNK_SIZE],
+                "voltage_data_tdc": voltage_data_tdc[:CHUNK_SIZE],
+                "voltage_pulse_data_tdc": voltage_pulse_data_tdc[:CHUNK_SIZE],
+                "laser_pulse_data_tdc": laser_pulse_data_tdc[:CHUNK_SIZE],
             }
-            save_queue.put((chunk_id, path, data_to_save))
-            # Load all chunks and extend variables
-            (xx_list_bin, xx, yy_list_bin, yy, tt_list_bin, tt, voltage_data, voltage_pulse_data,
-             laser_pulse_data, start_counter, channel_data,
-             time_data, tdc_start_counter, voltage_data_tdc, voltage_pulse_data_tdc,
-             laser_pulse_data_tdc) = load_and_concatenate_chunks(path, chunk_id)
 
+            # Send chunk data to saving process (non-blocking)
+            save_queue.put((chunk_id, path, chunk_data))
+
+            # Remove saved data from memory
+            del xx[:CHUNK_SIZE], yy[:CHUNK_SIZE], tt[:CHUNK_SIZE]
+            del xx_list_bin[:CHUNK_SIZE], yy_list_bin[:CHUNK_SIZE], tt_list_bin[:CHUNK_SIZE]
+            del voltage_data[:CHUNK_SIZE], voltage_pulse_data[:CHUNK_SIZE], laser_pulse_data[:CHUNK_SIZE]
+            del start_counter[:CHUNK_SIZE], channel_data[:CHUNK_SIZE], time_data[:CHUNK_SIZE]
+            del tdc_start_counter[:CHUNK_SIZE], voltage_data_tdc[:CHUNK_SIZE]
+            del voltage_pulse_data_tdc[:CHUNK_SIZE], laser_pulse_data_tdc[:CHUNK_SIZE]
+
+        if time.time() - start_time_loop > loop_time:
+            loop_delay_counter += 1
+        loop_counter += 1
+
+    print("TDC process: for %s times loop time took longer than %s second" % (loop_delay_counter, loop_time),
+          'out of %s iteration' % loop_counter)
+    variables.total_ions = events_detected
+    variables.total_raw_signals = raw_signal_detected
+    print("TDC Measurement stopped")
+
+    if chunk_id > 0:
+        chunk_id += 1
+        chunk_data = {
+            "x_bin": xx_list_bin[:CHUNK_SIZE],
+            "x_data": xx[:CHUNK_SIZE],
+            "y_bin": yy_list_bin[:CHUNK_SIZE],
+            "y_data": yy[:CHUNK_SIZE],
+            "t_bin": tt_list_bin[:CHUNK_SIZE],
+            "t_data": tt[:CHUNK_SIZE],
+            "voltage_data": voltage_data[:CHUNK_SIZE],
+            "voltage_pulse_data": voltage_pulse_data[:CHUNK_SIZE],
+            "laser_pulse_data": laser_pulse_data[:CHUNK_SIZE],
+            "start_counter": start_counter[:CHUNK_SIZE],
+            "channel_data": channel_data[:CHUNK_SIZE],
+            "time_data": time_data[:CHUNK_SIZE],
+            "tdc_start_counter": tdc_start_counter[:CHUNK_SIZE],
+            "voltage_data_tdc": voltage_data_tdc[:CHUNK_SIZE],
+            "voltage_pulse_data_tdc": voltage_pulse_data_tdc[:CHUNK_SIZE],
+            "laser_pulse_data_tdc": laser_pulse_data_tdc[:CHUNK_SIZE],
+        }
+        save_queue.put((chunk_id, path, chunk_data))
         save_queue.put(None)  # Signal the save process to end
         save_process.join()  # Wait for the save process to finish
 
-        # save DLD data
-        np.save(variables.path + "/temp_data/x_data.npy", np.array(xx))
-        np.save(variables.path + "/temp_data/y_data.npy", np.array(yy))
-        np.save(variables.path + "/temp_data/t_data.npy", np.array(tt))
-        np.save(variables.path + "/temp_data/voltage_data.npy", np.array(voltage_data))
-        np.save(variables.path + "/temp_data/voltage_pulse_data.npy", np.array(voltage_pulse_data))
-        np.save(variables.path + "/temp_data/laser_pulse_data.npy", np.array(laser_pulse_data))
-        np.save(variables.path + "/temp_data/start_counter.npy", np.array(start_counter))
+        # Load all chunks and extend variables
+        (xx_list_bin, xx, yy_list_bin, yy, tt_list_bin, tt, voltage_data, voltage_pulse_data,
+         laser_pulse_data, start_counter, channel_data,
+         time_data, tdc_start_counter, voltage_data_tdc, voltage_pulse_data_tdc,
+         laser_pulse_data_tdc) = load_and_concatenate_chunks(path, chunk_id)
 
-        # save DLD data binning
-        np.save(variables.path + "/temp_data/x_bin.npy", np.array(xx_list_bin))
-        np.save(variables.path + "/temp_data/y_bin.npy", np.array(yy_list_bin))
-        np.save(variables.path + "/temp_data/t_bin.npy", np.array(tt_list_bin))
+    save_queue.put(None)  # Signal the save process to end
+    save_process.join()  # Wait for the save process to finish
 
-        # save TDC data
-        np.save(variables.path + "/temp_data/channel_data.npy", np.array(channel_data))
-        np.save(variables.path + "/temp_data/time_data.npy", np.array(time_data))
-        np.save(variables.path + "/temp_data/main_raw_counter.npy", np.array(tdc_start_counter))
-        np.save(variables.path + "/temp_data/voltage_data_tdc.npy", np.array(voltage_data_tdc))
-        np.save(variables.path + "/temp_data/voltage_pulse_data_tdc.npy", np.array(voltage_pulse_data_tdc))
-        np.save(variables.path + "/temp_data/laser_pulse_data_tdc.npy", np.array(laser_pulse_data_tdc))
+    # save DLD data
+    np.save(variables.path + "/temp_data/x_data.npy", np.array(xx))
+    np.save(variables.path + "/temp_data/y_data.npy", np.array(yy))
+    np.save(variables.path + "/temp_data/t_data.npy", np.array(tt))
+    np.save(variables.path + "/temp_data/voltage_data.npy", np.array(voltage_data))
+    np.save(variables.path + "/temp_data/voltage_pulse_data.npy", np.array(voltage_pulse_data))
+    np.save(variables.path + "/temp_data/laser_pulse_data.npy", np.array(laser_pulse_data))
+    np.save(variables.path + "/temp_data/start_counter.npy", np.array(start_counter))
 
-        variables.extend_to('x', xx)
-        variables.extend_to('y', yy)
-        variables.extend_to('t', tt)
-        variables.extend_to('dld_start_counter', start_counter)
-        variables.extend_to('main_v_dc_dld', voltage_data)
-        variables.extend_to('main_v_p_dld', voltage_pulse_data)
-        variables.extend_to('main_l_p_dld', laser_pulse_data)
+    # save DLD data binning
+    np.save(variables.path + "/temp_data/x_bin.npy", np.array(xx_list_bin))
+    np.save(variables.path + "/temp_data/y_bin.npy", np.array(yy_list_bin))
+    np.save(variables.path + "/temp_data/t_bin.npy", np.array(tt_list_bin))
 
-        variables.extend_to('channel', channel_data)
-        variables.extend_to('time_data', time_data)
-        variables.extend_to('tdc_start_counter', tdc_start_counter)
-        variables.extend_to('main_v_dc_tdc', voltage_data_tdc)
-        variables.extend_to('main_v_p_tdc', voltage_pulse_data_tdc)
-        variables.extend_to('main_l_p_tdc', laser_pulse_data_tdc)
-        print("data save in share variables")
-        time.sleep(0.1)
-        bufdatacb.close()
-        bufdatacb_raw.close()
-        device.deinitialize()
+    # save TDC data
+    np.save(variables.path + "/temp_data/channel_data.npy", np.array(channel_data))
+    np.save(variables.path + "/temp_data/time_data.npy", np.array(time_data))
+    np.save(variables.path + "/temp_data/main_raw_counter.npy", np.array(tdc_start_counter))
+    np.save(variables.path + "/temp_data/voltage_data_tdc.npy", np.array(voltage_data_tdc))
+    np.save(variables.path + "/temp_data/voltage_pulse_data_tdc.npy", np.array(voltage_pulse_data_tdc))
+    np.save(variables.path + "/temp_data/laser_pulse_data_tdc.npy", np.array(laser_pulse_data_tdc))
 
-        variables.flag_finished_tdc = True
+    variables.extend_to('x', xx)
+    variables.extend_to('y', yy)
+    variables.extend_to('t', tt)
+    variables.extend_to('dld_start_counter', start_counter)
+    variables.extend_to('main_v_dc_dld', voltage_data)
+    variables.extend_to('main_v_p_dld', voltage_pulse_data)
+    variables.extend_to('main_l_p_dld', laser_pulse_data)
 
-        return 0
+    variables.extend_to('channel', channel_data)
+    variables.extend_to('time_data', time_data)
+    variables.extend_to('tdc_start_counter', tdc_start_counter)
+    variables.extend_to('main_v_dc_tdc', voltage_data_tdc)
+    variables.extend_to('main_v_p_tdc', voltage_pulse_data_tdc)
+    variables.extend_to('main_l_p_tdc', laser_pulse_data_tdc)
+    print("data save in share variables")
+    time.sleep(0.1)
+    bufdatacb.close()
+    bufdatacb_raw.close()
+    device.deinitialize()
+
+    variables.flag_finished_tdc = True
+
+    return 0
 
 
 def experiment_measure(variables, x_plot, y_plot, t_plot, main_v_dc_plot, stop_event):

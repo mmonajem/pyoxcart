@@ -555,7 +555,7 @@ class APT_Exp_Control:
             % (int(1000 / self.variables.ex_freq), index_time, steps))
 
         print('Waiting for TDC process to be finished for maximum 60 seconds...')
-        for i in range(600):
+        for i in range(10):
             if self.variables.flag_finished_tdc:
                 print('TDC process is finished')
                 break

@@ -131,8 +131,10 @@ class Variables:
         self.ns.index_experiment_in_text_line = 0
         self.ns.flag_cameras_take_screenshot = False
         self.ns.temperature = 0
-        self.ns.set_temperature = 0
-        self.ns.set_temperature_flag = None
+        self.ns.set_temperature_cryo = 0
+        self.ns.set_temperature_ll = 0
+        self.ns.set_temperature_flag_cryo = None
+        self.ns.set_temperature_flag_ll = None
         self.ns.vacuum_main = 0
         self.ns.vacuum_buffer = 0
         self.ns.vacuum_buffer_backing = 0
@@ -1102,22 +1104,40 @@ class Variables:
             self.ns.temperature = value
 
     @property
-    def set_temperature(self):
-        return self.ns.set_temperature
+    def set_temperature_cryo(self):
+	    return self.ns.set_temperature_cryo
 
-    @set_temperature.setter
-    def set_temperature(self, value):
-        with self.lock_vacuum_tmp:
-            self.ns.set_temperature = value
+    @set_temperature_cryo.setter
+    def set_temperature_cryo(self, value):
+	    with self.lock_vacuum_tmp:
+		    self.ns.set_temperature_cryo = value
 
     @property
-    def set_temperature_flag(self):
-        return self.ns.set_temperature_flag
+    def set_temperature_ll(self):
+	    return self.ns.set_temperature_ll
 
-    @set_temperature_flag.setter
-    def set_temperature_flag(self, value):
+    @set_temperature_ll.setter
+    def set_temperature_ll(self, value):
+	    with self.lock_vacuum_tmp:
+		    self.ns.set_temperature_ll = value
+
+    @property
+    def set_temperature_flag_cryo(self):
+	    return self.ns.set_temperature_flag_cryo
+
+    @set_temperature_flag_cryo.setter
+    def set_temperature_flag_cryo(self, value):
         with self.lock_vacuum_tmp:
-            self.ns.set_temperature_flag = value
+	        self.ns.set_temperature_flag_cryo = value
+
+    @property
+    def set_temperature_flag_ll(self):
+	    return self.ns.set_temperature_flag_ll
+
+    @set_temperature_flag_ll.setter
+    def set_temperature_flag_ll(self, value):
+        with self.lock_vacuum_tmp:
+	        self.ns.set_temperature_flag_ll = value
 
     @property
     def vacuum_main(self):
