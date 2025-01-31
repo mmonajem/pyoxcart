@@ -57,6 +57,7 @@ class Ui_Baking(object):
 		self.file_name = self.save_path + 'baking_logging_%s.csv' % now_time
 		self.file_name_backup = self.save_path + 'backup_baking_logging_%s.csv' % now_time
 
+
 	def setupUi(self, Baking):
 		"""
 		setupUi function.
@@ -120,6 +121,12 @@ class Ui_Baking(object):
 		self.emitter.vacuum_buffer.connect(self.update_vacuum_buffer)
 		self.emitter.vacuum_load_lock.connect(self.update_vacuum_load)
 		self.emitter.vacuum_cryo_load_lock.connect(self.update_vacuum_cryo_load_lock)
+
+		# Add grids to the plots
+		self.tempretures.showGrid(x=True, y=True)  # Add grid to temperature plot
+		self.presures.showGrid(x=True, y=True)  # Add grid to pressure plot
+
+
 	def retranslateUi(self, Baking):
 		"""
 		retranslateUi function.

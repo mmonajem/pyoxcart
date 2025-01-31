@@ -96,6 +96,13 @@ html_css_files = [
     'widestyle.css',
 ]
 
+html_context = {
+  'display_github': True,
+  'github_user': 'buskill',
+  'github_repo': 'buskill-app',
+  'github_version': 'master/docs/',
+}
+
 html_theme_options = {
     'logo_only': False,
     'display_version': True,
