@@ -6,7 +6,7 @@ import time
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer, pyqtSignal, QObject
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QPixmap
 
 # Local module and scripts
 from pyccapt.control.control import share_variables, read_files
@@ -421,6 +421,26 @@ class Ui_Pumps_Vacuum(object):
         Pumps_Vacuum.setTabOrder(self.pump_cryo_load_lock_switch, self.superuser)
 
         ###
+        self.led_red = QPixmap('./files/led-red-on.png')
+        self.led_green = QPixmap('./files/green-led-on.png')
+        self.led_pump_load_lock.setPixmap(self.led_green)
+        self.led_pump_cryo_load_lock.setPixmap(self.led_green)
+        self.pump_load_lock_switch.clicked.connect(self.pump_switch_ll)
+        self.pump_cryo_load_lock_switch.clicked.connect(self.pump_switch_cryo_ll)
+        # Set 8 digits for each LCD to show
+        self.vacuum_main.setDigitCount(8)
+        self.vacuum_buffer.setDigitCount(8)
+        self.vacuum_buffer_back.setDigitCount(8)
+        self.vacuum_load_lock.setDigitCount(8)
+        self.vacuum_load_lock_back.setDigitCount(8)
+        self.vacuum_cryo_load_lock.setDigitCount(8)
+        self.vacuum_cryo_load_lock_back.setDigitCount(8)
+        self.temp_stage.setDigitCount(8)
+        self.temp_cryo_head.setDigitCount(8)
+        self.target_tempreature_cryo.setValue(40)
+        self.target_tempreature_ll.setValue(40)
+
+        ###
         self.emitter.temp_stage.connect(self.update_temperature_stage)
         self.emitter.temp_cryo_head.connect(self.update_temperature_cryo)
         self.emitter.temp_ll.connect(self.update_temperature_ll)
@@ -516,7 +536,7 @@ class Ui_Pumps_Vacuum(object):
         if value == -1:
             self.temp_stage.display('Error')
         else:
-            self.temp_stage.display(value)
+            self.temp_stage.display(round(value, 2))
 
     def update_temperature_cryo(self, value):
         """
@@ -530,7 +550,8 @@ class Ui_Pumps_Vacuum(object):
         if value == -1:
             self.temp_cryo_head.display('Error')
         else:
-            self.temp_cryo_head.display(value)
+            # only up to 2 decimal points
+            self.temp_cryo_head.display(round(value, 2))
 
     def update_temperature_ll(self, value):
         """
@@ -544,7 +565,7 @@ class Ui_Pumps_Vacuum(object):
         if value == -1:
             self.temp_ll.display('Error')
         else:
-            self.temp_ll.display(value)
+            self.temp_ll.display(round(value, 2))
 
     def update_target_temperature_cryo(self, ):
         """

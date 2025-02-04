@@ -20,7 +20,7 @@
   "min_laser_pulse_frequency": 1,
   "max_temperature_cryo": 80,
   "min_temperature_cryo": 10,
-  "max_temperature_ll": 383.15,
+  "max_temperature_ll": 403.15,
   "min_temperature_ll": 273.15,
   "save_meta_interval_visualization": 300,
   "save_meta_interval_camera": 300,

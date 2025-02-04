@@ -123,7 +123,7 @@ class Ui_Baking(object):
 		self.emitter.vacuum_cryo_load_lock.connect(self.update_vacuum_cryo_load_lock)
 
 		# Add grids to the plots
-		self.tempretures.showGrid(x=True, y=True)  # Add grid to temperature plot
+		self.tempretures.showGrid(x=True, y=True)
 		self.presures.showGrid(x=True, y=True)  # Add grid to pressure plot
 
 
@@ -200,7 +200,6 @@ class Ui_Baking(object):
 		else:
 			self.vacuum_cryo_load_lock = value
 
-
 	def read(self):
 		"""
 		Read function.
@@ -267,8 +266,8 @@ class Ui_Baking(object):
 						# Handle the case where response is not a valid float
 						gauge_cll = -1
 				else:
-					gauge_bc = self.vacuum_main
-					gauge_mc = self.variables.vacuum_buffer
+					gauge_bc = self.vacuum_buffer
+					gauge_mc = self.vacuum_main
 					gauge_ll = self.vacuum_load_lock
 					gauge_cll = self.vacuum_cryo_load_lock
 
@@ -329,24 +328,28 @@ class Ui_Baking(object):
 		CLL_vacuum = self.data['CLL_vacuum'].tail(time_range).to_numpy()
 		CLL_gate = self.data['CLL_gate'].tail(time_range).to_numpy()
 		LL_pump = self.data['LL_pump'].tail(time_range).to_numpy()
-
 		self.tempretures.clear()
 		self.presures.clear()
 
-		self.tempretures.plot(time, MC_NEG, pen='b', name='MC_NEG')
-		self.tempretures.plot(time, MC_Det, pen='g', name='MC_Det')
-		self.tempretures.plot(time, Mc_Top, pen='r', name='Mc_Top')
-		self.tempretures.plot(time, MC_Gate, pen='c', name='MC_Gate')
-		self.tempretures.plot(time, BC_Top, pen='m', name='BC_Top')
-		self.tempretures.plot(time, BC_Pump, pen='y', name='BC_Pump')
-		self.tempretures.plot(time, CLL_gate, pen='orange', name='CLL_gate')
-		self.tempretures.plot(time, LL_pump, pen='w', name='LL_pump')
+		try:
+			# name only for last value and up to 2 decimal places
+			self.tempretures.plot(time, MC_NEG, pen='b', name='MC_NEG %.2f' % MC_NEG[-1])
+			self.tempretures.plot(time, MC_Det, pen='g', name='MC_Det %.2f' % MC_Det[-1])
+			self.tempretures.plot(time, Mc_Top, pen='r', name='Mc_Top %.2f' % Mc_Top[-1])
+			self.tempretures.plot(time, MC_Gate, pen='c', name='MC_Gate %.2f' % MC_Gate[-1])
+			self.tempretures.plot(time, BC_Top, pen='m', name='BC_Top %.2f' % BC_Top[-1])
+			self.tempretures.plot(time, BC_Pump, pen='y', name='BC_Pump %.2f' % BC_Pump[-1])
+			self.tempretures.plot(time, CLL_gate, pen='orange', name='CLL_gate %.2f' % CLL_gate[-1])
+			self.tempretures.plot(time, LL_pump, pen='w', name='LL_pump %.2f' % LL_pump[-1])
 
+			self.presures.plot(time, MC_vacuum, pen='r', name='MC_vacuum %s' % MC_vacuum[-1])
+			self.presures.plot(time, BC_vacuum, pen='g', name='BC_vacuum %s' % BC_vacuum[-1])
+			self.presures.plot(time, LL_vacuum, pen='b', name='LL_vacuum %s' % LL_vacuum[-1])
+			self.presures.plot(time, CLL_vacuum, pen='c', name='CLL_vacuum %s' % CLL_vacuum[-1])
+		except Exception as e:
+			print('Error in plotting the data')
+			print(e)
 
-		self.presures.plot(time, MC_vacuum, pen='r', name='MC_vacuum')
-		self.presures.plot(time, BC_vacuum, pen='g', name='BC_vacuum')
-		self.presures.plot(time, LL_vacuum, pen='b', name='LL_vacuum')
-		self.presures.plot(time, CLL_vacuum, pen='c', name='CLL_vacuum')
 
 		self.tempretures.enableAutoRange(axis='x')
 		self.presures.enableAutoRange(axis='x')
