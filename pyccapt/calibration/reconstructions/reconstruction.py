@@ -460,6 +460,22 @@ def reconstruction_plot(variables, element_percentage, opacity, rotary_fig_save,
         }
     )
 
+    fig.update_layout(
+        scene=dict(  # Target the 3D scene
+            bgcolor='white',  # Set scene background to white
+            xaxis=dict(
+                backgroundcolor="rgb(255,255,255)",
+                gridcolor="lightgrey",
+            ),
+            yaxis=dict(
+                backgroundcolor="rgb(255,255,255)",
+                gridcolor="lightgrey"
+            ),
+            zaxis=dict(
+                backgroundcolor="rgb(255,255,255)",
+                gridcolor="lightgrey"
+            )))
+
     # Show the plot in the Jupyter cell output
     variables.plotly_3d_reconstruction = go.FigureWidget(fig)
 
