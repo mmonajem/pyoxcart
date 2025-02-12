@@ -98,8 +98,8 @@ html_css_files = [
 
 html_context = {
   'display_github': True,
-  'github_user': 'buskill',
-  'github_repo': 'buskill-app',
+  'github_user': 'mmonajem',
+  'github_repo': 'pyccapt',
   'github_version': 'master/docs/',
 }
 
