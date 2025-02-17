@@ -410,7 +410,7 @@ class Ui_Visualization(object):
 		self.x_vdc = [i * 0.5 for i in range(200)]  # 100 time points
 		self.y_vdc = [0.0] * 200  # 200 data points, all initialized to 0.0
 		self.y_vdc[:] = [np.nan] * len(self.y_vdc)
-		pen_vdc = pg.mkPen(color=(255, 0, 0), width=6)
+		pen_vdc = pg.mkPen(color=(255, 0, 0), width=3)
 		self.data_line_vdc = self.vdc_time.plot(self.x_vdc, self.y_vdc, pen=pen_vdc)
 		self.vdc_time.plotItem.setMouseEnabled(x=False)  # Only allow zoom in Y-axis
 		# Add Axis Labels
@@ -427,7 +427,7 @@ class Ui_Visualization(object):
 		self.x_dtec = [i * 0.5 for i in range(200)]  # 100 time points
 		self.y_dtec = [0.0] * 200  # 200 data points, all initialized to 0.0
 		self.y_dtec[:] = [np.nan] * len(self.y_vdc)
-		pen_dtec = pg.mkPen(color=(255, 0, 0), width=6)
+		pen_dtec = pg.mkPen(color=(255, 0, 0), width=3)
 		self.data_line_dtec = self.detection_rate_viz.plot(self.x_dtec, self.y_dtec, pen=pen_dtec)
 
 		# Add Axis Labels
@@ -876,7 +876,7 @@ class Ui_Visualization(object):
 			self.y_vdc[:] = [np.nan] * len(self.y_vdc)
 
 			self.vdc_time.clear()
-			pen_vdc = pg.mkPen(color=(255, 0, 0), width=6)
+			pen_vdc = pg.mkPen(color=(255, 0, 0), width=3)
 			self.data_line_vdc = self.vdc_time.plot(self.x_vdc, self.y_vdc, pen=pen_vdc)
 
 			self.x_dtec = [i * 0.5 for i in range(200)]  # 100 time points
@@ -884,7 +884,7 @@ class Ui_Visualization(object):
 			self.y_dtec[:] = [np.nan] * len(self.y_vdc)
 
 			self.detection_rate_viz.clear()
-			pen_dtec = pg.mkPen(color=(255, 0, 0), width=6)
+			pen_dtec = pg.mkPen(color=(255, 0, 0), width=3)
 			self.data_line_dtec = self.detection_rate_viz.plot(self.x_dtec, self.y_dtec, pen=pen_dtec)
 
 			self.histogram.clear()
