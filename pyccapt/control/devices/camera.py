@@ -32,7 +32,7 @@ class CameraWorker(QObject):
 
         self.running = False
         self.index_save_image = 0
-        self.exposure_time_cam_1 = 1000000
+        self.exposure_time_cam_1 = 400000
         self.exposure_time_cam_1_light = 10000
         self.exposure_time_cam_2 = 1000000
         self.exposure_time_cam_2_light = 20000
@@ -71,7 +71,7 @@ class CameraWorker(QObject):
             None
         """
         if not self.exposure_auto:
-            self.exposure_time_cam_1 = 1000000
+            self.exposure_time_cam_1 = 400000
             self.exposure_time_cam_1_light = 10000
             self.exposure_time_cam_2 = 1000000
             self.exposure_time_cam_2_light = 20000

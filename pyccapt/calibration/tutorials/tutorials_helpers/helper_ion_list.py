@@ -4,15 +4,16 @@ import ipywidgets as widgets
 import numpy as np
 from IPython.display import clear_output, display
 from ipywidgets import Output
+from scipy.optimize import curve_fit
+
 from pyccapt.calibration.calibration import mc_plot, widgets as wd
 from pyccapt.calibration.data_tools import data_tools
-from scipy.optimize import curve_fit
 
 # Define a layout for labels to make them a fixed width
 label_layout = widgets.Layout(width='200px')
 
 
-def call_ion_list(variables, selector, path='./../../../files/'):
+def call_ion_list(variables, selector, path='../../../files/'):
     try:
         isotopeTableFile = path + 'isotopeTable.h5'
         dataframe = data_tools.read_range(isotopeTableFile)

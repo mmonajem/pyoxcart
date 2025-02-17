@@ -414,7 +414,7 @@ class Ui_Cameras_Alignment(object):
 		# arrow1 = pg.ArrowItem(pos=(925, 770), angle=0)
 		# self.cam_b_o.addItem(arrow1)
 		# Side camera (x, y) main arrow for puck exchange (Blue arrow)
-		arrow1 = pg.ArrowItem(pos=(887, 805), angle=-90)
+		arrow1 = pg.ArrowItem(pos=(805, 735), angle=-90)
 		arrow2 = pg.ArrowItem(pos=(645, 760), angle=-90, brush='r')
 		# arrow3 = pg.ArrowItem(pos=(890, 1100), angle=0)
 		self.cam_s_o.addItem(arrow1)
