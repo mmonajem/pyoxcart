@@ -1,32 +1,53 @@
 {
+  // Device Information
   "device_name": "Oxcart",
-  "flight_path_length": 110,
-  "log_time_time_interval": 15,
-  "t_0_voltage": 38.00,
-  "t_0_laser": 800.00,
-  "max_vdc": 14000,
-  "min_vp": 328,
-  "max_vp": 3281,
-  "pulse_amp_per_supply_voltage": 21.875,
-  "max_laser_power": 5.2,
-  "pulse_fraction_max": 20,
-  "detector_diameter": 80,
-  "bin_size": 0.1,
-  "max_mass": 400,
-  "max_tof": 10000,
-  "max_voltage_pulse_frequency": 200000,
-  "min_voltage_pulse_frequency": 1,
-  "max_laser_pulse_frequency": 10000,
-  "min_laser_pulse_frequency": 1,
-  "max_temperature_cryo": 80,
-  "min_temperature_cryo": 10,
-  "max_temperature_ll": 403.15,
-  "min_temperature_ll": 273.15,
-  "save_meta_interval_visualization": 300,
-  "save_meta_interval_camera": 300,
+  "flight_path_length": 110,  // mm
+  "log_time_time_interval": 15,  // minutes
+
+  // Calibration Parameters
+  "t_0_voltage": 38.00,      // ns
+  "t_0_laser": 800.00,       // ns
+
+  // Voltage Settings
+  "max_vdc": 14000,          // V
+  "min_vp": 328,             // V
+  "max_vp": 3281,            // V
+  "pulse_amp_per_supply_voltage": 21.875, // V
+
+  // Laser Settings
+  "max_laser_power": 5.2,    // mJ
+  "pulse_fraction_max": 20,   // %
+
+  // Detector Settings
+  "detector_diameter": 80,    // mm
+
+  // Data Acquisition Parameters
+  "bin_size": 0.1,           // ns or Da
+  "max_mass": 400,           // Da
+  "max_tof": 10000,          // ns
+
+  // Pulse Frequency Limits
+  "max_voltage_pulse_frequency": 200000,  // Hz
+  "min_voltage_pulse_frequency": 1,       // Hz
+  "max_laser_pulse_frequency": 10000,     // Hz
+  "min_laser_pulse_frequency": 1,         // Hz
+
+  // Temperature Limits
+  "max_temperature_cryo": 80,             // K
+  "min_temperature_cryo": 10,             // K
+  "max_temperature_ll": 403.15,           // K
+  "min_temperature_ll": 273.15,           // K
+
+  // Data Saving Intervals
+  "save_meta_interval_visualization": 300, // seconds
+  "save_meta_interval_camera": 300,       // seconds
+
+  // System Configuration
   "visualization": "mc",
   "tdc": "on",
-  "tdc_model": "Surface_Consept",
+  "tdc_model": "Surface_Consept", // "Surface_Consept" or "Roentdek"
+
+  // Hardware Enable/Disable Flags (on/off)
   "camera": "on",
   "pump_ll": "on",
   "pump_cll": "on",
@@ -42,6 +63,8 @@
   "usb_lamp_switch": "on",
   "thorlab_motor": "off",
   "baking": "on",
+
+  // Communication Ports
   "COM_PORT_laser": "COM9",
   "COM_PORT_gates": "Dev2/port0/",
   "COM_PORT_cryo": "COM7",

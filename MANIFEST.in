@@ -1,7 +1,90 @@
+# Include all Python source files
 global-include *.py
+
+# Include package data files
 include pyccapt/files/*
 include pyccapt/rdc_roentdec/*
 include pyccapt/rdc_surface_concept/*
 include pyccapt/tutorials/*
+
+# Include documentation files
 include README.md
 include LICENSE
+include CHANGELOG.txt
+include CONTRIBUTING.md
+include docs/*.rst
+include docs/*.md
+include docs/*.txt
+include docs/conf.py
+include docs/Makefile
+include docs/make.bat
+
+# Include test files
+include tests/*.py
+include tests/*.json
+include tests/*.yaml
+include tests/*.yml
+
+# Include configuration files
+include *.ini
+include *.cfg
+include *.yaml
+include *.yml
+include *.json
+include tox.ini
+include setup.cfg
+include .coveragerc
+include .flake8
+include .gitignore
+include .pre-commit-config.yaml
+
+# Include package metadata
+include pyccapt/__init__.py
+include pyccapt/version.py
+include pyccapt/config.json
+
+# Include additional package resources
+recursive-include pyccapt/files/readme_images *
+recursive-include pyccapt/files/logo2.png *
+recursive-include pyccapt/control *
+recursive-include pyccapt/calibration *
+recursive-include pyccapt/control/devices *
+recursive-include pyccapt/control/gui *
+recursive-include pyccapt/control/apt *
+recursive-include pyccapt/calibration/data_tools *
+recursive-include pyccapt/calibration/calibration_tools *
+
+# Exclude unnecessary files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude *.pyd
+global-exclude *.so
+global-exclude *.dll
+global-exclude *.dylib
+global-exclude *.class
+global-exclude *.o
+global-exclude *.a
+global-exclude *.lib
+global-exclude *.la
+global-exclude *.lo
+global-exclude *.log
+global-exclude *.tmp
+global-exclude *.bak
+global-exclude *.swp
+global-exclude *.swo
+global-exclude *~
+global-exclude .DS_Store
+global-exclude .git
+global-exclude .gitignore
+global-exclude .svn
+global-exclude .hg
+global-exclude .idea
+global-exclude .vscode
+global-exclude __pycache__
+global-exclude *.egg-info
+global-exclude build
+global-exclude dist
+global-exclude .tox
+global-exclude .coverage
+global-exclude .pytest_cache
+global-exclude .mypy_cache

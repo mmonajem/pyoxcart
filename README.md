@@ -1,104 +1,137 @@
 # PyCCAPT (APT_PyControl)
 
-# A modular, FAIR open-source python atom probe tomography software package for experiment control and data calibration
+A modular, FAIR open-source Python atom probe tomography software package for experiment control and data calibration.
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10210507.svg)](https://doi.org/10.5281/zenodo.10210507)
 [![Documentation Status](https://readthedocs.org/projects/pyccapt/badge/?version=latest)](https://pyccapt.readthedocs.io/en/latest/?badge=latest)
-<!--[![coverage report](https://gitlab.com/jesseds/apav/badges/master/coverage.svg)](https://gitlab.com/jesseds/apav/commits/master)
-[![pipeline status](https://gitlab.com/jesseds/apav/badges/master/pipeline.svg)](https://gitlab.com/jesseds/apav/-/commits/master)-->
+[![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-GPLv3-green.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
-<img align="right" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/logo2.png?raw=True)" alt="Alt Text" width="300" height="300">
+<img align="right" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/logo2.png?raw=True" alt="PyCCAPT Logo" width="300" height="300">
 
-This package aims to provide open-source software for controlling atom probe systems and calibrating data.
-The package is modular and adaptable for a wide range of devices in atom probe instrument. So far it is
-capable of collecting data from Surface consept and ReoenDek TDC systems. The package is developed in Python 3.9.
-Additionally, the package encompasses a comprehensive calibration module that provides various functionalities,
-including t<sub>0</sub> and flight path calculation, region of interest (ROI) selection, voltage and bowl calibration,
-as well as
-3D reconstruction techniques.
-This module enhances the capabilities of PyCCAPT by providing essential tools for accurate data interpretation and
-analysis.
+## Overview
 
-----------
+PyCCAPT is an open-source software package designed for controlling atom probe systems and calibrating data. The package is:
+- Modular and adaptable for a wide range of devices in atom probe instruments
+- Currently supports Surface Concept and RoentDek TDC systems
+- Developed in Python 3.9+
+- Includes a comprehensive calibration module with features for:
+  - t₀ and flight path calculation
+  - Region of interest (ROI) selection
+  - Voltage and bowl calibration
+  - 3D reconstruction techniques
 
-# Overview
+## Features
 
-PyCCAPT was initially developed and tested on the OXCART atom probe, an in-house atom probe system situated
-within the Department of Materials Science & Engineering at the University of Erlangen-Nürnberg. The OXCART atom probe boasts a titanium-based measuring chamber that facilitates an ultra-low hydrogen 
-vacuum environment. This system also features a state-of-the-art detector with a high detection
-efficiency of approximately 80%. While tailor-made for the OXCART, the PyCCAPT package offers versatility, extending its
-capabilities to effectively control atom probe systems.
+### Control Module
+- Modular design for easy integration with different instruments
+- Support for various devices including:
+  - Pfeifer gauges
+  - Fug power supplies
+  - Siglent signal generators
+- Proven compatibility with Surface Concept and RoentDek TDC systems
+- Graphical user interface for experiment control and visualization
 
-![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/oxcart.jpg?raw=True)
+### Calibration Module
+- Comprehensive data calibration tools
+- Advanced visualization capabilities
+- Support for various calibration techniques
+- 3D reconstruction capabilities
 
-The package is designed with modularity in mind, making it highly adaptable to new instruments. This
-adaptability extends to instruments like Pfeifer gauges, Fug power supplies, and Siglent signal generators. Notably, the
-PyCCAPT package has already demonstrated its proficiency in collecting data from Surface Concept and ReoenDek TDC
-systems.
+## Installation
 
-The PyCCAPT package forms the foundation of a fully FAIR atom probe data collection and processing chain. This
-repository includes the graphical user interface (GUI) and control program, which enable experiment control,
-visualization, and data acquisition. The following images provide an overview of the user interface:
+### Prerequisites
+- Python 3.9 or higher
+- Anaconda (recommended)
 
-![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/main_gui.png?raw=True)
+### Installation Options
 
-The calibration module is another component of the PyCCAPT, providing essential tools for data calibration and
-interpretation. This module includes functionalities such as t<sub>0</sub> and flight path calculation, region of
-interest (ROI) selection, voltage and bowl calibration, and 3D reconstruction techniques. 
+PyCCAPT can be installed in three ways:
 
-![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/visualization_gif.gif?raw=True)
+1. **Calibration Module Only** (default):
+   ```bash
+   pip install pyccapt
+   ```
+   Includes:
+   - Complete calibration module
+   - Data analysis tools
+   - Visualization capabilities
+   - Jupyter integration
+   - Material science tools
 
-You can see some of the features of the calibration module in the following images.
+2. **Calibration + Control Modules** (full installation):
+   ```bash
+   pip install "pyccapt[full]"
+   ```
+   Includes everything from option 1, plus:
+   - GUI components
+   - Hardware control
+   - Control algorithms
+   - Image processing
 
-The FDM and detector hitmap as Gif images for an Aluminium sample:
+3. **Development Installation** (for contributors):
+   ```bash
+   pip install "pyccapt[dev]"
+   ```
+   Adds development tools:
+   - Testing (pytest)
+   - Code formatting (black, flake8)
+   - Type checking (mypy)
+   - Pre-commit hooks
 
-![](https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/hist.png?raw=True)
+### Installation Steps
 
-<div align="center">
-  <img width = "37%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/fdm.png?raw=True">
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img width = "33%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/detector.gif?raw=True">
-</div>
+1. Create a virtual environment:
+   ```bash
+   conda create -n apt_env python=3.9
+   ```
 
-Bowl and voltage calibration:
+2. Activate the environment:
+   ```bash
+   conda activate apt_env
+   ```
 
+3. Install PyCCAPT with your preferred option (see above)
 
-<div align="center">
-  <img width="30%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/vol_corr.png?raw=True">
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img width="30%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/bowl_corr.png?raw=True">
-</div>
-<div align="center">
-  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/tof_V_corr.png?raw=True">
-  &nbsp;&nbsp;&nbsp;&nbsp;  
-  <img width = "30%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/tof_bowl_corr_y_det.png?raw=True">
-</div>
+### Running the Application
 
+If you have installed the control module, you can start the control GUI using either:
+```bash
+pyccapt
+```
+or
+```bash
+python -m pyccapt.control
+```
 
-A ranged mass spectrum for a Nimonic® 90 sample:
+For calibration module usage, start Jupyter Lab:
+```bash
+jupyter lab
+```
 
-<div align="center">
-  <img width = "90%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/mc.png?raw=True">
-</div>
+### Tutorials
 
+To access the tutorials:
+1. Open your terminal
+2. Navigate to the project folder
+3. Start Jupyter Lab:
+   ```bash
+   jupyter lab
+   ```
 
-Html link below can be used to show a 3d reconstruction of Nimonic® 90 sample: [Nimonic® 3D reconstruction](https://rawcdn.githack.com/mmonajem/pyccapt/52835bc47735ef12bffcf7e18ce90b556b07d12f/pyccapt/files/readme_images/3d_o.html)
+## Documentation
 
-The 3d reconstruction of Nimonic® 90 and precipitates can be seen in the following Gifs:
+- [Latest Documentation](https://pyccapt.readthedocs.io/)
+- [Configuration Guide](https://pyccapt.readthedocs.io/en/latest/configuration.html)
+- [Calibration Tutorials](https://pyccapt.readthedocs.io/en/latest/tutorials.html)
 
+### Google Colab Tutorials
+- [Data Processing](https://colab.research.google.com/github/mmonajem/pyccapt/blob/main/pyccapt/calibration/tutorials/colab/data_processing.ipynb)
+- [Data Visualization](https://colab.research.google.com/github/mmonajem/pyccapt/blob/main/pyccapt/calibration/tutorials/colab/visualization.ipynb)
+- [t₀ and Flight Path Calculation](https://colab.research.google.com/github/mmonajem/pyccapt/blob/main/pyccapt/calibration/tutorials/colab/L_and_t0_determination.ipynb)
 
-<div align="center">
-  <img width = "40%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/roto.gif?raw=True">
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img width = "40%" src="https://github.com/mmonajem/pyccapt/blob/main/pyccapt/files/readme_images/iso.gif?raw=True">
-</div>
+## Project Structure
 
-The PyCCAPT package is a tool for controlling atom probe systems and
-calibrating data.
-
- ---------------------
-
-# Directory structure
 ```
 pyccapt/
 ├── pyccapt/
@@ -114,125 +147,55 @@ pyccapt/
 ├── docs/
 ├── setup.py
 ├── README.md
-├── CONTRIBUTION.md
+├── CONTRIBUTING.md
 ├── MANIFEST.in
-├── Licence
-└── tox.ini
+├── LICENSE
+├── tox.ini
 └── tests/
     ├── __init__.py
     ├── data/
     └── tests
 ```
- ---------------------
 
-# Installation
+## Data Structure
 
-1. Create a virtual environment using Anaconda:
+- [Control Module Data Structure](pyccapt/control/DATA_STRUCTURE.md)
+- [Calibration Module Data Structure](pyccapt/calibration/DATA_STRUCTURE.md)
 
-   ```bash
-   conda create -n apt_env python=3.9
-    ```
+## Test Data
 
-2. Activate the virtual environment:
-
-   ```bash
-   conda activate apt_env
-   ```
-
-3. Clone or download this repository, unzip it, and in the project directory run:
-
-   ```bash
-   pip install -e .
-   ```
-
-After installation, you can run the control GUI by entering the following command in the console:
-
-   ```bash
-   pyccapt
-   ```
-
-or if the above command does not work, you can run the following command:
-
-   ```bash
-   python -m pyccapt.control
-   ```
-
-
-To start the tutorial, please follow these steps:
-
-1- Open your terminal.
-
-2- Navigate to the project folder using the cd command.
-
-3- Once you're inside the project folder, go to the tutorial folder by running the following command:
-
-   ```bash
-   Jupyter lab
-   ```
-
---------------
-
-# Documentation
-
-The latest documentation is available on
-[ReadTheDocs](https://pyccapt.readthedocs.io/) page. It provides feature descriptions, tutorials, and
-valuable information.
-
-
----------------------
-# Using PyCCAPT
-
-For control part of the package you can follow the steps
-on [documentation](https://pyccapt.readthedocs.io/en/latest/configuration.html).
-
-For calibration, review the [tutorial](https://pyccapt.readthedocs.io/en/latest/tutorials.html) to understand package
-features.
-
-To test the code on Google colab, you can use the following links:
-[data processing](https://colab.research.google.com/github/mmonajem/pyccapt/blob/main/pyccapt/calibration/tutorials/colab/data_processing.ipynb), 
-[data visualization](https://colab.research.google.com/github/mmonajem/pyccapt/blob/main/pyccapt/calibration/tutorials/colab/visualization.ipynb), and
-[t<sub>0</sub> and flight path calculation](https://colab.research.google.com/github/mmonajem/pyccapt/blob/main/pyccapt/calibration/tutorials/colab/L_and_t0_determination.ipynb).
-
----------------------
-# Data structure
-
-For checking the data structure of the control module you can check [here](pyccapt/control/DATA_STRUCTURE.md). For the 
-calibration module, you can check [here](pyccapt/calibration/DATA_STRUCTURE.md).
-
----------------------
-# Test data
-
-For start using the calibration package, you can use the test data (pure Aluminium) provided in the following link. The
-link contains the raw dataset that is collected from the OXCART atom probe from a pure Aluminium sample. It also
-contains
-the output file from the calibration module, which contains the calibrated data as well as the reconstructed data. The
-link also contain the range file (HDF5) that is calculated by the calibration module.
-
+Test data (pure Aluminium) is available for calibration package evaluation:
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14673955.svg)](https://doi.org/10.5281/zenodo.14673955)
 
-------------------
-# Bug reports
+The dataset includes:
+- Raw data from OXCART atom probe
+- Calibrated data
+- Reconstructed data
+- Range file (HDF5)
 
-Report bugs, issues, ask for help, or provide feedback on
-the [Github section](https://github.com/mmonajem/pyccapt/issues).
+## Support
 
-Qestions/comments:
-  - Mehrpad Monajem, mehrpad.monajem@fau.de
+- Report bugs and issues on [GitHub Issues](https://github.com/mmonajem/pyccapt/issues)
+- Contact: Mehrpad Monajem (mehrpad.monajem@fau.de)
 
------------
+## Contributing
 
-# Citing
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
------------
+## License
 
-# Contributing
+This project is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for details.
 
-Contributions to PyCCAPT are always welcome, and they are greatly appreciated! Our contribution
-policy can be found [here](CONTRIBUTING.md).
+## Citation
 
-------------
-
-# License
-
-This project is licensed under the GNU General Public License v3.0. See
-the [LICENSE](LICENSE) file for details.
+If you use PyCCAPT in your research, please cite:
+```
+@software{pyccapt2024,
+  author = {Monajem, Mehrpad},
+  title = {PyCCAPT: A modular Python package for atom probe tomography},
+  year = {2024},
+  publisher = {Zenodo},
+  doi = {10.5281/zenodo.10210507},
+  url = {https://doi.org/10.5281/zenodo.10210507}
+}
+```

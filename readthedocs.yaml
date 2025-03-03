@@ -23,6 +23,7 @@ sphinx:
 formats:
   - pdf
   - epub
+  - htmlzip
 
 # Optional but recommended, declare the Python requirements required
 # to build your documentation
@@ -30,3 +31,49 @@ formats:
 python:
   install:
     - requirements: docs/requirements.txt
+    - method: pip
+  build:
+    jobs: 2
+  system_packages:
+    - libffi-dev
+    - libssl-dev
+    - libxml2-dev
+    - libxslt1-dev
+    - zlib1g-dev
+
+# Submodules configuration
+submodules:
+  include:
+    - docs
+    - pyccapt
+  exclude:
+    - tests
+    - examples
+
+# Environment variables
+environment:
+  PYTHONPATH: $PYTHONPATH:./pyccapt
+  PYCCAPT_DOCS_BUILD: "1"
+
+# Caching configuration
+cache:
+  pip: true
+  apt: true
+  cargo: true
+
+# Additional settings
+doctype: "auto"
+default_branch: "main"
+default_version: "latest"
+enable_epub_build: true
+enable_pdf_build: true
+enable_redirects: true
+show_version_warning: true
+show_toc_level: 2
+use_system_packages: true
+
+# Search configuration
+search:
+  language: "en"
+  analytics_id: null
+  api_key: null

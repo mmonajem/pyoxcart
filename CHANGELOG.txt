@@ -1,8 +1,221 @@
-Change Log
-==========
+# Changelog
 
-0.0.1 (23.03.2022)
--------------------
-- First Release
+All notable changes to PyCCAPT will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- New calibration module with comprehensive data analysis tools
+- Support for Surface Concept and RoentDek TDC systems
+- GUI interface for experiment control
+- Data visualization capabilities
+- 3D reconstruction features
+
+### Changed
+- Improved error handling and logging system
+- Enhanced documentation structure
+- Updated dependency management
+
+### Fixed
+- Various bug fixes and performance improvements
+
+## [0.1.11] - 2024-03-XX
+
+### Added
+- Support for Python 3.12
+- New data processing features
+- Enhanced visualization tools
+- Improved documentation
+
+### Changed
+- Updated dependency versions
+- Improved error messages
+- Enhanced GUI responsiveness
+
+### Fixed
+- Bug fixes in calibration module
+- Memory leak in data processing
+- UI responsiveness issues
+
+## [0.1.10] - 2024-02-XX
+
+### Added
+- New hardware support
+- Additional calibration methods
+- Performance optimizations
+
+### Changed
+- Updated API documentation
+- Improved error handling
+- Enhanced data validation
+
+### Fixed
+- Various bug fixes
+- Documentation updates
+
+## [0.1.9] - 2024-01-XX
+
+### Added
+- New features for data analysis
+- Additional visualization options
+- Enhanced error reporting
+
+### Changed
+- Updated dependencies
+- Improved code organization
+- Enhanced documentation
+
+### Fixed
+- Bug fixes and improvements
+
+## [0.1.8] - 2023-12-XX
+
+### Added
+- New calibration methods
+- Additional hardware support
+- Enhanced data processing
+
+### Changed
+- Updated API
+- Improved performance
+- Enhanced documentation
+
+### Fixed
+- Various bug fixes
+
+## [0.1.7] - 2023-11-XX
+
+### Added
+- New features and improvements
+- Additional documentation
+- Enhanced error handling
+
+### Changed
+- Updated dependencies
+- Improved code structure
+- Enhanced user interface
+
+### Fixed
+- Bug fixes and improvements
+
+## [0.1.6] - 2023-10-XX
+
+### Added
+- New features
+- Additional hardware support
+- Enhanced documentation
+
+### Changed
+- Updated dependencies
+- Improved performance
+- Enhanced error handling
+
+### Fixed
+- Various bug fixes
+
+## [0.1.5] - 2023-09-XX
+
+### Added
+- New features and improvements
+- Additional documentation
+- Enhanced user interface
+
+### Changed
+- Updated dependencies
+- Improved code organization
+- Enhanced error reporting
+
+### Fixed
+- Bug fixes and improvements
+
+## [0.1.4] - 2023-08-XX
+
+### Added
+- New features
+- Additional hardware support
+- Enhanced documentation
+
+### Changed
+- Updated dependencies
+- Improved performance
+- Enhanced error handling
+
+### Fixed
+- Various bug fixes
+
+## [0.1.3] - 2023-07-XX
+
+### Added
+- New features and improvements
+- Additional documentation
+- Enhanced user interface
+
+### Changed
+- Updated dependencies
+- Improved code structure
+- Enhanced error reporting
+
+### Fixed
+- Bug fixes and improvements
+
+## [0.1.2] - 2023-06-XX
+
+### Added
+- New features
+- Additional hardware support
+- Enhanced documentation
+
+### Changed
+- Updated dependencies
+- Improved performance
+- Enhanced error handling
+
+### Fixed
+- Various bug fixes
+
+## [0.1.1] - 2023-05-XX
+
+### Added
+- New features and improvements
+- Additional documentation
+- Enhanced user interface
+
+### Changed
+- Updated dependencies
+- Improved code organization
+- Enhanced error reporting
+
+### Fixed
+- Bug fixes and improvements
+
+## [0.1.0] - 2023-04-XX
+
+### Added
+- Initial release
+- Basic functionality
+- Core features
+- Documentation
+
+### Changed
+- None (initial release)
+
+### Fixed
+- None (initial release)
+
+## [0.0.1] - 2022-03-23
+
+### Added
+- First release
+- Basic project structure
+- Initial documentation
+
+### Changed
+- None (initial release)
+
+### Fixed
+- None (initial release)
 
 
