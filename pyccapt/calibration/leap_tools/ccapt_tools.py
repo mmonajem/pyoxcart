@@ -151,8 +151,8 @@ def apt_to_ccapt(file_path):
         'Voltage': 'high_voltage (V)',
         'Vap': 'pulse',
         'Epos ToF': 't (ns)',
-        'det_x': 'x_det (cm)',
-        'det_y': 'y_det (cm)',
+        'XDet_mm': 'x_det (cm)',
+        'YDet_mm': 'y_det (cm)',
         'Delta Pulse': 'delta_p',
         'Multiplicity': 'multi',
     }

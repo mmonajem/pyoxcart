@@ -100,7 +100,7 @@ def store_df_to_hdf(dataframe: "dataframe which is to be stored in h5 file",
     """
         This function stores dataframe to hdf5 file.
 
-        Atrributes:
+        Attributes:
             filename: filename of hdf5 where dataframes needs to stored
             dataframe: dataframe that needs to be stored.
             key: Key that defines hierarchy of the hdf5
@@ -114,7 +114,7 @@ def store_df_to_csv(data, path):
     """
         This function stores dataframe to csv file.
 
-        Atrributes:
+        Attributes:
             path: filename of hdf5 where dataframes needs to stored
             data: data that needs to be stored.
         Returns:

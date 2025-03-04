@@ -35,24 +35,26 @@ def fetch_dataset_from_dld_grp(filename: str, extract_mode='dld') -> pd.DataFram
                 raise FileNotFoundError
             dld_highVoltage = hdf5Data['dld/high_voltage'].to_numpy()
             if 'dld/pulse' in hdf5Data:
-                dld_voltage_pulse = hdf5Data['dld/pulse'].to_numpy()
+                dld_pulse = hdf5Data['dld/pulse'].to_numpy()
             elif 'dld/voltage_pulse' in hdf5Data:
-                dld_voltage_pulse = hdf5Data['dld/voltage_pulse'].to_numpy()
+                dld_pulse = hdf5Data['dld/voltage_pulse'].to_numpy()
             elif 'dld/pulse_voltage' in hdf5Data:
-                dld_voltage_pulse = hdf5Data['dld/pulse_voltage'].to_numpy()
+                dld_pulse = hdf5Data['dld/pulse_voltage'].to_numpy()
+            elif 'dld/laser_intensity' in hdf5Data:
+                dld_pulse = hdf5Data['dld/laser_intensity'].to_numpy()
             else:
                 raise KeyError('Neither dld/pulse nor dld/voltage_pulse exists in the dataset')
-            if 'dld/laser_pulse' in hdf5Data:
-                dld_laser_pulse = hdf5Data['dld/laser_pulse'].to_numpy()
-            else:
-                dld_laser_pulse = np.expand_dims(np.zeros(len(dld_highVoltage)), axis=1)
 
-            dld_startCounter = hdf5Data['dld/start_counter'].to_numpy()
+            if 'dld/start_counter' in hdf5Data:
+                dld_startCounter = hdf5Data['dld/start_counter'].to_numpy()
+            else:
+                dld_startCounter = np.zeros(len(dld_highVoltage))
+                dld_startCounter = np.expand_dims(dld_startCounter, axis=1)
             dld_t = hdf5Data['dld/t'].to_numpy()
             dld_x = hdf5Data['dld/x'].to_numpy()
             dld_y = hdf5Data['dld/y'].to_numpy()
             dldGroupStorage = np.concatenate(
-                (dld_highVoltage, dld_voltage_pulse, dld_startCounter, dld_t, dld_x, dld_y),
+                (dld_highVoltage, dld_pulse, dld_startCounter, dld_t, dld_x, dld_y),
                                              axis=1)
             dld_group_storage = create_pandas_dataframe(dldGroupStorage, mode='dld')
             return dld_group_storage

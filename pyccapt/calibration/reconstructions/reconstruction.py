@@ -99,8 +99,15 @@ def atom_probe_recons_from_detector_Gault_et_al(detx, dety, hv, flight_path_leng
     # dz = (omega * ((flight_path_length * 1E-3) ** 2) * (kf ** 2) * ((field_evap / 1E-9) ** 2)) / (
     #         det_area * det_eff * (icf_2 ** 2) * (hv ** 2))
 
-    dz = (omega * ((flight_path_length * 1E-3) ** 2) * (kf ** 2) * ((field_evap / 1E-9) ** 2)) / (
+    dz_o = (omega * ((flight_path_length * 1E-3) ** 2) * (kf ** 2) * ((field_evap / 1E-9) ** 2)) / (
             det_area * det_eff * (icf ** 2) * (hv ** 2))
+
+    dz = avg_dens * flight_path_length ** 2 * kf ** 2 * field_evap ** 2 / (det_area * det_eff * icf ** 2 * hv ** 2)
+
+    assert dz != dz_o, 'dz is not equal to dz_o'
+    # check if dz has any NaN of inf values
+    assert not np.isnan(dz).any(), 'dz has NaN values'
+    assert not np.isinf(dz).any(), 'dz has inf values'
 
     cum_z = np.cumsum(dz)
     z = cum_z + z_p
